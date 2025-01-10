@@ -416,19 +416,11 @@ internal class Vedtaksperiode private constructor(
         val initiell = OppgittArbeidsgiverperiodehåndtering.opprett(oppgittArbeidgiverperiode.perioder, arbeidsgiveropplysninger.metadata)
 
         val rester = vedtaksperioder.fold(initiell) { acc, vedtaksperiode ->
-            when (vedtaksperiode.tilstand) {
-                AvventerInntektsmelding,
-                AvsluttetUtenUtbetaling,
-                AvventerBlokkerendePeriode -> {
-                    vedtaksperiode.registrerKontekst(aktivitetslogg)
-                    acc.sykdomstidslinje(vedtaksperiode.periode)?.let {
-                        vedtaksperiode.håndterDager(arbeidsgiveropplysninger, BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, it), aktivitetslogg) {}
-                        eventyr.add(Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
-                    }
+            val arbeidsgiverperiodetidslinje = acc.sykdomstidslinje(vedtaksperiode.periode)
+            if (arbeidsgiverperiodetidslinje != null) {
+                vedtaksperiode.håndterBitAvArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg, arbeidsgiverperiodetidslinje)?.also {
+                    eventyr.add(it)
                 }
-
-                else -> aktivitetslogg.info("Håndterer ikke arbeidsgiverperiode i ${vedtaksperiode.tilstand.type}")
-
             }
             acc.håndter(vedtaksperiode.periode)
         }
@@ -440,6 +432,23 @@ internal class Vedtaksperiode private constructor(
         }
 
         return eventyr
+    }
+
+    private fun håndterBitAvArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, arbeidsgiverperiodetidslinje: Sykdomstidslinje): Revurderingseventyr? {
+        registrerKontekst(aktivitetslogg)
+        val bitAvArbeidsgiverperiode = BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, arbeidsgiverperiodetidslinje)
+        when (tilstand) {
+            AvventerInntektsmelding,
+            AvsluttetUtenUtbetaling,
+            AvventerBlokkerendePeriode -> {
+                håndterDager(arbeidsgiveropplysninger, bitAvArbeidsgiverperiode, aktivitetslogg) {}
+                return Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, skjæringstidspunkt, periode)
+            }
+            else -> {
+                aktivitetslogg.info("Håndterer ikke arbeidsgiverperiode i ${tilstand.type}")
+            }
+        }
+        return null
     }
 
     private data class OppgittArbeidsgiverperiodehåndtering(
