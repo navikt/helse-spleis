@@ -13,6 +13,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
 import no.nav.helse.fredag
+import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Permisjonsdag
@@ -88,6 +89,7 @@ import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingPortal
+import no.nav.helse.spleis.e2e.håndterKorrigerteArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterPåminnelse
@@ -141,7 +143,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `En portalinntektsmelding uten inntekt (-1) bevarer inntekten som var`() {
+    fun `En portalinntektsmelding uten inntekt (-1) bevarer inntekten som var`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         nyeVedtak(januar, a1, a2)
         forlengVedtak(februar, a1)
         håndterSøknad(15.februar til 28.februar, a2)
@@ -181,8 +183,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
         assertTrue(observatør.inntektsmeldingHåndtert.contains(forespurtIm to 2.vedtaksperiode.id(a2)))
 
-        val selvbestemtIm = håndterInntektsmelding(emptyList(), beregnetInntekt = (-1).månedlig, refusjon = Refusjon(77.daglig, null), vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = a2, avsendersystem = NAV_NO_SELVBESTEMT)
-        assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(15.februar til 28.februar, 77.daglig), inspektør(a2).vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
+        val selvbestemtIm = håndterKorrigerteArbeidsgiveropplysninger(Arbeidsgiveropplysning.OppgittRefusjon(77.daglig, emptyList()), vedtaksperiodeId = 2.vedtaksperiode, orgnummer = a2)
+        assertBeløpstidslinje(Beløpstidslinje.fra(15.februar til 28.februar, 77.daglig, selvbestemtIm.arbeidsgiver), inspektør(a2).vedtaksperioder(2.vedtaksperiode).refusjonstidslinje)
 
         val inntektEtterselvbestemtIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.beløp
         assertEquals(INNTEKT, inntektEtterselvbestemtIm)

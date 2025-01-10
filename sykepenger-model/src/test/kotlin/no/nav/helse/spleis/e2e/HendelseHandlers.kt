@@ -27,6 +27,7 @@ import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
@@ -553,6 +554,23 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             avsendersystem = utledetAvsendersystem
         ), førReplay
     )
+}
+
+internal fun AbstractEndToEndTest.håndterKorrigerteArbeidsgiveropplysninger(
+    vararg opplysning: Arbeidsgiveropplysning,
+    vedtaksperiodeId: IdInnhenter,
+    id: UUID = UUID.randomUUID(),
+    orgnummer: String = a1
+): UUID {
+    KorrigerteArbeidsgiveropplysninger(
+        meldingsreferanseId = id,
+        innsendt = LocalDateTime.now(),
+        registrert = LocalDateTime.now().plusSeconds(1),
+        organisasjonsnummer = orgnummer,
+        vedtaksperiodeId = vedtaksperiodeId.id(orgnummer),
+        opplysninger = opplysning.toList()
+    ).håndter(Person::håndter)
+    return id
 }
 
 internal fun AbstractEndToEndTest.håndterArbeidsgiveropplysninger(arbeidsgiveropplysninger: Arbeidsgiveropplysninger): UUID {
