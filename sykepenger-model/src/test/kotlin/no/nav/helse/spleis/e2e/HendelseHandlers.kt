@@ -578,33 +578,6 @@ internal fun AbstractEndToEndTest.håndterArbeidsgiveropplysninger(arbeidsgivero
     return arbeidsgiveropplysninger.metadata.meldingsreferanseId
 }
 
-internal fun AbstractEndToEndTest.håndterInntektsmeldingPortal(
-    arbeidsgiverperioder: List<Periode>,
-    beregnetInntekt: Inntekt = INNTEKT,
-    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-    orgnummer: String = a1,
-    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
-    id: UUID = UUID.randomUUID(),
-    opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
-    begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-    harFlereInntektsmeldinger: Boolean = false,
-    avsendersystem: Avsenderutleder = NAV_NO
-): UUID {
-    val portalinntektsmelding = portalInntektsmelding(
-        id,
-        arbeidsgiverperioder,
-        beregnetInntekt = beregnetInntekt,
-        vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(vedtaksperiodeIdInnhenter),
-        refusjon = refusjon,
-        orgnummer = orgnummer,
-        opphørAvNaturalytelser = opphørAvNaturalytelser,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-        avsendersystem = avsendersystem,
-    )
-    return håndterInntektsmelding(portalinntektsmelding)
-}
-
 internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Inntektsmelding, førReplay: () -> Unit = {}): UUID {
     håndterOgReplayInntektsmeldinger(inntektsmelding.behandlingsporing.organisasjonsnummer) {
         inntektsmelding.håndter(Person::håndter)

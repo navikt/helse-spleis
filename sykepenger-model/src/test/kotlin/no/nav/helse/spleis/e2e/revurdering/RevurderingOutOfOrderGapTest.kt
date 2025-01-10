@@ -56,7 +56,6 @@ import no.nav.helse.spleis.e2e.forlengTilGodkjenning
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.forlengelseTilGodkjenning
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterInntektsmeldingPortal
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -88,9 +87,9 @@ import org.junit.jupiter.api.Test
 internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
     @Test
-    fun `Arbeidsgiver med kort gap mellom sykefravær blir forsøkt sklitaklet av annen arbeidsgiver som tetter gapet og flytter skjæringstidspunktet`() {
+    fun `Arbeidsgiver med kort gap mellom sykefravær blir forsøkt sklitaklet av annen arbeidsgiver som tetter gapet og flytter skjæringstidspunktet`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
@@ -100,7 +99,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmeldingPortal(emptyList(), orgnummer = a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(emptyList(), orgnummer = a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(RV_VV_2, 2.vedtaksperiode.filter(orgnummer = a1))
@@ -111,8 +110,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), orgnummer = a2, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)

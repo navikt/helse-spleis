@@ -88,7 +88,6 @@ import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterInntektsmeldingPortal
 import no.nav.helse.spleis.e2e.håndterKorrigerteArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
@@ -478,7 +477,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Håndterer ikke inntektsmelding fra portal`() {
         nyttVedtak(1.januar(2016) til 31.januar(2016), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), opphørAvNaturalytelser = listOf(Inntektsmelding.OpphørAvNaturalytelse(1000.månedlig, 1.januar, "BIL")), vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), opphørAvNaturalytelser = listOf(Inntektsmelding.OpphørAvNaturalytelse(1000.månedlig, 1.januar, "BIL")), vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
     }
@@ -2485,7 +2484,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        håndterInntektsmeldingPortal(
+        håndterInntektsmelding(
             listOf(1.februar til 16.februar),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             beregnetInntekt = INNTEKT,

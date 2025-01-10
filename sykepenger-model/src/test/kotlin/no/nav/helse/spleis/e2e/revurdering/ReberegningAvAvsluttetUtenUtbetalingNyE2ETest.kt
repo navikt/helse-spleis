@@ -1,12 +1,16 @@
 package no.nav.helse.spleis.e2e.revurdering
 
+import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Arbeidsgiveropplysning
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.Companion.fraInntektsmelding
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -61,6 +65,7 @@ import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterKorrigerteArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -79,6 +84,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -1237,36 +1243,32 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `omgjøring med funksjonell feil i inntektsmelding fra portalen`() {
+    fun `omgjøring med funksjonell feil i inntektsmelding fra portalen`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
         nyttVedtak(18.januar til 31.januar, arbeidsgiverperiode = listOf(2.januar til 17.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
-        val im = håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre",
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            avsendersystem = NAV_NO_SELVBESTEMT
+        val im = håndterKorrigerteArbeidsgiveropplysninger(
+            *fraInntektsmelding(
+                beregnetInntekt = INNTEKT,
+                refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre",
+                opphørAvNaturalytelser = emptyList()
+            ).toTypedArray(),
+            vedtaksperiodeId = 1.vedtaksperiode
         )
-        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_24, RV_IM_8), 1.vedtaksperiode.filter())
         assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertInntektshistorikkForDato(INNTEKT, 2.januar, inspektør)
 
-        assertForventetFeil(
-            forklaring = "Støtter ikke denne inntektsmeldingen",
-            nå = {
-                assertTrue(im in observatør.inntektsmeldingHåndtert.map { it.first })
-            },
-            ønsket = {
-                assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
-            }
-        )
+        assertTrue(im in observatør.inntektsmeldingHåndtert.map { it.first })
+        assertFalse(im in observatør.inntektsmeldingIkkeHåndtert)
 
-        assertFunksjonellFeil(RV_IM_8, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.let {
-            assertEquals(4, it.size)
+            assertEquals(3, it.size)
             assertTrue(it.all { behalding -> behalding.tilstand == AVSLUTTET_UTEN_VEDTAK })
-            assertEquals(im, it[3].kilde.meldingsreferanseId)
+            assertEquals(im, it[2].kilde.meldingsreferanseId)
         }
     }
 }

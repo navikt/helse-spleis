@@ -46,7 +46,6 @@ import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterInntektsmeldingPortal
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -175,7 +174,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             assertFalse(event.forespurteOpplysninger.any { it is PersonObserver.Arbeidsgiverperiode })
         }
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        håndterInntektsmeldingPortal(emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
@@ -415,13 +414,14 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender med første fraværsdag på alle arbeidsgivere for skjæringstidspunktet`() {
+    fun `sender med første fraværsdag på alle arbeidsgivere for skjæringstidspunktet`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         nyeVedtakMedUlikFom(
             mapOf(
                 a1 to (januar),
                 a2 to (2.januar til 31.januar)
             )
         )
+        assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter(a1))
         assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
@@ -452,6 +452,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 a2 to (januar)
             )
         )
+        assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter(a1))
         forlengVedtak(februar, orgnummer = a1)
         nyPeriode(mars, a2)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
@@ -980,7 +981,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
         assertEquals(20.januar til 31.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.periode)
 
-        håndterInntektsmeldingPortal(emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterInntektsmelding(emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
@@ -1052,12 +1053,12 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(ag1Periode.start til ag1Periode.endInclusive, a1)
         nyPeriode(ag2Periode.start til ag2Periode.endInclusive, a2)
 
-        håndterInntektsmeldingPortal(
+        håndterInntektsmelding(
             listOf(ag1Periode.start til ag1Periode.start.plusDays(15)),
             beregnetInntekt = INNTEKT,
             orgnummer = a1
         )
-        håndterInntektsmeldingPortal(
+        håndterInntektsmelding(
             listOf(ag2Periode.start til ag2Periode.start.plusDays(15)),
             beregnetInntekt = INNTEKT,
             orgnummer = a2
