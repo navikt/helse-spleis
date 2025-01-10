@@ -18,14 +18,12 @@ import org.junit.jupiter.api.Test
 internal class PortalInntektsmeldingTest : AbstractDslTest() {
 
     @Test
-    fun `uenige om arbeidsgiverperiode med NAV_NO som avsendersystem gir varsel`() {
+    fun `uenige om arbeidsgiverperiode med NAV_NO som avsendersystem gir varsel`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
             håndterInntektsmeldingPortal(listOf(2.januar til 17.januar), vedtaksperiodeId = 2.vedtaksperiode)
-            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
-        }
-        a1 {
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            assertInfo("Håndterer ikke arbeidsgiverperiode i AVSLUTTET", 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_24, 2.vedtaksperiode.filter())
         }
     }
 
