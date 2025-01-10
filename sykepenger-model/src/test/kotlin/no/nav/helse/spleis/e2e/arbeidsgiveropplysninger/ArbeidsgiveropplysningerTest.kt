@@ -1,10 +1,12 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import no.nav.helse.Toggle
+import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.ManglerOpptjening
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.StreikEllerLockout
@@ -18,15 +20,19 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbe
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
@@ -261,6 +267,38 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(1.vedtaksperiode, IkkeUtbetaltArbeidsgiverperiode(StreikEllerLockout))
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             assertFunksjonellFeil(RV_IM_8, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `oppgir at egenmeldingsdager fra sykmelding stemmer kort periode`() {
+        a1 {
+            håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent), egenmeldinger = listOf(1.januar.somPeriode()))
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)), OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        }
+    }
+
+    @Test
+    fun `oppgir at egenmeldingsdager fra sykmelding stemmer for kort periode - kommet søknad i forkant`() {
+        a1 {
+            håndterSøknad(Sykdom(2.april, 17.april, 100.prosent), egenmeldinger = listOf(1.april.somPeriode()))
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+            tilGodkjenning(januar)
+            assertVarsler(2.vedtaksperiode, RV_OO_1)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+
+            val id = håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.april til 16.april)), OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTrue(id to 1.vedtaksperiode in observatør.inntektsmeldingHåndtert)
+
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         }
     }
 }
