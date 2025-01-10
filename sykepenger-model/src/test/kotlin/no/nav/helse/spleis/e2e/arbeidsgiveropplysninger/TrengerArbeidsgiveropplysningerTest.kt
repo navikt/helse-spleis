@@ -1,9 +1,10 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.reflect.KClass
 import no.nav.helse.Toggle
+import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -33,7 +34,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -121,7 +121,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Skal ikke sende forespørsel for korte perioder etter at arbeidsgiver har sendt riktig AGP`() {
+    fun `Skal ikke sende forespørsel for korte perioder etter at arbeidsgiver har sendt riktig AGP`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         håndterSøknad(Sykdom(6.januar, 17.januar, 100.prosent), egenmeldinger = listOf(1.januar til 5.januar))
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         håndterSøknad(Sykdom(22.januar, 25.januar, 100.prosent), egenmeldinger = listOf(21.januar til 21.januar))
@@ -139,7 +139,6 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             avsendersystem = NAV_NO_SELVBESTEMT
         )
-        assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
         assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
@@ -187,7 +186,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ber ikke om arbeidsgiveropplysninger på ghost når riktig inntektsmelding kommer`() {
+    fun `ber ikke om arbeidsgiveropplysninger på ghost når riktig inntektsmelding kommer`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -215,8 +214,6 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
-
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(a1))
 
         assertEquals(2, observatør.inntektsmeldingHåndtert.size)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a1 })
@@ -522,7 +519,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `blir syk fra ghost`() {
+    fun `blir syk fra ghost`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -555,7 +552,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        assertVarsler(listOf(RV_VV_2, RV_IM_4), AktivitetsloggFilter.arbeidsgiver(a1))
+        assertVarsler(listOf(RV_VV_2), AktivitetsloggFilter.arbeidsgiver(a1))
         assertVarsler(emptyList(), AktivitetsloggFilter.arbeidsgiver(a2))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)

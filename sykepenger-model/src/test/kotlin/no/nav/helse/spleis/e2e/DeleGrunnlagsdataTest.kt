@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.april
-import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -100,7 +100,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `inntektsmelding bryter ikke opp forlengelse`() {
+    fun `inntektsmelding bryter ikke opp forlengelse`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
         håndterInntektsmelding(listOf(Periode(18.januar, 1.februar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
@@ -122,7 +122,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-        assertVarsler(listOf(RV_IM_3), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(), 1.vedtaksperiode.filter())
         assertVarsler(listOf(), 2.vedtaksperiode.filter())
         assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
         assertEquals(18.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))

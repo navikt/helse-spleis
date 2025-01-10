@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.*
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.PersonHendelsefabrikk
 import no.nav.helse.dsl.a1
@@ -509,7 +510,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
         avsendersystem = utledetAvsendersystem
     )
 
-    //return håndterArbeidsgiveropplysninger(arbeidsgiveropplysninger)
+    if (Toggle.PortalinntektsmeldingSomArbeidsgiveropplysninger.enabled)
+        return håndterArbeidsgiveropplysninger(arbeidsgiveropplysninger)
     return håndterInntektsmelding(portalInnteksmelding)
 }
 

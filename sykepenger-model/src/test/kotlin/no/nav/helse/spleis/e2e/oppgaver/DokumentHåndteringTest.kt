@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
 import java.util.*
+import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -277,7 +278,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `portal-Inntektsmelding noen dager håndtert`() {
+    fun `portal-Inntektsmelding noen dager håndtert`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         val søknad = håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
         val im = håndterInntektsmelding(
             listOf(4.januar til 19.januar),

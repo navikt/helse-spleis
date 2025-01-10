@@ -434,7 +434,10 @@ internal class Vedtaksperiode private constructor(
         }
         this.registrerKontekst(aktivitetslogg)
 
-        check(rester.sykdomstidslinje.count() == 0) { "Hvis det er rester igjen er det litt rart. Refusjon frem i tid?" }
+        val antallDagerIgjen = rester.sykdomstidslinje.count()
+        if (antallDagerIgjen > 0) {
+            aktivitetslogg.info("Det er rester igjen etter håndtering av dager ($antallDagerIgjen dager)")
+        }
 
         return eventyr
     }
@@ -502,14 +505,17 @@ internal class Vedtaksperiode private constructor(
         )
         inntektshistorikk.leggTil(inntektsmeldingInntekt)
 
-        person.nyeArbeidsgiverInntektsopplysninger(
+        val harEndretInntekt = person.nyeArbeidsgiverInntektsopplysninger(
             hendelse = hendelse,
             skjæringstidspunkt = skjæringstidspunkt,
             organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
             inntekt = inntektsmeldingInntekt,
             aktivitetslogg = aktivitetslogg,
             subsumsjonslogg = this.jurist
-        )
+        ) != null
+
+        // todo: per 10. januar 2025 så sender alltid Hag inntekt i portal-inntektsmeldinger selv om vi ikke har bedt om det, derfor må vi ta høyde for at det ikke nødvendigvis er endringer
+        if (!harEndretInntekt) return emptyList()
 
         return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
     }

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
+import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -27,7 +28,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -256,7 +256,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `flere AG - periode har gap på arbeidsgivernivå men er sammenhengende på personnivå - sender feilaktig flere perioder til behandling`() {
+    fun `flere AG - periode har gap på arbeidsgivernivå men er sammenhengende på personnivå - sender feilaktig flere perioder til behandling`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         nyeVedtak(januar, a1, a2, inntekt = 20000.månedlig)
         forlengVedtak(februar, orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a2)
@@ -427,7 +427,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `drawio -- PERIODE HOS AG1 STREKKER SEG OVER TO PERIODER HOS AG2 - Må vente på alle IM`() {
+    fun `drawio -- PERIODE HOS AG1 STREKKER SEG OVER TO PERIODER HOS AG2 - Må vente på alle IM`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(2.januar, 18.januar), orgnummer = a2)
@@ -458,9 +458,6 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             førsteFraværsdag = 20.januar,
             orgnummer = a2
         )
-
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a2))
-        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter(orgnummer = a2))
 
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -511,7 +508,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `drawio -- Må vente på alle IM (forlengelse)`() {
+    fun `drawio -- Må vente på alle IM (forlengelse)`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(18.januar, 17.februar), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(18.januar, 17.februar), orgnummer = a2)
@@ -544,7 +541,6 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         )
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode) ?: fail("Mangler vilkårsgrunnlag")
 
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a1))
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -632,7 +628,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `En arbeidsgiver uten sykdom, blir syk i forlengelsen - skal vente på inntektsmelding`() {
+    fun `En arbeidsgiver uten sykdom, blir syk i forlengelsen - skal vente på inntektsmelding`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         val periode1 = 1.januar(2021) til 31.januar(2021)
         val periode2 = 1.februar(2021) til 28.februar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode1.start, periode1.endInclusive), orgnummer = a1)
@@ -662,12 +658,11 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a1))
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
     @Test
-    fun `En arbeidsgiver uten sykdom, blir syk i forlengelsen - skal vente på inntektsmelding selv om saksbehandler har overstyrt ghostinntekten`() {
+    fun `En arbeidsgiver uten sykdom, blir syk i forlengelsen - skal vente på inntektsmelding selv om saksbehandler har overstyrt ghostinntekten`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         val periode1 = januar
         val periode2 = februar
         håndterSykmelding(Sykmeldingsperiode(periode1.start, periode1.endInclusive), orgnummer = a1)
@@ -700,7 +695,6 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a1))
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 

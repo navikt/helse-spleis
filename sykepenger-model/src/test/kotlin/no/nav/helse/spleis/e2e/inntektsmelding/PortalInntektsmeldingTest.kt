@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
+import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -29,26 +30,20 @@ internal class PortalInntektsmeldingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `tom arbeidsgiverperiode med NAV_NO som avsendersystem gir ikke varsel`() {
+    fun `tom arbeidsgiverperiode med NAV_NO som avsendersystem gir ikke varsel`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
             håndterInntektsmeldingPortal(emptyList(), vedtaksperiodeId = 2.vedtaksperiode)
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
         }
-        a1 {
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-        }
     }
 
     @Test
-    fun `tom arbeidsgiverperiode med NAV_NO_SELVBESTEMT som avsendersystem gir ikke varsel`() {
+    fun `tom arbeidsgiverperiode med NAV_NO_SELVBESTEMT som avsendersystem gir ikke varsel`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
             håndterInntektsmeldingPortal(emptyList(), vedtaksperiodeId = 2.vedtaksperiode, avsendersystem = NAV_NO_SELVBESTEMT)
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
-        }
-        a1 {
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 

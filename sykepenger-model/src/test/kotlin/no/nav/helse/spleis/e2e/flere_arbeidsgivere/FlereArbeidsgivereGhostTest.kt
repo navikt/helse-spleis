@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import java.time.LocalDate
 import kotlin.reflect.KClass
+import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
@@ -247,7 +248,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `blir syk fra ghost`() {
+    fun `blir syk fra ghost`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -271,7 +272,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
-        assertVarsler(listOf(RV_VV_2, RV_IM_4), 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter(orgnummer = a1))
         assertVarsler(emptyList(), 1.vedtaksperiode.filter(orgnummer = a2))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
@@ -368,7 +369,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `blir syk fra ghost annen måned enn skjæringstidspunkt etter at saksbehandler har overstyrt inntekten etter 8-28, 3 ledd bokstav b -- Ghost svarer på etterspurte arbeidsgiveropplysninger`() {
+    fun `blir syk fra ghost annen måned enn skjæringstidspunkt etter at saksbehandler har overstyrt inntekten etter 8-28, 3 ledd bokstav b -- Ghost svarer på etterspurte arbeidsgiveropplysninger`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -401,7 +402,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a1))
         assertInntektstype(1.januar, mapOf(a1 to Inntektsmeldinginntekt::class, a2 to Inntektsmeldinginntekt::class))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -416,7 +416,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Korrigerende refusjonsopplysninger på arbeidsgiver med skatteinntekt i sykepengegrunnlaget`() {
+    fun `Korrigerende refusjonsopplysninger på arbeidsgiver med skatteinntekt i sykepengegrunnlaget`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         utbetalPeriodeMedGhost()
         assertInntektstype(1.januar, mapOf(a1 to Inntektsmeldinginntekt::class, a2 to SkattSykepengegrunnlag::class))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
@@ -443,8 +443,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a1))
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a2))
         assertInntektstype(1.januar, mapOf(a1 to Inntektsmeldinginntekt::class, a2 to Inntektsmeldinginntekt::class))
         assertBeløpstidslinje(
             Beløpstidslinje.fra(1.februar til 19.februar, INNTEKT, inntektsmelding.arbeidsgiver) + Beløpstidslinje.fra(20.februar til 28.februar, INNTEKT, korrigerendeInntektsmelding.arbeidsgiver),
@@ -988,7 +986,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `arbeidsgiver går fra å være ghost mens første arbeidsgiver står til godkjenning -- Ghost svarer på etterspurte arbeidsgiveropplysninger`() {
+    fun `arbeidsgiver går fra å være ghost mens første arbeidsgiver står til godkjenning -- Ghost svarer på etterspurte arbeidsgiveropplysninger`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         utbetalPeriodeMedGhost(tilGodkjenning = true)
 
         nyPeriode(16.mars til 31.mars, a1) // Forlengelse på a1
@@ -1011,7 +1009,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a1))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a2)
 

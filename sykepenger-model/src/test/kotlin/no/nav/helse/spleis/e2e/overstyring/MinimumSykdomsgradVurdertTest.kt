@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
+import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.hendelser.til
@@ -7,7 +8,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -54,7 +54,7 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Får søknad fra ghost etter at minimum sykdomsgrad er vurdert`() {
+    fun `Får søknad fra ghost etter at minimum sykdomsgrad er vurdert`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         settOppAvslagPåMinimumSykdomsgrad()
 
         håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(januar))
@@ -89,7 +89,6 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         assertEquals(0, inspektør(a1).utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
         assertEquals(0, inspektør(a2).utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
         assertVarsel(Varselkode.RV_VV_17, 1.vedtaksperiode.filter(orgnummer = a2))
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a1))
     }
 
     @Test

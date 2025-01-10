@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import kotlin.reflect.KClass
+import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.august
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -659,14 +660,13 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyring av egenmeldingsdager til arbeidsdager`() {
+    fun `overstyring av egenmeldingsdager til arbeidsdager`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         nyttVedtak(januar)
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), Arbeid(20.februar, 28.februar))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(10.februar til 26.februar),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
-        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

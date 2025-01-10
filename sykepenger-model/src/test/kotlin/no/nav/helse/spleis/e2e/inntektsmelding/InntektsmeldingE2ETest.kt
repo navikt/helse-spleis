@@ -1,7 +1,8 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Toggle
+import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -392,7 +393,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `når arbeidsgiver feilaktig tror det er ny arbeidsgiverperiode må alle periodene få varsel`() {
+    fun `når arbeidsgiver feilaktig tror det er ny arbeidsgiverperiode må alle periodene få varsel`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         nyttVedtak(1.januar til 18.januar)
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
         håndterSøknad(februar)
@@ -406,13 +407,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-
-        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
-        assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
     }
 
     @Test
-    fun `uenighet i agp kan delvis bli utbetalt automatisk`() {
+    fun `uenighet i agp kan delvis bli utbetalt automatisk`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent)) // En periode arbeidsgiver har glemt/ikke fått med seg
         håndterSøknad(Sykdom(22.januar, 5.februar, 100.prosent))
         håndterSøknad(Sykdom(6.februar, 6.februar, 100.prosent))
@@ -429,7 +427,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         assertEquals(listOf(1.januar til 15.januar, 22.januar til 22.januar), inspektør.arbeidsgiverperioder(2.vedtaksperiode))
         assertEquals("PNNNNHH NNNNNHH N", inspektør.utbetalingstidslinjer(2.vedtaksperiode).toString())
-        assertVarsel(RV_IM_3, 3.vedtaksperiode.filter()) // Siste periode som håndterer dager fra IM får varsel (6.feb)
 
         assertForventetFeil(
             forklaring = """
@@ -619,11 +616,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Arbeidsgiver opplyser om feilaktig ny arbeidsgiverperiode som dekker hele perioden som skal utbetales`() {
+    fun `Arbeidsgiver opplyser om feilaktig ny arbeidsgiverperiode som dekker hele perioden som skal utbetales`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         nyttVedtak(1.januar til 20.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
         assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
         nyttVedtak(25.januar til 25.januar, arbeidsgiverperiode = listOf(25.januar til 9.februar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
     }
 
@@ -677,7 +673,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `mange korte perioder som ikke er sykdom`() {
+    fun `mange korte perioder som ikke er sykdom`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar))
         håndterSøknad(Sykdom(1.januar, 1.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(10.januar, 10.januar))
@@ -696,7 +692,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(5.vedtaksperiode)
         håndterYtelser(5.vedtaksperiode)
 
-        assertVarsel(RV_IM_3, 5.vedtaksperiode.filter())
         assertForventetFeil(
             forklaring = "Inntektsmelding forteller _implisitt_ at 1.jan-30.jan er arbeidsdager. Dagene henger igjen som sykedager i modellen." +
                 "De spredte sykedagene er innenfor 16 dager fra hverandre, slik at de teller med i samme arbeidsgiverperiodetelling." +
@@ -2364,7 +2359,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Hensyntar korrigert inntekt i avventer blokkerende`() {
+    fun `Hensyntar korrigert inntekt i avventer blokkerende`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         tilGodkjenning(januar, a1)
         nyPeriode(mars)
         håndterInntektsmelding(
@@ -2378,7 +2373,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(1.mars til 16.mars),
             beregnetInntekt = 30000.månedlig
         )
-        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
@@ -2467,7 +2461,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Spleis bruker feilaktig en ugyldig egenmeldingsdag i gap-beregning`() {
+    fun `Spleis bruker feilaktig en ugyldig egenmeldingsdag i gap-beregning`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         nyttVedtak(januar)
         nyPeriode(20.februar til 20.mars)
         håndterInntektsmelding(
@@ -2475,7 +2469,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         assertEquals(listOf(20.februar, 8.februar), inspektør.skjæringstidspunkter(2.vedtaksperiode))
-        assertVarsler(listOf(RV_IM_3, Varselkode.RV_IV_11), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IV_11), 2.vedtaksperiode.filter())
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 

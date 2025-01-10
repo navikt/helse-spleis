@@ -1,7 +1,8 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
+import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
@@ -26,7 +27,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -57,7 +57,7 @@ import org.junit.jupiter.api.Test
 internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `skjæringstidspunkt endres som følge av infotrygdperiode`() {
+    fun `skjæringstidspunkt endres som følge av infotrygdperiode`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         nyPeriode(1.januar til 1.januar, a1)
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
@@ -65,7 +65,6 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
             listOf(3.januar til 18.januar),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
-        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

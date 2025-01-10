@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
+import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -34,7 +35,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -139,7 +139,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender med feil vilkårsgrunnlagId i første godkjenningsbehov om det har kommet nytt vilkårsgrunnlag med endring _senere_ enn perioden mens den står i avventer simulering`() {
+    fun `sender med feil vilkårsgrunnlagId i første godkjenningsbehov om det har kommet nytt vilkårsgrunnlag med endring _senere_ enn perioden mens den står i avventer simulering`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         håndterSøknad(januar)
         håndterSøknad(februar)
         håndterSøknad(mars)
@@ -155,8 +155,6 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null)
         )
 
-        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
-        assertVarsel(RV_IM_4, 3.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING) // Reberegnes ikke ettersom endringen gjelder fra og med 1.mars
         val vilkårsgrunnlagId2 = vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(1.januar)
         assertEquals(vilkårsgrunnlagId1, vilkårsgrunnlagId2)

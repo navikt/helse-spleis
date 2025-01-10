@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.YearMonth
 import no.nav.helse.Personidentifikator
+import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -65,7 +66,6 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -78,7 +78,7 @@ import org.junit.jupiter.api.Test
 internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `subsummerer ikke inntektsspesfikke subsumsjoner ved overstyring som ikke fører til endrede inntekter i sykpengegrunnlaget`() {
+    fun `subsummerer ikke inntektsspesfikke subsumsjoner ved overstyring som ikke fører til endrede inntekter i sykpengegrunnlaget`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
         håndterSøknad(januar, orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -113,7 +113,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = a1))
         assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_A, versjon = 1.januar(2019)))
         assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_29, versjon = 1.januar(2019)))
         assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_B, versjon = 1.januar(2019)))
@@ -614,7 +613,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `§ 8-10 ledd 3 - årlig inntekt omregnet til daglig`() {
+    fun `§ 8-10 ledd 3 - årlig inntekt omregnet til daglig`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.disable {
         val inntekt = 260000.årlig
         håndterSykmelding(januar)
         håndterSøknad(januar)
