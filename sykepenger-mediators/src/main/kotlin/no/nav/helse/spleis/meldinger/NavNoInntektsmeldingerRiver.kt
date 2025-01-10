@@ -21,6 +21,7 @@ internal class NavNoInntektsmeldingerRiver(
     override val riverName = "Nav.no-inntektsmelding (førstegangs)"
     override fun precondition(packet: JsonMessage) {
         packet.requireValue("avsenderSystem.navn", "NAV_NO")
+        packet.requireKey("vedtaksperiodeId")
         // todo: endre fra interestedId til requireValue når Hag har rullet ut i prod
         packet.interestedIn("arsakTilInnsending") {
             check(it.asText() == "Ny")
@@ -28,33 +29,7 @@ internal class NavNoInntektsmeldingerRiver(
     }
 
     override fun validate(message: JsonMessage) {
-        message.requireKey(
-            "inntektsmeldingId", "arbeidstakerFnr",
-            "virksomhetsnummer",
-            "arbeidsgivertype", "beregnetInntekt",
-            "status", "arkivreferanse", "opphoerAvNaturalytelser", "vedtaksperiodeId"
-        )
-        message.requireArray("arbeidsgiverperioder") {
-            require("fom", JsonNode::asLocalDate)
-            require("tom", JsonNode::asLocalDate)
-        }
-        message.requireArray("endringIRefusjoner") {
-            require("endringsdato", JsonNode::asLocalDate)
-            requireKey("beloep")
-        }
-        message.require("mottattDato", JsonNode::asLocalDateTime)
-        message.require("fødselsdato", JsonNode::asLocalDate)
-        message.interestedIn("dødsdato", JsonNode::asLocalDate)
-        message.interestedIn("foersteFravaersdag", JsonNode::asLocalDate)
-        message.interestedIn("refusjon.opphoersdato", JsonNode::asLocalDate)
-        message.interestedIn(
-            "refusjon.beloepPrMnd",
-            "begrunnelseForReduksjonEllerIkkeUtbetalt",
-            "harFlereInntektsmeldinger",
-            "historiskeFolkeregisteridenter",
-            "avsenderSystem",
-            "inntektsdato"
-        )
+        standardInntektsmeldingvalidering(message)
     }
 
     override fun createMessage(packet: JsonMessage): NavNoInntektsmeldingMessage {

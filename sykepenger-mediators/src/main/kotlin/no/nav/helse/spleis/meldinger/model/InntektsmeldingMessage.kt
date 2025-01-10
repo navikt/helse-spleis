@@ -42,19 +42,18 @@ internal class InntektsmeldingMessage(
     private val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
     private val avsendersystem = avsendersystem(avsendersystem = packet["avsenderSystem"].path("navn").asText(), førsteFraværsdag = førsteFraværsdag)
 
-    protected val inntektsmelding
-        get() = Inntektsmelding(
-            meldingsreferanseId = meldingsporing.id,
-            refusjon = refusjon,
-            orgnummer = orgnummer,
-            beregnetInntekt = beregnetInntekt.månedlig,
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            opphørAvNaturalytelser = opphørAvNaturalytelser,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-            avsendersystem = avsendersystem,
-            mottatt = mottatt
-        )
+    private val inntektsmelding get() = Inntektsmelding(
+        meldingsreferanseId = meldingsporing.id,
+        refusjon = refusjon,
+        orgnummer = orgnummer,
+        beregnetInntekt = beregnetInntekt.månedlig,
+        arbeidsgiverperioder = arbeidsgiverperioder,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        opphørAvNaturalytelser = opphørAvNaturalytelser,
+        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+        avsendersystem = avsendersystem,
+        mottatt = mottatt
+    )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         mediator.behandle(personopplysninger, this, inntektsmelding, context)
