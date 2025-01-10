@@ -271,7 +271,7 @@ internal class TestPerson(
                 meldingsreferanseId = id,
                 innsendt = LocalDateTime.now(),
                 registrert = LocalDateTime.now().plusSeconds(1),
-                organisasjonsnummer = orgnummer,
+                organisasjonsnummer = this.orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
                     beregnetInntekt = beregnetInntekt,
