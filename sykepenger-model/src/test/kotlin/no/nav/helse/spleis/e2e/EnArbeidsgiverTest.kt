@@ -181,7 +181,10 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
             listOf(19.februar til 6.mars),
             vedtaksperiodeIdInnhenter = 3.vedtaksperiode
         )
-        assertVarsel(RV_IM_24, 3.vedtaksperiode.filter())
+        assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
 
@@ -189,7 +192,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
         assertEquals(listOf(19.februar til 6.mars), inspektør.arbeidsgiverperiode(3.vedtaksperiode))
 
-        assertEquals(3, inspektør.antallUtbetalinger)
+        assertEquals(4, inspektør.antallUtbetalinger)
         val januar = inspektør.utbetaling(0)
         val mars = inspektør.sisteUtbetaling()
         assertNotEquals(januar.korrelasjonsId, mars.korrelasjonsId)

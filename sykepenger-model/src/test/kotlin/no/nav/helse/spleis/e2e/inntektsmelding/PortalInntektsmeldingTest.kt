@@ -5,12 +5,19 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.inntektsmelding.NAV_NO_SELVBESTEMT
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -23,12 +30,19 @@ internal class PortalInntektsmeldingTest : AbstractDslTest() {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
             håndterInntektsmeldingPortal(listOf(2.januar til 17.januar), vedtaksperiodeId = 2.vedtaksperiode)
+
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
             assertInfo("Håndterer ikke arbeidsgiverperiode i AVSLUTTET", 1.vedtaksperiode.filter())
-            assertVarsel(Varselkode.RV_IM_24, 2.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
             val forespørselFebruar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.vedtaksperiodeId == 2.vedtaksperiode }
             assertEquals(0, forespørselFebruar.forespurteOpplysninger.filterIsInstance<PersonObserver.Arbeidsgiverperiode>().size)
             assertEquals(0, forespørselFebruar.forespurteOpplysninger.filterIsInstance<PersonObserver.Inntekt>().size)
             assertEquals(1, forespørselFebruar.forespurteOpplysninger.filterIsInstance<PersonObserver.Refusjon>().size)
+        }
+        a1 {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
     }
 
@@ -53,6 +67,7 @@ internal class PortalInntektsmeldingTest : AbstractDslTest() {
     private fun setupLiteGapA2SammeSkjæringstidspunkt() {
         listOf(a1, a2).nyeVedtak(januar)
         a1 { forlengVedtak(februar) }
+        nullstillTilstandsendringer()
         a2 {
             håndterSøknad(10.februar til 28.februar)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)

@@ -418,7 +418,7 @@ internal class Vedtaksperiode private constructor(
         val rester = vedtaksperioder.fold(initiell) { acc, vedtaksperiode ->
             val arbeidsgiverperiodetidslinje = acc.sykdomstidslinje(vedtaksperiode.periode)
             if (arbeidsgiverperiodetidslinje != null) {
-                vedtaksperiode.håndterBitAvArbeidsgiverperiode(arbeidsgiveropplysninger, this, aktivitetslogg, arbeidsgiverperiodetidslinje)?.also {
+                vedtaksperiode.håndterBitAvArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg, arbeidsgiverperiodetidslinje)?.also {
                     eventyr.add(it)
                 }
             }
@@ -434,7 +434,7 @@ internal class Vedtaksperiode private constructor(
         return eventyr
     }
 
-    private fun håndterBitAvArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, denSomHåndtererOpplysningen: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, arbeidsgiverperiodetidslinje: Sykdomstidslinje): Revurderingseventyr? {
+    private fun håndterBitAvArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, arbeidsgiverperiodetidslinje: Sykdomstidslinje): Revurderingseventyr? {
         registrerKontekst(aktivitetslogg)
         val bitAvArbeidsgiverperiode = BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, arbeidsgiverperiodetidslinje)
         when (tilstand) {
@@ -442,18 +442,15 @@ internal class Vedtaksperiode private constructor(
             AvsluttetUtenUtbetaling,
             AvventerBlokkerendePeriode -> {
                 håndterDager(arbeidsgiveropplysninger, bitAvArbeidsgiverperiode, aktivitetslogg) {}
-                return Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, skjæringstidspunkt, periode)
             }
             else -> {
-                aktivitetslogg.info("Håndterer ikke arbeidsgiverperiode i ${tilstand.type}")
-
                 // det er oppgitt arbeidsgiverperiode på uventede perioder; mest sannsynlig
                 // har da ikke vedtaksperioden bedt om Arbeidsgiverperiode som opplysning, men vi har fått det likevel
-                denSomHåndtererOpplysningen.registrerKontekst(aktivitetslogg)
-                aktivitetslogg.varsel(RV_IM_24)
+                varselFraArbeidsgiveropplysning(arbeidsgiveropplysninger, aktivitetslogg, RV_IM_24)
+                aktivitetslogg.info("Håndterer ikke arbeidsgiverperiode i ${tilstand.type}")
             }
         }
-        return null
+        return Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, skjæringstidspunkt, periode)
     }
 
     private data class OppgittArbeidsgiverperiodehåndtering(
