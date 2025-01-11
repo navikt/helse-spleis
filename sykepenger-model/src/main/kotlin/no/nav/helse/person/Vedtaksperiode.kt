@@ -3171,13 +3171,10 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
             if (!vedtaksperiode.behandlinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) {
-                aktivitetslogg.info("Infotrygdhistorikken er uendret, reberegner ikke periode")
-                return
+                return aktivitetslogg.info("Infotrygdhistorikken er uendret, reberegner ikke periode")
             }
-            vedtaksperiode.behandlinger.forkastUtbetaling(aktivitetslogg)
-            vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode) {
-                aktivitetslogg.info("Infotrygdhistorikken har endret seg, reberegner periode")
-            }
+            aktivitetslogg.info("Infotrygdhistorikken har endret seg, reberegner periode")
+            vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.infotrygd(hendelse, vedtaksperiode.periode), aktivitetslogg)
         }
 
         override fun igangsettOverstyring(
