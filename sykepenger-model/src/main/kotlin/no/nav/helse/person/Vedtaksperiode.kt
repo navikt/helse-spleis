@@ -299,47 +299,54 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg,
         arbeidsgivere: List<Arbeidsgiver>,
         infotrygdhistorikk: Infotrygdhistorikk
-    ) {
-        håndterSykdomstidslinjeHendelse(søknad, aktivitetslogg) {
-            søknadHåndtert(søknad)
+    ): Boolean {
+        if (!søknad.erRelevant(this.periode)) return false
+        registrerKontekst(aktivitetslogg)
 
-            when (tilstand) {
-                Start -> {
-                    håndterSøknadFørsteGang(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
-                }
+        person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId, id, arbeidsgiver.organisasjonsnummer)
 
-                AvventerBlokkerendePeriode,
-                AvventerInfotrygdHistorikk,
-                AvventerInntektsmelding,
-                AvventerGodkjenning,
-                AvventerHistorikk,
-                AvventerSimulering,
-                AvventerVilkårsprøving -> {
-                    val nesteTilstand = when (tilstand) {
-                        AvventerBlokkerendePeriode,
-                        AvventerInfotrygdHistorikk,
-                        AvventerInntektsmelding -> null
-                        else -> AvventerBlokkerendePeriode
-                    }
-                    håndterOverlappendeSøknad(søknad, aktivitetslogg, nesteTilstand)
-                }
-
-                AvsluttetUtenUtbetaling,
-                Avsluttet,
-                AvventerGodkjenningRevurdering,
-                AvventerHistorikkRevurdering,
-                AvventerRevurdering,
-                AvventerSimuleringRevurdering,
-                AvventerVilkårsprøvingRevurdering,
-                TilUtbetaling -> {
-                    håndterOverlappendeSøknadRevurdering(søknad, aktivitetslogg)
-                }
-
-                RevurderingFeilet,
-                TilInfotrygd -> error("Kan ikke håndtere søknad mens perioden er i $tilstand")
+        val eventyr = when (tilstand) {
+            Start -> {
+                håndterSøknadFørsteGang(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
+                null
             }
+
+            AvventerBlokkerendePeriode,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerGodkjenning,
+            AvventerHistorikk,
+            AvventerSimulering,
+            AvventerVilkårsprøving -> {
+                val nesteTilstand = when (tilstand) {
+                    AvventerBlokkerendePeriode,
+                    AvventerInfotrygdHistorikk,
+                    AvventerInntektsmelding -> null
+
+                    else -> AvventerBlokkerendePeriode
+                }
+                håndterOverlappendeSøknad(søknad, aktivitetslogg, nesteTilstand)
+                Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode)
+            }
+
+            AvsluttetUtenUtbetaling,
+            Avsluttet,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikkRevurdering,
+            AvventerRevurdering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøvingRevurdering,
+            TilUtbetaling -> {
+                håndterOverlappendeSøknadRevurdering(søknad, aktivitetslogg)
+                Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode)
+            }
+
+            RevurderingFeilet,
+            TilInfotrygd -> error("Kan ikke håndtere søknad mens perioden er i $tilstand")
         }
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) forkast(søknad, aktivitetslogg)
+        eventyr?.also { person.igangsettOverstyring(eventyr, aktivitetslogg) }
+        return true
     }
 
     private fun håndterSøknadFørsteGang(søknad: Søknad, aktivitetslogg: IAktivitetslogg, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
@@ -390,10 +397,6 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver.organisasjonsnummer
         )
         return false
-    }
-
-    private fun søknadHåndtert(søknad: Søknad) {
-        person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId, id, arbeidsgiver.organisasjonsnummer)
     }
 
     internal fun håndter(anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg) {
@@ -1140,10 +1143,6 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg.info("Håndterer overlappende søknad")
         håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad, aktivitetslogg)
         håndterSøknad(søknad, aktivitetslogg) { nesteTilstand }
-        person.igangsettOverstyring(
-            Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode),
-            aktivitetslogg
-        )
     }
 
     private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad, aktivitetslogg: IAktivitetslogg) {
@@ -1166,11 +1165,6 @@ internal class Vedtaksperiode private constructor(
                 søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, jurist)
             }
         }
-
-        person.igangsettOverstyring(
-            Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode),
-            aktivitetslogg
-        )
     }
 
     private fun håndtertInntektPåSkjæringstidspunktetOgVurderVarsel(

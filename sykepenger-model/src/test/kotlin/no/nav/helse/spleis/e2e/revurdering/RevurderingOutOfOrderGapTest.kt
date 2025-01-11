@@ -617,9 +617,10 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     @Test
     fun `out of order som overlapper med eksisterende`() {
         nyttVedtak(mars, orgnummer = a1)
+        nullstillTilstandsendringer()
         nyPeriode(20.februar til 15.mars, a1)
 
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }

@@ -1174,14 +1174,16 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
 
         håndterInntektsmelding(listOf(5.januar til 20.januar))
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
+
+        nullstillTilstandsendringer()
 
         assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(5.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
@@ -1193,13 +1195,13 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
 
@@ -1207,6 +1209,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
 
+        assertEquals(2.januar til 20.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(21.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
         assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }

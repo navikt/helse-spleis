@@ -53,7 +53,7 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
         assertEquals(1, antallPersonalias(FNR1))
         assertEquals(1, antallPersonalias(FNR2))
         val meldinger = testRapid.inspektør.meldinger("vedtaksperiode_endret")
-        assertEquals(5, meldinger.size)
+        assertEquals(4, meldinger.size)
         assertEquals(FNR1, meldinger[0].path("fødselsnummer").asText())
         assertEquals(FNR1, meldinger[1].path("fødselsnummer").asText())
         assertEquals(FNR2, meldinger[2].path("fødselsnummer").asText())

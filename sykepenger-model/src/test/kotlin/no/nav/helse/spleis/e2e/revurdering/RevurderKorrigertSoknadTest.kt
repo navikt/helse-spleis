@@ -32,6 +32,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -81,12 +82,13 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Avsluttet periode får en overlappende søknad som strekker seg etter vedtaksperiode - skal ikke sette i gang revurdering`() {
+    fun `Avsluttet periode får en overlappende søknad som strekker seg etter vedtaksperiode - skal sette i gang revurdering`() {
         nyttVedtak(januar)
+        nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar))
         håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent))
 
-        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }
@@ -103,9 +105,14 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertFunksjonellFeil(RV_SØ_13)
         assertForkastetPeriodeTilstander(4.vedtaksperiode, START, TIL_INFOTRYGD)
 
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 29.januar, 2.februar, 100.prosent, INNTEKT))
         forlengVedtak(april)
-        assertEquals(4, inspektør.antallUtbetalinger)
+        assertEquals(6, inspektør.antallUtbetalinger)
 
         inspektør.sisteUtbetaling().also { utbetalinginspektør ->
             assertEquals(utbetalinginspektør.korrelasjonsId, marsutbetaling.korrelasjonsId)
@@ -127,11 +134,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Avsluttet periode får en overlappende søknad som strekker seg før vedtaksperiode - skal ikke sette i gang revurdering`() {
+    fun `Avsluttet periode får en overlappende søknad som strekker seg før vedtaksperiode - skal sette i gang revurdering`() {
         nyttVedtak(januar)
+        nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(15.desember(2017), 15.januar))
         håndterSøknad(Sykdom(15.desember(2017), 15.januar, 100.prosent))
-        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }
@@ -245,12 +253,14 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     fun `Overlappende søknad treffer førstegangsbehandling og forlengelse`() {
         nyttVedtak(januar, 50.prosent)
         forlengVedtak(februar, 50.prosent)
+        nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar))
         håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent))
 
-        assertTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertTilstand(2.vedtaksperiode, AVSLUTTET)
-        assertFunksjonellFeil(RV_SØ_13, 2.vedtaksperiode.filter())
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+        assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
+        assertIngenFunksjonellFeil(RV_SØ_13, 2.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
@@ -258,12 +268,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     fun `Avsluttet forlengelse får en overlappende søknad som slutter etter`() {
         nyttVedtak(januar, 50.prosent)
         forlengVedtak(februar, 50.prosent)
-
+        nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(15.februar, 15.mars))
         håndterSøknad(Sykdom(15.februar, 15.mars, 100.prosent))
 
-        assertTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_SØ_13, 2.vedtaksperiode.filter())
     }
@@ -272,14 +282,15 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     fun `Avsluttet periode med forlengelse får en overlappende søknad som starter før`() {
         nyttVedtak(januar, 50.prosent)
         forlengVedtak(februar, 50.prosent)
+        nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(15.desember(2017), 15.januar))
         håndterSøknad(Sykdom(15.desember(2017), 15.januar, 100.prosent))
 
         assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
         assertTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
 
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
     }
 
     @Test

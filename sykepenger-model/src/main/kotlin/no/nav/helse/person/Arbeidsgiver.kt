@@ -543,8 +543,8 @@ internal class Arbeidsgiver private constructor(
         arbeidsgivere: List<Arbeidsgiver>,
         infotrygdhistorikk: Infotrygdhistorikk
     ) {
-        håndter(søknad) { håndter(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk) }
-        if (søknad.noenHarHåndtert() && !aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
+        val noenHarHåndtert = énHarHåndtert(søknad) { håndter(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk) }
+        if (noenHarHåndtert && !aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
         val vedtaksperiode = søknad.lagVedtaksperiode(aktivitetslogg, person, this, subsumsjonslogg)
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) {
             registrerForkastetVedtaksperiode(vedtaksperiode, søknad, aktivitetslogg)

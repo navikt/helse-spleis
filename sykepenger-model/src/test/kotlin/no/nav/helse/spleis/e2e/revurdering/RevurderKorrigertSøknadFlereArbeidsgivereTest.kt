@@ -88,9 +88,15 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
         }
+        nullstillTilstandsendringer()
         a1 {
             håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar))
             håndterSøknad(Sykdom(15.januar, 15.februar, 50.prosent))
+            håndterYtelser(1.vedtaksperiode)
+
+            assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+            assertEquals(15.januar til 15.februar, inspektør.periode(2.vedtaksperiode))
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
             val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
             (17.januar til 31.januar).forEach {
@@ -99,7 +105,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
 
         a2 {
-            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
     }
 
