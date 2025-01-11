@@ -3,8 +3,8 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.desember
-import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
+import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Dagtype.Feriedag
@@ -30,7 +30,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -926,10 +925,11 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Permisjonsdag)))
         håndterYtelser(1.vedtaksperiode)
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
-        assertUgyldigSituasjon("En vedtaksperiode i REVURDERING_FEILET trenger hjelp!") {
+        assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_GODKJENNING_REVURDERING trenger hjelp!") {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
         }
-        assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
+        assertVarsler(listOf(RV_UT_23, Varselkode.RV_UT_24), 1.vedtaksperiode.filter())
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertTrue(inspektør.periodeErIkkeForkastet(1.vedtaksperiode))
     }
 

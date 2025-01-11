@@ -7,6 +7,7 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.dsl.INNTEKT
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
@@ -203,7 +204,9 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         assertEquals(utbetalingId, utbetaling.inspektør.utbetalingId)
 
         assertEquals(IKKE_UTBETALT, utbetaling.inspektør.tilstand)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingId = utbetalingId, utbetalingGodkjent = false)
+        assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_GODKJENNING trenger hjelp!") {
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingId = utbetalingId, utbetalingGodkjent = false)
+        }
         assertEquals(IKKE_GODKJENT, utbetaling.inspektør.tilstand)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)

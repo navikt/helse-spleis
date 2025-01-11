@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.behandlinger
 
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
@@ -64,9 +65,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
+            assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_GODKJENNING_REVURDERING trenger hjelp!") {
+                håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
+            }
+
+            assertVarsler(listOf(Varselkode.RV_UT_23, Varselkode.RV_UT_24), 1.vedtaksperiode.filter())
             val behandlinger = inspektør(1.vedtaksperiode).behandlinger
             assertEquals(2, observatør.behandlingLukketEventer.size)
             assertEquals(2, behandlinger.size)
@@ -147,10 +151,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             nyttVedtak(1.januar til (onsdag den 31.januar))
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(onsdag den 31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
+            assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_GODKJENNING_REVURDERING trenger hjelp!") {
+                håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
+            }
 
+            assertVarsler(listOf(Varselkode.RV_UT_23, Varselkode.RV_UT_24), 1.vedtaksperiode.filter())
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id

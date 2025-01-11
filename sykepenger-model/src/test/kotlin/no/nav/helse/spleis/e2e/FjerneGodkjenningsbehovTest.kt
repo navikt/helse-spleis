@@ -11,9 +11,9 @@ import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_GODKJENT
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.UTBETALT
@@ -79,7 +79,10 @@ internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            håndterKanIkkeBehandlesHer(1.vedtaksperiode, automatisert = true)
+            assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_GODKJENNING_REVURDERING trenger hjelp!") {
+                håndterKanIkkeBehandlesHer(1.vedtaksperiode, automatisert = true)
+            }
+            assertVarsler(listOf(Varselkode.RV_UT_24), 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             assertEquals(IKKE_GODKJENT, inspektør.utbetalingtilstand(1))
             assertInfo("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck", 1.vedtaksperiode.filter())
@@ -97,10 +100,11 @@ internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            assertUgyldigSituasjon("En vedtaksperiode i REVURDERING_FEILET trenger hjelp!") {
+            assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_GODKJENNING_REVURDERING trenger hjelp!") {
                 håndterKanIkkeBehandlesHer(1.vedtaksperiode, automatisert = false)
             }
-            assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
+            assertVarsler(listOf(Varselkode.RV_UT_24), 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             assertEquals(IKKE_GODKJENT, inspektør.utbetalingtilstand(1))
         }
     }

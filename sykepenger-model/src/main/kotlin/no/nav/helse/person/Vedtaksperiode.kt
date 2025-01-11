@@ -875,7 +875,23 @@ internal class Vedtaksperiode private constructor(
         if (!utbetalingsavgjørelse.relevantVedtaksperiode(id)) return
         if (behandlinger.gjelderIkkeFor(utbetalingsavgjørelse)) return aktivitetslogg.info("Ignorerer løsning på utbetalingsavgjørelse, utbetalingid på løsningen matcher ikke vedtaksperiodens nåværende utbetaling")
         registrerKontekst(aktivitetslogg)
-        tilstand.håndter(person, arbeidsgiver, this, utbetalingsavgjørelse, aktivitetslogg)
+
+        if (tilstand !in setOf(AvventerGodkjenning, AvventerGodkjenningRevurdering)) return aktivitetslogg.info("Forventet ikke utbetalingsavgjørelse i %s".format(tilstand.type.name))
+
+        val erAvvist = behandlinger.erAvvist()
+        if (erAvvist) {
+            if (arbeidsgiver.kanForkastes(this, aktivitetslogg)) return forkast(utbetalingsavgjørelse, aktivitetslogg)
+            if (utbetalingsavgjørelse.automatisert) aktivitetslogg.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
+            aktivitetslogg.varsel(RV_UT_24)
+        }
+
+        behandlinger.vedtakFattet(arbeidsgiver, utbetalingsavgjørelse, aktivitetslogg)
+
+        if (erAvvist) return // er i limbo
+        tilstand(aktivitetslogg, when {
+            behandlinger.harUtbetalinger() -> TilUtbetaling
+            else -> Avsluttet
+        })
     }
 
     internal fun håndter(
@@ -2103,16 +2119,6 @@ internal class Vedtaksperiode private constructor(
         ) {
         }
 
-        fun håndter(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
-            utbetalingsavgjørelse: Behandlingsavgjørelse,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            aktivitetslogg.info("Forventet ikke utbetalingsavgjørelse i %s".format(type.name))
-        }
-
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
@@ -2954,32 +2960,12 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerGodkjenning(aktivitetslogg)
         }
 
-        override fun venteårsak(vedtaksperiode: Vedtaksperiode) = GODKJENNING.utenBegrunnelse
+        override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak {
+            if (vedtaksperiode.behandlinger.erAvvist()) return HJELP.utenBegrunnelse
+            return GODKJENNING.utenBegrunnelse
+        }
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) =
             vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
-
-        override fun håndter(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
-            utbetalingsavgjørelse: Behandlingsavgjørelse,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            vedtaksperiode.behandlinger.vedtakFattet(arbeidsgiver, utbetalingsavgjørelse, aktivitetslogg)
-            if (vedtaksperiode.behandlinger.erAvvist()) {
-                return if (arbeidsgiver.kanForkastes(vedtaksperiode, aktivitetslogg)) vedtaksperiode.forkast(
-                    utbetalingsavgjørelse,
-                    aktivitetslogg
-                )
-                else aktivitetslogg.varsel(RV_UT_24)
-            }
-            vedtaksperiode.tilstand(
-                aktivitetslogg, when {
-                vedtaksperiode.behandlinger.harUtbetalinger() -> TilUtbetaling
-                else -> Avsluttet
-            }
-            )
-        }
 
         override fun nyAnnullering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
@@ -3020,7 +3006,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerGodkjenning(aktivitetslogg)
         }
 
-        override fun venteårsak(vedtaksperiode: Vedtaksperiode) = GODKJENNING fordi OVERSTYRING_IGANGSATT
+        override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak {
+            if (vedtaksperiode.behandlinger.erAvvist()) return HJELP.utenBegrunnelse
+            return GODKJENNING fordi OVERSTYRING_IGANGSATT
+        }
         override fun igangsettOverstyring(
             vedtaksperiode: Vedtaksperiode,
             revurdering: Revurderingseventyr,
@@ -3049,28 +3038,6 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
                 vedtaksperiode.person.igangsettOverstyring(it, aktivitetslogg)
             } ?: vedtaksperiode.trengerGodkjenning(aktivitetslogg)
-        }
-
-        override fun håndter(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
-            utbetalingsavgjørelse: Behandlingsavgjørelse,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            vedtaksperiode.behandlinger.vedtakFattet(arbeidsgiver, utbetalingsavgjørelse, aktivitetslogg)
-            if (vedtaksperiode.behandlinger.erAvvist()) {
-                if (utbetalingsavgjørelse.automatisert) {
-                    return aktivitetslogg.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
-                }
-            }
-            vedtaksperiode.tilstand(
-                aktivitetslogg, when {
-                vedtaksperiode.behandlinger.erAvvist() -> RevurderingFeilet
-                vedtaksperiode.behandlinger.harUtbetalinger() -> TilUtbetaling
-                else -> Avsluttet
-            }
-            )
         }
 
         override fun håndter(
