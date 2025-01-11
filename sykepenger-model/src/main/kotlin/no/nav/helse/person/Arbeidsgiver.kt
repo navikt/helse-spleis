@@ -34,7 +34,6 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SykdomstidslinjeHendelse
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
@@ -1104,7 +1103,7 @@ internal class Arbeidsgiver private constructor(
 
     private fun registrerForkastetVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
-        hendelse: SykdomstidslinjeHendelse,
+        hendelse: Søknad,
         aktivitetslogg: IAktivitetslogg
     ) {
         aktivitetslogg.info("Oppretter forkastet vedtaksperiode ettersom Søknad inneholder errors")

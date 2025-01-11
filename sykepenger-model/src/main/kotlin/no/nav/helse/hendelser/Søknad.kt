@@ -57,7 +57,7 @@ class Søknad(
     private val søknadstype: Søknadstype,
     registrert: LocalDateTime,
     private val tilkomneInntekter: List<TilkommenInntekt>
-) : SykdomstidslinjeHendelse() {
+) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         organisasjonsnummer = orgnummer
     )
@@ -92,7 +92,7 @@ class Søknad(
             .subset(sykdomsperiode)
     }
 
-    override fun erRelevant(other: Periode): Boolean {
+    fun erRelevant(other: Periode): Boolean {
         if (other.delvisOverlappMed(sykdomsperiode)) delvisOverlappende = true
         return other.overlapperMed(sykdomsperiode)
     }
@@ -145,11 +145,6 @@ class Søknad(
 
     internal fun utenlandskSykmelding(): Boolean {
         if (utenlandskSykmelding) return true
-        return false
-    }
-
-    internal fun sendtTilGosys(): Boolean {
-        if (sendTilGosys) return true
         return false
     }
 

@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.forrigeDag
+import no.nav.helse.nesteDag
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.AAP
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Dagpenger
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Foreldrepenger
@@ -41,7 +42,7 @@ class OverstyrTidslinje(
     organisasjonsnummer: String,
     dager: List<ManuellOverskrivingDag>,
     opprettet: LocalDateTime,
-) : SykdomstidslinjeHendelse() {
+) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         organisasjonsnummer = organisasjonsnummer
     )
@@ -53,6 +54,7 @@ class OverstyrTidslinje(
         automatiskBehandling = false
     )
     private val kilde = Hendelseskilde(this::class, metadata.meldingsreferanseId, metadata.innsendt)
+    private var nesteFraOgMed: LocalDate = LocalDate.MIN
 
     private val periode: Periode
     var sykdomstidslinje: Sykdomstidslinje
@@ -161,9 +163,14 @@ class OverstyrTidslinje(
         }
     }
 
-    override fun erRelevant(other: Periode) = sykdomstidslinje.periode()?.let { other.oppdaterFom(other.start.forrigeDag).overlapperMed(it) } == true
+    internal fun vurdertTilOgMed(dato: LocalDate) {
+        nesteFraOgMed = dato.nesteDag
+        trimSykdomstidslinje(nesteFraOgMed)
+    }
 
-    override fun trimSykdomstidslinje(fom: LocalDate) {
+    fun erRelevant(other: Periode) = sykdomstidslinje.periode()?.let { other.oppdaterFom(other.start.forrigeDag).overlapperMed(it) } == true
+
+    fun trimSykdomstidslinje(fom: LocalDate) {
         sykdomstidslinje = sykdomstidslinje.fraOgMed(fom)
     }
 }

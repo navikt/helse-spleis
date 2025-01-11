@@ -355,7 +355,6 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {
         if (!hendelse.erRelevant(this.periode)) return hendelse.vurdertTilOgMed(periode.endInclusive)
         registrerKontekst(aktivitetslogg)
-        hendelse.leggTil(id, behandlinger)
         val arbeidsgiverperiodeFørOverstyring = arbeidsgiver.arbeidsgiverperiode(periode)
 
         when (tilstand) {
