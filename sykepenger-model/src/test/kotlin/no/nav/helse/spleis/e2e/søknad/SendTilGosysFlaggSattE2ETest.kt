@@ -13,6 +13,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.nyttVedtak
@@ -42,13 +43,12 @@ internal class SendTilGosysFlaggSattE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Overlapper med utbetalt - søknad med flagg sendTilGosys ignoreres og kastes ut`() {
+    fun `Overlapper med utbetalt - søknad med flagg sendTilGosys lager varsel`() {
         nyttVedtak(januar)
         nullstillTilstandsendringer()
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendTilGosys = true)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertFunksjonellFeil(RV_SØ_30, 1.vedtaksperiode.filter())
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
+        assertVarsler(listOf(RV_SØ_30), 1.vedtaksperiode.filter())
     }
 }

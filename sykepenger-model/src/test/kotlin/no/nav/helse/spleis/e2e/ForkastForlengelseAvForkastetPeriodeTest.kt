@@ -79,12 +79,12 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertTrue(observatør.hendelseider(3.vedtaksperiode.id(a1)).isNotEmpty())
         assertTrue(observatør.hendelseider(4.vedtaksperiode.id(a1)).isNotEmpty())
         assertTrue(observatør.hendelseider(5.vedtaksperiode.id(a1)).isNotEmpty())
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(4.vedtaksperiode, START, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(5.vedtaksperiode, START, TIL_INFOTRYGD)
-        assertFunksjonellFeil(Varselkode.RV_SØ_13, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_SØ_13), 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -93,7 +93,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSøknad(9.januar til 15.januar)
         håndterSøknad(16.januar til 19.januar)
         håndterSøknad(10.februar til 28.februar)
-        assertTilstander(5.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
     }
 
     @Test
@@ -102,8 +102,8 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar))
         håndterSøknad(18.januar til 31.januar)
-        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil(RV_SØ_37, 3.vedtaksperiode.filter())
+        assertSisteForkastetPeriodeTilstand(a1, 2.vedtaksperiode, TIL_INFOTRYGD)
+        assertFunksjonellFeil(RV_SØ_37, 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -112,8 +112,8 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar))
         håndterSøknad(22.januar til 31.januar)
-        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil(RV_SØ_37, 3.vedtaksperiode.filter())
+        assertSisteForkastetPeriodeTilstand(a1, 2.vedtaksperiode, TIL_INFOTRYGD)
+        assertFunksjonellFeil(RV_SØ_37, 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -122,8 +122,8 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar))
         håndterSøknad(10.februar til 28.februar)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        assertIngenFunksjonelleFeil(3.vedtaksperiode.filter())
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
     }
 
     @Test
@@ -132,16 +132,16 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(19.januar, 31.januar))
         håndterSøknad(19.januar til 31.januar)
-        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil(RV_SØ_37, 3.vedtaksperiode.filter())
+        assertSisteForkastetPeriodeTilstand(a1, 2.vedtaksperiode, TIL_INFOTRYGD)
+        assertFunksjonellFeil(RV_SØ_37, 2.vedtaksperiode.filter())
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
-        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil(RV_SØ_37, 3.vedtaksperiode.filter())
+        assertSisteForkastetPeriodeTilstand(a1, 2.vedtaksperiode, TIL_INFOTRYGD)
+        assertFunksjonellFeil(RV_SØ_37, 2.vedtaksperiode.filter())
         håndterSykmelding(Sykmeldingsperiode(21.mars, 21.april))
         håndterSøknad(21.mars til 21.april)
-        assertSisteTilstand(5.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        assertIngenFunksjonelleFeil(5.vedtaksperiode.filter())
+        assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertIngenFunksjonelleFeil(4.vedtaksperiode.filter())
     }
 
     @Test
@@ -289,10 +289,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
 
     @Test
     fun `person som kun har helg mellom to sykefraværstilfeller skal ikke få to funksjonelle feil når den kastes ut pga for lite gap`() {
-        nyPeriode(5.januar til fredag den 19.januar)
-        // trigger forkasting ved å lage en delvis overlappende søknad
-        håndterSøknad(1.januar til 7.januar)
-
+        (5.januar til fredag den 19.januar).forkast()
         nyPeriode(mandag den 22.januar til 31.januar)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_SØ_37)
@@ -301,12 +298,9 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
 
     @Test
     fun `søknad som har mindre enn 20 dagers gap til en forkastet periode og overlapper med en annen forkastet periode skal kun få én funksjonell feil`() {
-        nyPeriode(5.januar til 17.januar)
         nyPeriode(18.januar til 31.januar)
-        nyPeriode(5.januar til 31.januar)
-
-        // trigger forkasting ved å lage en delvis overlappende søknad
-        håndterSøknad(1.januar til 7.januar)
+        forkastAlle()
+        nyPeriode(1.januar til 7.januar)
 
         nyPeriode(22.januar til 31.januar)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
@@ -328,9 +322,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     private fun Periode.forkast() {
-        håndterSykmelding(Sykmeldingsperiode(start, endInclusive))
         håndterSøknad(this)
-        // trigger forkasting ved å lage en delvis overlappende søknad
-        håndterSøknad(oppdaterFom(start.minusDays(5L)))
+        forkastAlle()
     }
 }

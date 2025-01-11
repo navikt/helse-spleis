@@ -73,6 +73,8 @@ class Søknad(
     private val sykdomsperiode: Periode
     var sykdomstidslinje: Sykdomstidslinje
         private set
+    var delvisOverlappende: Boolean = false
+        private set
 
     internal companion object {
         internal const val tidslinjegrense = 40L
@@ -90,13 +92,14 @@ class Søknad(
             .subset(sykdomsperiode)
     }
 
-    override fun erRelevant(other: Periode) = other.overlapperMed(sykdomsperiode)
+    override fun erRelevant(other: Periode): Boolean {
+        if (other.delvisOverlappMed(sykdomsperiode)) delvisOverlappende = true
+        return other.overlapperMed(sykdomsperiode)
+    }
 
     internal fun egenmeldingsperioder(): List<Periode> {
         return egenmeldinger
     }
-
-    internal fun delvisOverlappende(other: Periode) = other.delvisOverlappMed(sykdomsperiode)
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, refusjonstidslinje: Beløpstidslinje, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
         valider(aktivitetslogg, subsumsjonslogg)

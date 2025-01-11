@@ -1139,31 +1139,25 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg,
         nesteTilstand: Vedtaksperiodetilstand? = null
     ) {
-        if (søknad.delvisOverlappende(periode)) return aktivitetslogg.funksjonellFeil(`Mottatt søknad som delvis overlapper`)
+        if (søknad.delvisOverlappende) return aktivitetslogg.funksjonellFeil(`Mottatt søknad som delvis overlapper`)
         aktivitetslogg.info("Håndterer overlappende søknad")
         håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad, aktivitetslogg)
         håndterSøknad(søknad, aktivitetslogg) { nesteTilstand }
     }
 
     private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad, aktivitetslogg: IAktivitetslogg) {
-        if (søknad.delvisOverlappende(periode)) return aktivitetslogg.funksjonellFeil(
-            `Mottatt søknad som delvis overlapper`
+        aktivitetslogg.info("Søknad har trigget en revurdering")
+        håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad, aktivitetslogg)
+        person.oppdaterVilkårsgrunnlagMedInntektene(
+            skjæringstidspunkt,
+            aktivitetslogg,
+            periode,
+            søknad.nyeInntekterUnderveis(aktivitetslogg),
+            jurist
         )
-        if (søknad.sendtTilGosys()) return aktivitetslogg.funksjonellFeil(RV_SØ_30)
-        if (søknad.utenlandskSykmelding()) return aktivitetslogg.funksjonellFeil(RV_SØ_29)
-        else {
-            aktivitetslogg.info("Søknad har trigget en revurdering")
-            håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad, aktivitetslogg)
-            person.oppdaterVilkårsgrunnlagMedInntektene(
-                skjæringstidspunkt,
-                aktivitetslogg,
-                periode,
-                søknad.nyeInntekterUnderveis(aktivitetslogg),
-                jurist
-            )
-            oppdaterHistorikk(søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
-                søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, jurist)
-            }
+        oppdaterHistorikk(søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
+            if (søknad.delvisOverlappende) aktivitetslogg.varsel(`Mottatt søknad som delvis overlapper`)
+            søknad.valider(FunksjonelleFeilTilVarsler(aktivitetslogg), vilkårsgrunnlag, refusjonstidslinje, jurist)
         }
     }
 

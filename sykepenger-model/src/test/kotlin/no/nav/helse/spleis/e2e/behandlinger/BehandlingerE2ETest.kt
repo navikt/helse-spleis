@@ -564,17 +564,18 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     fun `delvis overlappende søknad i avsluttet uten utbetaling`() {
         a1 {
             håndterSøknad(Sykdom(8.august, 21.august, 100.prosent))
+            nullstillTilstandsendringer()
             håndterSykmelding(Sykmeldingsperiode(10.august, 31.august))
             val overlappende = UUID.randomUUID()
             håndterSøknad(Sykdom(10.august, 31.august, 100.prosent), søknadId = overlappende)
             assertEquals(8.august til 21.august, inspektør.periode(1.vedtaksperiode))
             assertEquals(10.august til 31.august, inspektør.periode(2.vedtaksperiode))
-            assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().also { behandling ->
                 assertEquals(overlappende, behandling.kilde.meldingsreferanseId)
                 assertEquals(Dokumentsporing.søknad(overlappende), behandling.endringer.single().dokumentsporing)
             }
-            assertFunksjonellFeil(Varselkode.`Mottatt søknad som delvis overlapper`, 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.`Mottatt søknad som delvis overlapper`), 1.vedtaksperiode.filter())
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
         }
     }

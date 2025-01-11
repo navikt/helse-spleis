@@ -27,12 +27,14 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -501,6 +503,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     @Test
     fun `delvis overlappende søknad`() {
         val søknad1 = håndterSøknad(Sykdom(11.januar, 16.januar, 100.prosent))
+        nullstillTilstandsendringer()
         val søknad2 = håndterSøknad(Sykdom(10.januar, 15.januar, 100.prosent))
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
         assertEquals(
@@ -509,6 +512,9 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 søknad2 to 1.vedtaksperiode.id(a1)
             ), observatør.søknadHåndtert
         )
+        assertVarsler(listOf(RV_SØ_13), 1.vedtaksperiode.filter())
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        assertEquals(10.januar til 16.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
                 organisasjonsnummer = a1,
@@ -518,7 +524,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 fom = 10.januar,
                 tom = 15.januar,
                 behandletIInfotrygd = false,
-                forlengerPeriode = false,
+                forlengerPeriode = true,
                 harPeriodeInnenfor16Dager = false,
                 trengerArbeidsgiveropplysninger = false,
                 sykmeldingsperioder = listOf(11.januar til 16.januar, 10.januar til 15.januar)

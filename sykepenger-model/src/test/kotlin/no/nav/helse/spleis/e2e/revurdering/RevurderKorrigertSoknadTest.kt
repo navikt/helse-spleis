@@ -15,6 +15,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -22,6 +23,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -88,8 +90,9 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar))
         håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent))
 
+        assertVarsler(listOf(RV_SØ_13), 1.vedtaksperiode.filter())
+
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
@@ -102,11 +105,25 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 25.februar))
         håndterSøknad(Sykdom(29.januar, 25.februar, 100.prosent))
 
-        assertFunksjonellFeil(RV_SØ_13)
+        assertVarsler(listOf(RV_SØ_13), 2.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(4.vedtaksperiode, START, TIL_INFOTRYGD)
 
         håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        inspektør.sisteUtbetaling().also { utbetalinginspektør ->
+            assertEquals(utbetalinginspektør.korrelasjonsId, marsutbetaling.korrelasjonsId)
+            assertEquals(1, utbetalinginspektør.arbeidsgiverOppdrag.size)
+
+            utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                assertEquals(NY, linje.endringskode)
+                assertEquals(17.januar til 30.mars, linje.periode)
+                assertEquals(100, linje.grad)
+                assertEquals(1431, linje.beløp)
+            }
+        }
+
+        håndterUtbetalt()
         håndterYtelser(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
@@ -116,17 +133,11 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         inspektør.sisteUtbetaling().also { utbetalinginspektør ->
             assertEquals(utbetalinginspektør.korrelasjonsId, marsutbetaling.korrelasjonsId)
-            assertEquals(2, utbetalinginspektør.arbeidsgiverOppdrag.size)
+            assertEquals(1, utbetalinginspektør.arbeidsgiverOppdrag.size)
 
             utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-                assertEquals(UEND, linje.endringskode)
-                assertEquals(17.januar til 26.januar, linje.periode)
-                assertEquals(100, linje.grad)
-                assertEquals(1431, linje.beløp)
-            }
-            utbetalinginspektør.arbeidsgiverOppdrag[1].inspektør.also { linje ->
                 assertEquals(ENDR, linje.endringskode)
-                assertEquals(3.februar til 30.april, linje.periode)
+                assertEquals(17.januar til 30.april, linje.periode)
                 assertEquals(100, linje.grad)
                 assertEquals(1431, linje.beløp)
             }
@@ -139,9 +150,10 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(15.desember(2017), 15.januar))
         håndterSøknad(Sykdom(15.desember(2017), 15.januar, 100.prosent))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
+
+        assertVarsler(listOf(Varselkode.RV_IV_7, RV_SØ_13), 1.vedtaksperiode.filter())
+        assertEquals(15.desember(2017) til 31.januar, inspektør.periode(1.vedtaksperiode))
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
     }
 
     @Test
@@ -259,8 +271,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-        assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
-        assertIngenFunksjonellFeil(RV_SØ_13, 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_SØ_13), 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
@@ -272,10 +283,10 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(15.februar, 15.mars))
         håndterSøknad(Sykdom(15.februar, 15.mars, 100.prosent))
 
+        assertVarsler(listOf(RV_SØ_13), 2.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
-        assertFunksjonellFeil(RV_SØ_13, 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -286,10 +297,10 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(15.desember(2017), 15.januar))
         håndterSøknad(Sykdom(15.desember(2017), 15.januar, 100.prosent))
 
-        assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
-        assertTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+        assertVarsler(listOf(RV_SØ_13, Varselkode.RV_IV_7), 1.vedtaksperiode.filter())
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
     }
 

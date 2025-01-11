@@ -544,9 +544,9 @@ internal class Arbeidsgiver private constructor(
         infotrygdhistorikk: Infotrygdhistorikk
     ) {
         val noenHarHåndtert = énHarHåndtert(søknad) { håndter(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk) }
-        if (noenHarHåndtert && !aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
+        if (noenHarHåndtert && !søknad.delvisOverlappende) return
         val vedtaksperiode = søknad.lagVedtaksperiode(aktivitetslogg, person, this, subsumsjonslogg)
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) {
+        if (søknad.delvisOverlappende || aktivitetslogg.harFunksjonelleFeilEllerVerre()) {
             registrerForkastetVedtaksperiode(vedtaksperiode, søknad, aktivitetslogg)
             return
         }
