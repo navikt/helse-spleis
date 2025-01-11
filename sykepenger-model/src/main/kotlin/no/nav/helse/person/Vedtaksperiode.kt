@@ -53,7 +53,6 @@ import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.hendelser.SykdomstidslinjeHendelse
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
@@ -275,18 +274,6 @@ internal class Vedtaksperiode private constructor(
         sykmelding.trimLeft(periode.endInclusive)
     }
 
-    private fun <Hendelse : SykdomstidslinjeHendelse> håndterSykdomstidslinjeHendelse(
-        hendelse: Hendelse,
-        aktivitetslogg: IAktivitetslogg,
-        håndtering: (Hendelse) -> Unit
-    ) {
-        if (!hendelse.erRelevant(this.periode)) return hendelse.vurdertTilOgMed(periode.endInclusive)
-        registrerKontekst(aktivitetslogg)
-        hendelse.leggTil(id, behandlinger)
-        håndtering(hendelse)
-        hendelse.vurdertTilOgMed(periode.endInclusive)
-    }
-
     private fun validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         if (!tilstand.erFerdigBehandlet) return
         behandlinger.validerFerdigBehandlet(hendelse.metadata.meldingsreferanseId, aktivitetslogg)
@@ -366,22 +353,69 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {
-        håndterSykdomstidslinjeHendelse(hendelse, aktivitetslogg) {
-            val arbeidsgiverperiodeFørOverstyring = arbeidsgiver.arbeidsgiverperiode(periode)
-            tilstand.håndter(this, hendelse, aktivitetslogg)
-            val arbeidsgiverperiodeEtterOverstyring = arbeidsgiver.arbeidsgiverperiode(periode)
-            if (arbeidsgiverperiodeFørOverstyring != arbeidsgiverperiodeEtterOverstyring) {
-                behandlinger.sisteInntektsmeldingDagerId()?.let {
-                    person.arbeidsgiveropplysningerKorrigert(
-                        PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                            korrigerendeInntektsopplysningId = hendelse.metadata.meldingsreferanseId,
-                            korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
-                            korrigertInntektsmeldingId = it
-                        )
-                    )
+        if (!hendelse.erRelevant(this.periode)) return hendelse.vurdertTilOgMed(periode.endInclusive)
+        registrerKontekst(aktivitetslogg)
+        hendelse.leggTil(id, behandlinger)
+        val arbeidsgiverperiodeFørOverstyring = arbeidsgiver.arbeidsgiverperiode(periode)
+
+        when (tilstand) {
+            Avsluttet,
+            AvsluttetUtenUtbetaling,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering,
+            TilUtbetaling -> {
+                oppdaterHistorikk(hendelse.metadata.behandlingkilde, overstyrTidslinje(hendelse.metadata.meldingsreferanseId), hendelse.sykdomstidslinje, aktivitetslogg) {
+                    // ingen validering å gjøre :(
                 }
+                aktivitetslogg.info("Igangsetter overstyring av tidslinje")
+                val vedtaksperiodeTilRevurdering = arbeidsgiver.finnVedtaksperiodeFør(this)?.takeIf {
+                    nyArbeidsgiverperiodeEtterEndring(it)
+                } ?: this
+                person.igangsettOverstyring(Revurderingseventyr.sykdomstidslinje(
+                    hendelse = hendelse,
+                    skjæringstidspunkt = vedtaksperiodeTilRevurdering.skjæringstidspunkt,
+                    periodeForEndring = vedtaksperiodeTilRevurdering.periode
+                ), aktivitetslogg)
+            }
+
+            RevurderingFeilet,
+            Start,
+            TilInfotrygd -> error("Kan ikke overstyre tidslinjen i $tilstand")
+        }
+
+        val arbeidsgiverperiodeEtterOverstyring = arbeidsgiver.arbeidsgiverperiode(periode)
+        if (arbeidsgiverperiodeFørOverstyring != arbeidsgiverperiodeEtterOverstyring) {
+            behandlinger.sisteInntektsmeldingDagerId()?.let {
+                person.arbeidsgiveropplysningerKorrigert(
+                    PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
+                        korrigerendeInntektsopplysningId = hendelse.metadata.meldingsreferanseId,
+                        korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
+                        korrigertInntektsmeldingId = it
+                    )
+                )
             }
         }
+        hendelse.vurdertTilOgMed(periode.endInclusive)
+    }
+
+    private fun nyArbeidsgiverperiodeEtterEndring(other: Vedtaksperiode): Boolean {
+        if (this.behandlinger.erUtbetaltPåForskjelligeUtbetalinger(other.behandlinger)) return false
+        val arbeidsgiverperiodeOther = other.finnArbeidsgiverperiode()
+        val arbeidsgiverperiodeThis = this.finnArbeidsgiverperiode()
+        if (arbeidsgiverperiodeOther == null || arbeidsgiverperiodeThis == null) return false
+        val periode = arbeidsgiverperiodeThis.periode(this.periode.endInclusive)
+        // ingen overlapp i arbeidsgiverperiodene => ny arbeidsgiverperiode
+        return periode !in arbeidsgiverperiodeOther
     }
 
     private fun inntektsmeldingHåndtert(inntektsmelding: Inntektsmelding): Boolean {
@@ -1017,37 +1051,6 @@ internal class Vedtaksperiode private constructor(
     private fun forkast(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         if (!arbeidsgiver.kanForkastes(this, aktivitetslogg)) return aktivitetslogg.info("Kan ikke etterkomme forkasting")
         person.søppelbøtte(hendelse, aktivitetslogg, TIDLIGERE_OG_ETTERGØLGENDE(this))
-    }
-
-    private fun revurderTidslinje(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {
-        oppdaterHistorikk(hendelse.metadata.behandlingkilde, overstyrTidslinje(hendelse.metadata.meldingsreferanseId), hendelse.sykdomstidslinje, aktivitetslogg) {
-            // ingen validering å gjøre :(
-        }
-        igangsettOverstyringAvTidslinje(hendelse, aktivitetslogg)
-    }
-
-    private fun igangsettOverstyringAvTidslinje(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {
-        aktivitetslogg.info("Igangsetter overstyring av tidslinje")
-        val vedtaksperiodeTilRevurdering = arbeidsgiver.finnVedtaksperiodeFør(this)
-            ?.takeIf { nyArbeidsgiverperiodeEtterEndring(it) } ?: this
-        person.igangsettOverstyring(
-            Revurderingseventyr.sykdomstidslinje(
-                hendelse,
-                vedtaksperiodeTilRevurdering.skjæringstidspunkt,
-                vedtaksperiodeTilRevurdering.periode
-            ),
-            aktivitetslogg
-        )
-    }
-
-    private fun nyArbeidsgiverperiodeEtterEndring(other: Vedtaksperiode): Boolean {
-        if (this.behandlinger.erUtbetaltPåForskjelligeUtbetalinger(other.behandlinger)) return false
-        val arbeidsgiverperiodeOther = other.finnArbeidsgiverperiode()
-        val arbeidsgiverperiodeThis = this.finnArbeidsgiverperiode()
-        if (arbeidsgiverperiodeOther == null || arbeidsgiverperiodeThis == null) return false
-        val periode = arbeidsgiverperiodeThis.periode(this.periode.endInclusive)
-        // ingen overlapp i arbeidsgiverperiodene => ny arbeidsgiverperiode
-        return periode !in arbeidsgiverperiodeOther
     }
 
     private fun registrerKontekst(aktivitetslogg: IAktivitetslogg) {
@@ -2122,30 +2125,6 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Forventet ikke utbetaling i %s".format(type.name))
-        }
-
-        fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {
-            when (this) {
-                Avsluttet,
-                AvsluttetUtenUtbetaling,
-                AvventerBlokkerendePeriode,
-                AvventerGodkjenning,
-                AvventerGodkjenningRevurdering,
-                AvventerHistorikk,
-                AvventerHistorikkRevurdering,
-                AvventerInfotrygdHistorikk,
-                AvventerInntektsmelding,
-                AvventerRevurdering,
-                AvventerSimulering,
-                AvventerSimuleringRevurdering,
-                AvventerVilkårsprøving,
-                AvventerVilkårsprøvingRevurdering,
-                TilUtbetaling -> vedtaksperiode.revurderTidslinje(hendelse, aktivitetslogg)
-
-                RevurderingFeilet,
-                Start,
-                TilInfotrygd -> error("Kan ikke overstyre tidslinjen i $this")
-            }
         }
 
         fun håndter(
