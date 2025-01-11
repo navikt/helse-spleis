@@ -543,7 +543,7 @@ internal class Arbeidsgiver private constructor(
         arbeidsgivere: List<Arbeidsgiver>,
         infotrygdhistorikk: Infotrygdhistorikk
     ) {
-        val noenHarHåndtert = énHarHåndtert(søknad) { håndter(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk) }
+        val noenHarHåndtert = énHarHåndtert(søknad) { håndterKorrigertSøknad(søknad, aktivitetslogg) }
         if (noenHarHåndtert && !søknad.delvisOverlappende) return
         val vedtaksperiode = søknad.lagVedtaksperiode(aktivitetslogg, person, this, subsumsjonslogg)
         if (søknad.delvisOverlappende || aktivitetslogg.harFunksjonelleFeilEllerVerre()) {
@@ -551,7 +551,7 @@ internal class Arbeidsgiver private constructor(
             return
         }
         registrerNyVedtaksperiode(vedtaksperiode)
-        vedtaksperiode.håndter(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
+        vedtaksperiode.håndterSøknadFørsteGang(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
     }
 
     internal fun håndter(replays: InntektsmeldingerReplay, aktivitetslogg: IAktivitetslogg) {

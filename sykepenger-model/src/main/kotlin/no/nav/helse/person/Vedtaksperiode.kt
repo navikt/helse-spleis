@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
@@ -138,8 +138,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_29
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_30
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_31
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_32
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_33
@@ -294,23 +292,42 @@ internal class Vedtaksperiode private constructor(
         behandlinger.validerFerdigBehandlet(hendelse.metadata.meldingsreferanseId, aktivitetslogg)
     }
 
-    internal fun håndter(
+    internal fun håndterSøknadFørsteGang(
         søknad: Søknad,
         aktivitetslogg: IAktivitetslogg,
         arbeidsgivere: List<Arbeidsgiver>,
         infotrygdhistorikk: Infotrygdhistorikk
-    ): Boolean {
+    ) {
+        check(tilstand is Start)
+        registrerKontekst(aktivitetslogg)
+        person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId, id, arbeidsgiver.organisasjonsnummer)
+
+        val harSenereUtbetalinger = person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(this)).isNotEmpty()
+        val harSenereAUU = person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_UTEN_UTBETALING(this)).isNotEmpty()
+        if (harSenereUtbetalinger || harSenereAUU) aktivitetslogg.varsel(RV_OO_1)
+
+        arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(aktivitetslogg, this, arbeidsgivere)
+
+        infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
+        håndterSøknad(søknad, aktivitetslogg)
+        aktivitetslogg.info("Fullført behandling av søknad")
+
+        person.igangsettOverstyring(Revurderingseventyr.nyPeriode(søknad, skjæringstidspunkt, periode), aktivitetslogg)
+
+        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(søknad, aktivitetslogg)
+        tilstand(aktivitetslogg, when {
+            !infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
+            else -> AvventerInntektsmelding }
+        )
+    }
+
+    internal fun håndterKorrigertSøknad(søknad: Søknad, aktivitetslogg: IAktivitetslogg): Boolean {
         if (!søknad.erRelevant(this.periode)) return false
         registrerKontekst(aktivitetslogg)
 
         person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId, id, arbeidsgiver.organisasjonsnummer)
 
-        val eventyr = when (tilstand) {
-            Start -> {
-                håndterSøknadFørsteGang(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
-                null
-            }
-
+        when (tilstand) {
             AvventerBlokkerendePeriode,
             AvventerInfotrygdHistorikk,
             AvventerInntektsmelding,
@@ -326,7 +343,6 @@ internal class Vedtaksperiode private constructor(
                     else -> AvventerBlokkerendePeriode
                 }
                 håndterOverlappendeSøknad(søknad, aktivitetslogg, nesteTilstand)
-                Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode)
             }
 
             AvsluttetUtenUtbetaling,
@@ -338,35 +354,15 @@ internal class Vedtaksperiode private constructor(
             AvventerVilkårsprøvingRevurdering,
             TilUtbetaling -> {
                 håndterOverlappendeSøknadRevurdering(søknad, aktivitetslogg)
-                Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode)
             }
 
+            Start,
             RevurderingFeilet,
             TilInfotrygd -> error("Kan ikke håndtere søknad mens perioden er i $tilstand")
         }
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) forkast(søknad, aktivitetslogg)
-        eventyr?.also { person.igangsettOverstyring(eventyr, aktivitetslogg) }
+        person.igangsettOverstyring(Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode), aktivitetslogg)
         return true
-    }
-
-    private fun håndterSøknadFørsteGang(søknad: Søknad, aktivitetslogg: IAktivitetslogg, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
-        val harSenereUtbetalinger = person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(this)).isNotEmpty()
-        val harSenereAUU = person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_UTEN_UTBETALING(this)).isNotEmpty()
-        if (harSenereUtbetalinger || harSenereAUU) aktivitetslogg.varsel(RV_OO_1)
-
-        arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(aktivitetslogg, this, arbeidsgivere)
-
-        infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
-        håndterSøknad(søknad, aktivitetslogg)
-        aktivitetslogg.info("Fullført behandling av søknad")
-
-        person.igangsettOverstyring(Revurderingseventyr.nyPeriode(søknad, skjæringstidspunkt, periode), aktivitetslogg)
-
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
-        tilstand(aktivitetslogg, when {
-            !infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
-            else -> AvventerInntektsmelding }
-        )
     }
 
     internal fun håndter(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {
