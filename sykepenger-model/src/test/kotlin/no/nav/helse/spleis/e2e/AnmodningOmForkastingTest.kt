@@ -30,7 +30,7 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterAnmodningOmForkasting(1.vedtaksperiode)
-            assertInfo("Avslår anmodning om forkasting i AVSLUTTET (kan ikke forkastes)", 1.vedtaksperiode.filter())
+            assertInfo("Avslår anmodning om forkasting i Avsluttet", 1.vedtaksperiode.filter())
         }
     }
 
@@ -51,7 +51,7 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
         a2 {
             nullstillTilstandsendringer()
             håndterAnmodningOmForkasting(2.vedtaksperiode)
-            assertInfo("Etterkommer anmodning om forkasting", 2.vedtaksperiode.filter())
+            assertInfo("Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet", 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
         }

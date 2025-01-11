@@ -431,17 +431,31 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg) {
         if (!anmodningOmForkasting.erRelevant(id)) return
         registrerKontekst(aktivitetslogg)
-        if (anmodningOmForkasting.force) return forkast(anmodningOmForkasting, aktivitetslogg)
-        tilstand.håndter(this, anmodningOmForkasting, aktivitetslogg)
-    }
+        aktivitetslogg.info("Behandler anmodning om forkasting")
+        when (tilstand) {
+            AvventerInntektsmelding,
+            AvventerBlokkerendePeriode,
+            AvsluttetUtenUtbetaling -> forkast(anmodningOmForkasting, aktivitetslogg)
 
-    private fun etterkomAnmodningOmForkasting(
-        anmodningOmForkasting: AnmodningOmForkasting,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        if (!arbeidsgiver.kanForkastes(this, aktivitetslogg)) return aktivitetslogg.info("Kan ikke etterkomme anmodning om forkasting")
-        aktivitetslogg.info("Etterkommer anmodning om forkasting")
-        forkast(anmodningOmForkasting, aktivitetslogg)
+            Avsluttet,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering,
+            RevurderingFeilet,
+            Start,
+            TilInfotrygd,
+            TilUtbetaling -> {
+                if (anmodningOmForkasting.force) return forkast(anmodningOmForkasting, aktivitetslogg)
+                aktivitetslogg.info("Avslår anmodning om forkasting i $tilstand")
+            }
+        }
     }
 
     internal fun håndter(replays: InntektsmeldingerReplay, aktivitetslogg: IAktivitetslogg) {
@@ -984,10 +998,10 @@ internal class Vedtaksperiode private constructor(
 
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, aktivitetslogg: IAktivitetslogg): Boolean {
         if (!behandlinger.kanForkastes(aktivitetslogg, arbeidsgiverUtbetalinger)) {
-            aktivitetslogg.info("[kanForkastes] Kan ikke forkastes fordi behandlinger nekter det")
+            aktivitetslogg.info("Kan ikke forkastes fordi behandlinger nekter det")
             return false
         }
-        aktivitetslogg.info("[kanForkastes] Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet")
+        aktivitetslogg.info("Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet")
         return true
     }
 
@@ -1048,7 +1062,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun forkast(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-        if (!arbeidsgiver.kanForkastes(this, aktivitetslogg)) return aktivitetslogg.info("Kan ikke etterkomme forkasting")
         person.søppelbøtte(hendelse, aktivitetslogg, TIDLIGERE_OG_ETTERGØLGENDE(this))
     }
 
@@ -2080,16 +2093,6 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            anmodningOmForkasting: AnmodningOmForkasting,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            val kanForkastes = vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, aktivitetslogg)
-            if (kanForkastes) return aktivitetslogg.info("Avslår anmodning om forkasting i ${type.name} (kan forkastes)")
-            aktivitetslogg.info("Avslår anmodning om forkasting i ${type.name} (kan ikke forkastes)")
-        }
-
-        fun håndter(
-            vedtaksperiode: Vedtaksperiode,
             hendelse: Hendelse,
             aktivitetslogg: IAktivitetslogg,
             infotrygdhistorikk: Infotrygdhistorikk
@@ -2647,14 +2650,6 @@ internal class Vedtaksperiode private constructor(
             vurderOmKanGåVidere(vedtaksperiode, hendelse, aktivitetslogg)
         }
 
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            anmodningOmForkasting: AnmodningOmForkasting,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting, aktivitetslogg)
-        }
-
         private fun vurderOmKanGåVidere(
             vedtaksperiode: Vedtaksperiode,
             hendelse: Hendelse,
@@ -2740,14 +2735,6 @@ internal class Vedtaksperiode private constructor(
                 return
             }
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
-        }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            anmodningOmForkasting: AnmodningOmForkasting,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting, aktivitetslogg)
         }
 
         override fun håndter(
@@ -3338,14 +3325,6 @@ internal class Vedtaksperiode private constructor(
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) =
             if (!skalOmgjøres(vedtaksperiode)) null
             else vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            anmodningOmForkasting: AnmodningOmForkasting,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting, aktivitetslogg)
-        }
 
         override fun igangsettOverstyring(
             vedtaksperiode: Vedtaksperiode,
