@@ -395,12 +395,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(april)
         håndterInntektsmelding(listOf(1.april til 16.april), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(
-            1.vedtaksperiode, foreldrepenger = listOf(
-            GradertPeriode(februar, 100),
-            GradertPeriode(mai, 100)
-        )
-        )
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(februar, 100), GradertPeriode(mai, 100)))
         assertIngenFunksjonelleFeil()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }

@@ -7,7 +7,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.sykdomstidslinje.Dag.Companion.default
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_9
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 
@@ -40,8 +40,8 @@ class Ytelser(
     private val YTELSER_SOM_KAN_OPPDATERE_HISTORIKK: List<AnnenYtelseSomKanOppdatereHistorikk> = listOf(
         foreldrepenger
     )
-    lateinit var sykdomstidslinje: Sykdomstidslinje
-        private set
+    private val sykdomstidslinjer = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK
+        .map { it to it.sykdomstidslinje(metadata.meldingsreferanseId, metadata.registrert) }
 
     companion object {
         internal val Periode.familieYtelserPeriode get() = oppdaterFom(start.minusWeeks(4))
@@ -49,8 +49,17 @@ class Ytelser(
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate, maksdato: LocalDate, erForlengelse: Boolean): Boolean {
+    internal fun valider(
+        aktivitetslogg: IAktivitetslogg,
+        periode: Periode,
+        skjæringstidspunkt: LocalDate,
+        maksdato: LocalDate,
+        harTilkomneInntekter: Boolean,
+        erForlengelse: Boolean
+    ): Boolean {
         if (periode.start > maksdato) return true
+
+        if (harTilkomneInntekter && !andreYtelserPerioder().erTom()) aktivitetslogg.varsel(RV_IV_9)
 
         val periodeForOverlappsjekk = periode.start til minOf(periode.endInclusive, maksdato)
         arbeidsavklaringspenger.valider(aktivitetslogg, skjæringstidspunkt, periodeForOverlappsjekk)
@@ -65,28 +74,19 @@ class Ytelser(
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
-    internal fun oppdaterHistorikk(
+    internal fun sykdomstidslinje(
         aktivitetslogg: IAktivitetslogg,
         periode: Periode,
         skjæringstidspunkt: LocalDate,
-        periodeRettEtter: Periode?,
-        oppdaterHistorikk: () -> Unit
-    ) {
-        val sykdomstidslinjer = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK.mapNotNull { ytelse ->
-            if (!ytelse.skalOppdatereHistorikk(aktivitetslogg, ytelse, periode, skjæringstidspunkt, periodeRettEtter)) null
-            else ytelse.sykdomstidslinje(metadata.meldingsreferanseId, metadata.registrert)
+        periodeRettEtter: Periode?
+    ): Sykdomstidslinje? {
+        val result = sykdomstidslinjer.mapNotNull { (ytelse, tidslinje) ->
+            tidslinje.takeIf { ytelse.skalOppdatereHistorikk(aktivitetslogg, ytelse, periode, skjæringstidspunkt, periodeRettEtter) }
         }
-        if (sykdomstidslinjer.isEmpty()) return
-        this.sykdomstidslinje = sykdomstidslinjer.merge(beste = default)
-        oppdaterHistorikk()
+        return if (result.isEmpty()) null else result.merge()
     }
 
-    internal fun avgrensTil(periode: Periode): Ytelser {
-        sykdomstidslinje = sykdomstidslinje.fraOgMed(periode.start).fremTilOgMed(periode.endInclusive)
-        return this
-    }
-
-    internal fun andreYtelserPerioder(): AndreYtelserPerioder {
+    private fun andreYtelserPerioder(): AndreYtelserPerioder {
         val foreldrepenger = foreldrepenger.perioder()
         val svangerskapspenger = svangerskapspenger.perioder()
         val pleiepenger = pleiepenger.perioder()

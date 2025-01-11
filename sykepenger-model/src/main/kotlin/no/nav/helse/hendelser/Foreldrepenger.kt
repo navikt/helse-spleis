@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -40,7 +39,6 @@ class Foreldrepenger(
 
     override fun sykdomstidslinje(meldingsreferanseId: UUID, registrert: LocalDateTime): Sykdomstidslinje {
         if (foreldrepengeytelse.isEmpty()) return Sykdomstidslinje()
-        require(foreldrepengeytelse.map { it.periode }.grupperSammenhengendePerioder().size == 1) { "Ikke trygt å kalle sykdomstidslinjen til ${this.javaClass.simpleName} når det er huller i ytelser" }
         val hendelseskilde = Hendelseskilde(Ytelser::class, meldingsreferanseId, registrert)
         val førsteDag = foreldrepengeytelse.map { it.periode }.minOf { it.start }
         val sisteDag = foreldrepengeytelse.map { it.periode }.maxOf { it.endInclusive }
