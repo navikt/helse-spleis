@@ -838,8 +838,7 @@ internal class Vedtaksperiode private constructor(
         if (tilstand !in setOf(AvventerHistorikk, AvventerHistorikkRevurdering))
             return aktivitetslogg.info("Forventet ikke ytelsehistorikk i %s".format(tilstand.type))
 
-        val wrapper = if (!arbeidsgiver.kanForkastes(this, aktivitetslogg)) FunksjonelleFeilTilVarsler(aktivitetslogg) else aktivitetslogg
-        håndterYtelser(ytelser, wrapper, infotrygdhistorikk)
+        håndterYtelser(ytelser, aktivitetslogg.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk)
     }
 
     private fun håndterYtelser(ytelser: Ytelser, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
@@ -860,16 +859,16 @@ internal class Vedtaksperiode private constructor(
         infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
         ytelser.valider(aktivitetslogg, periode, skjæringstidspunkt, maksdatoresultat.maksdato, harTilkomneInntekter(), erForlengelse())
 
-        when (tilstand) {
-            AvventerHistorikk -> {
-                if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(ytelser, aktivitetslogg)
-                høstingsresultater(aktivitetslogg, AvventerSimulering, AvventerGodkjenning)
-            }
-            AvventerHistorikkRevurdering -> {
-                høstingsresultater(aktivitetslogg, AvventerSimuleringRevurdering, AvventerGodkjenningRevurdering)
-            }
+        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(ytelser, aktivitetslogg)
+
+        val nesteTilstander = when (tilstand) {
+            AvventerHistorikk -> AvventerSimulering to AvventerGodkjenning
+            AvventerHistorikkRevurdering -> AvventerSimuleringRevurdering to AvventerGodkjenningRevurdering
             else -> error("Forventer ikke ytelsehåndtering i $tilstand")
         }
+
+        val (simuleringtilstand, godkjenningtilstand) = nesteTilstander
+        høstingsresultater(aktivitetslogg, simuleringtilstand, godkjenningtilstand)
     }
 
     internal fun håndter(utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
@@ -891,13 +890,27 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, aktivitetslogg: IAktivitetslogg) {
         if (!vilkårsgrunnlag.erRelevant(aktivitetslogg, id, skjæringstidspunkt)) return
         registrerKontekst(aktivitetslogg)
-        tilstand.håndter(this, vilkårsgrunnlag, aktivitetslogg)
+        val nesteTilstand = when (tilstand) {
+            AvventerVilkårsprøving -> AvventerHistorikk
+            AvventerVilkårsprøvingRevurdering -> AvventerHistorikkRevurdering
+            else -> return aktivitetslogg.info("Forventet ikke vilkårsgrunnlag i %s".format(tilstand.type))
+        }
+        håndterVilkårsgrunnlag(vilkårsgrunnlag, aktivitetslogg.medFeilSomVarslerHvisNødvendig(), nesteTilstand)
     }
 
     internal fun håndter(simulering: Simulering, aktivitetslogg: IAktivitetslogg) {
         if (simulering.vedtaksperiodeId != this.id.toString()) return
         registrerKontekst(aktivitetslogg)
-        tilstand.håndter(this, simulering, aktivitetslogg)
+        val nesteTilstand = when (tilstand) {
+            AvventerSimulering -> AvventerGodkjenning
+            AvventerSimuleringRevurdering -> AvventerGodkjenningRevurdering
+            else -> return aktivitetslogg.info("Forventet ikke simulering i %s".format(tilstand.type.name))
+        }
+
+        val wrapper = aktivitetslogg.medFeilSomVarslerHvisNødvendig()
+        behandlinger.valider(simulering, wrapper)
+        if (!behandlinger.erKlarForGodkjenning()) return wrapper.info("Kan ikke gå videre da begge oppdragene ikke er simulert.")
+        tilstand(wrapper, nesteTilstand)
     }
 
     internal fun håndter(hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
@@ -2025,19 +2038,6 @@ internal class Vedtaksperiode private constructor(
         val type: TilstandType
         val erFerdigBehandlet: Boolean get() = false
 
-        fun aktivitetsloggForRevurdering(aktivitetslogg: IAktivitetslogg): IAktivitetslogg {
-            return FunksjonelleFeilTilVarsler(aktivitetslogg)
-        }
-
-        fun håndterFørstegangsbehandling(
-            aktivitetslogg: IAktivitetslogg,
-            vedtaksperiode: Vedtaksperiode
-        ): IAktivitetslogg {
-            if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, Aktivitetslogg())) return aktivitetslogg
-            // Om førstegangsbehandling ikke kan forkastes (typisk Out of Order/ omgjøring av AUU) så håndteres det som om det er en revurdering
-            return aktivitetsloggForRevurdering(aktivitetslogg)
-        }
-
         fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
         fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
@@ -2095,10 +2095,6 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg.info("Forventet ikke sykepengegrunnlag for arbeidsgiver i %s".format(type.name))
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag, aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.info("Forventet ikke vilkårsgrunnlag i %s".format(type.name))
-        }
-
         fun håndter(
             vedtaksperiode: Vedtaksperiode,
             hendelse: Hendelse,
@@ -2118,9 +2114,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
-        fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering, aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.info("Forventet ikke simulering i %s".format(type.name))
-        }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Forventet ikke utbetaling i %s".format(type.name))
@@ -2412,15 +2405,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.trengerVilkårsgrunnlag(aktivitetslogg)
-        }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            vilkårsgrunnlag: Vilkårsgrunnlag,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            val wrapper = aktivitetsloggForRevurdering(aktivitetslogg)
-            vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, wrapper, AvventerHistorikkRevurdering)
         }
 
         override fun skalHåndtereDager(
@@ -2840,15 +2824,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndtertInntektPåSkjæringstidspunktetOgVurderVarsel(hendelse, aktivitetslogg)
         }
 
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            vilkårsgrunnlag: Vilkårsgrunnlag,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            val wrapper = håndterFørstegangsbehandling(aktivitetslogg, vedtaksperiode)
-            vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, wrapper, AvventerHistorikk)
-        }
-
         override fun igangsettOverstyring(
             vedtaksperiode: Vedtaksperiode,
             revurdering: Revurderingseventyr,
@@ -2933,13 +2908,6 @@ internal class Vedtaksperiode private constructor(
             } ?: trengerSimulering(vedtaksperiode, aktivitetslogg)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering, aktivitetslogg: IAktivitetslogg) {
-            val aktivAktivitetslogg = håndterFørstegangsbehandling(aktivitetslogg, vedtaksperiode)
-            vedtaksperiode.behandlinger.valider(simulering, aktivAktivitetslogg)
-            if (!vedtaksperiode.behandlinger.erKlarForGodkjenning()) return aktivAktivitetslogg.info("Kan ikke gå videre da begge oppdragene ikke er simulert.")
-            vedtaksperiode.tilstand(aktivAktivitetslogg, AvventerGodkjenning)
-        }
-
         private fun trengerSimulering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.behandlinger.simuler(aktivitetslogg)
         }
@@ -2978,13 +2946,6 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ) =
             vedtaksperiode.skalHåndtereDagerRevurdering(dager, aktivitetslogg)
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering, aktivitetslogg: IAktivitetslogg) {
-            val wrapper = aktivitetsloggForRevurdering(aktivitetslogg)
-            vedtaksperiode.behandlinger.valider(simulering, wrapper)
-            if (!vedtaksperiode.behandlinger.erKlarForGodkjenning()) return wrapper.info("Kan ikke gå videre da begge oppdragene ikke er simulert.")
-            vedtaksperiode.tilstand(wrapper, AvventerGodkjenningRevurdering)
-        }
     }
 
     internal data object AvventerGodkjenning : Vedtaksperiodetilstand {
@@ -3286,7 +3247,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
             )
 
-            val aktivAktivitetslogg = håndterFørstegangsbehandling(aktivitetslogg, vedtaksperiode)
+            val aktivAktivitetslogg = with(vedtaksperiode) { aktivitetslogg.medFeilSomVarslerHvisNødvendig() }
 
             infotrygdhistorikk.valider(
                 aktivAktivitetslogg,
@@ -3340,8 +3301,7 @@ internal class Vedtaksperiode private constructor(
             dager: DagerFraInntektsmelding,
             aktivitetslogg: IAktivitetslogg
         ) {
-            val wrapper = aktivitetsloggForRevurdering(aktivitetslogg)
-            vedtaksperiode.håndterKorrigerendeInntektsmelding(dager, wrapper)
+            vedtaksperiode.håndterKorrigerendeInntektsmelding(dager, FunksjonelleFeilTilVarsler(aktivitetslogg))
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
@@ -3768,6 +3728,12 @@ internal class Vedtaksperiode private constructor(
         opprettet = opprettet,
         oppdatert = oppdatert
     )
+
+    private fun IAktivitetslogg.medFeilSomVarslerHvisNødvendig() =
+        when (!arbeidsgiver.kanForkastes(this@Vedtaksperiode, this)) {
+            true -> FunksjonelleFeilTilVarsler(this)
+            false -> this
+        }
 }
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean
