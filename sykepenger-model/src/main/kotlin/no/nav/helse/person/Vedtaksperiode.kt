@@ -2564,6 +2564,8 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
             if (vurderOmKanGåVidere(vedtaksperiode, påminnelse, aktivitetslogg)) return aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
 
+            if (påminnelse.når(Flagg("trengerReplay"))) return vedtaksperiode.trengerInntektsmeldingReplay()
+
             val ventetMinst3Måneder = påminnelse.når(VentetMinst(Period.ofMonths(3)))
             val påTideMedSkatt = ventetMinst3Måneder && (Toggle.InntektsmeldingSomIkkeKommer.enabled || påminnelse.når(Flagg("ønskerInntektFraAOrdningen")))
 
