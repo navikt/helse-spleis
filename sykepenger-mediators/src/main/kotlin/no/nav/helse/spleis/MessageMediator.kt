@@ -161,7 +161,7 @@ internal class MessageMediator(
 
     fun afterRiverHandling(message: String) {
         if (messageRecognized || riverErrors.isEmpty()) return
-        sikkerLogg.warn("kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${riverErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
+        sikkerLogg.error("kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${riverErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
     }
 
     private fun severeErrorHandler(err: Exception, message: HendelseMessage) {
