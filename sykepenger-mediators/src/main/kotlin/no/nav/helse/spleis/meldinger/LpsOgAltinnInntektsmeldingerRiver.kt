@@ -26,6 +26,8 @@ internal class LpsOgAltinnInntektsmeldingerRiver(
 
     override fun validate(message: JsonMessage) {
         standardInntektsmeldingvalidering(message)
+        message.require("fødselsdato", JsonNode::asLocalDate)
+        message.interestedIn("dødsdato", JsonNode::asLocalDate)
         message.interestedIn("harFlereInntektsmeldinger", "avsenderSystem")
         message.interestedIn("foersteFravaersdag", JsonNode::asLocalDate)
     }
@@ -60,8 +62,6 @@ internal fun standardInntektsmeldingvalidering(message: JsonMessage, pathPrefix:
         requireKey("beloep")
     }
     message.require(p("mottattDato"), JsonNode::asLocalDateTime)
-    message.require(p("fødselsdato"), JsonNode::asLocalDate)
-    message.interestedIn(p("dødsdato"), JsonNode::asLocalDate)
     message.interestedIn(p("refusjon.opphoersdato"), JsonNode::asLocalDate)
     message.interestedIn(p("refusjon.beloepPrMnd"), p("begrunnelseForReduksjonEllerIkkeUtbetalt"))
 }

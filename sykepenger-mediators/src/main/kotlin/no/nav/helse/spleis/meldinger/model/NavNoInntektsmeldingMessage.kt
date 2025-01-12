@@ -14,13 +14,11 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
-import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 // Understands a JSON message representing an Inntektsmelding
 internal class NavNoInntektsmeldingMessage(
     packet: JsonMessage,
-    val personopplysninger: Personopplysninger,
     override val meldingsporing: Meldingsporing
 ) : HendelseMessage(packet) {
     private val refusjon = Inntektsmelding.Refusjon(
@@ -74,8 +72,8 @@ internal class NavNoInntektsmeldingMessage(
     ).takeIf { harÅrsakTilInnsending }
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
-        if (arbeidsgiveropplysninger == null) return mediator.behandle(personopplysninger, this, inntektsmelding, context)
-        mediator.behandle(personopplysninger, this, arbeidsgiveropplysninger, context)
+        if (arbeidsgiveropplysninger == null) return mediator.behandle(this, inntektsmelding, context)
+        mediator.behandle(this, arbeidsgiveropplysninger, context)
     }
 }
 

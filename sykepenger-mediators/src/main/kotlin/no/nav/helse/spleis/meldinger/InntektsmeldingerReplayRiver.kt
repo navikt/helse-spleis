@@ -9,7 +9,7 @@ import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 
-internal open class InntektsmeldingerReplayRiver(
+internal class InntektsmeldingerReplayRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {

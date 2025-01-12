@@ -297,19 +297,23 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestInntektsmeldingVerdi.set(true)
     }
 
-    override fun behandle(personopplysninger: Personopplysninger, message: NavNoSelvbestemtInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext) {
+    override fun behandle(message: NavNoSelvbestemtInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext) {
         lestNavNoSelvbestemtInntektsmeldingVerdi.set(true)
     }
 
-    override fun behandle(personopplysninger: Personopplysninger, message: NavNoInntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
+    override fun behandle(
+        message: NavNoInntektsmeldingMessage,
+        inntektsmelding: Inntektsmelding,
+        context: MessageContext
+    ) {
         lestNavNoInntektsmeldingVerdi.set(true)
     }
 
-    override fun behandle(personopplysninger: Personopplysninger, message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: MessageContext) {
+    override fun behandle(message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: MessageContext) {
         lestNavNoInntektsmeldingVerdi.set(true)
     }
 
-    override fun behandle(personopplysninger: Personopplysninger, message: NavNoKorrigertInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext) {
+    override fun behandle(message: NavNoKorrigertInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext) {
         lestKorrigertNavNoInntektsmeldingVerdi.set(true)
     }
 
