@@ -5,7 +5,7 @@ include(
     "sykepenger-utbetaling-dto", "sykepenger-aktivitetslogg", "sykepenger-aktivitetslogg-dto", "sykepenger-etterlevelse-api"
 )
 
-val rapidsAndRiversVersion = "2024121811541734519284.92481d65a0e7"
+val rapidsAndRiversVersion = "2025011211161736676987.91f5afd557b9"
 
 dependencyResolutionManagement {
     versionCatalogs {
