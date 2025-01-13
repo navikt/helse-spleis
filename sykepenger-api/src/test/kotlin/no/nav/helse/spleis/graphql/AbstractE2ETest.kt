@@ -40,7 +40,6 @@ import no.nav.helse.spleis.testhelpers.TestObservatør
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.BeforeEach
@@ -177,41 +176,6 @@ internal abstract class AbstractE2ETest {
             orgnummer = orgnummer,
             vedtaksperiode = vedtaksperiode,
             portalInntektsmelding = portalInntektsmelding
-        )
-    }
-
-    protected fun håndterInntektsmeldingUtenRefusjon(
-        fom: LocalDate,
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        meldingsreferanseId: UUID = UUID.randomUUID(),
-        orgnummer: String = a1
-    ): UUID {
-        return håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
-            beregnetInntekt = INNTEKT,
-            refusjon = Inntektsmelding.Refusjon(INGEN, null),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            meldingsreferanseId = meldingsreferanseId,
-            orgnummer = orgnummer
-        )
-    }
-
-    protected fun håndterInntektsmeldingUtenRefusjon(
-        arbeidsgiverperioder: List<Periode>,
-        førsteFraværsdag: LocalDate,
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        meldingsreferanseId: UUID = UUID.randomUUID(),
-        orgnummer: String = a1
-    ): UUID {
-        return håndterInntektsmelding(
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            førsteFraværsdag = førsteFraværsdag,
-            beregnetInntekt = INNTEKT,
-            refusjon = Inntektsmelding.Refusjon(INGEN, null),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            meldingsreferanseId = meldingsreferanseId,
-            orgnummer = orgnummer,
-            portalInntektsmelding = false
         )
     }
 

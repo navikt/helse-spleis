@@ -349,9 +349,11 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelserTilGodkjenning()
-        håndterInntektsmeldingUtenRefusjon(
+        håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.februar
+            portalInntektsmelding = false,
+            førsteFraværsdag = 1.februar,
+            refusjon = Inntektsmelding.Refusjon(INGEN, null)
         )
         håndterYtelserTilGodkjent()
         håndterYtelserTilGodkjenning()
