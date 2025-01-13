@@ -41,7 +41,7 @@ internal class NavNoInntektsmeldingMessage(
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
 
-    private val harÅrsakTilInnsending = packet["arsakTilInnsending"].asText() == "Ny"
+    val harÅrsakTilInnsending = packet["arsakTilInnsending"].asText() == "Ny"
 
     private val inntektsmelding = Inntektsmelding(
         meldingsreferanseId = meldingsporing.id,
