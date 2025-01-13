@@ -25,8 +25,6 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.inntektsmelding.ALTINN
-import no.nav.helse.hendelser.inntektsmelding.NAV_NO
-import no.nav.helse.hendelser.inntektsmelding.NAV_NO_SELVBESTEMT
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -202,7 +200,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Tåler at inntektsdato ikke er oppgitt på portalinntektsmelding -- inntektsdato skal fjernes fra inntektsmeldingen`() {
         nyPeriode(januar)
         assertDoesNotThrow {
-            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), avsendersystem = NAV_NO, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         }
     }
 
@@ -262,20 +260,21 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Skal ikke håndtere selvbestemte inntektsmeldinger som treffer en forlengelse`() {
+    fun `Håndtere selvbestemte inntektsmeldinger som treffer en forlengelse på samme måte som en korrigert forespurt arbeidsgiveropplysninger`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
-        val inntektsmeldingId = håndterArbeidsgiveropplysninger(
-            arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT * 2,
-            avsendersystem = NAV_NO_SELVBESTEMT,
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
+        val korrigertId = håndterKorrigerteArbeidsgiveropplysninger(
+            Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+            Arbeidsgiveropplysning.OppgittInntekt(INNTEKT * 2),
+            Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT * 2, emptyList()),
+            vedtaksperiodeId = 2.vedtaksperiode
         )
 
-        assertTrue(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertTrue(korrigertId to 2.vedtaksperiode.id(a1) in observatør.inntektsmeldingHåndtert)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
     }
 
     @Test

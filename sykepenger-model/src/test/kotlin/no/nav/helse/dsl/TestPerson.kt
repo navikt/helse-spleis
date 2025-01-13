@@ -28,9 +28,6 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
-import no.nav.helse.hendelser.inntektsmelding.NAV_NO
-import no.nav.helse.hendelser.inntektsmelding.erForespurtNavPortal
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
@@ -260,8 +257,7 @@ internal class TestPerson(
             begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
             id: UUID = UUID.randomUUID(),
             orgnummer: String = "",
-            mottatt: LocalDateTime = LocalDateTime.now(),
-            avsendersystem: Avsenderutleder = NAV_NO
+            mottatt: LocalDateTime = LocalDateTime.now()
         ): UUID {
 
             val arbeidsgiveropplysninger = Arbeidsgiveropplysninger(
@@ -279,9 +275,7 @@ internal class TestPerson(
                 )
             )
 
-            if (erForespurtNavPortal(avsendersystem)) {
-                observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *arbeidsgiveropplysninger.toTypedArray())
-            }
+            observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *arbeidsgiveropplysninger.toTypedArray())
 
             arbeidsgiveropplysninger.håndter(Person::håndter)
             return id

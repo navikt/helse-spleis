@@ -49,7 +49,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
 import no.nav.helse.hendelser.inntektsmelding.LPS
-import no.nav.helse.hendelser.inntektsmelding.erNavPortal
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -148,7 +147,6 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         mottatt: LocalDateTime = LocalDateTime.now(),
         avsendersystem: Avsenderutleder = LPS
     ): Inntektsmelding {
-        check(!erNavPortal(avsendersystem)) { "Du kan ikke klage en klassisk inntektsmelding når avsenderen er NavPortal!" }
         val inntektsmeldinggenerator = {
             Inntektsmelding(
                 meldingsreferanseId = id,
@@ -159,7 +157,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 opphørAvNaturalytelser = opphørAvNaturalytelser,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-                avsendersystem = avsendersystem(UUID.randomUUID(), LocalDate.EPOCH, førsteFraværsdag),
+                avsendersystem = avsendersystem(førsteFraværsdag),
                 mottatt = mottatt
             )
         }

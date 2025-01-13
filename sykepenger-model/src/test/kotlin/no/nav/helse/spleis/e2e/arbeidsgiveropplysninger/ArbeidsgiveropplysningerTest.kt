@@ -21,7 +21,6 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbe
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.inntektsmelding.NAV_NO_SELVBESTEMT
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -362,15 +361,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
             håndterArbeidsgiveropplysninger(emptyList(), vedtaksperiodeId = 2.vedtaksperiode)
-            assertVarsler(emptyList(), 2.vedtaksperiode.filter())
-        }
-    }
-
-    @Test
-    fun `tom arbeidsgiverperiode med NAV_NO_SELVBESTEMT som avsendersystem gir ikke varsel`()  {
-        setupLiteGapA2SammeSkjæringstidspunkt()
-        a2 {
-            håndterArbeidsgiveropplysninger(emptyList(), vedtaksperiodeId = 2.vedtaksperiode, avsendersystem = NAV_NO_SELVBESTEMT)
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
         }
     }

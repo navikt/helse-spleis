@@ -50,9 +50,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
 import no.nav.helse.hendelser.inntektsmelding.LPS
-import no.nav.helse.hendelser.inntektsmelding.NAV_NO
-import no.nav.helse.hendelser.inntektsmelding.erForespurtNavPortal
-import no.nav.helse.hendelser.inntektsmelding.erNavPortal
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
@@ -461,17 +458,8 @@ internal fun AbstractEndToEndTest.håndterArbeidsgiveropplysninger(
     id: UUID = UUID.randomUUID(),
     opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-    avsendersystem: Avsenderutleder? = null,
     vedtaksperiodeIdInnhenter: IdInnhenter
 ): UUID {
-    val utledetAvsendersystem = when {
-        avsendersystem != null -> avsendersystem
-        else -> NAV_NO
-    }
-
-    check (erNavPortal(utledetAvsendersystem)) {
-        "må være NAV_NO eller selvbestemt"
-    }
 
     val vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(vedtaksperiodeIdInnhenter)
 
@@ -490,9 +478,7 @@ internal fun AbstractEndToEndTest.håndterArbeidsgiveropplysninger(
         )
     )
 
-    if (erForespurtNavPortal(utledetAvsendersystem)) {
-        observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *arbeidsgiveropplysninger.toTypedArray())
-    }
+    observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *arbeidsgiveropplysninger.toTypedArray())
 
     return håndterArbeidsgiveropplysninger(arbeidsgiveropplysninger)
 }
@@ -507,18 +493,9 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
-    avsendersystem: Avsenderutleder? = null,
+    avsendersystem: Avsenderutleder = LPS,
     førReplay: () -> Unit = {}
 ): UUID {
-    val utledetAvsendersystem = when {
-        avsendersystem != null -> avsendersystem
-        else -> LPS
-    }
-
-    check(!erNavPortal(utledetAvsendersystem)) {
-        "Skal ikke bruke NAV_NO her"
-    }
-
     return håndterInntektsmelding(
         inntektsmelding(
             id = id,
@@ -530,7 +507,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-            avsendersystem = utledetAvsendersystem
+            avsendersystem = avsendersystem
         ), førReplay
     )
 }
