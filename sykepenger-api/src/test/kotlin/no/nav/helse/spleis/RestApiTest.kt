@@ -105,7 +105,7 @@ internal class RestApiTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             harFlereInntektsmeldinger = false,
             opphørAvNaturalytelser = emptyList(),
-            avsendersystem = Inntektsmelding.Avsendersystem.NavPortal(vedtaksperiodeId, LocalDate.EPOCH, true),
+            avsendersystem = Inntektsmelding.Avsendersystem.LPS(LocalDate.of(2018, 9, 10)),
             mottatt = LocalDateTime.now()
         )
         val person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
