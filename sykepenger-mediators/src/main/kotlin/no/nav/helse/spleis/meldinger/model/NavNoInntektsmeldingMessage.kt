@@ -33,30 +33,13 @@ internal class NavNoInntektsmeldingMessage(
     )
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText().toUUID()
     private val orgnummer = packet["virksomhetsnummer"].asText()
-
     private val mottatt = packet["mottattDato"].asLocalDateTime()
     private val beregnetInntekt = packet["beregnetInntekt"].asDouble()
     private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
-    private val begrunnelseForReduksjonEllerIkkeUtbetalt =
-        packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
+    private val begrunnelseForReduksjonEllerIkkeUtbetalt = packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
 
-    val harÅrsakTilInnsending = packet["arsakTilInnsending"].asText() == "Ny"
-
-    private val inntektsmelding = Inntektsmelding(
-        meldingsreferanseId = meldingsporing.id,
-        refusjon = refusjon,
-        orgnummer = orgnummer,
-        beregnetInntekt = beregnetInntekt.månedlig,
-        arbeidsgiverperioder = arbeidsgiverperioder,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-        opphørAvNaturalytelser = opphørAvNaturalytelser,
-        harFlereInntektsmeldinger = false,
-        avsendersystem = Inntektsmelding.Avsendersystem.NavPortal(vedtaksperiodeId = vedtaksperiodeId, inntektsdato = null, forespurt = true),
-        mottatt = mottatt
-    )
-
-    val arbeidsgiveropplysninger = Arbeidsgiveropplysninger(
+    private val arbeidsgiveropplysninger get() = Arbeidsgiveropplysninger(
         meldingsreferanseId = meldingsporing.id,
         innsendt = mottatt,
         registrert = LocalDateTime.now(),
@@ -69,10 +52,9 @@ internal class NavNoInntektsmeldingMessage(
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             opphørAvNaturalytelser = opphørAvNaturalytelser
         )
-    ).takeIf { harÅrsakTilInnsending }
+    )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
-        if (arbeidsgiveropplysninger == null) return mediator.behandle(this, inntektsmelding, context)
         mediator.behandle(this, arbeidsgiveropplysninger, context)
     }
 }

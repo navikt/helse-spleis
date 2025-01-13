@@ -47,24 +47,11 @@ internal class MessageMediatorTest {
     }
 
     @Test
-    fun `NavNo inntektsmeldinger uten aarsakTilInnsending`() {
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagNavNoInntektsmelding(
-                arbeidsgiverperiode = listOf(Periode(LocalDate.now(), LocalDate.now())),
-                vedtaksperiodeId = UUID.randomUUID(),
-                årsakTilInnsending = null
-            )
-        )
-        assertTrue(hendelseMediator.lestNavNoInntektsmelding)
-    }
-
-    @Test
     fun `NavNo inntektsmeldinger`() {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagNavNoInntektsmelding(
                 arbeidsgiverperiode = listOf(Periode(LocalDate.now(), LocalDate.now())),
-                vedtaksperiodeId = UUID.randomUUID(),
-                årsakTilInnsending = "Ny"
+                vedtaksperiodeId = UUID.randomUUID()
             )
         )
         assertTrue(hendelseMediator.lestNavNoInntektsmelding)

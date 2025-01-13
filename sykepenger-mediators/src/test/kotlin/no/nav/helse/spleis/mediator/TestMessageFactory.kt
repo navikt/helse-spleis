@@ -510,8 +510,7 @@ internal class TestMessageFactory(
         opphørsdatoForRefusjon: LocalDate? = null,
         orgnummer: String = organisasjonsnummer,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        vedtaksperiodeId: UUID,
-        årsakTilInnsending: String? = "Ny"
+        vedtaksperiodeId: UUID
     ) = nyHendelse(
         "inntektsmelding", lagInntektsmelding(
         arbeidsgiverperiode,
@@ -523,12 +522,8 @@ internal class TestMessageFactory(
         begrunnelseForReduksjonEllerIkkeUtbetalt,
         AvsenderSystem("NAV_NO", "V1.0"),
         vedtaksperiodeId,
-        årsakTilInnsending ?: "Ny"
-    ).toMapMedFelterFraSpedisjon(fødselsdato).let {
-        if (årsakTilInnsending == null) {
-            it.toMutableMap().apply { remove("arsakTilInnsending") }
-        } else it
-    })
+        "Ny"
+    ).toMapMedFelterFraSpedisjon(fødselsdato))
 
     fun lagKorrigertNavNoInntektsmelding(
         arbeidsgiverperiode: List<Periode>,

@@ -134,7 +134,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is SendtSøknadArbeidsledigMessage -> SENDT_SØKNAD_ARBEIDSLEDIG
         is NavNoSelvbestemtInntektsmeldingMessage -> NAV_NO_SELVBESTEMT_INNTEKTSMELDING
         is NavNoKorrigertInntektsmeldingMessage -> NAV_NO_KORRIGERT_INNTEKTSMELDING
-        is NavNoInntektsmeldingMessage -> if (melding.harÅrsakTilInnsending) NAV_NO_INNTEKTSMELDING else INNTEKTSMELDING
+        is NavNoInntektsmeldingMessage -> NAV_NO_INNTEKTSMELDING
         is InntektsmeldingMessage -> INNTEKTSMELDING
         is UtbetalingpåminnelseMessage -> UTBETALINGPÅMINNELSE
         is YtelserMessage -> YTELSER

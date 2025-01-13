@@ -234,13 +234,6 @@ internal class HendelseMediator(
         }
     }
 
-    override fun behandle(message: NavNoInntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
-        hentPersonOgHåndter(message, context) { person, aktivitetslogg ->
-            HendelseProbe.onNavNoInntektsmelding()
-            person.håndter(inntektsmelding, aktivitetslogg)
-        }
-    }
-
     override fun behandle(message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: MessageContext) {
         hentPersonOgHåndter(message, context) { person, aktivitetslogg ->
             HendelseProbe.onNavNoInntektsmelding()
@@ -658,7 +651,6 @@ internal interface IHendelseMediator {
 
     fun behandle(personopplysninger: Personopplysninger, message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext)
     fun behandle(message: NavNoSelvbestemtInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext)
-    fun behandle(message: NavNoInntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext)
     fun behandle(message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: MessageContext)
     fun behandle(message: NavNoKorrigertInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext)
     fun behandle(message: InntektsmeldingerReplayMessage, replays: InntektsmeldingerReplay, context: MessageContext)

@@ -16,10 +16,7 @@ internal class NavNoInntektsmeldingerRiver(
     override fun precondition(packet: JsonMessage) {
         packet.requireValue("avsenderSystem.navn", "NAV_NO")
         packet.requireKey("vedtaksperiodeId")
-        // todo: endre fra interestedId til requireValue når Hag har rullet ut i prod
-        packet.interestedIn("arsakTilInnsending") {
-            check(it.asText() == "Ny")
-        }
+        packet.requireValue("arsakTilInnsending", "Ny")
     }
 
     override fun validate(message: JsonMessage) {

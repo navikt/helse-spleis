@@ -301,14 +301,6 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestNavNoSelvbestemtInntektsmeldingVerdi.set(true)
     }
 
-    override fun behandle(
-        message: NavNoInntektsmeldingMessage,
-        inntektsmelding: Inntektsmelding,
-        context: MessageContext
-    ) {
-        lestNavNoInntektsmeldingVerdi.set(true)
-    }
-
     override fun behandle(message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: MessageContext) {
         lestNavNoInntektsmeldingVerdi.set(true)
     }
