@@ -27,6 +27,7 @@ import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -82,7 +83,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     @Test
     fun `overstyre ghostinntekt`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -140,7 +141,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             beregnetInntekt = OverMinstegrense,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,

@@ -254,7 +254,7 @@ internal class InntektsmeldingMatchingTest {
             førsteFraværsdag: LocalDate?,
             vararg arbeidsgiverperiode: Periode
         ): DagerFraInntektsmelding {
-            val inntektsmelding = fabrikk.lagKlassiskInntektsmelding(
+            val inntektsmelding = fabrikk.lagInntektsmelding(
                 arbeidsgiverperiode.toList(),
                 beregnetInntekt = 400.månedlig,
                 førsteFraværsdag = førsteFraværsdag

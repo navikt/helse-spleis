@@ -9,7 +9,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -27,7 +27,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
     fun `utbetaling med 0 refusjon til arbeidsgiver`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(0.månedlig, null),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -45,7 +45,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
     fun `utbetaling med delvis refusjon til arbeidsgiver`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(20000.månedlig, null),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -66,7 +66,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
     fun `utbetaling med delvis refusjon`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,

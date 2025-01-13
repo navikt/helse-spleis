@@ -112,13 +112,13 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a2)
         håndterSøknad(1.januar(2020) til 31.januar(2020), orgnummer = a1)
         håndterSøknad(1.januar(2020) til 31.januar(2020), orgnummer = a2)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar(2020) til 16.januar(2020)),
             beregnetInntekt = INNTEKT,
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar(2020) til 16.januar(2020)),
             beregnetInntekt = INNTEKT,
             orgnummer = a2,
@@ -158,13 +158,13 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a2)
         håndterSøknad(1.januar(2020) til 31.januar(2020), orgnummer = a1)
         håndterSøknad(1.januar(2020) til 31.januar(2020), orgnummer = a2)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar(2020) til 16.januar(2020)),
             beregnetInntekt = 45000.månedlig,
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar(2020) til 16.januar(2020)),
             beregnetInntekt = 44000.månedlig,
             orgnummer = a2,

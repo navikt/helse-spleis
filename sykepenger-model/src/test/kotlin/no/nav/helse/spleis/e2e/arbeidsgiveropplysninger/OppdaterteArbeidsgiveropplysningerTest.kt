@@ -22,6 +22,7 @@ import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
@@ -150,7 +151,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `oppdaterte opplysninger for mars når ag2 tetter gapet`() {
         nyPeriode(januar, a1)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -211,7 +212,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(10.februar til 10.mars)
 
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
 
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
@@ -243,7 +244,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT,
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
@@ -323,7 +324,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(januar)
         nyPeriode(mars)
 
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 32000.månedlig,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -351,7 +352,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `sender ikke oppdatert forespørsel for en periode som har mottatt inntektsmelding`() {
         nyPeriode(januar)
         nyPeriode(mars)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.mars til 16.mars),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
@@ -359,7 +360,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, TilstandType.AVVENTER_BLOKKERENDE_PERIODE)
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )

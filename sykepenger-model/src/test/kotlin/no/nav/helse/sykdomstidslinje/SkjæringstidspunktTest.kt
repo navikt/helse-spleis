@@ -484,7 +484,7 @@ internal class SkjæringstidspunktTest {
         refusjonOpphørsdato: LocalDate = 31.desember,
         endringerIRefusjon: List<Inntektsmelding.Refusjon.EndringIRefusjon> = emptyList()
     ): BitAvArbeidsgiverperiode {
-        val inntektsmelding = hendelsefabrikk.lagKlassiskInntektsmelding(
+        val inntektsmelding = hendelsefabrikk.lagInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,
             førsteFraværsdag = førsteFraværsdag,

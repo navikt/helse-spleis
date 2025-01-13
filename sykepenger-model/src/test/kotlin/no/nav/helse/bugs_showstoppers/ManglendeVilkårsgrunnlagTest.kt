@@ -16,6 +16,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
@@ -38,7 +39,7 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
         // nav-perioden går fra AvventerInntektsmeldingUferdigForlengelse til AvventerUferdigForlengelse.
         // Når Inntektsmeldingen er håndtert sendes GjenopptaBehandling ut, som medfører at
         // NAV-perioden går videre til AvventerHistorikk uten å gjøre vilkårsvurdering først
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(
                 9.januar til 15.januar,
                 19.januar til 26.januar,

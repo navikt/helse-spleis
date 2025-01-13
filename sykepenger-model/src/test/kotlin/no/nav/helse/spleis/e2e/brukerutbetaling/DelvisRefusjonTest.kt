@@ -33,6 +33,7 @@ import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -92,7 +93,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `Refusjonsbeløpet er forskjellig fra beregnet inntekt i inntektsmeldingen`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 30000.månedlig,
             refusjon = Inntektsmelding.Refusjon(25000.månedlig, null, emptyList()),
@@ -116,7 +117,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `arbeidsgiver refunderer ikke`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT,
             refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()),
@@ -140,7 +141,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `tidligere vedtaksperiode har opphør i refusjon`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, 20.januar, emptyList()),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -166,7 +167,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(mars)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.mars til 16.mars),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
@@ -194,7 +195,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `kaster ikke ut vedtaksperiode når refusjonopphører`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, 20.januar, emptyList()),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -217,7 +218,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `ikke kast ut vedtaksperiode ved endring i refusjon`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, listOf(EndringIRefusjon(15000.månedlig, 20.januar))),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -240,7 +241,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `kaster ikke ut vedtaksperiode hvor endring i refusjon er etter perioden`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, listOf(EndringIRefusjon(15000.månedlig, 1.februar))),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -265,7 +266,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `ikke kast ut vedtaksperiode ved ferie i slutten av perioden`() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(25.januar, 31.januar))
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, 24.januar, emptyList()),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -300,7 +301,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(januar, orgnummer = a1)
         håndterSøknad(Sykdom(21.januar, 10.februar, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -308,7 +309,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
 
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = listOf(21.januar til 5.februar),
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -383,7 +384,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 10.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(21.januar, 10.februar, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -391,7 +392,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
 
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = listOf(21.januar til 5.februar),
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -466,7 +467,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(21.januar, 10.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 10.februar, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -474,7 +475,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
 
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = listOf(21.januar til 5.februar),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -551,7 +552,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `gradert sykmelding med en arbeidsgiver`() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList()),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -574,7 +575,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `korrigerende inntektsmelding endrer på refusjonsbeløp`()  {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -612,12 +613,12 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSykmelding(januar, orgnummer = a2)
         håndterSøknad(januar, orgnummer = a1)
         håndterSøknad(januar, orgnummer = a2)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(
                 INNTEKT, 20.januar
@@ -689,7 +690,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `Korrigerende inntektsmelding med feil skjæringstidspunkt går til manuell behandling på grunn av warning`()  {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.januar)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -703,7 +704,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `arbeidsgiver sender unødvendig inntektsmelding ved forlengelse før sykmelding`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -729,12 +730,12 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSykmelding(januar, orgnummer = a2)
         håndterSøknad(januar, orgnummer = a1)
         håndterSøknad(januar, orgnummer = a2)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(
                 INNTEKT, 15.januar, emptyList()

@@ -220,7 +220,7 @@ internal class SykmeldingsperioderTest {
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate
-    ): Inntektsmelding = hendelsefabrikk.lagKlassiskInntektsmelding(
+    ): Inntektsmelding = hendelsefabrikk.lagInntektsmelding(
         arbeidsgiverperioder = arbeidsgiverperioder,
         beregnetInntekt = Inntekt.INGEN,
         førsteFraværsdag = førsteFraværsdag,

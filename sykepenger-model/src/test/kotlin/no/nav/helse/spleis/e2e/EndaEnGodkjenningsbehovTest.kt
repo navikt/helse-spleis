@@ -109,7 +109,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     @Test
     fun ferie() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(31.januar, 31.januar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag()
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -200,7 +200,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     @Test
     fun `Sender med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga mindre enn 16 dagers gap selv om AGP er betalt av nav`() {
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "ArbeidOpphoert",
@@ -285,7 +285,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     @Test
     fun personutbetaling() {
         nyPeriode(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -299,7 +299,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     @Test
     fun `delvis refusjon`() {
         nyPeriode(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT / 2, opphørsdato = null),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -422,7 +422,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `Periode med arbeidsgiverperiodedager, ingen navdager og minst én avslagsdag får Avslag-tag`() {
         createTestPerson(Personidentifikator("16.01.1948"), 16.januar(1948))
         nyPeriode(januar, a1)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -436,7 +436,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `Periode med kun avslagsdager får Avslag-tag`() {
         createTestPerson(Personidentifikator("16.01.1946"), 16.januar(1946))
         nyPeriode(januar, a1)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -495,7 +495,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `legger til hendelses ID'er og dokumenttype på godkjenningsbehovet`() {
         håndterSykmelding(januar)
         val søknadId = håndterSøknad(januar)
-        val inntektsmeldingId = håndterInntektsmelding(
+        val inntektsmeldingId = håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )

@@ -136,7 +136,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     fun lagAvbruttSøknad(sykmeldingsperiode: Periode): AvbruttSøknad =
         AvbruttSøknad(sykmeldingsperiode, UUID.randomUUID(), organisasjonsnummer)
 
-    internal fun lagKlassiskInntektsmelding(
+    internal fun lagInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
         førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOf { it.start },

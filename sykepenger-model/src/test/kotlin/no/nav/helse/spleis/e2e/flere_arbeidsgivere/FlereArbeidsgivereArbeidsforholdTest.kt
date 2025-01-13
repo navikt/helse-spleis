@@ -23,7 +23,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -43,7 +43,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
     fun `Filtrerer ut irrelevante arbeidsforhold per arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.mars til 16.mars),
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
@@ -68,7 +68,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
     fun `Vanlige forlengelser av arbeidsgiver som ikke finnes i aareg, kan utbetales uten warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.mars til 16.mars),
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
@@ -95,7 +95,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
     fun `Flere aktive arbeidsforhold, men kun 1 med inntekt, skal ikke få warning for flere arbeidsgivere`() {
         håndterSykmelding(Sykmeldingsperiode(1.juli(2021), 31.juli(2021)), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.juli(2021), 31.juli(2021), 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.juli(2021) til 16.juli(2021)),
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1,
@@ -121,7 +121,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
     fun `arbeidsgivere med sammenligningsgrunnlag, men uten inntekt, skal ikke anses som ekstra arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -149,7 +149,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         * */
         håndterSykmelding(Sykmeldingsperiode(1.mars(2017), 31.mars(2017)), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars(2017), 31.mars(2017), 50.prosent), orgnummer = a1)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.mars(2017) til 16.mars(2017)),
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1,
@@ -163,7 +163,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 50.prosent), orgnummer = a2)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.mars til 16.mars),
             beregnetInntekt = 30000.månedlig,
             orgnummer = a2,
@@ -192,7 +192,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
     fun `lagrer kun arbeidsforhold som gjelder under skjæringstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.mars til 16.mars),
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1,
@@ -219,7 +219,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
     fun `opphold i arbeidsforhold skal ikke behandles som ghost`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 11400.månedlig,
             orgnummer = a1,
@@ -239,7 +239,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(2.februar, 20.februar), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(2.februar, 20.februar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(2.februar til 17.februar),
             beregnetInntekt = 45000.månedlig,
             orgnummer = a2,
@@ -262,7 +262,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.mars til 16.mars),
             beregnetInntekt = 11400.månedlig,
             orgnummer = a1,
@@ -301,7 +301,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
     fun `Vedtaksperioder med flere arbeidsforhold fra Aa-reg skal ha inntektskilde FLERE_ARBEIDSGIVERE`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -321,7 +321,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
     fun `Forlengelser skal ikke få warning på at arbeidsgiver ikke finnes i Aa-reg`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT,
             orgnummer = a1,

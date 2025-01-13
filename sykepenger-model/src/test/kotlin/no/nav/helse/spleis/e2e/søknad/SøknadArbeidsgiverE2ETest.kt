@@ -35,6 +35,7 @@ import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -195,7 +196,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(20.januar, 21.januar, 100.prosent))
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(
                 1.januar til 5.januar,
                 6.januar til 9.januar, // lager et tredagers opphold (10. januar - 12. januar) som forskyver agp
@@ -221,7 +222,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(
                 1.januar til 7.januar, // inntektsmeldingen oppgir nok opphold til at periode nr 3
                 15.januar til 23.januar  // haver innenfor arbeidsgiverperioden likevel
@@ -240,7 +241,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(17.januar, 21.januar))
         håndterSøknad(Sykdom(17.januar, 21.januar, 100.prosent))
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(
                 1.januar til 8.januar, // inntektsmeldingen oppgir nok opphold til at periode nr 2
                 12.januar til 19.januar  // haver innenfor arbeidsgiverperioden likevel
@@ -414,7 +415,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
 
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(
                 1.januar til 5.januar,
                 9.januar til 12.januar,
@@ -435,7 +436,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(9.januar, 12.januar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(
                 1.januar til 5.januar,
                 9.januar til 12.januar,
@@ -491,7 +492,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(9.januar, 12.januar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(
                 1.januar til 5.januar,
                 9.januar til 12.januar,

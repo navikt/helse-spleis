@@ -431,7 +431,7 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
             nyPeriode(1.januar til 16.januar)
         }
         a1 {
-            håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

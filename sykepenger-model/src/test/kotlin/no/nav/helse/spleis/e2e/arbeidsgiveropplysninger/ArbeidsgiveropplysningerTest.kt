@@ -340,7 +340,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `uenige om arbeidsgiverperiode med NAV_NO som avsendersystem gir varsel`()  {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
-            håndterInntektsmeldingPortal(listOf(2.januar til 17.januar), vedtaksperiodeId = 2.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(listOf(2.januar til 17.januar), vedtaksperiodeId = 2.vedtaksperiode)
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
@@ -361,7 +361,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `tom arbeidsgiverperiode med NAV_NO som avsendersystem gir ikke varsel`()  {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
-            håndterInntektsmeldingPortal(emptyList(), vedtaksperiodeId = 2.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(emptyList(), vedtaksperiodeId = 2.vedtaksperiode)
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
         }
     }
@@ -370,7 +370,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `tom arbeidsgiverperiode med NAV_NO_SELVBESTEMT som avsendersystem gir ikke varsel`()  {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
-            håndterInntektsmeldingPortal(emptyList(), vedtaksperiodeId = 2.vedtaksperiode, avsendersystem = NAV_NO_SELVBESTEMT)
+            håndterArbeidsgiveropplysninger(emptyList(), vedtaksperiodeId = 2.vedtaksperiode, avsendersystem = NAV_NO_SELVBESTEMT)
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
         }
     }

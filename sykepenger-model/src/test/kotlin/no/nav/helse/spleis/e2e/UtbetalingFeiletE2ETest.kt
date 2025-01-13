@@ -104,7 +104,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     fun `utbetaling feilet med ett oppdrag status avvist og ett som er ok`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList()),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -140,7 +140,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     fun `utbetaling feilet med ett oppdrag status ok og ett som er avvist`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList()),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -176,7 +176,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     fun `nyere perioder må vente til periode med feilet utbetaling er ok`() {
         nyttVedtak(januar, status = Oppdragstatus.AVVIST)
         nyPeriode(mars)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.mars til 16.mars),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )

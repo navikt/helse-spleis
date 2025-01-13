@@ -28,6 +28,7 @@ import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -58,7 +59,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
     fun `ferie med gap til forrige, men samme skjæringstidspunkt`()  {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT,
             orgnummer = a1,
@@ -77,7 +78,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.februar til 16.februar),
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode

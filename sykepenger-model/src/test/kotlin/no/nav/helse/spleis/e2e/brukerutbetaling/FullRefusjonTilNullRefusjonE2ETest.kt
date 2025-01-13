@@ -12,6 +12,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -34,7 +35,7 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
     fun `starter med ingen refusjon`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(0.daglig, null),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -65,7 +66,7 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
     fun `starter med refusjon, så ingen refusjon`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.januar),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -93,7 +94,7 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
     fun `starter med refusjon som opphører i neste periode`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, 3.februar),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -114,7 +115,7 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
     fun `starter med refusjon, så korrigeres refusjonen til ingenting`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -147,7 +148,7 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
     fun `starter med ingen refusjon, så korrigeres refusjonen til full`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(0.daglig, null),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,

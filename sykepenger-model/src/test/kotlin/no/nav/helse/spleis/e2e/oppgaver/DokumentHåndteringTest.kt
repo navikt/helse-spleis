@@ -36,6 +36,7 @@ import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -232,7 +233,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     @Test
     fun `Inntektsmelding bare håndtert inntekt`() {
         håndterSøknad(januar)
-        val im1 = håndterInntektsmelding(
+        val im1 = håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
@@ -281,7 +282,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     @Test
     fun `portal-Inntektsmelding noen dager håndtert`()  {
         val søknad = håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
-        val im = håndterInntektsmelding(
+        val im = håndterArbeidsgiveropplysninger(
             listOf(4.januar til 19.januar),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )

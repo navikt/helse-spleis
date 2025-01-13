@@ -52,6 +52,7 @@ import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
@@ -120,7 +121,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `sendes ikke ut overstyring igangsatt når det kommer inntektsmelding i avventer inntektsmelding`() {
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         assertEquals(0, observatør.overstyringIgangsatt.size)
     }
 
@@ -622,7 +623,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `overstyrer fra SykedagNav til Sykedag`() {
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "Saerregler",
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -662,7 +663,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     fun `overstyring av egenmeldingsdager til arbeidsdager`()  {
         nyttVedtak(januar)
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), Arbeid(20.februar, 28.februar))
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = listOf(10.februar til 26.februar),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )

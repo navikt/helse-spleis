@@ -75,7 +75,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT))
         nyPeriode(10.mars til 31.mars)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = emptyList(),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )

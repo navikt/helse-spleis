@@ -744,7 +744,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         // sender im på mursteinspølse hos a1
         a1 {
-            håndterInntektsmeldingPortal(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT,
                 vedtaksperiodeId = 2.vedtaksperiode
@@ -762,7 +762,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         // sender im på siste mursteinspølse på a2
         a2 {
-            håndterInntektsmeldingPortal(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT,
                 vedtaksperiodeId = 2.vedtaksperiode

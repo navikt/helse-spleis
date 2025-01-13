@@ -22,6 +22,7 @@ import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
@@ -110,14 +111,14 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
         val a1Inntekt = 50000.månedlig
         val a2Inntekt = 10000.månedlig
 
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             beregnetInntekt = a1Inntekt,
             refusjon = Inntektsmelding.Refusjon(a1Inntekt, null, emptyList()),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             beregnetInntekt = a2Inntekt,
             refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()),

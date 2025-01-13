@@ -33,7 +33,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         )
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -50,7 +50,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     fun `grad rundes av`() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 80.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -93,7 +93,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.desember, 31.desember, 10.prosent))
 
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(13.november til 14.november, 1.desember til 14.desember),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )

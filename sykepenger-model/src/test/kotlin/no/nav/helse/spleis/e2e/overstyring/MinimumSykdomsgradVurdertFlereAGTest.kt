@@ -12,7 +12,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterMinimumSykdomsgradVurdert
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalt
@@ -32,13 +32,13 @@ internal class MinimumSykdomsgradVurdertFlereAGTest : AbstractEndToEndTest() {
     fun `Saksbehandler vurderer arbeidstid og avslår under 20 prosent på begge arbeidsgivere`() {
         nyPeriode(januar, orgnummer = a1, grad = 15.prosent)
         nyPeriode(januar, orgnummer = a2, grad = 20.prosent)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 20000.månedlig,
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 40000.månedlig,
             orgnummer = a2,

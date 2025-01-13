@@ -39,7 +39,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(februar)
         håndterSøknad(mars)
         håndterSøknad(5.april til 30.april)
-        val inntektsmelding1Id = håndterInntektsmelding(
+        val inntektsmelding1Id = håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
@@ -83,7 +83,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSykmelding(Sykmeldingsperiode(5.april, 30.april))
         håndterSøknad(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
@@ -102,7 +102,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     fun `inntektsmelding bryter ikke opp forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
-        håndterInntektsmelding(listOf(Periode(18.januar, 1.februar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterArbeidsgiveropplysninger(listOf(Periode(18.januar, 1.februar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

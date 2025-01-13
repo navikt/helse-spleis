@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -19,7 +18,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -38,7 +37,7 @@ internal class KlippTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(20.januar, 15.februar))
         håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent))
         håndterSøknad(Sykdom(20.januar, 15.februar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         utbetalPeriode(1.vedtaksperiode)
         utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode)
         assertTilstander(
@@ -72,7 +71,7 @@ internal class KlippTest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 15.februar))
         håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         utbetalPeriode(1.vedtaksperiode)
         håndterSøknad(Sykdom(20.januar, 15.februar, 100.prosent))
         utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode)
@@ -109,7 +108,7 @@ internal class KlippTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent))
         håndterSøknad(Sykdom(20.januar, 25.januar, 100.prosent))
         håndterSøknad(Sykdom(26.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         utbetalPeriode(1.vedtaksperiode)
         utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode)
         utbetalPeriodeEtterVilkårsprøving(3.vedtaksperiode)
@@ -156,7 +155,7 @@ internal class KlippTest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterSøknad(Sykdom(1.februar, 15.februar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         utbetalPeriode(1.vedtaksperiode)
         utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode)
         assertTilstander(

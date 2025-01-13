@@ -76,7 +76,7 @@ internal class InntektshistorikkTest {
         beregnetInntekt: Inntekt = INNTEKT,
         førsteFraværsdag: LocalDate = 1.januar,
         arbeidsgiverperioder: List<Periode> = listOf(1.januar til 16.januar)
-    ) = hendelsefabrikk.lagKlassiskInntektsmelding(
+    ) = hendelsefabrikk.lagInntektsmelding(
         arbeidsgiverperioder = arbeidsgiverperioder,
         beregnetInntekt = beregnetInntekt,
         førsteFraværsdag = førsteFraværsdag,

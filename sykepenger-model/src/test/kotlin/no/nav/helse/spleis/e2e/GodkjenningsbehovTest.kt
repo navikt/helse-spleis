@@ -143,7 +143,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterSøknad(februar)
         håndterSøknad(mars)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         val vilkårsgrunnlagId1 = vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(1.januar)
         håndterYtelser(1.vedtaksperiode)
@@ -320,7 +320,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
@@ -391,7 +391,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `markerer godkjenningsbehov som har brukt skatteinntekter istedenfor inntektsmelding med riktig tag for flere arbeidsgivere med ulik start`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         nyPeriode(januar, a1)
         nyPeriode(februar, a2)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode

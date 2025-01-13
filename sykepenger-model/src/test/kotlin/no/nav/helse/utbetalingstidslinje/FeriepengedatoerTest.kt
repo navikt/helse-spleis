@@ -25,7 +25,7 @@ import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -380,7 +380,7 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
             Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
             orgnummer = orgnummer
         )
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(arbeidsgiverperiode),
             orgnummer = orgnummer,
             vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter
@@ -402,7 +402,7 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
             Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
             orgnummer = orgnummer
         )
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(arbeidsgiverperiode),
             orgnummer = orgnummer,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -424,12 +424,12 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil), orgnummer = a2)
         håndterSøknad(Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(arbeidsgiverperiode),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(arbeidsgiverperiode),
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode

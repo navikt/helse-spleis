@@ -25,7 +25,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
     @Test
     fun `Sender ut spisset event ved korrigerende inntektsmelding som endrer inntekt og refusjon`() {
         nyPeriode(januar)
-        val korrigertInntektsmeldingId = håndterInntektsmelding(
+        val korrigertInntektsmeldingId = håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 31000.månedlig,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null),
@@ -51,7 +51,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
     @Test
     fun `Sender ut spisset event ved korrigerende inntektsmelding som endrer agp`() {
         nyPeriode(januar)
-        val korrigertInntektsmeldingId = håndterInntektsmelding(
+        val korrigertInntektsmeldingId = håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
@@ -78,7 +78,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
     @Test
     fun `Sender ut spisset event ved saksbehandleroverstyring som endrer inntekt og refusjon`() {
         nyPeriode(januar)
-        val korrigertInntektsmeldingId = håndterInntektsmelding(
+        val korrigertInntektsmeldingId = håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
@@ -116,12 +116,12 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         val tom = 31.januar
         nyPeriode(fom til tom, orgnummer = a1)
         nyPeriode(fom til tom, orgnummer = a2)
-        val korrigertInntektsmeldingIdA1 = håndterInntektsmelding(
+        val korrigertInntektsmeldingIdA1 = håndterArbeidsgiveropplysninger(
             listOf(fom til fom.plusDays(15)),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        val korrigertInntektsmeldingIdA2 = håndterInntektsmelding(
+        val korrigertInntektsmeldingIdA2 = håndterArbeidsgiveropplysninger(
             listOf(fom til fom.plusDays(15)),
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -176,12 +176,12 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         val tom = 31.januar
         nyPeriode(fom til tom, orgnummer = a1)
         nyPeriode(fom til tom, orgnummer = a2)
-        val korrigertInntektsmeldingIdA1 = håndterInntektsmelding(
+        val korrigertInntektsmeldingIdA1 = håndterArbeidsgiveropplysninger(
             listOf(fom til fom.plusDays(15)),
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(fom til fom.plusDays(15)),
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
@@ -220,7 +220,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
     @Test
     fun `Sender ut spisset event ved saksbehandleroverstyring som endrer agp`() {
         nyPeriode(januar)
-        val korrigertInntektsmeldingId = håndterInntektsmelding(
+        val korrigertInntektsmeldingId = håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
@@ -269,7 +269,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
     @Test
     fun `Sender ut spisset event ved korrigerende inntektsmelding som ikke fører til endring`() {
         nyPeriode(januar)
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT,
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null),

@@ -142,7 +142,7 @@ internal fun AbstractEndToEndTest.søknad(
     tilkomneInntekter = tilkomneInntekter
 )
 
-internal fun AbstractEndToEndTest.klassiskInntektsmelding(
+internal fun AbstractEndToEndTest.inntektsmelding(
     id: UUID = UUID.randomUUID(),
     arbeidsgiverperioder: List<Periode>,
     beregnetInntekt: Inntekt = INNTEKT,
@@ -155,7 +155,7 @@ internal fun AbstractEndToEndTest.klassiskInntektsmelding(
     avsendersystem: Avsenderutleder = LPS
 ): Inntektsmelding {
     val inntektsmeldinggenerator = {
-        ArbeidsgiverHendelsefabrikk(orgnummer).lagKlassiskInntektsmelding(
+        ArbeidsgiverHendelsefabrikk(orgnummer).lagInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,
             førsteFraværsdag = førsteFraværsdag,

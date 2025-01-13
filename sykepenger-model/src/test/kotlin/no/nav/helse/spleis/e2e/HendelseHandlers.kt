@@ -143,7 +143,7 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     organisasjonsnummere.forEach { nyPeriode(periode, it) }
     organisasjonsnummere.forEach {
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = arbeidsgiverperiode,
             beregnetInntekt = beregnetInntekt,
             orgnummer = it,
@@ -199,7 +199,7 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
 
     }
     arbeidsgivere.forEach {
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
             beregnetInntekt = INNTEKT,
             orgnummer = it.first,
@@ -317,7 +317,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
 ): IdInnhenter {
     håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = orgnummer)
     håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, grad), orgnummer = orgnummer)
-    håndterInntektsmelding(
+    håndterArbeidsgiveropplysninger(
         arbeidsgiverperiode ?: listOf(Periode(periode.start, periode.start.plusDays(15))),
         beregnetInntekt = beregnetInntekt,
         refusjon = refusjon,
@@ -453,7 +453,7 @@ private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: St
     }
 }
 
-internal fun AbstractEndToEndTest.håndterInntektsmelding(
+internal fun AbstractEndToEndTest.håndterArbeidsgiveropplysninger(
     arbeidsgiverperioder: List<Periode>?,
     beregnetInntekt: Inntekt? = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
@@ -461,10 +461,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     id: UUID = UUID.randomUUID(),
     opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-    harFlereInntektsmeldinger: Boolean = false,
     avsendersystem: Avsenderutleder? = null,
-    vedtaksperiodeIdInnhenter: IdInnhenter,
-    inntektsdato: LocalDate? = null
+    vedtaksperiodeIdInnhenter: IdInnhenter
 ): UUID {
     val utledetAvsendersystem = when {
         avsendersystem != null -> avsendersystem
@@ -475,7 +473,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
         "må være NAV_NO eller selvbestemt"
     }
 
-    val vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(checkNotNull(vedtaksperiodeIdInnhenter) { "Du må sette vedtaksperiodeId for portalinntektsmelding!" })
+    val vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(vedtaksperiodeIdInnhenter)
 
     val arbeidsgiveropplysninger = Arbeidsgiveropplysninger(
         meldingsreferanseId = id,
@@ -493,17 +491,16 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     )
 
     if (erForespurtNavPortal(utledetAvsendersystem)) {
-        observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *arbeidsgiveropplysninger.opplysninger.toTypedArray())
+        observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *arbeidsgiveropplysninger.toTypedArray())
     }
-
 
     return håndterArbeidsgiveropplysninger(arbeidsgiveropplysninger)
 }
 
 internal fun AbstractEndToEndTest.håndterInntektsmelding(
-    arbeidsgiverperioder: List<Periode>?,
+    arbeidsgiverperioder: List<Periode>,
     førsteFraværsdag: LocalDate? = null,
-    beregnetInntekt: Inntekt? = INNTEKT,
+    beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = a1,
     id: UUID = UUID.randomUUID(),
@@ -522,10 +519,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
         "Skal ikke bruke NAV_NO her"
     }
 
-    check(arbeidsgiverperioder != null) { "Klassisk inntektsmelding må ha agp satt" }
-    check(beregnetInntekt != null) { "Klassisk inntektsmelding må ha beregnet inntekt satt" }
     return håndterInntektsmelding(
-        klassiskInntektsmelding(
+        inntektsmelding(
             id = id,
             arbeidsgiverperioder = arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,

@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.søknad
 
 import java.time.YearMonth
-import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -19,7 +18,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -45,7 +44,7 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
     fun `kan sende inn søknad før periode er gått ut`() {
         håndterSykmelding(Sykmeldingsperiode(fom, tom))
         håndterSøknad(Sykdom(fom, tom, 100.prosent))
-        håndterInntektsmelding(
+        håndterArbeidsgiveropplysninger(
             listOf(Periode(fom, sisteArbeidsgiverdag)),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )

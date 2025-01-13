@@ -123,7 +123,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                 sendtTilNAVEllerArbeidsgiver = 1.juni
             )
             assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
-            håndterInntektsmeldingPortal(listOf(1.februar til 16.februar))
+            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)

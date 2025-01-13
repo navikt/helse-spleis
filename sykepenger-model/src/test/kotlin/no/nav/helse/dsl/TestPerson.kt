@@ -169,8 +169,8 @@ internal class TestPerson(
         internal fun håndterSøknad(periode: Periode) = håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
 
         internal fun håndterArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning): UUID {
-            observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId)
             val hendelse = arbeidsgiverHendelsefabrikk.lagArbeidsgiveropplysninger(vedtaksperiodeId = vedtaksperiodeId, opplysninger = opplysninger)
+            observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *hendelse.toTypedArray())
             hendelse.håndter(Person::håndter)
             return hendelse.metadata.meldingsreferanseId
         }
@@ -238,7 +238,7 @@ internal class TestPerson(
             orgnummer: String = "",
             mottatt: LocalDateTime = LocalDateTime.now()
         ): UUID {
-            arbeidsgiverHendelsefabrikk.lagKlassiskInntektsmelding(
+            arbeidsgiverHendelsefabrikk.lagInntektsmelding(
                 arbeidsgiverperioder,
                 beregnetInntekt,
                 førsteFraværsdag,
@@ -251,7 +251,7 @@ internal class TestPerson(
             return id
         }
 
-        internal fun håndterInntektsmeldingPortal(
+        internal fun håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder: List<Periode>,
             beregnetInntekt: Inntekt = INNTEKT,
             vedtaksperiodeId: UUID = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.id,
@@ -263,13 +263,11 @@ internal class TestPerson(
             mottatt: LocalDateTime = LocalDateTime.now(),
             avsendersystem: Avsenderutleder = NAV_NO
         ): UUID {
-            if (erForespurtNavPortal(avsendersystem)) {
-                observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId)
-            }
+
             val arbeidsgiveropplysninger = Arbeidsgiveropplysninger(
                 meldingsreferanseId = id,
-                innsendt = LocalDateTime.now(),
-                registrert = LocalDateTime.now().plusSeconds(1),
+                innsendt = mottatt,
+                registrert = mottatt.plusSeconds(1),
                 organisasjonsnummer = this.orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
@@ -280,6 +278,11 @@ internal class TestPerson(
                     opphørAvNaturalytelser = opphørAvNaturalytelser
                 )
             )
+
+            if (erForespurtNavPortal(avsendersystem)) {
+                observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *arbeidsgiveropplysninger.toTypedArray())
+            }
+
             arbeidsgiveropplysninger.håndter(Person::håndter)
             return id
         }

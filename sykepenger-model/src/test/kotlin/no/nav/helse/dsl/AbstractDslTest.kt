@@ -324,7 +324,7 @@ internal abstract class AbstractDslTest {
         id: UUID = UUID.randomUUID()
     ) =
         this {
-            håndterInntektsmeldingPortal(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder,
                 beregnetInntekt,
                 vedtaksperiodeId,
