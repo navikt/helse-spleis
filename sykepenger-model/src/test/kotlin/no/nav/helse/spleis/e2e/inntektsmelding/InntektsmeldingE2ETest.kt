@@ -125,6 +125,37 @@ import org.junit.jupiter.api.assertDoesNotThrow
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
+    fun `oppgir refusjonopplysninger frem i tid, og så ombestemmer de seg`() {
+        håndterSøknad(januar)
+        val arbeidsgiver1 = håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            refusjon = Refusjon(25_000.månedlig, 31.januar),
+            beregnetInntekt = 25_000.månedlig,
+        )
+        assertBeløpstidslinje(Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver1.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
+        assertBeløpstidslinje(Beløpstidslinje.fra(1.februar.somPeriode(), INGEN, arbeidsgiver1.arbeidsgiver), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
+
+        val arbeidsgiver2 = håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            refusjon = Refusjon(25_000.månedlig, null),
+            beregnetInntekt = 25_000.månedlig,
+        )
+        assertBeløpstidslinje(Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
+        assertVarsler(listOf(RV_IM_4), 1.vedtaksperiode.filter())
+        assertForventetFeil(
+            forklaring = "Dette fungerer jo ikke",
+            ønsket = {
+                assertBeløpstidslinje(Beløpstidslinje.fra(1.februar.somPeriode(), 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
+            },
+            nå = {
+                assertBeløpstidslinje(Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
+            }
+        )
+    }
+
+    @Test
     fun `oppgir at det er opphør av naturalytelser`() = Toggle.OpphørAvNaturalytelser.enable {
         nyPeriode(januar)
         håndterInntektsmelding(
