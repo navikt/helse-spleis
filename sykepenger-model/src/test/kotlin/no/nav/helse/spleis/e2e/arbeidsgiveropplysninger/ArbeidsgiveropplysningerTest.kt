@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 import no.nav.helse.Toggle
 import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -80,16 +79,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             )
 
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
-
-            assertForventetFeil(
-                forklaring = "Dette fungerer jo ikke",
-                nå = {
-                    assertBeløpstidslinje(Beløpstidslinje.fra(1.februar.somPeriode(), INGEN, arbeidsgiver1.arbeidsgiver), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
-                },
-                ønsket = {
-                    assertBeløpstidslinje(Beløpstidslinje.fra(1.februar.somPeriode(), 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
-                }
-            )
+            assertBeløpstidslinje(Beløpstidslinje.fra(1.februar.somPeriode(), 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
         }
     }
 

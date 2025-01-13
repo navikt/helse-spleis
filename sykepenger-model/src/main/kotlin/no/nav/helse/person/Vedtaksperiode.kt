@@ -301,9 +301,11 @@ internal class Vedtaksperiode private constructor(
         person.igangsettOverstyring(Revurderingseventyr.nyPeriode(søknad, skjæringstidspunkt, periode), aktivitetslogg)
 
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(søknad, aktivitetslogg)
-        tilstand(aktivitetslogg, when {
+        tilstand(
+            aktivitetslogg, when {
             !infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
-            else -> AvventerInntektsmelding }
+            else -> AvventerInntektsmelding
+        }
         )
     }
 
@@ -379,11 +381,13 @@ internal class Vedtaksperiode private constructor(
                 val vedtaksperiodeTilRevurdering = arbeidsgiver.finnVedtaksperiodeFør(this)?.takeIf {
                     nyArbeidsgiverperiodeEtterEndring(it)
                 } ?: this
-                person.igangsettOverstyring(Revurderingseventyr.sykdomstidslinje(
-                    hendelse = hendelse,
-                    skjæringstidspunkt = vedtaksperiodeTilRevurdering.skjæringstidspunkt,
-                    periodeForEndring = vedtaksperiodeTilRevurdering.periode
-                ), aktivitetslogg)
+                person.igangsettOverstyring(
+                    Revurderingseventyr.sykdomstidslinje(
+                        hendelse = hendelse,
+                        skjæringstidspunkt = vedtaksperiodeTilRevurdering.skjæringstidspunkt,
+                        periodeForEndring = vedtaksperiodeTilRevurdering.periode
+                    ), aktivitetslogg
+                )
             }
 
             RevurderingFeilet,
@@ -544,6 +548,7 @@ internal class Vedtaksperiode private constructor(
             AvventerBlokkerendePeriode -> {
                 håndterDager(arbeidsgiveropplysninger, bitAvArbeidsgiverperiode, aktivitetslogg) {}
             }
+
             else -> {
                 // det er oppgitt arbeidsgiverperiode på uventede perioder; mest sannsynlig
                 // har da ikke vedtaksperioden bedt om Arbeidsgiverperiode som opplysning, men vi har fått det likevel
@@ -594,8 +599,9 @@ internal class Vedtaksperiode private constructor(
         val hovedopplysning = Arbeidsgiveropplysning.OppgittRefusjon.Refusjonsendring(startdatoPåSammenhengendeVedtaksperioder, oppgittRefusjon.beløp)
         val endringer = oppgittRefusjon.endringer.filter { it.fom > startdatoPåSammenhengendeVedtaksperioder }
         val alle = (endringer + hovedopplysning).distinctBy { it.fom }
+        val sisteTom = ubrukteRefusjonsopplysningerEtter(ubrukteRefusjonsopplysninger).lastOrNull()?.dato
         val refusjonstidslinje = alle.sortedBy { it.fom }.mapWithNext { nåværende, neste ->
-            Beløpstidslinje.fra(periode = nåværende.fom til (neste?.fom?.forrigeDag ?: nåværende.fom), beløp = nåværende.beløp, kilde = Kilde(hendelse.metadata.meldingsreferanseId, Avsender.ARBEIDSGIVER, hendelse.metadata.innsendt))
+            Beløpstidslinje.fra(periode = nåværende.fom til (neste?.fom?.forrigeDag ?: (sisteTom ?: nåværende.fom)), beløp = nåværende.beløp, kilde = Kilde(hendelse.metadata.meldingsreferanseId, Avsender.ARBEIDSGIVER, hendelse.metadata.innsendt))
         }.reduce(Beløpstidslinje::plus)
         val servitør = Refusjonsservitør.fra(refusjonstidslinje)
 
