@@ -7,7 +7,6 @@ import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
-import no.nav.helse.hendelser.inntektsmelding.validert
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -477,7 +476,6 @@ internal class InntektsmeldingTest {
             refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
         )
-        inntektsmelding.validert()
         dager = inntektsmelding.dager()
     }
 }

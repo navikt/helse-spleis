@@ -580,10 +580,8 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg.kontekst(this)
         if (vedtaksperiodeIdForReplay != null) aktivitetslogg.info("Replayer inntektsmelding.")
 
-        if (!inntektsmelding.valider(vedtaksperioder, aktivitetslogg, person::emitInntektsmeldingIkkeHåndtert)) return
         val dager = inntektsmelding.dager()
         håndter(inntektsmelding) { håndter(dager, aktivitetslogg) }
-        if (!inntektsmelding.valider(vedtaksperioder, aktivitetslogg, person::emitInntektsmeldingIkkeHåndtert)) return
 
         val refusjonsoverstyring = if (vedtaksperiodeIdForReplay == null) håndter(
             inntektsmelding,

@@ -6,7 +6,6 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.inntektsmelding.validert
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.InntektshistorikkInspektør
 import no.nav.helse.inspectors.inspektør
@@ -82,5 +81,5 @@ internal class InntektshistorikkTest {
         førsteFraværsdag = førsteFraværsdag,
         refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
         begrunnelseForReduksjonEllerIkkeUtbetalt = null
-    ).validert()
+    )
 }

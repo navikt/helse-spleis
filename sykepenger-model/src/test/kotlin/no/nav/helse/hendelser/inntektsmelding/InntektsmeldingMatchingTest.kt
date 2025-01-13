@@ -259,7 +259,6 @@ internal class InntektsmeldingMatchingTest {
                 beregnetInntekt = 400.månedlig,
                 førsteFraværsdag = førsteFraværsdag
             )
-            inntektsmelding.validert()
             return inntektsmelding.dager()
         }
     }

@@ -7,7 +7,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.inntektsmelding.validert
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -227,7 +226,7 @@ internal class SykmeldingsperioderTest {
         refusjon = Inntektsmelding.Refusjon(null, null),
         opphørAvNaturalytelser = emptyList(),
         begrunnelseForReduksjonEllerIkkeUtbetalt = null
-    ).validert()
+    )
 
     fun Sykmeldingsperioder.perioder() = view().perioder
 }
