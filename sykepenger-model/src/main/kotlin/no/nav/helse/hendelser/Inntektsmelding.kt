@@ -39,13 +39,14 @@ class Inntektsmelding(
     private val avsendersystem: Avsendersystem,
     mottatt: LocalDateTime
 ) : Hendelse {
+    private val førsteFraværsdag = when (avsendersystem) {
+        is Avsendersystem.LPS -> avsendersystem.førsteFraværsdag
+        is Avsendersystem.Altinn -> avsendersystem.førsteFraværsdag
+    }
 
     init {
         // TODO: Første fraværsdag kan gå tilbake til root, og vi trenger ikke noe avsendersystem..?
-        val førsteFraværsdag = when (avsendersystem) {
-            is Avsendersystem.LPS -> avsendersystem.førsteFraværsdag
-            is Avsendersystem.Altinn -> avsendersystem.førsteFraværsdag
-        }
+        
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) {
             error("Inntektsmelding må enten ha første fraværsdag eller arbeidsgiverperioder satt.")
         }
@@ -62,11 +63,11 @@ class Inntektsmelding(
         automatiskBehandling = false
     )
 
-    private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
+    private val grupperteArbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
     private val dager by lazy {
         DagerFraInntektsmelding(
-            arbeidsgiverperioder = this.arbeidsgiverperioder,
-            førsteFraværsdag = type.førsteFraværsdagForHåndteringAvDager(this),
+            arbeidsgiverperioder = grupperteArbeidsgiverperioder,
+            førsteFraværsdag = førsteFraværsdag,
             mottatt = metadata.registrert,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
@@ -78,35 +79,42 @@ class Inntektsmelding(
     private var håndtertInntekt = false
     val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
 
-    fun korrigertInntekt() = Inntektsmeldinginntekt(type.inntektsdato(this), metadata.meldingsreferanseId, beregnetInntekt)
+    fun korrigertInntekt() = Inntektsmeldinginntekt(inntektsdato, metadata.meldingsreferanseId, beregnetInntekt)
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg, alternativInntektsdato: LocalDate) {
-        val inntektsdato = type.alternativInntektsdatoForInntekthistorikk(this, alternativInntektsdato) ?: return
+        val inntektsdato = alternativInntektsdato.takeUnless { it == inntektsdato } ?: return
         if (!inntektshistorikk.leggTil(Inntektsmeldinginntekt(inntektsdato, metadata.meldingsreferanseId, beregnetInntekt))) return
         aktivitetslogg.info("Lagrer inntekt på alternativ inntektsdato $inntektsdato")
     }
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonslogg: Subsumsjonslogg): LocalDate {
         subsumsjonslogg.logg(`§ 8-10 ledd 3`(beregnetInntekt.årlig, beregnetInntekt.daglig))
-        val inntektsdato = type.inntektsdato(this)
         inntektshistorikk.leggTil(Inntektsmeldinginntekt(inntektsdato, metadata.meldingsreferanseId, beregnetInntekt))
         return inntektsdato
     }
 
-    internal fun inntektsdato() = type.inntektsdato(this)
+    internal val inntektsdato: LocalDate by lazy {
+        if (førsteFraværsdag != null && (grupperteArbeidsgiverperioder.isEmpty() || førsteFraværsdag > grupperteArbeidsgiverperioder.last().endInclusive.nesteDag)) førsteFraværsdag
+        else grupperteArbeidsgiverperioder.maxOf { it.start }
+    }
+
+    private val refusjonsdato: LocalDate by lazy {
+        if (førsteFraværsdag == null) grupperteArbeidsgiverperioder.maxOf { it.start }
+        else grupperteArbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
+    }
 
     private val refusjonsElement
         get() = Refusjonshistorikk.Refusjon(
             meldingsreferanseId = metadata.meldingsreferanseId,
-            førsteFraværsdag = type.refusjonsdato(this),
-            arbeidsgiverperioder = arbeidsgiverperioder,
+            førsteFraværsdag = refusjonsdato,
+            arbeidsgiverperioder = grupperteArbeidsgiverperioder,
             beløp = refusjon.beløp,
             sisteRefusjonsdag = refusjon.opphørsdato,
             endringerIRefusjon = refusjon.endringerIRefusjon.map { it.tilEndring() },
             tidsstempel = metadata.registrert
         )
 
-    internal val refusjonsservitør get() = Refusjonsservitør.fra(refusjon.refusjonstidslinje(type.refusjonsdato(this), metadata.meldingsreferanseId, metadata.innsendt))
+    internal val refusjonsservitør get() = Refusjonsservitør.fra(refusjon.refusjonstidslinje(refusjonsdato, metadata.meldingsreferanseId, metadata.innsendt))
 
     internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk) {
         refusjonshistorikk.leggTilRefusjon(refusjonsElement)
@@ -163,13 +171,7 @@ class Inntektsmelding(
             internal val beløp: Inntekt,
             internal val endringsdato: LocalDate
         ) {
-
             internal fun tilEndring() = Refusjonshistorikk.Refusjon.EndringIRefusjon(beløp, endringsdato)
-
-            internal companion object {
-                internal fun List<EndringIRefusjon>.minOf(opphørsdato: LocalDate?) =
-                    (map { it.endringsdato } + opphørsdato).filterNotNull().minOrNull()
-            }
         }
     }
 
@@ -185,14 +187,15 @@ class Inntektsmelding(
         sykmeldingsperioder: Sykmeldingsperioder
     ) {
         if (håndtertInntekt) return // Definisjonen av om en inntektsmelding er håndtert eller ikke er at vi har håndtert inntekten i den... 🤡
-        type.ikkeHåndtert(
-            inntektsmelding = this,
-            aktivitetslogg = aktivitetslogg,
-            person = person,
-            relevanteSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(dager) + sykmeldingsperioder.perioderInnenfor16Dager(dager),
-            overlapperMedForkastet = forkastede.overlapperMed(dager),
-            harPeriodeInnenfor16Dager = dager.harPeriodeInnenfor16Dager(vedtaksperioder)
-        )
+        val relevanteSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(dager) + sykmeldingsperioder.perioderInnenfor16Dager(dager)
+        val overlapperMedForkastet = forkastede.overlapperMed(dager)
+        val harPeriodeInnenfor16Dager = dager.harPeriodeInnenfor16Dager(vedtaksperioder)
+        if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
+            person.emitInntektsmeldingFørSøknadEvent(metadata.meldingsreferanseId, relevanteSykmeldingsperioder, behandlingsporing.organisasjonsnummer)
+            return aktivitetslogg.info("Inntektsmelding før søknad - er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
+        }
+        aktivitetslogg.info("Inntektsmelding ikke håndtert")
+        person.emitInntektsmeldingIkkeHåndtert(this, behandlingsporing.organisasjonsnummer, harPeriodeInnenfor16Dager)
     }
 
     internal fun subsumsjonskontekst() = Subsumsjonskontekst(
@@ -200,48 +203,8 @@ class Inntektsmelding(
         verdi = metadata.meldingsreferanseId.toString()
     )
 
-    internal fun skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode: Periode?) = type.skalOppdatereVilkårsgrunnlag(this, sykdomstidslinjeperiode)
-
-    // TODO: Fjern type
-    private val type: Type = when (avsendersystem) {
-        is Avsendersystem.LPS -> KlassiskInntektsmelding(avsendersystem.førsteFraværsdag)
-        is Avsendersystem.Altinn -> KlassiskInntektsmelding(avsendersystem.førsteFraværsdag)
-    }
-
-    private sealed interface Type {
-        fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?): Boolean
-        fun inntektsdato(inntektsmelding: Inntektsmelding): LocalDate
-        fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate): LocalDate?
-        fun refusjonsdato(inntektsmelding: Inntektsmelding): LocalDate
-        fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding): LocalDate?
-        fun ikkeHåndtert(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, relevanteSykmeldingsperioder: List<Periode>, overlapperMedForkastet: Boolean, harPeriodeInnenfor16Dager: Boolean)
-    }
-
-    private data class KlassiskInntektsmelding(private val førsteFraværsdag: LocalDate?) : Type {
-        override fun skalOppdatereVilkårsgrunnlag(inntektsmelding: Inntektsmelding, sykdomstidslinjeperiode: Periode?): Boolean {
-            if (sykdomstidslinjeperiode == null) return false // har ikke noe sykdom for arbeidsgiveren
-            return inntektsdato(inntektsmelding) in sykdomstidslinjeperiode
-        }
-
-        override fun inntektsdato(inntektsmelding: Inntektsmelding): LocalDate {
-            if (førsteFraværsdag != null && (inntektsmelding.arbeidsgiverperioder.isEmpty() || førsteFraværsdag > inntektsmelding.arbeidsgiverperioder.last().endInclusive.nesteDag)) return førsteFraværsdag
-            return inntektsmelding.arbeidsgiverperioder.maxOf { it.start }
-        }
-
-        override fun alternativInntektsdatoForInntekthistorikk(inntektsmelding: Inntektsmelding, alternativInntektsdato: LocalDate) = alternativInntektsdato.takeUnless { it == inntektsdato(inntektsmelding) }
-        override fun refusjonsdato(inntektsmelding: Inntektsmelding): LocalDate {
-            return if (førsteFraværsdag == null) inntektsmelding.arbeidsgiverperioder.maxOf { it.start }
-            else inntektsmelding.arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
-        }
-
-        override fun førsteFraværsdagForHåndteringAvDager(inntektsmelding: Inntektsmelding) = førsteFraværsdag
-        override fun ikkeHåndtert(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, person: Person, relevanteSykmeldingsperioder: List<Periode>, overlapperMedForkastet: Boolean, harPeriodeInnenfor16Dager: Boolean) {
-            if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
-                person.emitInntektsmeldingFørSøknadEvent(inntektsmelding.metadata.meldingsreferanseId, relevanteSykmeldingsperioder, inntektsmelding.behandlingsporing.organisasjonsnummer)
-                return aktivitetslogg.info("Inntektsmelding før søknad - er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
-            }
-            aktivitetslogg.info("Inntektsmelding ikke håndtert - ved ferdigstilling. Type ${this::class.simpleName}. Avsendersystem ${inntektsmelding.avsendersystem}")
-            person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, inntektsmelding.behandlingsporing.organisasjonsnummer, harPeriodeInnenfor16Dager)
-        }
+    internal fun skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode: Periode?): Boolean {
+        if (sykdomstidslinjeperiode == null) return false // har ikke noe sykdom for arbeidsgiveren
+        return inntektsdato in sykdomstidslinjeperiode
     }
 }

@@ -1000,7 +1000,7 @@ internal class Arbeidsgiver private constructor(
         val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk, subsumsjonsloggMedInntektsmeldingkontekst)
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
 
-        val skjæringstidspunkt = inntektsmelding.inntektsdato().let { dato ->
+        val skjæringstidspunkt = inntektsmelding.inntektsdato.let { dato ->
             vedtaksperioder.firstOrNull {
                 dato in it.periode || dato == it.skjæringstidspunkt
             }?.skjæringstidspunkt
