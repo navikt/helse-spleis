@@ -124,13 +124,9 @@ internal class MessageMediator(
             measureTime {
                 messageRecognized = true
                 message.logRecognized(log, sikkerLogg)
+                if (hendelseRepository.erBehandlet(message.meldingsporing.id)) return message.logDuplikat(sikkerLogg)
+
                 hendelseRepository.lagreMelding(message)
-
-                if (message.skalDuplikatsjekkes && hendelseRepository.erBehandlet(message.meldingsporing.id)) {
-                    message.logDuplikat(sikkerLogg)
-                    return
-                }
-
                 hendelseMediator.behandle(message, context)
                 hendelseRepository.markerSomBehandlet(message.meldingsporing.id)
             }.also { result ->

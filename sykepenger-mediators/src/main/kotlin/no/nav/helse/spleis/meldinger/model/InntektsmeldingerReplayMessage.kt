@@ -19,7 +19,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
-    override val skalDuplikatsjekkes = false
 
     private val inntektsmeldinger = mutableListOf<Inntektsmelding>()
 

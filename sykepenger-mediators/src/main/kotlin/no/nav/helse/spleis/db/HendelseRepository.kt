@@ -119,10 +119,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
     }
 
     fun erBehandlet(meldingId: UUID) = sessionOf(dataSource).use { session ->
-        session.run(
-            queryOf("SELECT behandlet_tidspunkt FROM melding WHERE melding_id = ?", meldingId.toString())
-                .map { it.localDateTimeOrNull("behandlet_tidspunkt") }.asSingle
-        ) != null
+        true == session.run(queryOf("SELECT exists(select 1 FROM melding WHERE melding_id = ?)", meldingId.toString()).map { it.boolean(1) }.asSingle)
     }
 
     private fun meldingstype(melding: HendelseMessage) = when (melding) {

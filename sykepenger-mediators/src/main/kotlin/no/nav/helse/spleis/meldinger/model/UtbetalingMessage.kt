@@ -19,7 +19,6 @@ internal class UtbetalingMessage(packet: JsonMessage, override val meldingsporin
     private val beskrivelse = packet["@løsning.${Utbetaling.name}.beskrivelse"].asText()
     private val avstemmingsnøkkel = packet["@løsning.${Utbetaling.name}.avstemmingsnøkkel"].asLong()
     private val overføringstidspunkt = packet["@løsning.${Utbetaling.name}.overføringstidspunkt"].asLocalDateTime()
-    override val skalDuplikatsjekkes = false
 
     private val utbetaling
         get() = UtbetalingHendelse(

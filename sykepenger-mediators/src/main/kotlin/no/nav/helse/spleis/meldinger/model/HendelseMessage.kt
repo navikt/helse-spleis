@@ -18,7 +18,6 @@ internal sealed class HendelseMessage(private val packet: JsonMessage) : Aktivit
     abstract val meldingsporing: Meldingsporing
     private val navn = packet["@event_name"].asText()
     protected val opprettet = packet["@opprettet"].asLocalDateTime()
-    internal open val skalDuplikatsjekkes = true
 
     internal abstract fun behandle(mediator: IHendelseMediator, context: MessageContext)
 
