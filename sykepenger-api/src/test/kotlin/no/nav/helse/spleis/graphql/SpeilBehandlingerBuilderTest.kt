@@ -109,8 +109,8 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     fun `periodene viser til overstyring av sykepengegrunnlag i hendelser`() {
         val søknadA1 = håndterSøknad(1.januar til 25.januar, orgnummer = a1)
         val søknadA2 = håndterSøknad(1.januar til 25.januar, orgnummer = a2)
-        val imA1 = håndterInntektsmelding(1.januar, orgnummer = a1)
-        val imA2 = håndterInntektsmelding(1.januar, orgnummer = a2)
+        val imA1 = håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
+        val imA2 = håndterArbeidsgiveropplysninger(1.januar, orgnummer = a2)
 
         val søknadA1Forlengelse = håndterSøknad(Sykdom(26.januar, 31.januar, 100.prosent), orgnummer = a1)
         val søknadA2Forlengelse = håndterSøknad(Sykdom(26.januar, 31.januar, 100.prosent), orgnummer = a2)
@@ -165,7 +165,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     fun `forkastet auu`() {
         val søknad = håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
         håndterSøknad(Sykdom(11.januar, 20.januar, 100.prosent))
-        val im = håndterInntektsmelding(1.januar)
+        val im = håndterArbeidsgiveropplysninger(1.januar)
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
         generasjoner {
@@ -190,9 +190,9 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         val søknad1 = håndterSøknad(Sykdom(1.januar, 24.januar, 100.prosent))
         val inntektsmeldingbeløp1 = INNTEKT
         val søknad2 = håndterSøknad(Sykdom(25.januar, søndag den 11.februar, 100.prosent))
-        val inntektsmelding1 = håndterInntektsmelding(listOf(25.januar til fredag den 9.februar), vedtaksperiode = 2, beregnetInntekt = inntektsmeldingbeløp1)
+        val inntektsmelding1 = håndterArbeidsgiveropplysninger(listOf(25.januar til fredag den 9.februar), vedtaksperiode = 2, beregnetInntekt = inntektsmeldingbeløp1)
         val inntektsmeldingbeløp2 = INNTEKT * 1.1
-        val inntektsmelding2 = håndterInntektsmelding(1.januar, vedtaksperiode = 1, beregnetInntekt = inntektsmeldingbeløp2)
+        val inntektsmelding2 = håndterArbeidsgiveropplysninger(1.januar, vedtaksperiode = 1, beregnetInntekt = inntektsmeldingbeløp2)
         håndterVilkårsgrunnlag()
 
         generasjoner {
@@ -215,7 +215,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterSøknad(Sykdom(17.januar, 22.januar, 100.prosent))
         håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(1.januar)
+        håndterArbeidsgiveropplysninger(1.januar)
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
@@ -246,7 +246,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     fun `syk nav-dager i to korte perioder`() {
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Ferie(1.januar, 15.januar))
         håndterSøknad(Sykdom(16.januar, 20.januar, 100.prosent), Ferie(16.januar, 20.januar))
-        håndterInntektsmelding(1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        håndterArbeidsgiveropplysninger(1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
         generasjoner {
             assertEquals(2, size)
             0.generasjon {
@@ -266,13 +266,13 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     fun `Manglende generasjon når det kommer IM som endrer AGP ved å endre dager i forkant av perioden`() {
         håndterSøknad(Sykdom(7.august, 20.august, 100.prosent))
         håndterSøknad(Sykdom(21.august, 1.september, 100.prosent))
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(24.juli til 25.juli, 7.august til 20.august))
+        håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(24.juli til 25.juli, 7.august til 20.august))
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
         // 21 & 22.August utbetalingsdager
 
-        håndterInntektsmelding(7.august)
+        håndterArbeidsgiveropplysninger(7.august)
         håndterYtelserTilUtbetalt()
         // 21 & 22.August agp -- denne blir ikke en generasjon
 
@@ -424,7 +424,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     @Test
     fun `person med foreldet dager`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAV = 1.juni.atStartOfDay())
-        håndterInntektsmelding(1.januar)
+        håndterArbeidsgiveropplysninger(1.januar)
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning()
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
@@ -472,7 +472,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         nyttVedtak(1.januar(2017), 31.januar(2017), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT),
             arbeidsforhold = listOf(a1 to EPOCH, a2 to 1.desember(2017))
@@ -721,7 +721,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     fun `kort periode med forlengelse`() {
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
-        håndterInntektsmelding(1.januar)
+        håndterArbeidsgiveropplysninger(1.januar)
         håndterVilkårsgrunnlagTilGodkjenning()
 
         generasjoner {
@@ -743,7 +743,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
 
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
-        håndterInntektsmelding(1.januar)
+        håndterArbeidsgiveropplysninger(1.januar)
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
@@ -882,7 +882,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     @Test
     fun `periode uten utbetaling - kun ferie`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
-        håndterInntektsmelding(1.januar)
+        håndterArbeidsgiveropplysninger(1.januar)
         generasjoner {
             assertEquals(2, size)
             0.generasjon {
@@ -973,7 +973,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     @Test
     fun `ta med personoppdrag`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INGEN, null))
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
@@ -1036,7 +1036,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
             }
         }
 
-        håndterInntektsmelding(1.januar)
+        håndterArbeidsgiveropplysninger(1.januar)
         generasjoner {
             0.generasjon {
                 assertEquals(2, size)
@@ -1704,7 +1704,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
         håndterSøknad(Sykdom(28.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(10.januar)
+        håndterArbeidsgiveropplysninger(10.januar)
         håndterVilkårsgrunnlagTilGodkjenning()
 
         generasjoner {
@@ -1727,7 +1727,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     fun `avvist revurdering uten tidligere utbetaling kan forkastes`() {
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
-        håndterInntektsmelding(10.januar)
+        håndterArbeidsgiveropplysninger(10.januar)
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
 
@@ -1754,7 +1754,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     @Test
     fun `avvist utbetaling`() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-        håndterInntektsmelding(1.januar)
+        håndterArbeidsgiveropplysninger(1.januar)
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
 
@@ -1831,7 +1831,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(30.mars, 31.mars))
         håndterYtelserTilUtbetalt()
 
-        håndterInntektsmelding(1.januar)
+        håndterArbeidsgiveropplysninger(1.januar)
         håndterVilkårsgrunnlagTilUtbetalt()
 
         generasjoner {
@@ -1857,7 +1857,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     @Test
     fun `omgjøre kort periode til at nav utbetaler`() {
         val søknad = håndterSøknad(Sykdom(4.januar, 20.januar, 100.prosent))
-        val im = håndterInntektsmelding(listOf(4.januar til 19.januar))
+        val im = håndterArbeidsgiveropplysninger(listOf(4.januar til 19.januar))
         val overstyring = UUID.randomUUID()
         håndterOverstyrTidslinje(4.januar.til(19.januar).map { ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100) }, meldingsreferanseId = overstyring)
 
@@ -1897,7 +1897,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         håndterOverstyrTidslinje((1.januar til 4.januar).map {
             ManuellOverskrivingDag(it, Dagtype.Sykedag, 100)
         }, orgnummer = a1)
-        håndterInntektsmelding(1.januar, orgnummer = a1, vedtaksperiode = 1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1, vedtaksperiode = 1)
         håndterVilkårsgrunnlagTilUtbetalt()
 
         håndterYtelser()
@@ -1937,7 +1937,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         }
 
         håndterSøknad(16.januar til 31.januar, orgnummer = a1)
-        håndterInntektsmelding(1.januar, orgnummer = a1, vedtaksperiode = 2)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1, vedtaksperiode = 2)
         håndterVilkårsgrunnlag()
         håndterYtelser()
         håndterSimulering()
@@ -2008,7 +2008,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     @Test
     fun `tidligere periode med arbeid får samme arbeidsgiverperiode som nyere periode`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAV = 1.mai.atStartOfDay())
-        håndterInntektsmelding(1.januar)
+        håndterArbeidsgiveropplysninger(1.januar)
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning()
 
@@ -2041,8 +2041,8 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     fun `bygge generasjon mens periode er i Avventer historikk og forrige arbeidsgiver er utbetalt`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(1.januar, orgnummer = a1)
-        håndterInntektsmelding(1.januar, orgnummer = a2)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a2)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to INNTEKT))
         håndterYtelserTilUtbetalt()
         generasjoner(a1) {

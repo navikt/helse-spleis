@@ -158,7 +158,7 @@ internal abstract class AbstractE2ETest {
         )).håndter(Person::håndter)
     }
 
-    protected fun håndterInntektsmelding(
+    protected fun håndterArbeidsgiveropplysninger(
         fom: LocalDate,
         orgnummer: String = a1,
         vedtaksperiode: Int = 1,
@@ -166,7 +166,7 @@ internal abstract class AbstractE2ETest {
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         meldingsreferanseId: UUID = UUID.randomUUID()
     ): UUID {
-        return håndterInntektsmelding(
+        return håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
             orgnummer = orgnummer,
             vedtaksperiode = vedtaksperiode,
@@ -198,7 +198,7 @@ internal abstract class AbstractE2ETest {
         return meldingsreferanseId
     }
 
-    protected fun håndterInntektsmelding(
+    protected fun håndterArbeidsgiveropplysninger(
         arbeidsgiverperioder: List<Periode>,
         orgnummer: String = a1,
         vedtaksperiode: Int = 1,
@@ -377,7 +377,7 @@ internal abstract class AbstractE2ETest {
 
     protected fun tilGodkjenning(fom: LocalDate, tom: LocalDate, orgnummer: String = a1, vedtaksperiode: Int = 1) {
         håndterSøknad(fom til tom, orgnummer)
-        håndterInntektsmelding(fom, orgnummer = orgnummer, vedtaksperiode = vedtaksperiode)
+        håndterArbeidsgiveropplysninger(fom, orgnummer = orgnummer, vedtaksperiode = vedtaksperiode)
         håndterVilkårsgrunnlag()
         håndterYtelserTilGodkjenning()
     }
@@ -389,7 +389,7 @@ internal abstract class AbstractE2ETest {
 
     protected fun tilYtelser(fom: LocalDate, tom: LocalDate, vararg orgnummerOgVedtaksperioder: Pair<String, Int>) {
         orgnummerOgVedtaksperioder.forEach { håndterSøknad(fom til tom, it.first) }
-        orgnummerOgVedtaksperioder.forEach { håndterInntektsmelding(fom, orgnummer = it.first, vedtaksperiode = it.second) }
+        orgnummerOgVedtaksperioder.forEach { håndterArbeidsgiveropplysninger(fom, orgnummer = it.first, vedtaksperiode = it.second) }
         håndterVilkårsgrunnlag()
     }
 

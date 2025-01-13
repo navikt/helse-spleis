@@ -48,7 +48,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     @Test
     fun `totalgrad må jo være lik for avslag og utbetaling`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 19.prosent), orgnummer = a1)
-        håndterInntektsmelding(1.januar, orgnummer = a1, beregnetInntekt = 836352.årlig)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1, beregnetInntekt = 836352.årlig)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to 836352.årlig, a2 to 168276.årlig))
         håndterYtelser()
 
@@ -139,7 +139,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     @Test
     fun `nav skal ikke utbetale agp for kort periode likevel - perioden går så til AUU`() {
         håndterSøknad(1.januar til 16.januar)
-        håndterInntektsmelding(1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer")
+        håndterArbeidsgiveropplysninger(1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer")
         håndterVilkårsgrunnlag()
         håndterYtelserTilGodkjenning()
         val idOverstyring = UUID.randomUUID()
@@ -165,7 +165,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     @Test
     fun `Viser inntektsgrunnlag for arbeidsforhold som startet innen 3 måneder før skjæringstidspunktet, selvom vi ikke har inntekt`() {
         håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to 31000.månedlig),
             arbeidsforhold = listOf(a1 to EPOCH, a2 to 25.november(2017))
@@ -256,12 +256,12 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     @Test
     fun `endring i refusjon frem i tid`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(
+        val inntektsmeldingId = håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(
                 INNTEKT, null, endringerIRefusjon = listOf(
-                Inntektsmelding.Refusjon.EndringIRefusjon(INGEN, 1.februar)
-            )
+                    Inntektsmelding.Refusjon.EndringIRefusjon(INGEN, 1.februar)
+                )
             ),
         )
         håndterVilkårsgrunnlag()
@@ -389,7 +389,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         val inntektSkatt = 31000.0 * 2
         val inntektSkjønnsfastsatt = 31000 * 1.5
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(1.januar, beregnetInntekt = inntektIm.månedlig)
+        håndterArbeidsgiveropplysninger(1.januar, beregnetInntekt = inntektIm.månedlig)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to inntektSkatt.månedlig))
         håndterYtelserTilGodkjenning()
         håndterSkjønnsmessigFastsettelse(
@@ -417,8 +417,8 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 20.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 20.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(1.januar, orgnummer = a2, beregnetInntekt = 22966.54.månedlig)
-        håndterInntektsmelding(1.januar, orgnummer = a1, beregnetInntekt = 18199.7.månedlig)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a2, beregnetInntekt = 22966.54.månedlig)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1, beregnetInntekt = 18199.7.månedlig)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to 18199.7.månedlig, a2 to 22966.54.månedlig))
         håndterYtelser()
 
@@ -440,8 +440,8 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 19.99.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 19.99.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(1.januar, orgnummer = a2, beregnetInntekt = 22966.54.månedlig)
-        håndterInntektsmelding(1.januar, orgnummer = a1, beregnetInntekt = 18199.7.månedlig)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a2, beregnetInntekt = 22966.54.månedlig)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1, beregnetInntekt = 18199.7.månedlig)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to 18199.7.månedlig, a2 to 22966.54.månedlig))
         håndterYtelser()
 

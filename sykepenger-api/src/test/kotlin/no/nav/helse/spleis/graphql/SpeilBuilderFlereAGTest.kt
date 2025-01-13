@@ -34,7 +34,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     fun `lager ikke hvit pølse i helg`() {
         håndterSøknad(1.januar til 19.januar)
         håndterSøknad(22.januar til 31.januar)
-        håndterInntektsmelding(1.januar)
+        håndterArbeidsgiveropplysninger(1.januar)
         håndterVilkårsgrunnlagTilGodkjenning()
 
         val speilJson = speilApi()
@@ -44,7 +44,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     @Test
     fun `sender med ghost tidslinjer til speil`() {
         håndterSøknad(1.januar til 20.januar, orgnummer = a1)
-        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
         håndterYtelserTilGodkjenning()
 
@@ -74,8 +74,8 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(4.januar, 31.januar, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(1.januar, orgnummer = a1)
-        håndterInntektsmelding(listOf(4.januar til 19.januar), orgnummer = a2, beregnetInntekt = 5000.månedlig)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(listOf(4.januar til 19.januar), orgnummer = a2, beregnetInntekt = 5000.månedlig)
 
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT, a2 to 5000.månedlig, a3 to 10000.månedlig),
@@ -137,9 +137,9 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         håndterSøknad(Sykdom(1.januar, 24.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(29.januar, 31.januar, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(1.januar, orgnummer = a1, vedtaksperiode = 1)
-        håndterInntektsmelding(1.januar, orgnummer = a2, vedtaksperiode = 1, beregnetInntekt = 5000.månedlig)
-        håndterInntektsmelding(29.januar, orgnummer = a2, vedtaksperiode = 2, beregnetInntekt = 5000.månedlig)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1, vedtaksperiode = 1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a2, vedtaksperiode = 1, beregnetInntekt = 5000.månedlig)
+        håndterArbeidsgiveropplysninger(29.januar, orgnummer = a2, vedtaksperiode = 2, beregnetInntekt = 5000.månedlig)
 
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT, a2 to 5000.månedlig, a3 to 10000.månedlig),
@@ -186,12 +186,12 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     @Test
     fun `lager ikke ghosts for forkastede perioder med vilkårsgrunnlag fra spleis`() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), orgnummer = a2)
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
 
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a1)
+        håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), orgnummer = a1)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
         håndterYtelserTilGodkjenning()
 
@@ -216,12 +216,12 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     @Test
     fun `skal ikke lage ghosts for gamle arbeidsgivere`() {
         håndterSøknad(Sykdom(1.januar(2017), 20.januar(2017), 100.prosent), sendtTilNAV = 20.januar(2017).atStartOfDay(), orgnummer = a3)
-        håndterInntektsmelding(1.januar(2017), orgnummer = a3)
+        håndterArbeidsgiveropplysninger(1.januar(2017), orgnummer = a3)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a3 to INNTEKT))
         håndterYtelserTilUtbetalt()
 
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
         håndterYtelserTilGodkjenning()
 
@@ -247,7 +247,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     @Test
     fun `ghost periode kuttes ved skjæringstidspunkt`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(3.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(3.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
         håndterYtelserTilGodkjenning()
         val speilJson = speilApi()
@@ -275,7 +275,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     @Test
     fun `arbeidsforhold uten sykepengegrunnlag de tre siste månedene før skjæringstidspunktet skal ikke ha ghostperioder`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT),
             arbeidsforhold = listOf(a1 to EPOCH, a2 to EPOCH)
@@ -289,7 +289,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     @Test
     fun `legger ved sammenlignignsgrunnlag og sykepengegrunnlag for deaktiverte arbeidsforhold`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 1000.månedlig))
         håndterYtelserTilGodkjenning()
 
@@ -325,7 +325,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     @Test
     fun `deaktiverte arbeidsforhold vises i speil selvom sammenligninggrunnlag og sykepengegrunnlag ikke er rapportert til A-ordningen enda`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT),
             arbeidsforhold = listOf(a1 to EPOCH, a2 to 1.desember(2017))
@@ -346,7 +346,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     @Test
     fun `deaktivert arbeidsforhold blir med i vilkårsgrunnlag`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(
             arbeidsforhold = listOf(a1 to EPOCH, a2 to 1.desember(2017))
         )
@@ -393,7 +393,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         nyttVedtak(1.januar(2017), 31.januar(2017), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(arbeidsforhold = listOf(a1 to 1.oktober(2017)))
         håndterYtelserTilGodkjenning()
 
@@ -408,7 +408,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     @Test
     fun `Ghostpølse forsvinner ikke etter overstyring av ghost-inntekt`() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
         håndterYtelserTilGodkjenning()
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, 9000.månedlig, "")))
@@ -433,7 +433,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     @Test
     fun `Ghosten finnes ikke i vilkårsgrunnlaget`() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
         håndterYtelser()
 
@@ -468,7 +468,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     fun `lager ikke Ghostperiode på et vilkårsgrunnlag som ingen beregnede perioder peker på`() {
         håndterSøknad(1.januar til 16.januar)
         håndterSøknad(17.januar til 31.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
         håndterYtelserTilGodkjenning()
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
@@ -481,7 +481,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     @Test
     fun `Finner riktig ghostpølse etter overstyring av ghost-inntekt selvom begge arbeidsgiverne har saksbehandlerinntekt`() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
         håndterYtelserTilGodkjenning()
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 30000.månedlig, "")))
@@ -510,7 +510,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     fun `ghost-perioder før og etter søknad`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
 
-        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to INNTEKT))
         håndterYtelserTilGodkjenning()
         håndterUtbetalingsgodkjenning()
@@ -581,7 +581,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         nyeVedtak(1.januar, 31.januar, a1 to 1, a2 to 1)
         håndterSøknad(1.februar til 28.februar, a1)
         håndterSøknad(15.februar til 28.februar, a2)
-        håndterInntektsmelding(emptyList(), orgnummer = a2, vedtaksperiode = 2)
+        håndterArbeidsgiveropplysninger(emptyList(), orgnummer = a2, vedtaksperiode = 2)
         håndterYtelser()
         håndterSimulering()
         håndterUtbetalingsgodkjenning()
