@@ -139,7 +139,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     @Test
     fun `nav skal ikke utbetale agp for kort periode likevel - perioden går så til AUU`() {
         håndterSøknad(1.januar til 16.januar)
-        håndterInntektsmelding(1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ja")
+        håndterInntektsmelding(1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer")
         håndterVilkårsgrunnlag()
         håndterYtelserTilGodkjenning()
         val idOverstyring = UUID.randomUUID()
@@ -320,7 +320,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     @Test
     fun `korrigert inntektsmelding i Avsluttet, velger tom liste med refusjon for eldste generasjon`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterInntektsmelding(
+        håndterKorrigerendeArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(20000.månedlig, null),
         )

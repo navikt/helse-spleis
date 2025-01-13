@@ -581,7 +581,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         nyeVedtak(1.januar, 31.januar, a1 to 1, a2 to 1)
         håndterSøknad(1.februar til 28.februar, a1)
         håndterSøknad(15.februar til 28.februar, a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, vedtaksperiode = 2)
+        håndterInntektsmelding(emptyList(), orgnummer = a2, vedtaksperiode = 2)
         håndterYtelser()
         håndterSimulering()
         håndterUtbetalingsgodkjenning()

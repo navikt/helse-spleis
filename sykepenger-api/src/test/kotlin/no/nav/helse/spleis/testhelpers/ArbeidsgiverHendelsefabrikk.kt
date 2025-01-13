@@ -8,6 +8,8 @@ import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Arbeidsgiveropplysning
+import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
@@ -20,6 +22,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
+import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Omsorgspenger
@@ -151,34 +154,52 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         )
     }
 
-    internal fun lagPortalinntektsmelding(
-        arbeidsgiverperioder: List<Periode>,
-        beregnetInntekt: Inntekt,
+    internal fun lagArbeidsgiveropplysninger(
+        arbeidsgiverperioder: List<Periode>?,
+        beregnetInntekt: Inntekt?,
         vedtaksperiodeId: UUID,
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        refusjon: Inntektsmelding.Refusjon? = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
-        harFlereInntektsmeldinger: Boolean = false,
         mottatt: LocalDateTime = LocalDateTime.now()
-    ): Inntektsmelding {
-        val inntektsmeldinggenerator = {
-            Inntektsmelding(
-                meldingsreferanseId = id,
-                refusjon = refusjon,
-                orgnummer = organisasjonsnummer,
-                beregnetInntekt = beregnetInntekt,
-                arbeidsgiverperioder = arbeidsgiverperioder,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                opphørAvNaturalytelser = opphørAvNaturalytelser,
-                harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-                avsendersystem = Inntektsmelding.Avsendersystem.NavPortal(vedtaksperiodeId, LocalDate.EPOCH, true),
-                mottatt = mottatt
-            )
-        }
-        inntektsmeldinger[id] = inntektsmeldinggenerator
-        return inntektsmeldinggenerator()
-    }
+    ) = Arbeidsgiveropplysninger(
+        meldingsreferanseId = id,
+        innsendt = mottatt,
+        registrert = mottatt.plusSeconds(1),
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
+        opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            beregnetInntekt = beregnetInntekt,
+            opphørAvNaturalytelser = opphørAvNaturalytelser,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            refusjon = refusjon
+        )
+    )
+    internal fun lagKorrigerendeArbeidsgiveropplysninger(
+        arbeidsgiverperioder: List<Periode>?,
+        beregnetInntekt: Inntekt?,
+        vedtaksperiodeId: UUID,
+        refusjon: Inntektsmelding.Refusjon? = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        id: UUID = UUID.randomUUID(),
+        mottatt: LocalDateTime = LocalDateTime.now()
+    ) = KorrigerteArbeidsgiveropplysninger(
+        meldingsreferanseId = id,
+        innsendt = mottatt,
+        registrert = mottatt.plusSeconds(1),
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
+        opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            beregnetInntekt = beregnetInntekt,
+            opphørAvNaturalytelser = opphørAvNaturalytelser,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            refusjon = refusjon
+        )
+    )
 
     internal fun lagInntektsmeldingReplayUtført(vedtaksperiodeId: UUID) =
         InntektsmeldingerReplay(UUID.randomUUID(), organisasjonsnummer, vedtaksperiodeId, emptyList())

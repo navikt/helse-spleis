@@ -165,7 +165,8 @@ internal abstract class AbstractE2ETest {
         vedtaksperiode: Int = 1,
         beregnetInntekt: Inntekt = INNTEKT,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        meldingsreferanseId: UUID = UUID.randomUUID()
+        meldingsreferanseId: UUID = UUID.randomUUID(),
+        portalInntektsmelding: Boolean = true
     ): UUID {
         return håndterInntektsmelding(
             arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
@@ -174,7 +175,8 @@ internal abstract class AbstractE2ETest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             meldingsreferanseId = meldingsreferanseId,
             orgnummer = orgnummer,
-            vedtaksperiode = vedtaksperiode
+            vedtaksperiode = vedtaksperiode,
+            portalInntektsmelding = portalInntektsmelding
         )
     }
 
@@ -213,9 +215,30 @@ internal abstract class AbstractE2ETest {
         )
     }
 
+    protected fun håndterKorrigerendeArbeidsgiveropplysninger(
+        arbeidsgiverperioder: List<Periode>?,
+        orgnummer: String = a1,
+        vedtaksperiode: Int = 1,
+        beregnetInntekt: Inntekt? = INNTEKT,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        refusjon: Inntektsmelding.Refusjon? = Inntektsmelding.Refusjon(beregnetInntekt, null),
+        meldingsreferanseId: UUID = UUID.randomUUID(),
+    ): UUID {
+        val hendelse = fabrikker.getValue(orgnummer).lagKorrigerendeArbeidsgiveropplysninger(
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            beregnetInntekt = beregnetInntekt,
+            vedtaksperiodeId = vedtaksperiode.vedtaksperiode(orgnummer),
+            refusjon = refusjon,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            id = meldingsreferanseId,
+        )
+        hendelse.håndter(Person::håndter)
+        return meldingsreferanseId
+    }
+
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
-        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
+        førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOfOrNull { it.start },
         orgnummer: String = a1,
         vedtaksperiode: Int = 1,
         beregnetInntekt: Inntekt = INNTEKT,
@@ -224,15 +247,15 @@ internal abstract class AbstractE2ETest {
         meldingsreferanseId: UUID = UUID.randomUUID(),
         portalInntektsmelding: Boolean = true
     ): UUID {
-        val inntektsmelding = when (portalInntektsmelding) {
-            true -> fabrikker.getValue(orgnummer).lagPortalinntektsmelding(
+        when (portalInntektsmelding) {
+            true -> fabrikker.getValue(orgnummer).lagArbeidsgiveropplysninger(
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 beregnetInntekt = beregnetInntekt,
                 vedtaksperiodeId = vedtaksperiode.vedtaksperiode(orgnummer),
                 refusjon = refusjon,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 id = meldingsreferanseId,
-            )
+            ).also { it.håndter(Person::håndter) }
 
             false -> fabrikker.getValue(orgnummer).lagInntektsmelding(
                 arbeidsgiverperioder = arbeidsgiverperioder,
@@ -241,9 +264,8 @@ internal abstract class AbstractE2ETest {
                 refusjon = refusjon,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 id = meldingsreferanseId
-            )
+            ).also { it.håndter(Person::håndter) }
         }
-        inntektsmelding.håndter(Person::håndter)
         return meldingsreferanseId
     }
 

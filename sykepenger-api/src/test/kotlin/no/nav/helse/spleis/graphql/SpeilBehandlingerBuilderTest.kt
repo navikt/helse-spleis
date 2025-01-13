@@ -314,7 +314,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         val beregnetInntekt = halvG.beløp(1.januar)
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        håndterInntektsmelding(1.januar, beregnetInntekt = beregnetInntekt - 1.daglig)
+        håndterInntektsmelding(1.januar, beregnetInntekt = beregnetInntekt - 1.daglig, portalInntektsmelding = false)
         håndterYtelserTilUtbetalt()
         håndterYtelserTilGodkjenning()
         generasjoner {
