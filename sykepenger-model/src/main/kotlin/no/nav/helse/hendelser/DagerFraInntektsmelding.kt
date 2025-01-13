@@ -68,7 +68,6 @@ internal class DagerFraInntektsmelding(
     }
     private val sykdomstidslinje = lagSykdomstidslinje()
     private val opprinneligPeriode = sykdomstidslinje.periode()
-    private val validator = DefaultValidering
 
     private val arbeidsdager = mutableSetOf<LocalDate>()
     private val _gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
@@ -262,9 +261,17 @@ internal class DagerFraInntektsmelding(
         return arbeidsgiverperioder.size > 1 && (førsteFraværsdag == null || førsteFraværsdag in arbeidsgiverperiode!!)
     }
 
+
+    private fun validerArbeidsgiverperiodeVedGjenståendeDager(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, beregnetArbeidsgiverperiode: List<Periode>?) {
+        val sisteDagAgp = beregnetArbeidsgiverperiode?.periode()?.endInclusive ?: return
+        // Om det er én eller fler ukedager mellom beregnet AGP og vedtaksperioden som overlapper med dager fra inntektsmeldingen
+        // tyder det på at arbeidsgiver tror det er ny arbeidsgiverperiode, men vi har beregnet at det _ikke_ er ny arbeidsgiverperiode.
+        if (ukedager(sisteDagAgp, vedtaksperiode.start) > 0) aktivitetslogg.varsel(RV_IM_3)
+    }
+
     internal fun validerArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, periode: Periode, beregnetArbeidsgiverperiode: List<Periode>?) {
         if (!skalValideresAv(periode)) return
-        if (_gjenståendeDager.isNotEmpty()) return validator.validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg, periode, beregnetArbeidsgiverperiode)
+        if (_gjenståendeDager.isNotEmpty()) return validerArbeidsgiverperiodeVedGjenståendeDager(aktivitetslogg, periode, beregnetArbeidsgiverperiode)
         if (beregnetArbeidsgiverperiode != null) validerArbeidsgiverperiode(aktivitetslogg, beregnetArbeidsgiverperiode)
         if (arbeidsgiverperioder.isEmpty()) aktivitetslogg.info("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
     }
@@ -272,7 +279,7 @@ internal class DagerFraInntektsmelding(
     private fun validerArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, arbeidsgiverperiode: List<Periode>) {
         if (this.arbeidsgiverperioder.isEmpty()) return
         if (starterUtbetalingSamtidig(arbeidsgiverperiode)) return
-        validator.uenigOmArbeidsgiverperiode(aktivitetslogg)
+        aktivitetslogg.varsel(RV_IM_3)
     }
 
     private fun starterUtbetalingSamtidig(beregnetArbeidsgiverperiode: List<Periode>): Boolean {
@@ -375,26 +382,6 @@ internal class DagerFraInntektsmelding(
                     else -> UKJENT
                 }
             }
-        }
-    }
-
-    // TODO: Fjern validator
-    private sealed interface Validator {
-        fun validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, beregnetArbeidsgiverperiode: List<Periode>?)
-        fun uenigOmArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg)
-    }
-
-
-    private data object DefaultValidering : Validator {
-        override fun validerFeilaktigNyArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, beregnetArbeidsgiverperiode: List<Periode>?) {
-            val sisteDagAgp = beregnetArbeidsgiverperiode?.periode()?.endInclusive ?: return
-            // Om det er én eller fler ukedager mellom beregnet AGP og vedtaksperioden som overlapper med dager fra inntektsmeldingen
-            // tyder det på at arbeidsgiver tror det er ny arbeidsgiverperiode, men vi har beregnet at det _ikke_ er ny arbeidsgiverperiode.
-            if (ukedager(sisteDagAgp, vedtaksperiode.start) > 0) aktivitetslogg.varsel(RV_IM_3)
-        }
-
-        override fun uenigOmArbeidsgiverperiode(aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.varsel(RV_IM_3)
         }
     }
 }
