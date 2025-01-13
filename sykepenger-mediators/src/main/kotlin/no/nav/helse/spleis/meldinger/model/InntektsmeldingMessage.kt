@@ -11,13 +11,11 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
-import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 // Understands a JSON message representing an Inntektsmelding
 internal class InntektsmeldingMessage(
     packet: JsonMessage,
-    val personopplysninger: Personopplysninger,
     override val meldingsporing: Meldingsporing
 ) : HendelseMessage(packet) {
     private val refusjon = Inntektsmelding.Refusjon(
@@ -56,7 +54,7 @@ internal class InntektsmeldingMessage(
     )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
-        mediator.behandle(personopplysninger, this, inntektsmelding, context)
+        mediator.behandle(this, inntektsmelding, context)
     }
 }
 

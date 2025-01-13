@@ -82,14 +82,15 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `replay inntektsmelding`() {
-        val (meldingId, _) = sendInntektsmelding(
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendInntektsmelding(
             listOf(Periode(fom = 3.januar, tom = 18.januar)),
             førsteFraværsdag = 3.januar
         )
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
+
         val behov = testRapid.inspektør.siste("behov")
         assertBehov(behov, null, "inntektsmeldinger_replay")
     }

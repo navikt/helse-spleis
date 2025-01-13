@@ -293,7 +293,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestSendtSøknadVerdi.set(true)
     }
 
-    override fun behandle(personopplysninger: Personopplysninger, message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
+    override fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
         lestInntektsmeldingVerdi.set(true)
     }
 

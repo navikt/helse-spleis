@@ -6,6 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import java.time.LocalDate
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,7 +19,7 @@ internal class SpreOppgaverKontraktTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `inntektmelding før søknad`() {
         sendNySøknad(SoknadsperiodeDTO(1.januar, 31.januar, 100))
-        val (inntektsmeldingId, _) = sendInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
+        sendInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
         val inntektsmeldingFørSøknad = testRapid.inspektør.siste("inntektsmelding_før_søknad")
         assertTrue(inntektsmeldingFørSøknad is ObjectNode)
         assertInntektsmeldingFørSøknad(inntektsmeldingFørSøknad)
@@ -26,6 +27,7 @@ internal class SpreOppgaverKontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `inntektmelding ikke håndtert`() {
+        sendNySøknad(SoknadsperiodeDTO(1.mars, 31.mars, 100))
         sendInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
         val melding = testRapid.inspektør.siste("inntektsmelding_ikke_håndtert")
         assertInntektsmeldingIkkeHåndtert(melding)

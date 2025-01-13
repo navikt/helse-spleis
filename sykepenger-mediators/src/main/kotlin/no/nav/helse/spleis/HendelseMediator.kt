@@ -227,8 +227,8 @@ internal class HendelseMediator(
         }
     }
 
-    override fun behandle(personopplysninger: Personopplysninger, message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
-        opprettPersonOgHåndter(personopplysninger, message, context, emptySet()) { person, aktivitetslogg ->
+    override fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
+        hentPersonOgHåndter(message, context) { person, aktivitetslogg ->
             HendelseProbe.onInntektsmelding()
             person.håndter(inntektsmelding, aktivitetslogg)
         }
@@ -649,7 +649,7 @@ internal interface IHendelseMediator {
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
 
-    fun behandle(personopplysninger: Personopplysninger, message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext)
+    fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext)
     fun behandle(message: NavNoSelvbestemtInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext)
     fun behandle(message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: MessageContext)
     fun behandle(message: NavNoKorrigertInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext)

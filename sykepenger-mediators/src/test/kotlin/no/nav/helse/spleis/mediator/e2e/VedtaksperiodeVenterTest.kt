@@ -34,9 +34,9 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `unngår å sende unødvendig vedtaksperiode venter når replay treffer`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
         sendInntektsmelding(listOf(Periode(fom = 1.februar, tom = 16.februar)), førsteFraværsdag = 2.januar)
         sendInntektsmelding(listOf(Periode(fom = 1.mars, tom = 16.mars)), førsteFraværsdag = 3.januar)
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
         assertAntallOgSisteÅrsak(0)
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)))
         assertAntallOgSisteÅrsak(1) // Står i AVVENTER_VILKÅRSPRØVING som ikke implementerer venter
