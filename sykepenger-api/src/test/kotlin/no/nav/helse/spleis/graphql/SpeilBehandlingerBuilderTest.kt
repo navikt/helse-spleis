@@ -190,9 +190,9 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         val søknad1 = håndterSøknad(Sykdom(1.januar, 24.januar, 100.prosent))
         val inntektsmeldingbeløp1 = INNTEKT
         val søknad2 = håndterSøknad(Sykdom(25.januar, søndag den 11.februar, 100.prosent))
-        val inntektsmelding1 = håndterInntektsmelding(listOf(25.januar til fredag den 9.februar), beregnetInntekt = inntektsmeldingbeløp1, vedtaksperiode = 2)
+        val inntektsmelding1 = håndterInntektsmelding(listOf(25.januar til fredag den 9.februar), vedtaksperiode = 2, beregnetInntekt = inntektsmeldingbeløp1)
         val inntektsmeldingbeløp2 = INNTEKT * 1.1
-        val inntektsmelding2 = håndterInntektsmelding(1.januar, beregnetInntekt = inntektsmeldingbeløp2, vedtaksperiode = 1)
+        val inntektsmelding2 = håndterInntektsmelding(1.januar, vedtaksperiode = 1, beregnetInntekt = inntektsmeldingbeløp2)
         håndterVilkårsgrunnlag()
 
         generasjoner {
@@ -315,7 +315,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         val beregnetInntekt = halvG.beløp(1.januar)
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        håndterInntektsmelding(1.januar, beregnetInntekt = beregnetInntekt - 1.daglig, portalInntektsmelding = false)
+        håndterLpsInntektsmelding(listOf(1.januar til 16.januar), 1.januar, beregnetInntekt = beregnetInntekt - 1.daglig)
         håndterYtelserTilUtbetalt()
         håndterYtelserTilGodkjenning()
         generasjoner {

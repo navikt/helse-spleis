@@ -75,7 +75,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         håndterSøknad(Sykdom(4.januar, 31.januar, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(1.januar, orgnummer = a1)
-        håndterInntektsmelding(listOf(4.januar til 19.januar), beregnetInntekt = 5000.månedlig, orgnummer = a2)
+        håndterInntektsmelding(listOf(4.januar til 19.januar), orgnummer = a2, beregnetInntekt = 5000.månedlig)
 
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT, a2 to 5000.månedlig, a3 to 10000.månedlig),
@@ -138,8 +138,8 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         håndterSøknad(Sykdom(29.januar, 31.januar, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(1.januar, orgnummer = a1, vedtaksperiode = 1)
-        håndterInntektsmelding(1.januar, beregnetInntekt = 5000.månedlig, orgnummer = a2, vedtaksperiode = 1)
-        håndterInntektsmelding(29.januar, beregnetInntekt = 5000.månedlig, orgnummer = a2, vedtaksperiode = 2)
+        håndterInntektsmelding(1.januar, orgnummer = a2, vedtaksperiode = 1, beregnetInntekt = 5000.månedlig)
+        håndterInntektsmelding(29.januar, orgnummer = a2, vedtaksperiode = 2, beregnetInntekt = 5000.månedlig)
 
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT, a2 to 5000.månedlig, a3 to 10000.månedlig),
@@ -636,10 +636,10 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(13.mars, 31.mars, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), 1.januar, orgnummer = a1, portalInntektsmelding = false)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), 12.februar, orgnummer = a1, portalInntektsmelding = false)
-        håndterInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), førsteFraværsdag = 17.januar, orgnummer = a2, portalInntektsmelding = false)
-        håndterInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), førsteFraværsdag = 13.mars, orgnummer = a2, portalInntektsmelding = false)
+        håndterLpsInntektsmelding(listOf(1.januar til 16.januar), 1.januar, orgnummer = a1)
+        håndterLpsInntektsmelding(listOf(1.januar til 16.januar), 12.februar, orgnummer = a1)
+        håndterLpsInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), førsteFraværsdag = 17.januar, orgnummer = a2)
+        håndterLpsInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), førsteFraværsdag = 13.mars, orgnummer = a2)
 
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to INNTEKT))
         håndterYtelserTilGodkjenning()

@@ -164,18 +164,16 @@ internal abstract class AbstractE2ETest {
         vedtaksperiode: Int = 1,
         beregnetInntekt: Inntekt = INNTEKT,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        meldingsreferanseId: UUID = UUID.randomUUID(),
-        portalInntektsmelding: Boolean = true
+        meldingsreferanseId: UUID = UUID.randomUUID()
     ): UUID {
         return håndterInntektsmelding(
             arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
-            beregnetInntekt = beregnetInntekt,
-            refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            meldingsreferanseId = meldingsreferanseId,
             orgnummer = orgnummer,
             vedtaksperiode = vedtaksperiode,
-            portalInntektsmelding = portalInntektsmelding
+            beregnetInntekt = beregnetInntekt,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null),
+            meldingsreferanseId = meldingsreferanseId
         )
     }
 
@@ -202,34 +200,43 @@ internal abstract class AbstractE2ETest {
 
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
-        førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOfOrNull { it.start },
         orgnummer: String = a1,
         vedtaksperiode: Int = 1,
         beregnetInntekt: Inntekt = INNTEKT,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null),
-        meldingsreferanseId: UUID = UUID.randomUUID(),
-        portalInntektsmelding: Boolean = true
+        meldingsreferanseId: UUID = UUID.randomUUID()
     ): UUID {
-        when (portalInntektsmelding) {
-            true -> fabrikker.getValue(orgnummer).lagArbeidsgiveropplysninger(
-                arbeidsgiverperioder = arbeidsgiverperioder,
-                beregnetInntekt = beregnetInntekt,
-                vedtaksperiodeId = vedtaksperiode.vedtaksperiode(orgnummer),
-                refusjon = refusjon,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                id = meldingsreferanseId,
-            ).also { it.håndter(Person::håndter) }
+        val hendelse = fabrikker.getValue(orgnummer).lagArbeidsgiveropplysninger(
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            beregnetInntekt = beregnetInntekt,
+            vedtaksperiodeId = vedtaksperiode.vedtaksperiode(orgnummer),
+            refusjon = refusjon,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            id = meldingsreferanseId,
+        )
+        hendelse.håndter(Person::håndter)
+        return meldingsreferanseId
+    }
 
-            false -> fabrikker.getValue(orgnummer).lagInntektsmelding(
-                arbeidsgiverperioder = arbeidsgiverperioder,
-                beregnetInntekt = beregnetInntekt,
-                førsteFraværsdag = førsteFraværsdag,
-                refusjon = refusjon,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                id = meldingsreferanseId
-            ).also { it.håndter(Person::håndter) }
-        }
+    protected fun håndterLpsInntektsmelding(
+        arbeidsgiverperioder: List<Periode>,
+        førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOfOrNull { it.start },
+        orgnummer: String = a1,
+        beregnetInntekt: Inntekt = INNTEKT,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null),
+        meldingsreferanseId: UUID = UUID.randomUUID()
+    ): UUID {
+        val hendelse = fabrikker.getValue(orgnummer).lagInntektsmelding(
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            beregnetInntekt = beregnetInntekt,
+            førsteFraværsdag = førsteFraværsdag,
+            refusjon = refusjon,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            id = meldingsreferanseId
+        )
+        hendelse.håndter(Person::håndter)
         return meldingsreferanseId
     }
 
