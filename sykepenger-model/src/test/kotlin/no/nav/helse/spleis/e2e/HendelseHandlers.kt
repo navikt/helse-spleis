@@ -48,8 +48,6 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
-import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
@@ -493,7 +491,6 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
-    avsendersystem: Avsenderutleder = LPS,
     førReplay: () -> Unit = {}
 ): UUID {
     return håndterInntektsmelding(
@@ -506,8 +503,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             orgnummer = orgnummer,
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-            avsendersystem = avsendersystem
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger
         ), førReplay
     )
 }

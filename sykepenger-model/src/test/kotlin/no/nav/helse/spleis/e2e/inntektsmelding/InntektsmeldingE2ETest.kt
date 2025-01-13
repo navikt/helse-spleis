@@ -24,7 +24,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.inntektsmelding.ALTINN
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -309,8 +308,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(1.juni til 16.juni),
             førsteFraværsdag = 1.august,
             beregnetInntekt = INNTEKT,
-            refusjon = Refusjon(INNTEKT, 30.juni),
-            avsendersystem = ALTINN
+            refusjon = Refusjon(INNTEKT, 30.juni)
         )
         assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)

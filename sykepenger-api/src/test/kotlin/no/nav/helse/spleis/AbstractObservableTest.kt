@@ -131,7 +131,7 @@ internal abstract class AbstractObservableTest {
         begrunnelseForReduksjonEllerIkkeUtbetalt = null,
         opphørAvNaturalytelser = opphørAvNaturalytelser,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-        avsendersystem = Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag),
+        førsteFraværsdag = førsteFraværsdag,
         mottatt = LocalDateTime.now()
     )
 

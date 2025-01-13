@@ -43,8 +43,6 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
-import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
@@ -151,8 +149,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     orgnummer: String = a1,
     opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-    harFlereInntektsmeldinger: Boolean = false,
-    avsendersystem: Avsenderutleder = LPS
+    harFlereInntektsmeldinger: Boolean = false
 ): Inntektsmelding {
     val inntektsmeldinggenerator = {
         ArbeidsgiverHendelsefabrikk(orgnummer).lagInntektsmelding(
@@ -163,8 +160,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             id = id,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-            avsendersystem = avsendersystem
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger
         )
     }
     val kontrakten = no.nav.inntektsmeldingkontrakt.Inntektsmelding(

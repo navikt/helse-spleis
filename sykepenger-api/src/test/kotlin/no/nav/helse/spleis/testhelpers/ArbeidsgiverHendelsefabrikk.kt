@@ -136,7 +136,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 opphørAvNaturalytelser = opphørAvNaturalytelser,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-                avsendersystem = Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag),
+                førsteFraværsdag = førsteFraværsdag,
                 mottatt = mottatt
             )
         }

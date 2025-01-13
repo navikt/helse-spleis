@@ -47,8 +47,6 @@ import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
-import no.nav.helse.hendelser.inntektsmelding.LPS
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -144,8 +142,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
         harFlereInntektsmeldinger: Boolean = false,
-        mottatt: LocalDateTime = LocalDateTime.now(),
-        avsendersystem: Avsenderutleder = LPS
+        mottatt: LocalDateTime = LocalDateTime.now()
     ): Inntektsmelding {
         val inntektsmeldinggenerator = {
             Inntektsmelding(
@@ -157,7 +154,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 opphørAvNaturalytelser = opphørAvNaturalytelser,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-                avsendersystem = avsendersystem(førsteFraværsdag),
+                førsteFraværsdag = førsteFraværsdag,
                 mottatt = mottatt
             )
         }

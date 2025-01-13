@@ -36,17 +36,11 @@ class Inntektsmelding(
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     private val opphørAvNaturalytelser: List<OpphørAvNaturalytelse>,
     private val harFlereInntektsmeldinger: Boolean,
-    private val avsendersystem: Avsendersystem,
+    private val førsteFraværsdag: LocalDate?,
     mottatt: LocalDateTime
 ) : Hendelse {
-    private val førsteFraværsdag = when (avsendersystem) {
-        is Avsendersystem.LPS -> avsendersystem.førsteFraværsdag
-        is Avsendersystem.Altinn -> avsendersystem.førsteFraværsdag
-    }
 
     init {
-        // TODO: Første fraværsdag kan gå tilbake til root, og vi trenger ikke noe avsendersystem..?
-        
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) {
             error("Inntektsmelding må enten ha første fraværsdag eller arbeidsgiverperioder satt.")
         }
@@ -129,11 +123,6 @@ class Inntektsmelding(
         val fom: LocalDate,
         val naturalytelse: String
     )
-
-    sealed interface Avsendersystem {
-        data class Altinn(internal val førsteFraværsdag: LocalDate?) : Avsendersystem
-        data class LPS(internal val førsteFraværsdag: LocalDate?) : Avsendersystem
-    }
 
     class Refusjon(
         val beløp: Inntekt?,

@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import java.time.LocalDate
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -29,16 +28,13 @@ internal class InntektsmeldingMessage(
         }
     )
     private val orgnummer = packet["virksomhetsnummer"].asText()
-
     private val mottatt = packet["mottattDato"].asLocalDateTime()
     private val førsteFraværsdag = packet["foersteFravaersdag"].asOptionalLocalDate()
     private val beregnetInntekt = packet["beregnetInntekt"].asDouble()
     private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
-    private val begrunnelseForReduksjonEllerIkkeUtbetalt =
-        packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
+    private val begrunnelseForReduksjonEllerIkkeUtbetalt = packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
     private val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
-    private val avsendersystem = avsendersystem(avsendersystem = packet["avsenderSystem"].path("navn").asText(), førsteFraværsdag = førsteFraværsdag)
 
     private val inntektsmelding get() = Inntektsmelding(
         meldingsreferanseId = meldingsporing.id,
@@ -49,7 +45,7 @@ internal class InntektsmeldingMessage(
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
         opphørAvNaturalytelser = opphørAvNaturalytelser,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-        avsendersystem = avsendersystem,
+        førsteFraværsdag = førsteFraværsdag,
         mottatt = mottatt
     )
 
@@ -67,9 +63,3 @@ internal fun JsonNode.tilOpphørAvNaturalytelser(): List<Inntektsmelding.Opphør
         )
     }
 }
-
-internal fun avsendersystem(avsendersystem: String, førsteFraværsdag: LocalDate?): Inntektsmelding.Avsendersystem {
-    return if (avsendersystem == "AltinnPortal") Inntektsmelding.Avsendersystem.Altinn(førsteFraværsdag)
-    else Inntektsmelding.Avsendersystem.LPS(førsteFraværsdag)
-}
-
