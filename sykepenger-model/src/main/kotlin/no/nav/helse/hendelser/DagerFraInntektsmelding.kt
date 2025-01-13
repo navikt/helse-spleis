@@ -9,13 +9,6 @@ import no.nav.helse.Toggle
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
-import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt.ARBBEIDSGIVER_VIL_AT_NAV_SKAL_DEKKE_AGP_FRA_FØRSTE_DAG
-import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt.ARBEIDSGIVER_SIER_AT_DET_IKKE_ER_NOE_AGP_Å_SNAKKE_OM_I_DET_HELE_TATT
-import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt.ARBEIDSGIVER_VIL_BARE_DEKKE_DELVIS_AGP
-import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt.ARBEIDSGIVER_VIL_IKKE_DEKKE_NY_AGP_TROSS_GAP
-import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt.UKJENT
-import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.ikkeStøttedeBegrunnelserForReduksjon
-import no.nav.helse.hendelser.DagerFraInntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.kjenteBegrunnelserForReduksjon
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
@@ -47,12 +40,6 @@ internal class DagerFraInntektsmelding(
     private val opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse>,
     val hendelse: Hendelse
 ) {
-    private companion object {
-        private const val MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER = 10
-        private const val MAKS_ANTALL_DAGER_MELLOM_FØRSTE_FRAVÆRSDAG_OG_AGP_FOR_HÅNDTERING_AV_DAGER = 20
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-    }
-
     // TODO: kilden må være av en type som arver SykdomshistorikkHendelse; altså BitAvInntektsmelding
     // krever nok at vi json-migrerer alle "Inntektsmelding" til "BitAvInntektsmelding" først
     internal val kilde = Hendelseskilde("Inntektsmelding", hendelse.metadata.meldingsreferanseId, mottatt)
@@ -245,10 +232,7 @@ internal class DagerFraInntektsmelding(
 
     private fun validerBegrunnelseForReduksjonEllerIkkeUtbetalt(aktivitetslogg: IAktivitetslogg) {
         if (begrunnelseForReduksjonEllerIkkeUtbetalt == null) return
-        aktivitetslogg.info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(begrunnelseForReduksjonEllerIkkeUtbetalt))
-        if (!kjenteBegrunnelserForReduksjon.contains(begrunnelseForReduksjonEllerIkkeUtbetalt)) {
-            aktivitetslogg.info("Kjenner ikke til betydning av $begrunnelseForReduksjonEllerIkkeUtbetalt")
-        }
+        aktivitetslogg.info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: $begrunnelseForReduksjonEllerIkkeUtbetalt")
         if (hulleteArbeidsgiverperiode()) aktivitetslogg.funksjonellFeil(RV_IM_23)
         when (begrunnelseForReduksjonEllerIkkeUtbetalt) {
             in ikkeStøttedeBegrunnelserForReduksjon -> aktivitetslogg.funksjonellFeil(RV_IM_8)
@@ -298,8 +282,7 @@ internal class DagerFraInntektsmelding(
         return sykmeldingsperioder.mapNotNull { sykmeldingsperiode ->
             val erRettFør = overlappsperiode.erRettFør(sykmeldingsperiode)
             if (erRettFør) return@mapNotNull sykmeldingsperiode
-            val dagerMellom =
-                overlappsperiode.periodeMellom(sykmeldingsperiode.start)?.count() ?: return@mapNotNull null
+            val dagerMellom = overlappsperiode.periodeMellom(sykmeldingsperiode.start)?.count() ?: return@mapNotNull null
             if (dagerMellom < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD) sykmeldingsperiode else null
         }
     }
@@ -333,55 +316,22 @@ internal class DagerFraInntektsmelding(
         return vedtaksperioder.påvirkerArbeidsgiverperiode(periode)
     }
 
-    fun revurderingseventyr(): Revurderingseventyr? {
+    internal fun revurderingseventyr(): Revurderingseventyr? {
         val dagene = håndterteDager.omsluttendePeriode ?: harValidert ?: return null
         return Revurderingseventyr.arbeidsgiverperiode(hendelse, dagene.start, dagene)
     }
 
-    internal class BegrunnelseForReduksjonEllerIkkeUtbetalt {
-        companion object {
-            private val støttedeBegrunnelserForReduksjon = setOf(
-                "LovligFravaer",
-                "ArbeidOpphoert",
-                "ManglerOpptjening",
-                "IkkeFravaer",
-                "Permittering",
-                "Saerregler",
-                "FerieEllerAvspasering",
-                "IkkeFullStillingsandel",
-                "TidligereVirksomhet"
-            )
-            internal val ikkeStøttedeBegrunnelserForReduksjon = setOf(
-                "BetvilerArbeidsufoerhet",
-                "FiskerMedHyre",
-                "StreikEllerLockout",
-                "FravaerUtenGyldigGrunn",
-                "BeskjedGittForSent",
-                "IkkeLoenn"
-            )
-            internal val kjenteBegrunnelserForReduksjon = støttedeBegrunnelserForReduksjon + ikkeStøttedeBegrunnelserForReduksjon
-
-            internal enum class FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt {
-                ARBEIDSGIVER_VIL_IKKE_DEKKE_NY_AGP_TROSS_GAP,
-                ARBEIDSGIVER_VIL_BARE_DEKKE_DELVIS_AGP,
-                ARBBEIDSGIVER_VIL_AT_NAV_SKAL_DEKKE_AGP_FRA_FØRSTE_DAG,
-                ARBEIDSGIVER_SIER_AT_DET_IKKE_ER_NOE_AGP_Å_SNAKKE_OM_I_DET_HELE_TATT,
-                UKJENT
-            }
-
-            internal fun funksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt(
-                antallDagerIOpplystArbeidsgiverperiode: Int,
-                førsteFraværsdagStarterMerEnn16DagerEtterEtterSisteDagIAGP: Boolean,
-                begrunnelseForReduksjonEllerIkkeUtbetalt: String
-            ): FunksjonellBetydningAvBegrunnelseForReduksjonEllerIkkeUtbetalt {
-                return when {
-                    antallDagerIOpplystArbeidsgiverperiode in (1..15) -> ARBEIDSGIVER_VIL_BARE_DEKKE_DELVIS_AGP
-                    førsteFraværsdagStarterMerEnn16DagerEtterEtterSisteDagIAGP -> ARBEIDSGIVER_VIL_IKKE_DEKKE_NY_AGP_TROSS_GAP
-                    antallDagerIOpplystArbeidsgiverperiode == 0 -> ARBEIDSGIVER_SIER_AT_DET_IKKE_ER_NOE_AGP_Å_SNAKKE_OM_I_DET_HELE_TATT
-                    begrunnelseForReduksjonEllerIkkeUtbetalt in støttedeBegrunnelserForReduksjon -> ARBBEIDSGIVER_VIL_AT_NAV_SKAL_DEKKE_AGP_FRA_FØRSTE_DAG
-                    else -> UKJENT
-                }
-            }
-        }
+    private companion object {
+        private const val MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER = 10
+        private const val MAKS_ANTALL_DAGER_MELLOM_FØRSTE_FRAVÆRSDAG_OG_AGP_FOR_HÅNDTERING_AV_DAGER = 20
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+        private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
+            "BetvilerArbeidsufoerhet",
+            "FiskerMedHyre",
+            "StreikEllerLockout",
+            "FravaerUtenGyldigGrunn",
+            "BeskjedGittForSent",
+            "IkkeLoenn"
+        )
     }
 }
