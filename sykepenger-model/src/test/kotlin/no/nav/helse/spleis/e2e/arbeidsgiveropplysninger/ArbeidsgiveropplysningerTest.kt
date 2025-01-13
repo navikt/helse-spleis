@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import no.nav.helse.Toggle
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -338,7 +337,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `uenige om arbeidsgiverperiode med NAV_NO som avsendersystem gir varsel`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `uenige om arbeidsgiverperiode med NAV_NO som avsendersystem gir varsel`()  {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
             håndterInntektsmeldingPortal(listOf(2.januar til 17.januar), vedtaksperiodeId = 2.vedtaksperiode)
@@ -359,7 +358,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `tom arbeidsgiverperiode med NAV_NO som avsendersystem gir ikke varsel`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `tom arbeidsgiverperiode med NAV_NO som avsendersystem gir ikke varsel`()  {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
             håndterInntektsmeldingPortal(emptyList(), vedtaksperiodeId = 2.vedtaksperiode)
@@ -368,7 +367,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `tom arbeidsgiverperiode med NAV_NO_SELVBESTEMT som avsendersystem gir ikke varsel`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `tom arbeidsgiverperiode med NAV_NO_SELVBESTEMT som avsendersystem gir ikke varsel`()  {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
             håndterInntektsmeldingPortal(emptyList(), vedtaksperiodeId = 2.vedtaksperiode, avsendersystem = NAV_NO_SELVBESTEMT)

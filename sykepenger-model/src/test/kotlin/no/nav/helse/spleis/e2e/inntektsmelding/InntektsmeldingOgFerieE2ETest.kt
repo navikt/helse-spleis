@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -56,7 +55,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ferie med gap til forrige, men samme skjæringstidspunkt`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `ferie med gap til forrige, men samme skjæringstidspunkt`()  {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(

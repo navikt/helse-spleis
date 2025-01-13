@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -268,7 +267,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Sender ut spisset event ved korrigerende inntektsmelding som ikke fører til endring`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `Sender ut spisset event ved korrigerende inntektsmelding som ikke fører til endring`() {
         nyPeriode(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),

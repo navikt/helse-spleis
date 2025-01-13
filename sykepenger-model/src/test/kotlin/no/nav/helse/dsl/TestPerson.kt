@@ -8,7 +8,6 @@ import java.time.temporal.Temporal
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
-import no.nav.helse.Toggle
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -281,21 +280,7 @@ internal class TestPerson(
                     opphørAvNaturalytelser = opphørAvNaturalytelser
                 )
             )
-            if (Toggle.PortalinntektsmeldingSomArbeidsgiveropplysninger.enabled) {
-                arbeidsgiveropplysninger.håndter(Person::håndter)
-            } else {
-                arbeidsgiverHendelsefabrikk.lagPortalinntektsmelding(
-                    arbeidsgiverperioder,
-                    beregnetInntekt,
-                    vedtaksperiodeId,
-                    refusjon,
-                    opphørAvNaturalytelser,
-                    begrunnelseForReduksjonEllerIkkeUtbetalt,
-                    id,
-                    mottatt = mottatt,
-                    avsendersystem = avsendersystem
-                ).håndter(Person::håndter)
-            }
+            arbeidsgiveropplysninger.håndter(Person::håndter)
             return id
         }
 

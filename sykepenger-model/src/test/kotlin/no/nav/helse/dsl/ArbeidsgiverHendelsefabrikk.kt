@@ -199,34 +199,6 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         return inntektsmeldinggenerator()
     }
 
-    internal fun lagPortalinntektsmelding(
-        arbeidsgiverperioder: List<Periode>,
-        beregnetInntekt: Inntekt,
-        vedtaksperiodeId: UUID,
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-        opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        id: UUID = UUID.randomUUID(),
-        harFlereInntektsmeldinger: Boolean = false,
-        mottatt: LocalDateTime = LocalDateTime.now(),
-        inntektsdato: LocalDate? = null,
-        avsendersystem: Avsenderutleder
-    ): Inntektsmelding {
-        check(erNavPortal(avsendersystem)) { "Du kan ikke klage en portalinntektsmelding når avsenderen er ALTINN/LPS!" }
-        return Inntektsmelding(
-            meldingsreferanseId = id,
-            refusjon = refusjon,
-            orgnummer = organisasjonsnummer,
-            beregnetInntekt = beregnetInntekt,
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            opphørAvNaturalytelser = opphørAvNaturalytelser,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-            avsendersystem = avsendersystem(vedtaksperiodeId, inntektsdato, null),
-            mottatt = mottatt
-        )
-    }
-
     internal fun lagArbeidsgiveropplysninger(
         meldingsreferanseId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID,

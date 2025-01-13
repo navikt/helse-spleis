@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.august
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -264,7 +263,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Periode med utbetaling etter kort gap etter kort auu tagges ikke med IngenNyArbeidsgiverperiode`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `Periode med utbetaling etter kort gap etter kort auu tagges ikke med IngenNyArbeidsgiverperiode`()  {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
         håndterSøknad(1.januar til 10.januar)
         tilGodkjenning(15.januar til 31.januar, a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)

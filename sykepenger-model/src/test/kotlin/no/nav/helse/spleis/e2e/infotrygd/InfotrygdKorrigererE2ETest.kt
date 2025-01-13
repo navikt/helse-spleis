@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
@@ -57,7 +56,7 @@ import org.junit.jupiter.api.Test
 internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `skjæringstidspunkt endres som følge av infotrygdperiode`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `skjæringstidspunkt endres som følge av infotrygdperiode`()  {
         nyPeriode(1.januar til 1.januar, a1)
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))

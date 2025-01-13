@@ -45,7 +45,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.inntektsmelding.Avsenderutleder
 import no.nav.helse.hendelser.inntektsmelding.LPS
-import no.nav.helse.hendelser.inntektsmelding.erForespurtNavPortal
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
@@ -200,36 +199,6 @@ internal fun AbstractEndToEndTest.klassiskInntektsmelding(
     inntekter[id] = beregnetInntekt
     EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
     return inntektsmeldinggenerator()
-}
-
-internal fun AbstractEndToEndTest.portalInntektsmelding(
-    id: UUID = UUID.randomUUID(),
-    arbeidsgiverperioder: List<Periode>,
-    beregnetInntekt: Inntekt = INNTEKT,
-    vedtaksperiodeId: UUID,
-    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-    orgnummer: String = a1,
-    opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
-    begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-    harFlereInntektsmeldinger: Boolean = false,
-    inntektsdato: LocalDate? = null,
-    avsendersystem: Avsenderutleder
-): Inntektsmelding {
-    if (erForespurtNavPortal(avsendersystem)) {
-        observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId)
-    }
-    return ArbeidsgiverHendelsefabrikk(orgnummer).lagPortalinntektsmelding(
-        arbeidsgiverperioder = arbeidsgiverperioder,
-        beregnetInntekt = beregnetInntekt,
-        vedtaksperiodeId = vedtaksperiodeId,
-        refusjon = refusjon,
-        opphørAvNaturalytelser = opphørAvNaturalytelser,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-        id = id,
-        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-        inntektsdato = inntektsdato,
-        avsendersystem = avsendersystem
-    )
 }
 
 internal fun AbstractEndToEndTest.vilkårsgrunnlag(

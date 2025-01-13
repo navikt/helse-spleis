@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
@@ -169,7 +168,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     private fun utbetalingIder(vedtaksperiode: IdInnhenter) = inspektør.vedtaksperioder(vedtaksperiode).inspektør.behandlinger.flatMap { it.endringer.mapNotNull { endring -> endring.utbetaling?.inspektør?.utbetalingId } }
 
     @Test
-    fun `Arbeid gjenopptatt i minst 16 dager fører til at vi bygger videre på feil utbetaling`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `Arbeid gjenopptatt i minst 16 dager fører til at vi bygger videre på feil utbetaling`()  {
         nyttVedtak(januar)
         håndterSøknad(Sykdom(1.februar, 18.februar, 100.prosent), Arbeid(3.februar, 18.februar))
         håndterYtelser(2.vedtaksperiode)

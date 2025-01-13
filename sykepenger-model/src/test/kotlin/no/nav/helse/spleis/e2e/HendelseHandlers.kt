@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.*
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.PersonHendelsefabrikk
 import no.nav.helse.dsl.a1
@@ -497,23 +496,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
         observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *arbeidsgiveropplysninger.opplysninger.toTypedArray())
     }
 
-    val portalInnteksmelding = portalInntektsmelding(
-        id = id,
-        arbeidsgiverperioder = arbeidsgiverperioder ?: emptyList(),
-        beregnetInntekt = beregnetInntekt ?: (-1).månedlig,
-        vedtaksperiodeId = vedtaksperiodeId,
-        refusjon = refusjon,
-        orgnummer = orgnummer,
-        opphørAvNaturalytelser = opphørAvNaturalytelser,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-        inntektsdato = inntektsdato,
-        avsendersystem = utledetAvsendersystem
-    )
 
-    if (Toggle.PortalinntektsmeldingSomArbeidsgiveropplysninger.enabled)
-        return håndterArbeidsgiveropplysninger(arbeidsgiveropplysninger)
-    return håndterInntektsmelding(portalInnteksmelding)
+    return håndterArbeidsgiveropplysninger(arbeidsgiveropplysninger)
 }
 
 internal fun AbstractEndToEndTest.håndterInntektsmelding(

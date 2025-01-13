@@ -4,7 +4,6 @@ import java.time.LocalDateTime
 import java.util.*
 import kotlin.reflect.KClass
 import no.nav.helse.Toggle
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -120,7 +119,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Skal ikke sende forespørsel for korte perioder etter at arbeidsgiver har sendt riktig AGP`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `Skal ikke sende forespørsel for korte perioder etter at arbeidsgiver har sendt riktig AGP`()  {
         håndterSøknad(Sykdom(6.januar, 17.januar, 100.prosent), egenmeldinger = listOf(1.januar til 5.januar))
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         håndterSøknad(Sykdom(22.januar, 25.januar, 100.prosent), egenmeldinger = listOf(21.januar til 21.januar))
@@ -185,7 +184,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ber ikke om arbeidsgiveropplysninger på ghost når riktig inntektsmelding kommer`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `ber ikke om arbeidsgiveropplysninger på ghost når riktig inntektsmelding kommer`()  {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -414,7 +413,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender med første fraværsdag på alle arbeidsgivere for skjæringstidspunktet`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `sender med første fraværsdag på alle arbeidsgivere for skjæringstidspunktet`()  {
         nyeVedtakMedUlikFom(
             mapOf(
                 a1 to (januar),
@@ -520,7 +519,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `blir syk fra ghost`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `blir syk fra ghost`()  {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),

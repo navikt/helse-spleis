@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
@@ -140,7 +139,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender med feil vilkårsgrunnlagId i første godkjenningsbehov om det har kommet nytt vilkårsgrunnlag med endring _senere_ enn perioden mens den står i avventer simulering`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `sender med feil vilkårsgrunnlagId i første godkjenningsbehov om det har kommet nytt vilkårsgrunnlag med endring _senere_ enn perioden mens den står i avventer simulering`()  {
         håndterSøknad(januar)
         håndterSøknad(februar)
         håndterSøknad(mars)

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
@@ -371,7 +370,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `korrigert agp i avventer_godkjenning`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `korrigert agp i avventer_godkjenning`()  {
         tilGodkjenning(januar, a1, beregnetInntekt = INNTEKT)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 

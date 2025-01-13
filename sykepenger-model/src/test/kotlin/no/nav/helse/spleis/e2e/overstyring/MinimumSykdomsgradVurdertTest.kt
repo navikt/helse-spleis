@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.hendelser.til
@@ -54,7 +53,7 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Får søknad fra ghost etter at minimum sykdomsgrad er vurdert`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `Får søknad fra ghost etter at minimum sykdomsgrad er vurdert`()  {
         settOppAvslagPåMinimumSykdomsgrad()
 
         håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(januar))

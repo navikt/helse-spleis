@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
@@ -103,7 +102,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ghost forlenger annen arbeidsgiver - skal gå fint`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `Ghost forlenger annen arbeidsgiver - skal gå fint`()  {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.brukerutbetaling
 
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -572,7 +571,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `korrigerende inntektsmelding endrer på refusjonsbeløp`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `korrigerende inntektsmelding endrer på refusjonsbeløp`()  {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
         håndterInntektsmelding(
@@ -687,7 +686,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Korrigerende inntektsmelding med feil skjæringstidspunkt går til manuell behandling på grunn av warning`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `Korrigerende inntektsmelding med feil skjæringstidspunkt går til manuell behandling på grunn av warning`()  {
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)

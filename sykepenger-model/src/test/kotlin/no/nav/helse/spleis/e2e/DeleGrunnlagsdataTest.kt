@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
@@ -100,7 +99,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `inntektsmelding bryter ikke opp forlengelse`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `inntektsmelding bryter ikke opp forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
         håndterInntektsmelding(listOf(Periode(18.januar, 1.februar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)

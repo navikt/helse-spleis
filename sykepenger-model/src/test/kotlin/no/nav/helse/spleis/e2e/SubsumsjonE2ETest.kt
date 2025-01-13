@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.YearMonth
 import no.nav.helse.Personidentifikator
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -78,7 +77,7 @@ import org.junit.jupiter.api.Test
 internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `subsummerer ikke inntektsspesfikke subsumsjoner ved overstyring som ikke fører til endrede inntekter i sykpengegrunnlaget`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `subsummerer ikke inntektsspesfikke subsumsjoner ved overstyring som ikke fører til endrede inntekter i sykpengegrunnlaget`()  {
         håndterSøknad(januar, orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -613,14 +612,14 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `§ 8-10 ledd 3 - årlig inntekt omregnet til daglig`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.disable {
+    fun `§ 8-10 ledd 3 - årlig inntekt omregnet til daglig`() {
         val inntekt = 260000.årlig
         håndterSykmelding(januar)
         håndterSøknad(januar)
         val im = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = inntekt,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
+            førsteFraværsdag = 1.januar
         )
 
         SubsumsjonInspektør(jurist).assertBeregnet(

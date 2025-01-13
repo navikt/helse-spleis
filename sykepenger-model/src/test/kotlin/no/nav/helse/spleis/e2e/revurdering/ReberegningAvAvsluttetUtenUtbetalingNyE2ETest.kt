@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.august
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -1244,7 +1243,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `omgjøring med funksjonell feil i inntektsmelding fra portalen`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `omgjøring med funksjonell feil i inntektsmelding fra portalen`()  {
         håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
         nyttVedtak(18.januar til 31.januar, arbeidsgiverperiode = listOf(2.januar til 17.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()

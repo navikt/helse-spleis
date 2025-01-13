@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import java.time.LocalDate
 import kotlin.reflect.KClass
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
@@ -248,7 +247,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `blir syk fra ghost`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `blir syk fra ghost`()  {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -369,7 +368,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `blir syk fra ghost annen måned enn skjæringstidspunkt etter at saksbehandler har overstyrt inntekten etter 8-28, 3 ledd bokstav b -- Ghost svarer på etterspurte arbeidsgiveropplysninger`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `blir syk fra ghost annen måned enn skjæringstidspunkt etter at saksbehandler har overstyrt inntekten etter 8-28, 3 ledd bokstav b -- Ghost svarer på etterspurte arbeidsgiveropplysninger`()  {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -416,7 +415,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Korrigerende refusjonsopplysninger på arbeidsgiver med skatteinntekt i sykepengegrunnlaget`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `Korrigerende refusjonsopplysninger på arbeidsgiver med skatteinntekt i sykepengegrunnlaget`()  {
         utbetalPeriodeMedGhost()
         assertInntektstype(1.januar, mapOf(a1 to Inntektsmeldinginntekt::class, a2 to SkattSykepengegrunnlag::class))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
@@ -986,7 +985,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `arbeidsgiver går fra å være ghost mens første arbeidsgiver står til godkjenning -- Ghost svarer på etterspurte arbeidsgiveropplysninger`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `arbeidsgiver går fra å være ghost mens første arbeidsgiver står til godkjenning -- Ghost svarer på etterspurte arbeidsgiveropplysninger`()  {
         utbetalPeriodeMedGhost(tilGodkjenning = true)
 
         nyPeriode(16.mars til 31.mars, a1) // Forlengelse på a1

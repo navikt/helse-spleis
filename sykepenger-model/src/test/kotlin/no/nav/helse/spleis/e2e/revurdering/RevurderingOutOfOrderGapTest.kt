@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.april
 import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.a1
@@ -86,7 +85,7 @@ import org.junit.jupiter.api.Test
 internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
     @Test
-    fun `Arbeidsgiver med kort gap mellom sykefravær blir forsøkt sklitaklet av annen arbeidsgiver som tetter gapet og flytter skjæringstidspunktet`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `Arbeidsgiver med kort gap mellom sykefravær blir forsøkt sklitaklet av annen arbeidsgiver som tetter gapet og flytter skjæringstidspunktet`()  {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
@@ -323,7 +322,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `out of order periode med 15 dagers gap - mellom to perioder`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `out of order periode med 15 dagers gap - mellom to perioder`()  {
         nyPeriode(1.januar til 15.januar)
         nyttVedtak(29.januar til 15.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 

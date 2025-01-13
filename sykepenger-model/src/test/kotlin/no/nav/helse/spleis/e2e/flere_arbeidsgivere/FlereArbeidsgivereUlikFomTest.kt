@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.INNTEKT
@@ -1342,7 +1341,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `søknad for ghost etter utbetalt`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `søknad for ghost etter utbetalt`()  {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -1416,7 +1415,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `søknad for ghost etter utbetalt som delvis overlapper med to perioder hos a1`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `søknad for ghost etter utbetalt som delvis overlapper med to perioder hos a1`()  {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),

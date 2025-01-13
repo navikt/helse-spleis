@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.ytelser
 
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
@@ -193,7 +192,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Foreldrepenger påvirker skjæringstidspunkt annen arbeidsgiver ved delvis overlapp`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `Foreldrepenger påvirker skjæringstidspunkt annen arbeidsgiver ved delvis overlapp`()  {
         håndterSøknad(januar, a1)
         håndterSøknad(28.januar til 28.februar, a2)
         håndterInntektsmelding(

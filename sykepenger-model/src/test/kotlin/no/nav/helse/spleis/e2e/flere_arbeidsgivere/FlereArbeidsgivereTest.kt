@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.util.*
-import no.nav.helse.Toggle.Companion.PortalinntektsmeldingSomArbeidsgiveropplysninger
 import no.nav.helse.april
 import no.nav.helse.den
 import no.nav.helse.desember
@@ -703,7 +702,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun `bruddstykker hos arbeidsgivere skal ikke medføre at alle perioder må ha inntekt`() = PortalinntektsmeldingSomArbeidsgiveropplysninger.enable {
+    fun `bruddstykker hos arbeidsgivere skal ikke medføre at alle perioder må ha inntekt`()  {
         a1 {
             håndterSykmelding(1.januar til 20.januar)
             håndterSykmelding(25.januar til 10.februar)
