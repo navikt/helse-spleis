@@ -95,7 +95,7 @@ private val HendelseMessage.kontekstnavn
         is InntektsmeldingMessage -> "Inntektsmelding"
         is NavNoInntektsmeldingMessage -> "NavNoInntektsmelding"
         is NavNoKorrigertInntektsmeldingMessage -> "NavNoKorrigertInntektsmelding"
-        is NavNoSelvbestemtInntektsmeldingMessage -> "NavNoSelvstemtInntektsmelding"
+        is NavNoSelvbestemtInntektsmeldingMessage -> "NavNoSelvbestemtInntektsmelding"
         is InntektsmeldingerReplayMessage -> "InntektsmeldingerReplay"
         is MigrateMessage -> "Migrate"
         is MinimumSykdomsgradVurdertMessage -> "MinimumSykdomsgradsvurderingMelding"
