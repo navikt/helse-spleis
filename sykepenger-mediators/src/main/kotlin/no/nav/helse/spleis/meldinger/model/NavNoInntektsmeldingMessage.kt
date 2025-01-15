@@ -34,7 +34,7 @@ internal class NavNoInntektsmeldingMessage(
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText().toUUID()
     private val orgnummer = packet["virksomhetsnummer"].asText()
     private val mottatt = packet["mottattDato"].asLocalDateTime()
-    private val beregnetInntekt = packet["beregnetInntekt"].asDouble()
+    private val beregnetInntekt = packet["beregnetInntekt"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()
     private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
@@ -46,7 +46,7 @@ internal class NavNoInntektsmeldingMessage(
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId,
         opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
-            beregnetInntekt = beregnetInntekt.månedlig,
+            beregnetInntekt = beregnetInntekt?.månedlig,
             arbeidsgiverperioder = arbeidsgiverperioder,
             refusjon = refusjon,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,

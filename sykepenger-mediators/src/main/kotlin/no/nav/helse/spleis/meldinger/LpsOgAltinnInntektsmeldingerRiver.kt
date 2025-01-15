@@ -23,6 +23,7 @@ internal class LpsOgAltinnInntektsmeldingerRiver(
 
     override fun validate(message: JsonMessage) {
         standardInntektsmeldingvalidering(message)
+        message.requireKey("beregnetInntekt")
         message.interestedIn("harFlereInntektsmeldinger", "avsenderSystem")
         message.interestedIn("foersteFravaersdag", JsonNode::asLocalDate)
     }
@@ -41,7 +42,7 @@ internal class LpsOgAltinnInntektsmeldingerRiver(
 
 internal fun standardInntektsmeldingvalidering(message: JsonMessage, pathPrefix: String? = null) {
     fun p(key: String) = pathPrefix?.let { "$pathPrefix.$key" } ?: key
-    message.requireKey(p("arbeidstakerFnr"), p("virksomhetsnummer"), p("beregnetInntekt"), p("opphoerAvNaturalytelser"))
+    message.requireKey(p("arbeidstakerFnr"), p("virksomhetsnummer"), p("opphoerAvNaturalytelser"))
     message.requireArray(p("arbeidsgiverperioder")) {
         require("fom", JsonNode::asLocalDate)
         require("tom", JsonNode::asLocalDate)

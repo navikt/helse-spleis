@@ -27,9 +27,7 @@ import org.junit.jupiter.api.Test
 internal class NavNoInntektsmeldingerRiverTest : RiverTest() {
 
     private val fødselsdato = 17.mai(1995)
-    private val InvalidJson = "foo"
-    private val UnknownJson = "{\"foo\": \"bar\"}"
-    private val ValidInntektsmelding = Inntektsmeldingkontrakt(
+    private val im = Inntektsmeldingkontrakt(
         inntektsmeldingId = UUID.randomUUID().toString(),
         arbeidstakerFnr = "fødselsnummer",
         arbeidstakerAktorId = "aktørId",
@@ -55,43 +53,21 @@ internal class NavNoInntektsmeldingerRiverTest : RiverTest() {
         innsenderTelefon = "tlfnr",
         inntektsdato = null,
         vedtaksperiodeId = UUID.randomUUID()
-    ).asObjectNode()
-    private val ValidInntektsmeldingUtenRefusjon = Inntektsmeldingkontrakt(
-        inntektsmeldingId = UUID.randomUUID().toString(),
-        arbeidstakerFnr = "fødselsnummer",
-        arbeidstakerAktorId = "aktørId",
-        virksomhetsnummer = "virksomhetsnummer",
-        arbeidsgiverFnr = null,
-        arbeidsgiverAktorId = null,
-        arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
-        arbeidsforholdId = null,
-        beregnetInntekt = BigDecimal.ONE,
-        refusjon = Refusjon(beloepPrMnd = null, opphoersdato = null),
-        endringIRefusjoner = listOf(EndringIRefusjon(endringsdato = LocalDate.now(), beloep = BigDecimal.ONE)),
-        opphoerAvNaturalytelser = emptyList(),
-        gjenopptakelseNaturalytelser = emptyList(),
-        arbeidsgiverperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
-        status = Status.GYLDIG,
-        arkivreferanse = "",
-        avsenderSystem = AvsenderSystem("NAV_NO", "1.0"),
-        ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
-        foersteFravaersdag = LocalDate.now(),
-        mottattDato = LocalDateTime.now(),
-        naerRelasjon = null,
-        innsenderTelefon = "tlfnr",
-        innsenderFulltNavn = "SPLEIS MEDIATOR",
-        inntektsdato = null,
-        vedtaksperiodeId = UUID.randomUUID()
-    ).asObjectNode().toJson()
+    )
+    private val InvalidJson = "foo"
+    private val UnknownJson = "{\"foo\": \"bar\"}"
+    private val ValidInntektsmelding = im.asObjectNode()
+    private val ValidInntektsmeldingUtenBeregnetInntekt = im.copy(beregnetInntekt = null).asObjectNode().toJson()
+    private val ValidInntektsmeldingUtenRefusjon = im.asObjectNode().toJson()
 
     private val ValidInntektsmeldingJson = ValidInntektsmelding.toJson()
     private val ValidInntektsmeldingWithUnknownFieldsJson =
         ValidInntektsmelding.put(UUID.randomUUID().toString(), "foobar").toJson()
 
-    private val ValidInntektsmeldingMedOpphørAvNaturalytelser = ValidInntektsmelding.set<ObjectNode>(
-        "opphoerAvNaturalytelser",
-        listOf(OpphoerAvNaturalytelse(ELEKTRONISKKOMMUNIKASJON, LocalDate.now(), BigDecimal(589.00))).toJsonNode()
-    ).toJson()
+    private val ValidInntektsmeldingMedOpphørAvNaturalytelser = im.copy(
+        opphoerAvNaturalytelser = listOf(OpphoerAvNaturalytelse(ELEKTRONISKKOMMUNIKASJON, LocalDate.now(), BigDecimal(589.00)))
+    ).asObjectNode().toJson()
+
 
     private val ValidInntektsmeldingUtenVedtaksperiodeId = ValidInntektsmelding.apply { this.remove("vedtaksperiodeId") }.toJson()
 
@@ -111,6 +87,7 @@ internal class NavNoInntektsmeldingerRiverTest : RiverTest() {
         assertNoErrors(ValidInntektsmeldingWithUnknownFieldsJson)
         assertNoErrors(ValidInntektsmeldingJson)
         assertNoErrors(ValidInntektsmeldingUtenRefusjon)
+        assertNoErrors(ValidInntektsmeldingUtenBeregnetInntekt)
         assertNoErrors(ValidInntektsmeldingMedOpphørAvNaturalytelser)
     }
 

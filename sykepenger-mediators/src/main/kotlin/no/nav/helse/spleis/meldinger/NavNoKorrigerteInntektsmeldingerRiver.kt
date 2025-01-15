@@ -21,6 +21,7 @@ internal class NavNoKorrigerteInntektsmeldingerRiver(
 
     override fun validate(message: JsonMessage) {
         standardInntektsmeldingvalidering(message)
+        message.interestedIn("beregnetInntekt")
     }
 
     override fun createMessage(packet: JsonMessage): NavNoKorrigertInntektsmeldingMessage {

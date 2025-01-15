@@ -22,6 +22,7 @@ internal class InntektsmeldingerReplayRiver(
         message.requireArray("inntektsmeldinger") {
             require("internDokumentId") { it.asText().toUUID() }
             standardInntektsmeldingvalidering(this, "inntektsmelding")
+            requireKey("inntektsmelding.beregnetInntekt")
             interestedIn("inntektsmelding.harFlereInntektsmeldinger", "inntektsmelding.avsenderSystem")
             interestedIn("inntektsmelding.foersteFravaersdag", JsonNode::asLocalDate)
         }
