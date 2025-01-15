@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
+import java.util.*
 import no.nav.helse.Toggle
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -24,6 +26,8 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.DokumentType
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -365,6 +369,61 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         }
     }
 
+    @Test
+    fun `dokumentsporing fra inntektsmelding`() {
+        a1 {
+            håndterSøknad(januar)
+            val id = håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList()),
+                OppgittArbeidgiverperiode(listOf(1.januar til 16.januar))
+            )
+            assertForventetFeil(
+                forklaring = "Må legge til for inntektsmeldingInntekt",
+                ønsket = {
+                    assertDokumentsporingPåSisteBehandling(
+                        1.vedtaksperiode,
+                        Dokumentsporing.inntektsmeldingDager(id),
+                        Dokumentsporing.inntektsmeldingInntekt(id),
+                        Dokumentsporing.inntektsmeldingRefusjon(id)
+                    )
+                },
+                nå = {
+                    assertDokumentsporingPåSisteBehandling(
+                        1.vedtaksperiode,
+                        Dokumentsporing.inntektsmeldingDager(id),
+                        Dokumentsporing.inntektsmeldingRefusjon(id)
+                    )
+                }
+            )
+
+            val idKorrigert = håndterKorrigerteArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittInntekt(INNTEKT * 1.10)
+            )
+            assertForventetFeil(
+                forklaring = "Må legge til for inntektsmeldingInntekt",
+                ønsket = {
+                    assertDokumentsporingPåSisteBehandling(
+                        1.vedtaksperiode,
+                        Dokumentsporing.inntektsmeldingDager(id),
+                        Dokumentsporing.inntektsmeldingInntekt(id),
+                        Dokumentsporing.inntektsmeldingRefusjon(id),
+                        Dokumentsporing.inntektsmeldingInntekt(idKorrigert)
+                    )
+                },
+                nå = {
+                    assertDokumentsporingPåSisteBehandling(
+                        1.vedtaksperiode,
+                        Dokumentsporing.inntektsmeldingDager(id),
+                        Dokumentsporing.inntektsmeldingRefusjon(id),
+                    )
+                }
+            )
+        }
+    }
+
     private fun setupLiteGapA2SammeSkjæringstidspunkt() {
         listOf(a1, a2).nyeVedtak(januar)
         a1 { forlengVedtak(februar) }
@@ -373,5 +432,26 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSøknad(10.februar til 28.februar)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
+    }
+
+    private fun assertDokumentsporingPåSisteBehandling(vedtaksperiode: UUID, vararg forventet: Dokumentsporing) {
+        val faktisk = inspektør.vedtaksperioder(vedtaksperiode).behandlinger.behandlinger
+            .last().endringer
+            .map { it.dokumentsporing }.filter { when (it.dokumentType) {
+                DokumentType.InntektsmeldingInntekt,
+                DokumentType.InntektsmeldingRefusjon,
+                DokumentType.InntektsmeldingDager -> true
+                DokumentType.Søknad,
+                DokumentType.Sykmelding,
+                DokumentType.InntektFraAOrdningen,
+                DokumentType.OverstyrTidslinje,
+                DokumentType.OverstyrInntekt,
+                DokumentType.OverstyrRefusjon,
+                DokumentType.OverstyrArbeidsgiveropplysninger,
+                DokumentType.OverstyrArbeidsforhold,
+                DokumentType.SkjønnsmessigFastsettelse,
+                DokumentType.AndreYtelser -> false
+            } }
+        assertEquals(forventet.toSet(), faktisk.toSet())
     }
 }
