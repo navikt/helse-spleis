@@ -34,11 +34,12 @@ internal class HendelseDao(private val dataSource: () -> DataSource, private val
             SELECT melding_type, data FROM melding 
             WHERE fnr=? AND (melding_type = 'NY_SØKNAD' OR melding_type = 'SENDT_SØKNAD_NAV' OR melding_type = 'SENDT_SØKNAD_FRILANS'
                 OR melding_type = 'SENDT_SØKNAD_SELVSTENDIG' OR melding_type = 'SENDT_SØKNAD_ARBEIDSGIVER' OR melding_type = 'SENDT_SØKNAD_ARBEIDSLEDIG' 
-                OR melding_type = 'INNTEKTSMELDING' OR melding_type = 'SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER')
+                OR melding_type = 'INNTEKTSMELDING' OR melding_type = 'NAV_NO_SELVBESTEMT_INNTEKTSMELDING' OR melding_type = 'NAV_NO_KORRIGERT_INNTEKTSMELDING' OR melding_type = 'NAV_NO_INNTEKTSMELDING' 
+                OR melding_type = 'SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER')
         """
         return sessionOf(dataSource()).use { session ->
             session.run(queryOf(statement, fødselsnummer).map { row ->
-                Meldingstype.valueOf(row.string("melding_type")) to row.string("data")
+                Meldingstype.fra(row.string("melding_type")) to row.string("data")
             }.asList)
         }.mapNotNull { (type, data) ->
             objectMapper.readTree(data)?.let { node ->
@@ -149,6 +150,15 @@ internal class HendelseDao(private val dataSource: () -> DataSource, private val
         SENDT_SØKNAD_ARBEIDSGIVER,
         SENDT_SØKNAD_ARBEIDSLEDIG,
         INNTEKTSMELDING,
-        SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER
+        SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER;
+
+        internal companion object {
+            internal fun fra(verdi: String) = when (verdi) {
+                "NAV_NO_SELVBESTEMT_INNTEKTSMELDING",
+                "NAV_NO_KORRIGERT_INNTEKTSMELDING",
+                "NAV_NO_INNTEKTSMELDING" -> INNTEKTSMELDING
+                else -> valueOf(verdi)
+            }
+        }
     }
 }
