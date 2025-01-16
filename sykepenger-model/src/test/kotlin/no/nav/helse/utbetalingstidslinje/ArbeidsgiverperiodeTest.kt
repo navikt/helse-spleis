@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.desember
-import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
@@ -10,11 +9,9 @@ import no.nav.helse.januar
 import no.nav.helse.lørdag
 import no.nav.helse.mandag
 import no.nav.helse.søndag
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -178,19 +175,6 @@ internal class ArbeidsgiverperiodeTest {
         assertTrue(1.januar til 6.januar in arbeidsgiverperiode)
         assertFalse(1.januar til 1.januar in arbeidsgiverperiode)
         assertFalse(6.januar til 7.januar in arbeidsgiverperiode)
-    }
-
-    @Test
-    fun `finner riktig arbeidsgiverperiode`() {
-        val første = Arbeidsgiverperiode(listOf(1.januar til 16.januar))
-        val andre = Arbeidsgiverperiode.fiktiv(1.februar)
-        val perioder = listOf(første.also { it.kjentDag(17.januar) }, andre)
-
-        assertEquals(første, perioder.finn(1.januar til 16.januar))
-        assertEquals(første, perioder.finn(17.januar til 18.januar))
-        assertNull(perioder.finn(18.januar til 31.januar))
-        assertEquals(andre, perioder.finn(1.februar til 18.februar))
-        assertNull(perioder.finn(2.februar til 18.februar))
     }
 
     private fun agp(vararg periode: Periode) = Arbeidsgiverperiode(periode.toList())
