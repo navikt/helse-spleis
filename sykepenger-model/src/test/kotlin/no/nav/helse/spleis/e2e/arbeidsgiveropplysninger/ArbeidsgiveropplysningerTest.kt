@@ -59,8 +59,30 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
+
+    @Test
+    fun `korrigerende opplysninger på periode med kun arbeid`() {
+        a1 {
+            håndterSøknad(januar)
+            håndterSøknad(februar)
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittArbeidgiverperiode(listOf(1.februar til 16.februar)),
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList())
+            )
+            assertEquals("AAAAARR AAAAARR AAAAARR AAAAARR AAA", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertThrows<NullPointerException> {
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    OppgittArbeidgiverperiode(listOf(1.januar til 16.januar))
+                )
+            }
+        }
+    }
 
     @Test
     fun `oppgir refusjonopplysninger frem i tid, og så ombestemmer de seg`() {
