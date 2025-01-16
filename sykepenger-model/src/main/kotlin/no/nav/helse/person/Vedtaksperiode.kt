@@ -1762,6 +1762,7 @@ internal class Vedtaksperiode private constructor(
         if (this.tilstand !in setOf(AvventerGodkjenningRevurdering, AvventerGodkjenning)) {
             return
         }
+        registrerKontekst(aktivitetslogg)
         this.trengerGodkjenning(aktivitetslogg)
     }
 
