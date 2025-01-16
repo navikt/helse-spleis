@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
@@ -954,10 +954,12 @@ internal class Vedtaksperiode private constructor(
         behandlinger.vedtakFattet(arbeidsgiver, utbetalingsavgjørelse, aktivitetslogg)
 
         if (erAvvist) return // er i limbo
-        tilstand(aktivitetslogg, when {
+        tilstand(
+            aktivitetslogg, when {
             behandlinger.harUtbetalinger() -> TilUtbetaling
             else -> Avsluttet
-        })
+        }
+        )
     }
 
     internal fun håndter(
@@ -1750,10 +1752,17 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun igangsettOverstyring(revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
-        if (revurdering.ikkeRelevant(periode)) return
+        if (revurdering.ikkeRelevant(periode)) return sendNyttGodkjenningsbehov(aktivitetslogg)
         registrerKontekst(aktivitetslogg)
         tilstand.igangsettOverstyring(this, revurdering, aktivitetslogg)
         videreførEksisterendeOpplysninger(revurdering.hendelse.metadata.behandlingkilde, aktivitetslogg)
+    }
+
+    private fun sendNyttGodkjenningsbehov(aktivitetslogg: IAktivitetslogg) {
+        if (this.tilstand !in setOf(AvventerGodkjenningRevurdering, AvventerGodkjenning)) {
+            return
+        }
+        this.trengerGodkjenning(aktivitetslogg)
     }
 
     internal fun inngåIRevurderingseventyret(
@@ -2661,7 +2670,6 @@ internal class Vedtaksperiode private constructor(
             return vedtaksperiode.vedtaksperiodeVenter(venterPå)
         }
 
-
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
             dager: DagerFraInntektsmelding,
@@ -2954,6 +2962,7 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.behandlinger.erAvvist()) return HJELP.utenBegrunnelse
             return GODKJENNING.utenBegrunnelse
         }
+
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) =
             vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
 
@@ -2987,6 +2996,7 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.behandlinger.erAvvist()) return HJELP.utenBegrunnelse
             return GODKJENNING fordi OVERSTYRING_IGANGSATT
         }
+
         override fun igangsettOverstyring(
             vedtaksperiode: Vedtaksperiode,
             revurdering: Revurderingseventyr,
