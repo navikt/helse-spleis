@@ -41,6 +41,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
@@ -59,7 +60,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
 
@@ -75,12 +75,11 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittRefusjon(INNTEKT, emptyList())
             )
             assertEquals("AAAAARR AAAAARR AAAAARR AAAAARR AAA", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertThrows<NullPointerException> {
-                håndterKorrigerteArbeidsgiveropplysninger(
-                    1.vedtaksperiode,
-                    OppgittArbeidgiverperiode(listOf(1.januar til 16.januar))
-                )
-            }
+            håndterKorrigerteArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittArbeidgiverperiode(listOf(1.januar til 16.januar))
+            )
+            assertVarsler(1.vedtaksperiode, RV_IM_24)
         }
     }
 
