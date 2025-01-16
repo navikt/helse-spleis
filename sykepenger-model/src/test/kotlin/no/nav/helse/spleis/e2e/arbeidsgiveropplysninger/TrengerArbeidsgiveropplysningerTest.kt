@@ -922,35 +922,6 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Kort periode som blir lang pga korrigerende søknad med egenmeldingsdager skal sende ut forespørsel`() {
-        nyPeriode(2.januar til 17.januar)
-        håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent), egenmeldinger = listOf(1.januar til 1.januar))
-
-        assertEquals(2.januar til 17.januar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.periode)
-
-        assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-
-        val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-            organisasjonsnummer = a1,
-            vedtaksperiodeId = 1.vedtaksperiode.id(a1),
-            skjæringstidspunkt = 2.januar,
-            sykmeldingsperioder = listOf(2.januar til 17.januar),
-            egenmeldingsperioder = listOf(1.januar til 1.januar),
-            førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(a1, 2.januar)),
-            forespurteOpplysninger = listOf(
-                PersonObserver.Inntekt,
-                PersonObserver.Refusjon,
-                PersonObserver.Arbeidsgiverperiode
-            ),
-            innhentInntektFraAOrdningen = false
-        )
-
-        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
-        assertEquals(expectedForespørsel, actualForespørsel)
-    }
-
-    @Test
     fun `Sender ikke med sykmeldingsperioder som er etter skjæringstidspunktet`() {
         nyPeriode(januar)
         nyPeriode(februar)

@@ -43,8 +43,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
-import no.nav.helse.hendelser.Periode.Companion.lik
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
@@ -522,9 +520,7 @@ internal class Vedtaksperiode private constructor(
         val rester = vedtaksperioder.fold(initiell) { acc, vedtaksperiode ->
             val arbeidsgiverperiodetidslinje = acc.sykdomstidslinje(vedtaksperiode.periode)
             if (arbeidsgiverperiodetidslinje != null) {
-                vedtaksperiode.håndterBitAvArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg, arbeidsgiverperiodetidslinje)?.also {
-                    eventyr.add(it)
-                }
+                eventyr.add(vedtaksperiode.håndterBitAvArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg, arbeidsgiverperiodetidslinje))
             }
             acc.håndter(vedtaksperiode.periode)
         }
@@ -538,7 +534,7 @@ internal class Vedtaksperiode private constructor(
         return eventyr
     }
 
-    private fun håndterBitAvArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, arbeidsgiverperiodetidslinje: Sykdomstidslinje): Revurderingseventyr? {
+    private fun håndterBitAvArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, arbeidsgiverperiodetidslinje: Sykdomstidslinje): Revurderingseventyr {
         registrerKontekst(aktivitetslogg)
         val bitAvArbeidsgiverperiode = BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, arbeidsgiverperiodetidslinje)
         when (tilstand) {
@@ -1245,17 +1241,6 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad: Søknad, aktivitetslogg: IAktivitetslogg) {
-        val nyeEgenmeldingsperioder = søknad.egenmeldingsperioder()
-        if (egenmeldingsperioder.lik(nyeEgenmeldingsperioder)) return
-        if (nyeEgenmeldingsperioder.isEmpty()) return aktivitetslogg.info("Hadde egenmeldingsperioder $egenmeldingsperioder, men den overlappende søknaden har ingen.")
-
-        val sammenslåtteEgenmeldingsperioder =
-            (egenmeldingsperioder + nyeEgenmeldingsperioder).grupperSammenhengendePerioderMedHensynTilHelg()
-        aktivitetslogg.info("Oppdaterer egenmeldingsperioder fra $egenmeldingsperioder til $sammenslåtteEgenmeldingsperioder")
-        egenmeldingsperioder = sammenslåtteEgenmeldingsperioder
-    }
-
     private fun håndterSøknad(
         søknad: Søknad,
         aktivitetslogg: IAktivitetslogg,
@@ -1283,13 +1268,11 @@ internal class Vedtaksperiode private constructor(
     ) {
         if (søknad.delvisOverlappende) return aktivitetslogg.funksjonellFeil(`Mottatt søknad som delvis overlapper`)
         aktivitetslogg.info("Håndterer overlappende søknad")
-        håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad, aktivitetslogg)
         håndterSøknad(søknad, aktivitetslogg) { nesteTilstand }
     }
 
     private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad, aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Søknad har trigget en revurdering")
-        håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad, aktivitetslogg)
         person.oppdaterVilkårsgrunnlagMedInntektene(
             skjæringstidspunkt,
             aktivitetslogg,

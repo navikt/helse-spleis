@@ -19,7 +19,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertTilstand
-import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
@@ -41,72 +40,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
-    @Test
-    fun `Sender ny forespørsel når korrigerende søknad kommer før vi har fått svar på forrige forespørsel -- flytter skjæringstidspunktet`() {
-        nyPeriode(2.januar til 31.januar)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(2.januar, 31.januar, 100.prosent), egenmeldinger = listOf(1.januar til 1.januar))
-
-        val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-            organisasjonsnummer = a1,
-            vedtaksperiodeId = 1.vedtaksperiode.id(a1),
-            skjæringstidspunkt = 2.januar,
-            sykmeldingsperioder = listOf(2.januar til 31.januar),
-            egenmeldingsperioder = listOf(1.januar til 1.januar),
-            førsteFraværsdager = listOf(
-                PersonObserver.FørsteFraværsdag(a1, 2.januar)
-            ),
-            forespurteOpplysninger = listOf(
-                PersonObserver.Inntekt,
-                PersonObserver.Refusjon,
-                PersonObserver.Arbeidsgiverperiode
-            ),
-            innhentInntektFraAOrdningen = false
-        )
-
-        assertTilstander(
-            1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_INFOTRYGDHISTORIKK,
-            TilstandType.AVVENTER_INNTEKTSMELDING
-        )
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
-        assertEquals(expectedForespørsel, actualForespørsel)
-    }
-
-    @Test
-    fun `Sender ny forespørsel når korrigerende søknad kommer før vi har fått svar på forrige forespørsel -- flytter ikke skjæringstidspunktet`() {
-        håndterSykmelding(Sykmeldingsperiode(5.januar, 31.januar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.januar, 31.januar, 100.prosent), egenmeldinger = listOf(1.januar til 1.januar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.januar, 31.januar, 100.prosent), egenmeldinger = listOf(1.januar til 2.januar))
-
-        val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-            organisasjonsnummer = a1,
-            vedtaksperiodeId = 1.vedtaksperiode.id(a1),
-            skjæringstidspunkt = 5.januar,
-            sykmeldingsperioder = listOf(5.januar til 31.januar),
-            egenmeldingsperioder = listOf(1.januar til 2.januar),
-            førsteFraværsdager = listOf(
-                PersonObserver.FørsteFraværsdag(a1, 5.januar)
-            ),
-            forespurteOpplysninger = listOf(
-                PersonObserver.Inntekt,
-                PersonObserver.Refusjon,
-                PersonObserver.Arbeidsgiverperiode
-            ),
-            innhentInntektFraAOrdningen = false
-        )
-
-        assertTilstander(
-            1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_INFOTRYGDHISTORIKK,
-            TilstandType.AVVENTER_INNTEKTSMELDING
-        )
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
-        assertEquals(expectedForespørsel, actualForespørsel)
-    }
 
     @Test
     fun `Søknad fra annen arbeidsgiver flytter skjæringstidspunktet i AVVENTER_INNTEKTSMELDING`() {
