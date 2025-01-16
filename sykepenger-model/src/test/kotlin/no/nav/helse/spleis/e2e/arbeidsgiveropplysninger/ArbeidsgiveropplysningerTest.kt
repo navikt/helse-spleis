@@ -9,8 +9,10 @@ import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.ManglerOpptjening
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.StreikEllerLockout
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode
@@ -26,9 +28,12 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mandag
 import no.nav.helse.person.DokumentType
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.Inntekt
+import no.nav.helse.person.PersonObserver.Refusjon
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -62,6 +67,24 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
+
+    @Test
+    fun `tøysete egenmeldingsdag skaper loop av forespørsler`() {
+        a1 {
+            nyttVedtak(1.januar til fredag(19.januar))
+            håndterSøknad(Sykdom(15.februar, 20.februar, 100.prosent), egenmeldinger = listOf(mandag(5.februar).somPeriode()))
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            val forespørselPgaEgenmeldingsdager = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 2.vedtaksperiode }
+            assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
+            assertEquals(listOf(Inntekt, Refusjon), forespørselPgaEgenmeldingsdager.forespurteOpplysninger)
+            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.clear()
+            håndterArbeidsgiveropplysninger(2.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()))
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            val forespørselPgaEgenmeldingsdager2 = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 2.vedtaksperiode }
+            assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
+            assertEquals(listOf(Inntekt, Refusjon), forespørselPgaEgenmeldingsdager2.forespurteOpplysninger)
+        }
+    }
 
     @Test
     fun `korrigerende opplysninger på periode med kun arbeid`() {
@@ -372,8 +395,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
             val forespørselFebruar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.vedtaksperiodeId == 2.vedtaksperiode }
             assertEquals(0, forespørselFebruar.forespurteOpplysninger.filterIsInstance<PersonObserver.Arbeidsgiverperiode>().size)
-            assertEquals(0, forespørselFebruar.forespurteOpplysninger.filterIsInstance<PersonObserver.Inntekt>().size)
-            assertEquals(1, forespørselFebruar.forespurteOpplysninger.filterIsInstance<PersonObserver.Refusjon>().size)
+            assertEquals(0, forespørselFebruar.forespurteOpplysninger.filterIsInstance<Inntekt>().size)
+            assertEquals(1, forespørselFebruar.forespurteOpplysninger.filterIsInstance<Refusjon>().size)
         }
         a1 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
