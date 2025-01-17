@@ -9,10 +9,6 @@ import java.util.UUID
 data class AlderDto(val fødselsdato: LocalDate, val dødsdato: LocalDate?)
 
 data class SykmeldingsperioderDto(val perioder: List<PeriodeDto>)
-data class EndringIRefusjonDto(
-    val beløp: InntektbeløpDto.MånedligDouble,
-    val endringsdato: LocalDate
-)
 
 data class SykdomshistorikkDto(val elementer: List<SykdomshistorikkElementDto>)
 data class SykdomshistorikkElementDto(

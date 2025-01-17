@@ -15,6 +15,5 @@ data class ArbeidsgiverInnDto(
     val forkastede: List<ForkastetVedtaksperiodeInnDto>,
     val utbetalinger: List<UtbetalingInnDto>,
     val feriepengeutbetalinger: List<FeriepengeInnDto>,
-    val refusjonshistorikk: RefusjonshistorikkInnDto,
     val ubrukteRefusjonsopplysninger: RefusjonsservitørDto
 )

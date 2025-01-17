@@ -17,7 +17,6 @@ import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.DokumenttypeDto
-import no.nav.helse.dto.EndringIRefusjonDto
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
 import no.nav.helse.dto.FeriepengeberegnerDto
@@ -66,10 +65,6 @@ import no.nav.helse.dto.deserialisering.MinimumSykdomsgradVurderingInnDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.deserialisering.OpptjeningInnDto
 import no.nav.helse.dto.deserialisering.PersonInnDto
-import no.nav.helse.dto.deserialisering.RefusjonInnDto
-import no.nav.helse.dto.deserialisering.RefusjonshistorikkInnDto
-import no.nav.helse.dto.deserialisering.RefusjonsopplysningInnDto
-import no.nav.helse.dto.deserialisering.RefusjonsopplysningerInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingsdagInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingslinjeInnDto
@@ -277,14 +272,12 @@ data class PersonData(
             val orgnummer: String,
             val fom: LocalDate,
             val tom: LocalDate,
-            val inntektsopplysning: InntektsopplysningData,
-            val refusjonsopplysninger: List<ArbeidsgiverData.RefusjonsopplysningData>
+            val inntektsopplysning: InntektsopplysningData
         ) {
             fun tilDto() = ArbeidsgiverInntektsopplysningInnDto(
                 orgnummer = this.orgnummer,
                 gjelder = PeriodeDto(fom = this.fom, tom = this.tom),
-                inntektsopplysning = this.inntektsopplysning.tilDto(),
-                refusjonsopplysninger = RefusjonsopplysningerInnDto(opplysninger = this.refusjonsopplysninger.map { it.tilDto() })
+                inntektsopplysning = this.inntektsopplysning.tilDto()
             )
 
             data class SkatteopplysningData(
@@ -451,7 +444,6 @@ data class PersonData(
         val forkastede: List<ForkastetVedtaksperiodeData>,
         val utbetalinger: List<UtbetalingData>,
         val feriepengeutbetalinger: List<FeriepengeutbetalingData>,
-        val refusjonshistorikk: List<RefusjonData>,
         val ubrukteRefusjonsopplysninger: Map<LocalDate, BeløpstidslinjeData>
     ) {
         fun tilDto() = ArbeidsgiverInnDto(
@@ -464,7 +456,6 @@ data class PersonData(
             forkastede = this.forkastede.map { it.tilDto() },
             utbetalinger = this.utbetalinger.map { it.tilDto() },
             feriepengeutbetalinger = this.feriepengeutbetalinger.map { it.tilDto() },
-            refusjonshistorikk = RefusjonshistorikkInnDto(this.refusjonshistorikk.map { it.tilDto() }),
             ubrukteRefusjonsopplysninger = RefusjonsservitørDto(this.ubrukteRefusjonsopplysninger.mapValues { (_, beløpstidslinje) -> beløpstidslinje.tilDto() })
         )
 
@@ -488,24 +479,6 @@ data class PersonData(
                     }
                 } ?: InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver,
                 tidsstempel = this.tidsstempel
-            )
-        }
-
-        data class RefusjonsopplysningData(
-            val meldingsreferanseId: UUID,
-            val fom: LocalDate,
-            val tom: LocalDate?,
-            val beløp: Double,
-            val avsender: AvsenderData,
-            val tidsstempel: LocalDateTime
-        ) {
-            fun tilDto() = RefusjonsopplysningInnDto(
-                meldingsreferanseId = this.meldingsreferanseId,
-                fom = this.fom,
-                tom = this.tom,
-                beløp = InntektbeløpDto.MånedligDouble(beløp),
-                avsender = avsender.tilDto(),
-                tidsstempel = tidsstempel
             )
         }
 
@@ -1019,32 +992,6 @@ data class PersonData(
             }
         }
 
-        data class RefusjonData(
-            val meldingsreferanseId: UUID,
-            val førsteFraværsdag: LocalDate?,
-            val arbeidsgiverperioder: List<PeriodeData>,
-            val beløp: Double?,
-            val sisteRefusjonsdag: LocalDate?,
-            val endringerIRefusjon: List<EndringIRefusjonData>,
-            val tidsstempel: LocalDateTime
-        ) {
-            fun tilDto() = RefusjonInnDto(
-                meldingsreferanseId = this.meldingsreferanseId,
-                førsteFraværsdag = this.førsteFraværsdag,
-                arbeidsgiverperioder = this.arbeidsgiverperioder.map { it.tilDto() },
-                beløp = this.beløp?.let { InntektbeløpDto.MånedligDouble(it) },
-                sisteRefusjonsdag = this.sisteRefusjonsdag,
-                endringerIRefusjon = this.endringerIRefusjon.map { it.tilDto() },
-                tidsstempel = this.tidsstempel
-            )
-
-            data class EndringIRefusjonData(
-                val beløp: Double,
-                val endringsdato: LocalDate
-            ) {
-                fun tilDto() = EndringIRefusjonDto(beløp = InntektbeløpDto.MånedligDouble(this.beløp), endringsdato = this.endringsdato)
-            }
-        }
     }
 
     data class SykdomshistorikkData(

@@ -9,7 +9,6 @@ import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.DokumenttypeDto
-import no.nav.helse.dto.EndringIRefusjonDto
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
 import no.nav.helse.dto.HendelseskildeDto
@@ -49,8 +48,6 @@ import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.dto.serialisering.PersonUtDto
-import no.nav.helse.dto.serialisering.RefusjonUtDto
-import no.nav.helse.dto.serialisering.RefusjonsopplysningUtDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
@@ -91,7 +88,6 @@ private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
     forkastede = this.forkastede.map { it.tilPersonData() },
     utbetalinger = this.utbetalinger.map { it.tilPersonData() },
     feriepengeutbetalinger = this.feriepengeutbetalinger.map { it.tilPersonData() },
-    refusjonshistorikk = this.refusjonshistorikk.refusjoner.map { it.tilPersonData() },
     ubrukteRefusjonsopplysninger = this.ubrukteRefusjonsopplysninger.ubrukteRefusjonsopplysninger.tilPersonData(),
 )
 
@@ -311,21 +307,6 @@ private fun HendelseskildeDto.tilPersonData() = PersonData.ArbeidsgiverData.Sykd
     type = this.type,
     id = this.meldingsreferanseId,
     tidsstempel = this.tidsstempel
-)
-
-private fun RefusjonUtDto.tilPersonData() = PersonData.ArbeidsgiverData.RefusjonData(
-    meldingsreferanseId = this.meldingsreferanseId,
-    førsteFraværsdag = this.førsteFraværsdag,
-    arbeidsgiverperioder = this.arbeidsgiverperioder.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
-    beløp = this.beløp?.månedligDouble?.beløp,
-    sisteRefusjonsdag = this.sisteRefusjonsdag,
-    endringerIRefusjon = this.endringerIRefusjon.map { it.tilPersonData() },
-    tidsstempel = this.tidsstempel
-)
-
-private fun EndringIRefusjonDto.tilPersonData() = PersonData.ArbeidsgiverData.RefusjonData.EndringIRefusjonData(
-    beløp = this.beløp.beløp,
-    endringsdato = this.endringsdato
 )
 
 private fun SykmeldingsperioderDto.tilPersonData() = perioder.map {
@@ -814,10 +795,7 @@ private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() = PersonData.Vil
     orgnummer = this.orgnummer,
     fom = this.gjelder.fom,
     tom = this.gjelder.tom,
-    inntektsopplysning = this.inntektsopplysning.tilPersonData(),
-    refusjonsopplysninger = this.refusjonsopplysninger.opplysninger.map {
-        it.tilPersonData()
-    }
+    inntektsopplysning = this.inntektsopplysning.tilPersonData()
 )
 
 private fun NyInntektUnderveisDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.NyInntektUnderveisData(
@@ -878,15 +856,6 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
 
         else -> null
     }
-)
-
-private fun RefusjonsopplysningUtDto.tilPersonData() = PersonData.ArbeidsgiverData.RefusjonsopplysningData(
-    meldingsreferanseId = this.meldingsreferanseId,
-    fom = this.fom,
-    tom = this.tom,
-    beløp = this.beløp.månedligDouble.beløp,
-    avsender = this.avsender.tilPersonData(),
-    tidsstempel = this.tidsstempel
 )
 
 private fun SkatteopplysningDto.tilPersonDataSkattopplysning() = SkatteopplysningData(

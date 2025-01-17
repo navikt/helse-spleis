@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
-import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -60,7 +59,7 @@ class ForespurtOpplysningTest {
         ),
         mapOf(
             "opplysningstype" to "Refusjon",
-            "forslag" to emptyList<Refusjonsopplysning>(),
+            "forslag" to emptyList<Any>(),
         )
     )
 }

@@ -22,7 +22,6 @@ import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbei
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
 import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.erRelevantForOverstyring
 import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.merge
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -30,13 +29,8 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 data class ArbeidsgiverInntektsopplysning(
     val orgnummer: String,
     val gjelder: Periode,
-    val inntektsopplysning: Inntektsopplysning,
-    private val refusjonsopplysninger: Refusjonsopplysninger
+    val inntektsopplysning: Inntektsopplysning
 ) {
-    constructor(orgnummer: String, gjelder: Periode, inntektsopplysning: Inntektsopplysning) : this(
-        orgnummer, gjelder, inntektsopplysning, Refusjonsopplysninger()
-    )
-
     private fun gjelderPåSkjæringstidspunktet(skjæringstidspunkt: LocalDate) =
         skjæringstidspunkt == gjelder.start
 
@@ -84,16 +78,14 @@ data class ArbeidsgiverInntektsopplysning(
         return ArbeidsgiverInntektsopplysning(
             orgnummer = this.orgnummer,
             gjelder = nyGjelder,
-            inntektsopplysning = gammel.inntektsopplysning.overstyresAv(this.inntektsopplysning),
-            refusjonsopplysninger = gammel.refusjonsopplysninger
+            inntektsopplysning = gammel.inntektsopplysning.overstyresAv(this.inntektsopplysning)
         )
     }
 
     private fun rullTilbake() = ArbeidsgiverInntektsopplysning(
         orgnummer = this.orgnummer,
         gjelder = this.gjelder,
-        inntektsopplysning = this.inntektsopplysning.omregnetÅrsinntekt(),
-        refusjonsopplysninger = refusjonsopplysninger
+        inntektsopplysning = this.inntektsopplysning.omregnetÅrsinntekt()
     )
 
     private fun subsummer(subsumsjonslogg: Subsumsjonslogg, opptjening: Opptjening?) {
@@ -152,8 +144,7 @@ data class ArbeidsgiverInntektsopplysning(
                 ArbeidsgiverInntektsopplysning(
                     it.orgnummer,
                     it.gjelder,
-                    it.inntektsopplysning.omregnetÅrsinntekt(),
-                    it.refusjonsopplysninger
+                    it.inntektsopplysning.omregnetÅrsinntekt()
                 )
             }
         }
@@ -339,8 +330,7 @@ data class ArbeidsgiverInntektsopplysning(
             return ArbeidsgiverInntektsopplysning(
                 orgnummer = dto.orgnummer,
                 gjelder = Periode.gjenopprett(dto.gjelder),
-                inntektsopplysning = Inntektsopplysning.gjenopprett(dto.inntektsopplysning, inntekter),
-                refusjonsopplysninger = Refusjonsopplysninger.gjenopprett(dto.refusjonsopplysninger)
+                inntektsopplysning = Inntektsopplysning.gjenopprett(dto.inntektsopplysning, inntekter)
             )
         }
     }
@@ -348,7 +338,6 @@ data class ArbeidsgiverInntektsopplysning(
     internal fun dto() = ArbeidsgiverInntektsopplysningUtDto(
         orgnummer = this.orgnummer,
         gjelder = this.gjelder.dto(),
-        inntektsopplysning = this.inntektsopplysning.dto(),
-        refusjonsopplysninger = this.refusjonsopplysninger.dto()
+        inntektsopplysning = this.inntektsopplysning.dto()
     )
 }

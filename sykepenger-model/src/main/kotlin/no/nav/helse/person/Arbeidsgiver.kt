@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
@@ -71,7 +71,6 @@ import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
-import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.view.ArbeidsgiverView
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -97,7 +96,6 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class Arbeidsgiver private constructor(
@@ -111,7 +109,6 @@ internal class Arbeidsgiver private constructor(
     private val forkastede: MutableList<ForkastetVedtaksperiode>,
     private val utbetalinger: MutableList<Utbetaling>,
     private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
-    private val refusjonshistorikk: Refusjonshistorikk,
     private val ubrukteRefusjonsopplysninger: Refusjonsservitør,
     private val yrkesaktivitet: Yrkesaktivitet,
     private val subsumsjonslogg: Subsumsjonslogg
@@ -127,7 +124,6 @@ internal class Arbeidsgiver private constructor(
         forkastede = mutableListOf(),
         utbetalinger = mutableListOf(),
         feriepengeutbetalinger = mutableListOf(),
-        refusjonshistorikk = Refusjonshistorikk(),
         ubrukteRefusjonsopplysninger = Refusjonsservitør(),
         yrkesaktivitet = yrkesaktivitet,
         subsumsjonslogg = subsumsjonslogg
@@ -143,7 +139,6 @@ internal class Arbeidsgiver private constructor(
         utbetalinger = utbetalinger.map { it.view },
         inntektshistorikk = inntektshistorikk.view(),
         sykmeldingsperioder = sykmeldingsperioder.view(),
-        refusjonshistorikk = refusjonshistorikk.view(),
         ubrukteRefusjonsopplysninger = ubrukteRefusjonsopplysninger.view(),
         feriepengeutbetalinger = feriepengeutbetalinger.map { it.view() },
         aktiveVedtaksperioder = vedtaksperioder.map { it.view() },
@@ -318,7 +313,6 @@ internal class Arbeidsgiver private constructor(
                 utbetalinger = utbetalinger.toMutableList(),
                 feriepengeutbetalinger = dto.feriepengeutbetalinger.map { Feriepengeutbetaling.gjenopprett(alder, it) }
                     .toMutableList(),
-                refusjonshistorikk = Refusjonshistorikk.gjenopprett(dto.refusjonshistorikk),
                 ubrukteRefusjonsopplysninger = Refusjonsservitør.gjenopprett(dto.ubrukteRefusjonsopplysninger),
                 yrkesaktivitet = dto.organisasjonsnummer.tilYrkesaktivitet(),
                 subsumsjonslogg = subsumsjonslogg
@@ -650,9 +644,6 @@ internal class Arbeidsgiver private constructor(
         )
 
         inntektshistorikk.leggTil(im)
-        val refusjon =
-            Refusjonshistorikk.Refusjon(meldingsreferanseId, skjæringstidspunkt, emptyList(), INGEN, null, emptyList())
-        refusjonshistorikk.leggTilRefusjon(refusjon)
     }
 
     internal fun håndter(
@@ -994,8 +985,6 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg: IAktivitetslogg,
         overstyring: Revurderingseventyr?
     ) {
-        inntektsmelding.leggTilRefusjon(refusjonshistorikk)
-
         val subsumsjonsloggMedInntektsmeldingkontekst = subsumsjonsloggMedInntektsmeldingkontekst(inntektsmelding)
         val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk, subsumsjonsloggMedInntektsmeldingkontekst)
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
@@ -1227,7 +1216,6 @@ internal class Arbeidsgiver private constructor(
             forkastede = forkastede.map { it.dto() },
             utbetalinger = utbetalinger.map { it.dto() },
             feriepengeutbetalinger = feriepengeutbetalinger.map { it.dto() },
-            refusjonshistorikk = refusjonshistorikk.dto(),
             ubrukteRefusjonsopplysninger = UbrukteRefusjonsopplysningerUtDto(
                 ubrukteRefusjonsopplysninger = ubrukteRefusjonsopplysninger.dto(),
                 sisteRefusjonstidslinje = refusjonsopplysningerPåSisteBehandling?.second?.dto(),

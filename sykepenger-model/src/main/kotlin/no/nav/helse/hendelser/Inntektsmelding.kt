@@ -23,7 +23,6 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
-import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.økonomi.Inntekt
 
@@ -97,22 +96,7 @@ class Inntektsmelding(
         else grupperteArbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
     }
 
-    private val refusjonsElement
-        get() = Refusjonshistorikk.Refusjon(
-            meldingsreferanseId = metadata.meldingsreferanseId,
-            førsteFraværsdag = refusjonsdato,
-            arbeidsgiverperioder = grupperteArbeidsgiverperioder,
-            beløp = refusjon.beløp,
-            sisteRefusjonsdag = refusjon.opphørsdato,
-            endringerIRefusjon = refusjon.endringerIRefusjon.map { it.tilEndring() },
-            tidsstempel = metadata.registrert
-        )
-
     internal val refusjonsservitør get() = Refusjonsservitør.fra(refusjon.refusjonstidslinje(refusjonsdato, metadata.meldingsreferanseId, metadata.innsendt))
-
-    internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk) {
-        refusjonshistorikk.leggTilRefusjon(refusjonsElement)
-    }
 
     internal fun inntektHåndtert() {
         håndtertInntekt = true
@@ -124,7 +108,7 @@ class Inntektsmelding(
         val naturalytelse: String
     )
 
-    class Refusjon(
+    data class Refusjon(
         val beløp: Inntekt?,
         val opphørsdato: LocalDate?,
         val endringerIRefusjon: List<EndringIRefusjon> = emptyList()
@@ -156,12 +140,7 @@ class Inntektsmelding(
             }.reduce(Beløpstidslinje::plus)
         }
 
-        class EndringIRefusjon(
-            internal val beløp: Inntekt,
-            internal val endringsdato: LocalDate
-        ) {
-            internal fun tilEndring() = Refusjonshistorikk.Refusjon.EndringIRefusjon(beløp, endringsdato)
-        }
+        data class EndringIRefusjon(val beløp: Inntekt, val endringsdato: LocalDate)
     }
 
     internal fun dager(): DagerFraInntektsmelding {

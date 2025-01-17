@@ -4,7 +4,6 @@ import no.nav.helse.person.SykmeldingsperioderView
 import no.nav.helse.person.VedtaksperiodeView
 import no.nav.helse.person.VilkårsgrunnlagHistorikkView
 import no.nav.helse.person.inntekt.InntektshistorikkView
-import no.nav.helse.person.inntekt.RefusjonshistorikkView
 import no.nav.helse.person.refusjon.RefusjonsservitørView
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkView
 import no.nav.helse.utbetalingslinjer.FeriepengeutbetalingView
@@ -21,7 +20,6 @@ internal data class ArbeidsgiverView(
     val utbetalinger: List<UtbetalingView>,
     val inntektshistorikk: InntektshistorikkView,
     val sykmeldingsperioder: SykmeldingsperioderView,
-    val refusjonshistorikk: RefusjonshistorikkView,
     val ubrukteRefusjonsopplysninger: RefusjonsservitørView,
     val feriepengeutbetalinger: List<FeriepengeutbetalingView>,
     val aktiveVedtaksperioder: List<VedtaksperiodeView>,
