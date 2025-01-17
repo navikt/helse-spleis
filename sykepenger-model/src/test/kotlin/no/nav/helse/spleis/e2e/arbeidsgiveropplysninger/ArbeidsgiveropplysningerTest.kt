@@ -63,6 +63,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -83,6 +84,43 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             val forespørselPgaEgenmeldingsdager2 = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 2.vedtaksperiode }
             assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
             assertEquals(listOf(Inntekt, Refusjon), forespørselPgaEgenmeldingsdager2.forespurteOpplysninger)
+        }
+    }
+
+    @Test
+    fun `Mange auuer hvor de to siste vil utbetales om egenmeldingsdagene er rett på auuen i snuten`() {
+        a1 {
+            håndterSøknad(Sykdom(5.januar, 10.januar, 100.prosent), egenmeldinger = listOf(1.januar til 4.januar))
+            håndterSøknad(Sykdom(11.januar, 16.januar, 100.prosent))
+            håndterSøknad(Sykdom(17.januar, 17.januar, 100.prosent))
+            håndterSøknad(Sykdom(18.januar, 18.januar, 100.prosent))
+
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+            assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+            assertNotNull(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 3.vedtaksperiode })
+            assertNotNull(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 4.vedtaksperiode })
+        }
+    }
+
+    @Test
+    fun `En egenmeldingsdag som oppgis etter gjennomført arbeidsgiverperiode`() {
+        a1 {
+            håndterSøknad(1.januar til 16.januar)
+            håndterSøknad(Sykdom(4.februar, 13.februar, 100.prosent), egenmeldinger = listOf(20.januar.somPeriode()))
+            håndterSøknad(14.februar til 19.februar)
+
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+            // Litt tøysete forespørsler
+            assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+            assertNotNull(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 2.vedtaksperiode })
+            assertNotNull(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 3.vedtaksperiode })
         }
     }
 
