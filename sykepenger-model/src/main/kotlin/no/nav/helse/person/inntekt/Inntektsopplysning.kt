@@ -2,8 +2,10 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
+import no.nav.helse.dto.deserialisering.InntektsdataInnDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
+import no.nav.helse.dto.serialisering.InntektsdataUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-15`
@@ -15,14 +17,45 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 
-sealed class Inntektsopplysning(
-    val id: UUID,
+data class Inntektsdata(
     val hendelseId: UUID,
     val dato: LocalDate,
     val beløp: Inntekt,
     val tidsstempel: LocalDateTime
 ) {
-    internal fun fastsattÅrsinntekt() = beløp
+
+    fun funksjoneltLik(other: Inntektsdata) =
+        this.dato == other.dato && this.beløp == other.beløp
+
+    fun dto() = InntektsdataUtDto(
+        hendelseId = hendelseId,
+        dato = dato,
+        beløp = beløp.dto(),
+        tidsstempel = tidsstempel
+    )
+
+    companion object {
+        fun ingen(hendelseId: UUID, dato: LocalDate, tidsstempel: LocalDateTime = LocalDateTime.now()) = Inntektsdata(
+            hendelseId = hendelseId,
+            dato = dato,
+            beløp = Inntekt.INGEN,
+            tidsstempel = tidsstempel
+        )
+
+        fun gjenopprett(dto: InntektsdataInnDto) = Inntektsdata(
+            hendelseId = dto.hendelseId,
+            dato = dto.dato,
+            beløp = Inntekt.gjenopprett(dto.beløp),
+            tidsstempel = dto.tidsstempel
+        )
+    }
+}
+
+sealed class Inntektsopplysning(
+    val id: UUID,
+    val inntektsdata: Inntektsdata
+) {
+    internal fun fastsattÅrsinntekt() = inntektsdata.beløp
     internal fun omregnetÅrsinntekt() = when (this) {
         is Infotrygd,
         is Inntektsmeldinginntekt,
@@ -51,7 +84,7 @@ sealed class Inntektsopplysning(
                     }
                     // inntektsmelding tillates bare hvis inntekten er i samme måned.
                     // hvis det er flere AG med ulik fom, så kan f.eks. skjæringstidspunktet være i en måned og inntektmåneden være i en annen mnd
-                    else -> when (ny.dato.yearMonth == this.dato.yearMonth) {
+                    else -> when (ny.inntektsdata.dato.yearMonth == this.inntektsdata.dato.yearMonth) {
                         true -> ny
                         else -> this
                     }
@@ -73,8 +106,8 @@ sealed class Inntektsopplysning(
     final override fun equals(other: Any?) = other is Inntektsopplysning && erSamme(other)
 
     final override fun hashCode(): Int {
-        var result = dato.hashCode()
-        result = 31 * result + tidsstempel.hashCode() * 31
+        var result = inntektsdata.dato.hashCode()
+        result = 31 * result + inntektsdata.tidsstempel.hashCode() * 31
         return result
     }
 
@@ -95,7 +128,7 @@ sealed class Inntektsopplysning(
     ) = apply {
         subsumsjonslogg.logg(
             `§ 8-15`(
-                skjæringstidspunkt = dato,
+                skjæringstidspunkt = inntektsdata.dato,
                 organisasjonsnummer = organisasjonsnummer,
                 inntekterSisteTreMåneder = emptyList(),
                 forklaring = forklaring,
@@ -139,11 +172,11 @@ sealed class Inntektsopplysning(
             omregnetÅrsinntekt(før) != omregnetÅrsinntekt(etter)
 
         private fun omregnetÅrsinntekt(liste: List<Inntektsopplysning>) = liste
-            .map { it.omregnetÅrsinntekt().beløp }
+            .map { it.omregnetÅrsinntekt().inntektsdata.beløp }
             .map { it.årlig.toInt() }
 
         internal fun List<Inntektsopplysning>.markerFlereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {
-            if (distinctBy { it.dato }.size <= 1 && none { it is SkattSykepengegrunnlag || it is IkkeRapportert }) return
+            if (distinctBy { it.inntektsdata.dato }.size <= 1 && none { it is SkattSykepengegrunnlag || it is IkkeRapportert }) return
             aktivitetslogg.varsel(Varselkode.RV_VV_2)
         }
 

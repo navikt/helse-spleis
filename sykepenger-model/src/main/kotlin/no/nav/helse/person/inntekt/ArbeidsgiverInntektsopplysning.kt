@@ -66,7 +66,7 @@ data class ArbeidsgiverInntektsopplysning(
 
     private fun medBeløpstidslinje(kilde: Kilde): NyInntektUnderveis {
         return NyInntektUnderveis(orgnummer = this.orgnummer, beløpstidslinje = Beløpstidslinje(gjelder.map {
-            Beløpsdag(it, inntektsopplysning.beløp, kilde)
+            Beløpsdag(it, inntektsopplysning.inntektsdata.beløp, kilde)
         }))
     }
 

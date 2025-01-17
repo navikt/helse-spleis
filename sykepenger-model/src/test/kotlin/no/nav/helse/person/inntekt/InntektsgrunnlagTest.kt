@@ -429,7 +429,7 @@ internal class InntektsgrunnlagTest {
     @Test
     fun `overstyre inntekt og refusjon - forsøker å endre Infotrygd-inntekt`() {
         val skjæringstidspunkt = 1.januar
-        val a1Inntektsopplysning = Infotrygd(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
+        val a1Inntektsopplysning = infotrygd(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
         val a2Inntektsopplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 5000.månedlig)
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning)
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning)
@@ -495,7 +495,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = SkattSykepengegrunnlag(
+                    inntektsopplysning = skattSykepengegrunnlag(
                         hendelseId = UUID.randomUUID(),
                         dato = skjæringstidspunkt,
                         inntektsopplysninger = listOf(
@@ -572,7 +572,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = SkattSykepengegrunnlag(
+                    inntektsopplysning = skattSykepengegrunnlag(
                         hendelseId = UUID.randomUUID(),
                         dato = skjæringstidspunkt,
                         inntektsopplysninger = listOf(
@@ -774,7 +774,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = "orgnummer",
                     gjelder = 1.januar til LocalDate.MAX,
-                    inntektsopplysning = Infotrygd(
+                    inntektsopplysning = infotrygd(
                         id = inntektID,
                         dato = 1.januar,
                         hendelseId = hendelseId,
@@ -797,7 +797,7 @@ internal class InntektsgrunnlagTest {
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",
                         gjelder = 1.januar til LocalDate.MAX,
-                        inntektsopplysning = Infotrygd(
+                        inntektsopplysning = infotrygd(
                             id = inntektID,
                             dato = 1.januar,
                             hendelseId = hendelseId,
@@ -810,7 +810,7 @@ internal class InntektsgrunnlagTest {
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",
                         gjelder = 1.januar til LocalDate.MAX,
-                        inntektsopplysning = Infotrygd(
+                        inntektsopplysning = infotrygd(
                             id = inntektID,
                             dato = 1.januar,
                             hendelseId = hendelseId,

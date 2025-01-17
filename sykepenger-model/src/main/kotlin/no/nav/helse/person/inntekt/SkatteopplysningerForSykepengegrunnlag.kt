@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag.AnsattPeriode.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.yearMonth
+import no.nav.helse.økonomi.Inntekt
 
 // § 8-28-inntekter fra skatteetaten
 internal data class SkatteopplysningerForSykepengegrunnlag(
@@ -16,11 +17,18 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
     val tidsstempel: LocalDateTime
 ) {
     val utgangspunkt = skjæringstidspunkt.yearMonth
-
     // inntekter tre måneder før skjæringstidspunktet brukes for å regne om til årsinntekt
     val beregningsperiode = utgangspunkt.minusMonths(3)..utgangspunkt.minusMonths(1)
+
     val treMånederFørSkjæringstidspunkt = inntektsopplysninger.filter { it.måned in beregningsperiode }
     val omregnetÅrsinntekt = Skatteopplysning.omregnetÅrsinntekt(treMånederFørSkjæringstidspunkt)
+
+    val inntektsdata = Inntektsdata(
+        hendelseId = hendelseId,
+        dato = skjæringstidspunkt,
+        beløp = omregnetÅrsinntekt,
+        tidsstempel = tidsstempel
+    )
 
     val ansattVedSkjæringstidspunkt = ansattVedSkjæringstidspunkt(skjæringstidspunkt)
     val nyoppstartetArbeidsforhold = nyoppstartetArbeidsforhold(skjæringstidspunkt)
@@ -36,17 +44,15 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
 
         return when {
             inntektsopplysninger.isEmpty() && nyoppstartetArbeidsforhold -> IkkeRapportert(
-                hendelseId = this.hendelseId,
-                dato = this.skjæringstidspunkt,
-                tidsstempel = this.tidsstempel
+                id = UUID.randomUUID(),
+                inntektsdata = inntektsdata.copy(beløp = Inntekt.INGEN)
             )
 
             harInntekterToMånederFørSkjæringstidspunkt -> SkattSykepengegrunnlag(
-                hendelseId = this.hendelseId,
-                dato = this.skjæringstidspunkt,
+                id = UUID.randomUUID(),
+                inntektsdata = inntektsdata,
                 inntektsopplysninger = this.treMånederFørSkjæringstidspunkt,
-                ansattPerioder = emptyList(),
-                tidsstempel = this.tidsstempel
+                ansattPerioder = emptyList()
             )
 
             else -> null
@@ -56,17 +62,15 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
     fun arbeidstakerInntektsgrunnlag(): SkatteopplysningSykepengegrunnlag {
         if (inntektsopplysninger.isEmpty())
             return IkkeRapportert(
-                hendelseId = this.hendelseId,
-                dato = this.skjæringstidspunkt,
-                tidsstempel = this.tidsstempel
+                id = UUID.randomUUID(),
+                inntektsdata = inntektsdata.copy(beløp = Inntekt.INGEN)
             )
 
         return SkattSykepengegrunnlag(
-            hendelseId = this.hendelseId,
-            dato = this.skjæringstidspunkt,
+            id = UUID.randomUUID(),
+            inntektsdata = inntektsdata,
             inntektsopplysninger = this.treMånederFørSkjæringstidspunkt,
-            ansattPerioder = emptyList(),
-            tidsstempel = this.tidsstempel
+            ansattPerioder = emptyList()
         )
     }
 

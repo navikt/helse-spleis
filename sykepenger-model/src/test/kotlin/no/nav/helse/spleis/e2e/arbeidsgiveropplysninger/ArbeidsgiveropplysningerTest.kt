@@ -149,7 +149,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
             inspektør.inntekt(1.vedtaksperiode).let {
                 assertTrue(it is Inntektsmeldinginntekt)
-                assertEquals(25_000.månedlig, it.beløp)
+                assertEquals(25_000.månedlig, it.inntektsdata.beløp)
             }
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, 25_000.månedlig), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
         }
@@ -176,7 +176,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
             inspektør.inntekt(1.vedtaksperiode).let {
                 assertTrue(it is Inntektsmeldinginntekt)
-                assertEquals(25_000.månedlig, it.beløp)
+                assertEquals(25_000.månedlig, it.inntektsdata.beløp)
             }
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(februar, 25_000.månedlig), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
         }
@@ -392,7 +392,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
             assertInfo("Håndterer ikke arbeidsgiverperiode i AVSLUTTET", 1.vedtaksperiode.filter())
-            assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
             val forespørselFebruar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.vedtaksperiodeId == 2.vedtaksperiode }
             assertEquals(0, forespørselFebruar.forespurteOpplysninger.filterIsInstance<PersonObserver.Arbeidsgiverperiode>().size)
             assertEquals(0, forespørselFebruar.forespurteOpplysninger.filterIsInstance<Inntekt>().size)

@@ -22,7 +22,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deak
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.yearMonth
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -122,13 +121,12 @@ internal class ArbeidsgiverInntektsopplysningTest {
     fun `ny inntektsmelding uten endring i beløp i forhold Skatt endrer kun omregnet årsinntekt for skjønnsmessig fastsatt`() {
         val skjæringstidspunkt = 1.januar
         val opptjening = Opptjening.nyOpptjening(emptyList(), skjæringstidspunkt)
-        val skattA1 = SkattSykepengegrunnlag(
+        val skattA1 = skattSykepengegrunnlag(
             UUID.randomUUID(), skjæringstidspunkt, listOf(
             Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(1).yearMonth, LØNNSINNTEKT, "", ""),
             Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(2).yearMonth, LØNNSINNTEKT, "", ""),
             Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(3).yearMonth, LØNNSINNTEKT, "", "")
-        ), emptyList(), LocalDateTime.now()
-        )
+        ), emptyList())
         val inntektsmeldinginntektA2 = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 2000.månedlig)
         val inntektsmeldinginntektA3 = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 3000.månedlig)
 
@@ -207,7 +205,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
     fun `deaktiverer en inntekt`() {
         val skjæringstidspunkt = 1.januar
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig))
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, IkkeRapportert(skjæringstidspunkt, UUID.randomUUID(), LocalDateTime.now()))
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, IkkeRapportert(skjæringstidspunkt, UUID.randomUUID()))
 
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
         val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", EmptyLog)
@@ -226,7 +224,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
     fun `subsummerer deaktivering`() {
         val skjæringstidspunkt = 1.januar
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig))
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, IkkeRapportert(skjæringstidspunkt, UUID.randomUUID(), LocalDateTime.now()))
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, IkkeRapportert(skjæringstidspunkt, UUID.randomUUID()))
 
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
         val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", jurist)
@@ -252,7 +250,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
     fun `subsummerer aktivering`() {
         val skjæringstidspunkt = 1.januar
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig))
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, IkkeRapportert(skjæringstidspunkt, UUID.randomUUID(), LocalDateTime.now()))
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, IkkeRapportert(skjæringstidspunkt, UUID.randomUUID()))
 
         val opprinneligAktive = listOf(a1Opplysning)
         val opprinneligDeaktiverte = listOf(a2Opplysning)
@@ -284,7 +282,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val inntektsopplysning1 = ArbeidsgiverInntektsopplysning(
             orgnummer = "orgnummer",
             gjelder = 1.januar til LocalDate.MAX,
-            inntektsopplysning = Infotrygd(
+            inntektsopplysning = infotrygd(
                 id = inntektID,
                 dato = 1.januar,
                 hendelseId = hendelseId,
@@ -297,7 +295,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             ArbeidsgiverInntektsopplysning(
                 orgnummer = "orgnummer",
                 gjelder = 1.januar til LocalDate.MAX,
-                inntektsopplysning = Infotrygd(
+                inntektsopplysning = infotrygd(
                     id = inntektID,
                     dato = 1.januar,
                     hendelseId = hendelseId,
@@ -311,7 +309,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             ArbeidsgiverInntektsopplysning(
                 orgnummer = "orgnummer2",
                 gjelder = 1.januar til LocalDate.MAX,
-                inntektsopplysning = Infotrygd(
+                inntektsopplysning = infotrygd(
                     id = inntektID,
                     dato = 1.januar,
                     hendelseId = hendelseId,
@@ -325,7 +323,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             ArbeidsgiverInntektsopplysning(
                 orgnummer = "orgnummer",
                 gjelder = 1.januar til LocalDate.MAX,
-                inntektsopplysning = Infotrygd(
+                inntektsopplysning = infotrygd(
                     id = inntektID,
                     dato = 5.januar,
                     hendelseId = hendelseId,
@@ -335,18 +333,4 @@ internal class ArbeidsgiverInntektsopplysningTest {
             )
         )
     }
-
-    private fun skjønnsmessigFastsatt(
-        dato: LocalDate,
-        beløp: Inntekt,
-        overstyrtInntekt: Inntektsopplysning
-    ) = SkjønnsmessigFastsatt(
-        id = UUID.randomUUID(),
-        dato = dato,
-        hendelseId = UUID.randomUUID(),
-        beløp = beløp,
-        overstyrtInntekt = overstyrtInntekt,
-        omregnetÅrsinntekt = overstyrtInntekt.omregnetÅrsinntekt(),
-        tidsstempel = LocalDateTime.now()
-    )
 }

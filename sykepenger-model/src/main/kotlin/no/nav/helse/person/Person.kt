@@ -712,9 +712,9 @@ class Person private constructor(
             is Inntektsmeldinginntekt -> {
                 arbeidsgiveropplysningerKorrigert(
                     PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                        korrigertInntektsmeldingId = inntektFraFør.hendelseId,
+                        korrigertInntektsmeldingId = inntektFraFør.inntektsdata.hendelseId,
                         korrigerendeInntektektsopplysningstype = INNTEKTSMELDING,
-                        korrigerendeInntektsopplysningId = inntekt.hendelseId
+                        korrigerendeInntektsopplysningId = inntekt.inntektsdata.hendelseId
                     )
                 )
             }

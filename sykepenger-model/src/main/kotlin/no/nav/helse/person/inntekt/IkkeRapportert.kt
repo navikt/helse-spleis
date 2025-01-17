@@ -1,34 +1,25 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
-import no.nav.helse.økonomi.Inntekt
 
-internal class IkkeRapportert(
-    id: UUID,
-    hendelseId: UUID,
-    dato: LocalDate,
-    tidsstempel: LocalDateTime
-) : SkatteopplysningSykepengegrunnlag(id, hendelseId, dato, Inntekt.INGEN, tidsstempel) {
-    internal constructor(dato: LocalDate, hendelseId: UUID, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), hendelseId, dato, tidsstempel)
+internal class IkkeRapportert(id: UUID, inntektsdata: Inntektsdata) : SkatteopplysningSykepengegrunnlag(id, inntektsdata) {
+    internal constructor(dato: LocalDate, hendelseId: UUID) : this(UUID.randomUUID(), Inntektsdata.ingen(hendelseId, dato))
 
     override fun erSamme(other: Inntektsopplysning): Boolean {
-        return other is IkkeRapportert && this.dato == other.dato
+        return other is IkkeRapportert && this.inntektsdata.funksjoneltLik(other.inntektsdata)
     }
 
     override fun dto() =
-        InntektsopplysningUtDto.IkkeRapportertDto(id, hendelseId, dato, tidsstempel)
+        InntektsopplysningUtDto.IkkeRapportertDto(id, inntektsdata.dto())
 
     internal companion object {
         fun gjenopprett(dto: InntektsopplysningInnDto.IkkeRapportertDto) =
             IkkeRapportert(
                 id = dto.id,
-                hendelseId = dto.hendelseId,
-                dato = dto.dato,
-                tidsstempel = dto.tidsstempel
+                inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata)
             )
     }
 }

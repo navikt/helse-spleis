@@ -17,22 +17,19 @@ import no.nav.helse.økonomi.Inntekt
 
 class Inntektsmeldinginntekt internal constructor(
     id: UUID,
-    dato: LocalDate,
-    hendelseId: UUID,
-    beløp: Inntekt,
-    tidsstempel: LocalDateTime,
+    inntektsdata: Inntektsdata,
     private val kilde: Kilde
-) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
+) : Inntektsopplysning(id, inntektsdata) {
     internal constructor(
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         kilde: Kilde = Kilde.Arbeidsgiver,
         tidsstempel: LocalDateTime = LocalDateTime.now()
-    ) : this(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel, kilde)
+    ) : this(UUID.randomUUID(), Inntektsdata(hendelseId, dato, beløp, tidsstempel), kilde)
 
     override fun gjenbrukbarInntekt(beløp: Inntekt?) =
-        beløp?.let { Inntektsmeldinginntekt(dato, hendelseId, it, kilde, tidsstempel) } ?: this
+        beløp?.let { Inntektsmeldinginntekt(inntektsdata.dato, inntektsdata.hendelseId, it, kilde, inntektsdata.tidsstempel) } ?: this
 
     internal fun inntektskilde(): Inntektskilde = when (kilde) {
         Kilde.Arbeidsgiver -> Inntektskilde.Arbeidsgiver
@@ -41,20 +38,17 @@ class Inntektsmeldinginntekt internal constructor(
 
     internal fun view() = InntektsmeldingView(
         id = id,
-        dato = dato,
-        hendelseId = hendelseId,
-        beløp = beløp,
-        tidsstempel = tidsstempel
+        inntektsdata = inntektsdata
     )
 
     internal fun avklarSykepengegrunnlag(skatt: SkatteopplysningSykepengegrunnlag): Inntektsopplysning {
-        if (skatt.dato.yearMonth < this.dato.yearMonth) return skatt
+        if (skatt.inntektsdata.dato.yearMonth < this.inntektsdata.dato.yearMonth) return skatt
         return this
     }
 
-    internal fun kanLagres(other: Inntektsmeldinginntekt) = this.hendelseId != other.hendelseId || this.dato != other.dato
+    internal fun kanLagres(other: Inntektsmeldinginntekt) = this.inntektsdata.hendelseId != other.inntektsdata.hendelseId || this.inntektsdata.dato != other.inntektsdata.dato
     override fun erSamme(other: Inntektsopplysning): Boolean {
-        return other is Inntektsmeldinginntekt && this.dato == other.dato && other.beløp == this.beløp
+        return other is Inntektsmeldinginntekt && this.inntektsdata.funksjoneltLik(other.inntektsdata)
     }
 
     override fun arbeidsgiveropplysningerKorrigert(
@@ -62,7 +56,7 @@ class Inntektsmeldinginntekt internal constructor(
         orgnummer: String,
         saksbehandlerOverstyring: OverstyrArbeidsgiveropplysninger
     ) {
-        saksbehandlerOverstyring.arbeidsgiveropplysningerKorrigert(person, orgnummer, hendelseId)
+        saksbehandlerOverstyring.arbeidsgiveropplysningerKorrigert(person, orgnummer, inntektsdata.hendelseId)
     }
 
     internal fun kopierTidsnærOpplysning(
@@ -71,26 +65,23 @@ class Inntektsmeldinginntekt internal constructor(
         nyArbeidsgiverperiode: Boolean,
         inntektshistorikk: Inntektshistorikk
     ) {
-        if (nyDato == this.dato) return
-        val dagerMellom = ChronoUnit.DAYS.between(this.dato, nyDato)
+        if (nyDato == this.inntektsdata.dato) return
+        val dagerMellom = ChronoUnit.DAYS.between(this.inntektsdata.dato, nyDato)
         if (dagerMellom >= 60) {
-            aktivitetslogg.info("Det er $dagerMellom dager mellom forrige inntektdato (${this.dato}) og ny inntektdato ($nyDato), dette utløser varsel om gjenbruk.")
+            aktivitetslogg.info("Det er $dagerMellom dager mellom forrige inntektdato (${this.inntektsdata.dato}) og ny inntektdato ($nyDato), dette utløser varsel om gjenbruk.")
             aktivitetslogg.varsel(RV_IV_7)
         } else if (nyArbeidsgiverperiode) {
-            aktivitetslogg.info("Det er ny arbeidsgiverperiode, og dette utløser varsel om gjenbruk. Forrige inntektdato var ${this.dato} og ny inntektdato er $nyDato")
+            aktivitetslogg.info("Det er ny arbeidsgiverperiode, og dette utløser varsel om gjenbruk. Forrige inntektdato var ${this.inntektsdata.dato} og ny inntektdato er $nyDato")
             aktivitetslogg.varsel(RV_IV_7)
         }
-        inntektshistorikk.leggTil(Inntektsmeldinginntekt(nyDato, hendelseId, beløp, kilde, tidsstempel))
-        aktivitetslogg.info("Kopierte inntekt som lå lagret på ${this.dato} til $nyDato")
+        inntektshistorikk.leggTil(Inntektsmeldinginntekt(nyDato, inntektsdata.hendelseId, inntektsdata.beløp, kilde, inntektsdata.tidsstempel))
+        aktivitetslogg.info("Kopierte inntekt som lå lagret på ${this.inntektsdata.dato} til $nyDato")
     }
 
     override fun dto() =
         InntektsopplysningUtDto.InntektsmeldingDto(
             id = id,
-            hendelseId = hendelseId,
-            dato = dato,
-            beløp = beløp.dto(),
-            tidsstempel = tidsstempel,
+            inntektsdata = inntektsdata.dto(),
             kilde = kilde.dto()
         )
 
@@ -115,10 +106,7 @@ class Inntektsmeldinginntekt internal constructor(
         internal fun gjenopprett(dto: InntektsopplysningInnDto.InntektsmeldingDto): Inntektsmeldinginntekt {
             return Inntektsmeldinginntekt(
                 id = dto.id,
-                dato = dto.dato,
-                hendelseId = dto.hendelseId,
-                beløp = Inntekt.gjenopprett(dto.beløp),
-                tidsstempel = dto.tidsstempel,
+                inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata),
                 kilde = Kilde.gjenopprett(dto.kilde),
             )
         }
@@ -127,16 +115,13 @@ class Inntektsmeldinginntekt internal constructor(
             skjæringstidspunkt: LocalDate,
             førsteFraværsdag: LocalDate?
         ): Inntektsmeldinginntekt? {
-            val inntektsmeldinger = this.filter { it.dato == skjæringstidspunkt || it.dato == førsteFraværsdag }
-            return inntektsmeldinger.maxByOrNull { inntektsmelding -> inntektsmelding.tidsstempel }
+            val inntektsmeldinger = this.filter { it.inntektsdata.dato == skjæringstidspunkt || it.inntektsdata.dato == førsteFraværsdag }
+            return inntektsmeldinger.maxByOrNull { inntektsmelding -> inntektsmelding.inntektsdata.tidsstempel }
         }
     }
 }
 
 internal data class InntektsmeldingView(
     val id: UUID,
-    val dato: LocalDate,
-    val hendelseId: UUID,
-    val beløp: Inntekt,
-    val tidsstempel: LocalDateTime
+    val inntektsdata: Inntektsdata
 )

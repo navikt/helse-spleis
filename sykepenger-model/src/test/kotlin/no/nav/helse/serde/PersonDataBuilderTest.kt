@@ -302,12 +302,12 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             assertEquals(a1, arbeidsgiver.organisasjonsnummer)
             assertEquals(1, arbeidsgiver.inntektshistorikk.historikk.size)
             arbeidsgiver.inntektshistorikk.historikk[0].also { inntektsmelding ->
-                assertEquals(1.januar, inntektsmelding.dato)
+                assertEquals(1.januar, inntektsmelding.inntektsdata.dato)
                 val forventetInntekt = INNTEKT
-                assertEquals(forventetInntekt.årlig, inntektsmelding.beløp.årlig.beløp)
-                assertEquals(forventetInntekt.månedlig, inntektsmelding.beløp.månedligDouble.beløp)
-                assertEquals(forventetInntekt.daglig, inntektsmelding.beløp.dagligDouble.beløp)
-                assertEquals(forventetInntekt.dagligInt, inntektsmelding.beløp.dagligInt.beløp)
+                assertEquals(forventetInntekt.årlig, inntektsmelding.inntektsdata.beløp.årlig.beløp)
+                assertEquals(forventetInntekt.månedlig, inntektsmelding.inntektsdata.beløp.månedligDouble.beløp)
+                assertEquals(forventetInntekt.daglig, inntektsmelding.inntektsdata.beløp.dagligDouble.beløp)
+                assertEquals(forventetInntekt.dagligInt, inntektsmelding.inntektsdata.beløp.dagligInt.beløp)
             }
             assertEquals(3, arbeidsgiver.sykdomshistorikk.elementer.size)
             arbeidsgiver.sykdomshistorikk.elementer[2].also { sykdomshistorikkElement ->
@@ -382,12 +382,18 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                             InntektbeløpDto.MånedligDouble(beløp = 31000.0),
                             InntektbeløpDto.DagligDouble(beløp = 1430.7692307692307),
                             InntektbeløpDto.DagligInt(beløp = 1430)
-                        ), arbeidsgiverInntektsopplysningDto.inntektsopplysning.beløp
+                        ), arbeidsgiverInntektsopplysningDto.inntektsopplysning.inntektsdata.beløp
                     )
                 }
                 vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger[1].also { arbeidsgiverInntektsopplysningDto ->
                     assertInstanceOf<InntektsopplysningUtDto.IkkeRapportertDto>(arbeidsgiverInntektsopplysningDto.inntektsopplysning)
-                    assertNull(arbeidsgiverInntektsopplysningDto.inntektsopplysning.beløp)
+                    assertEquals(
+                        InntektDto(
+                            InntektbeløpDto.Årlig(beløp = 0.0),
+                            InntektbeløpDto.MånedligDouble(beløp = 0.0),
+                            InntektbeløpDto.DagligDouble(beløp = 0.0),
+                            InntektbeløpDto.DagligInt(beløp = 0)
+                        ), arbeidsgiverInntektsopplysningDto.inntektsopplysning.inntektsdata.beløp)
                 }
             }
         }

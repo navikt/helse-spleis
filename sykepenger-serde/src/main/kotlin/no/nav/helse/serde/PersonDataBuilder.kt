@@ -93,14 +93,14 @@ private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
 
 private fun InntektsopplysningUtDto.InntektsmeldingDto.tilPersonData() = PersonData.ArbeidsgiverData.InntektsmeldingData(
     id = this.id,
-    dato = this.dato,
-    hendelseId = this.hendelseId,
-    beløp = this.beløp.månedligDouble.beløp,
+    dato = this.inntektsdata.dato,
+    hendelseId = this.inntektsdata.hendelseId,
+    beløp = this.inntektsdata.beløp.månedligDouble.beløp,
     kilde = when (this.kilde) {
         InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.Arbeidsgiver
         InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.AOrdningen
     },
-    tidsstempel = this.tidsstempel
+    tidsstempel = this.inntektsdata.tidsstempel
 )
 
 private fun SykdomshistorikkElementDto.tilPersonData() = PersonData.SykdomshistorikkData(
@@ -805,16 +805,10 @@ private fun NyInntektUnderveisDto.tilPersonData() = PersonData.VilkårsgrunnlagE
 
 private fun InntektsopplysningUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData(
     id = this.id,
-    dato = this.dato,
-    hendelseId = this.hendelseId,
-    beløp = when (this) {
-        is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> null
-        is InntektsopplysningUtDto.IkkeRapportertDto -> null
-        is InntektsopplysningUtDto.InfotrygdDto -> this.beløp.månedligDouble.beløp
-        is InntektsopplysningUtDto.InntektsmeldingDto -> this.beløp.månedligDouble.beløp
-        is InntektsopplysningUtDto.SaksbehandlerDto -> this.beløp.månedligDouble.beløp
-        is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> this.beløp.månedligDouble.beløp
-    },
+    dato = this.inntektsdata.dato,
+    hendelseId = this.inntektsdata.hendelseId,
+    beløp = this.inntektsdata.beløp.månedligDouble.beløp,
+    tidsstempel = this.inntektsdata.tidsstempel,
     kilde = when (this) {
         is InntektsopplysningUtDto.IkkeRapportertDto -> "IKKE_RAPPORTERT"
         is InntektsopplysningUtDto.InfotrygdDto -> "INFOTRYGD"
@@ -838,7 +832,6 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
 
         else -> null
     },
-    tidsstempel = this.tidsstempel,
     overstyrtInntektId = when (this) {
         is InntektsopplysningUtDto.SaksbehandlerDto -> this.overstyrtInntekt
         is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> this.overstyrtInntekt

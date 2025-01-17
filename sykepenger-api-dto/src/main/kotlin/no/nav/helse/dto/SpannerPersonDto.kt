@@ -725,10 +725,10 @@ private fun InntektDto.tilPersonData() = SpannerPersonDto.InntektDto(
 private fun InntektsopplysningUtDto.InntektsmeldingDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData(
         id = this.id,
-        dato = this.dato,
-        hendelseId = this.hendelseId,
-        beløp = this.beløp.tilPersonData(),
-        tidsstempel = this.tidsstempel,
+        dato = this.inntektsdata.dato,
+        hendelseId = this.inntektsdata.hendelseId,
+        beløp = this.inntektsdata.beløp.tilPersonData(),
+        tidsstempel = this.inntektsdata.tidsstempel,
         kilde = when (this.kilde) {
             InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.Arbeidsgiver
             InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.AOrdningen
@@ -1534,16 +1534,10 @@ private fun NyInntektUnderveisDto.tilPersonData() = VilkårsgrunnlagElementData.
 private fun InntektsopplysningUtDto.tilPersonData() =
     ArbeidsgiverInntektsopplysningData.InntektsopplysningData(
         id = this.id,
-        dato = this.dato,
-        hendelseId = this.hendelseId,
-        beløp = when (this) {
-            is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> null
-            is InntektsopplysningUtDto.IkkeRapportertDto -> null
-            is InntektsopplysningUtDto.InfotrygdDto -> this.beløp.tilPersonData()
-            is InntektsopplysningUtDto.InntektsmeldingDto -> this.beløp.tilPersonData()
-            is InntektsopplysningUtDto.SaksbehandlerDto -> this.beløp.tilPersonData()
-            is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> this.beløp.tilPersonData()
-        },
+        dato = this.inntektsdata.dato,
+        hendelseId = this.inntektsdata.hendelseId,
+        beløp = this.inntektsdata.beløp.tilPersonData(),
+        tidsstempel = this.inntektsdata.tidsstempel,
         kilde = when (this) {
             is InntektsopplysningUtDto.IkkeRapportertDto -> "IKKE_RAPPORTERT"
             is InntektsopplysningUtDto.InfotrygdDto -> "INFOTRYGD"
@@ -1567,7 +1561,6 @@ private fun InntektsopplysningUtDto.tilPersonData() =
 
             else -> null
         },
-        tidsstempel = this.tidsstempel,
         overstyrtInntektId = when (this) {
             is InntektsopplysningUtDto.SaksbehandlerDto -> this.overstyrtInntekt
             is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> this.overstyrtInntekt

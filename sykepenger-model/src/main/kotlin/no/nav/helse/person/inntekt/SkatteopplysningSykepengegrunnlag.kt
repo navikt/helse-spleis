@@ -1,14 +1,5 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.økonomi.Inntekt
+import java.util.*
 
-sealed class SkatteopplysningSykepengegrunnlag(
-    id: UUID,
-    hendelseId: UUID,
-    dato: LocalDate,
-    beløp: Inntekt,
-    tidsstempel: LocalDateTime
-) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel)
+sealed class SkatteopplysningSykepengegrunnlag(id: UUID, inntektsdata: Inntektsdata) : Inntektsopplysning(id, inntektsdata)

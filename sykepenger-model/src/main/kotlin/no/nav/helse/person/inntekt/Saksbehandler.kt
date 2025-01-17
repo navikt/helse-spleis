@@ -17,23 +17,21 @@ import no.nav.helse.økonomi.Inntekt
 
 class Saksbehandler internal constructor(
     id: UUID,
-    dato: LocalDate,
-    hendelseId: UUID,
-    beløp: Inntekt,
+    inntektsdata: Inntektsdata,
     val forklaring: String?,
     val subsumsjon: Subsumsjon?,
-    val overstyrtInntekt: Inntektsopplysning?,
-    tidsstempel: LocalDateTime
-) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
-    constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, forklaring: String, subsumsjon: Subsumsjon?, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, hendelseId, beløp, forklaring, subsumsjon, null, tidsstempel)
+    val overstyrtInntekt: Inntektsopplysning?
+) : Inntektsopplysning(id, inntektsdata) {
+    constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, forklaring: String, subsumsjon: Subsumsjon?, tidsstempel: LocalDateTime) :
+        this(UUID.randomUUID(), Inntektsdata(hendelseId, dato, beløp, tidsstempel), forklaring, subsumsjon, null)
 
-    override fun gjenbrukbarInntekt(beløp: Inntekt?) = overstyrtInntekt?.gjenbrukbarInntekt(beløp ?: this.beløp)
+    override fun gjenbrukbarInntekt(beløp: Inntekt?) = overstyrtInntekt?.gjenbrukbarInntekt(beløp ?: this.inntektsdata.beløp)
 
     fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
-        Saksbehandler(id, dato, hendelseId, beløp, forklaring, subsumsjon, overstyrtInntekt, tidsstempel)
+        Saksbehandler(id, inntektsdata, forklaring, subsumsjon, overstyrtInntekt)
 
     override fun erSamme(other: Inntektsopplysning) =
-        other is Saksbehandler && this.dato == other.dato && this.beløp == other.beløp
+        other is Saksbehandler && this.inntektsdata.funksjoneltLik(other.inntektsdata)
 
     override fun subsumerSykepengegrunnlag(subsumsjonslogg: Subsumsjonslogg, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
         if (subsumsjon == null) return
@@ -47,8 +45,8 @@ class Saksbehandler internal constructor(
                 `§ 8-28 ledd 3 bokstav b`(
                     organisasjonsnummer = organisasjonsnummer,
                     startdatoArbeidsforhold = startdatoArbeidsforhold,
-                    overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.månedlig),
-                    skjæringstidspunkt = dato,
+                    overstyrtInntektFraSaksbehandler = mapOf("dato" to inntektsdata.dato, "beløp" to inntektsdata.beløp.månedlig),
+                    skjæringstidspunkt = inntektsdata.dato,
                     forklaring = forklaring,
                     grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
                     grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
@@ -61,8 +59,8 @@ class Saksbehandler internal constructor(
             subsumsjonslogg.logg(
                 `§ 8-28 ledd 3 bokstav c`(
                     organisasjonsnummer = organisasjonsnummer,
-                    overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.månedlig),
-                    skjæringstidspunkt = dato,
+                    overstyrtInntektFraSaksbehandler = mapOf("dato" to inntektsdata.dato, "beløp" to inntektsdata.beløp.månedlig),
+                    skjæringstidspunkt = inntektsdata.dato,
                     forklaring = forklaring,
                     grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
                     grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
@@ -72,8 +70,8 @@ class Saksbehandler internal constructor(
             subsumsjonslogg.logg(
                 `§ 8-28 ledd 5`(
                     organisasjonsnummer = organisasjonsnummer,
-                    overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.månedlig),
-                    skjæringstidspunkt = dato,
+                    overstyrtInntektFraSaksbehandler = mapOf("dato" to inntektsdata.dato, "beløp" to inntektsdata.beløp.månedlig),
+                    skjæringstidspunkt = inntektsdata.dato,
                     forklaring = forklaring,
                     grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
                     grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
@@ -85,10 +83,7 @@ class Saksbehandler internal constructor(
     override fun dto() =
         InntektsopplysningUtDto.SaksbehandlerDto(
             id = id,
-            hendelseId = hendelseId,
-            dato = dato,
-            beløp = beløp.dto(),
-            tidsstempel = tidsstempel,
+            inntektsdata = inntektsdata.dto(),
             forklaring = forklaring,
             subsumsjon = subsumsjon?.dto(),
             overstyrtInntekt = overstyrtInntekt!!.dto().id
@@ -98,10 +93,7 @@ class Saksbehandler internal constructor(
         fun gjenopprett(dto: InntektsopplysningInnDto.SaksbehandlerDto, inntekter: Map<UUID, Inntektsopplysning>) =
             Saksbehandler(
                 id = dto.id,
-                hendelseId = dto.hendelseId,
-                dato = dto.dato,
-                beløp = Inntekt.gjenopprett(dto.beløp),
-                tidsstempel = dto.tidsstempel,
+                inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata),
                 forklaring = dto.forklaring,
                 subsumsjon = dto.subsumsjon?.let { Subsumsjon.gjenopprett(it) },
                 overstyrtInntekt = inntekter.getValue(dto.overstyrtInntekt)

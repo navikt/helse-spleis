@@ -189,13 +189,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(0, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<PersonObserver.Arbeidsgiverperiode>().size)
         assertEquals(1, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<PersonObserver.Refusjon>().size)
 
-        val inntektFør = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.beløp
+        val inntektFør = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.inntektsdata.beløp
         assertEquals(INNTEKT, inntektFør)
         val forespurtIm = håndterArbeidsgiveropplysninger(emptyList(), beregnetInntekt = (-1).månedlig, refusjon = Refusjon(100.daglig, null), orgnummer = a2, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(15.februar til 28.februar, 100.daglig), inspektør(a2).vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
 
-        val inntektEtter = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.beløp
+        val inntektEtter = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.inntektsdata.beløp
 
         assertEquals(INNTEKT, inntektEtter)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
@@ -213,7 +213,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         val selvbestemtIm = håndterKorrigerteArbeidsgiveropplysninger(Arbeidsgiveropplysning.OppgittRefusjon(77.daglig, emptyList()), vedtaksperiodeId = 2.vedtaksperiode, orgnummer = a2)
         assertBeløpstidslinje(Beløpstidslinje.fra(15.februar til 28.februar, 77.daglig, selvbestemtIm.arbeidsgiver), inspektør(a2).vedtaksperioder(2.vedtaksperiode).refusjonstidslinje)
 
-        val inntektEtterselvbestemtIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.beløp
+        val inntektEtterselvbestemtIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.inntektsdata.beløp
         assertEquals(INNTEKT, inntektEtterselvbestemtIm)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)

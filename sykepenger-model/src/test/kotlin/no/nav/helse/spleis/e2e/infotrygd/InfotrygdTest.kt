@@ -88,7 +88,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 15000.månedlig, "foo", null, emptyList())))
         assertEquals(antallInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         assertTrue(inspektør.inntekt(1.vedtaksperiode) is Infotrygd)
-        assertEquals(31000.månedlig, inspektør.inntekt(1.vedtaksperiode).beløp)
+        assertEquals(31000.månedlig, inspektør.inntekt(1.vedtaksperiode).inntektsdata.beløp)
     }
 
     @Test
@@ -106,7 +106,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
         assertBeløpstidslinje(Beløpstidslinje.fra(februar, 15000.månedlig, meldingsreferanse.saksbehandler), inspektør.refusjon(1.vedtaksperiode))
         assertTrue(inspektør.inntekt(1.vedtaksperiode) is Infotrygd)
-        assertEquals(31000.månedlig, inspektør.inntekt(1.vedtaksperiode).beløp)
+        assertEquals(31000.månedlig, inspektør.inntekt(1.vedtaksperiode).inntektsdata.beløp)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 }

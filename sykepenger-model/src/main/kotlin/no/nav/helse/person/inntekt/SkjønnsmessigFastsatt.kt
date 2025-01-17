@@ -9,30 +9,25 @@ import no.nav.helse.økonomi.Inntekt
 
 class SkjønnsmessigFastsatt internal constructor(
     id: UUID,
-    dato: LocalDate,
-    hendelseId: UUID,
-    beløp: Inntekt,
+    inntektsdata: Inntektsdata,
     val overstyrtInntekt: Inntektsopplysning?,
-    val omregnetÅrsinntekt: Inntektsopplysning?,
-    tidsstempel: LocalDateTime
-) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
-    constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, hendelseId, beløp, null, null, tidsstempel)
+    val omregnetÅrsinntekt: Inntektsopplysning?
+) : Inntektsopplysning(id, inntektsdata) {
+    constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) :
+        this(UUID.randomUUID(), Inntektsdata(hendelseId, dato, beløp, tidsstempel), null, null)
 
     override fun gjenbrukbarInntekt(beløp: Inntekt?) = checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.gjenbrukbarInntekt(beløp)
 
     fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
-        SkjønnsmessigFastsatt(id, dato, hendelseId, beløp, overstyrtInntekt, overstyrtInntekt.omregnetÅrsinntekt(), tidsstempel)
+        SkjønnsmessigFastsatt(id, inntektsdata, overstyrtInntekt, overstyrtInntekt.omregnetÅrsinntekt())
 
     override fun erSamme(other: Inntektsopplysning) =
-        other is SkjønnsmessigFastsatt && this.dato == other.dato && this.beløp == other.beløp
+        other is SkjønnsmessigFastsatt && this.inntektsdata.funksjoneltLik(other.inntektsdata)
 
     override fun dto() =
         InntektsopplysningUtDto.SkjønnsmessigFastsattDto(
             id = id,
-            hendelseId = hendelseId,
-            dato = dato,
-            beløp = beløp.dto(),
-            tidsstempel = tidsstempel,
+            inntektsdata = inntektsdata.dto(),
             overstyrtInntekt = overstyrtInntekt!!.dto().id
         )
 
@@ -41,10 +36,7 @@ class SkjønnsmessigFastsatt internal constructor(
             val overstyrtInntekt = inntekter.getValue(dto.overstyrtInntekt)
             return SkjønnsmessigFastsatt(
                 id = dto.id,
-                hendelseId = dto.hendelseId,
-                dato = dto.dato,
-                beløp = Inntekt.gjenopprett(dto.beløp),
-                tidsstempel = dto.tidsstempel,
+                inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata),
                 overstyrtInntekt = overstyrtInntekt,
                 omregnetÅrsinntekt = overstyrtInntekt.omregnetÅrsinntekt()
             )

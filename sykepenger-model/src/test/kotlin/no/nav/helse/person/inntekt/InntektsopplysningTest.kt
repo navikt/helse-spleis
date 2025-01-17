@@ -32,7 +32,7 @@ internal class InntektsopplysningTest {
         val saksbehandler2 = Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val saksbehandler3 = Saksbehandler(20.januar, UUID.randomUUID(), 30000.månedlig, "", null, LocalDateTime.now())
         val saksbehandler4 = Saksbehandler(20.januar, UUID.randomUUID(), INGEN, "", null, LocalDateTime.now())
-        val ikkeRapportert = IkkeRapportert(1.januar, UUID.randomUUID(), LocalDateTime.now())
+        val ikkeRapportert = IkkeRapportert(1.januar, UUID.randomUUID())
 
         assertEquals(saksbehandler1, im1.overstyresAv(saksbehandler1))
         assertEquals(saksbehandler1, saksbehandler1.overstyresAv(saksbehandler2))
@@ -50,8 +50,8 @@ internal class InntektsopplysningTest {
         val skjønnsmessigFastsatt1 = im.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
         val skjønnsmessigFastsatt2 = saksbehandler.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
         val skjønnsmessigFastsatt3 = skjønnsmessigFastsatt2.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
-        val ikkeRapportert = IkkeRapportert(1.januar, UUID.randomUUID(), LocalDateTime.now())
-        val skatt = SkattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
+        val ikkeRapportert = IkkeRapportert(1.januar, UUID.randomUUID())
+        val skatt = skattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
 
         assertEquals(im, im.omregnetÅrsinntekt())
         assertEquals(saksbehandler, saksbehandler.omregnetÅrsinntekt())
@@ -146,4 +146,12 @@ internal class InntektsopplysningTest {
         assertSame(im, im.avklarSykepengegrunnlag(skatt1.arbeidstakerInntektsgrunnlag()))
         assertInstanceOf(SkattSykepengegrunnlag::class.java, im.avklarSykepengegrunnlag(skatt2.arbeidstakerInntektsgrunnlag()))
     }
+
+    private fun skattSykepengegrunnlag(
+        hendelseId: UUID,
+        dato: LocalDate,
+        inntektsopplysninger: List<Skatteopplysning>,
+        ansattPerioder: List<AnsattPeriode>
+    ) =
+        SkattSykepengegrunnlag(UUID.randomUUID(), Inntektsdata(hendelseId, dato, Skatteopplysning.omregnetÅrsinntekt(inntektsopplysninger), LocalDateTime.now()), inntektsopplysninger, ansattPerioder)
 }

@@ -15,9 +15,9 @@ internal val Inntektsopplysning.inspektør get() = InntektsopplysningInspektør(
 
 internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysning) {
 
-    val beløp: Inntekt = inntektsopplysning.beløp
-    val hendelseId: UUID = inntektsopplysning.hendelseId
-    val tidsstempel: LocalDateTime = inntektsopplysning.tidsstempel
+    val beløp: Inntekt = inntektsopplysning.inntektsdata.beløp
+    val hendelseId: UUID = inntektsopplysning.inntektsdata.hendelseId
+    val tidsstempel: LocalDateTime = inntektsopplysning.inntektsdata.tidsstempel
     val forrigeInntekt = when (inntektsopplysning) {
         is Infotrygd -> null
         is Saksbehandler -> inntektsopplysning.overstyrtInntekt

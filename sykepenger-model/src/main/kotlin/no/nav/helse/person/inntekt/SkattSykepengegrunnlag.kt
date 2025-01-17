@@ -1,7 +1,6 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.AnsattPeriodeDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
@@ -11,45 +10,30 @@ import no.nav.helse.etterlevelse.`§ 8-15`
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav a`
 import no.nav.helse.etterlevelse.`§ 8-29`
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
-import no.nav.helse.økonomi.Inntekt
 
-internal class SkattSykepengegrunnlag private constructor(
+internal class SkattSykepengegrunnlag(
     id: UUID,
-    hendelseId: UUID,
-    dato: LocalDate,
-    beløp: Inntekt,
+    inntektsdata: Inntektsdata,
     val inntektsopplysninger: List<Skatteopplysning>,
-    val ansattPerioder: List<AnsattPeriode>,
-    tidsstempel: LocalDateTime
-) : SkatteopplysningSykepengegrunnlag(id, hendelseId, dato, beløp, tidsstempel) {
+    val ansattPerioder: List<AnsattPeriode>
+) : SkatteopplysningSykepengegrunnlag(id, inntektsdata) {
     internal companion object {
         internal fun gjenopprett(dto: InntektsopplysningInnDto.SkattSykepengegrunnlagDto): SkattSykepengegrunnlag {
             val skatteopplysninger = dto.inntektsopplysninger.map { Skatteopplysning.gjenopprett(it) }
             return SkattSykepengegrunnlag(
                 id = dto.id,
-                hendelseId = dto.hendelseId,
-                dato = dto.dato,
-                beløp = Skatteopplysning.omregnetÅrsinntekt(skatteopplysninger),
+                inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata),
                 inntektsopplysninger = skatteopplysninger,
                 ansattPerioder = dto.ansattPerioder.map { AnsattPeriode.gjenopprett(it) },
-                tidsstempel = dto.tidsstempel
             )
         }
     }
-
-    internal constructor(
-        hendelseId: UUID,
-        dato: LocalDate,
-        inntektsopplysninger: List<Skatteopplysning>,
-        ansattPerioder: List<AnsattPeriode>,
-        tidsstempel: LocalDateTime = LocalDateTime.now()
-    ) : this(UUID.randomUUID(), hendelseId, dato, Skatteopplysning.omregnetÅrsinntekt(inntektsopplysninger), inntektsopplysninger, ansattPerioder, tidsstempel)
 
     override fun subsumerSykepengegrunnlag(subsumsjonslogg: Subsumsjonslogg, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
         subsumsjonslogg.logg(
             `§ 8-28 ledd 3 bokstav a`(
                 organisasjonsnummer = organisasjonsnummer,
-                skjæringstidspunkt = dato,
+                skjæringstidspunkt = inntektsdata.dato,
                 inntekterSisteTreMåneder = inntektsopplysninger.subsumsjonsformat(),
                 grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
                 grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
@@ -57,7 +41,7 @@ internal class SkattSykepengegrunnlag private constructor(
         )
         subsumsjonslogg.logg(
             `§ 8-29`(
-                skjæringstidspunkt = dato,
+                skjæringstidspunkt = inntektsdata.dato,
                 grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
                 inntektsopplysninger = inntektsopplysninger.subsumsjonsformat(),
                 organisasjonsnummer = organisasjonsnummer
@@ -73,7 +57,7 @@ internal class SkattSykepengegrunnlag private constructor(
     ) = apply {
         subsumsjonslogg.logg(
             `§ 8-15`(
-                skjæringstidspunkt = dato,
+                skjæringstidspunkt = inntektsdata.dato,
                 organisasjonsnummer = organisasjonsnummer,
                 inntekterSisteTreMåneder = inntektsopplysninger.subsumsjonsformat(),
                 forklaring = forklaring,
@@ -83,16 +67,13 @@ internal class SkattSykepengegrunnlag private constructor(
     }
 
     override fun erSamme(other: Inntektsopplysning): Boolean {
-        return other is SkattSykepengegrunnlag && this.dato == other.dato && this.inntektsopplysninger == other.inntektsopplysninger
+        return other is SkattSykepengegrunnlag && this.inntektsdata.funksjoneltLik(other.inntektsdata)
     }
 
     override fun dto() =
         InntektsopplysningUtDto.SkattSykepengegrunnlagDto(
             id = id,
-            hendelseId = hendelseId,
-            dato = dato,
-            beløp = beløp.dto(),
-            tidsstempel = tidsstempel,
+            inntektsdata = inntektsdata.dto(),
             inntektsopplysninger = inntektsopplysninger.map { it.dto() },
             ansattPerioder = ansattPerioder.map { it.dto() })
 }

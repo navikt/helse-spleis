@@ -1345,7 +1345,7 @@ internal class Vedtaksperiode private constructor(
         return skatteopplysninger
             .firstOrNull { it.arbeidsgiver == this.arbeidsgiver.organisasjonsnummer }
             ?.arbeidstakerInntektsgrunnlag()
-            ?: IkkeRapportert(skjæringstidspunkt, hendelse.metadata.meldingsreferanseId, LocalDateTime.now())
+            ?: IkkeRapportert(skjæringstidspunkt, hendelse.metadata.meldingsreferanseId)
     }
 
     private fun inntektsgrunnlagArbeidsgivere(
@@ -2553,7 +2553,7 @@ internal class Vedtaksperiode private constructor(
                 skatteinntekter = skatteopplysninger.map {
                     PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.måned, it.beløp.månedlig)
                 },
-                omregnetÅrsinntekt = Skatteopplysning.omregnetÅrsinntekt(skatteopplysninger).årlig
+                omregnetÅrsinntekt = omregnetÅrsinntekt.årlig
             )
             vedtaksperiode.person.sendSkatteinntekterLagtTilGrunn(event)
 

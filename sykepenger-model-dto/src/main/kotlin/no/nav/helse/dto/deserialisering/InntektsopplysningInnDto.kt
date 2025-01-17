@@ -1,43 +1,27 @@
 package no.nav.helse.dto.deserialisering
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.AnsattPeriodeDto
-import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.dto.SkatteopplysningDto
 import no.nav.helse.dto.SubsumsjonDto
 
 sealed class InntektsopplysningInnDto {
     abstract val id: UUID
-    abstract val hendelseId: UUID
-    abstract val dato: LocalDate
-    abstract val beløp: InntektbeløpDto.MånedligDouble?
-    abstract val tidsstempel: LocalDateTime
+    abstract val inntektsdata: InntektsdataInnDto
 
     data class IkkeRapportertDto(
         override val id: UUID,
-        override val hendelseId: UUID,
-        override val dato: LocalDate,
-        override val tidsstempel: LocalDateTime
-    ) : InntektsopplysningInnDto() {
-        override val beløp: InntektbeløpDto.MånedligDouble? = null
-    }
+        override val inntektsdata: InntektsdataInnDto,
+    ) : InntektsopplysningInnDto()
 
     data class InfotrygdDto(
         override val id: UUID,
-        override val hendelseId: UUID,
-        override val dato: LocalDate,
-        override val beløp: InntektbeløpDto.MånedligDouble,
-        override val tidsstempel: LocalDateTime
+        override val inntektsdata: InntektsdataInnDto
     ) : InntektsopplysningInnDto()
 
     data class SaksbehandlerDto(
         override val id: UUID,
-        override val hendelseId: UUID,
-        override val dato: LocalDate,
-        override val beløp: InntektbeløpDto.MånedligDouble,
-        override val tidsstempel: LocalDateTime,
+        override val inntektsdata: InntektsdataInnDto,
         val forklaring: String?,
         val subsumsjon: SubsumsjonDto?,
         val overstyrtInntekt: UUID,
@@ -45,19 +29,13 @@ sealed class InntektsopplysningInnDto {
 
     data class SkjønnsmessigFastsattDto(
         override val id: UUID,
-        override val hendelseId: UUID,
-        override val dato: LocalDate,
-        override val beløp: InntektbeløpDto.MånedligDouble,
-        override val tidsstempel: LocalDateTime,
+        override val inntektsdata: InntektsdataInnDto,
         val overstyrtInntekt: UUID,
     ) : InntektsopplysningInnDto()
 
     data class InntektsmeldingDto(
         override val id: UUID,
-        override val hendelseId: UUID,
-        override val dato: LocalDate,
-        override val beløp: InntektbeløpDto.MånedligDouble,
-        override val tidsstempel: LocalDateTime,
+        override val inntektsdata: InntektsdataInnDto,
         val kilde: KildeDto
     ) : InntektsopplysningInnDto() {
         enum class KildeDto {
@@ -68,12 +46,8 @@ sealed class InntektsopplysningInnDto {
 
     data class SkattSykepengegrunnlagDto(
         override val id: UUID,
-        override val hendelseId: UUID,
-        override val dato: LocalDate,
-        override val tidsstempel: LocalDateTime,
+        override val inntektsdata: InntektsdataInnDto,
         val inntektsopplysninger: List<SkatteopplysningDto>,
         val ansattPerioder: List<AnsattPeriodeDto>
-    ) : InntektsopplysningInnDto() {
-        override val beløp: InntektbeløpDto.MånedligDouble? = null
-    }
+    ) : InntektsopplysningInnDto()
 }

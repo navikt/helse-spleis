@@ -57,6 +57,7 @@ import no.nav.helse.dto.deserialisering.InfotrygdInntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdPersonutbetalingsperiodeInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
+import no.nav.helse.dto.deserialisering.InntektsdataInnDto
 import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
@@ -316,11 +317,11 @@ data class PersonData(
                 val id: UUID,
                 val dato: LocalDate,
                 val hendelseId: UUID,
-                val beløp: Double?,
+                val beløp: Double?, // todo: trenger ikke være null etter 20. februar 2025
+                val tidsstempel: LocalDateTime,
                 val kilde: String,
                 val forklaring: String?,
                 val subsumsjon: SubsumsjonData?,
-                val tidsstempel: LocalDateTime,
                 val overstyrtInntektId: UUID?,
                 val skatteopplysninger: List<SkatteopplysningData>?,
                 val inntektsmeldingkilde: InntektsmeldingKildeDto?
@@ -333,39 +334,48 @@ data class PersonData(
                 fun tilDto() = when (kilde.let(Inntektsopplysningskilde::valueOf)) {
                     Inntektsopplysningskilde.INFOTRYGD -> InntektsopplysningInnDto.InfotrygdDto(
                         id = this.id,
-                        hendelseId = this.hendelseId,
-                        dato = this.dato,
-                        beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
-                        tidsstempel = this.tidsstempel
+                        inntektsdata = InntektsdataInnDto(
+                            hendelseId = this.hendelseId,
+                            dato = this.dato,
+                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
+                            tidsstempel = this.tidsstempel
+                        )
                     )
 
                     Inntektsopplysningskilde.INNTEKTSMELDING -> InntektsopplysningInnDto.InntektsmeldingDto(
                         id = this.id,
-                        hendelseId = this.hendelseId,
-                        dato = this.dato,
-                        beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
+                        inntektsdata = InntektsdataInnDto(
+                            hendelseId = this.hendelseId,
+                            dato = this.dato,
+                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
+                            tidsstempel = this.tidsstempel
+                        ),
                         kilde = this.inntektsmeldingkilde?.let {
                             when (it) {
                                 InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
                                 InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.AOrdningen
                             }
-                        } ?: InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver, // todo: denne trenger ikke være nullable etter 20. oktober 2024..
-                        tidsstempel = this.tidsstempel
+                        } ?: InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver // todo: denne trenger ikke være nullable etter 20. oktober 2024..
                     )
 
                     Inntektsopplysningskilde.IKKE_RAPPORTERT -> InntektsopplysningInnDto.IkkeRapportertDto(
                         id = this.id,
-                        hendelseId = this.hendelseId,
-                        dato = this.dato,
-                        tidsstempel = this.tidsstempel
+                        inntektsdata = InntektsdataInnDto(
+                            hendelseId = this.hendelseId,
+                            dato = this.dato,
+                            beløp = InntektbeløpDto.MånedligDouble(beløp = 0.0),
+                            tidsstempel = this.tidsstempel
+                        ),
                     )
 
                     Inntektsopplysningskilde.SAKSBEHANDLER -> InntektsopplysningInnDto.SaksbehandlerDto(
                         id = this.id,
-                        hendelseId = this.hendelseId,
-                        dato = this.dato,
-                        beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
-                        tidsstempel = this.tidsstempel,
+                        inntektsdata = InntektsdataInnDto(
+                            hendelseId = this.hendelseId,
+                            dato = this.dato,
+                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
+                            tidsstempel = this.tidsstempel
+                        ),
                         overstyrtInntekt = this.overstyrtInntektId!!,
                         forklaring = this.forklaring,
                         subsumsjon = this.subsumsjon?.tilDto()
@@ -373,18 +383,26 @@ data class PersonData(
 
                     Inntektsopplysningskilde.SKJØNNSMESSIG_FASTSATT -> InntektsopplysningInnDto.SkjønnsmessigFastsattDto(
                         id = this.id,
-                        hendelseId = this.hendelseId,
-                        dato = this.dato,
-                        beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
-                        tidsstempel = this.tidsstempel,
+                        inntektsdata = InntektsdataInnDto(
+                            hendelseId = this.hendelseId,
+                            dato = this.dato,
+                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
+                            tidsstempel = this.tidsstempel
+                        ),
                         overstyrtInntekt = this.overstyrtInntektId!!
                     )
 
                     Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG -> InntektsopplysningInnDto.SkattSykepengegrunnlagDto(
                         id = this.id,
-                        hendelseId = this.hendelseId,
-                        dato = this.dato,
-                        tidsstempel = this.tidsstempel,
+                        inntektsdata = InntektsdataInnDto(
+                            hendelseId = this.hendelseId,
+                            dato = this.dato,
+                            beløp = InntektbeløpDto.MånedligDouble(beløp = skatteopplysninger!! // todo: hent beløp fra ${this.beløp} når this.beløp ikke er null mer
+                                .sumOf { it.beløp }
+                                .coerceAtLeast(0.0)
+                                .div(3)),
+                            tidsstempel = this.tidsstempel
+                        ),
                         inntektsopplysninger = this.skatteopplysninger!!.map { it.tilDto() },
                         ansattPerioder = emptyList()
                     )
@@ -469,16 +487,18 @@ data class PersonData(
         ) {
             fun tilDto() = InntektsopplysningInnDto.InntektsmeldingDto(
                 id = this.id,
-                hendelseId = this.hendelseId,
-                dato = this.dato,
-                beløp = InntektbeløpDto.MånedligDouble(beløp = this.beløp),
+                inntektsdata = InntektsdataInnDto(
+                    hendelseId = this.hendelseId,
+                    dato = this.dato,
+                    beløp = InntektbeløpDto.MånedligDouble(beløp),
+                    tidsstempel = this.tidsstempel
+                ),
                 kilde = kilde?.let {
                     when (it) {
                         InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
                         InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.AOrdningen
                     }
-                } ?: InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver,
-                tidsstempel = this.tidsstempel
+                } ?: InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
             )
         }
 
