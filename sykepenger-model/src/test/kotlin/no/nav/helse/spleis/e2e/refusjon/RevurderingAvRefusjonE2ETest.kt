@@ -35,7 +35,7 @@ internal class RevurderingAvRefusjonE2ETest : AbstractDslTest() {
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar, listOf(
                 OverstyrtArbeidsgiveropplysning(
-                    a1, INNTEKT, "ingen endring", null, listOf(
+                    a1, INNTEKT, "ingen endring", listOf(
                     Triple(25.januar, null, INGEN)
                 )
                 )

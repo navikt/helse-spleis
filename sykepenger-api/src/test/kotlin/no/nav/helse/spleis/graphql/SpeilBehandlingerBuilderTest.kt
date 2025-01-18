@@ -1124,7 +1124,8 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     fun `revurdering av tidligere skjæringstidspunkt - opphører refusjon som treffer flere perioder`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "", null, listOf(Triple(1.januar, null, INGEN)))))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "",
+            listOf(Triple(1.januar, null, INGEN)))))
         håndterYtelserTilUtbetalt()
         håndterYtelserTilUtbetalt()
 

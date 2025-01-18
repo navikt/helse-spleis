@@ -36,7 +36,6 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -921,12 +920,12 @@ internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
     gjelder: Periode = skjæringstidspunkt til LocalDate.MAX,
     meldingsreferanseId: UUID = UUID.randomUUID(),
     forklaring: String = "forklaring",
-    subsumsjon: Subsumsjon? = null
+    begrunnelse: OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse? = null
 ) {
     håndterOverstyrArbeidsgiveropplysninger(
         skjæringstidspunkt,
         listOf(OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, emptyList(), gjelder)),
-        listOf(OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(orgnummer, forklaring, subsumsjon)),
+        listOf(OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(orgnummer, forklaring, begrunnelse)),
         meldingsreferanseId
     )
 }

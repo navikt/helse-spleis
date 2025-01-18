@@ -82,21 +82,12 @@ class OverstyrArbeidsgiveropplysninger(
     data class Overstyringbegrunnelse(
         val organisasjonsnummer: String,
         val forklaring: String,
-        val subsumsjon: Subsumsjon?,
+        val begrunnelse: Begrunnelse?
     ) {
         enum class Begrunnelse {
             NYOPPSTARTET_ARBEIDSFORHOLD,
             VARIG_LØNNSENDRING,
             MANGELFULL_ELLER_URIKTIG_INNRAPPORTERING
-        }
-
-        val begrunnelse = subsumsjon?.let {
-            when {
-                subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref && subsumsjon.ledd == Ledd.LEDD_3.nummer && subsumsjon.bokstav == Bokstav.BOKSTAV_B.ref.toString() -> Begrunnelse.NYOPPSTARTET_ARBEIDSFORHOLD
-                subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref && subsumsjon.ledd == Ledd.LEDD_3.nummer && subsumsjon.bokstav == Bokstav.BOKSTAV_C.ref.toString() -> Begrunnelse.VARIG_LØNNSENDRING
-                subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref && subsumsjon.ledd == Ledd.LEDD_5.nummer -> Begrunnelse.MANGELFULL_ELLER_URIKTIG_INNRAPPORTERING
-                else -> null
-            }
         }
 
         fun subsummer(inntektsdata: Inntektsdata, subsumsjonslogg: Subsumsjonslogg, startdatoArbeidsforhold: LocalDate?) {

@@ -49,7 +49,6 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -97,7 +96,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             skjæringstidspunkt = 1.januar,
             arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a2, INNTEKT * 1.1)),
             begrunnelser = listOf(
-                OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(a2, "forklaring", Subsumsjon("8-28", 3, "b"))
+                OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(a2, "forklaring", OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.NYOPPSTARTET_ARBEIDSFORHOLD)
             )
         )
 
@@ -1737,12 +1736,11 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val subsumsjon = Subsumsjon("8-28", 3, "b")
         håndterOverstyrInntekt(
             inntekt = 1500.månedlig,
             orgnummer = a2,
             1.januar,
-            subsumsjon = subsumsjon,
+            begrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.NYOPPSTARTET_ARBEIDSFORHOLD,
             forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 b"
         )
         SubsumsjonInspektør(jurist).assertBeregnet(
@@ -1783,12 +1781,11 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val subsumsjon = Subsumsjon("8-28", 3, "c")
         håndterOverstyrInntekt(
             inntekt = 1500.månedlig,
             orgnummer = a2,
             1.januar,
-            subsumsjon = subsumsjon,
+            begrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.VARIG_LØNNSENDRING,
             forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 c"
         )
         SubsumsjonInspektør(jurist).assertBeregnet(
@@ -1828,12 +1825,11 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val subsumsjon = Subsumsjon("8-28", 5, null)
         håndterOverstyrInntekt(
             inntekt = 1500.månedlig,
             orgnummer = a2,
             1.januar,
-            subsumsjon = subsumsjon,
+            begrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.MANGELFULL_ELLER_URIKTIG_INNRAPPORTERING,
             forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 (5)"
         )
         SubsumsjonInspektør(jurist).assertBeregnet(

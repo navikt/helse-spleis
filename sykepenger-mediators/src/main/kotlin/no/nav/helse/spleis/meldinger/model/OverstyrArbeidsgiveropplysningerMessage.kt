@@ -10,9 +10,12 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.etterlevelse.Bokstav
+import no.nav.helse.etterlevelse.Ledd
+import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.Subsumsjon
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
@@ -32,7 +35,7 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
         OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(
             organisasjonsnummer = overstyring.path("organisasjonsnummer").asText(),
             forklaring = overstyring.path("forklaring").asText(),
-            subsumsjon = overstyring.path("subsumsjon").asSubsumsjon()
+            begrunnelse = overstyring.path("subsumsjon").asBegrunnelse()
         )
     }
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) =
@@ -63,12 +66,16 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
             }
         }
 
-        private fun JsonNode.asSubsumsjon() = this.takeUnless(JsonNode::isMissingOrNull)?.let {
-            Subsumsjon(
-                paragraf = it["paragraf"].asText(),
-                ledd = it.path("ledd").takeUnless(JsonNode::isMissingOrNull)?.asInt(),
-                bokstav = it.path("bokstav").takeUnless(JsonNode::isMissingOrNull)?.asText()
-            )
+        private fun JsonNode.asBegrunnelse() = this.takeUnless(JsonNode::isMissingOrNull)?.let {
+            val paragraf = it["paragraf"].asText()
+            val ledd = it.path("ledd").takeUnless(JsonNode::isMissingOrNull)?.asInt()
+            val bokstav = it.path("bokstav").takeUnless(JsonNode::isMissingOrNull)?.asText()
+            when {
+                paragraf == Paragraf.PARAGRAF_8_28.ref && ledd == Ledd.LEDD_3.nummer && bokstav == Bokstav.BOKSTAV_B.ref.toString() -> Begrunnelse.NYOPPSTARTET_ARBEIDSFORHOLD
+                paragraf == Paragraf.PARAGRAF_8_28.ref && ledd == Ledd.LEDD_3.nummer && bokstav == Bokstav.BOKSTAV_C.ref.toString() -> Begrunnelse.VARIG_LØNNSENDRING
+                paragraf == Paragraf.PARAGRAF_8_28.ref && ledd == Ledd.LEDD_5.nummer -> Begrunnelse.MANGELFULL_ELLER_URIKTIG_INNRAPPORTERING
+                else -> null
+            }
         }
 
         private fun JsonMessage.refusjonstidslinjer(): Map<String, Pair<Beløpstidslinje, Boolean>> {

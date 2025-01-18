@@ -928,7 +928,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 50.daglig, "overstyring", null, listOf(Triple(1.januar, null, INNTEKT)))
+                OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 50.daglig, "overstyring", listOf(Triple(1.januar, null, INNTEKT)))
             )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -979,13 +979,13 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 50.daglig, "overstyring", null, listOf(Triple(1.januar, null, INNTEKT)))))
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 50.daglig, "overstyring", listOf(Triple(1.januar, null, INNTEKT)))))
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
 
             val andreOverstyring = UUID.randomUUID()
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig, "overstyring", null, listOf(Triple(1.januar, null, INNTEKT)))), meldingsreferanseId = andreOverstyring)
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig, "overstyring", listOf(Triple(1.januar, null, INNTEKT)))), meldingsreferanseId = andreOverstyring)
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig)))

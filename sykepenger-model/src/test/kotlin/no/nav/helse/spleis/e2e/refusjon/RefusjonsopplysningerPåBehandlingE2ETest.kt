@@ -81,7 +81,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
             val saksbehandlerId = håndterOverstyrArbeidsgiveropplysninger(
                 1.januar,
-                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "forklaring", null, refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))))
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "forklaring", refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))))
             ).metadata.meldingsreferanseId
 
             assertBeløpstidslinje(Beløpstidslinje.fra(1.februar til 1.mars, INNTEKT, saksbehandlerId.saksbehandler), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
@@ -104,7 +104,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
             val saksbehandlerId = håndterOverstyrArbeidsgiveropplysninger(
                 1.januar,
-                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "forklaring", null, refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, INGEN))))
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "forklaring", refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, INGEN))))
             ).metadata.meldingsreferanseId
 
             assertBeløpstidslinje(Beløpstidslinje.fra(1.februar til 1.mars, INGEN, saksbehandlerId.saksbehandler), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
@@ -184,7 +184,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                 orgnummer = a1,
                 inntekt = INNTEKT,
                 forklaring = "nebb",
-                subsumsjon = null,
                 refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, INGEN))
             )
         )
@@ -267,7 +266,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             val overstyringId = UUID.randomUUID()
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "forklaring", null, listOf(Triple(1.januar, null, INNTEKT / 2)))), hendelseId = overstyringId)
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "forklaring", listOf(Triple(1.januar, null, INNTEKT / 2)))), hendelseId = overstyringId)
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
@@ -286,7 +285,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar, listOf(
                 OverstyrtArbeidsgiveropplysning(
-                    a1, INNTEKT, "forklaring", null, listOf(
+                    a1, INNTEKT, "forklaring", listOf(
                     Triple(1.januar, 28.februar, INGEN),
                     Triple(1.mars, null, INNTEKT)
                 )
@@ -356,7 +355,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
             val overstyringId = UUID.randomUUID()
             val overstyringTidspunkt = LocalDateTime.now()
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "bla", null, listOf(Triple(1.februar, null, INGEN)))), hendelseId = overstyringId, tidsstempel = overstyringTidspunkt)
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "bla", listOf(Triple(1.februar, null, INGEN)))), hendelseId = overstyringId, tidsstempel = overstyringTidspunkt)
             assertEquals(setOf(1.januar), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.keys)
 
             val forventetUbrukt =

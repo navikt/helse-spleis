@@ -21,7 +21,7 @@ internal class VarselVedNegativtBeløpE2ETest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a1, INNTEKT, ".", null, listOf(Triple(1.januar, null, Inntekt.INGEN)))
+                OverstyrtArbeidsgiveropplysning(a1, INNTEKT, ".", listOf(Triple(1.januar, null, Inntekt.INGEN)))
             )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -37,7 +37,7 @@ internal class VarselVedNegativtBeløpE2ETest : AbstractDslTest() {
             nyttVedtak(januar, refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()))
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a1, INNTEKT, ".", null, listOf(Triple(1.januar, null, INNTEKT)))
+                OverstyrtArbeidsgiveropplysning(a1, INNTEKT, ".", listOf(Triple(1.januar, null, INNTEKT)))
             )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -54,7 +54,7 @@ internal class VarselVedNegativtBeløpE2ETest : AbstractDslTest() {
 
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 0.8, ".", null, emptyList())
+                OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 0.8, ".", emptyList())
             )
             )
             håndterYtelser(1.vedtaksperiode)

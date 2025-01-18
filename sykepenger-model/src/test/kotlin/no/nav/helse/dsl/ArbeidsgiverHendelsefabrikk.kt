@@ -501,7 +501,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     internal fun lagOverstyrInntekt(hendelseId: UUID, skjæringstidspunkt: LocalDate, inntekt: Inntekt, orgnummer: String, tidsstempel: LocalDateTime = LocalDateTime.now()) =
         PersonHendelsefabrikk().lagOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt, listOf(
-            OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, "forklaring", null, emptyList())
+            OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, "forklaring", emptyList())
         ), meldingsreferanseId = hendelseId, tidsstempel
         )
 }

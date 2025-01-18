@@ -14,7 +14,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -83,7 +82,6 @@ internal class OverstyrtArbeidsgiveropplysning(
     private val orgnummer: String,
     private val inntekt: Inntekt,
     private val forklaring: String? = null,
-    private val subsumsjon: Subsumsjon? = null,
     private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>? = null,
     private val gjelder: Periode? = null
 ) {
@@ -113,7 +111,6 @@ internal class OverstyrtArbeidsgiveropplysning(
             forEach {
                 check(it.refusjonsopplysninger == null) { "Skal ikke sette refusjonspplysnger på Skjønnsmessig fastsatt inntekt" }
                 check(it.forklaring == null) { "Skal ikke sette forklaring på Skjønnsmessig fastsatt inntekt" }
-                check(it.subsumsjon == null) { "Skal ikke sette subsumsjon på Skjønssmessig fastsatt inntekt" }
             }
             return map {
                 val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
