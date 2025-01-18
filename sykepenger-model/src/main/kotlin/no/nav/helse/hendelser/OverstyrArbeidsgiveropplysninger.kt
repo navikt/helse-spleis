@@ -8,22 +8,16 @@ import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav b`
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav c`
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 5`
 import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrTilkommendeInntekter
 import no.nav.helse.person.inntekt.Inntektsdata
-import no.nav.helse.person.inntekt.Inntektsgrunnlag
-import no.nav.helse.person.inntekt.NyInntektUnderveis
-import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.refusjon.Refusjonsservitør
+import no.nav.helse.økonomi.Inntekt
 
 class OverstyrArbeidsgiveropplysninger(
     meldingsreferanseId: UUID,
     internal val skjæringstidspunkt: LocalDate,
-    private val arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>,
+    val arbeidsgiveropplysninger: List<KorrigertArbeidsgiverInntektsopplysning>,
     opprettet: LocalDateTime,
-    private val refusjonstidslinjer: Map<String, Pair<Beløpstidslinje, Boolean>>,
-    private val begrunnelser: List<Overstyringbegrunnelse>
+    private val refusjonstidslinjer: Map<String, Pair<Beløpstidslinje, Boolean>>
 ) : Hendelse, OverstyrInntektsgrunnlag {
     override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
     override val metadata = HendelseMetadata(
@@ -34,27 +28,11 @@ class OverstyrArbeidsgiveropplysninger(
         automatiskBehandling = false
     )
 
-    init {
-        check(arbeidsgiveropplysninger.all { it.inntektsopplysning is Saksbehandler }) {
-            "alle inntektene må være saksbehandler"
-        }
-    }
-
     override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 
-    internal fun overstyr(builder: Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer) {
-        arbeidsgiveropplysninger.forEach { builder.leggTilInntekt(it) }
-    }
-
-    internal fun overstyr(nyInntektUnderveis: List<NyInntektUnderveis>): List<NyInntektUnderveis> {
-        val kilde = Kilde(metadata.meldingsreferanseId, Avsender.SAKSBEHANDLER, metadata.registrert)
-        return arbeidsgiveropplysninger.overstyrTilkommendeInntekter(nyInntektUnderveis, skjæringstidspunkt, kilde)
-    }
-
     internal fun subsummer(subsumsjonslogg: Subsumsjonslogg, startdatoArbeidsforhold: LocalDate?, organisasjonsnummer: String) {
-        val begrunnelseForArbeidsgiver = begrunnelser.singleOrNull { it.organisasjonsnummer == organisasjonsnummer } ?: return
-        val inntektForArbeidsgiver = arbeidsgiveropplysninger.single { it.orgnummer == organisasjonsnummer }.inntektsopplysning.inntektsdata
-        begrunnelseForArbeidsgiver.subsummer(inntektForArbeidsgiver, subsumsjonslogg, startdatoArbeidsforhold)
+        arbeidsgiveropplysninger.singleOrNull { it.organisasjonsnummer == organisasjonsnummer }
+            ?.subsummer(subsumsjonslogg, startdatoArbeidsforhold)
     }
 
     internal fun refusjonsservitør(
@@ -76,8 +54,18 @@ class OverstyrArbeidsgiveropplysninger(
         return Refusjonsservitør.fra(startdatoer = startdatoer, refusjonstidslinje = eksisterendeRefusjonstidslinje + nyInformasjon)
     }
 
-    data class Overstyringbegrunnelse(
+    data class KorrigertArbeidsgiverInntektsopplysning(
         val organisasjonsnummer: String,
+        val gjelder: Periode,
+        val inntektsdata: Inntektsdata,
+        val begrunnelse: Overstyringbegrunnelse
+    ) {
+        fun subsummer(subsumsjonslogg: Subsumsjonslogg, startdatoArbeidsforhold: LocalDate?) {
+            begrunnelse.subsummer(inntektsdata.dato, inntektsdata.beløp, organisasjonsnummer, subsumsjonslogg, startdatoArbeidsforhold)
+        }
+    }
+
+    data class Overstyringbegrunnelse(
         val forklaring: String,
         val begrunnelse: Begrunnelse?
     ) {
@@ -87,8 +75,8 @@ class OverstyrArbeidsgiveropplysninger(
             MANGELFULL_ELLER_URIKTIG_INNRAPPORTERING
         }
 
-        fun subsummer(inntektsdata: Inntektsdata, subsumsjonslogg: Subsumsjonslogg, startdatoArbeidsforhold: LocalDate?) {
-            val overstyrtInntektMap = mapOf("dato" to inntektsdata.dato, "beløp" to inntektsdata.beløp.månedlig)
+        fun subsummer(skjæringstidspunkt: LocalDate, beløp: Inntekt, organisasjonsnummer: String, subsumsjonslogg: Subsumsjonslogg, startdatoArbeidsforhold: LocalDate?) {
+            val overstyrtInntektMap = mapOf("dato" to skjæringstidspunkt, "beløp" to beløp.månedlig)
             when (begrunnelse) {
                 Begrunnelse.NYOPPSTARTET_ARBEIDSFORHOLD -> {
                     requireNotNull(startdatoArbeidsforhold) { "Fant ikke aktivt arbeidsforhold for skjæringstidspunktet i arbeidsforholdshistorikken" }
@@ -97,10 +85,10 @@ class OverstyrArbeidsgiveropplysninger(
                             organisasjonsnummer = organisasjonsnummer,
                             startdatoArbeidsforhold = startdatoArbeidsforhold,
                             overstyrtInntektFraSaksbehandler = overstyrtInntektMap,
-                            skjæringstidspunkt = inntektsdata.dato,
+                            skjæringstidspunkt = skjæringstidspunkt,
                             forklaring = forklaring,
-                            grunnlagForSykepengegrunnlagÅrlig = inntektsdata.beløp.årlig,
-                            grunnlagForSykepengegrunnlagMånedlig = inntektsdata.beløp.månedlig
+                            grunnlagForSykepengegrunnlagÅrlig = beløp.årlig,
+                            grunnlagForSykepengegrunnlagMånedlig = beløp.månedlig
                         )
                     )
                 }
@@ -109,10 +97,10 @@ class OverstyrArbeidsgiveropplysninger(
                         `§ 8-28 ledd 3 bokstav c`(
                             organisasjonsnummer = organisasjonsnummer,
                             overstyrtInntektFraSaksbehandler = overstyrtInntektMap,
-                            skjæringstidspunkt = inntektsdata.dato,
+                            skjæringstidspunkt = skjæringstidspunkt,
                             forklaring = forklaring,
-                            grunnlagForSykepengegrunnlagÅrlig = inntektsdata.beløp.årlig,
-                            grunnlagForSykepengegrunnlagMånedlig = inntektsdata.beløp.månedlig
+                            grunnlagForSykepengegrunnlagÅrlig = beløp.årlig,
+                            grunnlagForSykepengegrunnlagMånedlig = beløp.månedlig
                         )
                     )
                 }
@@ -121,10 +109,10 @@ class OverstyrArbeidsgiveropplysninger(
                         `§ 8-28 ledd 5`(
                             organisasjonsnummer = organisasjonsnummer,
                             overstyrtInntektFraSaksbehandler = overstyrtInntektMap,
-                            skjæringstidspunkt = inntektsdata.dato,
+                            skjæringstidspunkt = skjæringstidspunkt,
                             forklaring = forklaring,
-                            grunnlagForSykepengegrunnlagÅrlig = inntektsdata.beløp.årlig,
-                            grunnlagForSykepengegrunnlagMånedlig = inntektsdata.beløp.månedlig
+                            grunnlagForSykepengegrunnlagÅrlig = beløp.årlig,
+                            grunnlagForSykepengegrunnlagMånedlig = beløp.månedlig
                         )
                     )
                 }

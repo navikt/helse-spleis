@@ -5,6 +5,7 @@ import java.util.*
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
@@ -12,14 +13,9 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.beløp.Beløpsdag
-import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
-import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.erRelevantForOverstyring
-import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.merge
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -57,15 +53,23 @@ data class ArbeidsgiverInntektsopplysning(
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
-    private fun overstyr(overstyringer: List<ArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
+    private fun overstyrMedInntektsmelding(overstyringer: List<ArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
         val overstyring = overstyringer.singleOrNull { it.orgnummer == this.orgnummer } ?: return this
         return overstyring.overstyrer(this)
     }
 
-    private fun medBeløpstidslinje(kilde: Kilde): NyInntektUnderveis {
-        return NyInntektUnderveis(orgnummer = this.orgnummer, beløpstidslinje = Beløpstidslinje(gjelder.map {
-            Beløpsdag(it, inntektsopplysning.inntektsdata.beløp, kilde)
-        }))
+    private fun overstyrMedSaksbehandler(overstyringer: List<KorrigertArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
+        val korrigering = overstyringer.singleOrNull { it.organisasjonsnummer == this.orgnummer } ?: return this
+        val nyInntektsopplysning = Saksbehandler(
+            id = UUID.randomUUID(),
+            inntektsdata = korrigering.inntektsdata,
+            overstyrtInntekt = this.inntektsopplysning
+        )
+        return ArbeidsgiverInntektsopplysning(
+            orgnummer = this.orgnummer,
+            gjelder = korrigering.gjelder,
+            inntektsopplysning = this.inntektsopplysning.overstyresAv(nyInntektsopplysning)
+        )
     }
 
     private fun overstyrer(gammel: ArbeidsgiverInntektsopplysning): ArbeidsgiverInntektsopplysning {
@@ -154,27 +158,28 @@ data class ArbeidsgiverInntektsopplysning(
 
         // overskriver eksisterende verdier i *this* med verdier fra *other*,
         // og legger til ting i *other* som ikke finnes i *this* som tilkommet inntekter
-        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrInntekter(
+        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrMedInntektsmelding(
             skjæringstidspunkt: LocalDate,
             other: List<ArbeidsgiverInntektsopplysning>
         ): List<ArbeidsgiverInntektsopplysning> {
-            val endringen = this.map { inntekt -> inntekt.overstyr(other) }
+            val endringen = this.map { inntekt -> inntekt.overstyrMedInntektsmelding(other) }
             if (erOmregnetÅrsinntektEndret(skjæringstidspunkt, this, endringen)) {
                 return endringen.map { it.rullTilbake() }
             }
             return endringen
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrTilkommendeInntekter(
-            nyInntektUnderveis: List<NyInntektUnderveis>,
+        // overskriver eksisterende verdier i *this* med verdier fra *other*,
+        // og legger til ting i *other* som ikke finnes i *this* som tilkommet inntekter
+        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrMedSaksbehandler(
             skjæringstidspunkt: LocalDate,
-            kilde: Kilde
-        ): List<NyInntektUnderveis> {
-            val somBeløpstidslinjer = this.mapNotNull { inntekt ->
-                if (!nyInntektUnderveis.erRelevantForOverstyring(skjæringstidspunkt, inntekt.gjelder)) null
-                else inntekt.medBeløpstidslinje(kilde)
+            other: List<KorrigertArbeidsgiverInntektsopplysning>
+        ): List<ArbeidsgiverInntektsopplysning> {
+            val endringen = this.map { inntekt -> inntekt.overstyrMedSaksbehandler(other) }
+            if (erOmregnetÅrsinntektEndret(skjæringstidspunkt, this, endringen)) {
+                return endringen.map { it.rullTilbake() }
             }
-            return nyInntektUnderveis.merge(somBeløpstidslinjer)
+            return endringen
         }
 
         private fun erOmregnetÅrsinntektEndret(

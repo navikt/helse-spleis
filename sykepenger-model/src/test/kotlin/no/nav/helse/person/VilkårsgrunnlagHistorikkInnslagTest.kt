@@ -15,7 +15,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
-import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
@@ -113,10 +113,11 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 ArbeidsgiverInntektsopplysning(
                     "orgnr",
                     skjæringstidspunkt til LocalDate.MAX,
-                    Saksbehandler(
+                    Inntektsmeldinginntekt(
                         skjæringstidspunkt,
                         UUID.randomUUID(),
                         inntekt,
+                        Inntektsmeldinginntekt.Kilde.Arbeidsgiver,
                         LocalDateTime.now()
                     )
                 )

@@ -12,6 +12,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-10 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-51 ledd 2`
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
@@ -23,6 +24,7 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.berik
@@ -36,7 +38,8 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harI
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedSaksbehandler
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedInntektsmelding
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.sjekkForNyArbeidsgiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.totalOmregnetÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
@@ -45,7 +48,7 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_IKKE_6G_BEGRE
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTRYGD
 import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.finnEndringsdato
 import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.merge
-import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.overstyr
+import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.overstyrMedSaksbehandler
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
@@ -265,10 +268,9 @@ internal class Inntektsgrunnlag private constructor(
     }
 
     internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonslogg: Subsumsjonslogg): EndretInntektsgrunnlag? {
-        val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger)
-        hendelse.overstyr(builder)
-        val resultat = builder.resultat()
-        return lagEndring(resultat, subsumsjonslogg, tilkommendeInntekter.overstyr(hendelse))
+        val resultat = this.arbeidsgiverInntektsopplysninger.overstyrMedSaksbehandler(skjæringstidspunkt, hendelse.arbeidsgiveropplysninger)
+        val kilde = Kilde(hendelse.metadata.meldingsreferanseId, Avsender.SAKSBEHANDLER, hendelse.metadata.registrert)
+        return lagEndring(resultat, subsumsjonslogg, tilkommendeInntekter.overstyrMedSaksbehandler(kilde, skjæringstidspunkt, hendelse.arbeidsgiveropplysninger))
     }
 
     internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
@@ -300,7 +302,7 @@ internal class Inntektsgrunnlag private constructor(
             gjelder = skjæringstidspunkt til LocalDate.MAX,
             inntektsopplysning = inntekt
         )
-        val resultat = arbeidsgiverInntektsopplysninger.overstyrInntekter(skjæringstidspunkt, listOf(nyInntektsopplysning))
+        val resultat = arbeidsgiverInntektsopplysninger.overstyrMedInntektsmelding(skjæringstidspunkt, listOf(nyInntektsopplysning))
         return lagEndring(resultat, subsumsjonslogg)
     }
 
@@ -405,7 +407,7 @@ internal class Inntektsgrunnlag private constructor(
         }
 
         internal fun resultat(): List<ArbeidsgiverInntektsopplysning> {
-            return opprinneligArbeidsgiverInntektsopplysninger.overstyrInntekter(skjæringstidspunkt, nyeInntektsopplysninger)
+            return opprinneligArbeidsgiverInntektsopplysninger.overstyrMedInntektsmelding(skjæringstidspunkt, nyeInntektsopplysninger)
         }
     }
 

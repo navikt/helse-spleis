@@ -63,7 +63,7 @@ import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.refusjonstidslinjer
@@ -924,8 +924,8 @@ internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
 ) {
     håndterOverstyrArbeidsgiveropplysninger(
         skjæringstidspunkt,
-        listOf(OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, emptyList(), gjelder)),
-        listOf(OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(orgnummer, forklaring, begrunnelse)),
+        listOf(OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, emptyList(), gjelder, OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(forklaring, begrunnelse))),
+        listOf(OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(forklaring, begrunnelse)),
         meldingsreferanseId
     )
 }
@@ -953,7 +953,6 @@ internal fun AbstractEndToEndTest.håndterOverstyrArbeidsgiveropplysninger(
         skjæringstidspunkt = skjæringstidspunkt,
         arbeidsgiveropplysninger = arbeidsgiveropplysninger.tilOverstyrt(meldingsreferanseId, skjæringstidspunkt),
         refusjonstidslinjer = arbeidsgiveropplysninger.refusjonstidslinjer(meldingsreferanseId, opprettet),
-        begrunnelser = begrunnelser,
         opprettet = opprettet
     ).håndter(Person::håndter)
     return meldingsreferanseId
@@ -977,7 +976,8 @@ internal class OverstyrtArbeidsgiveropplysning(
     private val orgnummer: String,
     private val inntekt: Inntekt,
     private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>,
-    private val gjelder: Periode? = null
+    private val gjelder: Periode? = null,
+    private val overstyringbegrunnelse: OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse? = null
 ) {
     internal constructor(orgnummer: String, inntekt: Inntekt) : this(orgnummer, inntekt, emptyList(), null)
     internal constructor(orgnummer: String, inntekt: Inntekt, gjelder: Periode) : this(orgnummer, inntekt, emptyList(), gjelder)
@@ -986,7 +986,20 @@ internal class OverstyrtArbeidsgiveropplysning(
         internal fun List<OverstyrtArbeidsgiveropplysning>.tilOverstyrt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =
             map {
                 val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
-                ArbeidsgiverInntektsopplysning(it.orgnummer, gjelder, Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, LocalDateTime.now()))
+                OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning(
+                    organisasjonsnummer = it.orgnummer,
+                    gjelder = gjelder,
+                    inntektsdata = Inntektsdata(
+                        hendelseId = meldingsreferanseId,
+                        dato = skjæringstidspunkt,
+                        beløp = it.inntekt,
+                        tidsstempel = LocalDateTime.now()
+                    ),
+                    begrunnelse = it.overstyringbegrunnelse ?: OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(
+                        forklaring = "forklaring",
+                        begrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.VARIG_LØNNSENDRING
+                    )
+                )
             }
 
         internal fun List<OverstyrtArbeidsgiveropplysning>.tilSkjønnsmessigFastsatt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =

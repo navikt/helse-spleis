@@ -26,11 +26,11 @@ internal class InntektsopplysningTest {
     fun overstyres() {
         val im1 = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT)
         val im2 = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT)
-        val saksbehandler1 = im1.overstyresAv(Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
-        val saksbehandler2 = Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now())
-        val saksbehandler3 = Saksbehandler(20.januar, UUID.randomUUID(), 30000.månedlig, LocalDateTime.now())
-        val saksbehandler4 = Saksbehandler(20.januar, UUID.randomUUID(), INGEN, LocalDateTime.now())
         val ikkeRapportert = IkkeRapportert(1.januar, UUID.randomUUID())
+        val saksbehandler1 = im1.overstyresAv(Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, 20000.månedlig, LocalDateTime.now()), im1))
+        val saksbehandler2 = Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, 20000.månedlig, LocalDateTime.now()), saksbehandler1)
+        val saksbehandler3 = Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, 30000.månedlig, LocalDateTime.now()), saksbehandler1)
+        val saksbehandler4 = Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, INGEN, LocalDateTime.now()), ikkeRapportert)
 
         assertTrue(saksbehandler1.funksjoneltLik(im1.overstyresAv(saksbehandler1)))
         assertSame(saksbehandler1, saksbehandler1.overstyresAv(saksbehandler2))
@@ -44,7 +44,7 @@ internal class InntektsopplysningTest {
     @Test
     fun `opphøre, gjøre om, avvikle, tilbakestille eller kansellere`() {
         val im = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT)
-        val saksbehandler = im.overstyresAv(Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
+        val saksbehandler = im.overstyresAv(Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, 20000.månedlig, LocalDateTime.now()), im))
         val skjønnsmessigFastsatt1 = im.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
         val skjønnsmessigFastsatt2 = saksbehandler.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
         val skjønnsmessigFastsatt3 = skjønnsmessigFastsatt2.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
@@ -83,8 +83,9 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `saksbehandler-likhet`() {
-        val saksbehandler1 = Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now())
-        val saksbehandler2 = Saksbehandler(20.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+        val ikkeRapportert = IkkeRapportert(1.januar, UUID.randomUUID())
+        val saksbehandler1 = Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, 20000.månedlig, LocalDateTime.now()), ikkeRapportert)
+        val saksbehandler2 = Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, 25000.månedlig, LocalDateTime.now()), ikkeRapportert)
 
         assertFalse(saksbehandler1.funksjoneltLik(saksbehandler2))
     }

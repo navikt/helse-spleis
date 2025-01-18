@@ -7,7 +7,9 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
+import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
 
 data class NyInntektUnderveis(
     val orgnummer: String,
@@ -45,8 +47,21 @@ data class NyInntektUnderveis(
             return omsluttendePeriode.inneholder(periode)
         }
 
-        internal fun List<NyInntektUnderveis>.overstyr(hendelse: OverstyrArbeidsgiveropplysninger): List<NyInntektUnderveis> {
-            return hendelse.overstyr(this)
+        internal fun List<NyInntektUnderveis>.overstyrMedSaksbehandler(kilde: Kilde, skjæringstidspunkt: LocalDate, korrigeringer: List<OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning>): List<NyInntektUnderveis> {
+            val somBeløpstidslinjer = korrigeringer.mapNotNull { inntekt ->
+                if (!this.erRelevantForOverstyring(skjæringstidspunkt, inntekt.gjelder)) null
+                else inntekt.medBeløpstidslinje(kilde)
+            }
+            return this.merge(somBeløpstidslinjer)
+        }
+
+        private fun OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning.medBeløpstidslinje(kilde: Kilde): NyInntektUnderveis {
+            return NyInntektUnderveis(
+                orgnummer = organisasjonsnummer,
+                beløpstidslinje = Beløpstidslinje(gjelder.map {
+                    Beløpsdag(it, inntektsdata.beløp, kilde)
+                })
+            )
         }
 
         internal fun List<NyInntektUnderveis>.merge(nyeInntekter: List<NyInntektUnderveis>): List<NyInntektUnderveis> {

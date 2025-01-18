@@ -1,7 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.januar
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -27,8 +27,7 @@ internal class SkjønnsmessigFastsattTest {
         val originalBeløp = 2500.daglig
         val saksbehandlerbeløp = 2600.daglig
         val original = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), originalBeløp)
-        val saksbehandler = original.overstyresAv(Saksbehandler(1.januar, UUID.randomUUID(), saksbehandlerbeløp,
-            LocalDateTime.now()))
+        val saksbehandler = original.overstyresAv(Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 1.januar, saksbehandlerbeløp, LocalDateTime.now()), original))
         val skjønnsmessigFastsatt = saksbehandler.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), skjønnsmessigFastsattBeløp, LocalDateTime.now()))
 
         assertTrue(skjønnsmessigFastsatt is SkjønnsmessigFastsatt)

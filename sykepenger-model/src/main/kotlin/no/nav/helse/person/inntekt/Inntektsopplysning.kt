@@ -131,7 +131,7 @@ sealed class Inntektsopplysning(
 
     internal fun gjenbrukbarInntekt(beløp: Inntekt? = null): Inntektsmeldinginntekt? = when (this) {
         is Inntektsmeldinginntekt -> beløp?.let { Inntektsmeldinginntekt(inntektsdata.dato, inntektsdata.hendelseId, it, kilde, inntektsdata.tidsstempel) } ?: this
-        is Saksbehandler -> checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.gjenbrukbarInntekt(beløp ?: this.inntektsdata.beløp)
+        is Saksbehandler -> overstyrtInntekt.gjenbrukbarInntekt(beløp ?: this.inntektsdata.beløp)
         is SkjønnsmessigFastsatt -> checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.gjenbrukbarInntekt(beløp)
 
         is Infotrygd,

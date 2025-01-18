@@ -15,12 +15,12 @@ import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -31,13 +31,6 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
     private val arbeidsgiveropplysninger = packet.arbeidsgiveropplysninger(skjæringstidspunkt)
     private val refusjonstidslinjer = packet.refusjonstidslinjer()
 
-    private val begrunnelser = packet["arbeidsgivere"].map { overstyring ->
-        OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(
-            organisasjonsnummer = overstyring.path("organisasjonsnummer").asText(),
-            forklaring = overstyring.path("forklaring").asText(),
-            begrunnelse = overstyring.path("subsumsjon").asBegrunnelse()
-        )
-    }
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) =
         mediator.behandle(this, OverstyrArbeidsgiveropplysninger(
             meldingsreferanseId = meldingsporing.id,
@@ -45,12 +38,11 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
             arbeidsgiveropplysninger = arbeidsgiveropplysninger,
             opprettet = opprettet,
             refusjonstidslinjer = refusjonstidslinjer,
-            begrunnelser = begrunnelser,
         ), context)
 
     private companion object {
 
-        private fun JsonMessage.arbeidsgiveropplysninger(skjæringstidspunkt: LocalDate): List<ArbeidsgiverInntektsopplysning> {
+        private fun JsonMessage.arbeidsgiveropplysninger(skjæringstidspunkt: LocalDate): List<OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning> {
             val arbeidsgivere = get("arbeidsgivere").takeUnless { it.isMissingOrNull() } ?: return emptyList()
             val id = UUID.fromString(get("@id").asText())
             val opprettet = get("@opprettet").asLocalDateTime()
@@ -58,11 +50,25 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
                 val orgnummer = arbeidsgiveropplysning["organisasjonsnummer"].asText()
                 val månedligInntekt = arbeidsgiveropplysning["månedligInntekt"].asDouble().månedlig
 
+                val forklaring = arbeidsgiveropplysning.path("forklaring").asText()
+                val begrunnelse = arbeidsgiveropplysning.path("subsumsjon").asBegrunnelse()
                 val fom = arbeidsgiveropplysning.path("fom").takeIf(JsonNode::isTextual)?.asLocalDate() ?: skjæringstidspunkt
                 val tom = arbeidsgiveropplysning.path("tom").takeIf(JsonNode::isTextual)?.asLocalDate() ?: LocalDate.MAX
-                val saksbehandlerinntekt = Saksbehandler(skjæringstidspunkt, id, månedligInntekt, opprettet)
 
-                ArbeidsgiverInntektsopplysning(orgnummer, fom til tom, saksbehandlerinntekt)
+                OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning(
+                    organisasjonsnummer = orgnummer,
+                    gjelder = fom til tom,
+                    inntektsdata = Inntektsdata(
+                        hendelseId = id,
+                        dato = skjæringstidspunkt,
+                        beløp = månedligInntekt,
+                        tidsstempel = opprettet
+                    ),
+                    begrunnelse = Overstyringbegrunnelse(
+                        forklaring = forklaring,
+                        begrunnelse = begrunnelse
+                    )
+                )
             }
         }
 

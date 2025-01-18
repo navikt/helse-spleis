@@ -19,8 +19,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.Inntektsopplysning
-import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.økonomi.Inntekt
 
@@ -63,7 +62,6 @@ internal class PersonHendelsefabrikk {
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSaksbehandlerinntekt(meldingsreferanseId, skjæringstidspunkt, tidsstempel),
             refusjonstidslinjer = arbeidsgiveropplysninger.refusjonstidslinjer(skjæringstidspunkt, meldingsreferanseId, tidsstempel),
-            begrunnelser = emptyList(),
             opprettet = tidsstempel
         )
 
@@ -87,13 +85,22 @@ internal class OverstyrtArbeidsgiveropplysning(
     private fun refusjonsopplysninger(førsteDag: LocalDate) = refusjonsopplysninger ?: listOf(Triple(førsteDag, null, inntekt))
 
     internal companion object {
-        private fun List<OverstyrtArbeidsgiveropplysning>.tilArbeidsgiverInntektsopplysning(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate, tidsstempel: LocalDateTime, inntektsopplysning: (overstyrtArbeidsgiveropplysning: OverstyrtArbeidsgiveropplysning) -> Inntektsopplysning) =
+        private fun List<OverstyrtArbeidsgiveropplysning>.tilArbeidsgiverInntektsopplysning(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate, tidsstempel: LocalDateTime) =
             map {
                 val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = it.orgnummer,
+                OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning(
+                    organisasjonsnummer = it.orgnummer,
                     gjelder = gjelder,
-                    inntektsopplysning = inntektsopplysning(it)
+                    inntektsdata = Inntektsdata(
+                        hendelseId = meldingsreferanseId,
+                        dato = skjæringstidspunkt,
+                        beløp = it.inntekt,
+                        tidsstempel = tidsstempel
+                    ),
+                    begrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(
+                        forklaring = "forklaring",
+                        begrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.VARIG_LØNNSENDRING
+                    )
                 )
             }
 
@@ -101,9 +108,7 @@ internal class OverstyrtArbeidsgiveropplysning(
             meldingsreferanseId: UUID,
             skjæringstidspunkt: LocalDate,
             tidsstempel: LocalDateTime
-        ) = tilArbeidsgiverInntektsopplysning(meldingsreferanseId, skjæringstidspunkt, tidsstempel) {
-            Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, LocalDateTime.now())
-        }
+        ) = tilArbeidsgiverInntektsopplysning(meldingsreferanseId, skjæringstidspunkt, tidsstempel)
 
         internal fun List<OverstyrtArbeidsgiveropplysning>.medSkjønnsmessigFastsattInntekt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate): List<ArbeidsgiverInntektsopplysning> {
             forEach {

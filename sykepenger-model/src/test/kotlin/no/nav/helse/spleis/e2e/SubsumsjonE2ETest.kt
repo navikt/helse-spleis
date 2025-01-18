@@ -94,9 +94,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
-            arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a2, INNTEKT * 1.1)),
+            arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a2, INNTEKT * 1.1, emptyList(), overstyringbegrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse("forklaring", OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.NYOPPSTARTET_ARBEIDSFORHOLD))),
             begrunnelser = listOf(
-                OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(a2, "forklaring", OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.NYOPPSTARTET_ARBEIDSFORHOLD)
+                OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse("forklaring", OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.NYOPPSTARTET_ARBEIDSFORHOLD)
             )
         )
 
