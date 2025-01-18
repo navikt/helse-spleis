@@ -15,6 +15,8 @@ import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`fvl § 35 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`
+import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav a`
+import no.nav.helse.etterlevelse.`§ 8-29`
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
@@ -158,7 +160,9 @@ import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.person.inntekt.SkatteopplysningSykepengegrunnlag
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
 import no.nav.helse.person.refusjon.Refusjonsservitør
@@ -1329,15 +1333,46 @@ internal class Vedtaksperiode private constructor(
 
         val inntektForArbeidsgiver = arbeidsgiver.avklarInntekt(skjæringstidspunkt, alleForSammeArbeidsgiver)
         val faktaavklartInntekt = when (inntektForArbeidsgiver) {
+            // arbeidsgiver har ikke sendt egne inntektsopplysninger
             null -> skatteopplysning
-            else -> {
-                inntektForArbeidsgiver.avklarSykepengegrunnlag(skatteopplysning)
-            }
+            // velger arbeidsgiver eller skatt, avhengig av måneden skjæringstidspunktet er i
+            else -> inntektForArbeidsgiver.avklarSykepengegrunnlag(skatteopplysning)
         }
+        if (faktaavklartInntekt is SkattSykepengegrunnlag) subsummerBrukAvSkatteopplysninger(faktaavklartInntekt)
         return ArbeidsgiverInntektsopplysning(
             orgnummer = arbeidsgiver.organisasjonsnummer,
             gjelder = skjæringstidspunkt til LocalDate.MAX,
             inntektsopplysning = faktaavklartInntekt
+        )
+    }
+
+    private fun subsummerBrukAvSkatteopplysninger(inntekt: SkatteopplysningSykepengegrunnlag) {
+        subsummerBrukAvSkatteopplysninger(arbeidsgiver.organisasjonsnummer, inntekt)
+    }
+    private fun subsummerGhostArbeidsgiver(orgnummer: String, inntekt: SkatteopplysningSykepengegrunnlag) {
+        subsummerBrukAvSkatteopplysninger(orgnummer, inntekt)
+    }
+    private fun subsummerBrukAvSkatteopplysninger(orgnummer: String, inntekt: SkatteopplysningSykepengegrunnlag) {
+        val inntekter = when (inntekt) {
+            is IkkeRapportert -> emptyList()
+            is SkattSykepengegrunnlag -> inntekt.inntektsopplysninger.subsumsjonsformat()
+        }
+        subsumsjonslogg.logg(
+            `§ 8-28 ledd 3 bokstav a`(
+                organisasjonsnummer = orgnummer,
+                skjæringstidspunkt = skjæringstidspunkt,
+                inntekterSisteTreMåneder = inntekter,
+                grunnlagForSykepengegrunnlagÅrlig = inntekt.fastsattÅrsinntekt().årlig,
+                grunnlagForSykepengegrunnlagMånedlig = inntekt.fastsattÅrsinntekt().månedlig
+            )
+        )
+        subsumsjonslogg.logg(
+            `§ 8-29`(
+                skjæringstidspunkt = skjæringstidspunkt,
+                grunnlagForSykepengegrunnlagÅrlig = inntekt.fastsattÅrsinntekt().årlig,
+                inntektsopplysninger = inntekter,
+                organisasjonsnummer = orgnummer
+            )
         )
     }
 
@@ -1373,6 +1408,7 @@ internal class Vedtaksperiode private constructor(
                 skatteopplysning.ghostInntektsgrunnlag(skjæringstidspunkt)?.let { ghostopplysning ->
                     // vi er ghost, ingen søknader på skjæringstidspunktet og
                     // inntekten fra skatt anses som ghost
+                    subsummerGhostArbeidsgiver(skatteopplysning.arbeidsgiver, ghostopplysning)
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = skatteopplysning.arbeidsgiver,
                         gjelder = skjæringstidspunkt til LocalDate.MAX,
@@ -1389,7 +1425,8 @@ internal class Vedtaksperiode private constructor(
         val inntektsgrunnlagArbeidsgivere = inntektsgrunnlagArbeidsgivere(hendelse, skatteopplysninger)
         // ghosts er alle inntekter fra skatt, som vi ikke har søknad for og som skal vektlegges som ghost
         val ghosts = ghostArbeidsgivere(inntektsgrunnlagArbeidsgivere, skatteopplysninger)
-        return Inntektsgrunnlag.opprett(person.alder, inntektsgrunnlagArbeidsgivere + ghosts, skjæringstidspunkt, jurist)
+        val inntektene = inntektsgrunnlagArbeidsgivere + ghosts
+        return Inntektsgrunnlag.opprett(person.alder, inntektene, skjæringstidspunkt, jurist)
     }
 
     private fun håndterVilkårsgrunnlag(

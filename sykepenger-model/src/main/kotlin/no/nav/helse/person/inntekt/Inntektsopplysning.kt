@@ -9,17 +9,9 @@ import no.nav.helse.dto.serialisering.InntektsdataUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-15`
-import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav a`
-import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav b`
-import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav c`
-import no.nav.helse.etterlevelse.`§ 8-28 ledd 5`
-import no.nav.helse.etterlevelse.`§ 8-29`
-import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.inntekt.Saksbehandler.Begrunnelse
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
@@ -113,84 +105,6 @@ sealed class Inntektsopplysning(
     fun funksjoneltLik(other: Inntektsopplysning) =
         this::class == other::class && this.inntektsdata.funksjoneltLik(other.inntektsdata)
 
-    internal fun subsumerSykepengegrunnlag(
-        subsumsjonslogg: Subsumsjonslogg,
-        organisasjonsnummer: String,
-        startdatoArbeidsforhold: LocalDate?
-    ) {
-        when (this) {
-            is Saksbehandler -> {
-                if (subsumsjon == null) return
-                requireNotNull(forklaring) { "Det skal være en forklaring fra saksbehandler ved overstyring av inntekt" }
-                when (begrunnelse) {
-                    Begrunnelse.NYOPPSTARTET_ARBEIDSFORHOLD -> {
-                        requireNotNull(startdatoArbeidsforhold) { "Fant ikke aktivt arbeidsforhold for skjæringstidspunktet i arbeidsforholdshistorikken" }
-                        subsumsjonslogg.logg(
-                            `§ 8-28 ledd 3 bokstav b`(
-                                organisasjonsnummer = organisasjonsnummer,
-                                startdatoArbeidsforhold = startdatoArbeidsforhold,
-                                overstyrtInntektFraSaksbehandler = mapOf("dato" to inntektsdata.dato, "beløp" to inntektsdata.beløp.månedlig),
-                                skjæringstidspunkt = inntektsdata.dato,
-                                forklaring = forklaring,
-                                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
-                                grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
-                            )
-                        )
-                    }
-                    Begrunnelse.VARIG_LØNNSENDRING -> {
-                        subsumsjonslogg.logg(
-                            `§ 8-28 ledd 3 bokstav c`(
-                                organisasjonsnummer = organisasjonsnummer,
-                                overstyrtInntektFraSaksbehandler = mapOf("dato" to inntektsdata.dato, "beløp" to inntektsdata.beløp.månedlig),
-                                skjæringstidspunkt = inntektsdata.dato,
-                                forklaring = forklaring,
-                                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
-                                grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
-                            )
-                        )
-                    }
-                    Begrunnelse.MANGELFULL_ELLER_URIKTIG_INNRAPPORTERING -> {
-                        subsumsjonslogg.logg(
-                            `§ 8-28 ledd 5`(
-                                organisasjonsnummer = organisasjonsnummer,
-                                overstyrtInntektFraSaksbehandler = mapOf("dato" to inntektsdata.dato, "beløp" to inntektsdata.beløp.månedlig),
-                                skjæringstidspunkt = inntektsdata.dato,
-                                forklaring = forklaring,
-                                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
-                                grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
-                            )
-                        )
-                    }
-                    null -> {}
-                }
-            }
-            is SkattSykepengegrunnlag -> {
-                subsumsjonslogg.logg(
-                    `§ 8-28 ledd 3 bokstav a`(
-                        organisasjonsnummer = organisasjonsnummer,
-                        skjæringstidspunkt = inntektsdata.dato,
-                        inntekterSisteTreMåneder = inntektsopplysninger.subsumsjonsformat(),
-                        grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
-                        grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
-                    )
-                )
-                subsumsjonslogg.logg(
-                    `§ 8-29`(
-                        skjæringstidspunkt = inntektsdata.dato,
-                        grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
-                        inntektsopplysninger = inntektsopplysninger.subsumsjonsformat(),
-                        organisasjonsnummer = organisasjonsnummer
-                    )
-                )
-            }
-
-            is Infotrygd,
-            is Inntektsmeldinginntekt,
-            is IkkeRapportert,
-            is SkjønnsmessigFastsatt -> {}
-        }
-    }
-
     internal fun subsumerArbeidsforhold(
         subsumsjonslogg: Subsumsjonslogg,
         organisasjonsnummer: String,
@@ -241,17 +155,6 @@ sealed class Inntektsopplysning(
             aktivitetslogg = aktivitetslogg,
             nyArbeidsgiverperiode = nyArbeidsgiverperiode
         )
-    }
-
-    internal fun arbeidsgiveropplysningerKorrigert(person: Person, orgnummer: String, saksbehandlerOverstyring: OverstyrArbeidsgiveropplysninger) {
-        when (this) {
-            is Inntektsmeldinginntekt -> saksbehandlerOverstyring.arbeidsgiveropplysningerKorrigert(person, orgnummer, inntektsdata.hendelseId)
-            is Infotrygd,
-            is Saksbehandler,
-            is IkkeRapportert,
-            is SkattSykepengegrunnlag,
-            is SkjønnsmessigFastsatt -> {}
-        }
     }
 
     internal companion object {

@@ -20,7 +20,6 @@ import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Person
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
@@ -32,7 +31,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fakt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattInntekt
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finn
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harGjenbrukbarInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
@@ -40,7 +38,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.mark
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.sjekkForNyArbeidsgiver
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.subsummer
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.totalOmregnetÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_6G_BEGRENSET
@@ -90,7 +87,6 @@ internal class Inntektsgrunnlag private constructor(
         vurdertInfotrygd: Boolean = false
     ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, emptyList(), emptyList(), vurdertInfotrygd) {
         subsumsjonslogg.apply {
-            arbeidsgiverInntektsopplysninger.subsummer(this, forrige = emptyList())
             logg(
                 `§ 8-10 ledd 2 punktum 1`(
                     erBegrenset = begrensning == ER_6G_BEGRENSET,
@@ -268,17 +264,15 @@ internal class Inntektsgrunnlag private constructor(
         return hendelse.overstyr(this, subsumsjonslogg)
     }
 
-    internal fun overstyrArbeidsgiveropplysninger(person: Person, hendelse: OverstyrArbeidsgiveropplysninger, opptjening: Opptjening?, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
-        val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, opptjening, subsumsjonslogg)
+    internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonslogg: Subsumsjonslogg): EndretInntektsgrunnlag? {
+        val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger)
         hendelse.overstyr(builder)
         val resultat = builder.resultat()
-        val overstyrtTilkommenInntekt = tilkommendeInntekter.overstyr(hendelse)
-        arbeidsgiverInntektsopplysninger.forEach { it.arbeidsgiveropplysningerKorrigert(person, hendelse) }
-        return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, overstyrtTilkommenInntekt, subsumsjonslogg)
+        return lagEndring(resultat, subsumsjonslogg, tilkommendeInntekter.overstyr(hendelse))
     }
 
-    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, opptjening: Opptjening?, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
-        val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, opptjening, subsumsjonslogg)
+    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
+        val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger)
         hendelse.overstyr(builder)
         val resultat = builder.resultat()
         return kopierSykepengegrunnlagOgValiderMinsteinntekt(
@@ -306,12 +300,23 @@ internal class Inntektsgrunnlag private constructor(
             gjelder = skjæringstidspunkt til LocalDate.MAX,
             inntektsopplysning = inntekt
         )
-        val resultat = arbeidsgiverInntektsopplysninger.overstyrInntekter(skjæringstidspunkt, null, listOf(nyInntektsopplysning), subsumsjonslogg)
-        val nyttInntektsgrunnlag = kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, tilkommendeInntekter, subsumsjonslogg)
+        val resultat = arbeidsgiverInntektsopplysninger.overstyrInntekter(skjæringstidspunkt, listOf(nyInntektsopplysning))
+        return lagEndring(resultat, subsumsjonslogg)
+    }
+
+    private fun lagEndring(nyeInntekter: List<ArbeidsgiverInntektsopplysning>, subsumsjonslogg: Subsumsjonslogg, nyeInntekterUnderveis: List<NyInntektUnderveis> = tilkommendeInntekter): EndretInntektsgrunnlag? {
+        val nyttInntektsgrunnlag = kopierSykepengegrunnlagOgValiderMinsteinntekt(nyeInntekter, deaktiverteArbeidsforhold, nyeInntekterUnderveis, subsumsjonslogg)
         val endringFom = nyttInntektsgrunnlag.finnEndringsdato(this) ?: return null
         return EndretInntektsgrunnlag(
-            inntektFør = arbeidsgiverInntektsopplysninger.finn(organisasjonsnummer),
-            inntektEtter = resultat.finn(organisasjonsnummer),
+            inntekter = nyeInntekter.mapNotNull { potensiellEndret ->
+                val eksisterende = arbeidsgiverInntektsopplysninger.single { eksisterende -> potensiellEndret.orgnummer == eksisterende.orgnummer }
+
+                if (eksisterende.inntektsopplysning.id == potensiellEndret.inntektsopplysning.id) null
+                else EndretInntektsgrunnlag.EndretInntekt(
+                    inntektFør = eksisterende,
+                    inntektEtter = potensiellEndret
+                )
+            },
             endringFom = endringFom,
             inntektsgrunnlagFør = this,
             inntektsgrunnlagEtter = nyttInntektsgrunnlag
@@ -392,9 +397,7 @@ internal class Inntektsgrunnlag private constructor(
 
     internal class ArbeidsgiverInntektsopplysningerOverstyringer(
         private val skjæringstidspunkt: LocalDate,
-        private val opprinneligArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-        private val opptjening: Opptjening?,
-        private val subsumsjonslogg: Subsumsjonslogg
+        private val opprinneligArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>
     ) {
         private val nyeInntektsopplysninger = mutableListOf<ArbeidsgiverInntektsopplysning>()
         internal fun leggTilInntekt(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning) {
@@ -402,7 +405,7 @@ internal class Inntektsgrunnlag private constructor(
         }
 
         internal fun resultat(): List<ArbeidsgiverInntektsopplysning> {
-            return opprinneligArbeidsgiverInntektsopplysninger.overstyrInntekter(skjæringstidspunkt, opptjening, nyeInntektsopplysninger, subsumsjonslogg)
+            return opprinneligArbeidsgiverInntektsopplysninger.overstyrInntekter(skjæringstidspunkt, nyeInntektsopplysninger)
         }
     }
 
@@ -434,12 +437,16 @@ internal class Inntektsgrunnlag private constructor(
 }
 
 internal data class EndretInntektsgrunnlag(
-    val inntektFør: ArbeidsgiverInntektsopplysning?,
-    val inntektEtter: ArbeidsgiverInntektsopplysning?,
+    val inntekter: List<EndretInntekt>,
     val endringFom: LocalDate,
     val inntektsgrunnlagFør: Inntektsgrunnlag,
     val inntektsgrunnlagEtter: Inntektsgrunnlag
-)
+) {
+    data class EndretInntekt(
+        val inntektFør: ArbeidsgiverInntektsopplysning,
+        val inntektEtter: ArbeidsgiverInntektsopplysning,
+    )
+}
 
 internal data class InntektsgrunnlagView(
     val sykepengegrunnlag: Inntekt,

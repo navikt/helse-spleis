@@ -68,6 +68,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.venter
 import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
+import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -78,8 +79,13 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.inntekt.IkkeRapportert
+import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.NyInntektUnderveis
+import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.view.PersonView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -708,7 +714,10 @@ class Person private constructor(
         }
         val (nyttGrunnlag, endretInntektsgrunnlag) = grunnlag.nyeArbeidsgiverInntektsopplysninger(organisasjonsnummer, inntekt, aktivitetslogg, subsumsjonslogg) ?: return null
 
-        when (val inntektFraFør = endretInntektsgrunnlag.inntektFør?.inntektsopplysning) {
+        val endretInntektForArbeidsgiver = endretInntektsgrunnlag.inntekter.firstNotNullOf { før ->
+            før.inntektFør.inntektsopplysning.takeIf { før.inntektFør.orgnummer == organisasjonsnummer }
+        }
+        when (val inntektFraFør = endretInntektForArbeidsgiver) {
             is Inntektsmeldinginntekt -> {
                 arbeidsgiveropplysningerKorrigert(
                     PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
@@ -719,8 +728,7 @@ class Person private constructor(
                 )
             }
 
-            else -> { /* gjør ingenting */
-            }
+            else -> { /* gjør ingenting */ }
         }
 
         val eventyr = Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(hendelse, skjæringstidspunkt, endretInntektsgrunnlag.endringFom)
@@ -735,8 +743,33 @@ class Person private constructor(
         subsumsjonslogg: Subsumsjonslogg
     ): Revurderingseventyr? {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return null
-        val (nyttGrunnlag, eventyr) = grunnlag.overstyrArbeidsgiveropplysninger(this, hendelse, aktivitetslogg, subsumsjonslogg) ?: return null
+        val (nyttGrunnlag, endretInntektsgrunnlag) = grunnlag.overstyrArbeidsgiveropplysninger(hendelse, aktivitetslogg, subsumsjonslogg) ?: return null
         nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
+
+        endretInntektsgrunnlag.inntekter
+            .forEach {
+                it.inntektEtter.inntektsopplysning as Saksbehandler
+                val opptjeningFom = nyttGrunnlag.opptjening!!.startdatoFor(it.inntektEtter.orgnummer)
+                hendelse.subsummer(subsumsjonslogg, opptjeningFom, it.inntektEtter.orgnummer, it.inntektEtter.inntektsopplysning)
+                when (it.inntektFør.inntektsopplysning) {
+                    is Inntektsmeldinginntekt -> {
+                        arbeidsgiveropplysningerKorrigert(
+                            PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
+                                korrigertInntektsmeldingId = it.inntektFør.inntektsopplysning.inntektsdata.hendelseId,
+                                korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
+                                korrigerendeInntektsopplysningId = hendelse.metadata.meldingsreferanseId
+                            )
+                        )
+                    }
+                    is Infotrygd,
+                    is Saksbehandler,
+                    is IkkeRapportert,
+                    is SkattSykepengegrunnlag,
+                    is SkjønnsmessigFastsatt -> { /* gjør ingenting */ }
+                }
+            }
+
+        val eventyr = Revurderingseventyr.arbeidsgiveropplysninger(hendelse, skjæringstidspunkt, endretInntektsgrunnlag.endringFom)
         return eventyr
     }
 

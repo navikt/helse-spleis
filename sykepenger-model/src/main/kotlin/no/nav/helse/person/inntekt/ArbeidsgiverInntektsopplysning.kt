@@ -5,11 +5,9 @@ import java.util.*
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -88,10 +86,6 @@ data class ArbeidsgiverInntektsopplysning(
         inntektsopplysning = this.inntektsopplysning.omregnetÅrsinntekt()
     )
 
-    private fun subsummer(subsumsjonslogg: Subsumsjonslogg, opptjening: Opptjening?) {
-        inntektsopplysning.subsumerSykepengegrunnlag(subsumsjonslogg, orgnummer, opptjening?.startdatoFor(orgnummer))
-    }
-
     private fun deaktiver(
         forklaring: String,
         oppfylt: Boolean,
@@ -99,13 +93,6 @@ data class ArbeidsgiverInntektsopplysning(
     ): ArbeidsgiverInntektsopplysning {
         inntektsopplysning.subsumerArbeidsforhold(subsumsjonslogg, orgnummer, forklaring, oppfylt)
         return this
-    }
-
-    internal fun arbeidsgiveropplysningerKorrigert(
-        person: Person,
-        saksbehandleroverstyring: OverstyrArbeidsgiveropplysninger
-    ) {
-        inntektsopplysning.arbeidsgiveropplysningerKorrigert(person, orgnummer, saksbehandleroverstyring)
     }
 
     internal companion object {
@@ -169,13 +156,9 @@ data class ArbeidsgiverInntektsopplysning(
         // og legger til ting i *other* som ikke finnes i *this* som tilkommet inntekter
         internal fun List<ArbeidsgiverInntektsopplysning>.overstyrInntekter(
             skjæringstidspunkt: LocalDate,
-            opptjening: Opptjening?,
-            other: List<ArbeidsgiverInntektsopplysning>,
-            subsumsjonslogg: Subsumsjonslogg
+            other: List<ArbeidsgiverInntektsopplysning>
         ): List<ArbeidsgiverInntektsopplysning> {
-            val endringen = this
-                .map { inntekt -> inntekt.overstyr(other) }
-                .also { it.subsummer(subsumsjonslogg, opptjening, this) }
+            val endringen = this.map { inntekt -> inntekt.overstyr(other) }
             if (erOmregnetÅrsinntektEndret(skjæringstidspunkt, this, endringen)) {
                 return endringen.map { it.rullTilbake() }
             }
@@ -242,23 +225,6 @@ data class ArbeidsgiverInntektsopplysning(
         ): PersonObserver.FastsattInntekt? {
             val fastsattOpplysning = singleOrNull { it.gjelder(organisasjonsnummer) } ?: return null
             return PersonObserver.FastsattInntekt(fastsattOpplysning.fastsattÅrsinntekt(skjæringstidspunkt))
-        }
-
-        private fun List<ArbeidsgiverInntektsopplysning>.finnEndredeInntektsopplysninger(forrige: List<ArbeidsgiverInntektsopplysning>): List<ArbeidsgiverInntektsopplysning> {
-            val forrigeInntektsopplysninger = forrige.map { it.inntektsopplysning }
-            return filter { potensiellNy ->
-                forrigeInntektsopplysninger.none { eksisterende -> potensiellNy.inntektsopplysning.funksjoneltLik(eksisterende) }
-            }
-        }
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.subsummer(
-            subsumsjonslogg: Subsumsjonslogg,
-            opptjening: Opptjening? = null,
-            forrige: List<ArbeidsgiverInntektsopplysning>
-        ) {
-            val endredeInntektsopplysninger = finnEndredeInntektsopplysninger(forrige)
-            if (endredeInntektsopplysninger.isEmpty()) return
-            endredeInntektsopplysninger.forEach { it.subsummer(subsumsjonslogg, opptjening) }
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.berik(builder: UtkastTilVedtakBuilder) = this

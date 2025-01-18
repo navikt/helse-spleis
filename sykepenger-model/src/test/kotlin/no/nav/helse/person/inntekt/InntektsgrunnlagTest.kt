@@ -372,7 +372,7 @@ internal class InntektsgrunnlagTest {
             ArbeidsgiverInntektsopplysning("a1", skjæringstidsounkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidsounkt, UUID.randomUUID(), 25000.månedlig)),
             ArbeidsgiverInntektsopplysning("a2", skjæringstidsounkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidsounkt, UUID.randomUUID(), 5000.månedlig)),
         )
-        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidsounkt, opprinnelig, null, EmptyLog)
+        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidsounkt, opprinnelig)
         val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidsounkt til LocalDate.MAX, Saksbehandler(skjæringstidsounkt, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()))
         overstyring.leggTilInntekt(endretOpplysning)
 
@@ -388,7 +388,7 @@ internal class InntektsgrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
+        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig)
         val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()))
         overstyring.leggTilInntekt(endretOpplysning)
 
@@ -405,7 +405,7 @@ internal class InntektsgrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
+        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig)
 
         val a1EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
 
@@ -425,7 +425,7 @@ internal class InntektsgrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
+        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig)
 
         val a1EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
 
@@ -444,7 +444,7 @@ internal class InntektsgrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
+        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig)
 
         val a3EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
 

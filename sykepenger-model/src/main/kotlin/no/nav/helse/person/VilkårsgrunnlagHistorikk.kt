@@ -178,15 +178,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
         )
 
-        internal fun overstyrArbeidsgiveropplysninger(person: Person, hendelse: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): Pair<VilkårsgrunnlagElement, Revurderingseventyr>? {
-            val sykepengegrunnlag = inntektsgrunnlag.overstyrArbeidsgiveropplysninger(person, hendelse, opptjening, subsumsjonslogg)
-            val endringsdato = sykepengegrunnlag.finnEndringsdato(this.inntektsgrunnlag) ?: return null
-            val eventyr = Revurderingseventyr.arbeidsgiveropplysninger(hendelse, skjæringstidspunkt, endringsdato)
-            return kopierMed(aktivitetslogg, sykepengegrunnlag, opptjening, subsumsjonslogg) to eventyr
+        internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): Pair<VilkårsgrunnlagElement, EndretInntektsgrunnlag>? {
+            val endretInntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsgiveropplysninger(hendelse, subsumsjonslogg) ?: return null
+            return kopierMed(aktivitetslogg, endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, subsumsjonslogg) to endretInntektsgrunnlag
         }
 
         internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): Pair<VilkårsgrunnlagElement, Revurderingseventyr>? {
-            val sykepengegrunnlag = inntektsgrunnlag.skjønnsmessigFastsettelse(hendelse, opptjening, subsumsjonslogg)
+            val sykepengegrunnlag = inntektsgrunnlag.skjønnsmessigFastsettelse(hendelse, subsumsjonslogg)
             val endringsdato = sykepengegrunnlag.finnEndringsdato(this.inntektsgrunnlag) ?: return null
             val eventyr = Revurderingseventyr.skjønnsmessigFastsettelse(hendelse, skjæringstidspunkt, endringsdato)
             return kopierMed(aktivitetslogg, sykepengegrunnlag, opptjening, subsumsjonslogg) to eventyr

@@ -3,20 +3,15 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.april
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
-import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.KontekstType
-import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
-import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.januar
-import no.nav.helse.person.Opptjening
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
@@ -43,7 +38,6 @@ internal class ArbeidsgiverInntektsopplysningTest {
     @Test
     fun `overstyr inntekter`() {
         val skjæringstidspunkt = 1.januar
-        val opptjening = Opptjening.nyOpptjening(emptyList(), skjæringstidspunkt)
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig))
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 2000.månedlig))
         val a1Overstyrt = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 3000.månedlig, "", null, LocalDateTime.now()))
@@ -56,29 +50,24 @@ internal class ArbeidsgiverInntektsopplysningTest {
         assertEquals(
             expected, original.overstyrInntekter(
             skjæringstidspunkt,
-            opptjening,
-            listOf(a1Overstyrt, a1Overstyrt),
-            EmptyLog
+            listOf(a1Overstyrt, a1Overstyrt)
         )
         ) { "kan ikke velge mellom inntekter for samme orgnr" }
 
         assertEquals(
             expected, original.overstyrInntekter(
             skjæringstidspunkt,
-            opptjening,
-            emptyList(),
-            EmptyLog
+            emptyList()
         )
         )
-        assertTrue(listOf(a1Overstyrt, a2Opplysning).funksjoneltLik(original.overstyrInntekter(skjæringstidspunkt, opptjening, new, EmptyLog)))
+        assertTrue(listOf(a1Overstyrt, a2Opplysning).funksjoneltLik(original.overstyrInntekter(skjæringstidspunkt, new)))
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
-        assertTrue(listOf(a1Overstyrt, a2Opplysning).funksjoneltLik(original.overstyrInntekter(skjæringstidspunkt, opptjening, forMange, EmptyLog)))
+        assertTrue(listOf(a1Overstyrt, a2Opplysning).funksjoneltLik(original.overstyrInntekter(skjæringstidspunkt, forMange)))
     }
 
     @Test
     fun `ny inntektsmelding uten endring i beløp endrer kun omregnet årsinntekt for skjønnsmessig fastsatt`() {
         val skjæringstidspunkt = 1.januar
-        val opptjening = Opptjening.nyOpptjening(emptyList(), skjæringstidspunkt)
         val inntektsmeldinginntektA1 = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig)
         val inntektsmeldinginntektA2 = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 2000.månedlig)
         val inntektsmeldinginntektA3 = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 3000.månedlig)
@@ -97,9 +86,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
 
         val actual = original.overstyrInntekter(
             skjæringstidspunkt,
-            opptjening,
-            new,
-            EmptyLog
+            new
         )
         assertTrue(expected.funksjoneltLik(actual)) { "kan ikke velge mellom inntekter for samme orgnr" }
     }
@@ -107,7 +94,6 @@ internal class ArbeidsgiverInntektsopplysningTest {
     @Test
     fun `ny inntektsmelding uten endring i beløp i forhold Skatt endrer kun omregnet årsinntekt for skjønnsmessig fastsatt`() {
         val skjæringstidspunkt = 1.januar
-        val opptjening = Opptjening.nyOpptjening(emptyList(), skjæringstidspunkt)
         val skattA1 = skattSykepengegrunnlag(
             UUID.randomUUID(), skjæringstidspunkt, listOf(
             Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(1).yearMonth, LØNNSINNTEKT, "", ""),
@@ -131,61 +117,9 @@ internal class ArbeidsgiverInntektsopplysningTest {
 
         val actual = original.overstyrInntekter(
             skjæringstidspunkt,
-            opptjening,
-            new,
-            EmptyLog
+            new
         )
         assertTrue(expected.funksjoneltLik(actual))
-    }
-
-    @Test
-    fun `subsummerer etter overstyring`() {
-        val skjæringstidspunkt = 1.april
-        val ansattFom = 1.januar
-        val orgnummer = "a1"
-
-        val opptjening = Opptjening.nyOpptjening(
-            listOf(
-                Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
-                    orgnummer, listOf(
-                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(
-                        ansattFom,
-                        null,
-                        false
-                    )
-                )
-                )
-            ), skjæringstidspunkt
-        )
-
-        val paragraf = Paragraf.PARAGRAF_8_28
-        val ledd = Ledd.LEDD_3
-        val bokstav = Bokstav.BOKSTAV_B
-        val overstyrtBeløp = 3000.månedlig
-
-        val subsumsjon = Subsumsjon(paragraf.ref, ledd.nummer, bokstav.ref.toString())
-        val a1Opplysning = ArbeidsgiverInntektsopplysning(orgnummer, skjæringstidspunkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig))
-        val a1Overstyrt = ArbeidsgiverInntektsopplysning(orgnummer, skjæringstidspunkt til LocalDate.MAX, Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), overstyrtBeløp, "Jeg bare måtte gjøre det", subsumsjon, LocalDateTime.now()))
-
-        listOf(a1Opplysning).overstyrInntekter(skjæringstidspunkt, opptjening, listOf(a1Overstyrt), jurist)
-        SubsumsjonInspektør(subsumsjonslogg).assertBeregnet(
-            paragraf = paragraf,
-            versjon = LocalDate.of(2019, 1, 1),
-            ledd = ledd,
-            punktum = null,
-            bokstav = bokstav,
-            input = mapOf(
-                "organisasjonsnummer" to orgnummer,
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "startdatoArbeidsforhold" to ansattFom,
-                "overstyrtInntektFraSaksbehandler" to mapOf("dato" to skjæringstidspunkt, "beløp" to overstyrtBeløp.månedlig),
-                "forklaring" to "Jeg bare måtte gjøre det"
-            ),
-            output = mapOf(
-                "beregnetGrunnlagForSykepengegrunnlagPrÅr" to overstyrtBeløp.årlig,
-                "beregnetGrunnlagForSykepengegrunnlagPrMåned" to overstyrtBeløp.månedlig
-            )
-        )
     }
 
     @Test
