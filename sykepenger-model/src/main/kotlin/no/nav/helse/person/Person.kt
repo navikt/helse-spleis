@@ -212,14 +212,14 @@ class Person private constructor(
     }
 
     fun håndter(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler arbeidsgiveropplysningene ${arbeidsgiveropplysninger.map { it::class.simpleName }.joinToString()}")
+        registrer(aktivitetslogg, "Behandler arbeidsgiveropplysningene ${arbeidsgiveropplysninger.joinToString { "${it::class.simpleName}" }}")
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(arbeidsgiveropplysninger.behandlingsporing, aktivitetslogg)
         arbeidsgiver.håndter(arbeidsgiveropplysninger, aktivitetslogg)
         håndterGjenoppta(arbeidsgiveropplysninger, aktivitetslogg)
     }
 
     fun håndter(korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler de korrigerte arbeidsgiveropplysningene ${korrigerteArbeidsgiveropplysninger.map { it::class.simpleName }.joinToString()}")
+        registrer(aktivitetslogg, "Behandler de korrigerte arbeidsgiveropplysningene ${korrigerteArbeidsgiveropplysninger.joinToString { "${it::class.simpleName}" }}")
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(korrigerteArbeidsgiveropplysninger.behandlingsporing, aktivitetslogg)
         arbeidsgiver.håndter(korrigerteArbeidsgiveropplysninger, aktivitetslogg)
         håndterGjenoppta(korrigerteArbeidsgiveropplysninger, aktivitetslogg)
