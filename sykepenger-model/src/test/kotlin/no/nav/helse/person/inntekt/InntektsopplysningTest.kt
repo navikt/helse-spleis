@@ -2,7 +2,7 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
@@ -11,10 +11,8 @@ import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertInstanceOf
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -34,13 +32,13 @@ internal class InntektsopplysningTest {
         val saksbehandler4 = Saksbehandler(20.januar, UUID.randomUUID(), INGEN, "", null, LocalDateTime.now())
         val ikkeRapportert = IkkeRapportert(1.januar, UUID.randomUUID())
 
-        assertEquals(saksbehandler1, im1.overstyresAv(saksbehandler1))
-        assertEquals(saksbehandler1, saksbehandler1.overstyresAv(saksbehandler2))
-        assertEquals(saksbehandler3, saksbehandler1.overstyresAv(saksbehandler3))
-        assertEquals(im1, im1.overstyresAv(im2))
-        assertEquals(ikkeRapportert, ikkeRapportert.overstyresAv(saksbehandler4))
-        assertEquals(saksbehandler1, ikkeRapportert.overstyresAv(saksbehandler1))
-        assertEquals(im1, ikkeRapportert.overstyresAv(im1))
+        assertTrue(saksbehandler1.funksjoneltLik(im1.overstyresAv(saksbehandler1)))
+        assertSame(saksbehandler1, saksbehandler1.overstyresAv(saksbehandler2))
+        assertTrue(saksbehandler3.funksjoneltLik(saksbehandler1.overstyresAv(saksbehandler3)))
+        assertTrue(im1.funksjoneltLik(im1.overstyresAv(im2)))
+        assertSame(ikkeRapportert, ikkeRapportert.overstyresAv(saksbehandler4))
+        assertTrue(saksbehandler1.funksjoneltLik(ikkeRapportert.overstyresAv(saksbehandler1)))
+        assertSame(im1, ikkeRapportert.overstyresAv(im1))
     }
 
     @Test
@@ -53,13 +51,13 @@ internal class InntektsopplysningTest {
         val ikkeRapportert = IkkeRapportert(1.januar, UUID.randomUUID())
         val skatt = skattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
 
-        assertEquals(im, im.omregnetÅrsinntekt())
-        assertEquals(saksbehandler, saksbehandler.omregnetÅrsinntekt())
-        assertEquals(im, skjønnsmessigFastsatt1.omregnetÅrsinntekt())
-        assertEquals(saksbehandler, skjønnsmessigFastsatt2.omregnetÅrsinntekt())
-        assertEquals(saksbehandler, skjønnsmessigFastsatt3.omregnetÅrsinntekt())
-        assertEquals(ikkeRapportert, ikkeRapportert.omregnetÅrsinntekt())
-        assertEquals(skatt, skatt.omregnetÅrsinntekt())
+        assertSame(im, im.omregnetÅrsinntekt())
+        assertSame(saksbehandler, saksbehandler.omregnetÅrsinntekt())
+        assertSame(im, skjønnsmessigFastsatt1.omregnetÅrsinntekt())
+        assertSame(saksbehandler, skjønnsmessigFastsatt2.omregnetÅrsinntekt())
+        assertSame(saksbehandler, skjønnsmessigFastsatt3.omregnetÅrsinntekt())
+        assertSame(ikkeRapportert, ikkeRapportert.omregnetÅrsinntekt())
+        assertSame(skatt, skatt.omregnetÅrsinntekt())
     }
 
     @Test
@@ -68,7 +66,7 @@ internal class InntektsopplysningTest {
         val im1 = Inntektsmeldinginntekt(1.januar, hendelsesId, INNTEKT)
         val im2 = Inntektsmeldinginntekt(1.januar, hendelsesId, INNTEKT)
 
-        assertEquals(im1, im2)
+        assertTrue(im1.funksjoneltLik(im2))
         assertFalse(im1.kanLagres(im2))
         assertFalse(im2.kanLagres(im1))
     }
@@ -78,7 +76,7 @@ internal class InntektsopplysningTest {
         val im1 = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT)
         val im2 = Inntektsmeldinginntekt(2.januar, UUID.randomUUID(), INNTEKT)
 
-        assertNotEquals(im1, im2)
+        assertFalse(im1.funksjoneltLik(im2))
         assertTrue(im1.kanLagres(im2))
         assertTrue(im2.kanLagres(im1))
     }
@@ -88,7 +86,7 @@ internal class InntektsopplysningTest {
         val saksbehandler1 = Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val saksbehandler2 = Saksbehandler(20.januar, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now())
 
-        assertNotEquals(saksbehandler1, saksbehandler2)
+        assertFalse(saksbehandler1.funksjoneltLik(saksbehandler2))
     }
 
     @Test
@@ -96,7 +94,7 @@ internal class InntektsopplysningTest {
         val im1 = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmeldinginntekt.Kilde.Arbeidsgiver, LocalDateTime.now())
         val im2 = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmeldinginntekt.Kilde.Arbeidsgiver, LocalDateTime.now().plusSeconds(1))
 
-        assertEquals(im2, listOf(im1, im2).finnInntektsmeldingForSkjæringstidspunkt(1.januar, null))
+        assertSame(im2, listOf(im1, im2).finnInntektsmeldingForSkjæringstidspunkt(1.januar, null))
     }
 
     @Test

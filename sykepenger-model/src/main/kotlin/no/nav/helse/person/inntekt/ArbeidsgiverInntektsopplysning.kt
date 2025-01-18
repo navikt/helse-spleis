@@ -108,7 +108,17 @@ data class ArbeidsgiverInntektsopplysning(
         inntektsopplysning.arbeidsgiveropplysningerKorrigert(person, orgnummer, saksbehandleroverstyring)
     }
 
+    internal fun funksjoneltLik(other: ArbeidsgiverInntektsopplysning): Boolean {
+        return this.gjelder == other.gjelder && this.orgnummer == other.orgnummer && this.inntektsopplysning.funksjoneltLik(other.inntektsopplysning)
+    }
+
     internal companion object {
+        internal fun List<ArbeidsgiverInntektsopplysning>.funksjoneltLik(other: List<ArbeidsgiverInntektsopplysning>): Boolean {
+            if (this.size != other.size) return false
+            return this
+                .zip(other) { a, b -> a.funksjoneltLik(b) }
+                .none { it == false }
+        }
         internal fun List<ArbeidsgiverInntektsopplysning>.faktaavklarteInntekter() = this
             .map {
                 VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt(
@@ -246,7 +256,9 @@ data class ArbeidsgiverInntektsopplysning(
 
         private fun List<ArbeidsgiverInntektsopplysning>.finnEndredeInntektsopplysninger(forrige: List<ArbeidsgiverInntektsopplysning>): List<ArbeidsgiverInntektsopplysning> {
             val forrigeInntektsopplysninger = forrige.map { it.inntektsopplysning }
-            return filterNot { it.inntektsopplysning in forrigeInntektsopplysninger }
+            return filter { potensiellNy ->
+                forrigeInntektsopplysninger.none { eksisterende -> potensiellNy.inntektsopplysning.funksjoneltLik(eksisterende) }
+            }
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.subsummer(
@@ -296,7 +308,7 @@ data class ArbeidsgiverInntektsopplysning(
                 val gammel = other.singleOrNull { it.orgnummer == ny.orgnummer }
                 when {
                     gammel == null -> ny.gjelder.start
-                    ny.inntektsopplysning != gammel.inntektsopplysning || ny.gjelder != gammel.gjelder -> minOf(ny.gjelder.start, gammel.gjelder.start)
+                    !ny.inntektsopplysning.funksjoneltLik(gammel.inntektsopplysning) || ny.gjelder != gammel.gjelder -> minOf(ny.gjelder.start, gammel.gjelder.start)
                     else -> null
                 }
             }

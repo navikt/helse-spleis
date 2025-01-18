@@ -8,9 +8,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.infotrygd
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -66,64 +64,61 @@ internal class InfotrygdInntektsopplysningTest {
             beløp = 25000.månedlig,
             tidsstempel = tidsstempel
         )
-        assertEquals(
-            inntektsopplysning1,
-            infotrygd(
-                id = inntektID,
-                dato = 1.januar,
-                hendelseId = hendelseId,
-                beløp = 25000.månedlig,
-                tidsstempel = tidsstempel
+        assertTrue(
+            inntektsopplysning1.funksjoneltLik(infotrygd(
+            id = inntektID,
+            dato = 1.januar,
+            hendelseId = hendelseId,
+            beløp = 25000.månedlig,
+            tidsstempel = tidsstempel
+        )))
+        assertFalse(
+            inntektsopplysning1.funksjoneltLik(infotrygd(
+            id = inntektID,
+            dato = 5.januar,
+            hendelseId = hendelseId,
+            beløp = 25000.månedlig,
+            tidsstempel = tidsstempel
+        )))
+        assertFalse(
+            inntektsopplysning1.funksjoneltLik(infotrygd(
+            id = inntektID,
+            dato = 1.januar,
+            hendelseId = hendelseId,
+            beløp = 32000.månedlig,
+            tidsstempel = tidsstempel
+        )))
+        assertTrue(
+            inntektsopplysning1.funksjoneltLik(
+                infotrygd(
+                    id = UUID.randomUUID(),
+                    dato = 1.januar,
+                    hendelseId = hendelseId,
+                    beløp = 25000.månedlig,
+                    tidsstempel = tidsstempel
+                )
             )
         )
-        assertNotEquals(
-            inntektsopplysning1,
-            infotrygd(
-                id = inntektID,
-                dato = 5.januar,
-                hendelseId = hendelseId,
-                beløp = 25000.månedlig,
-                tidsstempel = tidsstempel
+        assertTrue(
+            inntektsopplysning1.funksjoneltLik(
+                infotrygd(
+                    id = inntektID,
+                    dato = 1.januar,
+                    hendelseId = UUID.randomUUID(),
+                    beløp = 25000.månedlig,
+                    tidsstempel = tidsstempel
+                )
             )
         )
-        assertNotEquals(
-            inntektsopplysning1,
-            infotrygd(
-                id = inntektID,
-                dato = 1.januar,
-                hendelseId = hendelseId,
-                beløp = 32000.månedlig,
-                tidsstempel = tidsstempel
-            )
-        )
-        assertEquals(
-            inntektsopplysning1,
-            infotrygd(
-                id = UUID.randomUUID(),
-                dato = 1.januar,
-                hendelseId = hendelseId,
-                beløp = 25000.månedlig,
-                tidsstempel = tidsstempel
-            )
-        )
-        assertEquals(
-            inntektsopplysning1,
-            infotrygd(
-                id = inntektID,
-                dato = 1.januar,
-                hendelseId = UUID.randomUUID(),
-                beløp = 25000.månedlig,
-                tidsstempel = tidsstempel
-            )
-        )
-        assertEquals(
-            inntektsopplysning1,
-            infotrygd(
-                id = inntektID,
-                dato = 1.januar,
-                hendelseId = hendelseId,
-                beløp = 25000.månedlig,
-                tidsstempel = LocalDate.EPOCH.atStartOfDay()
+        assertTrue(
+            inntektsopplysning1.funksjoneltLik(
+                infotrygd(
+                    id = inntektID,
+                    dato = 1.januar,
+                    hendelseId = hendelseId,
+                    beløp = 25000.månedlig,
+                    tidsstempel = LocalDate.EPOCH.atStartOfDay()
+                )
             )
         )
     }

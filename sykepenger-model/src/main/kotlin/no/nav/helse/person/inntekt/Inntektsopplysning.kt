@@ -103,12 +103,8 @@ sealed class Inntektsopplysning(
         }
     }
 
-    final override fun equals(other: Any?): Boolean {
-        if (other !is Inntektsopplysning || other::class != this::class) return false
-        return this.inntektsdata.funksjoneltLik(other.inntektsdata)
-    }
-
-    final override fun hashCode() = id.hashCode()
+    fun funksjoneltLik(other: Inntektsopplysning) =
+        this::class == other::class && this.inntektsdata.funksjoneltLik(other.inntektsdata)
 
     internal open fun subsumerSykepengegrunnlag(
         subsumsjonslogg: Subsumsjonslogg,

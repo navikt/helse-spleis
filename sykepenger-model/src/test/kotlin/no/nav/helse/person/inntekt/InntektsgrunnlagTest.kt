@@ -2,7 +2,7 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.properties.Delegates
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Grunnbeløp
@@ -39,6 +39,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.funksjoneltLik
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
@@ -403,7 +404,7 @@ internal class InntektsgrunnlagTest {
         overstyring.leggTilInntekt(endretOpplysning)
 
         val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning)
-        assertEquals(listOf(forventetOpplysning, a2Opplysning), overstyring.resultat())
+        assertTrue(listOf(forventetOpplysning, a2Opplysning).funksjoneltLik(overstyring.resultat()))
     }
 
     @Test
@@ -423,7 +424,7 @@ internal class InntektsgrunnlagTest {
         overstyring.leggTilInntekt(endretOpplysning)
 
         val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning)
-        assertEquals(listOf(forventetOpplysning, a2Opplysning), overstyring.resultat())
+        assertTrue(listOf(forventetOpplysning, a2Opplysning).funksjoneltLik(overstyring.resultat()))
     }
 
     @Test

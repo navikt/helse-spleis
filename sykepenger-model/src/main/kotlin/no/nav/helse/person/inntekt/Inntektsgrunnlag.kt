@@ -33,6 +33,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fast
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finn
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.funksjoneltLik
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harGjenbrukbarInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
@@ -371,11 +372,11 @@ internal class Inntektsgrunnlag private constructor(
     override fun equals(other: Any?): Boolean {
         if (other !is Inntektsgrunnlag) return false
         return sykepengegrunnlag == other.sykepengegrunnlag
-            && arbeidsgiverInntektsopplysninger == other.arbeidsgiverInntektsopplysninger
+            && arbeidsgiverInntektsopplysninger.funksjoneltLik(other.arbeidsgiverInntektsopplysninger)
             && beregningsgrunnlag == other.beregningsgrunnlag
             && begrensning == other.begrensning
             && `6G` == other.`6G`
-            && deaktiverteArbeidsforhold == other.deaktiverteArbeidsforhold
+            && deaktiverteArbeidsforhold.funksjoneltLik(other.deaktiverteArbeidsforhold)
     }
 
     override fun hashCode(): Int {

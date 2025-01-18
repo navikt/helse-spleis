@@ -2,7 +2,7 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.april
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
@@ -19,12 +19,14 @@ import no.nav.helse.januar
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.funksjoneltLik
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -69,23 +71,9 @@ internal class ArbeidsgiverInntektsopplysningTest {
             EmptyLog
         )
         )
-        assertEquals(
-            listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(
-            skjæringstidspunkt,
-            opptjening,
-            new,
-            EmptyLog
-        )
-        )
+        assertTrue(listOf(a1Overstyrt, a2Opplysning).funksjoneltLik(original.overstyrInntekter(skjæringstidspunkt, opptjening, new, EmptyLog)))
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
-        assertEquals(
-            listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(
-            skjæringstidspunkt,
-            opptjening,
-            forMange,
-            EmptyLog
-        )
-        )
+        assertTrue(listOf(a1Overstyrt, a2Opplysning).funksjoneltLik(original.overstyrInntekter(skjæringstidspunkt, opptjening, forMange, EmptyLog)))
     }
 
     @Test
@@ -114,7 +102,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             new,
             EmptyLog
         )
-        assertEquals(expected, actual) { "kan ikke velge mellom inntekter for samme orgnr" }
+        assertTrue(expected.funksjoneltLik(actual)) { "kan ikke velge mellom inntekter for samme orgnr" }
     }
 
     @Test
@@ -148,7 +136,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             new,
             EmptyLog
         )
-        assertEquals(expected, actual) { "kan ikke velge mellom inntekter for samme orgnr" }
+        assertTrue(expected.funksjoneltLik(actual))
     }
 
     @Test
@@ -214,7 +202,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
 
         val (nyDeaktivert, nyAktivert) = deaktiverte.aktiver(aktive, "a2", "Jeg gjorde en feil, jeg angrer!", EmptyLog)
         assertEquals(0, nyDeaktivert.size)
-        assertEquals(opprinnelig, nyAktivert)
+        assertTrue(opprinnelig.funksjoneltLik(nyAktivert))
 
         assertThrows<RuntimeException> { opprinnelig.deaktiver(emptyList(), "a3", "jeg vil deaktivere noe som ikke finnes", EmptyLog) }
         assertThrows<RuntimeException> { emptyList<ArbeidsgiverInntektsopplysning>().aktiver(opprinnelig, "a3", "jeg vil aktivere noe som ikke finnes", EmptyLog) }
@@ -256,7 +244,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val opprinneligDeaktiverte = listOf(a2Opplysning)
 
         val (deaktiverte, aktive) = opprinneligDeaktiverte.aktiver(opprinneligAktive, "a2", "Denne må tilbake", jurist)
-        assertEquals(listOf(a1Opplysning, a2Opplysning), aktive)
+        assertTrue(listOf(a1Opplysning, a2Opplysning).funksjoneltLik(aktive))
         assertEquals(0, deaktiverte.size)
         SubsumsjonInspektør(subsumsjonslogg).assertIkkeOppfylt(
             paragraf = Paragraf.PARAGRAF_8_15,
@@ -290,45 +278,48 @@ internal class ArbeidsgiverInntektsopplysningTest {
                 tidsstempel = tidsstempel
             )
         )
-        assertEquals(
-            inntektsopplysning1,
-            ArbeidsgiverInntektsopplysning(
-                orgnummer = "orgnummer",
-                gjelder = 1.januar til LocalDate.MAX,
-                inntektsopplysning = infotrygd(
-                    id = inntektID,
-                    dato = 1.januar,
-                    hendelseId = hendelseId,
-                    beløp = 25000.månedlig,
-                    tidsstempel = tidsstempel
+        assertTrue(
+            inntektsopplysning1.funksjoneltLik(
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = "orgnummer",
+                    gjelder = 1.januar til LocalDate.MAX,
+                    inntektsopplysning = infotrygd(
+                        id = inntektID,
+                        dato = 1.januar,
+                        hendelseId = hendelseId,
+                        beløp = 25000.månedlig,
+                        tidsstempel = tidsstempel
+                    )
                 )
             )
         )
-        assertNotEquals(
-            inntektsopplysning1,
-            ArbeidsgiverInntektsopplysning(
-                orgnummer = "orgnummer2",
-                gjelder = 1.januar til LocalDate.MAX,
-                inntektsopplysning = infotrygd(
-                    id = inntektID,
-                    dato = 1.januar,
-                    hendelseId = hendelseId,
-                    beløp = 25000.månedlig,
-                    tidsstempel = tidsstempel
+        assertFalse(
+            inntektsopplysning1.funksjoneltLik(
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = "orgnummer2",
+                    gjelder = 1.januar til LocalDate.MAX,
+                    inntektsopplysning = infotrygd(
+                        id = inntektID,
+                        dato = 1.januar,
+                        hendelseId = hendelseId,
+                        beløp = 25000.månedlig,
+                        tidsstempel = tidsstempel
+                    )
                 )
             )
         )
-        assertNotEquals(
-            inntektsopplysning1,
-            ArbeidsgiverInntektsopplysning(
-                orgnummer = "orgnummer",
-                gjelder = 1.januar til LocalDate.MAX,
-                inntektsopplysning = infotrygd(
-                    id = inntektID,
-                    dato = 5.januar,
-                    hendelseId = hendelseId,
-                    beløp = 25000.månedlig,
-                    tidsstempel = tidsstempel
+        assertFalse(
+            inntektsopplysning1.funksjoneltLik(
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = "orgnummer",
+                    gjelder = 1.januar til LocalDate.MAX,
+                    inntektsopplysning = infotrygd(
+                        id = inntektID,
+                        dato = 5.januar,
+                        hendelseId = hendelseId,
+                        beløp = 25000.månedlig,
+                        tidsstempel = tidsstempel
+                    )
                 )
             )
         )

@@ -51,6 +51,7 @@ import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -270,7 +271,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, nyInntekt, "Prøver å overstyre Infotrygd-inntekt", null, emptyList()))
         )
         assertEquals(antallHistorikkInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertEquals(gammelInntekt, inspektør.inntekt(1.januar))
+        assertSame(gammelInntekt, inspektør.inntekt(1.januar))
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
     }
 
@@ -407,8 +408,8 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a2)
         assertEquals(vilkårsgrunnlagHistorikkInnslagFørOverstyring, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
-        assertEquals(a1InntektFørOverstyring, inspektør.inntekt(1.januar))
-        assertEquals(a2InntektFørOverstyring, inspektør(a2).inntekt(1.januar))
+        assertSame(a1InntektFørOverstyring, inspektør.inntekt(1.januar))
+        assertSame(a2InntektFørOverstyring, inspektør(a2).inntekt(1.januar))
     }
 
     @Test
@@ -453,7 +454,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
         assertEquals(vilkårsgrunnlagHistorikkInnslagFørOverstyring + 1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
-        assertEquals(a1InntektsopplysningFørOverstyring, inspektør.inntekt(1.vedtaksperiode))
+        assertSame(a1InntektsopplysningFørOverstyring, inspektør.inntekt(1.vedtaksperiode))
         assertBeløpstidslinje(a1RefusjonFørOverstyring, inspektør.refusjon(1.vedtaksperiode))
 
         assertEquals(inntektPerArbeidsgiver * 1.5, inspektør(a2).inntekt(1.januar).inntektsdata.beløp)
@@ -688,8 +689,8 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
         assertEquals(vilkårsgrunnlagHistorikkInnslagFørOverstyring + 1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertEquals(a1InntektFørOverstyring, inspektør.inntekt(1.vedtaksperiode))
-        assertEquals(a1RefusjonFørOverstyring, inspektør.refusjon(1.vedtaksperiode))
+        assertSame(a1InntektFørOverstyring, inspektør.inntekt(1.vedtaksperiode))
+        assertSame(a1RefusjonFørOverstyring, inspektør.refusjon(1.vedtaksperiode))
 
         assertEquals(inntektPerArbeidsgiver * 1.5, inspektør(a2).inntekt(1.vedtaksperiode).inntektsdata.beløp)
         assertBeløpstidslinje(
