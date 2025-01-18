@@ -9,7 +9,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Subsumsjon
@@ -28,17 +28,22 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
     private val arbeidsgiveropplysninger = packet.arbeidsgiveropplysninger(skjæringstidspunkt)
     private val refusjonstidslinjer = packet.refusjonstidslinjer()
 
+    private val begrunnelser = packet["arbeidsgivere"].map { overstyring ->
+        OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(
+            organisasjonsnummer = overstyring.path("organisasjonsnummer").asText(),
+            forklaring = overstyring.path("forklaring").asText(),
+            subsumsjon = overstyring.path("subsumsjon").asSubsumsjon()
+        )
+    }
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) =
-        mediator.behandle(
-            this, OverstyrArbeidsgiveropplysninger(
+        mediator.behandle(this, OverstyrArbeidsgiveropplysninger(
             meldingsreferanseId = meldingsporing.id,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiveropplysninger = arbeidsgiveropplysninger,
             opprettet = opprettet,
-            refusjonstidslinjer = refusjonstidslinjer
-        ),
-            context
-        )
+            refusjonstidslinjer = refusjonstidslinjer,
+            begrunnelser = begrunnelser,
+        ), context)
 
     private companion object {
 

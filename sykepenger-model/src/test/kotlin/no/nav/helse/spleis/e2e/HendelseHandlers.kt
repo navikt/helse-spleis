@@ -8,6 +8,7 @@ import java.util.*
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.PersonHendelsefabrikk
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dto.SimuleringResultatDto
@@ -926,6 +927,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
     håndterOverstyrArbeidsgiveropplysninger(
         skjæringstidspunkt,
         listOf(OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, forklaring, subsumsjon, emptyList(), gjelder)),
+        listOf(OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(orgnummer, forklaring, subsumsjon)),
         meldingsreferanseId
     )
 }
@@ -944,6 +946,7 @@ internal fun AbstractEndToEndTest.håndterMinimumSykdomsgradVurdert(
 internal fun AbstractEndToEndTest.håndterOverstyrArbeidsgiveropplysninger(
     skjæringstidspunkt: LocalDate,
     arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>,
+    begrunnelser: List<OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse> = emptyList(),
     meldingsreferanseId: UUID = UUID.randomUUID()
 ): UUID {
     val opprettet = LocalDateTime.now()
@@ -952,6 +955,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrArbeidsgiveropplysninger(
         skjæringstidspunkt = skjæringstidspunkt,
         arbeidsgiveropplysninger = arbeidsgiveropplysninger.tilOverstyrt(meldingsreferanseId, skjæringstidspunkt),
         refusjonstidslinjer = arbeidsgiveropplysninger.refusjonstidslinjer(meldingsreferanseId, opprettet),
+        begrunnelser = begrunnelser,
         opprettet = opprettet
     ).håndter(Person::håndter)
     return meldingsreferanseId

@@ -748,9 +748,8 @@ class Person private constructor(
 
         endretInntektsgrunnlag.inntekter
             .forEach {
-                it.inntektEtter.inntektsopplysning as Saksbehandler
                 val opptjeningFom = nyttGrunnlag.opptjening!!.startdatoFor(it.inntektEtter.orgnummer)
-                hendelse.subsummer(subsumsjonslogg, opptjeningFom, it.inntektEtter.orgnummer, it.inntektEtter.inntektsopplysning)
+                hendelse.subsummer(subsumsjonslogg, opptjeningFom, it.inntektEtter.orgnummer)
                 when (it.inntektFør.inntektsopplysning) {
                     is Inntektsmeldinginntekt -> {
                         arbeidsgiveropplysningerKorrigert(

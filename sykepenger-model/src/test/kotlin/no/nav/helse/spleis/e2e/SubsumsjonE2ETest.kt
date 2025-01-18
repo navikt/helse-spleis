@@ -47,6 +47,7 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -92,7 +93,13 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, INNTEKT * 1.1, Subsumsjon("8-28", 3, "b"))))
+        håndterOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt = 1.januar,
+            arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a2, INNTEKT * 1.1, Subsumsjon("8-28", 3, "b"))),
+            begrunnelser = listOf(
+                OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(a2, "forklaring", Subsumsjon("8-28", 3, "b"))
+            )
+        )
 
         assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_A, versjon = 1.januar(2019)))
         assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_29, versjon = 1.januar(2019)))

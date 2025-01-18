@@ -68,6 +68,7 @@ internal class PersonHendelsefabrikk {
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSaksbehandlerinntekt(meldingsreferanseId, skjæringstidspunkt),
             refusjonstidslinjer = arbeidsgiveropplysninger.refusjonstidslinjer(skjæringstidspunkt, meldingsreferanseId, opprettet),
+            begrunnelser = emptyList(),
             opprettet = opprettet
         )
     }
