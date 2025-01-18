@@ -16,8 +16,6 @@ class SkjønnsmessigFastsatt internal constructor(
     constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) :
         this(UUID.randomUUID(), Inntektsdata(hendelseId, dato, beløp, tidsstempel), null, null)
 
-    override fun gjenbrukbarInntekt(beløp: Inntekt?) = checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.gjenbrukbarInntekt(beløp)
-
     fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
         SkjønnsmessigFastsatt(id, inntektsdata, overstyrtInntekt, overstyrtInntekt.omregnetÅrsinntekt())
 

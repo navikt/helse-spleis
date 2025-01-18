@@ -3,12 +3,10 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto.InntektsmeldingDto.KildeDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
-import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
@@ -18,7 +16,7 @@ import no.nav.helse.økonomi.Inntekt
 class Inntektsmeldinginntekt internal constructor(
     id: UUID,
     inntektsdata: Inntektsdata,
-    private val kilde: Kilde
+    internal val kilde: Kilde
 ) : Inntektsopplysning(id, inntektsdata) {
     internal constructor(
         dato: LocalDate,
@@ -27,9 +25,6 @@ class Inntektsmeldinginntekt internal constructor(
         kilde: Kilde = Kilde.Arbeidsgiver,
         tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : this(UUID.randomUUID(), Inntektsdata(hendelseId, dato, beløp, tidsstempel), kilde)
-
-    override fun gjenbrukbarInntekt(beløp: Inntekt?) =
-        beløp?.let { Inntektsmeldinginntekt(inntektsdata.dato, inntektsdata.hendelseId, it, kilde, inntektsdata.tidsstempel) } ?: this
 
     internal fun inntektskilde(): Inntektskilde = when (kilde) {
         Kilde.Arbeidsgiver -> Inntektskilde.Arbeidsgiver
@@ -47,14 +42,6 @@ class Inntektsmeldinginntekt internal constructor(
     }
 
     internal fun kanLagres(other: Inntektsmeldinginntekt) = this.inntektsdata.hendelseId != other.inntektsdata.hendelseId || this.inntektsdata.dato != other.inntektsdata.dato
-
-    override fun arbeidsgiveropplysningerKorrigert(
-        person: Person,
-        orgnummer: String,
-        saksbehandlerOverstyring: OverstyrArbeidsgiveropplysninger
-    ) {
-        saksbehandlerOverstyring.arbeidsgiveropplysningerKorrigert(person, orgnummer, inntektsdata.hendelseId)
-    }
 
     internal fun kopierTidsnærOpplysning(
         nyDato: LocalDate,
