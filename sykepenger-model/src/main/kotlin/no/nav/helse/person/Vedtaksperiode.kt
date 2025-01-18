@@ -1357,7 +1357,7 @@ internal class Vedtaksperiode private constructor(
             is IkkeRapportert -> emptyList()
             is SkattSykepengegrunnlag -> inntekt.inntektsopplysninger.subsumsjonsformat()
         }
-        subsumsjonslogg.logg(
+        jurist.logg(
             `§ 8-28 ledd 3 bokstav a`(
                 organisasjonsnummer = orgnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -1366,7 +1366,7 @@ internal class Vedtaksperiode private constructor(
                 grunnlagForSykepengegrunnlagMånedlig = inntekt.fastsattÅrsinntekt().månedlig
             )
         )
-        subsumsjonslogg.logg(
+        jurist.logg(
             `§ 8-29`(
                 skjæringstidspunkt = skjæringstidspunkt,
                 grunnlagForSykepengegrunnlagÅrlig = inntekt.fastsattÅrsinntekt().årlig,
