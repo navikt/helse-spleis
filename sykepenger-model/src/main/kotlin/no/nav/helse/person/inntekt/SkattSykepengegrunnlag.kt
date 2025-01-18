@@ -66,10 +66,6 @@ internal class SkattSykepengegrunnlag(
         )
     }
 
-    override fun erSamme(other: Inntektsopplysning): Boolean {
-        return other is SkattSykepengegrunnlag && this.inntektsdata.funksjoneltLik(other.inntektsdata)
-    }
-
     override fun dto() =
         InntektsopplysningUtDto.SkattSykepengegrunnlagDto(
             id = id,

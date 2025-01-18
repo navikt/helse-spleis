@@ -30,9 +30,6 @@ class Saksbehandler internal constructor(
     fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
         Saksbehandler(id, inntektsdata, forklaring, subsumsjon, overstyrtInntekt)
 
-    override fun erSamme(other: Inntektsopplysning) =
-        other is Saksbehandler && this.inntektsdata.funksjoneltLik(other.inntektsdata)
-
     override fun subsumerSykepengegrunnlag(subsumsjonslogg: Subsumsjonslogg, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
         if (subsumsjon == null) return
         requireNotNull(forklaring) { "Det skal være en forklaring fra saksbehandler ved overstyring av inntekt" }

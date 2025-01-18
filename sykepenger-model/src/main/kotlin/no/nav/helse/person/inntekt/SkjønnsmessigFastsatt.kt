@@ -21,9 +21,6 @@ class SkjønnsmessigFastsatt internal constructor(
     fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
         SkjønnsmessigFastsatt(id, inntektsdata, overstyrtInntekt, overstyrtInntekt.omregnetÅrsinntekt())
 
-    override fun erSamme(other: Inntektsopplysning) =
-        other is SkjønnsmessigFastsatt && this.inntektsdata.funksjoneltLik(other.inntektsdata)
-
     override fun dto() =
         InntektsopplysningUtDto.SkjønnsmessigFastsattDto(
             id = id,

@@ -47,9 +47,6 @@ class Inntektsmeldinginntekt internal constructor(
     }
 
     internal fun kanLagres(other: Inntektsmeldinginntekt) = this.inntektsdata.hendelseId != other.inntektsdata.hendelseId || this.inntektsdata.dato != other.inntektsdata.dato
-    override fun erSamme(other: Inntektsopplysning): Boolean {
-        return other is Inntektsmeldinginntekt && this.inntektsdata.funksjoneltLik(other.inntektsdata)
-    }
 
     override fun arbeidsgiveropplysningerKorrigert(
         person: Person,

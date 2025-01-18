@@ -103,15 +103,12 @@ sealed class Inntektsopplysning(
         }
     }
 
-    final override fun equals(other: Any?) = other is Inntektsopplysning && erSamme(other)
-
-    final override fun hashCode(): Int {
-        var result = inntektsdata.dato.hashCode()
-        result = 31 * result + inntektsdata.tidsstempel.hashCode() * 31
-        return result
+    final override fun equals(other: Any?): Boolean {
+        if (other !is Inntektsopplysning || other::class != this::class) return false
+        return this.inntektsdata.funksjoneltLik(other.inntektsdata)
     }
 
-    protected abstract fun erSamme(other: Inntektsopplysning): Boolean
+    final override fun hashCode() = id.hashCode()
 
     internal open fun subsumerSykepengegrunnlag(
         subsumsjonslogg: Subsumsjonslogg,
