@@ -7,8 +7,6 @@ import kotlin.properties.Delegates
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
-import no.nav.helse.desember
-import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -39,7 +37,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.funksjoneltLik
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
@@ -55,6 +52,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -70,16 +68,6 @@ internal class InntektsgrunnlagTest {
         Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
     )
     )
-
-    @Test
-    fun equality() {
-        val sykepengegrunnlag = INNTEKT.sykepengegrunnlag
-        assertEquals(sykepengegrunnlag, sykepengegrunnlag)
-        assertEquals(sykepengegrunnlag, INNTEKT.sykepengegrunnlag)
-        assertEquals(INNTEKT.sykepengegrunnlag, INNTEKT.sykepengegrunnlag)
-        assertNotEquals(INNTEKT.sykepengegrunnlag, INNTEKT.inntektsgrunnlag("annet orgnr"))
-        assertNotEquals(INNTEKT.sykepengegrunnlag, INNTEKT.inntektsgrunnlag(31.desember))
-    }
 
     @Test
     fun `minimum inntekt tom 67 år - må være 0,5 G`() {
@@ -333,7 +321,8 @@ internal class InntektsgrunnlagTest {
     fun `justerer grunnbeløpet`() {
         val sykepengegrunnlag = 60000.månedlig.inntektsgrunnlag("orgnr", 1.mai(2020), 1.mai(2020))
         val justert = sykepengegrunnlag.grunnbeløpsregulering()
-        assertNotEquals(sykepengegrunnlag, justert)
+        assertNotNull(justert)
+        assertNotSame(sykepengegrunnlag, justert)
         assertNotEquals(sykepengegrunnlag.inspektør.sykepengegrunnlag, justert.inspektør.sykepengegrunnlag)
         assertNotEquals(sykepengegrunnlag.inspektør.`6G`, justert.inspektør.`6G`)
         assertTrue(sykepengegrunnlag.inspektør.`6G` < justert.inspektør.`6G`)
@@ -761,68 +750,6 @@ internal class InntektsgrunnlagTest {
             inntektsgrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
             aktivitetslogg.assertVarsler(emptyList())
         }
-    }
-
-    @Test
-    fun equals() {
-        val inntektID = UUID.randomUUID()
-        val hendelseId = UUID.randomUUID()
-        val tidsstempel = LocalDateTime.now()
-        val inntektsgrunnlag1 = Inntektsgrunnlag.ferdigSykepengegrunnlag(
-            alder = UNG_PERSON_FØDSELSDATO.alder,
-            skjæringstidspunkt = 1.januar,
-            arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = "orgnummer",
-                    gjelder = 1.januar til LocalDate.MAX,
-                    inntektsopplysning = infotrygd(
-                        id = inntektID,
-                        dato = 1.januar,
-                        hendelseId = hendelseId,
-                        beløp = 25000.månedlig,
-                        tidsstempel = tidsstempel
-                    )
-                )
-            ),
-            deaktiverteArbeidsforhold = emptyList(),
-            vurdertInfotrygd = false
-        )
-
-        assertEquals(inntektsgrunnlag1, inntektsgrunnlag1.grunnbeløpsregulering()) { "grunnbeløpet trenger ikke justering" }
-        assertNotEquals(
-            inntektsgrunnlag1,
-            Inntektsgrunnlag.ferdigSykepengegrunnlag(
-                alder = UNG_PERSON_FØDSELSDATO.alder,
-                skjæringstidspunkt = 1.januar,
-                arbeidsgiverInntektsopplysninger = listOf(
-                    ArbeidsgiverInntektsopplysning(
-                        orgnummer = "orgnummer",
-                        gjelder = 1.januar til LocalDate.MAX,
-                        inntektsopplysning = infotrygd(
-                            id = inntektID,
-                            dato = 1.januar,
-                            hendelseId = hendelseId,
-                            beløp = 25000.månedlig,
-                            tidsstempel = tidsstempel
-                        )
-                    )
-                ),
-                deaktiverteArbeidsforhold = listOf(
-                    ArbeidsgiverInntektsopplysning(
-                        orgnummer = "orgnummer",
-                        gjelder = 1.januar til LocalDate.MAX,
-                        inntektsopplysning = infotrygd(
-                            id = inntektID,
-                            dato = 1.januar,
-                            hendelseId = hendelseId,
-                            beløp = 25000.månedlig,
-                            tidsstempel = tidsstempel
-                        )
-                    )
-                ),
-                vurdertInfotrygd = false
-            )
-        )
     }
 
     private class MinsteinntektSubsumsjonObservatør : Subsumsjonslogg {

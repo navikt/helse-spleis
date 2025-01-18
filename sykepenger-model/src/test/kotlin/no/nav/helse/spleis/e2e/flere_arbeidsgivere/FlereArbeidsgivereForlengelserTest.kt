@@ -25,6 +25,7 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlagFlereArbeidsgivere
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test
 
 internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
@@ -130,10 +131,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a2)
         assertEquals(1.januar, inspektør(a1).skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(
-            inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode),
-            inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)
-        )
+        assertSame(inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode), inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode))
     }
 
     @Test

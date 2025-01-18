@@ -21,9 +21,10 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.nullstillTilstandsendringer
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNotSame
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -67,9 +68,9 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
-        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(3.vedtaksperiode))
-        assertNotEquals(inspektør.vilkårsgrunnlag(3.vedtaksperiode), inspektør.vilkårsgrunnlag(4.vedtaksperiode))
+        assertSame(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertSame(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(3.vedtaksperiode))
+        assertNotSame(inspektør.vilkårsgrunnlag(3.vedtaksperiode), inspektør.vilkårsgrunnlag(4.vedtaksperiode))
         assertTrue(inntektsmelding1Id in inspektør.hendelseIder(1.vedtaksperiode))
         assertTrue(inntektsmelding1Id in inspektør.hendelseIder(2.vedtaksperiode))
         assertTrue(inntektsmelding1Id in inspektør.hendelseIder(3.vedtaksperiode))
@@ -93,8 +94,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(5.april til 30.april)
 
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
-        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(3.vedtaksperiode))
+        assertSame(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertSame(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(3.vedtaksperiode))
         assertNull(inspektør.vilkårsgrunnlag(4.vedtaksperiode))
     }
 
@@ -123,7 +124,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
         assertVarsler(listOf(), 1.vedtaksperiode.filter())
         assertVarsler(listOf(), 2.vedtaksperiode.filter())
-        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertSame(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
         assertEquals(18.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(18.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }

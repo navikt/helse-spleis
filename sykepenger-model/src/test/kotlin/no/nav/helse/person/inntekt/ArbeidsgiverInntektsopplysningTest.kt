@@ -19,7 +19,6 @@ import no.nav.helse.januar
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.funksjoneltLik
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.yearMonth
@@ -324,4 +323,15 @@ internal class ArbeidsgiverInntektsopplysningTest {
             )
         )
     }
+}
+
+internal fun List<ArbeidsgiverInntektsopplysning>.funksjoneltLik(other: List<ArbeidsgiverInntektsopplysning>): Boolean {
+    if (this.size != other.size) return false
+    return this
+        .zip(other) { a, b -> a.funksjoneltLik(b) }
+        .none { it == false }
+}
+
+internal fun ArbeidsgiverInntektsopplysning.funksjoneltLik(other: ArbeidsgiverInntektsopplysning): Boolean {
+    return this.gjelder == other.gjelder && this.orgnummer == other.orgnummer && this.inntektsopplysning.funksjoneltLik(other.inntektsopplysning)
 }

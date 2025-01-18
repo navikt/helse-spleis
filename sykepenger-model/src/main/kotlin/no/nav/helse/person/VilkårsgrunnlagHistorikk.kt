@@ -51,13 +51,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal fun lagre(vilkårsgrunnlag: VilkårsgrunnlagElement) {
         val siste = sisteInnlag()
         val nytt = Innslag(siste, vilkårsgrunnlag)
-        if (nytt == siste) return
         historikk.add(0, nytt)
     }
 
     internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, sykefraværstilfeller: Set<LocalDate>) {
         val nyttInnslag = sisteInnlag()?.oppdaterHistorikk(aktivitetslogg, sykefraværstilfeller) ?: return
-        if (nyttInnslag == sisteInnlag()) return
         historikk.add(0, nyttInnslag)
     }
 
@@ -94,19 +92,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             }
         }
 
-        override fun hashCode(): Int {
-            return this.vilkårsgrunnlag.hashCode()
-        }
-
-        override fun equals(other: Any?): Boolean {
-            if (other !is Innslag) return false
-            return this.vilkårsgrunnlag == other.vilkårsgrunnlag
-        }
-
-        internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, sykefraværstilfeller: Set<LocalDate>): Innslag {
+        internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, sykefraværstilfeller: Set<LocalDate>): Innslag? {
             val gyldigeVilkårsgrunnlag = beholdAktiveSkjæringstidspunkter(sykefraværstilfeller)
             val diff = this.vilkårsgrunnlag.size - gyldigeVilkårsgrunnlag.size
-            if (diff > 0) aktivitetslogg.info("Fjernet $diff vilkårsgrunnlagselementer")
+            if (diff == 0) return null
+            aktivitetslogg.info("Fjernet $diff vilkårsgrunnlagselementer")
             return Innslag(gyldigeVilkårsgrunnlag)
         }
 
@@ -222,7 +212,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             subsumsjonslogg: Subsumsjonslogg
         ): VilkårsgrunnlagElement? {
             val nyttSykepengegrunnlag = inntektsgrunnlag.grunnbeløpsregulering()
-            if (nyttSykepengegrunnlag == inntektsgrunnlag) {
+            if (nyttSykepengegrunnlag == null) {
                 aktivitetslogg.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt er allerede korrekt.")
                 return null
             }
@@ -441,17 +431,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         override fun vilkårsgrunnlagtype() = "Infotrygd"
-
-        override fun equals(other: Any?): Boolean {
-            if (other !is InfotrygdVilkårsgrunnlag) return false
-            return skjæringstidspunkt == other.skjæringstidspunkt && inntektsgrunnlag == other.inntektsgrunnlag
-        }
-
-        override fun hashCode(): Int {
-            var result = skjæringstidspunkt.hashCode()
-            result = 31 * result + inntektsgrunnlag.hashCode()
-            return result
-        }
 
         override fun dto(
             vilkårsgrunnlagId: UUID,

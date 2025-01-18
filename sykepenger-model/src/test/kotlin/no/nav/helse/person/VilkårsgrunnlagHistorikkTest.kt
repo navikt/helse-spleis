@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.desember
 import no.nav.helse.dsl.SubsumsjonsListLog
@@ -41,7 +41,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -448,39 +447,5 @@ internal class VilkårsgrunnlagHistorikkTest {
                 assertEquals(Begrunnelse.MinimumInntektOver67, it.begrunnelser.first())
             }
         }
-    }
-
-    @Test
-    fun `equals av InfotrygdVilkårsgrunnlag`() {
-        val sykepengegrunnlag = 25000.månedlig.sykepengegrunnlag
-        val element1 = VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-            skjæringstidspunkt = 1.januar,
-            inntektsgrunnlag = sykepengegrunnlag
-        )
-        assertEquals(element1, element1)
-        assertEquals(
-            element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-            skjæringstidspunkt = 1.januar,
-            inntektsgrunnlag = sykepengegrunnlag
-        )
-        )
-        assertNotEquals(
-            element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-            skjæringstidspunkt = 2.januar,
-            inntektsgrunnlag = sykepengegrunnlag
-        )
-        )
-        assertNotEquals(
-            element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-            skjæringstidspunkt = 5.februar,
-            inntektsgrunnlag = 25000.månedlig.sykepengegrunnlag
-        )
-        )
-        assertNotEquals(
-            element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-            skjæringstidspunkt = 1.januar,
-            inntektsgrunnlag = 30900.månedlig.sykepengegrunnlag
-        )
-        )
     }
 }

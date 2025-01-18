@@ -33,7 +33,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fast
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finn
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.funksjoneltLik
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harGjenbrukbarInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
@@ -344,10 +343,11 @@ internal class Inntektsgrunnlag private constructor(
         vurdertInfotrygd = vurdertInfotrygd
     )
 
-    internal fun grunnbeløpsregulering() = kopierSykepengegrunnlag(
-        arbeidsgiverInntektsopplysninger,
-        deaktiverteArbeidsforhold
-    )
+    internal fun grunnbeløpsregulering(): Inntektsgrunnlag? {
+        val nyttInntektsgrunnlag = kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold)
+        if (this.`6G` == nyttInntektsgrunnlag.`6G`) return null
+        return nyttInntektsgrunnlag
+    }
 
     internal fun inntektskilde() = when {
         arbeidsgiverInntektsopplysninger.size > 1 -> UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
@@ -367,25 +367,6 @@ internal class Inntektsgrunnlag private constructor(
         )
         tilkommendeInntekter.forEach { builder.tilkommetInntekt(it.orgnummer) }
         arbeidsgiverInntektsopplysninger.berik(builder)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is Inntektsgrunnlag) return false
-        return sykepengegrunnlag == other.sykepengegrunnlag
-            && arbeidsgiverInntektsopplysninger.funksjoneltLik(other.arbeidsgiverInntektsopplysninger)
-            && beregningsgrunnlag == other.beregningsgrunnlag
-            && begrensning == other.begrensning
-            && `6G` == other.`6G`
-            && deaktiverteArbeidsforhold.funksjoneltLik(other.deaktiverteArbeidsforhold)
-    }
-
-    override fun hashCode(): Int {
-        var result = sykepengegrunnlag.hashCode()
-        result = 31 * result + arbeidsgiverInntektsopplysninger.hashCode()
-        result = 31 * result + beregningsgrunnlag.hashCode()
-        result = 31 * result + begrensning.hashCode()
-        result = 31 * result + deaktiverteArbeidsforhold.hashCode()
-        return result
     }
 
     override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
