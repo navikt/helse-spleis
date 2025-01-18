@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.KontekstType
@@ -24,11 +24,9 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagHistorikkInnslagTest {
-    private lateinit var innslag: VilkårsgrunnlagHistorikk.Innslag
     private val jurist = BehandlingSubsumsjonslogg(
         EmptyLog, listOf(
         Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
@@ -41,15 +39,10 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         private val ALDER = 12.februar(1992).alder
     }
 
-    @BeforeEach
-    fun beforeEach() {
-        innslag = VilkårsgrunnlagHistorikk.Innslag(null, emptyList())
-    }
-
     @Test
     fun `avviser dager uten opptjening`() {
         val tidslinjer = listOf(tidslinjeOf(1.NAV))
-        innslag.add(1.januar, grunnlagsdata(1.januar, harOpptjening = false))
+        val innslag = VilkårsgrunnlagHistorikk.Innslag(null, grunnlagsdata(1.januar, harOpptjening = false))
         val resultat = innslag.avvis(tidslinjer, 1.januar til 1.januar, jurist)
         val avvisteDager = avvisteDager(resultat)
         assertEquals(1, avvisteDager.size)
@@ -59,7 +52,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     @Test
     fun `avviser ikke dager dersom vurdert ok`() {
         val tidslinjer = listOf(tidslinjeOf(1.NAV))
-        innslag.add(1.januar, grunnlagsdata(1.januar, harOpptjening = true, harMinimumInntekt = true, erMedlem = true))
+        val innslag = VilkårsgrunnlagHistorikk.Innslag(null, grunnlagsdata(1.januar, harOpptjening = true, harMinimumInntekt = true, erMedlem = true))
         val resultat = innslag.avvis(tidslinjer, 1.januar til 1.januar, jurist)
         assertEquals(0, avvisteDager(resultat).size)
     }
@@ -67,7 +60,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     @Test
     fun `avviser med flere begrunnelser`() {
         val tidslinjer = listOf(tidslinjeOf(1.NAV))
-        innslag.add(1.januar, grunnlagsdata(1.januar, harOpptjening = false, harMinimumInntekt = false))
+        val innslag = VilkårsgrunnlagHistorikk.Innslag(null, grunnlagsdata(1.januar, harOpptjening = false, harMinimumInntekt = false))
         val resultat = innslag.avvis(tidslinjer, 1.januar til 1.januar, jurist)
         val avvisteDager = avvisteDager(resultat)
         assertEquals(1, avvisteDager.size)
@@ -80,8 +73,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     @Test
     fun `avviser på tvers av vilkårsgrunnlagelementer`() {
         val tidslinjer = listOf(tidslinjeOf(2.NAV, skjæringstidspunkter = listOf(1.januar, 2.januar)))
-        innslag.add(1.januar, grunnlagsdata(1.januar, harOpptjening = false))
-        innslag.add(2.januar, grunnlagsdata(2.januar, harMinimumInntekt = false))
+        val innslag1 = VilkårsgrunnlagHistorikk.Innslag(null, grunnlagsdata(1.januar, harOpptjening = false))
+        val innslag = VilkårsgrunnlagHistorikk.Innslag(innslag1, grunnlagsdata(2.januar, harMinimumInntekt = false))
         val resultat = innslag.avvis(tidslinjer, 2.januar til 2.januar, jurist)
         val avvisteDager = avvisteDager(resultat)
         assertEquals(2, avvisteDager.size)
@@ -92,8 +85,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     @Test
     fun `oppfyller ingen inngangsvilkår deler av perioden`() {
         val tidslinjer = listOf(tidslinjeOf(2.NAV, skjæringstidspunkter = listOf(1.januar, 2.januar)))
-        innslag.add(1.januar, grunnlagsdata(1.januar))
-        innslag.add(2.januar, grunnlagsdata(2.januar, harOpptjening = false, harMinimumInntekt = false, erMedlem = false))
+        val innslag1 = VilkårsgrunnlagHistorikk.Innslag(null, grunnlagsdata(1.januar))
+        val innslag = VilkårsgrunnlagHistorikk.Innslag(innslag1, grunnlagsdata(2.januar, harOpptjening = false, harMinimumInntekt = false, erMedlem = false))
         val resultat = innslag.avvis(tidslinjer, 2.januar til 2.januar, jurist)
         val avvisteDager = avvisteDager(resultat)
         assertEquals(1, avvisteDager.size)

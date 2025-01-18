@@ -48,10 +48,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun view() = VilkårsgrunnlagHistorikkView(innslag = historikk.map { it.view() })
 
-    internal fun lagre(vararg vilkårsgrunnlag: VilkårsgrunnlagElement) {
-        if (vilkårsgrunnlag.isEmpty()) return
+    internal fun lagre(vilkårsgrunnlag: VilkårsgrunnlagElement) {
         val siste = sisteInnlag()
-        val nytt = Innslag(siste, vilkårsgrunnlag.toList())
+        val nytt = Innslag(siste, vilkårsgrunnlag)
         if (nytt == siste) return
         historikk.add(0, nytt)
     }
@@ -76,23 +75,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal class Innslag private constructor(
         internal val id: UUID,
         private val opprettet: LocalDateTime,
-        private val vilkårsgrunnlag: MutableMap<LocalDate, VilkårsgrunnlagElement>
+        private val vilkårsgrunnlag: Map<LocalDate, VilkårsgrunnlagElement>
     ) {
-        internal constructor(vilkårsgrunnlag: Map<LocalDate, VilkårsgrunnlagElement>) : this(
-            UUID.randomUUID(),
-            LocalDateTime.now(),
-            vilkårsgrunnlag.toMutableMap()
-        )
+        internal constructor(vilkårsgrunnlag: Map<LocalDate, VilkårsgrunnlagElement>) : this(UUID.randomUUID(), LocalDateTime.now(), vilkårsgrunnlag)
 
-        internal constructor(other: Innslag?, elementer: List<VilkårsgrunnlagElement>) : this(other?.vilkårsgrunnlag?.toMap() ?: emptyMap()) {
-            elementer.forEach { it.add(this) }
-        }
+        internal constructor(other: Innslag?, nyttElement: VilkårsgrunnlagElement) : this((other?.vilkårsgrunnlag ?: emptyMap()) + mapOf(nyttElement.skjæringstidspunkt to nyttElement))
 
         internal fun view() = VilkårsgrunnlagInnslagView(vilkårsgrunnlag = vilkårsgrunnlag.map { it.value.view() })
-
-        internal fun add(skjæringstidspunkt: LocalDate, vilkårsgrunnlagElement: VilkårsgrunnlagElement) {
-            vilkårsgrunnlag[skjæringstidspunkt] = vilkårsgrunnlagElement
-        }
 
         internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
             vilkårsgrunnlag[skjæringstidspunkt]
@@ -158,10 +147,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         val inntektsgrunnlag: Inntektsgrunnlag,
         val opptjening: Opptjening?
     ) : Aktivitetskontekst {
-        internal fun add(innslag: Innslag) {
-            innslag.add(skjæringstidspunkt, this)
-        }
-
         internal open fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) = true
 
         internal fun view() = VilkårsgrunnlagView(
