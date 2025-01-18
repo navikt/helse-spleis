@@ -158,19 +158,11 @@ data class SpannerPersonDto(
                 val hendelseId: UUID,
                 val beløp: InntektDto?,
                 val kilde: String,
-                val forklaring: String?,
-                val subsumsjon: SubsumsjonData?,
                 val tidsstempel: LocalDateTime,
                 val overstyrtInntektId: UUID?,
                 val skatteopplysninger: List<SkatteopplysningData>?,
                 val inntektsmeldingkilde: ArbeidsgiverData.InntektsmeldingData.KildeData?
-            ) {
-                data class SubsumsjonData(
-                    val paragraf: String,
-                    val ledd: Int?,
-                    val bokstav: String?
-                )
-            }
+            )
         }
 
         data class OpptjeningData(
@@ -1545,21 +1537,6 @@ private fun InntektsopplysningUtDto.tilPersonData() =
             is InntektsopplysningUtDto.SaksbehandlerDto -> "SAKSBEHANDLER"
             is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> "SKATT_SYKEPENGEGRUNNLAG"
             is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> "SKJØNNSMESSIG_FASTSATT"
-        },
-        forklaring = when (this) {
-            is InntektsopplysningUtDto.SaksbehandlerDto -> this.forklaring
-            else -> null
-        },
-        subsumsjon = when (this) {
-            is InntektsopplysningUtDto.SaksbehandlerDto -> this.subsumsjon?.let {
-                ArbeidsgiverInntektsopplysningData.InntektsopplysningData.SubsumsjonData(
-                    paragraf = it.paragraf,
-                    bokstav = it.bokstav,
-                    ledd = it.ledd
-                )
-            }
-
-            else -> null
         },
         overstyrtInntektId = when (this) {
             is InntektsopplysningUtDto.SaksbehandlerDto -> this.overstyrtInntekt

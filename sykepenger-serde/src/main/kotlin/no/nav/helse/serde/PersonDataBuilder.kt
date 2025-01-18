@@ -817,21 +817,6 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
         is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> "SKATT_SYKEPENGEGRUNNLAG"
         is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> "SKJØNNSMESSIG_FASTSATT"
     },
-    forklaring = when (this) {
-        is InntektsopplysningUtDto.SaksbehandlerDto -> this.forklaring
-        else -> null
-    },
-    subsumsjon = when (this) {
-        is InntektsopplysningUtDto.SaksbehandlerDto -> this.subsumsjon?.let {
-            PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.SubsumsjonData(
-                paragraf = it.paragraf,
-                bokstav = it.bokstav,
-                ledd = it.ledd
-            )
-        }
-
-        else -> null
-    },
     overstyrtInntektId = when (this) {
         is InntektsopplysningUtDto.SaksbehandlerDto -> this.overstyrtInntekt
         is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> this.overstyrtInntekt

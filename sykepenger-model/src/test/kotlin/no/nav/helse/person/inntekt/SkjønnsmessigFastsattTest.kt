@@ -27,7 +27,8 @@ internal class SkjønnsmessigFastsattTest {
         val originalBeløp = 2500.daglig
         val saksbehandlerbeløp = 2600.daglig
         val original = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), originalBeløp)
-        val saksbehandler = original.overstyresAv(Saksbehandler(1.januar, UUID.randomUUID(), saksbehandlerbeløp, "", null, LocalDateTime.now()))
+        val saksbehandler = original.overstyresAv(Saksbehandler(1.januar, UUID.randomUUID(), saksbehandlerbeløp,
+            LocalDateTime.now()))
         val skjønnsmessigFastsatt = saksbehandler.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), skjønnsmessigFastsattBeløp, LocalDateTime.now()))
 
         assertTrue(skjønnsmessigFastsatt is SkjønnsmessigFastsatt)

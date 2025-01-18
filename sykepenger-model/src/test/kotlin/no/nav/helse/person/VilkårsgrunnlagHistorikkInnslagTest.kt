@@ -117,8 +117,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                         skjæringstidspunkt,
                         UUID.randomUUID(),
                         inntekt,
-                        "",
-                        null,
                         LocalDateTime.now()
                     )
                 )

@@ -8,7 +8,6 @@ import java.util.*
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.PersonHendelsefabrikk
 import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dto.SimuleringResultatDto
@@ -926,7 +925,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
 ) {
     håndterOverstyrArbeidsgiveropplysninger(
         skjæringstidspunkt,
-        listOf(OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, forklaring, subsumsjon, emptyList(), gjelder)),
+        listOf(OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, emptyList(), gjelder)),
         listOf(OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(orgnummer, forklaring, subsumsjon)),
         meldingsreferanseId
     )
@@ -978,20 +977,17 @@ internal fun AbstractEndToEndTest.håndterSkjønnsmessigFastsettelse(
 internal class OverstyrtArbeidsgiveropplysning(
     private val orgnummer: String,
     private val inntekt: Inntekt,
-    private val forklaring: String,
-    private val subsumsjon: Subsumsjon?,
     private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>,
     private val gjelder: Periode? = null
 ) {
-    internal constructor(orgnummer: String, inntekt: Inntekt) : this(orgnummer, inntekt, "forklaring", null, emptyList(), null)
-    internal constructor(orgnummer: String, inntekt: Inntekt, subsumsjon: Subsumsjon) : this(orgnummer, inntekt, "forklaring", subsumsjon, emptyList(), null)
-    internal constructor(orgnummer: String, inntekt: Inntekt, gjelder: Periode) : this(orgnummer, inntekt, "forklaring", null, emptyList(), gjelder)
+    internal constructor(orgnummer: String, inntekt: Inntekt) : this(orgnummer, inntekt, emptyList(), null)
+    internal constructor(orgnummer: String, inntekt: Inntekt, gjelder: Periode) : this(orgnummer, inntekt, emptyList(), gjelder)
 
     internal companion object {
         internal fun List<OverstyrtArbeidsgiveropplysning>.tilOverstyrt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =
             map {
                 val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
-                ArbeidsgiverInntektsopplysning(it.orgnummer, gjelder, Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, it.forklaring, it.subsumsjon, LocalDateTime.now()))
+                ArbeidsgiverInntektsopplysning(it.orgnummer, gjelder, Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, LocalDateTime.now()))
             }
 
         internal fun List<OverstyrtArbeidsgiveropplysning>.tilSkjønnsmessigFastsatt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =

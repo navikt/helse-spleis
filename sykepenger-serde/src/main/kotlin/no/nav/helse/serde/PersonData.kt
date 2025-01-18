@@ -34,7 +34,6 @@ import no.nav.helse.dto.RefusjonsservitørDto
 import no.nav.helse.dto.SatstypeDto
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.SkatteopplysningDto
-import no.nav.helse.dto.SubsumsjonDto
 import no.nav.helse.dto.SykdomshistorikkDto
 import no.nav.helse.dto.SykdomshistorikkElementDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto
@@ -320,8 +319,6 @@ data class PersonData(
                 val beløp: Double?, // todo: trenger ikke være null etter 20. februar 2025
                 val tidsstempel: LocalDateTime,
                 val kilde: String,
-                val forklaring: String?,
-                val subsumsjon: SubsumsjonData?,
                 val overstyrtInntektId: UUID?,
                 val skatteopplysninger: List<SkatteopplysningData>?,
                 val inntektsmeldingkilde: InntektsmeldingKildeDto?
@@ -376,9 +373,7 @@ data class PersonData(
                             beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
                             tidsstempel = this.tidsstempel
                         ),
-                        overstyrtInntekt = this.overstyrtInntektId!!,
-                        forklaring = this.forklaring,
-                        subsumsjon = this.subsumsjon?.tilDto()
+                        overstyrtInntekt = this.overstyrtInntektId!!
                     )
 
                     Inntektsopplysningskilde.SKJØNNSMESSIG_FASTSATT -> InntektsopplysningInnDto.SkjønnsmessigFastsattDto(
@@ -408,14 +403,6 @@ data class PersonData(
                     )
 
                     else -> error("Fant ${kilde}. Det er ugyldig for sykepengegrunnlag")
-                }
-
-                data class SubsumsjonData(
-                    val paragraf: String,
-                    val ledd: Int?,
-                    val bokstav: String?
-                ) {
-                    fun tilDto() = SubsumsjonDto(paragraf, ledd, bokstav)
                 }
             }
         }

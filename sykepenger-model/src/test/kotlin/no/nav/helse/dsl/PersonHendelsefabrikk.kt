@@ -106,7 +106,7 @@ internal class OverstyrtArbeidsgiveropplysning(
             tidsstempel: LocalDateTime
         ) = tilArbeidsgiverInntektsopplysning(meldingsreferanseId, skjæringstidspunkt, tidsstempel) {
             checkNotNull(it.forklaring) { "Forklaring må settes på Saksbehandlerinntekt" }
-            Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, it.forklaring, it.subsumsjon, LocalDateTime.now())
+            Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, LocalDateTime.now())
         }
 
         internal fun List<OverstyrtArbeidsgiveropplysning>.medSkjønnsmessigFastsattInntekt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate): List<ArbeidsgiverInntektsopplysning> {

@@ -78,8 +78,6 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
             OverstyrtArbeidsgiveropplysning(
                 orgnummer = a1,
                 inntekt = 60000.månedlig,
-                forklaring = "",
-                subsumsjon = null,
                 refusjonsopplysninger = listOf(
                     Triple(1.januar, null, 31000.månedlig)
                 )

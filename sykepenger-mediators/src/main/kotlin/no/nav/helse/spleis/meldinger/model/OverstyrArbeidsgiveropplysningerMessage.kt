@@ -54,12 +54,10 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
             return arbeidsgivere.map { arbeidsgiveropplysning ->
                 val orgnummer = arbeidsgiveropplysning["organisasjonsnummer"].asText()
                 val månedligInntekt = arbeidsgiveropplysning["månedligInntekt"].asDouble().månedlig
-                val forklaring = arbeidsgiveropplysning["forklaring"].asText()
-                val subsumsjon = arbeidsgiveropplysning.path("subsumsjon").asSubsumsjon()
 
                 val fom = arbeidsgiveropplysning.path("fom").takeIf(JsonNode::isTextual)?.asLocalDate() ?: skjæringstidspunkt
                 val tom = arbeidsgiveropplysning.path("tom").takeIf(JsonNode::isTextual)?.asLocalDate() ?: LocalDate.MAX
-                val saksbehandlerinntekt = Saksbehandler(skjæringstidspunkt, id, månedligInntekt, forklaring, subsumsjon, opprettet)
+                val saksbehandlerinntekt = Saksbehandler(skjæringstidspunkt, id, månedligInntekt, opprettet)
 
                 ArbeidsgiverInntektsopplysning(orgnummer, fom til tom, saksbehandlerinntekt)
             }

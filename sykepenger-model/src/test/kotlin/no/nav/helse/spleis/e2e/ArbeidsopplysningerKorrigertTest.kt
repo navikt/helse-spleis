@@ -94,8 +94,6 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
                 OverstyrtArbeidsgiveropplysning(
                     a1,
                     25000.månedlig,
-                    "forklaring",
-                    null,
                     refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
                 )
             )
@@ -142,15 +140,11 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
                 OverstyrtArbeidsgiveropplysning(
                     a1,
                     25000.månedlig,
-                    "forklaring",
-                    null,
                     refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
                 ),
                 OverstyrtArbeidsgiveropplysning(
                     a2,
                     25000.månedlig,
-                    "forklaring",
-                    null,
                     refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
                 )
             )
@@ -202,8 +196,6 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
                 OverstyrtArbeidsgiveropplysning(
                     a1,
                     25000.månedlig,
-                    "forklaring",
-                    null,
                     refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
                 )
             )
@@ -287,8 +279,6 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
                 OverstyrtArbeidsgiveropplysning(
                     a1,
                     INNTEKT,
-                    "forklaring",
-                    null,
                     refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
                 )
             )
@@ -305,8 +295,6 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
                 OverstyrtArbeidsgiveropplysning(
                     a1,
                     40000.månedlig,
-                    "forklaring",
-                    null,
                     refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
                 )
             )

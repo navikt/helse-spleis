@@ -760,7 +760,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
             arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(a1, 32000.månedlig, "", null, listOf(Triple(1.januar, null, 32000.månedlig)))
+                OverstyrtArbeidsgiveropplysning(a1, 32000.månedlig, listOf(Triple(1.januar, null, 32000.månedlig)))
             )
         )
         håndterYtelser(1.vedtaksperiode)

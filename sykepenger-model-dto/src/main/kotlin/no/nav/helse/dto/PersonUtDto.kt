@@ -133,11 +133,6 @@ sealed class MedlemskapsvurderingDto {
 }
 
 data class AnsattPeriodeDto(val fom: LocalDate, val tom: LocalDate?)
-data class SubsumsjonDto(
-    val paragraf: String,
-    val ledd: Int?,
-    val bokstav: String?,
-)
 
 data class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto(
     val orgnummer: String,

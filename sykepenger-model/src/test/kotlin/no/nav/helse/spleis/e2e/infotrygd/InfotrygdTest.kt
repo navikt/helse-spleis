@@ -85,7 +85,8 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         createOvergangFraInfotrygdPerson()
         val antallInnslagFør = inspektør.vilkårsgrunnlagHistorikkInnslag().size
 
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 15000.månedlig, "foo", null, emptyList())))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 15000.månedlig,
+            emptyList())))
         assertEquals(antallInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         assertTrue(inspektør.inntekt(1.vedtaksperiode) is Infotrygd)
         assertEquals(31000.månedlig, inspektør.inntekt(1.vedtaksperiode).inntektsdata.beløp)
@@ -99,7 +100,8 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         val meldingsreferanse = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
-            arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, 15000.månedlig, "foo", null, listOf(Triple(1.januar, null, 15000.månedlig)))),
+            arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, 15000.månedlig,
+                listOf(Triple(1.januar, null, 15000.månedlig)))),
             meldingsreferanseId = meldingsreferanse
         )
         assertEquals(antallInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)

@@ -3,7 +3,6 @@ package no.nav.helse.dto.serialisering
 import java.util.UUID
 import no.nav.helse.dto.AnsattPeriodeDto
 import no.nav.helse.dto.SkatteopplysningDto
-import no.nav.helse.dto.SubsumsjonDto
 
 sealed class InntektsopplysningUtDto {
     abstract val id: UUID
@@ -22,8 +21,6 @@ sealed class InntektsopplysningUtDto {
     data class SaksbehandlerDto(
         override val id: UUID,
         override val inntektsdata: InntektsdataUtDto,
-        val forklaring: String?,
-        val subsumsjon: SubsumsjonDto?,
         val overstyrtInntekt: UUID,
     ) : InntektsopplysningUtDto()
 
