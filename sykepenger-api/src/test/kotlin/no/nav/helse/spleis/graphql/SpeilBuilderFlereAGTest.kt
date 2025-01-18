@@ -411,7 +411,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
         håndterYtelserTilGodkjenning()
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, 9000.månedlig, "")))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, 9000.månedlig)))
         håndterYtelserTilGodkjenning()
 
         val speilJson = speilApi()
@@ -484,10 +484,10 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
         håndterYtelserTilGodkjenning()
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 30000.månedlig, "")))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 30000.månedlig)))
         håndterYtelserTilGodkjenning()
 
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, 9000.månedlig, "")))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, 9000.månedlig)))
         håndterYtelserTilGodkjenning()
 
         val speilJson = speilApi()

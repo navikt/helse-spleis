@@ -33,13 +33,16 @@ internal class RevurderingAvRefusjonE2ETest : AbstractDslTest() {
             nyttVedtak(januar)
             assertSubsumsjoner { assertEquals(1, antallSubsumsjoner(this)) }
             håndterOverstyrArbeidsgiveropplysninger(
-                1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    a1, INNTEKT, "ingen endring", listOf(
-                    Triple(25.januar, null, INGEN)
+                skjæringstidspunkt = 1.januar,
+                overstyringer = listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a1,
+                        inntekt = INNTEKT,
+                        refusjonsopplysninger = listOf(
+                            Triple(25.januar, null, INGEN)
+                        )
+                    )
                 )
-                )
-            )
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())

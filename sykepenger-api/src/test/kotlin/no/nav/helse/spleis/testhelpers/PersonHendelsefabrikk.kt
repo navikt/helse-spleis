@@ -86,7 +86,6 @@ internal class PersonHendelsefabrikk {
 internal class OverstyrtArbeidsgiveropplysning(
     private val orgnummer: String,
     private val inntekt: Inntekt,
-    private val forklaring: String? = null,
     private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>? = null,
     private val gjelder: Periode? = null
 ) {
@@ -103,14 +102,12 @@ internal class OverstyrtArbeidsgiveropplysning(
             }
 
         internal fun List<OverstyrtArbeidsgiveropplysning>.medSaksbehandlerinntekt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) = tilArbeidsgiverInntektsopplysning(meldingsreferanseId, skjæringstidspunkt) {
-            checkNotNull(it.forklaring) { "Forklaring må settes på Saksbehandlerinntekt" }
             Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, LocalDateTime.now())
         }
 
         internal fun List<OverstyrtArbeidsgiveropplysning>.medSkjønnsmessigFastsattInntekt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate): List<ArbeidsgiverInntektsopplysning> {
             forEach {
                 check(it.refusjonsopplysninger == null) { "Skal ikke sette refusjonspplysnger på Skjønnsmessig fastsatt inntekt" }
-                check(it.forklaring == null) { "Skal ikke sette forklaring på Skjønnsmessig fastsatt inntekt" }
             }
             return map {
                 ArbeidsgiverInntektsopplysning(

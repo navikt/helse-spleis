@@ -3,9 +3,6 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.etterlevelse.Bokstav
-import no.nav.helse.etterlevelse.Ledd
-import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav b`
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav c`

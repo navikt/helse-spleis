@@ -140,11 +140,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            håndterOverstyrArbeidsgiveropplysninger(
-                1.juni, listOf(
-                OverstyrtArbeidsgiveropplysning(a3, INNTEKT + 1.daglig, "for lite inntekt")
-            )
-            )
+            håndterOverstyrArbeidsgiveropplysninger(1.juni, listOf(OverstyrtArbeidsgiveropplysning(a3, INNTEKT + 1.daglig)))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)

@@ -144,7 +144,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1, forklaring = "yepp")))
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1)))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             val venterPå = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }.venterPå
             assertEquals("a3", venterPå.organisasjonsnummer)

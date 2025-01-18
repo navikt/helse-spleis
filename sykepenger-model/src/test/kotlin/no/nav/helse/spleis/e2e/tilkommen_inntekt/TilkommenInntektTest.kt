@@ -102,12 +102,11 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 assertEquals(200.daglig, tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp)
             }
             håndterOverstyrArbeidsgiveropplysninger(
-                1.januar,
+                skjæringstidspunkt = 1.januar,
                 arbeidsgiveropplysninger = listOf(
                     OverstyrtArbeidsgiveropplysning(
-                        a2,
-                        250.daglig,
-                        forklaring = "forklaring",
+                        orgnummer = a2,
+                        inntekt = 250.daglig,
                         gjelder = 1.februar til 28.februar
                     )
                 )
@@ -160,12 +159,11 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 assertEquals(363.daglig, tilkommendeInntekter.single().beløpstidslinje[1.mars].beløp)
             }
             håndterOverstyrArbeidsgiveropplysninger(
-                1.januar,
+                skjæringstidspunkt = 1.januar,
                 arbeidsgiveropplysninger = listOf(
                     OverstyrtArbeidsgiveropplysning(
-                        a2,
-                        400.daglig,
-                        forklaring = "forklaring",
+                        orgnummer = a2,
+                        inntekt = 400.daglig,
                         gjelder = 1.mars til 31.mars
                     )
                 )
@@ -189,12 +187,11 @@ internal class TilkommenInntektTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterOverstyrArbeidsgiveropplysninger(
-                1.januar,
+                skjæringstidspunkt = 1.januar,
                 arbeidsgiveropplysninger = listOf(
                     OverstyrtArbeidsgiveropplysning(
-                        a2,
-                        400.daglig,
-                        forklaring = "forklaring",
+                        orgnummer = a2,
+                        inntekt = 400.daglig,
                         gjelder = 5.januar til 31.januar
                     )
                 )

@@ -291,13 +291,12 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     fun `saksbehandler endrer refusjon frem i tid`() {
         nyttVedtak(1.januar, 31.januar)
         håndterOverstyrArbeidsgiveropplysninger(
-            1.januar,
+            skjæringstidspunkt = 1.januar,
             opplysninger = listOf(
                 OverstyrtArbeidsgiveropplysning(
-                    a1,
-                    INNTEKT,
-                    refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, INGEN)),
-                    forklaring = "Opphør"
+                    orgnummer = a1,
+                    inntekt = INNTEKT,
+                    refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, INGEN))
                 )
             )
         )

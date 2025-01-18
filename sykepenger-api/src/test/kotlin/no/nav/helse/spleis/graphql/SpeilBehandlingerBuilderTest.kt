@@ -338,12 +338,12 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig, "")))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig)))
         håndterYtelserTilGodkjenning()
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
         håndterYtelserTilGodkjenning()
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 550.daglig, "")))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 550.daglig)))
         håndterYtelserTilGodkjenning()
         generasjoner {
             assertEquals(3, size)
@@ -372,11 +372,11 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig, "")))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig)))
         håndterYtelserTilUtbetalt()
         håndterYtelserTilUtbetalt()
         håndterYtelserTilUtbetalt()
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 2.daglig, "")))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 2.daglig)))
         håndterYtelserTilGodkjenning()
         generasjoner {
             assertEquals(3, size)
@@ -405,7 +405,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     fun `periodetype ved enkel revurdering`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.0.daglig, "")))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.0.daglig)))
         håndterYtelserTilGodkjenning()
         generasjoner {
             0.generasjon {
@@ -1124,7 +1124,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     fun `revurdering av tidligere skjæringstidspunkt - opphører refusjon som treffer flere perioder`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "",
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT,
             listOf(Triple(1.januar, null, INGEN)))))
         håndterYtelserTilUtbetalt()
         håndterYtelserTilUtbetalt()

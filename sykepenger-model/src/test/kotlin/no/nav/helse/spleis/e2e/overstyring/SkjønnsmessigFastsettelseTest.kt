@@ -248,7 +248,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
     @Test
     fun `saksbehandler-inntekt overstyres av en skjønnsmessig med samme beløp`() {
         nyttVedtak(januar)
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2, forklaring = "forklaring")))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         assertTrue(inspektør.inntekt(1.januar) is Saksbehandler)
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
@@ -284,14 +284,11 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
     @Test
     fun `korrigert IM etter skjønnsfastsettelse på flere AG`() {
         (a1 og a2 og a3).nyeVedtak(januar)
-        håndterOverstyrArbeidsgiveropplysninger(
-            1.januar,
-            listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a3, inntekt = INNTEKT * 3, forklaring = "ogga bogga"))
-        )
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a3, inntekt = INNTEKT * 3)))
         a3 { assertTrue(inspektør.inntekt(1.januar) is Saksbehandler) }
         håndterSkjønnsmessigFastsettelse(
-            1.januar,
-            listOf(
+            skjæringstidspunkt = 1.januar,
+            arbeidsgiveropplysninger = listOf(
                 OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2),
                 OverstyrtArbeidsgiveropplysning(orgnummer = a2, inntekt = INNTEKT * 2),
                 OverstyrtArbeidsgiveropplysning(orgnummer = a3, inntekt = INNTEKT * 2)
@@ -333,25 +330,9 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
 
-            håndterSkjønnsmessigFastsettelse(
-                1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT * 2
-                )
-            )
-            )
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
 
-
-            håndterOverstyrArbeidsgiveropplysninger(
-                1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT,
-                    forklaring = "forklaring"
-                )
-            )
-            )
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT)))
 
             assertTrue(inspektør.inntekt(1.januar) is Saksbehandler)
             håndterYtelser(1.vedtaksperiode)
@@ -406,7 +387,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
 
             // Saksbehandler endrer kun refusjon, men beholder inntekt
             val overstyrInntektOgRefusjonId = UUID.randomUUID()
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = inntektsmeldingInntekt, forklaring = "forklaring", refusjonsopplysninger = listOf(Triple(1.januar, null, skjønnsfastsattInntekt)))), hendelseId = overstyrInntektOgRefusjonId)
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = inntektsmeldingInntekt, refusjonsopplysninger = listOf(Triple(1.januar, null, skjønnsfastsattInntekt)))), hendelseId = overstyrInntektOgRefusjonId)
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertTrue(inspektør.inntekt(1.januar) is SkjønnsmessigFastsatt)
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, skjønnsfastsattInntekt, overstyrInntektOgRefusjonId.saksbehandler), inspektør.refusjon(1.vedtaksperiode))
@@ -440,7 +421,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
 
             // Saksbehandler endrer refusjon og inntekt til INNTEKT * 2
             val overstyrInntektOgRefusjonId = UUID.randomUUID()
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsfastsattInntekt, forklaring = "forklaring", refusjonsopplysninger = listOf(Triple(1.januar, null, skjønnsfastsattInntekt)))), hendelseId = overstyrInntektOgRefusjonId)
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsfastsattInntekt, refusjonsopplysninger = listOf(Triple(1.januar, null, skjønnsfastsattInntekt)))), hendelseId = overstyrInntektOgRefusjonId)
             assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertTrue(inspektør.inntekt(1.januar) is Saksbehandler)
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, skjønnsfastsattInntekt, overstyrInntektOgRefusjonId.saksbehandler), inspektør.refusjon(1.vedtaksperiode))
