@@ -13,7 +13,6 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
-import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 
 data class Inntektsdata(
@@ -62,40 +61,6 @@ sealed class Inntektsopplysning(
         is IkkeRapportert,
         is SkattSykepengegrunnlag -> this
         is SkjønnsmessigFastsatt -> this.omregnetÅrsinntekt!!
-    }
-
-    internal fun overstyresAv(ny: Inntektsopplysning): Inntektsopplysning {
-        return when (this) {
-            // infotrygd kan ikke overstyres
-            is Infotrygd -> this
-
-            is Inntektsmeldinginntekt,
-            is Saksbehandler,
-            is SkjønnsmessigFastsatt,
-            is IkkeRapportert,
-            is SkattSykepengegrunnlag -> when (ny) {
-                is Inntektsmeldinginntekt -> when (this) {
-                    // erstatter skjønnsmessig inntekt hvis inntektsmeldingen har annet beløp enn den inntekten
-                    // som ligger bak den skjønnsmessige. i praksis medfører det at det skjønnsmessige sykepengegrunnlaget "rulles tilbake"
-                    is SkjønnsmessigFastsatt -> when (erOmregnetÅrsinntektEndret(ny, this)) {
-                        true -> ny
-                        else -> this.kopierMed(ny)
-                    }
-                    // inntektsmelding tillates bare hvis inntekten er i samme måned.
-                    // hvis det er flere AG med ulik fom, så kan f.eks. skjæringstidspunktet være i en måned og inntektmåneden være i en annen mnd
-                    else -> when (ny.inntektsdata.dato.yearMonth == this.inntektsdata.dato.yearMonth) {
-                        true -> ny
-                        else -> this
-                    }
-                }
-
-                is Saksbehandler,
-                is SkjønnsmessigFastsatt,
-                is Infotrygd,
-                is IkkeRapportert,
-                is SkattSykepengegrunnlag -> error("${ny::class.simpleName} kan ikke erstatte annen inntekt")
-            }
-        }
     }
 
     fun funksjoneltLik(other: Inntektsopplysning) =

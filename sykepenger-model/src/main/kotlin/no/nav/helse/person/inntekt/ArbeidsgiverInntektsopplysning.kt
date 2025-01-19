@@ -18,6 +18,7 @@ import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
+import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
@@ -54,9 +55,30 @@ internal data class ArbeidsgiverInntektsopplysning(
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
-    private fun overstyrMedInntektsmelding(overstyringer: List<ArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
-        val overstyring = overstyringer.singleOrNull { it.orgnummer == this.orgnummer } ?: return this
-        return overstyring.overstyrer(this)
+    private fun overstyrMedInntektsmelding(organisasjonsnummer: String, nyInntekt: Inntektsmeldinginntekt): ArbeidsgiverInntektsopplysning {
+        if (this.orgnummer != organisasjonsnummer) return this
+
+        val endring = when (this.inntektsopplysning) {
+            // erstatter skjønnsmessig inntekt hvis inntektsmeldingen har annet beløp enn den inntekten
+            // som ligger bak den skjønnsmessige. i praksis medfører det at det skjønnsmessige sykepengegrunnlaget "rulles tilbake"
+            is SkjønnsmessigFastsatt -> when (Inntektsopplysning.erOmregnetÅrsinntektEndret(nyInntekt, this.inntektsopplysning)) {
+                true -> nyInntekt
+                // oppdater bakenforliggende inntekt til skjønnsmessig fastsettelsen
+                else -> this.inntektsopplysning.endreOmregnetÅrsinntekt(nyInntekt)
+            }
+            // inntektsmelding tillates bare hvis inntekten er i samme måned.
+            // hvis det er flere AG med ulik fom, så kan f.eks. skjæringstidspunktet være i en måned og inntektmåneden være i en annen mnd
+            else -> when (nyInntekt.inntektsdata.dato.yearMonth == this.inntektsopplysning.inntektsdata.dato.yearMonth) {
+                true -> nyInntekt
+                else -> this.inntektsopplysning
+            }
+        }
+
+        return ArbeidsgiverInntektsopplysning(
+            orgnummer = this.orgnummer,
+            gjelder = this.gjelder,
+            inntektsopplysning = endring
+        )
     }
 
     private fun overstyrMedSaksbehandler(overstyringer: List<KorrigertArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
@@ -90,18 +112,6 @@ internal data class ArbeidsgiverInntektsopplysning(
             orgnummer = this.orgnummer,
             gjelder = this.gjelder,
             inntektsopplysning = nyInntektsopplysning
-        )
-    }
-
-    private fun overstyrer(gammel: ArbeidsgiverInntektsopplysning): ArbeidsgiverInntektsopplysning {
-        val nyGjelder = when (this.inntektsopplysning) {
-            is Saksbehandler -> this.gjelder
-            else -> gammel.gjelder
-        }
-        return ArbeidsgiverInntektsopplysning(
-            orgnummer = this.orgnummer,
-            gjelder = nyGjelder,
-            inntektsopplysning = gammel.inntektsopplysning.overstyresAv(this.inntektsopplysning)
         )
     }
 
@@ -177,13 +187,12 @@ internal data class ArbeidsgiverInntektsopplysning(
             return aktive to (deaktiverte + listOfNotNull(inntektsopplysning))
         }
 
-        // overskriver eksisterende verdier i *this* med verdier fra *other*,
-        // og legger til ting i *other* som ikke finnes i *this* som tilkommet inntekter
         internal fun List<ArbeidsgiverInntektsopplysning>.overstyrMedInntektsmelding(
             skjæringstidspunkt: LocalDate,
-            other: List<ArbeidsgiverInntektsopplysning>
+            organisasjonsnummer: String,
+            nyInntekt: Inntektsmeldinginntekt
         ): List<ArbeidsgiverInntektsopplysning> {
-            val endringen = this.map { inntekt -> inntekt.overstyrMedInntektsmelding(other) }
+            val endringen = this.map { inntekt -> inntekt.overstyrMedInntektsmelding(organisasjonsnummer, nyInntekt) }
             if (erOmregnetÅrsinntektEndret(skjæringstidspunkt, this, endringen)) {
                 return endringen.map { it.rullTilbake() }
             }

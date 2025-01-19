@@ -291,12 +291,7 @@ internal class Inntektsgrunnlag private constructor(
         inntekt: Inntektsmeldinginntekt,
         subsumsjonslogg: Subsumsjonslogg
     ): EndretInntektsgrunnlag? {
-        val nyInntektsopplysning = ArbeidsgiverInntektsopplysning(
-            orgnummer = organisasjonsnummer,
-            gjelder = skjæringstidspunkt til LocalDate.MAX,
-            inntektsopplysning = inntekt
-        )
-        val resultat = arbeidsgiverInntektsopplysninger.overstyrMedInntektsmelding(skjæringstidspunkt, listOf(nyInntektsopplysning))
+        val resultat = arbeidsgiverInntektsopplysninger.overstyrMedInntektsmelding(skjæringstidspunkt, organisasjonsnummer, inntekt)
         return lagEndring(resultat, subsumsjonslogg)
     }
 

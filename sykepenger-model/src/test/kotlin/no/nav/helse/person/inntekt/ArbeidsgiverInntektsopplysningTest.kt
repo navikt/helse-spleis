@@ -52,7 +52,6 @@ internal class ArbeidsgiverInntektsopplysningTest {
 
         assertEquals(expected, original.overstyrMedSaksbehandler(skjæringstidspunkt, listOf(a1Overstyrt, a1Overstyrt)))
 
-        assertEquals(expected, original.overstyrMedInntektsmelding(skjæringstidspunkt, emptyList()))
         original.overstyrMedSaksbehandler(skjæringstidspunkt, new).also {
             assertEquals(2, it.size)
             assertInstanceOf<Saksbehandler>(it[0].inntektsopplysning)
@@ -74,7 +73,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val inntektsmeldinginntektA3 = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 3000.månedlig)
 
         val inntektsmeldinginntektA1Ny = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig)
-        val overstyrtA1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig))
+        val overstyrtA1Opplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig)
         val forventetA1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig, inntektsmeldinginntektA1Ny))
 
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig, inntektsmeldinginntektA1))
@@ -83,12 +82,8 @@ internal class ArbeidsgiverInntektsopplysningTest {
 
         val original = listOf(a1Opplysning, a2Opplysning, a3Opplysning)
         val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning)
-        val new = listOf(overstyrtA1Opplysning)
 
-        val actual = original.overstyrMedInntektsmelding(
-            skjæringstidspunkt,
-            new
-        )
+        val actual = original.overstyrMedInntektsmelding(skjæringstidspunkt, "a1", overstyrtA1Opplysning)
         assertTrue(expected.funksjoneltLik(actual)) { "kan ikke velge mellom inntekter for samme orgnr" }
     }
 
@@ -105,7 +100,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val inntektsmeldinginntektA3 = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 3000.månedlig)
 
         val inntektsmeldinginntektA1Ny = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig)
-        val overstyrtA1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig))
+        val overstyrtA1Opplysning = Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig)
         val forventetA1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig, inntektsmeldinginntektA1Ny))
 
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig, skattA1))
@@ -114,12 +109,8 @@ internal class ArbeidsgiverInntektsopplysningTest {
 
         val original = listOf(a1Opplysning, a2Opplysning, a3Opplysning)
         val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning)
-        val new = listOf(overstyrtA1Opplysning)
 
-        val actual = original.overstyrMedInntektsmelding(
-            skjæringstidspunkt,
-            new
-        )
+        val actual = original.overstyrMedInntektsmelding(skjæringstidspunkt, "a1", overstyrtA1Opplysning)
         assertTrue(expected.funksjoneltLik(actual))
     }
 
