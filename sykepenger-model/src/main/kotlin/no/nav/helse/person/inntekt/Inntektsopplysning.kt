@@ -58,7 +58,6 @@ sealed class Inntektsopplysning(
         is Infotrygd,
         is Inntektsmeldinginntekt,
         is Saksbehandler,
-        is IkkeRapportert,
         is SkattSykepengegrunnlag -> this
         is SkjønnsmessigFastsatt -> this.omregnetÅrsinntekt!!
     }
@@ -81,7 +80,6 @@ sealed class Inntektsopplysning(
                     is Infotrygd,
                     is Inntektsmeldinginntekt,
                     is Saksbehandler,
-                    is IkkeRapportert,
                     is SkjønnsmessigFastsatt -> emptyList()
                 },
                 forklaring = forklaring,
@@ -96,7 +94,6 @@ sealed class Inntektsopplysning(
         is SkjønnsmessigFastsatt -> checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.gjenbrukbarInntekt(beløp)
 
         is Infotrygd,
-        is IkkeRapportert,
         is SkattSykepengegrunnlag -> null
     }
 
@@ -130,7 +127,7 @@ sealed class Inntektsopplysning(
             .map { it.årlig.toInt() }
 
         internal fun List<Inntektsopplysning>.markerFlereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {
-            if (distinctBy { it.inntektsdata.dato }.size <= 1 && none { it is SkattSykepengegrunnlag || it is IkkeRapportert }) return
+            if (distinctBy { it.inntektsdata.dato }.size <= 1 && none { it is SkattSykepengegrunnlag }) return
             aktivitetslogg.varsel(Varselkode.RV_VV_2)
         }
 
@@ -144,7 +141,6 @@ sealed class Inntektsopplysning(
         ): Inntektsopplysning {
             val inntektsopplysning = inntekter.getOrPut(dto.id) {
                 when (dto) {
-                    is InntektsopplysningInnDto.IkkeRapportertDto -> IkkeRapportert.gjenopprett(dto)
                     is InntektsopplysningInnDto.InfotrygdDto -> Infotrygd.gjenopprett(dto)
                     is InntektsopplysningInnDto.InntektsmeldingDto -> Inntektsmeldinginntekt.gjenopprett(dto)
                     is InntektsopplysningInnDto.SaksbehandlerDto -> Saksbehandler.gjenopprett(dto, inntekter)

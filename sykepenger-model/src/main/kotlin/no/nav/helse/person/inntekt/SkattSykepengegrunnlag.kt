@@ -1,5 +1,6 @@
 package no.nav.helse.person.inntekt
 
+import java.time.LocalDate
 import java.util.*
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
@@ -8,8 +9,15 @@ internal class SkattSykepengegrunnlag(
     id: UUID,
     inntektsdata: Inntektsdata,
     val inntektsopplysninger: List<Skatteopplysning>
-) : SkatteopplysningSykepengegrunnlag(id, inntektsdata) {
+) : Inntektsopplysning(id, inntektsdata) {
     internal companion object {
+        internal fun ikkeRapportert(dato: LocalDate, meldingsreferanseId: UUID) =
+            SkattSykepengegrunnlag(
+                id = UUID.randomUUID(),
+                inntektsdata = Inntektsdata.ingen(meldingsreferanseId, dato),
+                inntektsopplysninger = emptyList()
+            )
+
         internal fun gjenopprett(dto: InntektsopplysningInnDto.SkattSykepengegrunnlagDto): SkattSykepengegrunnlag {
             val skatteopplysninger = dto.inntektsopplysninger.map { Skatteopplysning.gjenopprett(it) }
             return SkattSykepengegrunnlag(

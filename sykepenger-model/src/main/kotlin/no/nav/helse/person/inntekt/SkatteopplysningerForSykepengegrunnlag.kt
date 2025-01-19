@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag.AnsattPeriode.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.yearMonth
-import no.nav.helse.økonomi.Inntekt
 
 // § 8-28-inntekter fra skatteetaten
 internal data class SkatteopplysningerForSykepengegrunnlag(
@@ -36,19 +35,15 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
     // må ha inntekter innenfor to måneder før skjæringstidspunktet for at vi skal hensynta skatteinntektene
     val inntektvurderingsperiode = utgangspunkt.minusMonths(MAKS_INNTEKT_GAP.toLong())..utgangspunkt.minusMonths(1)
     val harInntekterToMånederFørSkjæringstidspunkt = inntektsopplysninger.any { it.måned in inntektvurderingsperiode }
-    fun ghostInntektsgrunnlag(skjæringstidspunkt: LocalDate): SkatteopplysningSykepengegrunnlag? {
+    fun ghostInntektsgrunnlag(skjæringstidspunkt: LocalDate): SkattSykepengegrunnlag? {
         if (this.skjæringstidspunkt != skjæringstidspunkt) return null
         if (ansattPerioder.isEmpty()) return null
         // ser bort fra skatteinntekter om man ikke er ansatt på skjæringstidspunktet:
         if (!ansattVedSkjæringstidspunkt) return null
 
+        val erNyoppstartetArbeidsforhold = inntektsopplysninger.isEmpty() && nyoppstartetArbeidsforhold
         return when {
-            inntektsopplysninger.isEmpty() && nyoppstartetArbeidsforhold -> IkkeRapportert(
-                id = UUID.randomUUID(),
-                inntektsdata = inntektsdata.copy(beløp = Inntekt.INGEN)
-            )
-
-            harInntekterToMånederFørSkjæringstidspunkt -> SkattSykepengegrunnlag(
+             erNyoppstartetArbeidsforhold || harInntekterToMånederFørSkjæringstidspunkt -> SkattSykepengegrunnlag(
                 id = UUID.randomUUID(),
                 inntektsdata = inntektsdata,
                 inntektsopplysninger = this.treMånederFørSkjæringstidspunkt
@@ -58,13 +53,7 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
         }
     }
 
-    fun arbeidstakerInntektsgrunnlag(): SkatteopplysningSykepengegrunnlag {
-        if (inntektsopplysninger.isEmpty())
-            return IkkeRapportert(
-                id = UUID.randomUUID(),
-                inntektsdata = inntektsdata.copy(beløp = Inntekt.INGEN)
-            )
-
+    fun arbeidstakerInntektsgrunnlag(): SkattSykepengegrunnlag {
         return SkattSykepengegrunnlag(
             id = UUID.randomUUID(),
             inntektsdata = inntektsdata,

@@ -378,7 +378,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
                     kilde = Inntektkilde.IkkeRapportert,
                     beløp = 0.0,
                     månedsbeløp = 0.0,
-                    inntekterFraAOrdningen = null
+                    inntekterFraAOrdningen = emptyList()
                 ),
                 fom = 1.januar,
                 tom = null,

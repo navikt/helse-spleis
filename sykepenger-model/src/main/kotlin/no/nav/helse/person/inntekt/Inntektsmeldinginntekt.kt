@@ -36,7 +36,7 @@ class Inntektsmeldinginntekt internal constructor(
         inntektsdata = inntektsdata
     )
 
-    internal fun avklarSykepengegrunnlag(skatt: SkatteopplysningSykepengegrunnlag): Inntektsopplysning {
+    internal fun avklarSykepengegrunnlag(skatt: SkattSykepengegrunnlag): Inntektsopplysning {
         if (skatt.inntektsdata.dato.yearMonth < this.inntektsdata.dato.yearMonth) return skatt
         return this
     }

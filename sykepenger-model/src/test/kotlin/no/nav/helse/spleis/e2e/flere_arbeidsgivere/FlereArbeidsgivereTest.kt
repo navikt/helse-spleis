@@ -49,7 +49,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
-import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -607,7 +606,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             val arbeidsgiverInntektsopplysninger = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
             assertEquals(2, arbeidsgiverInntektsopplysninger.size)
             assertInstanceOf<Inntektsmeldinginntekt>(arbeidsgiverInntektsopplysninger[0].inntektsopplysning)
-            assertInstanceOf<IkkeRapportert>(arbeidsgiverInntektsopplysninger[1].inntektsopplysning)
+            assertInstanceOf<SkattSykepengegrunnlag>(arbeidsgiverInntektsopplysninger[1].inntektsopplysning)
         }
     }
 
@@ -1255,7 +1254,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
             val arbeidsgiverInntektsopplysninger = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
             assertEquals(2, arbeidsgiverInntektsopplysninger.size)
-            assertInstanceOf<IkkeRapportert>(arbeidsgiverInntektsopplysninger[0].inntektsopplysning)
+            assertInstanceOf<SkattSykepengegrunnlag>(arbeidsgiverInntektsopplysninger[0].inntektsopplysning)
             assertInstanceOf<Inntektsmeldinginntekt>(arbeidsgiverInntektsopplysninger[1].inntektsopplysning)
             assertEquals(UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE, a1.inspektør.inntektskilde(2.vedtaksperiode))
         }

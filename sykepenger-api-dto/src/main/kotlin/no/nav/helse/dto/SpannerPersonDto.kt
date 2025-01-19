@@ -1531,7 +1531,6 @@ private fun InntektsopplysningUtDto.tilPersonData() =
         beløp = this.inntektsdata.beløp.tilPersonData(),
         tidsstempel = this.inntektsdata.tidsstempel,
         kilde = when (this) {
-            is InntektsopplysningUtDto.IkkeRapportertDto -> "IKKE_RAPPORTERT"
             is InntektsopplysningUtDto.InfotrygdDto -> "INFOTRYGD"
             is InntektsopplysningUtDto.InntektsmeldingDto -> "INNTEKTSMELDING"
             is InntektsopplysningUtDto.SaksbehandlerDto -> "SAKSBEHANDLER"

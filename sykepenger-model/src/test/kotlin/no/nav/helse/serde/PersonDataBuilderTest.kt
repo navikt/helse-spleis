@@ -382,7 +382,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                     )
                 }
                 vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger[1].also { arbeidsgiverInntektsopplysningDto ->
-                    assertInstanceOf<InntektsopplysningUtDto.IkkeRapportertDto>(arbeidsgiverInntektsopplysningDto.inntektsopplysning)
+                    assertInstanceOf<InntektsopplysningUtDto.SkattSykepengegrunnlagDto>(arbeidsgiverInntektsopplysningDto.inntektsopplysning)
                     assertEquals(
                         InntektDto(
                             InntektbeløpDto.Årlig(beløp = 0.0),

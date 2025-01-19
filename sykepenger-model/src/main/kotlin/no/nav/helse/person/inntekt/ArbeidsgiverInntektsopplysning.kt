@@ -275,7 +275,6 @@ internal data class ArbeidsgiverInntektsopplysning(
                     skjønnsfastsatt = if (arbeidsgiver.inntektsopplysning is SkjønnsmessigFastsatt) arbeidsgiver.inntektsopplysning.fastsattÅrsinntekt() else null,
                     gjelder = arbeidsgiver.gjelder,
                     inntektskilde = when (arbeidsgiver.inntektsopplysning) {
-                        is IkkeRapportert,
                         is SkattSykepengegrunnlag -> Inntektskilde.AOrdningen
 
                         is Inntektsmeldinginntekt -> arbeidsgiver.inntektsopplysning.inntektskilde()

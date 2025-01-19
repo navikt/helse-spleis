@@ -63,7 +63,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertInstanceOf<IkkeRapportert>(skatt.ghostInntektsgrunnlag(10.april))
+        assertInstanceOf<SkattSykepengegrunnlag>(skatt.ghostInntektsgrunnlag(10.april))
     }
 
     @Test

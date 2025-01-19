@@ -7,11 +7,6 @@ sealed class InntektsopplysningInnDto {
     abstract val id: UUID
     abstract val inntektsdata: InntektsdataInnDto
 
-    data class IkkeRapportertDto(
-        override val id: UUID,
-        override val inntektsdata: InntektsdataInnDto,
-    ) : InntektsopplysningInnDto()
-
     data class InfotrygdDto(
         override val id: UUID,
         override val inntektsdata: InntektsdataInnDto

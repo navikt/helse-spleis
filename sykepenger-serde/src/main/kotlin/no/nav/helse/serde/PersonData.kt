@@ -318,7 +318,7 @@ data class PersonData(
                 val hendelseId: UUID,
                 val beløp: Double?, // todo: trenger ikke være null etter 20. februar 2025
                 val tidsstempel: LocalDateTime,
-                val kilde: String,
+                val kilde: InntektsopplysningskildeData,
                 val overstyrtInntektId: UUID?,
                 val skatteopplysninger: List<SkatteopplysningData>?,
                 val inntektsmeldingkilde: InntektsmeldingKildeDto?
@@ -328,8 +328,18 @@ data class PersonData(
                     AOrdningen
                 }
 
-                fun tilDto() = when (kilde.let(Inntektsopplysningskilde::valueOf)) {
-                    Inntektsopplysningskilde.INFOTRYGD -> InntektsopplysningInnDto.InfotrygdDto(
+                enum class InntektsopplysningskildeData {
+                    SKATT_SYKEPENGEGRUNNLAG,
+                    INFOTRYGD,
+                    INNTEKTSMELDING,
+                    SAKSBEHANDLER,
+                    SKJØNNSMESSIG_FASTSATT,
+                    @Deprecated("Erstattet med SKATT_SYKEPENGEGRUNNLAG (kan fjernes etter 20. februar 2025)", replaceWith = ReplaceWith("SKATT_SYKEPENGEGRUNNLAG"))
+                    IKKE_RAPPORTERT
+                }
+
+                fun tilDto() = when (kilde) {
+                    InntektsopplysningskildeData.INFOTRYGD -> InntektsopplysningInnDto.InfotrygdDto(
                         id = this.id,
                         inntektsdata = InntektsdataInnDto(
                             hendelseId = this.hendelseId,
@@ -339,7 +349,7 @@ data class PersonData(
                         )
                     )
 
-                    Inntektsopplysningskilde.INNTEKTSMELDING -> InntektsopplysningInnDto.InntektsmeldingDto(
+                    InntektsopplysningskildeData.INNTEKTSMELDING -> InntektsopplysningInnDto.InntektsmeldingDto(
                         id = this.id,
                         inntektsdata = InntektsdataInnDto(
                             hendelseId = this.hendelseId,
@@ -355,17 +365,7 @@ data class PersonData(
                         } ?: InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver // todo: denne trenger ikke være nullable etter 20. oktober 2024..
                     )
 
-                    Inntektsopplysningskilde.IKKE_RAPPORTERT -> InntektsopplysningInnDto.IkkeRapportertDto(
-                        id = this.id,
-                        inntektsdata = InntektsdataInnDto(
-                            hendelseId = this.hendelseId,
-                            dato = this.dato,
-                            beløp = InntektbeløpDto.MånedligDouble(beløp = 0.0),
-                            tidsstempel = this.tidsstempel
-                        ),
-                    )
-
-                    Inntektsopplysningskilde.SAKSBEHANDLER -> InntektsopplysningInnDto.SaksbehandlerDto(
+                    InntektsopplysningskildeData.SAKSBEHANDLER -> InntektsopplysningInnDto.SaksbehandlerDto(
                         id = this.id,
                         inntektsdata = InntektsdataInnDto(
                             hendelseId = this.hendelseId,
@@ -376,7 +376,7 @@ data class PersonData(
                         overstyrtInntekt = this.overstyrtInntektId!!
                     )
 
-                    Inntektsopplysningskilde.SKJØNNSMESSIG_FASTSATT -> InntektsopplysningInnDto.SkjønnsmessigFastsattDto(
+                    InntektsopplysningskildeData.SKJØNNSMESSIG_FASTSATT -> InntektsopplysningInnDto.SkjønnsmessigFastsattDto(
                         id = this.id,
                         inntektsdata = InntektsdataInnDto(
                             hendelseId = this.hendelseId,
@@ -387,21 +387,22 @@ data class PersonData(
                         overstyrtInntekt = this.overstyrtInntektId!!
                     )
 
-                    Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG -> InntektsopplysningInnDto.SkattSykepengegrunnlagDto(
+                    InntektsopplysningskildeData.IKKE_RAPPORTERT,
+                    InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> InntektsopplysningInnDto.SkattSykepengegrunnlagDto(
                         id = this.id,
                         inntektsdata = InntektsdataInnDto(
                             hendelseId = this.hendelseId,
                             dato = this.dato,
-                            beløp = InntektbeløpDto.MånedligDouble(beløp = skatteopplysninger!! // todo: hent beløp fra ${this.beløp} når this.beløp ikke er null mer
-                                .sumOf { it.beløp }
-                                .coerceAtLeast(0.0)
-                                .div(3)),
+                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp ?: skatteopplysninger // todo: hent beløp fra ${this.beløp} når this.beløp ikke er null mer
+                                ?.sumOf { it.beløp }
+                                ?.coerceAtLeast(0.0)
+                                ?.div(3)
+                                ?: 0.0),
                             tidsstempel = this.tidsstempel
                         ),
-                        inntektsopplysninger = this.skatteopplysninger!!.map { it.tilDto() }
+                        // todo: skatteopplysninger er null frem til etter 20. februar siden IKKE_RAPPORTERT ble slått sammen med SKATT_SYKEPENGEGRUNNLAG
+                        inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
                     )
-
-                    else -> error("Fant ${kilde}. Det er ugyldig for sykepengegrunnlag")
                 }
             }
         }

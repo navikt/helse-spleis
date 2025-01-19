@@ -208,7 +208,6 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         val begrensning = SykepengegrunnlagsgrenseDTO.fra6GBegrensning(grunnlagsdata.inntektsgrunnlag.`6G`)
         val overstyringer = grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.mapNotNull {
             when (it.inntektsopplysning) {
-                is InntektsopplysningUtDto.IkkeRapportertDto -> null
                 is InntektsopplysningUtDto.InfotrygdDto -> null
                 is InntektsopplysningUtDto.InntektsmeldingDto -> null
                 is InntektsopplysningUtDto.SaksbehandlerDto -> it.inntektsopplysning.inntektsdata.hendelseId
@@ -256,7 +255,6 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
 
     private fun mapInntekt(orgnummer: String, fom: LocalDate, tom: LocalDate, io: InntektsopplysningUtDto, deaktivert: Boolean): IArbeidsgiverinntekt {
         val omregnetÅrsinntekt = when (io) {
-            is InntektsopplysningUtDto.IkkeRapportertDto -> IOmregnetÅrsinntekt(IInntektkilde.IkkeRapportert, 0.0, 0.0, null)
             is InntektsopplysningUtDto.InfotrygdDto -> IOmregnetÅrsinntekt(IInntektkilde.Infotrygd, io.inntektsdata.beløp.årlig.beløp, io.inntektsdata.beløp.månedligDouble.beløp, null)
             is InntektsopplysningUtDto.InntektsmeldingDto -> {
                 val kilde = if (io.kilde == InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen) IInntektkilde.AOrdningen else IInntektkilde.Inntektsmelding
@@ -270,15 +268,18 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
 
             is InntektsopplysningUtDto.SaksbehandlerDto -> IOmregnetÅrsinntekt(IInntektkilde.Saksbehandler, io.inntektsdata.beløp.årlig.beløp, io.inntektsdata.beløp.månedligDouble.beløp, null)
             is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> IOmregnetÅrsinntekt(
-                IInntektkilde.AOrdningen, io.inntektsdata.beløp.årlig.beløp, io.inntektsdata.beløp.månedligDouble.beløp, io.inntektsopplysninger
-                .groupBy { it.måned }
-                .mapValues { (_, verdier) -> verdier.sumOf { it.beløp.beløp } }
-                .map { (måned, månedligSum) ->
-                    IInntekterFraAOrdningen(
-                        måned = måned,
-                        sum = månedligSum
-                    )
-                }
+                kilde = if (io.inntektsopplysninger.isEmpty()) IInntektkilde.IkkeRapportert else IInntektkilde.AOrdningen,
+                beløp = io.inntektsdata.beløp.årlig.beløp,
+                månedsbeløp = io.inntektsdata.beløp.månedligDouble.beløp,
+                inntekterFraAOrdningen = io.inntektsopplysninger
+                    .groupBy { it.måned }
+                    .mapValues { (_, verdier) -> verdier.sumOf { it.beløp.beløp } }
+                    .map { (måned, månedligSum) ->
+                        IInntekterFraAOrdningen(
+                            måned = måned,
+                            sum = månedligSum
+                        )
+                    }
             )
 
             is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> inntekter.getValue(io.overstyrtInntekt)

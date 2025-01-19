@@ -79,7 +79,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.NyInntektUnderveis
@@ -762,7 +761,6 @@ class Person private constructor(
                     }
                     is Infotrygd,
                     is Saksbehandler,
-                    is IkkeRapportert,
                     is SkattSykepengegrunnlag,
                     is SkjønnsmessigFastsatt -> { /* gjør ingenting */ }
                 }

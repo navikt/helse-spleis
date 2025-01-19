@@ -156,14 +156,12 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
-import no.nav.helse.person.inntekt.SkatteopplysningSykepengegrunnlag
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.sykdomstidslinje.Dag
@@ -1325,7 +1323,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun avklarSykepengegrunnlag(
-        skatteopplysning: SkatteopplysningSykepengegrunnlag,
+        skatteopplysning: SkattSykepengegrunnlag,
         vedtaksperioderMedSammeSkjæringstidspunkt: List<Vedtaksperiode>
     ): ArbeidsgiverInntektsopplysning {
         val alleForSammeArbeidsgiver = vedtaksperioderMedSammeSkjæringstidspunkt
@@ -1346,17 +1344,14 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun subsummerBrukAvSkatteopplysninger(inntekt: SkatteopplysningSykepengegrunnlag) {
+    private fun subsummerBrukAvSkatteopplysninger(inntekt: SkattSykepengegrunnlag) {
         subsummerBrukAvSkatteopplysninger(arbeidsgiver.organisasjonsnummer, inntekt)
     }
-    private fun subsummerGhostArbeidsgiver(orgnummer: String, inntekt: SkatteopplysningSykepengegrunnlag) {
+    private fun subsummerGhostArbeidsgiver(orgnummer: String, inntekt: SkattSykepengegrunnlag) {
         subsummerBrukAvSkatteopplysninger(orgnummer, inntekt)
     }
-    private fun subsummerBrukAvSkatteopplysninger(orgnummer: String, inntekt: SkatteopplysningSykepengegrunnlag) {
-        val inntekter = when (inntekt) {
-            is IkkeRapportert -> emptyList()
-            is SkattSykepengegrunnlag -> inntekt.inntektsopplysninger.subsumsjonsformat()
-        }
+    private fun subsummerBrukAvSkatteopplysninger(orgnummer: String, inntekt: SkattSykepengegrunnlag) {
+        val inntekter = inntekt.inntektsopplysninger.subsumsjonsformat()
         jurist.logg(
             `§ 8-28 ledd 3 bokstav a`(
                 organisasjonsnummer = orgnummer,
@@ -1376,11 +1371,11 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun skatteopplysningForArbeidsgiver(hendelse: Hendelse, skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>): SkatteopplysningSykepengegrunnlag {
+    private fun skatteopplysningForArbeidsgiver(hendelse: Hendelse, skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>): SkattSykepengegrunnlag {
         return skatteopplysninger
             .firstOrNull { it.arbeidsgiver == this.arbeidsgiver.organisasjonsnummer }
             ?.arbeidstakerInntektsgrunnlag()
-            ?: IkkeRapportert(skjæringstidspunkt, hendelse.metadata.meldingsreferanseId)
+            ?: SkattSykepengegrunnlag.ikkeRapportert(skjæringstidspunkt, hendelse.metadata.meldingsreferanseId)
     }
 
     private fun inntektsgrunnlagArbeidsgivere(

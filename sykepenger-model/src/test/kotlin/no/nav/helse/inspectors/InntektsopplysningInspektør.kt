@@ -2,7 +2,6 @@ package no.nav.helse.inspectors
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.Inntektsopplysning
@@ -22,7 +21,6 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
         is Infotrygd -> null
         is Saksbehandler -> inntektsopplysning.overstyrtInntekt
         is SkjønnsmessigFastsatt -> inntektsopplysning.overstyrtInntekt
-        is IkkeRapportert -> null
         is Inntektsmeldinginntekt -> null
         is SkattSykepengegrunnlag -> null
     }

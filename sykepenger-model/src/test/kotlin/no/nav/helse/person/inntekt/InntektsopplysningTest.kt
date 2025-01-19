@@ -44,7 +44,7 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `saksbehandler-likhet`() {
-        val ikkeRapportert = IkkeRapportert(1.januar, UUID.randomUUID())
+        val ikkeRapportert = SkattSykepengegrunnlag.ikkeRapportert(1.januar, UUID.randomUUID())
         val saksbehandler1 = Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, 20000.månedlig, LocalDateTime.now()), ikkeRapportert)
         val saksbehandler2 = Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, 25000.månedlig, LocalDateTime.now()), ikkeRapportert)
 

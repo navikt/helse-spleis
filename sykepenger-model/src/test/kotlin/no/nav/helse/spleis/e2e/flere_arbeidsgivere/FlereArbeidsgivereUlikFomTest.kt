@@ -38,7 +38,6 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
-import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -1541,9 +1540,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.also { inntekter ->
             assertEquals(3, inntekter.size)
             assertInstanceOf<SkattSykepengegrunnlag>(inntekter.getValue(a1).inspektør.inntektsopplysning)
-            assertInstanceOf<IkkeRapportert>(inntekter.getValue(a2).inspektør.inntektsopplysning)
-            assertInstanceOf<IkkeRapportert>(inntekter.getValue(a3).inspektør.inntektsopplysning)
-            assertEquals(IkkeRapportert::class, inntekter.getValue(a3).inspektør.inntektsopplysning::class)
+            assertInstanceOf<SkattSykepengegrunnlag>(inntekter.getValue(a2).inspektør.inntektsopplysning)
+            assertInstanceOf<SkattSykepengegrunnlag>(inntekter.getValue(a3).inspektør.inntektsopplysning)
         }
 
         assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter(orgnummer = a1))

@@ -58,6 +58,7 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.UtbetalingsdagData
+import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsopplysningskildeData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 
@@ -810,12 +811,11 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
     beløp = this.inntektsdata.beløp.månedligDouble.beløp,
     tidsstempel = this.inntektsdata.tidsstempel,
     kilde = when (this) {
-        is InntektsopplysningUtDto.IkkeRapportertDto -> "IKKE_RAPPORTERT"
-        is InntektsopplysningUtDto.InfotrygdDto -> "INFOTRYGD"
-        is InntektsopplysningUtDto.InntektsmeldingDto -> "INNTEKTSMELDING"
-        is InntektsopplysningUtDto.SaksbehandlerDto -> "SAKSBEHANDLER"
-        is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> "SKATT_SYKEPENGEGRUNNLAG"
-        is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> "SKJØNNSMESSIG_FASTSATT"
+        is InntektsopplysningUtDto.InfotrygdDto -> InntektsopplysningskildeData.INFOTRYGD
+        is InntektsopplysningUtDto.InntektsmeldingDto -> InntektsopplysningskildeData.INNTEKTSMELDING
+        is InntektsopplysningUtDto.SaksbehandlerDto -> InntektsopplysningskildeData.SAKSBEHANDLER
+        is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG
+        is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> InntektsopplysningskildeData.SKJØNNSMESSIG_FASTSATT
     },
     overstyrtInntektId = when (this) {
         is InntektsopplysningUtDto.SaksbehandlerDto -> this.overstyrtInntekt
