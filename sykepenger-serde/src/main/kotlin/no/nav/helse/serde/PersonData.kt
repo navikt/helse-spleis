@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import kotlin.streams.asSequence
 import no.nav.helse.dto.AlderDto
 import no.nav.helse.dto.ArbeidsforholdDto
@@ -237,13 +237,13 @@ data class PersonData(
             val grunnbeløp: Double?,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
-            val tilkommendeInntekter: List<NyInntektUnderveisData>?, // todo: migrere inn tom liste for å unngå null
+            val tilkommendeInntekter: List<NyInntektUnderveisData>,
             val vurdertInfotrygd: Boolean
         ) {
             fun tilSpleisDto() = InntektsgrunnlagInnDto(
                 arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilDto() },
                 deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
-                tilkommendeInntekter = this.tilkommendeInntekter?.map { it.tilDto() } ?: emptyList(),
+                tilkommendeInntekter = this.tilkommendeInntekter.map { it.tilDto() },
                 vurdertInfotrygd = this.vurdertInfotrygd,
                 `6G` = InntektbeløpDto.Årlig(grunnbeløp!!)
             )
@@ -315,7 +315,7 @@ data class PersonData(
                 val id: UUID,
                 val dato: LocalDate,
                 val hendelseId: UUID,
-                val beløp: Double?, // todo: trenger ikke være null etter 20. februar 2025
+                val beløp: Double,
                 val tidsstempel: LocalDateTime,
                 val kilde: InntektsopplysningskildeData,
                 val overstyrtInntektId: UUID?,
@@ -333,8 +333,6 @@ data class PersonData(
                     INNTEKTSMELDING,
                     SAKSBEHANDLER,
                     SKJØNNSMESSIG_FASTSATT,
-                    @Deprecated("Erstattet med SKATT_SYKEPENGEGRUNNLAG (kan fjernes etter 20. februar 2025)", replaceWith = ReplaceWith("SKATT_SYKEPENGEGRUNNLAG"))
-                    IKKE_RAPPORTERT
                 }
 
                 fun tilDto() = when (kilde) {
@@ -343,7 +341,7 @@ data class PersonData(
                         inntektsdata = InntektsdataInnDto(
                             hendelseId = this.hendelseId,
                             dato = this.dato,
-                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
+                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
                             tidsstempel = this.tidsstempel
                         )
                     )
@@ -353,15 +351,13 @@ data class PersonData(
                         inntektsdata = InntektsdataInnDto(
                             hendelseId = this.hendelseId,
                             dato = this.dato,
-                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
+                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
                             tidsstempel = this.tidsstempel
                         ),
-                        kilde = this.inntektsmeldingkilde?.let {
-                            when (it) {
-                                InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver
-                                InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen
-                            }
-                        } ?: InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver // todo: denne trenger ikke være nullable etter 20. oktober 2024..
+                        kilde = when (this.inntektsmeldingkilde!!) {
+                            InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver
+                            InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen
+                        }
                     )
 
                     InntektsopplysningskildeData.SAKSBEHANDLER -> InntektsopplysningInnDto.SaksbehandlerDto(
@@ -369,7 +365,7 @@ data class PersonData(
                         inntektsdata = InntektsdataInnDto(
                             hendelseId = this.hendelseId,
                             dato = this.dato,
-                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
+                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
                             tidsstempel = this.tidsstempel
                         ),
                         overstyrtInntekt = this.overstyrtInntektId!!
@@ -380,27 +376,21 @@ data class PersonData(
                         inntektsdata = InntektsdataInnDto(
                             hendelseId = this.hendelseId,
                             dato = this.dato,
-                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
+                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
                             tidsstempel = this.tidsstempel
                         ),
                         overstyrtInntekt = this.overstyrtInntektId!!
                     )
 
-                    InntektsopplysningskildeData.IKKE_RAPPORTERT,
                     InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> InntektsopplysningInnDto.SkattSykepengegrunnlagDto(
                         id = this.id,
                         inntektsdata = InntektsdataInnDto(
                             hendelseId = this.hendelseId,
                             dato = this.dato,
-                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp ?: skatteopplysninger // todo: hent beløp fra ${this.beløp} når this.beløp ikke er null mer
-                                ?.sumOf { it.beløp }
-                                ?.coerceAtLeast(0.0)
-                                ?.div(3)
-                                ?: 0.0),
+                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
                             tidsstempel = this.tidsstempel
                         ),
-                        // todo: skatteopplysninger er null frem til etter 20. februar siden IKKE_RAPPORTERT ble slått sammen med SKATT_SYKEPENGEGRUNNLAG
-                        inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
+                        inntektsopplysninger = this.skatteopplysninger!!.map { it.tilDto() }
                     )
                 }
             }
@@ -468,7 +458,7 @@ data class PersonData(
             val dato: LocalDate,
             val hendelseId: UUID,
             val beløp: Double,
-            val kilde: InntektsmeldingKildeDto?, // todo: denne trenger ikke være nullable etter 20. oktober 2024..
+            val kilde: InntektsmeldingKildeDto,
             val tidsstempel: LocalDateTime
         ) {
             enum class InntektsmeldingKildeDto {
@@ -484,12 +474,10 @@ data class PersonData(
                     beløp = InntektbeløpDto.MånedligDouble(beløp),
                     tidsstempel = this.tidsstempel
                 ),
-                kilde = kilde?.let {
-                    when (it) {
-                        InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver
-                        InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen
-                    }
-                } ?: InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver
+                kilde = when (kilde) {
+                    InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver
+                    InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen
+                }
             )
         }
 
