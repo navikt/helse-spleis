@@ -75,7 +75,6 @@ import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnslagInnDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlaghistorikkInnDto
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
-import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 
 data class PersonData(
@@ -349,7 +348,7 @@ data class PersonData(
                         )
                     )
 
-                    InntektsopplysningskildeData.INNTEKTSMELDING -> InntektsopplysningInnDto.InntektsmeldingDto(
+                    InntektsopplysningskildeData.INNTEKTSMELDING -> InntektsopplysningInnDto.ArbeidsgiverinntektDto(
                         id = this.id,
                         inntektsdata = InntektsdataInnDto(
                             hendelseId = this.hendelseId,
@@ -359,10 +358,10 @@ data class PersonData(
                         ),
                         kilde = this.inntektsmeldingkilde?.let {
                             when (it) {
-                                InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
-                                InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.AOrdningen
+                                InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver
+                                InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen
                             }
-                        } ?: InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver // todo: denne trenger ikke være nullable etter 20. oktober 2024..
+                        } ?: InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver // todo: denne trenger ikke være nullable etter 20. oktober 2024..
                     )
 
                     InntektsopplysningskildeData.SAKSBEHANDLER -> InntektsopplysningInnDto.SaksbehandlerDto(
@@ -472,7 +471,12 @@ data class PersonData(
             val kilde: InntektsmeldingKildeDto?, // todo: denne trenger ikke være nullable etter 20. oktober 2024..
             val tidsstempel: LocalDateTime
         ) {
-            fun tilDto() = InntektsopplysningInnDto.InntektsmeldingDto(
+            enum class InntektsmeldingKildeDto {
+                Arbeidsgiver,
+                AOrdningen
+            }
+
+            fun tilDto() = InntektsopplysningInnDto.ArbeidsgiverinntektDto(
                 id = this.id,
                 inntektsdata = InntektsdataInnDto(
                     hendelseId = this.hendelseId,
@@ -482,10 +486,10 @@ data class PersonData(
                 ),
                 kilde = kilde?.let {
                     when (it) {
-                        InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
-                        InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.AOrdningen
+                        InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver
+                        InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen
                     }
-                } ?: InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
+                } ?: InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver
             )
         }
 

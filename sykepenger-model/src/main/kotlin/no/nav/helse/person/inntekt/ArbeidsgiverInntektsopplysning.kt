@@ -15,6 +15,7 @@ import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt.Kilde
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
@@ -55,7 +56,7 @@ internal data class ArbeidsgiverInntektsopplysning(
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
-    private fun overstyrMedInntektsmelding(organisasjonsnummer: String, nyInntekt: Inntektsmeldinginntekt): ArbeidsgiverInntektsopplysning {
+    private fun overstyrMedInntektsmelding(organisasjonsnummer: String, nyInntekt: Arbeidsgiverinntekt): ArbeidsgiverInntektsopplysning {
         if (this.orgnummer != organisasjonsnummer) return this
 
         val endring = when (this.inntektsopplysning) {
@@ -190,7 +191,7 @@ internal data class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.overstyrMedInntektsmelding(
             skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
-            nyInntekt: Inntektsmeldinginntekt
+            nyInntekt: Arbeidsgiverinntekt
         ): List<ArbeidsgiverInntektsopplysning> {
             val endringen = this.map { inntekt -> inntekt.overstyrMedInntektsmelding(organisasjonsnummer, nyInntekt) }
             if (erOmregnetÅrsinntektEndret(skjæringstidspunkt, this, endringen)) {
@@ -277,7 +278,10 @@ internal data class ArbeidsgiverInntektsopplysning(
                     inntektskilde = when (arbeidsgiver.inntektsopplysning) {
                         is SkattSykepengegrunnlag -> Inntektskilde.AOrdningen
 
-                        is Inntektsmeldinginntekt -> arbeidsgiver.inntektsopplysning.inntektskilde()
+                        is Arbeidsgiverinntekt -> when (arbeidsgiver.inntektsopplysning.kilde) {
+                            Kilde.Arbeidsgiver -> Inntektskilde.Arbeidsgiver
+                            Kilde.AOrdningen -> Inntektskilde.AOrdningen
+                        }
 
                         is Infotrygd -> Inntektskilde.Arbeidsgiver
 

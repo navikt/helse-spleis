@@ -24,7 +24,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -162,7 +162,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-        assertTrue(inspektør.inntekt(1.januar) is Inntektsmeldinginntekt)
+        assertTrue(inspektør.inntekt(1.januar) is Arbeidsgiverinntekt)
     }
 
     @Test
@@ -700,7 +700,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a1))
-        assertTrue(inspektør.inntekt(1.januar) is Inntektsmeldinginntekt)
+        assertTrue(inspektør.inntekt(1.januar) is Arbeidsgiverinntekt)
         assertTrue(inspektør(a2).inntekt(1.januar) is Saksbehandler)
     }
 

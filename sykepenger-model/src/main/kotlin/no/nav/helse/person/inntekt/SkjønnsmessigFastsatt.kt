@@ -16,7 +16,7 @@ class SkjønnsmessigFastsatt internal constructor(
     constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) :
         this(UUID.randomUUID(), Inntektsdata(hendelseId, dato, beløp, tidsstempel), null, null)
 
-    fun endreOmregnetÅrsinntekt(overstyrtInntekt: Inntektsmeldinginntekt) =
+    fun endreOmregnetÅrsinntekt(overstyrtInntekt: Arbeidsgiverinntekt) =
         SkjønnsmessigFastsatt(id, inntektsdata, overstyrtInntekt, overstyrtInntekt.omregnetÅrsinntekt())
 
     override fun dto() =

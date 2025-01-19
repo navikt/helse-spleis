@@ -371,7 +371,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             innslag.vilkårsgrunnlag[0].also { vilkårsgrunnlagDto ->
                 assertEquals(2, vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
                 vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger[0].also { arbeidsgiverInntektsopplysningDto ->
-                    assertInstanceOf<InntektsopplysningUtDto.InntektsmeldingDto>(arbeidsgiverInntektsopplysningDto.inntektsopplysning)
+                    assertInstanceOf<InntektsopplysningUtDto.ArbeidsgiverinntektDto>(arbeidsgiverInntektsopplysningDto.inntektsopplysning)
                     assertEquals(
                         InntektDto(
                             InntektbeløpDto.Årlig(beløp = 372000.0),

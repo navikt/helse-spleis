@@ -43,6 +43,7 @@ import no.nav.helse.dto.serialisering.InfotrygdInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
+import no.nav.helse.dto.serialisering.InntektsmeldingDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
@@ -55,6 +56,7 @@ import no.nav.helse.dto.serialisering.UtbetalingstidslinjeUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingData.InntektsmeldingKildeDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.UtbetalingsdagData
@@ -92,14 +94,14 @@ private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
     ubrukteRefusjonsopplysninger = this.ubrukteRefusjonsopplysninger.ubrukteRefusjonsopplysninger.tilPersonData(),
 )
 
-private fun InntektsopplysningUtDto.InntektsmeldingDto.tilPersonData() = PersonData.ArbeidsgiverData.InntektsmeldingData(
+private fun InntektsmeldingDto.tilPersonData() = PersonData.ArbeidsgiverData.InntektsmeldingData(
     id = this.id,
     dato = this.inntektsdata.dato,
     hendelseId = this.inntektsdata.hendelseId,
     beløp = this.inntektsdata.beløp.månedligDouble.beløp,
     kilde = when (this.kilde) {
-        InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.Arbeidsgiver
-        InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.AOrdningen
+        InntektsmeldingDto.KildeDto.Arbeidsgiver -> InntektsmeldingKildeDto.Arbeidsgiver
+        InntektsmeldingDto.KildeDto.AOrdningen -> InntektsmeldingKildeDto.AOrdningen
     },
     tidsstempel = this.inntektsdata.tidsstempel
 )
@@ -812,7 +814,7 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
     tidsstempel = this.inntektsdata.tidsstempel,
     kilde = when (this) {
         is InntektsopplysningUtDto.InfotrygdDto -> InntektsopplysningskildeData.INFOTRYGD
-        is InntektsopplysningUtDto.InntektsmeldingDto -> InntektsopplysningskildeData.INNTEKTSMELDING
+        is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> InntektsopplysningskildeData.INNTEKTSMELDING
         is InntektsopplysningUtDto.SaksbehandlerDto -> InntektsopplysningskildeData.SAKSBEHANDLER
         is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG
         is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> InntektsopplysningskildeData.SKJØNNSMESSIG_FASTSATT
@@ -827,9 +829,9 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
         else -> null
     },
     inntektsmeldingkilde = when (this) {
-        is InntektsopplysningUtDto.InntektsmeldingDto -> when (this.kilde) {
-            InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.Arbeidsgiver
-            InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.AOrdningen
+        is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> when (this.kilde) {
+            InntektsopplysningUtDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.Arbeidsgiver
+            InntektsopplysningUtDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.AOrdningen
         }
 
         else -> null

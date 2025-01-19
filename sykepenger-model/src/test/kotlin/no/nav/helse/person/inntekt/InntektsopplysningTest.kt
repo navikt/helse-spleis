@@ -6,13 +6,12 @@ import java.util.*
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt.Companion.finnInntektsmeldingForSkjæringstidspunkt
+import no.nav.helse.person.inntekt.Inntektsmeldinginntekt.Kilde
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
+import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertInstanceOf
-import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -24,20 +23,18 @@ internal class InntektsopplysningTest {
     @Test
     fun `inntektsmelding-likhet`() {
         val hendelsesId = UUID.randomUUID()
-        val im1 = Inntektsmeldinginntekt(1.januar, hendelsesId, INNTEKT)
-        val im2 = Inntektsmeldinginntekt(1.januar, hendelsesId, INNTEKT)
+        val im1 = inntektsmeldinginntekt(1.januar, hendelsesId)
+        val im2 = inntektsmeldinginntekt(1.januar, hendelsesId)
 
-        assertTrue(im1.funksjoneltLik(im2))
         assertFalse(im1.kanLagres(im2))
         assertFalse(im2.kanLagres(im1))
     }
 
     @Test
     fun `inntektsmelding-ulikhet`() {
-        val im1 = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT)
-        val im2 = Inntektsmeldinginntekt(2.januar, UUID.randomUUID(), INNTEKT)
+        val im1 = inntektsmeldinginntekt(1.januar, UUID.randomUUID())
+        val im2 = inntektsmeldinginntekt(2.januar, UUID.randomUUID())
 
-        assertFalse(im1.funksjoneltLik(im2))
         assertTrue(im1.kanLagres(im2))
         assertTrue(im2.kanLagres(im1))
     }
@@ -52,16 +49,8 @@ internal class InntektsopplysningTest {
     }
 
     @Test
-    fun `turnering - inntektsmelding vs inntektsmelding`() {
-        val im1 = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmeldinginntekt.Kilde.Arbeidsgiver, LocalDateTime.now())
-        val im2 = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmeldinginntekt.Kilde.Arbeidsgiver, LocalDateTime.now().plusSeconds(1))
-
-        assertSame(im2, listOf(im1, im2).finnInntektsmeldingForSkjæringstidspunkt(1.januar, null))
-    }
-
-    @Test
     fun `turnering - skatt vs inntektsmelding`() {
-        val im = Inntektsmeldinginntekt(10.februar, UUID.randomUUID(), INNTEKT)
+        val im = inntektsmeldinginntekt(10.februar, UUID.randomUUID())
         val skatt1 = SkatteopplysningerForSykepengegrunnlag(
             arbeidsgiver = "orgnr",
             hendelseId = UUID.randomUUID(),
@@ -103,7 +92,11 @@ internal class InntektsopplysningTest {
             tidsstempel = LocalDateTime.now()
         )
 
-        assertSame(im, im.avklarSykepengegrunnlag(skatt1.arbeidstakerInntektsgrunnlag()))
-        assertInstanceOf(SkattSykepengegrunnlag::class.java, im.avklarSykepengegrunnlag(skatt2.arbeidstakerInntektsgrunnlag()))
+        assertInstanceOf<Arbeidsgiverinntekt>(im.avklarSykepengegrunnlag(skatt1.arbeidstakerInntektsgrunnlag()))
+        assertInstanceOf<SkattSykepengegrunnlag>(im.avklarSykepengegrunnlag(skatt2.arbeidstakerInntektsgrunnlag()))
     }
+
+    private fun inntektsmeldinginntekt(dato: LocalDate, hendelseId: UUID) =
+        Inntektsmeldinginntekt(UUID.randomUUID(), Inntektsdata(hendelseId, dato, INNTEKT, LocalDateTime.now()), Kilde.Arbeidsgiver)
+
 }

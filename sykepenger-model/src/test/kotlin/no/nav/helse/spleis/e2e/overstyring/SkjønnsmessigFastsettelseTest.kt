@@ -25,7 +25,7 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -303,8 +303,8 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
 
-        a1 { assertTrue(inspektør.inntekt(1.januar) is Inntektsmeldinginntekt) }
-        a2 { assertTrue(inspektør.inntekt(1.januar) is Inntektsmeldinginntekt) }
+        a1 { assertTrue(inspektør.inntekt(1.januar) is Arbeidsgiverinntekt) }
+        a2 { assertTrue(inspektør.inntekt(1.januar) is Arbeidsgiverinntekt) }
         a3 { assertTrue(inspektør.inntekt(1.januar) is Saksbehandler) }
     }
 
@@ -319,7 +319,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 3)
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertTrue(inspektør.inntekt(1.januar) is Inntektsmeldinginntekt)
+        assertTrue(inspektør.inntekt(1.januar) is Arbeidsgiverinntekt)
     }
 
     @Test
@@ -376,7 +376,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            assertTrue(inspektør.inntekt(1.januar) is Inntektsmeldinginntekt)
+            assertTrue(inspektør.inntekt(1.januar) is Arbeidsgiverinntekt)
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, inntektsmeldingInntekt, inntektsmeldingId.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
 
             // Saksbehandler skjønnsmessig fastsetter
@@ -410,7 +410,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            assertTrue(inspektør.inntekt(1.januar) is Inntektsmeldinginntekt)
+            assertTrue(inspektør.inntekt(1.januar) is Arbeidsgiverinntekt)
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, inntektsmeldingInntekt, inntektsmeldingId.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
 
             // Saksbehandler skjønnsmessig fastsetter

@@ -41,7 +41,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
@@ -297,7 +297,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         val sykepengegrunnlagInspektør = vilkårsgrunnlaget.inspektør.inntektsgrunnlag.inspektør
         val arbeidsgiverInntektsopplysning = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør
         assertEquals(INNTEKT, arbeidsgiverInntektsopplysning.inntektsopplysning.inspektør.beløp)
-        assertEquals(Inntektsmeldinginntekt::class, arbeidsgiverInntektsopplysning.inntektsopplysning::class)
+        assertEquals(Arbeidsgiverinntekt::class, arbeidsgiverInntektsopplysning.inntektsopplysning::class)
     }
 
     @Test

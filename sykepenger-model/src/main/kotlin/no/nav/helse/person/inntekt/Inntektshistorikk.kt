@@ -35,4 +35,4 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
     )
 }
 
-internal data class InntektshistorikkView(val inntekter: List<InntektsmeldingView>)
+internal data class InntektshistorikkView(val inntekter: List<InntektsmeldinginntektView>)

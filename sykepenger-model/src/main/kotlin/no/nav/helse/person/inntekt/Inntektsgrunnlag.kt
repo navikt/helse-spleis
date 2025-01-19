@@ -288,7 +288,7 @@ internal class Inntektsgrunnlag private constructor(
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
         organisasjonsnummer: String,
-        inntekt: Inntektsmeldinginntekt,
+        inntekt: Arbeidsgiverinntekt,
         subsumsjonslogg: Subsumsjonslogg
     ): EndretInntektsgrunnlag? {
         val resultat = arbeidsgiverInntektsopplysninger.overstyrMedInntektsmelding(skjæringstidspunkt, organisasjonsnummer, inntekt)

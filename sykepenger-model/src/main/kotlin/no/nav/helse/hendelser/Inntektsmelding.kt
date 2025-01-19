@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
@@ -21,6 +21,8 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
+import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.refusjon.Refusjonsservitør
@@ -69,23 +71,6 @@ class Inntektsmelding(
         )
     }
 
-    private var håndtertInntekt = false
-    val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
-
-    fun korrigertInntekt() = Inntektsmeldinginntekt(inntektsdato, metadata.meldingsreferanseId, beregnetInntekt)
-
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg, alternativInntektsdato: LocalDate) {
-        val inntektsdato = alternativInntektsdato.takeUnless { it == inntektsdato } ?: return
-        if (!inntektshistorikk.leggTil(Inntektsmeldinginntekt(inntektsdato, metadata.meldingsreferanseId, beregnetInntekt))) return
-        aktivitetslogg.info("Lagrer inntekt på alternativ inntektsdato $inntektsdato")
-    }
-
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonslogg: Subsumsjonslogg): LocalDate {
-        subsumsjonslogg.logg(`§ 8-10 ledd 3`(beregnetInntekt.årlig, beregnetInntekt.daglig))
-        inntektshistorikk.leggTil(Inntektsmeldinginntekt(inntektsdato, metadata.meldingsreferanseId, beregnetInntekt))
-        return inntektsdato
-    }
-
     internal val inntektsdato: LocalDate by lazy {
         if (førsteFraværsdag != null && (grupperteArbeidsgiverperioder.isEmpty() || førsteFraværsdag > grupperteArbeidsgiverperioder.last().endInclusive.nesteDag)) førsteFraværsdag
         else grupperteArbeidsgiverperioder.maxOf { it.start }
@@ -97,6 +82,29 @@ class Inntektsmelding(
     }
 
     internal val refusjonsservitør get() = Refusjonsservitør.fra(refusjon.refusjonstidslinje(refusjonsdato, metadata.meldingsreferanseId, metadata.innsendt))
+
+    private var håndtertInntekt = false
+    val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
+
+    private val inntektsdata = Inntektsdata(metadata.meldingsreferanseId, inntektsdato, beregnetInntekt, metadata.registrert)
+
+    fun korrigertInntekt() = Arbeidsgiverinntekt(
+        id = UUID.randomUUID(),
+        inntektsdata = inntektsdata,
+        kilde = Arbeidsgiverinntekt.Kilde.Arbeidsgiver
+    )
+
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg, alternativInntektsdato: LocalDate) {
+        val inntektsdato = alternativInntektsdato.takeUnless { it == inntektsdato } ?: return
+        if (!inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), inntektsdata.copy(dato = inntektsdato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))) return
+        aktivitetslogg.info("Lagrer inntekt på alternativ inntektsdato $inntektsdato")
+    }
+
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonslogg: Subsumsjonslogg): LocalDate {
+        subsumsjonslogg.logg(`§ 8-10 ledd 3`(beregnetInntekt.årlig, beregnetInntekt.daglig))
+        inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), inntektsdata.copy(dato = inntektsdato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
+        return inntektsdato
+    }
 
     internal fun inntektHåndtert() {
         håndtertInntekt = true

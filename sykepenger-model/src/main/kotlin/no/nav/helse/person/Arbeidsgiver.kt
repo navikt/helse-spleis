@@ -70,6 +70,8 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
+import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.view.ArbeidsgiverView
@@ -637,9 +639,13 @@ internal class Arbeidsgiver private constructor(
         omregnetÅrsinntekt: Inntekt
     ) {
         val im = Inntektsmeldinginntekt(
-            dato = skjæringstidspunkt,
-            hendelseId = meldingsreferanseId,
-            beløp = omregnetÅrsinntekt,
+            id = UUID.randomUUID(),
+            inntektsdata = Inntektsdata(
+                hendelseId = meldingsreferanseId,
+                dato = skjæringstidspunkt,
+                beløp = omregnetÅrsinntekt,
+                tidsstempel = LocalDateTime.now()
+            ),
             kilde = Inntektsmeldinginntekt.Kilde.AOrdningen
         )
 
@@ -1025,7 +1031,7 @@ internal class Arbeidsgiver private constructor(
     private fun korrigerVilkårsgrunnlagOgIgangsettOverstyring(
         hendelse: Hendelse,
         skjæringstidspunkt: LocalDate?,
-        inntekt: Inntektsmeldinginntekt,
+        inntekt: Arbeidsgiverinntekt,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonsloggMedInntektsmeldingkontekst: BehandlingSubsumsjonslogg,
         overstyring: Revurderingseventyr?
@@ -1055,13 +1061,13 @@ internal class Arbeidsgiver private constructor(
     internal fun lagreTidsnærInntektsmelding(
         skjæringstidspunkt: LocalDate,
         orgnummer: String,
-        inntektsmeldinginntekt: Inntektsmeldinginntekt,
+        arbeidsgiverinntekt: Arbeidsgiverinntekt,
         aktivitetslogg: IAktivitetslogg,
         nyArbeidsgiverperiode: Boolean
     ) {
         if (this.organisasjonsnummer != orgnummer) return
         setOfNotNull(finnFørsteFraværsdag(skjæringstidspunkt), skjæringstidspunkt).forEach { dato ->
-            inntektsmeldinginntekt.kopierTidsnærOpplysning(dato, aktivitetslogg, nyArbeidsgiverperiode, inntektshistorikk)
+            arbeidsgiverinntekt.kopierTidsnærOpplysning(dato, aktivitetslogg, nyArbeidsgiverperiode, inntektshistorikk)
         }
     }
 

@@ -1,7 +1,6 @@
 package no.nav.helse
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.dsl.a1
@@ -9,7 +8,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.arbeidsgiverinntekt
 import no.nav.helse.økonomi.Inntekt
 
 internal val Inntekt.sykepengegrunnlag get() = inntektsgrunnlag(a1)
@@ -26,7 +25,7 @@ internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstid
             ArbeidsgiverInntektsopplysning(
                 orgnr,
                 skjæringstidspunkt til LocalDate.MAX,
-                Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), this)
+                arbeidsgiverinntekt(skjæringstidspunkt, this)
             )
         ),
         skjæringstidspunkt = skjæringstidspunkt,
@@ -41,7 +40,7 @@ internal fun Inntekt.inntektsgrunnlag(orgnr: String, skjæringstidspunkt: LocalD
             ArbeidsgiverInntektsopplysning(
                 orgnr,
                 skjæringstidspunkt til LocalDate.MAX,
-                Inntektsmeldinginntekt(skjæringstidspunkt, UUID.randomUUID(), this)
+                arbeidsgiverinntekt(skjæringstidspunkt, this)
             )
         ),
         deaktiverteArbeidsforhold = emptyList(),

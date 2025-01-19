@@ -80,7 +80,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Infotrygd
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.NyInntektUnderveis
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
@@ -702,7 +702,7 @@ class Person private constructor(
         hendelse: Hendelse,
         skjæringstidspunkt: LocalDate,
         organisasjonsnummer: String,
-        inntekt: Inntektsmeldinginntekt,
+        inntekt: Arbeidsgiverinntekt,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonslogg: Subsumsjonslogg
     ): Revurderingseventyr? {
@@ -717,7 +717,7 @@ class Person private constructor(
             før.inntektFør.inntektsopplysning.takeIf { før.inntektFør.orgnummer == organisasjonsnummer }
         }
         when (val inntektFraFør = endretInntektForArbeidsgiver) {
-            is Inntektsmeldinginntekt -> {
+            is Arbeidsgiverinntekt -> {
                 arbeidsgiveropplysningerKorrigert(
                     PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
                         korrigertInntektsmeldingId = inntektFraFør.inntektsdata.hendelseId,
@@ -750,7 +750,7 @@ class Person private constructor(
                 val opptjeningFom = nyttGrunnlag.opptjening!!.startdatoFor(it.inntektEtter.orgnummer)
                 hendelse.subsummer(subsumsjonslogg, opptjeningFom, it.inntektEtter.orgnummer)
                 when (it.inntektFør.inntektsopplysning) {
-                    is Inntektsmeldinginntekt -> {
+                    is Arbeidsgiverinntekt -> {
                         arbeidsgiveropplysningerKorrigert(
                             PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
                                 korrigertInntektsmeldingId = it.inntektFør.inntektsopplysning.inntektsdata.hendelseId,

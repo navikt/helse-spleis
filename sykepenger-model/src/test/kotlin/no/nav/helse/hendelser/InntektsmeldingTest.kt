@@ -434,7 +434,7 @@ internal class InntektsmeldingTest {
         )
         val inntektshistorikk = Inntektshistorikk()
         inntektsmelding.addInntekt(inntektshistorikk, Aktivitetslogg(), 1.februar)
-        assertEquals(2000.månedlig, inntektshistorikk.avklarInntektsgrunnlag(1.februar, 1.februar)?.inspektør?.beløp)
+        assertEquals(2000.månedlig, inntektshistorikk.avklarInntektsgrunnlag(1.februar, 1.februar)?.inntektsdata?.beløp)
         assertNull(inntektshistorikk.avklarInntektsgrunnlag(3.februar, 3.februar))
     }
 
@@ -448,7 +448,7 @@ internal class InntektsmeldingTest {
         )
         val inntektshistorikk = Inntektshistorikk()
         inntektsmelding.addInntekt(inntektshistorikk, EmptyLog)
-        assertEquals(2000.månedlig, inntektshistorikk.avklarInntektsgrunnlag(1.januar, 1.januar)?.inspektør?.beløp)
+        assertEquals(2000.månedlig, inntektshistorikk.avklarInntektsgrunnlag(1.januar, 1.januar)?.inntektsdata?.beløp)
     }
 
     @Test

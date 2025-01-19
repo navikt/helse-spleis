@@ -25,7 +25,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
@@ -105,7 +105,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(a1)?.inspektør
             ?.also {
                 assertEquals(32000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                assertEquals(Inntektsmeldinginntekt::class, it.inntektsopplysning::class)
+                assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
             }
     }
 
@@ -143,7 +143,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(a1)?.inspektør
             ?.also {
                 assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                assertEquals(Inntektsmeldinginntekt::class, it.inntektsopplysning::class)
+                assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
             }
     }
 

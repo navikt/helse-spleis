@@ -158,6 +158,8 @@ import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
+import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
@@ -613,18 +615,27 @@ internal class Vedtaksperiode private constructor(
 
     private fun <T> håndterOppgittInntekt(hendelse: T, inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
         val oppgittInntekt = hendelse.filterIsInstance<OppgittInntekt>().singleOrNull() ?: return emptyList()
-        val inntektsmeldingInntekt = Inntektsmeldinginntekt(
-            dato = skjæringstidspunkt, // Her skulle du kanskje tro at det riktige var å lagre på første fraværsdag, MEN siden dette er arbeidsgiveropplysninger fra HAG har de hensyntatt at man er syk i annen måned enn skjæringstidspunktet, så vi skal bare sluke det de opplyser om og lagre på skjæringstidspunktet.
-            hendelseId = hendelse.metadata.meldingsreferanseId,
-            beløp = oppgittInntekt.inntekt
-        )
-        inntektshistorikk.leggTil(inntektsmeldingInntekt)
 
+        val inntektsdata = Inntektsdata(
+            hendelseId = hendelse.metadata.meldingsreferanseId,
+            dato = skjæringstidspunkt, // Her skulle du kanskje tro at det riktige var å lagre på første fraværsdag, MEN siden dette er arbeidsgiveropplysninger fra HAG har de hensyntatt at man er syk i annen måned enn skjæringstidspunktet, så vi skal bare sluke det de opplyser om og lagre på skjæringstidspunktet.
+            beløp = oppgittInntekt.inntekt,
+            tidsstempel = LocalDateTime.now()
+        )
+        inntektshistorikk.leggTil(Inntektsmeldinginntekt(
+            id = UUID.randomUUID(),
+            inntektsdata = inntektsdata,
+            kilde = Inntektsmeldinginntekt.Kilde.Arbeidsgiver
+        ))
         val harEndretInntekt = person.nyeArbeidsgiverInntektsopplysninger(
             hendelse = hendelse,
             skjæringstidspunkt = skjæringstidspunkt,
             organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-            inntekt = inntektsmeldingInntekt,
+            inntekt = Arbeidsgiverinntekt(
+                id = UUID.randomUUID(),
+                inntektsdata = inntektsdata,
+                kilde = Arbeidsgiverinntekt.Kilde.Arbeidsgiver
+            ),
             aktivitetslogg = aktivitetslogg,
             subsumsjonslogg = this.jurist
         ) != null

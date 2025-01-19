@@ -55,7 +55,7 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
@@ -186,7 +186,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
             inspektør.inntekt(1.vedtaksperiode).let {
-                assertTrue(it is Inntektsmeldinginntekt)
+                assertTrue(it is Arbeidsgiverinntekt)
                 assertEquals(25_000.månedlig, it.inntektsdata.beløp)
             }
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, 25_000.månedlig), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
@@ -213,7 +213,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
             inspektør.inntekt(1.vedtaksperiode).let {
-                assertTrue(it is Inntektsmeldinginntekt)
+                assertTrue(it is Arbeidsgiverinntekt)
                 assertEquals(25_000.månedlig, it.inntektsdata.beløp)
             }
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(februar, 25_000.månedlig), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)

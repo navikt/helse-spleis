@@ -351,8 +351,8 @@ internal class InntektsgrunnlagTest {
         val a1Inntekt = 25000.månedlig
         val a2Inntekt = 5000.månedlig
         val inntekter = listOf(
-            ArbeidsgiverInntektsopplysning("a1", a1Fom til LocalDate.MAX, Inntektsmeldinginntekt(a1Fom, UUID.randomUUID(), a1Inntekt)),
-            ArbeidsgiverInntektsopplysning("a2", a2Fom til LocalDate.MAX, Inntektsmeldinginntekt(a2Fom, UUID.randomUUID(), a2Inntekt)),
+            ArbeidsgiverInntektsopplysning("a1", a1Fom til LocalDate.MAX, arbeidsgiverinntekt(a1Fom, a1Inntekt)),
+            ArbeidsgiverInntektsopplysning("a2", a2Fom til LocalDate.MAX, arbeidsgiverinntekt(a2Fom, a2Inntekt)),
         )
 
         val inntektsgrunnlag = Inntektsgrunnlag(
@@ -378,11 +378,9 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmeldinginntekt(
+                    inntektsopplysning = arbeidsgiverinntekt(
                         dato = skjæringstidspunkt,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
+                        beløp = 25000.månedlig
                     )
                 ),
                 ArbeidsgiverInntektsopplysning(
@@ -454,11 +452,9 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmeldinginntekt(
+                    inntektsopplysning = arbeidsgiverinntekt(
                         dato = førsteFraværsdagAG1,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
+                        beløp = 25000.månedlig
                     )
                 ),
                 ArbeidsgiverInntektsopplysning(
@@ -504,21 +500,17 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmeldinginntekt(
+                    inntektsopplysning = arbeidsgiverinntekt(
                         dato = førsteFraværsdagAG1,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
+                        beløp = 25000.månedlig
                     )
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmeldinginntekt(
+                    inntektsopplysning = arbeidsgiverinntekt(
                         dato = førsteFraværsdagAG2,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
+                        beløp = 25000.månedlig
                     )
                 )
             ),
@@ -543,21 +535,17 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmeldinginntekt(
+                    inntektsopplysning = arbeidsgiverinntekt(
                         dato = skjæringstidspunkt,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
+                        beløp = 25000.månedlig
                     )
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmeldinginntekt(
+                    inntektsopplysning = arbeidsgiverinntekt(
                         dato = skjæringstidspunkt,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
+                        beløp = 25000.månedlig
                     )
                 )
             ),
@@ -624,21 +612,17 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmeldinginntekt(
+                    inntektsopplysning = arbeidsgiverinntekt(
                         dato = førsteFraværsdagAG1,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
+                        beløp = 25000.månedlig
                     )
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = Inntektsmeldinginntekt(
+                    inntektsopplysning = arbeidsgiverinntekt(
                         dato = førsteFraværsdagAG2,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = 25000.månedlig,
-                        tidsstempel = LocalDateTime.now()
+                        beløp = 25000.månedlig
                     )
                 )
             ),

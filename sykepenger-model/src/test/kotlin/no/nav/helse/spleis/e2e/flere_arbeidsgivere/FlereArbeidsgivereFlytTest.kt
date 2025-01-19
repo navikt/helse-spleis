@@ -549,8 +549,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         val inntekterA1 = inntekter.getValue(a1).inspektør
         val inntekterA2 = inntekter.getValue(a2).inspektør
 
-        assertEquals(no.nav.helse.person.inntekt.Inntektsmeldinginntekt::class, inntekterA1.inntektsopplysning::class)
-        assertEquals(no.nav.helse.person.inntekt.Inntektsmeldinginntekt::class, inntekterA2.inntektsopplysning::class)
+        assertEquals(no.nav.helse.person.inntekt.Arbeidsgiverinntekt::class, inntekterA1.inntektsopplysning::class)
+        assertEquals(no.nav.helse.person.inntekt.Arbeidsgiverinntekt::class, inntekterA2.inntektsopplysning::class)
         assertEquals(INNTEKT, inntekterA2.inntektsopplysning.inspektør.beløp)
     }
 

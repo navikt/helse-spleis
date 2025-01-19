@@ -45,7 +45,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.inntekt.InntektsgrunnlagView
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.manuellSykedag
@@ -1219,7 +1219,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.tidsstempel
         )
         assertEquals(
-            Inntektsmeldinginntekt::class,
+            Arbeidsgiverinntekt::class,
             inntektsopplysningerEtterEndring.inspektør.inntektsopplysning::class
         )
     }

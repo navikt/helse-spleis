@@ -49,7 +49,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -120,8 +120,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, a3)
             val inntekter = inspektør.vilkårsgrunnlag(1.januar)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger ?: emptyList()
             assertEquals(3, inntekter.size)
-            assertTrue(inntekter.single { it.gjelder(a1) }.inspektør.inntektsopplysning is Inntektsmeldinginntekt)
-            assertTrue(inntekter.single { it.gjelder(a2) }.inspektør.inntektsopplysning is Inntektsmeldinginntekt)
+            assertTrue(inntekter.single { it.gjelder(a1) }.inspektør.inntektsopplysning is Arbeidsgiverinntekt)
+            assertTrue(inntekter.single { it.gjelder(a2) }.inspektør.inntektsopplysning is Arbeidsgiverinntekt)
             assertTrue(inntekter.single { it.gjelder(a3) }.inspektør.inntektsopplysning is SkattSykepengegrunnlag)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -492,7 +492,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is Inntektsmeldinginntekt)
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is Arbeidsgiverinntekt)
             assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkattSykepengegrunnlag)
         }
 
@@ -605,7 +605,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
             val arbeidsgiverInntektsopplysninger = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
             assertEquals(2, arbeidsgiverInntektsopplysninger.size)
-            assertInstanceOf<Inntektsmeldinginntekt>(arbeidsgiverInntektsopplysninger[0].inntektsopplysning)
+            assertInstanceOf<Arbeidsgiverinntekt>(arbeidsgiverInntektsopplysninger[0].inntektsopplysning)
             assertInstanceOf<SkattSykepengegrunnlag>(arbeidsgiverInntektsopplysninger[1].inntektsopplysning)
         }
     }
@@ -1255,7 +1255,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             val arbeidsgiverInntektsopplysninger = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
             assertEquals(2, arbeidsgiverInntektsopplysninger.size)
             assertInstanceOf<SkattSykepengegrunnlag>(arbeidsgiverInntektsopplysninger[0].inntektsopplysning)
-            assertInstanceOf<Inntektsmeldinginntekt>(arbeidsgiverInntektsopplysninger[1].inntektsopplysning)
+            assertInstanceOf<Arbeidsgiverinntekt>(arbeidsgiverInntektsopplysninger[1].inntektsopplysning)
             assertEquals(UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE, a1.inspektør.inntektskilde(2.vedtaksperiode))
         }
         a2 {

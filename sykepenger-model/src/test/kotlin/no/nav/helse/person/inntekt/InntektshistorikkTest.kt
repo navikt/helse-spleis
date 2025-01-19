@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.InntektshistorikkInspektør
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.økonomi.Inntekt
@@ -41,7 +40,7 @@ internal class InntektshistorikkTest {
     fun `Inntekt fra inntektsmelding brukes til å beregne sykepengegrunnlaget`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, EmptyLog)
         assertEquals(1, inspektør.size)
-        assertEquals(INNTEKT, historikk.avklarInntektsgrunnlag(1.januar, 1.januar)?.inspektør?.beløp)
+        assertEquals(INNTEKT, historikk.avklarInntektsgrunnlag(1.januar, 1.januar)?.inntektsdata?.beløp)
     }
 
     @Test
@@ -50,8 +49,8 @@ internal class InntektshistorikkTest {
         inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 29000.månedlig).addInntekt(historikk, EmptyLog)
         resetSeed(1.februar)
         inntektsmelding(førsteFraværsdag = 1.februar, beregnetInntekt = 31000.månedlig).addInntekt(historikk, EmptyLog)
-        assertEquals(29000.månedlig, historikk.avklarInntektsgrunnlag(1.januar, 1.januar)?.inspektør?.beløp)
-        assertEquals(31000.månedlig, historikk.avklarInntektsgrunnlag(1.februar, 1.februar)?.inspektør?.beløp)
+        assertEquals(29000.månedlig, historikk.avklarInntektsgrunnlag(1.januar, 1.januar)?.inntektsdata?.beløp)
+        assertEquals(31000.månedlig, historikk.avklarInntektsgrunnlag(1.februar, 1.februar)?.inntektsdata?.beløp)
     }
 
     @Test

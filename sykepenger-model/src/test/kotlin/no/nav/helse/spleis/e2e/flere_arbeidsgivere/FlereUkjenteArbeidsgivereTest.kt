@@ -30,7 +30,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -88,10 +88,10 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertEquals(2, inntektsopplysninger.size)
         val a1Inspektør = inntektsopplysninger.getValue(a1).inspektør
-        assertEquals(Inntektsmeldinginntekt::class, a1Inspektør.inntektsopplysning::class)
+        assertEquals(Arbeidsgiverinntekt::class, a1Inspektør.inntektsopplysning::class)
         assertEquals(inntektA1, a1Inspektør.inntektsopplysning.inspektør.beløp)
         val a2Inspektør = inntektsopplysninger.getValue(a2).inspektør
-        assertEquals(Inntektsmeldinginntekt::class, a2Inspektør.inntektsopplysning::class)
+        assertEquals(Arbeidsgiverinntekt::class, a2Inspektør.inntektsopplysning::class)
         assertEquals(inntektA2, a2Inspektør.inntektsopplysning.inspektør.beløp)
 
         val overstyringerIgangsatt = observatør.overstyringIgangsatt

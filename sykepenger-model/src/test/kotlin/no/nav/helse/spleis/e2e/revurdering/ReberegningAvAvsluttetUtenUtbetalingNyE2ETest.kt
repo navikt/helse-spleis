@@ -47,7 +47,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -1010,7 +1010,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(riktigInntekt, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Inntektsmeldinginntekt::class, it.inntektsopplysning::class)
+            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
         }
 
         assertEquals(riktigInntekt, vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.sykepengegrunnlag)

@@ -24,6 +24,7 @@ import no.nav.helse.dto.serialisering.InfotrygdInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
+import no.nav.helse.dto.serialisering.InntektsmeldingDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
@@ -714,7 +715,7 @@ private fun InntektDto.tilPersonData() = SpannerPersonDto.InntektDto(
     dagligInt = this.dagligInt.beløp
 )
 
-private fun InntektsopplysningUtDto.InntektsmeldingDto.tilPersonData() =
+private fun InntektsmeldingDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData(
         id = this.id,
         dato = this.inntektsdata.dato,
@@ -722,8 +723,8 @@ private fun InntektsopplysningUtDto.InntektsmeldingDto.tilPersonData() =
         beløp = this.inntektsdata.beløp.tilPersonData(),
         tidsstempel = this.inntektsdata.tidsstempel,
         kilde = when (this.kilde) {
-            InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.Arbeidsgiver
-            InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.AOrdningen
+            InntektsmeldingDto.KildeDto.Arbeidsgiver -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.Arbeidsgiver
+            InntektsmeldingDto.KildeDto.AOrdningen -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.AOrdningen
         }
     )
 
@@ -1532,7 +1533,7 @@ private fun InntektsopplysningUtDto.tilPersonData() =
         tidsstempel = this.inntektsdata.tidsstempel,
         kilde = when (this) {
             is InntektsopplysningUtDto.InfotrygdDto -> "INFOTRYGD"
-            is InntektsopplysningUtDto.InntektsmeldingDto -> "INNTEKTSMELDING"
+            is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> "INNTEKTSMELDING"
             is InntektsopplysningUtDto.SaksbehandlerDto -> "SAKSBEHANDLER"
             is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> "SKATT_SYKEPENGEGRUNNLAG"
             is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> "SKJØNNSMESSIG_FASTSATT"
@@ -1547,9 +1548,9 @@ private fun InntektsopplysningUtDto.tilPersonData() =
             else -> null
         },
         inntektsmeldingkilde = when (this) {
-            is InntektsopplysningUtDto.InntektsmeldingDto -> when (this.kilde) {
-                InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.Arbeidsgiver
-                InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.AOrdningen
+            is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> when (this.kilde) {
+                InntektsopplysningUtDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.Arbeidsgiver
+                InntektsopplysningUtDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.AOrdningen
             }
 
             else -> null

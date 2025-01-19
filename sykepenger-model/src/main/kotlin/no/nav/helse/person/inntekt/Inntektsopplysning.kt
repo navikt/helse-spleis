@@ -56,7 +56,7 @@ sealed class Inntektsopplysning(
     internal fun fastsattÅrsinntekt() = inntektsdata.beløp
     internal fun omregnetÅrsinntekt() = when (this) {
         is Infotrygd,
-        is Inntektsmeldinginntekt,
+        is Arbeidsgiverinntekt,
         is Saksbehandler,
         is SkattSykepengegrunnlag -> this
         is SkjønnsmessigFastsatt -> this.omregnetÅrsinntekt!!
@@ -78,7 +78,7 @@ sealed class Inntektsopplysning(
                 inntekterSisteTreMåneder = when (this) {
                     is SkattSykepengegrunnlag -> inntektsopplysninger.subsumsjonsformat()
                     is Infotrygd,
-                    is Inntektsmeldinginntekt,
+                    is Arbeidsgiverinntekt,
                     is Saksbehandler,
                     is SkjønnsmessigFastsatt -> emptyList()
                 },
@@ -88,8 +88,8 @@ sealed class Inntektsopplysning(
         )
     }
 
-    internal fun gjenbrukbarInntekt(beløp: Inntekt? = null): Inntektsmeldinginntekt? = when (this) {
-        is Inntektsmeldinginntekt -> beløp?.let { Inntektsmeldinginntekt(inntektsdata.dato, inntektsdata.hendelseId, it, kilde, inntektsdata.tidsstempel) } ?: this
+    internal fun gjenbrukbarInntekt(beløp: Inntekt? = null): Arbeidsgiverinntekt? = when (this) {
+        is Arbeidsgiverinntekt -> beløp?.let { Arbeidsgiverinntekt(UUID.randomUUID(), inntektsdata.copy(beløp = it), kilde) } ?: this
         is Saksbehandler -> overstyrtInntekt.gjenbrukbarInntekt(beløp ?: this.inntektsdata.beløp)
         is SkjønnsmessigFastsatt -> checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.gjenbrukbarInntekt(beløp)
 
@@ -109,7 +109,7 @@ sealed class Inntektsopplysning(
         arbeidsgiver.lagreTidsnærInntektsmelding(
             skjæringstidspunkt = skjæringstidspunkt,
             orgnummer = orgnummer,
-            inntektsmeldinginntekt = gjenbrukbarInntekt,
+            arbeidsgiverinntekt = gjenbrukbarInntekt,
             aktivitetslogg = aktivitetslogg,
             nyArbeidsgiverperiode = nyArbeidsgiverperiode
         )
@@ -142,7 +142,7 @@ sealed class Inntektsopplysning(
             val inntektsopplysning = inntekter.getOrPut(dto.id) {
                 when (dto) {
                     is InntektsopplysningInnDto.InfotrygdDto -> Infotrygd.gjenopprett(dto)
-                    is InntektsopplysningInnDto.InntektsmeldingDto -> Inntektsmeldinginntekt.gjenopprett(dto)
+                    is InntektsopplysningInnDto.ArbeidsgiverinntektDto -> Arbeidsgiverinntekt.gjenopprett(dto)
                     is InntektsopplysningInnDto.SaksbehandlerDto -> Saksbehandler.gjenopprett(dto, inntekter)
                     is InntektsopplysningInnDto.SkattSykepengegrunnlagDto -> SkattSykepengegrunnlag.gjenopprett(dto)
                     is InntektsopplysningInnDto.SkjønnsmessigFastsattDto -> SkjønnsmessigFastsatt.gjenopprett(

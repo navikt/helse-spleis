@@ -17,7 +17,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -77,7 +77,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(a1)?.inspektør
             ?.also {
                 assertEquals(overstyrtInntekt, it.inntektsopplysning.inspektør.beløp)
-                assertEquals(Inntektsmeldinginntekt::class, it.inntektsopplysning::class)
+                assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
             }
     }
 

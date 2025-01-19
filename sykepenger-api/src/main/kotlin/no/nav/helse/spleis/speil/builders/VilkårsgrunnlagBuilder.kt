@@ -209,7 +209,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         val overstyringer = grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.mapNotNull {
             when (it.inntektsopplysning) {
                 is InntektsopplysningUtDto.InfotrygdDto -> null
-                is InntektsopplysningUtDto.InntektsmeldingDto -> null
+                is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> null
                 is InntektsopplysningUtDto.SaksbehandlerDto -> it.inntektsopplysning.inntektsdata.hendelseId
                 is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> null
                 is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> it.inntektsopplysning.inntektsdata.hendelseId
@@ -256,8 +256,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
     private fun mapInntekt(orgnummer: String, fom: LocalDate, tom: LocalDate, io: InntektsopplysningUtDto, deaktivert: Boolean): IArbeidsgiverinntekt {
         val omregnetÅrsinntekt = when (io) {
             is InntektsopplysningUtDto.InfotrygdDto -> IOmregnetÅrsinntekt(IInntektkilde.Infotrygd, io.inntektsdata.beløp.årlig.beløp, io.inntektsdata.beløp.månedligDouble.beløp, null)
-            is InntektsopplysningUtDto.InntektsmeldingDto -> {
-                val kilde = if (io.kilde == InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen) IInntektkilde.AOrdningen else IInntektkilde.Inntektsmelding
+            is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> {
+                val kilde = if (io.kilde == InntektsopplysningUtDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen) IInntektkilde.AOrdningen else IInntektkilde.Inntektsmelding
                 IOmregnetÅrsinntekt(
                     kilde,
                     io.inntektsdata.beløp.årlig.beløp,
