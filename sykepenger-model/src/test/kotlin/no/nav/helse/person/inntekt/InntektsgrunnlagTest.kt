@@ -401,8 +401,7 @@ internal class InntektsgrunnlagTest {
                                 beskrivelse = "",
                                 tidsstempel = LocalDateTime.now()
                             )
-                        ),
-                        ansattPerioder = emptyList()
+                        )
                     )
                 )
             ),
@@ -478,8 +477,7 @@ internal class InntektsgrunnlagTest {
                                 beskrivelse = "",
                                 tidsstempel = LocalDateTime.now()
                             )
-                        ),
-                        ansattPerioder = emptyList()
+                        )
                     )
                 )
             ),

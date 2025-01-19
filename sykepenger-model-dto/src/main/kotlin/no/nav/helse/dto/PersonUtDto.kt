@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 data class AlderDto(val fødselsdato: LocalDate, val dødsdato: LocalDate?)
 
@@ -131,8 +131,6 @@ sealed class MedlemskapsvurderingDto {
     data object VetIkke : MedlemskapsvurderingDto()
     data object UavklartMedBrukerspørsmål : MedlemskapsvurderingDto()
 }
-
-data class AnsattPeriodeDto(val fom: LocalDate, val tom: LocalDate?)
 
 data class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto(
     val orgnummer: String,

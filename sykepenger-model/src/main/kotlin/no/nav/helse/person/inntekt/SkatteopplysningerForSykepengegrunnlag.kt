@@ -51,8 +51,7 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
             harInntekterToMånederFørSkjæringstidspunkt -> SkattSykepengegrunnlag(
                 id = UUID.randomUUID(),
                 inntektsdata = inntektsdata,
-                inntektsopplysninger = this.treMånederFørSkjæringstidspunkt,
-                ansattPerioder = emptyList()
+                inntektsopplysninger = this.treMånederFørSkjæringstidspunkt
             )
 
             else -> null
@@ -69,8 +68,7 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
         return SkattSykepengegrunnlag(
             id = UUID.randomUUID(),
             inntektsdata = inntektsdata,
-            inntektsopplysninger = this.treMånederFørSkjæringstidspunkt,
-            ansattPerioder = emptyList()
+            inntektsopplysninger = this.treMånederFørSkjæringstidspunkt
         )
     }
 

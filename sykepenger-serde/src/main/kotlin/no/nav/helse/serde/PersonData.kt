@@ -398,8 +398,7 @@ data class PersonData(
                                 .div(3)),
                             tidsstempel = this.tidsstempel
                         ),
-                        inntektsopplysninger = this.skatteopplysninger!!.map { it.tilDto() },
-                        ansattPerioder = emptyList()
+                        inntektsopplysninger = this.skatteopplysninger!!.map { it.tilDto() }
                     )
 
                     else -> error("Fant ${kilde}. Det er ugyldig for sykepengegrunnlag")

@@ -106,12 +106,4 @@ internal class InntektsopplysningTest {
         assertSame(im, im.avklarSykepengegrunnlag(skatt1.arbeidstakerInntektsgrunnlag()))
         assertInstanceOf(SkattSykepengegrunnlag::class.java, im.avklarSykepengegrunnlag(skatt2.arbeidstakerInntektsgrunnlag()))
     }
-
-    private fun skattSykepengegrunnlag(
-        hendelseId: UUID,
-        dato: LocalDate,
-        inntektsopplysninger: List<Skatteopplysning>,
-        ansattPerioder: List<AnsattPeriode>
-    ) =
-        SkattSykepengegrunnlag(UUID.randomUUID(), Inntektsdata(hendelseId, dato, Skatteopplysning.omregnetÅrsinntekt(inntektsopplysninger), LocalDateTime.now()), inntektsopplysninger, ansattPerioder)
 }

@@ -11,10 +11,9 @@ internal fun infotrygd(id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Innt
 internal fun skattSykepengegrunnlag(
     hendelseId: UUID,
     dato: LocalDate,
-    inntektsopplysninger: List<Skatteopplysning>,
-    ansattPerioder: List<AnsattPeriode>
+    inntektsopplysninger: List<Skatteopplysning>
 ) =
-    SkattSykepengegrunnlag(UUID.randomUUID(), Inntektsdata(hendelseId, dato, Skatteopplysning.omregnetÅrsinntekt(inntektsopplysninger), LocalDateTime.now()), inntektsopplysninger, ansattPerioder)
+    SkattSykepengegrunnlag(UUID.randomUUID(), Inntektsdata(hendelseId, dato, Skatteopplysning.omregnetÅrsinntekt(inntektsopplysninger), LocalDateTime.now()), inntektsopplysninger)
 
 fun skjønnsmessigFastsatt(
     dato: LocalDate,
