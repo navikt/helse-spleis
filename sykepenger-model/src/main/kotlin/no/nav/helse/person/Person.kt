@@ -779,8 +779,10 @@ class Person private constructor(
         subsumsjonslogg: Subsumsjonslogg
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
-        val (nyttGrunnlag, eventyr) = grunnlag.skjønnsmessigFastsettelse(hendelse, aktivitetslogg, subsumsjonslogg) ?: return
+        val (nyttGrunnlag, endretInntektsgrunnlag) = grunnlag.skjønnsmessigFastsettelse(hendelse, aktivitetslogg, subsumsjonslogg) ?: return
         nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
+
+        val eventyr = Revurderingseventyr.skjønnsmessigFastsettelse(hendelse, skjæringstidspunkt, endretInntektsgrunnlag.endringFom)
         igangsettOverstyring(eventyr, aktivitetslogg)
     }
 

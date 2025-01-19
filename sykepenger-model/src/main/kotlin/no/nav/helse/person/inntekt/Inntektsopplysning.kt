@@ -88,13 +88,9 @@ sealed class Inntektsopplysning(
                         else -> this
                     }
                 }
-                // bare sett inn ny inntekt hvis beløp er ulikt (speil sender inntekt- og refusjonoverstyring i samme melding)
-                is Saksbehandler -> when (ny.fastsattÅrsinntekt() != this.omregnetÅrsinntekt().fastsattÅrsinntekt()) {
-                    true -> ny.kopierMed(this)
-                    false -> this
-                }
-                is SkjønnsmessigFastsatt -> ny.kopierMed(this)
 
+                is Saksbehandler,
+                is SkjønnsmessigFastsatt,
                 is Infotrygd,
                 is IkkeRapportert,
                 is SkattSykepengegrunnlag -> error("${ny::class.simpleName} kan ikke erstatte annen inntekt")

@@ -9,7 +9,6 @@ import no.nav.helse.januar
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt.Companion.finnInntektsmeldingForSkjæringstidspunkt
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.yearMonth
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertInstanceOf
@@ -20,44 +19,6 @@ import org.junit.jupiter.api.Test
 internal class InntektsopplysningTest {
     private companion object {
         private val INNTEKT = 25000.månedlig
-    }
-
-    @Test
-    fun overstyres() {
-        val im1 = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT)
-        val im2 = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT)
-        val ikkeRapportert = IkkeRapportert(1.januar, UUID.randomUUID())
-        val saksbehandler1 = im1.overstyresAv(Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, 20000.månedlig, LocalDateTime.now()), im1))
-        val saksbehandler2 = Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, 20000.månedlig, LocalDateTime.now()), saksbehandler1)
-        val saksbehandler3 = Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, 30000.månedlig, LocalDateTime.now()), saksbehandler1)
-        val saksbehandler4 = Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, INGEN, LocalDateTime.now()), ikkeRapportert)
-
-        assertTrue(saksbehandler1.funksjoneltLik(im1.overstyresAv(saksbehandler1)))
-        assertSame(saksbehandler1, saksbehandler1.overstyresAv(saksbehandler2))
-        assertTrue(saksbehandler3.funksjoneltLik(saksbehandler1.overstyresAv(saksbehandler3)))
-        assertTrue(im1.funksjoneltLik(im1.overstyresAv(im2)))
-        assertSame(ikkeRapportert, ikkeRapportert.overstyresAv(saksbehandler4))
-        assertTrue(saksbehandler1.funksjoneltLik(ikkeRapportert.overstyresAv(saksbehandler1)))
-        assertSame(im1, ikkeRapportert.overstyresAv(im1))
-    }
-
-    @Test
-    fun `opphøre, gjøre om, avvikle, tilbakestille eller kansellere`() {
-        val im = Inntektsmeldinginntekt(1.januar, UUID.randomUUID(), INNTEKT)
-        val saksbehandler = im.overstyresAv(Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, 20000.månedlig, LocalDateTime.now()), im))
-        val skjønnsmessigFastsatt1 = im.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
-        val skjønnsmessigFastsatt2 = saksbehandler.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
-        val skjønnsmessigFastsatt3 = skjønnsmessigFastsatt2.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
-        val ikkeRapportert = IkkeRapportert(1.januar, UUID.randomUUID())
-        val skatt = skattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
-
-        assertSame(im, im.omregnetÅrsinntekt())
-        assertSame(saksbehandler, saksbehandler.omregnetÅrsinntekt())
-        assertSame(im, skjønnsmessigFastsatt1.omregnetÅrsinntekt())
-        assertSame(saksbehandler, skjønnsmessigFastsatt2.omregnetÅrsinntekt())
-        assertSame(saksbehandler, skjønnsmessigFastsatt3.omregnetÅrsinntekt())
-        assertSame(ikkeRapportert, ikkeRapportert.omregnetÅrsinntekt())
-        assertSame(skatt, skatt.omregnetÅrsinntekt())
     }
 
     @Test

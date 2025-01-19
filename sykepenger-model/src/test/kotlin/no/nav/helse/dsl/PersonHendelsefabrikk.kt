@@ -3,7 +3,7 @@ package no.nav.helse.dsl
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.medSaksbehandlerinntekt
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.medSkjønnsmessigFastsattInntekt
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.refusjonstidslinjer
@@ -18,9 +18,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsdata
-import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.økonomi.Inntekt
 
 internal class PersonHendelsefabrikk {
@@ -110,16 +108,16 @@ internal class OverstyrtArbeidsgiveropplysning(
             tidsstempel: LocalDateTime
         ) = tilArbeidsgiverInntektsopplysning(meldingsreferanseId, skjæringstidspunkt, tidsstempel)
 
-        internal fun List<OverstyrtArbeidsgiveropplysning>.medSkjønnsmessigFastsattInntekt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate): List<ArbeidsgiverInntektsopplysning> {
-            forEach {
-                check(it.refusjonsopplysninger == null) { "Skal ikke sette refusjonspplysnger på Skjønnsmessig fastsatt inntekt" }
-            }
+        internal fun List<OverstyrtArbeidsgiveropplysning>.medSkjønnsmessigFastsattInntekt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate): List<SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt> {
             return map {
-                val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
-                ArbeidsgiverInntektsopplysning(
+                SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt(
                     orgnummer = it.orgnummer,
-                    gjelder = gjelder,
-                    inntektsopplysning = SkjønnsmessigFastsatt(skjæringstidspunkt, meldingsreferanseId, it.inntekt, LocalDateTime.now())
+                    inntektsdata = Inntektsdata(
+                        hendelseId = meldingsreferanseId,
+                        dato = skjæringstidspunkt,
+                        beløp = it.inntekt,
+                        tidsstempel = LocalDateTime.now()
+                    )
                 )
             }
         }

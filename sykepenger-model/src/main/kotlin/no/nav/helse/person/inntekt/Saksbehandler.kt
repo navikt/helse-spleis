@@ -10,9 +10,6 @@ class Saksbehandler internal constructor(
     val overstyrtInntekt: Inntektsopplysning
 ) : Inntektsopplysning(id, inntektsdata) {
 
-    fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
-        Saksbehandler(id, inntektsdata, overstyrtInntekt)
-
     override fun dto() =
         InntektsopplysningUtDto.SaksbehandlerDto(
             id = id,

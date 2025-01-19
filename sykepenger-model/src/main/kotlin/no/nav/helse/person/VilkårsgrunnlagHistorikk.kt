@@ -20,7 +20,6 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
@@ -179,15 +178,15 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         )
 
         internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): Pair<VilkårsgrunnlagElement, EndretInntektsgrunnlag>? {
+            if (this is InfotrygdVilkårsgrunnlag) return null
             val endretInntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsgiveropplysninger(hendelse, subsumsjonslogg) ?: return null
             return kopierMed(aktivitetslogg, endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, subsumsjonslogg) to endretInntektsgrunnlag
         }
 
-        internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): Pair<VilkårsgrunnlagElement, Revurderingseventyr>? {
-            val sykepengegrunnlag = inntektsgrunnlag.skjønnsmessigFastsettelse(hendelse, subsumsjonslogg)
-            val endringsdato = sykepengegrunnlag.finnEndringsdato(this.inntektsgrunnlag) ?: return null
-            val eventyr = Revurderingseventyr.skjønnsmessigFastsettelse(hendelse, skjæringstidspunkt, endringsdato)
-            return kopierMed(aktivitetslogg, sykepengegrunnlag, opptjening, subsumsjonslogg) to eventyr
+        internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): Pair<VilkårsgrunnlagElement, EndretInntektsgrunnlag>? {
+            if (this is InfotrygdVilkårsgrunnlag) return null
+            val endretInntektsgrunnlag = inntektsgrunnlag.skjønnsmessigFastsettelse(hendelse, subsumsjonslogg) ?: return null
+            return kopierMed(aktivitetslogg, endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, subsumsjonslogg) to endretInntektsgrunnlag
         }
 
         protected abstract fun kopierMed(

@@ -7,6 +7,7 @@ import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.PersonObserver
@@ -20,7 +21,7 @@ import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
-data class ArbeidsgiverInntektsopplysning(
+internal data class ArbeidsgiverInntektsopplysning(
     val orgnummer: String,
     val gjelder: Periode,
     val inntektsopplysning: Inntektsopplysning
@@ -60,15 +61,35 @@ data class ArbeidsgiverInntektsopplysning(
 
     private fun overstyrMedSaksbehandler(overstyringer: List<KorrigertArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
         val korrigering = overstyringer.singleOrNull { it.organisasjonsnummer == this.orgnummer } ?: return this
-        val nyInntektsopplysning = Saksbehandler(
+        val saksbehandler = Saksbehandler(
             id = UUID.randomUUID(),
             inntektsdata = korrigering.inntektsdata,
             overstyrtInntekt = this.inntektsopplysning
         )
+        // bare sett inn ny inntekt hvis beløp er ulikt (speil sender inntekt- og refusjonoverstyring i samme melding)
+        val nyInntektsopplysning = when (saksbehandler.fastsattÅrsinntekt() != this.inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt()) {
+            true -> saksbehandler
+            false -> this.inntektsopplysning
+        }
         return ArbeidsgiverInntektsopplysning(
             orgnummer = this.orgnummer,
             gjelder = korrigering.gjelder,
-            inntektsopplysning = this.inntektsopplysning.overstyresAv(nyInntektsopplysning)
+            inntektsopplysning = nyInntektsopplysning
+        )
+    }
+
+    private fun skjønnsfastsett(fastsettelser: List<SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt>): ArbeidsgiverInntektsopplysning {
+        val fastsettelse = fastsettelser.single { it.orgnummer == this.orgnummer }
+        val nyInntektsopplysning = SkjønnsmessigFastsatt(
+            id = UUID.randomUUID(),
+            inntektsdata = fastsettelse.inntektsdata,
+            overstyrtInntekt = this.inntektsopplysning,
+            omregnetÅrsinntekt = this.inntektsopplysning.omregnetÅrsinntekt()
+        )
+        return ArbeidsgiverInntektsopplysning(
+            orgnummer = this.orgnummer,
+            gjelder = this.gjelder,
+            inntektsopplysning = nyInntektsopplysning
         )
     }
 
@@ -180,6 +201,11 @@ data class ArbeidsgiverInntektsopplysning(
                 return endringen.map { it.rullTilbake() }
             }
             return endringen
+        }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.skjønnsfastsett(other: List<SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt>): List<ArbeidsgiverInntektsopplysning> {
+            check (this.size == other.size) { "alle inntektene må skjønnsfastsettes" }
+            return this.map { inntekt -> inntekt.skjønnsfastsett(other) }
         }
 
         private fun erOmregnetÅrsinntektEndret(

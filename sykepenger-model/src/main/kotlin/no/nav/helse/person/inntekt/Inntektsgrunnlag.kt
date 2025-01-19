@@ -1,7 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
@@ -30,17 +30,18 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.akti
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.berik
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.faktaavklarteInntekter
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harGjenbrukbarInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedSaksbehandler
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedInntektsmelding
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedSaksbehandler
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.sjekkForNyArbeidsgiver
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.skjønnsfastsett
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.totalOmregnetÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_6G_BEGRENSET
@@ -273,16 +274,9 @@ internal class Inntektsgrunnlag private constructor(
         return lagEndring(resultat, subsumsjonslogg, tilkommendeInntekter.overstyrMedSaksbehandler(kilde, skjæringstidspunkt, hendelse.arbeidsgiveropplysninger))
     }
 
-    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
-        val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger)
-        hendelse.overstyr(builder)
-        val resultat = builder.resultat()
-        return kopierSykepengegrunnlagOgValiderMinsteinntekt(
-            resultat,
-            deaktiverteArbeidsforhold,
-            tilkommendeInntekter,
-            subsumsjonslogg
-        )
+    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, subsumsjonslogg: Subsumsjonslogg): EndretInntektsgrunnlag? {
+        val resultat = this.arbeidsgiverInntektsopplysninger.skjønnsfastsett(hendelse.arbeidsgiveropplysninger)
+        return lagEndring(resultat, subsumsjonslogg)
     }
 
     internal fun tilkomneInntekterFraSøknaden(søknad: IAktivitetslogg, periode: Periode, nyeInntekter: List<NyInntektUnderveis>, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag? {
@@ -395,20 +389,6 @@ internal class Inntektsgrunnlag private constructor(
 
     enum class Begrensning {
         ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD
-    }
-
-    internal class ArbeidsgiverInntektsopplysningerOverstyringer(
-        private val skjæringstidspunkt: LocalDate,
-        private val opprinneligArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>
-    ) {
-        private val nyeInntektsopplysninger = mutableListOf<ArbeidsgiverInntektsopplysning>()
-        internal fun leggTilInntekt(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning) {
-            nyeInntektsopplysninger.add(arbeidsgiverInntektsopplysning)
-        }
-
-        internal fun resultat(): List<ArbeidsgiverInntektsopplysning> {
-            return opprinneligArbeidsgiverInntektsopplysninger.overstyrMedInntektsmelding(skjæringstidspunkt, nyeInntektsopplysninger)
-        }
     }
 
     internal fun fastsattInntekt(organisasjonsnummer: String) =

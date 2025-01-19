@@ -62,9 +62,7 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsdata
-import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.refusjonstidslinjer
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.tilOverstyrt
@@ -1004,8 +1002,15 @@ internal class OverstyrtArbeidsgiveropplysning(
 
         internal fun List<OverstyrtArbeidsgiveropplysning>.tilSkjønnsmessigFastsatt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =
             map {
-                val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
-                ArbeidsgiverInntektsopplysning(it.orgnummer, gjelder, SkjønnsmessigFastsatt(skjæringstidspunkt, meldingsreferanseId, it.inntekt, LocalDateTime.now()))
+                SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt(
+                    orgnummer = it.orgnummer,
+                    inntektsdata = Inntektsdata(
+                        hendelseId = meldingsreferanseId,
+                        dato = skjæringstidspunkt,
+                        beløp = it.inntekt,
+                        tidsstempel = LocalDateTime.now()
+                    )
+                )
             }
 
         internal fun List<OverstyrtArbeidsgiveropplysning>.refusjonstidslinjer(meldingsreferanseId: UUID, opprettet: LocalDateTime) = this.associateBy { it.orgnummer }.mapValues { (_, opplysning) ->
