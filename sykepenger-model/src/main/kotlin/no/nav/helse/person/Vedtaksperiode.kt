@@ -161,6 +161,7 @@ import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
@@ -186,6 +187,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
+import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
@@ -1333,20 +1335,31 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    private fun inntektForArbeidsgiver(
+        hendelse: Hendelse,
+        skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
+        alleForSammeArbeidsgiver: List<Vedtaksperiode>
+    ): Inntektsopplysning {
+        val inntektForArbeidsgiver = arbeidsgiver
+            .avklarInntekt(skjæringstidspunkt, alleForSammeArbeidsgiver)
+            // velger bort inntekten hvis situasjonen er "fom ulik skjæringstidspunktet"
+            ?.takeUnless { skjæringstidspunkt.yearMonth < it.inntektsdata.dato.yearMonth }
+
+        if (inntektForArbeidsgiver != null) return Arbeidsgiverinntekt.fraInntektsmelding(inntektForArbeidsgiver)
+        if (skatteopplysning != null) return SkattSykepengegrunnlag.fraSkatt(skatteopplysning.inntektsdata, skatteopplysning.treMånederFørSkjæringstidspunkt)
+        return SkattSykepengegrunnlag.ikkeRapportert(skjæringstidspunkt, hendelse.metadata.meldingsreferanseId)
+    }
+
     private fun avklarSykepengegrunnlag(
-        skatteopplysning: SkattSykepengegrunnlag,
+        hendelse: Hendelse,
+        skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
         vedtaksperioderMedSammeSkjæringstidspunkt: List<Vedtaksperiode>
     ): ArbeidsgiverInntektsopplysning {
         val alleForSammeArbeidsgiver = vedtaksperioderMedSammeSkjæringstidspunkt
             .filter { it.arbeidsgiver === this.arbeidsgiver }
 
-        val inntektForArbeidsgiver = arbeidsgiver.avklarInntekt(skjæringstidspunkt, alleForSammeArbeidsgiver)
-        val faktaavklartInntekt = when (inntektForArbeidsgiver) {
-            // arbeidsgiver har ikke sendt egne inntektsopplysninger
-            null -> skatteopplysning
-            // velger arbeidsgiver eller skatt, avhengig av måneden skjæringstidspunktet er i
-            else -> inntektForArbeidsgiver.avklarSykepengegrunnlag(skatteopplysning)
-        }
+        val faktaavklartInntekt = inntektForArbeidsgiver(hendelse, skatteopplysning, alleForSammeArbeidsgiver)
+
         if (faktaavklartInntekt is SkattSykepengegrunnlag) subsummerBrukAvSkatteopplysninger(faktaavklartInntekt)
         return ArbeidsgiverInntektsopplysning(
             orgnummer = arbeidsgiver.organisasjonsnummer,
@@ -1363,30 +1376,24 @@ internal class Vedtaksperiode private constructor(
     }
     private fun subsummerBrukAvSkatteopplysninger(orgnummer: String, inntekt: SkattSykepengegrunnlag) {
         val inntekter = inntekt.inntektsopplysninger.subsumsjonsformat()
+        val beløp = inntekt.inntektsdata.beløp
         jurist.logg(
             `§ 8-28 ledd 3 bokstav a`(
                 organisasjonsnummer = orgnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 inntekterSisteTreMåneder = inntekter,
-                grunnlagForSykepengegrunnlagÅrlig = inntekt.fastsattÅrsinntekt().årlig,
-                grunnlagForSykepengegrunnlagMånedlig = inntekt.fastsattÅrsinntekt().månedlig
+                grunnlagForSykepengegrunnlagÅrlig = beløp.årlig,
+                grunnlagForSykepengegrunnlagMånedlig = beløp.månedlig
             )
         )
         jurist.logg(
             `§ 8-29`(
                 skjæringstidspunkt = skjæringstidspunkt,
-                grunnlagForSykepengegrunnlagÅrlig = inntekt.fastsattÅrsinntekt().årlig,
+                grunnlagForSykepengegrunnlagÅrlig = beløp.årlig,
                 inntektsopplysninger = inntekter,
                 organisasjonsnummer = orgnummer
             )
         )
-    }
-
-    private fun skatteopplysningForArbeidsgiver(hendelse: Hendelse, skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>): SkattSykepengegrunnlag {
-        return skatteopplysninger
-            .firstOrNull { it.arbeidsgiver == this.arbeidsgiver.organisasjonsnummer }
-            ?.arbeidstakerInntektsgrunnlag()
-            ?: SkattSykepengegrunnlag.ikkeRapportert(skjæringstidspunkt, hendelse.metadata.meldingsreferanseId)
     }
 
     private fun inntektsgrunnlagArbeidsgivere(
@@ -1402,25 +1409,25 @@ internal class Vedtaksperiode private constructor(
         return perioderMedSammeSkjæringstidspunkt
             .distinctBy { it.arbeidsgiver }
             .map { vedtaksperiode ->
-                val skatteopplysningForArbeidsgiver = vedtaksperiode.skatteopplysningForArbeidsgiver(hendelse, skatteopplysninger)
-                vedtaksperiode.avklarSykepengegrunnlag(skatteopplysningForArbeidsgiver, perioderMedSammeSkjæringstidspunkt)
+                val skatteopplysningForArbeidsgiver = skatteopplysninger.firstOrNull { it.arbeidsgiver == vedtaksperiode.arbeidsgiver.organisasjonsnummer }
+                vedtaksperiode.avklarSykepengegrunnlag(hendelse, skatteopplysningForArbeidsgiver, perioderMedSammeSkjæringstidspunkt)
             }
     }
 
     private fun ghostArbeidsgivere(arbeidsgivere: List<ArbeidsgiverInntektsopplysning>, skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>): List<ArbeidsgiverInntektsopplysning> {
         return skatteopplysninger
             .filter { skatteopplysning -> arbeidsgivere.none { it.orgnummer == skatteopplysning.arbeidsgiver } }
-            .mapNotNull { skatteopplysning ->
-                skatteopplysning.ghostInntektsgrunnlag(skjæringstidspunkt)?.let { ghostopplysning ->
-                    // vi er ghost, ingen søknader på skjæringstidspunktet og
-                    // inntekten fra skatt anses som ghost
-                    subsummerGhostArbeidsgiver(skatteopplysning.arbeidsgiver, ghostopplysning)
-                    ArbeidsgiverInntektsopplysning(
-                        orgnummer = skatteopplysning.arbeidsgiver,
-                        gjelder = skjæringstidspunkt til LocalDate.MAX,
-                        inntektsopplysning = ghostopplysning
-                    )
-                }
+            .filter { skatteopplysning -> skatteopplysning.erGhostarbeidsgiver }
+            .map { skatteopplysning ->
+                val ghostopplysning = SkattSykepengegrunnlag.fraSkatt(skatteopplysning.inntektsdata, skatteopplysning.treMånederFørSkjæringstidspunkt)
+                // vi er ghost, ingen søknader på skjæringstidspunktet og
+                // inntekten fra skatt anses som ghost
+                subsummerGhostArbeidsgiver(skatteopplysning.arbeidsgiver, ghostopplysning)
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = skatteopplysning.arbeidsgiver,
+                    gjelder = skjæringstidspunkt til LocalDate.MAX,
+                    inntektsopplysning = ghostopplysning
+                )
             }
     }
 

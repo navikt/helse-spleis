@@ -2,7 +2,7 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag.AnsattPeriode.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.yearMonth
 
@@ -35,31 +35,9 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
     // må ha inntekter innenfor to måneder før skjæringstidspunktet for at vi skal hensynta skatteinntektene
     val inntektvurderingsperiode = utgangspunkt.minusMonths(MAKS_INNTEKT_GAP.toLong())..utgangspunkt.minusMonths(1)
     val harInntekterToMånederFørSkjæringstidspunkt = inntektsopplysninger.any { it.måned in inntektvurderingsperiode }
-    fun ghostInntektsgrunnlag(skjæringstidspunkt: LocalDate): SkattSykepengegrunnlag? {
-        if (this.skjæringstidspunkt != skjæringstidspunkt) return null
-        if (ansattPerioder.isEmpty()) return null
-        // ser bort fra skatteinntekter om man ikke er ansatt på skjæringstidspunktet:
-        if (!ansattVedSkjæringstidspunkt) return null
+    val erNyoppstartetArbeidsforhold = inntektsopplysninger.isEmpty() && nyoppstartetArbeidsforhold
 
-        val erNyoppstartetArbeidsforhold = inntektsopplysninger.isEmpty() && nyoppstartetArbeidsforhold
-        return when {
-             erNyoppstartetArbeidsforhold || harInntekterToMånederFørSkjæringstidspunkt -> SkattSykepengegrunnlag(
-                id = UUID.randomUUID(),
-                inntektsdata = inntektsdata,
-                inntektsopplysninger = this.treMånederFørSkjæringstidspunkt
-            )
-
-            else -> null
-        }
-    }
-
-    fun arbeidstakerInntektsgrunnlag(): SkattSykepengegrunnlag {
-        return SkattSykepengegrunnlag(
-            id = UUID.randomUUID(),
-            inntektsdata = inntektsdata,
-            inntektsopplysninger = this.treMånederFørSkjæringstidspunkt
-        )
-    }
+    val erGhostarbeidsgiver = ansattPerioder.isNotEmpty() && ansattVedSkjæringstidspunkt && (erNyoppstartetArbeidsforhold || harInntekterToMånederFørSkjæringstidspunkt)
 
     private fun nyoppstartetArbeidsforhold(skjæringstidspunkt: LocalDate) =
         ansattPerioder.harArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP)

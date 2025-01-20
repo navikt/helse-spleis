@@ -4,20 +4,20 @@ import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
-import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class SkatteopplysningerForSykepengegrunnlagTest {
@@ -33,7 +33,10 @@ class SkatteopplysningerForSykepengegrunnlagTest {
             ),
             ansattPerioder = emptyList()
         )
-        assertNull(skatt.ghostInntektsgrunnlag(10.april))
+        assertTrue(skatt.harInntekterToMånederFørSkjæringstidspunkt)
+        assertFalse(skatt.ansattVedSkjæringstidspunkt)
+        assertFalse(skatt.erNyoppstartetArbeidsforhold)
+        assertFalse(skatt.erGhostarbeidsgiver)
     }
 
     @Test
@@ -48,7 +51,10 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertNull(skatt.ghostInntektsgrunnlag(10.april))
+        assertFalse(skatt.harInntekterToMånederFørSkjæringstidspunkt)
+        assertTrue(skatt.ansattVedSkjæringstidspunkt)
+        assertFalse(skatt.erNyoppstartetArbeidsforhold)
+        assertFalse(skatt.erGhostarbeidsgiver)
     }
 
     @Test
@@ -63,7 +69,10 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertInstanceOf<SkattSykepengegrunnlag>(skatt.ghostInntektsgrunnlag(10.april))
+        assertFalse(skatt.harInntekterToMånederFørSkjæringstidspunkt)
+        assertTrue(skatt.ansattVedSkjæringstidspunkt)
+        assertTrue(skatt.erNyoppstartetArbeidsforhold)
+        assertTrue(skatt.erGhostarbeidsgiver)
     }
 
     @Test
@@ -80,7 +89,10 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertNull(skatt.ghostInntektsgrunnlag(10.april))
+        assertFalse(skatt.harInntekterToMånederFørSkjæringstidspunkt)
+        assertTrue(skatt.ansattVedSkjæringstidspunkt)
+        assertFalse(skatt.erNyoppstartetArbeidsforhold)
+        assertFalse(skatt.erGhostarbeidsgiver)
     }
 
     @Test
@@ -97,7 +109,10 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertInstanceOf<SkattSykepengegrunnlag>(skatt.ghostInntektsgrunnlag(10.april))
+        assertTrue(skatt.harInntekterToMånederFørSkjæringstidspunkt)
+        assertTrue(skatt.ansattVedSkjæringstidspunkt)
+        assertFalse(skatt.erNyoppstartetArbeidsforhold)
+        assertTrue(skatt.erGhostarbeidsgiver)
     }
 
     @Test
@@ -114,7 +129,10 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertInstanceOf<SkattSykepengegrunnlag>(skatt.ghostInntektsgrunnlag(10.april))
+        assertTrue(skatt.harInntekterToMånederFørSkjæringstidspunkt)
+        assertTrue(skatt.ansattVedSkjæringstidspunkt)
+        assertFalse(skatt.erNyoppstartetArbeidsforhold)
+        assertTrue(skatt.erGhostarbeidsgiver)
     }
 
     @Test
@@ -131,7 +149,10 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertNull(skatt.ghostInntektsgrunnlag(10.april))
+        assertFalse(skatt.harInntekterToMånederFørSkjæringstidspunkt)
+        assertTrue(skatt.ansattVedSkjæringstidspunkt)
+        assertFalse(skatt.erNyoppstartetArbeidsforhold)
+        assertFalse(skatt.erGhostarbeidsgiver)
     }
 
     @Test
@@ -146,7 +167,10 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertNull(skatt.ghostInntektsgrunnlag(10.april))
+        assertFalse(skatt.harInntekterToMånederFørSkjæringstidspunkt)
+        assertTrue(skatt.ansattVedSkjæringstidspunkt)
+        assertFalse(skatt.erNyoppstartetArbeidsforhold)
+        assertFalse(skatt.erGhostarbeidsgiver)
     }
 
     @Test
@@ -168,7 +192,11 @@ class SkatteopplysningerForSykepengegrunnlagTest {
             )
         )
         val forventetSnitt = (3000.månedlig + 1500.månedlig + 1500.månedlig) / 3
-        assertEquals(forventetSnitt, skatt.ghostInntektsgrunnlag(10.april)!!.fastsattÅrsinntekt())
+        assertTrue(skatt.harInntekterToMånederFørSkjæringstidspunkt)
+        assertTrue(skatt.ansattVedSkjæringstidspunkt)
+        assertFalse(skatt.erNyoppstartetArbeidsforhold)
+        assertTrue(skatt.erGhostarbeidsgiver)
+        assertEquals(forventetSnitt, skatt.inntektsdata.beløp)
     }
 
     @Test
@@ -185,7 +213,11 @@ class SkatteopplysningerForSykepengegrunnlagTest {
                 )
             )
         )
-        assertEquals(INGEN, skatt.ghostInntektsgrunnlag(10.april)!!.fastsattÅrsinntekt())
+        assertTrue(skatt.harInntekterToMånederFørSkjæringstidspunkt)
+        assertTrue(skatt.ansattVedSkjæringstidspunkt)
+        assertFalse(skatt.erNyoppstartetArbeidsforhold)
+        assertTrue(skatt.erGhostarbeidsgiver)
+        assertEquals(INGEN, skatt.inntektsdata.beløp)
     }
 
     private fun opplysninger(

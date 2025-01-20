@@ -62,6 +62,16 @@ class Arbeidsgiverinntekt internal constructor(
     }
 
     internal companion object {
+        internal fun fraInntektsmelding(inntektsmeldinginntekt: Inntektsmeldinginntekt) =
+            Arbeidsgiverinntekt(
+                id = UUID.randomUUID(),
+                inntektsdata = inntektsmeldinginntekt.inntektsdata,
+                kilde = when (inntektsmeldinginntekt.kilde) {
+                    Inntektsmeldinginntekt.Kilde.Arbeidsgiver -> Kilde.Arbeidsgiver
+                    Inntektsmeldinginntekt.Kilde.AOrdningen -> Kilde.AOrdningen
+                }
+            )
+
         internal fun gjenopprett(dto: InntektsopplysningInnDto.ArbeidsgiverinntektDto): Arbeidsgiverinntekt {
             return Arbeidsgiverinntekt(
                 id = dto.id,

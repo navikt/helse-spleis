@@ -282,11 +282,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
+            assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
         }
     }
 
@@ -330,11 +330,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(30000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(18000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
         }
     }
 
@@ -382,11 +382,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(21000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
+            assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
         }
     }
 
@@ -1197,11 +1197,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(21000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
         }
     }
 
@@ -1240,11 +1240,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
+            assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
         }
     }
 
@@ -1314,11 +1314,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(32000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
         }
     }
 
@@ -1503,8 +1503,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
         vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.also { inntekter ->
             assertEquals(2, inntekter.size)
-            assertEquals(SkattSykepengegrunnlag::class, inntekter.getValue(a1).inspektør.inntektsopplysning::class)
-            assertEquals(SkattSykepengegrunnlag::class, inntekter.getValue(a2).inspektør.inntektsopplysning::class)
+            assertInstanceOf<SkattSykepengegrunnlag>(inntekter.getValue(a1).inspektør.inntektsopplysning)
+            assertInstanceOf<SkattSykepengegrunnlag>(inntekter.getValue(a2).inspektør.inntektsopplysning)
         }
 
         assertVarsler(listOf(RV_VV_2, RV_IM_3), 1.vedtaksperiode.filter(orgnummer = a1))

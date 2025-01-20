@@ -17,6 +17,12 @@ internal class SkattSykepengegrunnlag(
                 inntektsdata = Inntektsdata.ingen(meldingsreferanseId, dato),
                 inntektsopplysninger = emptyList()
             )
+        internal fun fraSkatt(inntektsdata: Inntektsdata, inntektsopplysningerTreMånederFørSkjæringstidspunkt: List<Skatteopplysning>) =
+            SkattSykepengegrunnlag(
+                id = UUID.randomUUID(),
+                inntektsdata = inntektsdata,
+                inntektsopplysninger = inntektsopplysningerTreMånederFørSkjæringstidspunkt
+            )
 
         internal fun gjenopprett(dto: InntektsopplysningInnDto.SkattSykepengegrunnlagDto): SkattSykepengegrunnlag {
             val skatteopplysninger = dto.inntektsopplysninger.map { Skatteopplysning.gjenopprett(it) }

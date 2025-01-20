@@ -3,13 +3,10 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt.Kilde
-import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.testhelpers.assertInstanceOf
-import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -51,49 +48,8 @@ internal class InntektsopplysningTest {
     @Test
     fun `turnering - skatt vs inntektsmelding`() {
         val im = inntektsmeldinginntekt(10.februar, UUID.randomUUID())
-        val skatt1 = SkatteopplysningerForSykepengegrunnlag(
-            arbeidsgiver = "orgnr",
-            hendelseId = UUID.randomUUID(),
-            skjæringstidspunkt = 1.februar,
-            inntektsopplysninger = listOf(
-                Skatteopplysning(
-                    hendelseId = UUID.randomUUID(),
-                    beløp = 25000.månedlig,
-                    måned = 1.januar.yearMonth,
-                    type = LØNNSINNTEKT,
-                    fordel = "",
-                    beskrivelse = "",
-                    tidsstempel = LocalDateTime.now()
-                )
-            ),
-            ansattPerioder = listOf(
-                SkatteopplysningerForSykepengegrunnlag.AnsattPeriode(LocalDate.EPOCH, null),
-            ),
-            tidsstempel = LocalDateTime.now()
-        )
-        val skatt2 = SkatteopplysningerForSykepengegrunnlag(
-            arbeidsgiver = "orgnr",
-            hendelseId = UUID.randomUUID(),
-            skjæringstidspunkt = 31.januar,
-            inntektsopplysninger = listOf(
-                Skatteopplysning(
-                    hendelseId = UUID.randomUUID(),
-                    beløp = 25000.månedlig,
-                    måned = 1.desember(2017).yearMonth,
-                    type = LØNNSINNTEKT,
-                    fordel = "",
-                    beskrivelse = "",
-                    tidsstempel = LocalDateTime.now()
-                )
-            ),
-            ansattPerioder = listOf(
-                SkatteopplysningerForSykepengegrunnlag.AnsattPeriode(LocalDate.EPOCH, null),
-            ),
-            tidsstempel = LocalDateTime.now()
-        )
-
-        assertInstanceOf<Arbeidsgiverinntekt>(im.avklarSykepengegrunnlag(skatt1.arbeidstakerInntektsgrunnlag()))
-        assertInstanceOf<SkattSykepengegrunnlag>(im.avklarSykepengegrunnlag(skatt2.arbeidstakerInntektsgrunnlag()))
+        assertInstanceOf<Arbeidsgiverinntekt>(im.avklarSykepengegrunnlag(SkattSykepengegrunnlag.ikkeRapportert(1.februar, UUID.randomUUID())))
+        assertInstanceOf<SkattSykepengegrunnlag>(im.avklarSykepengegrunnlag(SkattSykepengegrunnlag.ikkeRapportert(31.januar, UUID.randomUUID())))
     }
 
     private fun inntektsmeldinginntekt(dato: LocalDate, hendelseId: UUID) =
