@@ -170,10 +170,13 @@ internal class TestArbeidsgiverInspektør(
     internal fun refusjon(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).refusjonstidslinje
     internal fun refusjon(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).refusjonstidslinje
 
-    private fun VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.inntekt() = inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnummer).inntektsopplysning
+    private fun VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.arbeidsgiveropplysning() = inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnummer)
+    private fun VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.inntekt() = arbeidsgiveropplysning().inntektsopplysning
     internal fun inntekt(skjæringstidspunkt: LocalDate) = vilkårsgrunnlag(skjæringstidspunkt)!!.inntekt()
     internal fun inntekt(vedtaksperiodeIdInnhenter: IdInnhenter) = vilkårsgrunnlag(vedtaksperiodeIdInnhenter)!!.inntekt()
     internal fun inntekt(vedtaksperiodeId: UUID) = vilkårsgrunnlag(vedtaksperiodeId)!!.inntekt()
+    internal fun skjønnsfastsatt(vedtaksperiodeId: UUID) = vilkårsgrunnlag(vedtaksperiodeId)!!.arbeidsgiveropplysning().skjønnsmessigFastsatt
+    internal fun skjønnsfastsatt(skjæringstidspunkt: LocalDate) = vilkårsgrunnlag(skjæringstidspunkt)!!.arbeidsgiveropplysning().skjønnsmessigFastsatt
 
     internal fun harFunksjonelleFeilEllerVerre(): Boolean = personInspektør.aktivitetslogg.harFunksjonelleFeilEllerVerre()
 }

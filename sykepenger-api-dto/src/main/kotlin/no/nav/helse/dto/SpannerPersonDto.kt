@@ -134,7 +134,8 @@ data class SpannerPersonDto(
             val orgnummer: String,
             val fom: LocalDate,
             val tom: LocalDate,
-            val inntektsopplysning: InntektsopplysningData
+            val inntektsopplysning: InntektsopplysningData,
+            val skjønnsmessigFastsatt: InntektsopplysningData?
         ) {
             data class SkatteopplysningData(
                 val hendelseId: UUID,
@@ -1516,7 +1517,8 @@ private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() =
         orgnummer = this.orgnummer,
         fom = this.gjelder.fom,
         tom = this.gjelder.tom,
-        inntektsopplysning = this.inntektsopplysning.tilPersonData()
+        inntektsopplysning = this.inntektsopplysning.tilPersonData(),
+        skjønnsmessigFastsatt = this.skjønnsmessigFastsatt?.tilPersonData()
     )
 
 private fun NyInntektUnderveisDto.tilPersonData() = VilkårsgrunnlagElementData.NyInntektUnderveisData(

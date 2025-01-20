@@ -1,11 +1,8 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
-import no.nav.helse.økonomi.Inntekt
 
 class SkjønnsmessigFastsatt internal constructor(
     id: UUID,
@@ -13,11 +10,6 @@ class SkjønnsmessigFastsatt internal constructor(
     val overstyrtInntekt: Inntektsopplysning?,
     val omregnetÅrsinntekt: Inntektsopplysning?
 ) : Inntektsopplysning(id, inntektsdata) {
-    constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) :
-        this(UUID.randomUUID(), Inntektsdata(hendelseId, dato, beløp, tidsstempel), null, null)
-
-    fun endreOmregnetÅrsinntekt(overstyrtInntekt: Arbeidsgiverinntekt) =
-        SkjønnsmessigFastsatt(id, inntektsdata, overstyrtInntekt, overstyrtInntekt.omregnetÅrsinntekt())
 
     override fun dto() =
         InntektsopplysningUtDto.SkjønnsmessigFastsattDto(

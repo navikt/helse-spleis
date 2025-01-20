@@ -32,9 +32,10 @@ import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
-import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.person
+import no.nav.helse.testhelpers.assertInstanceOf
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
@@ -95,7 +96,8 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
+                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
+                    assertNotNull(it.skjønnsmessigFastsatt)
                 }
             }
         }
@@ -167,7 +169,8 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
+                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
+                    assertNotNull(it.skjønnsmessigFastsatt)
                 }
             }
         }
@@ -552,11 +555,13 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
             assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                 assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
+                assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
+                assertNotNull(it.skjønnsmessigFastsatt)
             }
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
                 assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
+                assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
+                assertNotNull(it.skjønnsmessigFastsatt)
             }
         }
     }
@@ -574,14 +579,14 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is Arbeidsgiverinntekt)
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkattSykepengegrunnlag)
+            assertInstanceOf<Arbeidsgiverinntekt>(inspektør.inntektsopplysning(1.vedtaksperiode, a1))
+            assertInstanceOf<SkattSykepengegrunnlag>(inspektør.inntektsopplysning(1.vedtaksperiode, a2))
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertPeriode(17.januar til 31.januar, 1114.daglig)
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, deaktivert = true, "deaktiverer a2"))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, inntekt)))
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is SkjønnsmessigFastsatt)
+            assertTrue(inspektør.erSkjønnsfastsatt(1.vedtaksperiode, a1))
 
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -589,8 +594,8 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
             håndterUtbetalt()
             assertPeriode(17.januar til 31.januar, 1523.daglig)
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, deaktivert = false, "aktiverer a2 igjen"))
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is Arbeidsgiverinntekt)
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkattSykepengegrunnlag)
+            assertInstanceOf<Arbeidsgiverinntekt>(inspektør.inntektsopplysning(1.vedtaksperiode, a1))
+            assertInstanceOf<SkattSykepengegrunnlag>(inspektør.inntektsopplysning(1.vedtaksperiode, a2))
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
@@ -628,9 +633,9 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is Arbeidsgiverinntekt)
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is Arbeidsgiverinntekt)
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a3) is SkattSykepengegrunnlag)
+            assertInstanceOf<Arbeidsgiverinntekt>(inspektør.inntektsopplysning(1.vedtaksperiode, a1))
+            assertInstanceOf<Arbeidsgiverinntekt>(inspektør.inntektsopplysning(1.vedtaksperiode, a2))
+            assertInstanceOf<SkattSykepengegrunnlag>(inspektør.inntektsopplysning(1.vedtaksperiode, a3))
         }
 
 
@@ -644,8 +649,8 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
                 OverstyrtArbeidsgiveropplysning(a2, inntekt)
             )
             )
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is SkjønnsmessigFastsatt)
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkjønnsmessigFastsatt)
+            assertTrue(inspektør.erSkjønnsfastsatt(1.vedtaksperiode, a1))
+            assertTrue(inspektør.erSkjønnsfastsatt(1.vedtaksperiode, a2))
         }
 
         (a1 og a2) {
@@ -663,9 +668,9 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is Arbeidsgiverinntekt)
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is Arbeidsgiverinntekt)
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a3) is SkattSykepengegrunnlag)
+            assertInstanceOf<Arbeidsgiverinntekt>(inspektør.inntektsopplysning(1.vedtaksperiode, a1))
+            assertInstanceOf<Arbeidsgiverinntekt>(inspektør.inntektsopplysning(1.vedtaksperiode, a2))
+            assertInstanceOf<SkattSykepengegrunnlag>(inspektør.inntektsopplysning(1.vedtaksperiode, a3))
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", person())
         }
@@ -686,5 +691,9 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
     ) =
         periode.forEach { assertDag(it, arbeidsgiverbeløp, personbeløp) }
 
-    private fun TestArbeidsgiverInspektør.inntektsopplysning(vedtaksperiode: UUID, orgnr: String) = vilkårsgrunnlag(vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.first { it.gjelder(orgnr) }.inspektør.inntektsopplysning
+    private fun TestArbeidsgiverInspektør.inntektsopplysning(vedtaksperiode: UUID, orgnr: String) =
+        vilkårsgrunnlag(vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnr).inspektør.inntektsopplysning
+
+    private fun TestArbeidsgiverInspektør.erSkjønnsfastsatt(vedtaksperiode: UUID, orgnr: String) =
+        vilkårsgrunnlag(vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnr).inspektør.skjønnsmessigFastsatt != null
 }

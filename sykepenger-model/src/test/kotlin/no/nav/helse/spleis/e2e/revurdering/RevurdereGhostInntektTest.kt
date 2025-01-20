@@ -24,8 +24,9 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
-import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.testhelpers.assertInstanceOf
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -60,11 +61,11 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
                 }
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
+                    assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
                 }
             }
             nullstillTilstandsendringer()
@@ -97,11 +98,13 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
+                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
+                    assertNotNull(it.skjønnsmessigFastsatt)
                 }
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
                     assertEquals(15000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
+                    assertInstanceOf<Saksbehandler>(it.inntektsopplysning)
+                    assertNotNull(it.skjønnsmessigFastsatt)
                 }
             }
         }
@@ -130,11 +133,11 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
                 }
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
+                    assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
                 }
             }
             nullstillTilstandsendringer()
@@ -160,11 +163,11 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
                 }
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
                     assertEquals(40000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
+                    assertInstanceOf<Saksbehandler>(it.inntektsopplysning)
                 }
             }
         }
@@ -193,11 +196,11 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
                 }
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
+                    assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
                 }
             }
             nullstillTilstandsendringer()
@@ -230,11 +233,13 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
+                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
+                    assertNotNull(it.skjønnsmessigFastsatt)
                 }
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
                     assertEquals(0.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
+                    assertInstanceOf<Saksbehandler>(it.inntektsopplysning)
+                    assertNotNull(it.skjønnsmessigFastsatt)
                 }
             }
         }
@@ -299,11 +304,11 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
                 }
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
                     assertEquals(16000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
+                    assertInstanceOf<Saksbehandler>(it.inntektsopplysning)
                 }
             }
             (inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
@@ -316,11 +321,11 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
                 }
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
+                    assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
                 }
             }
             assertTilstander(

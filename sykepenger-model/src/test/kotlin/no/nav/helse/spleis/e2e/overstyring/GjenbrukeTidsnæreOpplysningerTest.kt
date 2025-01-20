@@ -50,6 +50,7 @@ import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.manuellSykedag
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
@@ -1122,6 +1123,10 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             inntektsopplysning(8.januar).let {
+                assertEquals(INNTEKT, it.inspektør.beløp)
+                assertEquals(inntektsmeldingId, it.inspektør.hendelseId)
+            }
+            skjønnsfastsatt(8.januar).let {
                 assertEquals(INNTEKT * 1.25, it.inspektør.beløp)
                 assertEquals(skjønnsmessigId, it.inspektør.hendelseId)
             }
@@ -1227,6 +1232,9 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
     private fun TestPerson.TestArbeidsgiver.inntektsopplysning(skjæringstidspunkt: LocalDate) =
         inspektør.vilkårsgrunnlag(skjæringstidspunkt)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.singleOrNull { it.inspektør.orgnummer == this.orgnummer }?.inspektør?.inntektsopplysning ?: error("Forventet å finne inntektsopplysning for ${this.orgnummer} på $skjæringstidspunkt")
 
+    private fun TestPerson.TestArbeidsgiver.skjønnsfastsatt(skjæringstidspunkt: LocalDate) =
+        inspektør.vilkårsgrunnlag(skjæringstidspunkt)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.singleOrNull { it.inspektør.orgnummer == this.orgnummer }?.inspektør?.skjønnsmessigFastsatt ?: error("Forventet å finne inntektsopplysning for ${this.orgnummer} på $skjæringstidspunkt")
+
     private fun TestPerson.TestArbeidsgiver.assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: Melding) {
         val dagen = inspektør.sykdomstidslinje[dato]
         assertEquals(dagtype, dagen::class)
@@ -1244,7 +1252,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
     }
 
     private fun TestArbeidsgiverInspektør.skjønnsmessigFastsattOverstyrtHendelseId(skjæringstidspunkt: LocalDate, organisasjonsnummer: String = this.orgnummer) =
-        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(organisasjonsnummer) }.inspektør.inntektsopplysning.let {
+        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(organisasjonsnummer) }.inspektør.skjønnsmessigFastsatt.let {
+            assertNotNull(it)
             assertTrue(it is SkjønnsmessigFastsatt) { "Forventet SkjønnmessigFastsatt inntekt, var ${it::class.simpleName}" }
             it.inspektør.forrigeInntekt!!.inspektør.hendelseId
         }

@@ -271,13 +271,18 @@ data class PersonData(
             val orgnummer: String,
             val fom: LocalDate,
             val tom: LocalDate,
-            val inntektsopplysning: InntektsopplysningData
+            val inntektsopplysning: InntektsopplysningData,
+            val skjønnsmessigFastsatt: InntektsopplysningData?
         ) {
-            fun tilDto() = ArbeidsgiverInntektsopplysningInnDto(
-                orgnummer = this.orgnummer,
-                gjelder = PeriodeDto(fom = this.fom, tom = this.tom),
-                inntektsopplysning = this.inntektsopplysning.tilDto()
-            )
+            fun tilDto(): ArbeidsgiverInntektsopplysningInnDto {
+                val inntektsopplysningen = this.inntektsopplysning.tilDto()
+                return ArbeidsgiverInntektsopplysningInnDto(
+                    orgnummer = this.orgnummer,
+                    gjelder = PeriodeDto(fom = this.fom, tom = this.tom),
+                    inntektsopplysning = inntektsopplysningen,
+                    skjønnsmessigFastsatt = inntektsopplysningen as? InntektsopplysningInnDto.SkjønnsmessigFastsattDto
+                )
+            }
 
             data class SkatteopplysningData(
                 val hendelseId: UUID,

@@ -41,3 +41,4 @@ sealed class InntektsopplysningInnDto {
         val inntektsopplysninger: List<SkatteopplysningDto>
     ) : InntektsopplysningInnDto()
 }
+

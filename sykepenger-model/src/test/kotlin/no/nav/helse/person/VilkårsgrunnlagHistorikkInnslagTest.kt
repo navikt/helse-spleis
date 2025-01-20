@@ -110,12 +110,10 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             inntektsgrunnlag = Inntektsgrunnlag.opprett(
                 ALDER, listOf(
                 ArbeidsgiverInntektsopplysning(
-                    "orgnr",
-                    skjæringstidspunkt til LocalDate.MAX,
-                    arbeidsgiverinntekt(
-                        skjæringstidspunkt,
-                        inntekt
-                    )
+                    orgnummer = "orgnr",
+                    gjelder = skjæringstidspunkt til LocalDate.MAX,
+                    inntektsopplysning = arbeidsgiverinntekt(skjæringstidspunkt, inntekt),
+                    skjønnsmessigFastsatt = null
                 )
             ), skjæringstidspunkt, jurist
             ),

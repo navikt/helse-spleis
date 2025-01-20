@@ -798,7 +798,8 @@ private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() = PersonData.Vil
     orgnummer = this.orgnummer,
     fom = this.gjelder.fom,
     tom = this.gjelder.tom,
-    inntektsopplysning = this.inntektsopplysning.tilPersonData()
+    inntektsopplysning = this.inntektsopplysning.tilPersonData(),
+    skjønnsmessigFastsatt = this.skjønnsmessigFastsatt?.tilPersonData()
 )
 
 private fun NyInntektUnderveisDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.NyInntektUnderveisData(

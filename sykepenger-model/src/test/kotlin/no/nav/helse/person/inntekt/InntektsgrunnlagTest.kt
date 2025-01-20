@@ -351,8 +351,8 @@ internal class InntektsgrunnlagTest {
         val a1Inntekt = 25000.månedlig
         val a2Inntekt = 5000.månedlig
         val inntekter = listOf(
-            ArbeidsgiverInntektsopplysning("a1", a1Fom til LocalDate.MAX, arbeidsgiverinntekt(a1Fom, a1Inntekt)),
-            ArbeidsgiverInntektsopplysning("a2", a2Fom til LocalDate.MAX, arbeidsgiverinntekt(a2Fom, a2Inntekt)),
+            ArbeidsgiverInntektsopplysning("a1", a1Fom til LocalDate.MAX, arbeidsgiverinntekt(a1Fom, a1Inntekt), null),
+            ArbeidsgiverInntektsopplysning("a2", a2Fom til LocalDate.MAX, arbeidsgiverinntekt(a2Fom, a2Inntekt), null),
         )
 
         val inntektsgrunnlag = Inntektsgrunnlag(
@@ -381,7 +381,8 @@ internal class InntektsgrunnlagTest {
                     inntektsopplysning = arbeidsgiverinntekt(
                         dato = skjæringstidspunkt,
                         beløp = 25000.månedlig
-                    )
+                    ),
+                    skjønnsmessigFastsatt = null
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
@@ -400,7 +401,8 @@ internal class InntektsgrunnlagTest {
                                 tidsstempel = LocalDateTime.now()
                             )
                         )
-                    )
+                    ),
+                    skjønnsmessigFastsatt = null
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
@@ -455,7 +457,8 @@ internal class InntektsgrunnlagTest {
                     inntektsopplysning = arbeidsgiverinntekt(
                         dato = førsteFraværsdagAG1,
                         beløp = 25000.månedlig
-                    )
+                    ),
+                    skjønnsmessigFastsatt = null
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
@@ -474,7 +477,8 @@ internal class InntektsgrunnlagTest {
                                 tidsstempel = LocalDateTime.now()
                             )
                         )
-                    )
+                    ),
+                    skjønnsmessigFastsatt = null
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
@@ -503,7 +507,8 @@ internal class InntektsgrunnlagTest {
                     inntektsopplysning = arbeidsgiverinntekt(
                         dato = førsteFraværsdagAG1,
                         beløp = 25000.månedlig
-                    )
+                    ),
+                    skjønnsmessigFastsatt = null
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
@@ -511,7 +516,8 @@ internal class InntektsgrunnlagTest {
                     inntektsopplysning = arbeidsgiverinntekt(
                         dato = førsteFraværsdagAG2,
                         beløp = 25000.månedlig
-                    )
+                    ),
+                    skjønnsmessigFastsatt = null
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
@@ -538,7 +544,8 @@ internal class InntektsgrunnlagTest {
                     inntektsopplysning = arbeidsgiverinntekt(
                         dato = skjæringstidspunkt,
                         beløp = 25000.månedlig
-                    )
+                    ),
+                    skjønnsmessigFastsatt = null
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
@@ -546,7 +553,8 @@ internal class InntektsgrunnlagTest {
                     inntektsopplysning = arbeidsgiverinntekt(
                         dato = skjæringstidspunkt,
                         beløp = 25000.månedlig
-                    )
+                    ),
+                    skjønnsmessigFastsatt = null
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
@@ -615,7 +623,8 @@ internal class InntektsgrunnlagTest {
                     inntektsopplysning = arbeidsgiverinntekt(
                         dato = førsteFraværsdagAG1,
                         beløp = 25000.månedlig
-                    )
+                    ),
+                    skjønnsmessigFastsatt = null
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
@@ -623,7 +632,8 @@ internal class InntektsgrunnlagTest {
                     inntektsopplysning = arbeidsgiverinntekt(
                         dato = førsteFraværsdagAG2,
                         beløp = 25000.månedlig
-                    )
+                    ),
+                    skjønnsmessigFastsatt = null
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),

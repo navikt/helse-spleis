@@ -23,9 +23,10 @@ internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstid
         alder = alder,
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
-                orgnr,
-                skjæringstidspunkt til LocalDate.MAX,
-                arbeidsgiverinntekt(skjæringstidspunkt, this)
+                orgnummer = orgnr,
+                gjelder = skjæringstidspunkt til LocalDate.MAX,
+                inntektsopplysning = arbeidsgiverinntekt(skjæringstidspunkt, this),
+                skjønnsmessigFastsatt = null
             )
         ),
         skjæringstidspunkt = skjæringstidspunkt,
@@ -38,9 +39,10 @@ internal fun Inntekt.inntektsgrunnlag(orgnr: String, skjæringstidspunkt: LocalD
         skjæringstidspunkt = skjæringstidspunkt,
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
-                orgnr,
-                skjæringstidspunkt til LocalDate.MAX,
-                arbeidsgiverinntekt(skjæringstidspunkt, this)
+                orgnummer = orgnr,
+                gjelder = skjæringstidspunkt til LocalDate.MAX,
+                inntektsopplysning = arbeidsgiverinntekt(skjæringstidspunkt, this),
+                skjønnsmessigFastsatt = null
             )
         ),
         deaktiverteArbeidsforhold = emptyList(),
