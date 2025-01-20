@@ -344,7 +344,7 @@ internal data class ArbeidsgiverInntektsopplysning(
                     is SkjønnsmessigFastsatt -> io.omregnetÅrsinntekt!!
                 },
                 skjønnsmessigFastsatt = dto.skjønnsmessigFastsatt?.let {
-                    SkjønnsmessigFastsatt.gjenopprett(it, inntekter)
+                    inntekter.getOrPut(it.id) { SkjønnsmessigFastsatt.gjenopprett(it, inntekter) } as SkjønnsmessigFastsatt
                 }
             )
         }
