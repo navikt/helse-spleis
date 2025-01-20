@@ -3,10 +3,8 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt.Kilde
-import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -43,13 +41,6 @@ internal class InntektsopplysningTest {
         val saksbehandler2 = Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, 25000.månedlig, LocalDateTime.now()), ikkeRapportert)
 
         assertFalse(saksbehandler1.funksjoneltLik(saksbehandler2))
-    }
-
-    @Test
-    fun `turnering - skatt vs inntektsmelding`() {
-        val im = inntektsmeldinginntekt(10.februar, UUID.randomUUID())
-        assertInstanceOf<Arbeidsgiverinntekt>(im.avklarSykepengegrunnlag(SkattSykepengegrunnlag.ikkeRapportert(1.februar, UUID.randomUUID())))
-        assertInstanceOf<SkattSykepengegrunnlag>(im.avklarSykepengegrunnlag(SkattSykepengegrunnlag.ikkeRapportert(31.januar, UUID.randomUUID())))
     }
 
     private fun inntektsmeldinginntekt(dato: LocalDate, hendelseId: UUID) =

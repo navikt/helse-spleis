@@ -6,7 +6,6 @@ import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto
 import no.nav.helse.dto.serialisering.InntektsmeldingDto
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
-import no.nav.helse.yearMonth
 
 internal data class Inntektsmeldinginntekt(
     val id: UUID,
@@ -22,18 +21,6 @@ internal data class Inntektsmeldinginntekt(
         id = id,
         inntektsdata = inntektsdata
     )
-
-    internal fun avklarSykepengegrunnlag(skatt: SkattSykepengegrunnlag): Inntektsopplysning {
-        if (skatt.inntektsdata.dato.yearMonth < this.inntektsdata.dato.yearMonth) return skatt
-        return Arbeidsgiverinntekt(
-            id = UUID.randomUUID(),
-            inntektsdata = this.inntektsdata,
-            kilde = when (this.kilde) {
-                Kilde.Arbeidsgiver -> Arbeidsgiverinntekt.Kilde.Arbeidsgiver
-                Kilde.AOrdningen -> Arbeidsgiverinntekt.Kilde.AOrdningen
-            }
-        )
-    }
 
     internal fun kanLagres(other: Inntektsmeldinginntekt) = this.inntektsdata.hendelseId != other.inntektsdata.hendelseId || this.inntektsdata.dato != other.inntektsdata.dato
 
