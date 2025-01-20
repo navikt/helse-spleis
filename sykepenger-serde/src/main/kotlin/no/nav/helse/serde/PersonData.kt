@@ -276,11 +276,17 @@ data class PersonData(
         ) {
             fun tilDto(): ArbeidsgiverInntektsopplysningInnDto {
                 val inntektsopplysningen = this.inntektsopplysning.tilDto()
+                val skjønnsmessigFastsattOpplysning = skjønnsmessigFastsatt?.let {
+                    it.tilDto() as InntektsopplysningInnDto.SkjønnsmessigFastsattDto
+                } ?: inntektsopplysningen
+                    .takeIf { it is InntektsopplysningInnDto.SkjønnsmessigFastsattDto }
+                    ?.let { it as InntektsopplysningInnDto.SkjønnsmessigFastsattDto }
+
                 return ArbeidsgiverInntektsopplysningInnDto(
                     orgnummer = this.orgnummer,
                     gjelder = PeriodeDto(fom = this.fom, tom = this.tom),
                     inntektsopplysning = inntektsopplysningen,
-                    skjønnsmessigFastsatt = inntektsopplysningen as? InntektsopplysningInnDto.SkjønnsmessigFastsattDto
+                    skjønnsmessigFastsatt = skjønnsmessigFastsattOpplysning
                 )
             }
 
