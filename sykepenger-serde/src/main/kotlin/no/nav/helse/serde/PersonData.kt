@@ -344,6 +344,9 @@ data class PersonData(
                     INNTEKTSMELDING,
                     SAKSBEHANDLER,
                     SKJØNNSMESSIG_FASTSATT,
+
+                    @Deprecated("det jobbes med å få bort denne")
+                    IKKE_RAPPORTERT
                 }
 
                 fun tilDto() = when (kilde) {
@@ -393,6 +396,7 @@ data class PersonData(
                         overstyrtInntekt = this.overstyrtInntektId!!
                     )
 
+                    InntektsopplysningskildeData.IKKE_RAPPORTERT,
                     InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> InntektsopplysningInnDto.SkattSykepengegrunnlagDto(
                         id = this.id,
                         inntektsdata = InntektsdataInnDto(
@@ -401,7 +405,7 @@ data class PersonData(
                             beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
                             tidsstempel = this.tidsstempel
                         ),
-                        inntektsopplysninger = this.skatteopplysninger!!.map { it.tilDto() }
+                        inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
                     )
                 }
             }
