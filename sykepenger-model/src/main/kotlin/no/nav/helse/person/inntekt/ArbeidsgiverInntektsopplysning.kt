@@ -318,11 +318,14 @@ internal data class ArbeidsgiverInntektsopplysning(
             dto: ArbeidsgiverInntektsopplysningInnDto,
             inntekter: MutableMap<UUID, Inntektsopplysning>
         ): ArbeidsgiverInntektsopplysning {
+            val inntektsopplysning = Inntektsopplysning.gjenopprett(dto.inntektsopplysning, inntekter)
             return ArbeidsgiverInntektsopplysning(
                 orgnummer = dto.orgnummer,
                 gjelder = Periode.gjenopprett(dto.gjelder),
-                inntektsopplysning = Inntektsopplysning.gjenopprett(dto.inntektsopplysning, inntekter),
-                skjønnsmessigFastsatt = dto.skjønnsmessigFastsatt?.let { SkjønnsmessigFastsatt.gjenopprett(it) }
+                inntektsopplysning = inntektsopplysning,
+                skjønnsmessigFastsatt = dto.skjønnsmessigFastsatt?.let { SkjønnsmessigFastsatt.gjenopprett(it).also { skjønnsmessig ->
+                    inntekter.putIfAbsent(skjønnsmessig.id, inntektsopplysning)
+                } }
             )
         }
     }
