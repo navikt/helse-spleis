@@ -204,7 +204,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also { arbeidsgiverInntektsopplysning ->
                 assertInstanceOf<Arbeidsgiverinntekt>(arbeidsgiverInntektsopplysning.inntektsopplysning)
                 assertNotNull(arbeidsgiverInntektsopplysning.skjønnsmessigFastsatt)
-                assertNotEquals(im, arbeidsgiverInntektsopplysning.inntektsopplysning.omregnetÅrsinntekt().inspektør.hendelseId)
+                assertNotEquals(im, arbeidsgiverInntektsopplysning.inntektsopplysning.inspektør.hendelseId)
             }
             sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also { arbeidsgiverInntektsopplysning ->
                 assertInstanceOf<Arbeidsgiverinntekt>(arbeidsgiverInntektsopplysning.inntektsopplysning)
@@ -283,7 +283,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             val inntektsopplysning = inspektør.inntekt(1.januar)
             assertNotNull(inspektør.skjønnsfastsatt(1.januar))
-            assertNotEquals(im, inntektsopplysning.omregnetÅrsinntekt().inspektør.hendelseId)
+            assertNotEquals(im, inntektsopplysning.inspektør.hendelseId)
             assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         }
     }

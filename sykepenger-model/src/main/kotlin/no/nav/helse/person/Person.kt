@@ -84,7 +84,6 @@ import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.NyInntektUnderveis
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
-import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.view.PersonView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -761,8 +760,7 @@ class Person private constructor(
                     }
                     is Infotrygd,
                     is Saksbehandler,
-                    is SkattSykepengegrunnlag,
-                    is SkjønnsmessigFastsatt -> { /* gjør ingenting */ }
+                    is SkattSykepengegrunnlag -> { /* gjør ingenting */ }
                 }
             }
 

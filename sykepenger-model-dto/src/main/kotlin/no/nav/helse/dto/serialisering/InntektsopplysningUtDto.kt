@@ -18,12 +18,6 @@ sealed class InntektsopplysningUtDto {
         val overstyrtInntekt: UUID,
     ) : InntektsopplysningUtDto()
 
-    data class SkjønnsmessigFastsattDto(
-        override val id: UUID,
-        override val inntektsdata: InntektsdataUtDto,
-        val overstyrtInntekt: UUID,
-    ) : InntektsopplysningUtDto()
-
     data class ArbeidsgiverinntektDto(
         override val id: UUID,
         override val inntektsdata: InntektsdataUtDto,

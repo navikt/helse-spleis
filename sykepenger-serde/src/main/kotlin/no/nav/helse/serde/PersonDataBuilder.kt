@@ -49,6 +49,7 @@ import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.dto.serialisering.PersonUtDto
+import no.nav.helse.dto.serialisering.SkjønnsmessigFastsattUtDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
@@ -818,11 +819,9 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
         is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> InntektsopplysningskildeData.INNTEKTSMELDING
         is InntektsopplysningUtDto.SaksbehandlerDto -> InntektsopplysningskildeData.SAKSBEHANDLER
         is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG
-        is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> InntektsopplysningskildeData.SKJØNNSMESSIG_FASTSATT
     },
     overstyrtInntektId = when (this) {
         is InntektsopplysningUtDto.SaksbehandlerDto -> this.overstyrtInntekt
-        is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> this.overstyrtInntekt
         else -> null
     },
     skatteopplysninger = when (this) {
@@ -837,6 +836,13 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
 
         else -> null
     }
+)
+private fun SkjønnsmessigFastsattUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkjønnsmessigFastsattData(
+    id = this.id,
+    dato = this.inntektsdata.dato,
+    hendelseId = this.inntektsdata.hendelseId,
+    beløp = this.inntektsdata.beløp.månedligDouble.beløp,
+    tidsstempel = this.inntektsdata.tidsstempel
 )
 
 private fun SkatteopplysningDto.tilPersonDataSkattopplysning() = SkatteopplysningData(

@@ -74,11 +74,11 @@ internal class ArbeidsgiverInntektsopplysningTest {
 
         val arbeidsgiverinntektA1Ny = arbeidsgiverinntekt(skjæringstidspunkt, 1000.månedlig)
         val overstyrtA1Opplysning = arbeidsgiverinntekt(skjæringstidspunkt, 1000.månedlig)
-        val forventetA1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntektA1Ny, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig, arbeidsgiverinntektA1Ny))
+        val forventetA1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntektA1Ny, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig))
 
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntektA1, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig, arbeidsgiverinntektA1))
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntektA2, skjønnsmessigFastsatt(skjæringstidspunkt, 950.månedlig, arbeidsgiverinntektA2))
-        val a3Opplysning = ArbeidsgiverInntektsopplysning("a3", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntektA3, skjønnsmessigFastsatt(skjæringstidspunkt, 975.månedlig, arbeidsgiverinntektA3))
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntektA1, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig))
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntektA2, skjønnsmessigFastsatt(skjæringstidspunkt, 950.månedlig))
+        val a3Opplysning = ArbeidsgiverInntektsopplysning("a3", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntektA3, skjønnsmessigFastsatt(skjæringstidspunkt, 975.månedlig))
 
         val original = listOf(a1Opplysning, a2Opplysning, a3Opplysning)
         val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning)
@@ -102,11 +102,11 @@ internal class ArbeidsgiverInntektsopplysningTest {
 
         val arbeidsgiverinntektA1Ny = arbeidsgiverinntekt(skjæringstidspunkt, 1000.månedlig)
         val overstyrtA1Opplysning = arbeidsgiverinntekt(skjæringstidspunkt, 1000.månedlig)
-        val forventetA1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntektA1Ny, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig, arbeidsgiverinntektA1Ny))
+        val forventetA1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntektA1Ny, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig))
 
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, skattA1, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig, skattA1))
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntektA2, skjønnsmessigFastsatt(skjæringstidspunkt, 950.månedlig, arbeidsgiverinntektA2))
-        val a3Opplysning = ArbeidsgiverInntektsopplysning("a3", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntektA3, skjønnsmessigFastsatt(skjæringstidspunkt, 975.månedlig, arbeidsgiverinntektA3))
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, skattA1, skjønnsmessigFastsatt(skjæringstidspunkt, 900.månedlig))
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntektA2, skjønnsmessigFastsatt(skjæringstidspunkt, 950.månedlig))
+        val a3Opplysning = ArbeidsgiverInntektsopplysning("a3", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntektA3, skjønnsmessigFastsatt(skjæringstidspunkt, 975.månedlig))
 
         val original = listOf(a1Opplysning, a2Opplysning, a3Opplysning)
         val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning)

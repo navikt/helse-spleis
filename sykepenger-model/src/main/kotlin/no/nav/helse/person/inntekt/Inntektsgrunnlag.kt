@@ -66,7 +66,7 @@ internal class Inntektsgrunnlag private constructor(
 ) : Comparable<Inntekt> {
 
     init {
-        arbeidsgiverInntektsopplysninger.validerSkjønnsmessigAltEllerIntet(skjæringstidspunkt)
+        arbeidsgiverInntektsopplysninger.validerSkjønnsmessigAltEllerIntet()
     }
 
     private val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())

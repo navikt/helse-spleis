@@ -9,7 +9,7 @@ import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 
-class Arbeidsgiverinntekt internal constructor(
+internal class Arbeidsgiverinntekt internal constructor(
     id: UUID,
     inntektsdata: Inntektsdata,
     internal val kilde: Kilde

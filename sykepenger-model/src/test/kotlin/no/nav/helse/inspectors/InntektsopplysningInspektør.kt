@@ -1,13 +1,12 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.person.inntekt.Infotrygd
+import java.util.*
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
+import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
-import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.økonomi.Inntekt
 
 internal val Inntektsopplysning.inspektør get() = InntektsopplysningInspektør(this)
@@ -20,7 +19,6 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
     val forrigeInntekt = when (inntektsopplysning) {
         is Infotrygd -> null
         is Saksbehandler -> inntektsopplysning.overstyrtInntekt
-        is SkjønnsmessigFastsatt -> inntektsopplysning.overstyrtInntekt
         is Arbeidsgiverinntekt -> null
         is SkattSykepengegrunnlag -> null
     }

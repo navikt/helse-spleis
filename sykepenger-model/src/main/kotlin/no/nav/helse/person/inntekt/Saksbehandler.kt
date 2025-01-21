@@ -4,7 +4,7 @@ import java.util.*
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 
-class Saksbehandler internal constructor(
+internal class Saksbehandler internal constructor(
     id: UUID,
     inntektsdata: Inntektsdata,
     val overstyrtInntekt: Inntektsopplysning

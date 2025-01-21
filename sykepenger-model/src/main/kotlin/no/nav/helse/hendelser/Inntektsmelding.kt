@@ -88,7 +88,7 @@ class Inntektsmelding(
 
     private val inntektsdata = Inntektsdata(metadata.meldingsreferanseId, inntektsdato, beregnetInntekt, metadata.registrert)
 
-    fun korrigertInntekt() = Arbeidsgiverinntekt(
+    internal fun korrigertInntekt() = Arbeidsgiverinntekt(
         id = UUID.randomUUID(),
         inntektsdata = inntektsdata,
         kilde = Arbeidsgiverinntekt.Kilde.Arbeidsgiver

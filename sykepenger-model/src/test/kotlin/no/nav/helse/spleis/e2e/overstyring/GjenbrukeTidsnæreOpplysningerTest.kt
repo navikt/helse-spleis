@@ -46,7 +46,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.inntekt.InntektsgrunnlagView
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
-import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.manuellSykedag
 import no.nav.helse.sykdomstidslinje.Dag
@@ -1251,10 +1250,9 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
         assertEquals(personbeløp, dagen.økonomi.inspektør.personbeløp)
     }
 
-    private fun TestArbeidsgiverInspektør.skjønnsmessigFastsattOverstyrtHendelseId(skjæringstidspunkt: LocalDate, organisasjonsnummer: String = this.orgnummer) =
-        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(organisasjonsnummer) }.inspektør.skjønnsmessigFastsatt.let {
-            assertNotNull(it)
-            assertTrue(it is SkjønnsmessigFastsatt) { "Forventet SkjønnmessigFastsatt inntekt, var ${it::class.simpleName}" }
-            it.inspektør.forrigeInntekt!!.inspektør.hendelseId
-        }
+    private fun TestArbeidsgiverInspektør.skjønnsmessigFastsattOverstyrtHendelseId(skjæringstidspunkt: LocalDate, organisasjonsnummer: String = this.orgnummer): UUID {
+        val info = vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(organisasjonsnummer).inspektør
+        assertNotNull(info.skjønnsmessigFastsatt)
+        return info.inntektsopplysning.inspektør.hendelseId
+    }
 }

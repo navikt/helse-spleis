@@ -26,10 +26,9 @@ internal fun skattSykepengegrunnlag(
 ) =
     SkattSykepengegrunnlag(UUID.randomUUID(), Inntektsdata(hendelseId, dato, Skatteopplysning.omregnetÅrsinntekt(inntektsopplysninger), LocalDateTime.now()), inntektsopplysninger)
 
-fun skjønnsmessigFastsatt(
+internal fun skjønnsmessigFastsatt(
     dato: LocalDate,
-    beløp: Inntekt,
-    overstyrtInntekt: Inntektsopplysning
+    beløp: Inntekt
 ) = SkjønnsmessigFastsatt(
     id = UUID.randomUUID(),
     inntektsdata = Inntektsdata(
@@ -37,7 +36,5 @@ fun skjønnsmessigFastsatt(
         dato = dato,
         beløp = beløp,
         tidsstempel = LocalDateTime.now()
-    ),
-    overstyrtInntekt = overstyrtInntekt,
-    omregnetÅrsinntekt = overstyrtInntekt.omregnetÅrsinntekt()
+    )
 )

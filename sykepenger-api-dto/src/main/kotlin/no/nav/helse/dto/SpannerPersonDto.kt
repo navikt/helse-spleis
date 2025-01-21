@@ -30,6 +30,7 @@ import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.dto.serialisering.PersonUtDto
+import no.nav.helse.dto.serialisering.SkjønnsmessigFastsattUtDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
@@ -135,7 +136,7 @@ data class SpannerPersonDto(
             val fom: LocalDate,
             val tom: LocalDate,
             val inntektsopplysning: InntektsopplysningData,
-            val skjønnsmessigFastsatt: InntektsopplysningData?
+            val skjønnsmessigFastsatt: SkjønnsmessigFastsattData?
         ) {
             data class SkatteopplysningData(
                 val hendelseId: UUID,
@@ -164,6 +165,13 @@ data class SpannerPersonDto(
                 val overstyrtInntektId: UUID?,
                 val skatteopplysninger: List<SkatteopplysningData>?,
                 val inntektsmeldingkilde: ArbeidsgiverData.InntektsmeldingData.KildeData?
+            )
+            data class SkjønnsmessigFastsattData(
+                val id: UUID,
+                val dato: LocalDate,
+                val hendelseId: UUID,
+                val beløp: InntektDto?,
+                val tidsstempel: LocalDateTime
             )
         }
 
@@ -1538,11 +1546,9 @@ private fun InntektsopplysningUtDto.tilPersonData() =
             is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> "INNTEKTSMELDING"
             is InntektsopplysningUtDto.SaksbehandlerDto -> "SAKSBEHANDLER"
             is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> "SKATT_SYKEPENGEGRUNNLAG"
-            is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> "SKJØNNSMESSIG_FASTSATT"
         },
         overstyrtInntektId = when (this) {
             is InntektsopplysningUtDto.SaksbehandlerDto -> this.overstyrtInntekt
-            is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> this.overstyrtInntekt
             else -> null
         },
         skatteopplysninger = when (this) {
@@ -1557,6 +1563,14 @@ private fun InntektsopplysningUtDto.tilPersonData() =
 
             else -> null
         }
+    )
+private fun SkjønnsmessigFastsattUtDto.tilPersonData() =
+    ArbeidsgiverInntektsopplysningData.SkjønnsmessigFastsattData(
+        id = this.id,
+        dato = this.inntektsdata.dato,
+        hendelseId = this.inntektsdata.hendelseId,
+        beløp = this.inntektsdata.beløp.tilPersonData(),
+        tidsstempel = this.inntektsdata.tidsstempel
     )
 
 private fun SkatteopplysningDto.tilPersonDataSkattopplysning() =

@@ -9,6 +9,7 @@ import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
+import no.nav.helse.dto.serialisering.SkjønnsmessigFastsattUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.spleis.speil.dto.GhostPeriodeDTO
@@ -212,7 +213,6 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> null
                 is InntektsopplysningUtDto.SaksbehandlerDto -> it.inntektsopplysning.inntektsdata.hendelseId
                 is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> null
-                is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> it.inntektsopplysning.inntektsdata.hendelseId
             }, it.skjønnsmessigFastsatt?.inntektsdata?.hendelseId)
         }.toSet()
 
@@ -253,7 +253,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         return mapInntekt(dto.orgnummer, dto.gjelder.fom, dto.gjelder.tom, dto.inntektsopplysning, dto.skjønnsmessigFastsatt, deaktivert)
     }
 
-    private fun mapInntekt(orgnummer: String, fom: LocalDate, tom: LocalDate, io: InntektsopplysningUtDto, skjønnsmessigFastsattDto: InntektsopplysningUtDto.SkjønnsmessigFastsattDto?, deaktivert: Boolean): IArbeidsgiverinntekt {
+    private fun mapInntekt(orgnummer: String, fom: LocalDate, tom: LocalDate, io: InntektsopplysningUtDto, skjønnsmessigFastsattDto: SkjønnsmessigFastsattUtDto?, deaktivert: Boolean): IArbeidsgiverinntekt {
         val omregnetÅrsinntekt = when (io) {
             is InntektsopplysningUtDto.InfotrygdDto -> IOmregnetÅrsinntekt(IInntektkilde.Infotrygd, io.inntektsdata.beløp.årlig.beløp, io.inntektsdata.beløp.månedligDouble.beløp, null)
             is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> {
@@ -281,8 +281,6 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                         )
                     }
             )
-
-            is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> inntekter.getValue(io.overstyrtInntekt)
         }.also {
             inntekter[io.id] = it
         }

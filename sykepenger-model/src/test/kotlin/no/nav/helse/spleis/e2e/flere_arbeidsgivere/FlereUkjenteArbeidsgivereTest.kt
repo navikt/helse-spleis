@@ -283,7 +283,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a1))
 
-        assertEquals(INNTEKT, inspektør(a2).inntekt(1.januar).fastsattÅrsinntekt())
+        assertEquals(INNTEKT, inspektør(a2).inntekt(1.januar).inspektør.beløp)
         assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, imId.arbeidsgiver), inspektør(a2).refusjon(1.vedtaksperiode))
 
         assertEquals(

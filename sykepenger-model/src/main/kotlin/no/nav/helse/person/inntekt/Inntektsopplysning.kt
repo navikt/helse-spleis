@@ -49,19 +49,10 @@ data class Inntektsdata(
     }
 }
 
-sealed class Inntektsopplysning(
+internal sealed class Inntektsopplysning(
     val id: UUID,
     val inntektsdata: Inntektsdata
 ) {
-    internal fun fastsattÅrsinntekt() = inntektsdata.beløp
-    internal fun omregnetÅrsinntekt() = when (this) {
-        is Infotrygd,
-        is Arbeidsgiverinntekt,
-        is Saksbehandler,
-        is SkattSykepengegrunnlag -> this
-        is SkjønnsmessigFastsatt -> this.omregnetÅrsinntekt!!
-    }
-
     fun funksjoneltLik(other: Inntektsopplysning) =
         this::class == other::class && this.inntektsdata.funksjoneltLik(other.inntektsdata)
 
@@ -79,8 +70,7 @@ sealed class Inntektsopplysning(
                     is SkattSykepengegrunnlag -> inntektsopplysninger.subsumsjonsformat()
                     is Infotrygd,
                     is Arbeidsgiverinntekt,
-                    is Saksbehandler,
-                    is SkjønnsmessigFastsatt -> emptyList()
+                    is Saksbehandler -> emptyList()
                 },
                 forklaring = forklaring,
                 oppfylt = oppfylt
@@ -91,7 +81,6 @@ sealed class Inntektsopplysning(
     internal fun gjenbrukbarInntekt(beløp: Inntekt? = null): Arbeidsgiverinntekt? = when (this) {
         is Arbeidsgiverinntekt -> beløp?.let { Arbeidsgiverinntekt(UUID.randomUUID(), inntektsdata.copy(beløp = it), kilde) } ?: this
         is Saksbehandler -> overstyrtInntekt.gjenbrukbarInntekt(beløp ?: this.inntektsdata.beløp)
-        is SkjønnsmessigFastsatt -> checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.gjenbrukbarInntekt(beløp)
 
         is Infotrygd,
         is SkattSykepengegrunnlag -> null
@@ -123,16 +112,12 @@ sealed class Inntektsopplysning(
             omregnetÅrsinntekt(før) != omregnetÅrsinntekt(etter)
 
         private fun omregnetÅrsinntekt(liste: List<Inntektsopplysning>) = liste
-            .map { it.omregnetÅrsinntekt().inntektsdata.beløp }
+            .map { it.inntektsdata.beløp }
             .map { it.årlig.toInt() }
 
         internal fun List<Inntektsopplysning>.markerFlereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {
             if (distinctBy { it.inntektsdata.dato }.size <= 1 && none { it is SkattSykepengegrunnlag }) return
             aktivitetslogg.varsel(Varselkode.RV_VV_2)
-        }
-
-        internal fun List<Inntektsopplysning>.validerSkjønnsmessigAltEllerIntet() {
-            check(all { it is SkjønnsmessigFastsatt } || none { it is SkjønnsmessigFastsatt }) { "Enten så må alle inntektsopplysninger var skjønnsmessig fastsatt, eller så må ingen være det" }
         }
 
         internal fun gjenopprett(
@@ -145,10 +130,6 @@ sealed class Inntektsopplysning(
                     is InntektsopplysningInnDto.ArbeidsgiverinntektDto -> Arbeidsgiverinntekt.gjenopprett(dto)
                     is InntektsopplysningInnDto.SaksbehandlerDto -> Saksbehandler.gjenopprett(dto, inntekter)
                     is InntektsopplysningInnDto.SkattSykepengegrunnlagDto -> SkattSykepengegrunnlag.gjenopprett(dto)
-                    is InntektsopplysningInnDto.SkjønnsmessigFastsattDto -> SkjønnsmessigFastsatt.gjenopprett(
-                        dto,
-                        inntekter
-                    )
                 }
             }
             return inntektsopplysning
