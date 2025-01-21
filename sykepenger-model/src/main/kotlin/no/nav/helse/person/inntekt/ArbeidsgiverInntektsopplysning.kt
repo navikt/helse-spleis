@@ -323,13 +323,16 @@ internal data class ArbeidsgiverInntektsopplysning(
 
                     is Saksbehandler -> io.omregnetÅrsinntekt
                 },
-                korrigertInntekt = dto.korrigertInntekt?.let { Saksbehandler.gjenopprett(it, inntekter) } ?: when (val io = inntektsopplysning) {
-                    is Arbeidsgiverinntekt,
-                    is Infotrygd,
-                    is SkattSykepengegrunnlag -> null
+                korrigertInntekt = dto.korrigertInntekt
+                    ?.let { Saksbehandler.gjenopprett(it, inntekter) }
+                    ?.also { inntekter.putIfAbsent(it.id, inntektsopplysning) }
+                    ?: when (val io = inntektsopplysning) {
+                        is Arbeidsgiverinntekt,
+                        is Infotrygd,
+                        is SkattSykepengegrunnlag -> null
 
-                    is Saksbehandler -> io
-                },
+                        is Saksbehandler -> io
+                    },
                 skjønnsmessigFastsatt = dto.skjønnsmessigFastsatt?.let { SkjønnsmessigFastsatt.gjenopprett(it).also { skjønnsmessig ->
                     inntekter.putIfAbsent(skjønnsmessig.id, inntektsopplysning)
                 } }
