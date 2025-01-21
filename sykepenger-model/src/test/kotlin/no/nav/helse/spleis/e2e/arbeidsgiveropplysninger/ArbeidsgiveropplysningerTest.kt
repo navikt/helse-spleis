@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 import java.util.*
 import no.nav.helse.Toggle
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -461,47 +460,23 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittRefusjon(INNTEKT, emptyList()),
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar))
             )
-            assertForventetFeil(
-                forklaring = "Må legge til for inntektsmeldingInntekt",
-                ønsket = {
-                    assertDokumentsporingPåSisteBehandling(
-                        1.vedtaksperiode,
-                        Dokumentsporing.inntektsmeldingDager(id),
-                        Dokumentsporing.inntektsmeldingInntekt(id),
-                        Dokumentsporing.inntektsmeldingRefusjon(id)
-                    )
-                },
-                nå = {
-                    assertDokumentsporingPåSisteBehandling(
-                        1.vedtaksperiode,
-                        Dokumentsporing.inntektsmeldingDager(id),
-                        Dokumentsporing.inntektsmeldingRefusjon(id)
-                    )
-                }
+            assertDokumentsporingPåSisteBehandling(
+                1.vedtaksperiode,
+                Dokumentsporing.inntektsmeldingDager(id),
+                Dokumentsporing.inntektsmeldingInntekt(id),
+                Dokumentsporing.inntektsmeldingRefusjon(id)
             )
 
             val idKorrigert = håndterKorrigerteArbeidsgiveropplysninger(
                 1.vedtaksperiode,
                 OppgittInntekt(INNTEKT * 1.10)
             )
-            assertForventetFeil(
-                forklaring = "Må legge til for inntektsmeldingInntekt",
-                ønsket = {
-                    assertDokumentsporingPåSisteBehandling(
-                        1.vedtaksperiode,
-                        Dokumentsporing.inntektsmeldingDager(id),
-                        Dokumentsporing.inntektsmeldingInntekt(id),
-                        Dokumentsporing.inntektsmeldingRefusjon(id),
-                        Dokumentsporing.inntektsmeldingInntekt(idKorrigert)
-                    )
-                },
-                nå = {
-                    assertDokumentsporingPåSisteBehandling(
-                        1.vedtaksperiode,
-                        Dokumentsporing.inntektsmeldingDager(id),
-                        Dokumentsporing.inntektsmeldingRefusjon(id),
-                    )
-                }
+            assertDokumentsporingPåSisteBehandling(
+                1.vedtaksperiode,
+                Dokumentsporing.inntektsmeldingDager(id),
+                Dokumentsporing.inntektsmeldingInntekt(id),
+                Dokumentsporing.inntektsmeldingRefusjon(id),
+                Dokumentsporing.inntektsmeldingInntekt(idKorrigert)
             )
         }
     }

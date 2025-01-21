@@ -2398,10 +2398,12 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
-        håndterInntektsmelding(
-            listOf(1.mars til 16.mars),
-            beregnetInntekt = 30000.månedlig
-        )
+        assertVarsler(2.vedtaksperiode.filter(), etter = listOf(RV_IM_4)) {
+            håndterInntektsmelding(
+                listOf(1.mars til 16.mars),
+                beregnetInntekt = 30000.månedlig
+            )
+        }
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 

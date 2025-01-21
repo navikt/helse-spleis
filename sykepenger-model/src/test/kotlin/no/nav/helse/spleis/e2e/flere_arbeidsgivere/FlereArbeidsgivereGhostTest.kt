@@ -434,11 +434,13 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertBeløpstidslinje(Beløpstidslinje.fra(februar, INNTEKT, inntektsmelding.arbeidsgiver), inspektør(a2).refusjon(1.vedtaksperiode))
 
-        val korrigerendeInntektsmelding = håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(1.februar til 16.februar),
-            førsteFraværsdag = 20.februar,
-            orgnummer = a2
-        )
+        val korrigerendeInntektsmelding =  assertVarsler(1.vedtaksperiode.filter(a2), etter = listOf(RV_IM_4)) {
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.februar til 16.februar),
+                førsteFraværsdag = 20.februar,
+                orgnummer = a2
+            )
+        }
 
         assertInntektstype(1.januar, mapOf(a1 to Arbeidsgiverinntekt::class, a2 to Arbeidsgiverinntekt::class))
         assertBeløpstidslinje(

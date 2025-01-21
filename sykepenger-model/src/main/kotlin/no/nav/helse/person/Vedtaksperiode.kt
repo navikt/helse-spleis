@@ -70,6 +70,7 @@ import no.nav.helse.person.Behandlinger.Companion.berik
 import no.nav.helse.person.Dokumentsporing.Companion.andreYtelser
 import no.nav.helse.person.Dokumentsporing.Companion.inntektFraAOrdingen
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingDager
+import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingInntekt
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrTidslinje
 import no.nav.helse.person.Dokumentsporing.Companion.søknad
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype
@@ -629,7 +630,14 @@ internal class Vedtaksperiode private constructor(
             inntektsdata = inntektsdata,
             kilde = Inntektsmeldinginntekt.Kilde.Arbeidsgiver
         ))
-        val harEndretInntekt = person.nyeArbeidsgiverInntektsopplysninger(
+
+        // Skjæringstidspunktet er _ikke_ vilkårsprøvd før (det mest normale - står typisk i AvventerInntektsmelding)
+        if (person.vilkårsgrunnlagFor(skjæringstidspunkt) == null) {
+            dokumentsporingFraArbeidsgiveropplysning(hendelse, ::inntektsmeldingInntekt)
+            return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
+        }
+
+        val harEndretInntektIVilkårsgrunnlag = person.nyeArbeidsgiverInntektsopplysninger(
             hendelse = hendelse,
             skjæringstidspunkt = skjæringstidspunkt,
             organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
@@ -642,10 +650,14 @@ internal class Vedtaksperiode private constructor(
             subsumsjonslogg = this.jurist
         ) != null
 
-        // todo: per 10. januar 2025 så sender alltid Hag inntekt i portal-inntektsmeldinger selv om vi ikke har bedt om det, derfor må vi ta høyde for at det ikke nødvendigvis er endringer
-        if (!harEndretInntekt) return emptyList()
+        // Skjæringstidspunktet er allerede vilkårsprøvd, men inntekten for arbeidsgiveren er byttet ut med denne oppgitte inntekten
+        if (harEndretInntektIVilkårsgrunnlag) {
+            dokumentsporingFraArbeidsgiveropplysning(hendelse, ::inntektsmeldingInntekt)
+            return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
+        }
 
-        return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
+        // todo: per 10. januar 2025 så sender alltid Hag inntekt i portal-inntektsmeldinger selv om vi ikke har bedt om det, derfor må vi ta høyde for at det ikke nødvendigvis er endringer
+        return emptyList()
     }
 
     private fun håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
@@ -757,14 +769,18 @@ internal class Vedtaksperiode private constructor(
         return BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, sykdomstidslinje)
     }
 
-    private fun <T> varselFraArbeidsgiveropplysning(hendelse: T, aktivitetslogg: IAktivitetslogg, varselkode: Varselkode) where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
+    private fun <T> dokumentsporingFraArbeidsgiveropplysning(hendelse: T, dokumentsporing: (meldingsreferanseId: UUID) -> Dokumentsporing) where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
         behandlinger.sikreNyBehandling(
             arbeidsgiver = arbeidsgiver,
             behandlingkilde = hendelse.metadata.behandlingkilde,
             beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
             beregnArbeidsgiverperiode = arbeidsgiver.beregnArbeidsgiverperiode()
         )
-        behandlinger.oppdaterDokumentsporing(inntektsmeldingDager(hendelse.metadata.meldingsreferanseId))
+        behandlinger.oppdaterDokumentsporing(dokumentsporing(hendelse.metadata.meldingsreferanseId))
+    }
+
+    private fun <T> varselFraArbeidsgiveropplysning(hendelse: T, aktivitetslogg: IAktivitetslogg, varselkode: Varselkode) where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
+        dokumentsporingFraArbeidsgiveropplysning(hendelse, ::inntektsmeldingDager)
         aktivitetslogg.varsel(varselkode)
     }
 

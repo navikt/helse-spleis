@@ -162,6 +162,12 @@ internal fun AbstractPersonTest.assertFunksjonelleFeil(filter: AktivitetsloggFil
 internal fun AbstractPersonTest.assertIngenFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenFunksjonellFeil(varselkode, filter, assertetVarsler)
 internal fun AbstractPersonTest.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenFunksjonelleFeil(filter, assertetVarsler)
 internal fun AbstractPersonTest.assertLogiskFeil(severe: String, filter: AktivitetsloggFilter) = person.personLogg.assertLogiskFeil(severe, filter, assertetVarsler)
+internal fun <T> AbstractPersonTest.assertVarsler(filter: AktivitetsloggFilter, før: List<Varselkode> = emptyList(), etter: List<Varselkode>, block: () -> T): T{
+    assertVarsler(før, filter)
+    val resultat = block()
+    assertVarsler(etter, filter)
+    return resultat
+}
 
 internal fun Aktivitetslogg.assertInfo(forventet: String, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
     AktivitetsloggAsserts(this, assertetVarsler).assertInfo(forventet, filter)

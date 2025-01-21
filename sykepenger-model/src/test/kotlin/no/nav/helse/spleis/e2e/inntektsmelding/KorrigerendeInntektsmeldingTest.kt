@@ -374,11 +374,12 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         tilGodkjenning(januar, a1, beregnetInntekt = INNTEKT)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
-        håndterInntektsmelding(listOf(5.januar til 20.januar))
+        assertVarsler(1.vedtaksperiode.filter(), etter = listOf(RV_IM_4, RV_IM_24)) {
+            håndterInntektsmelding(listOf(5.januar til 20.januar))
+        }
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
-        assertVarsler(listOf(RV_IM_24), 1.vedtaksperiode.filter())
         assertEquals("AAAASHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
 
@@ -403,13 +404,14 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         nyPeriode(februar)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterInntektsmelding(
-            listOf(1.februar til 16.februar)
-        )
+        assertVarsler(2.vedtaksperiode.filter(), etter = listOf(RV_IM_24)) {
+            håndterInntektsmelding(
+                listOf(1.februar til 16.februar)
+            )
+        }
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-        assertVarsler(listOf(RV_IM_24), 2.vedtaksperiode.filter())
     }
 }
