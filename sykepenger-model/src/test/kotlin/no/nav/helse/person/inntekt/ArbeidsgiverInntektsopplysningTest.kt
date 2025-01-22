@@ -58,7 +58,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             assertEquals(3000.månedlig, it[0].fastsattÅrsinntekt)
             assertEquals(2000.månedlig, it[1].fastsattÅrsinntekt)
             assertNotNull(it[0].korrigertInntekt)
-            assertInstanceOf<Arbeidsgiverinntekt>(it[1].inntektsopplysning)
+            assertInstanceOf<Arbeidsgiverinntekt>(it[1].faktaavklartInntekt.inntektsopplysning)
         }
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
         original.overstyrMedSaksbehandler(forMange).also {
@@ -66,7 +66,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             assertEquals(3000.månedlig, it[0].fastsattÅrsinntekt)
             assertEquals(2000.månedlig, it[1].fastsattÅrsinntekt)
             assertNotNull(it[0].korrigertInntekt)
-            assertInstanceOf<Arbeidsgiverinntekt>(it[1].inntektsopplysning)
+            assertInstanceOf<Arbeidsgiverinntekt>(it[1].faktaavklartInntekt.inntektsopplysning)
         }
     }
 
@@ -124,7 +124,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
     fun `deaktiverer en inntekt`() {
         val skjæringstidspunkt = 1.januar
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntekt(skjæringstidspunkt, 1000.månedlig), null, null)
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, SkattSykepengegrunnlag.ikkeRapportert(skjæringstidspunkt, UUID.randomUUID()), null, null)
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, skattSykepengegrunnlag(UUID.randomUUID(), skjæringstidspunkt, emptyList()), null, null)
 
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
         val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", EmptyLog)
@@ -143,7 +143,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
     fun `subsummerer deaktivering`() {
         val skjæringstidspunkt = 1.januar
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntekt(skjæringstidspunkt, 1000.månedlig), null, null)
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, SkattSykepengegrunnlag.ikkeRapportert(skjæringstidspunkt, UUID.randomUUID()), null, null)
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, skattSykepengegrunnlag(UUID.randomUUID(), skjæringstidspunkt, emptyList()), null, null)
 
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
         val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", jurist)
@@ -169,7 +169,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
     fun `subsummerer aktivering`() {
         val skjæringstidspunkt = 1.januar
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntekt(skjæringstidspunkt, 1000.månedlig), null, null)
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, SkattSykepengegrunnlag.ikkeRapportert(skjæringstidspunkt, UUID.randomUUID()), null, null)
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, skattSykepengegrunnlag(UUID.randomUUID(), skjæringstidspunkt, emptyList()), null, null)
 
         val opprinneligAktive = listOf(a1Opplysning)
         val opprinneligDeaktiverte = listOf(a2Opplysning)
@@ -201,7 +201,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val inntektsopplysning1 = ArbeidsgiverInntektsopplysning(
             orgnummer = "orgnummer",
             gjelder = 1.januar til LocalDate.MAX,
-            inntektsopplysning = infotrygd(
+            faktaavklartInntekt = infotrygd(
                 id = inntektID,
                 dato = 1.januar,
                 hendelseId = hendelseId,
@@ -216,7 +216,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = "orgnummer",
                     gjelder = 1.januar til LocalDate.MAX,
-                    inntektsopplysning = infotrygd(
+                    faktaavklartInntekt = infotrygd(
                         id = inntektID,
                         dato = 1.januar,
                         hendelseId = hendelseId,
@@ -233,7 +233,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = "orgnummer2",
                     gjelder = 1.januar til LocalDate.MAX,
-                    inntektsopplysning = infotrygd(
+                    faktaavklartInntekt = infotrygd(
                         id = inntektID,
                         dato = 1.januar,
                         hendelseId = hendelseId,
@@ -250,7 +250,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = "orgnummer",
                     gjelder = 1.januar til LocalDate.MAX,
-                    inntektsopplysning = infotrygd(
+                    faktaavklartInntekt = infotrygd(
                         id = inntektID,
                         dato = 5.januar,
                         hendelseId = hendelseId,
@@ -273,5 +273,5 @@ internal fun List<ArbeidsgiverInntektsopplysning>.funksjoneltLik(other: List<Arb
 }
 
 internal fun ArbeidsgiverInntektsopplysning.funksjoneltLik(other: ArbeidsgiverInntektsopplysning): Boolean {
-    return this.gjelder == other.gjelder && this.orgnummer == other.orgnummer && this.inntektsopplysning.funksjoneltLik(other.inntektsopplysning)
+    return this.gjelder == other.gjelder && this.orgnummer == other.orgnummer && this.faktaavklartInntekt.funksjoneltLik(other.faktaavklartInntekt)
 }

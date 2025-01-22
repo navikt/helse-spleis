@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.RefusjonservitørData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
@@ -17,6 +17,7 @@ import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.BehandlingendringUtDto
+import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.FeriepengeUtDto
 import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdArbeidsgiverutbetalingsperiodeUtDto
@@ -24,7 +25,7 @@ import no.nav.helse.dto.serialisering.InfotrygdInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
-import no.nav.helse.dto.serialisering.InntektsmeldingDto
+import no.nav.helse.dto.serialisering.InntektsmeldingUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
@@ -136,7 +137,7 @@ data class SpannerPersonDto(
             val orgnummer: String,
             val fom: LocalDate,
             val tom: LocalDate,
-            val inntektsopplysning: InntektsopplysningData,
+            val faktaavklartInntekt: InntektsopplysningData,
             val korrigertInntekt: KorrigertInntektsopplysningData?,
             val skjønnsmessigFastsatt: SkjønnsmessigFastsattData?
         ) {
@@ -732,7 +733,7 @@ private fun InntektDto.tilPersonData() = SpannerPersonDto.InntektDto(
     dagligInt = this.dagligInt.beløp
 )
 
-private fun InntektsmeldingDto.tilPersonData() =
+private fun InntektsmeldingUtDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData(
         id = this.id,
         dato = this.inntektsdata.dato,
@@ -740,8 +741,8 @@ private fun InntektsmeldingDto.tilPersonData() =
         beløp = this.inntektsdata.beløp.tilPersonData(),
         tidsstempel = this.inntektsdata.tidsstempel,
         kilde = when (this.kilde) {
-            InntektsmeldingDto.KildeDto.Arbeidsgiver -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.Arbeidsgiver
-            InntektsmeldingDto.KildeDto.AOrdningen -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.AOrdningen
+            InntektsmeldingUtDto.KildeDto.Arbeidsgiver -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.Arbeidsgiver
+            InntektsmeldingUtDto.KildeDto.AOrdningen -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.AOrdningen
         }
     )
 
@@ -1533,7 +1534,7 @@ private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() =
         orgnummer = this.orgnummer,
         fom = this.gjelder.fom,
         tom = this.gjelder.tom,
-        inntektsopplysning = this.inntektsopplysning.tilPersonData(),
+        faktaavklartInntekt = this.faktaavklartInntekt.tilPersonData(),
         korrigertInntekt = this.korrigertInntekt?.tilPersonData(),
         skjønnsmessigFastsatt = this.skjønnsmessigFastsatt?.tilPersonData()
     )
@@ -1543,24 +1544,24 @@ private fun NyInntektUnderveisDto.tilPersonData() = VilkårsgrunnlagElementData.
     beløpstidslinje = this.beløpstidslinje.tilPersonData()
 )
 
-private fun InntektsopplysningUtDto.tilPersonData() =
+private fun FaktaavklartInntektUtDto.tilPersonData() =
     ArbeidsgiverInntektsopplysningData.InntektsopplysningData(
         id = this.id,
         dato = this.inntektsdata.dato,
         hendelseId = this.inntektsdata.hendelseId,
         beløp = this.inntektsdata.beløp.tilPersonData(),
         tidsstempel = this.inntektsdata.tidsstempel,
-        kilde = when (this) {
+        kilde = when (this.inntektsopplysning) {
             is InntektsopplysningUtDto.InfotrygdDto -> "INFOTRYGD"
             is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> "INNTEKTSMELDING"
             is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> "SKATT_SYKEPENGEGRUNNLAG"
         },
-        skatteopplysninger = when (this) {
-            is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> this.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
+        skatteopplysninger = when (val io = this.inntektsopplysning) {
+            is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> io.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
             else -> null
         },
-        inntektsmeldingkilde = when (this) {
-            is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> when (this.kilde) {
+        inntektsmeldingkilde = when (val io = this.inntektsopplysning) {
+            is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> when (io.kilde) {
                 InntektsopplysningUtDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.Arbeidsgiver
                 InntektsopplysningUtDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.AOrdningen
             }

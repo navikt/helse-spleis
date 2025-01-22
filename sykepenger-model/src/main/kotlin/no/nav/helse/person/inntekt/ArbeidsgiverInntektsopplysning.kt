@@ -17,7 +17,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt.Kilde
-import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
+import no.nav.helse.person.inntekt.FaktaavklartInntekt.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.yearMonth
@@ -27,11 +27,11 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 internal data class ArbeidsgiverInntektsopplysning(
     val orgnummer: String,
     val gjelder: Periode,
-    val inntektsopplysning: Inntektsopplysning,
+    val faktaavklartInntekt: FaktaavklartInntekt,
     val korrigertInntekt: Saksbehandler?,
     val skjønnsmessigFastsatt: SkjønnsmessigFastsatt?
 ) {
-    val omregnetÅrsinntekt = korrigertInntekt?.inntektsdata ?: inntektsopplysning.inntektsdata
+    val omregnetÅrsinntekt = korrigertInntekt?.inntektsdata ?: faktaavklartInntekt.inntektsdata
     val fastsattÅrsinntekt = skjønnsmessigFastsatt?.inntektsdata?.beløp ?: omregnetÅrsinntekt.beløp
 
     private fun gjelderPåSkjæringstidspunktet(skjæringstidspunkt: LocalDate) =
@@ -62,11 +62,11 @@ internal data class ArbeidsgiverInntektsopplysning(
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
-    private fun overstyrMedInntektsmelding(organisasjonsnummer: String, nyInntekt: Arbeidsgiverinntekt): ArbeidsgiverInntektsopplysning {
+    private fun overstyrMedInntektsmelding(organisasjonsnummer: String, nyInntekt: FaktaavklartInntekt): ArbeidsgiverInntektsopplysning {
         if (this.orgnummer != organisasjonsnummer) return this
         if (nyInntekt.inntektsdata.dato.yearMonth != this.omregnetÅrsinntekt.dato.yearMonth) return this
         return copy(
-            inntektsopplysning = nyInntekt,
+            faktaavklartInntekt = nyInntekt,
             korrigertInntekt = null
         )
     }
@@ -106,8 +106,8 @@ internal data class ArbeidsgiverInntektsopplysning(
             `§ 8-15`(
                 skjæringstidspunkt = omregnetÅrsinntekt.dato,
                 organisasjonsnummer = orgnummer,
-                inntekterSisteTreMåneder = if (korrigertInntekt == null && inntektsopplysning is SkattSykepengegrunnlag)
-                    inntektsopplysning.inntektsopplysninger.subsumsjonsformat()
+                inntekterSisteTreMåneder = if (korrigertInntekt == null && faktaavklartInntekt.inntektsopplysning is SkattSykepengegrunnlag)
+                    faktaavklartInntekt.inntektsopplysning.inntektsopplysninger.subsumsjonsformat()
                 else
                     emptyList(),
                 forklaring = forklaring,
@@ -172,7 +172,7 @@ internal data class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.overstyrMedInntektsmelding(
             organisasjonsnummer: String,
-            nyInntekt: Arbeidsgiverinntekt
+            nyInntekt: FaktaavklartInntekt
         ): List<ArbeidsgiverInntektsopplysning> {
             val endringen = this.map { inntekt -> inntekt.overstyrMedInntektsmelding(organisasjonsnummer, nyInntekt) }
             if (skalSkjønnsmessigFastsattRullesTilbake(endringen)) {
@@ -221,7 +221,7 @@ internal data class ArbeidsgiverInntektsopplysning(
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.markerFlereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {
-            return map { it.inntektsopplysning }.markerFlereArbeidsgivere(aktivitetslogg)
+            return map { it.faktaavklartInntekt }.markerFlereArbeidsgivere(aktivitetslogg)
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.fastsattInntekt(
@@ -241,10 +241,10 @@ internal data class ArbeidsgiverInntektsopplysning(
                     gjelder = arbeidsgiver.gjelder,
                     inntektskilde = if (arbeidsgiver.skjønnsmessigFastsatt != null || arbeidsgiver.korrigertInntekt != null)
                         Inntektskilde.Saksbehandler
-                    else when (arbeidsgiver.inntektsopplysning) {
+                    else when (arbeidsgiver.faktaavklartInntekt.inntektsopplysning) {
                         is SkattSykepengegrunnlag -> Inntektskilde.AOrdningen
 
-                        is Arbeidsgiverinntekt -> when (arbeidsgiver.inntektsopplysning.kilde) {
+                        is Arbeidsgiverinntekt -> when (arbeidsgiver.faktaavklartInntekt.inntektsopplysning.kilde) {
                             Kilde.Arbeidsgiver -> Inntektskilde.Arbeidsgiver
                             Kilde.AOrdningen -> Inntektskilde.AOrdningen
                         }
@@ -280,12 +280,12 @@ internal data class ArbeidsgiverInntektsopplysning(
         private fun ArbeidsgiverInntektsopplysning.harFunksjonellEndring(other: ArbeidsgiverInntektsopplysning): Boolean {
             if (this.gjelder != other.gjelder) return true
             if (this.skjønnsmessigFastsatt != other.skjønnsmessigFastsatt) return true
-            if (!this.inntektsopplysning.funksjoneltLik(other.inntektsopplysning)) return true
+            if (!this.faktaavklartInntekt.funksjoneltLik(other.faktaavklartInntekt)) return true
             return this.korrigertInntekt != other.korrigertInntekt
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.harGjenbrukbarInntekt(organisasjonsnummer: String) =
-            singleOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning is Arbeidsgiverinntekt
+            singleOrNull { it.orgnummer == organisasjonsnummer }?.faktaavklartInntekt?.inntektsopplysning is Arbeidsgiverinntekt
 
         internal fun List<ArbeidsgiverInntektsopplysning>.lagreTidsnæreInntekter(
             skjæringstidspunkt: LocalDate,
@@ -294,15 +294,15 @@ internal data class ArbeidsgiverInntektsopplysning(
             nyArbeidsgiverperiode: Boolean
         ) {
             this.forEach {
-                val tidsnær = it.inntektsopplysning as? Arbeidsgiverinntekt
+                val tidsnær = it.faktaavklartInntekt.inntektsopplysning as? Arbeidsgiverinntekt
                 if (tidsnær != null) {
                     arbeidsgiver.lagreTidsnærInntektsmelding(
                         skjæringstidspunkt = skjæringstidspunkt,
                         orgnummer = it.orgnummer,
-                        arbeidsgiverinntekt = Arbeidsgiverinntekt(
+                        arbeidsgiverinntekt = FaktaavklartInntekt(
                             id = UUID.randomUUID(),
-                            inntektsdata = tidsnær.inntektsdata.copy(beløp = it.omregnetÅrsinntekt.beløp),
-                            kilde = tidsnær.kilde
+                            inntektsdata = it.faktaavklartInntekt.inntektsdata.copy(beløp = it.omregnetÅrsinntekt.beløp),
+                            inntektsopplysning = Arbeidsgiverinntekt(kilde = tidsnær.kilde)
                         ),
                         aktivitetslogg = aktivitetslogg,
                         nyArbeidsgiverperiode = nyArbeidsgiverperiode
@@ -315,7 +315,7 @@ internal data class ArbeidsgiverInntektsopplysning(
             return ArbeidsgiverInntektsopplysning(
                 orgnummer = dto.orgnummer,
                 gjelder = Periode.gjenopprett(dto.gjelder),
-                inntektsopplysning = Inntektsopplysning.gjenopprett(dto.inntektsopplysning),
+                faktaavklartInntekt = FaktaavklartInntekt.gjenopprett(dto.faktaavklartInntekt),
                 korrigertInntekt = dto.korrigertInntekt?.let { Saksbehandler.gjenopprett(it) },
                 skjønnsmessigFastsatt = dto.skjønnsmessigFastsatt?.let { SkjønnsmessigFastsatt.gjenopprett(it) }
             )
@@ -325,7 +325,7 @@ internal data class ArbeidsgiverInntektsopplysning(
     internal fun dto() = ArbeidsgiverInntektsopplysningUtDto(
         orgnummer = this.orgnummer,
         gjelder = this.gjelder.dto(),
-        inntektsopplysning = this.inntektsopplysning.dto(),
+        faktaavklartInntekt = this.faktaavklartInntekt.dto(),
         korrigertInntekt = this.korrigertInntekt?.dto(),
         skjønnsmessigFastsatt = skjønnsmessigFastsatt?.dto()
     )

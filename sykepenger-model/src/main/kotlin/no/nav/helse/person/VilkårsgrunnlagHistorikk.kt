@@ -27,8 +27,8 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.EndretInntektsgrunnlag
+import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.inntekt.InntektsgrunnlagView
@@ -223,7 +223,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun nyeArbeidsgiverInntektsopplysninger(
             organisasjonsnummer: String,
-            inntekt: Arbeidsgiverinntekt,
+            inntekt: FaktaavklartInntekt,
             aktivitetslogg: IAktivitetslogg,
             subsumsjonslogg: Subsumsjonslogg
         ): Pair<VilkårsgrunnlagElement, EndretInntektsgrunnlag>? {

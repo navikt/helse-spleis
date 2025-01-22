@@ -1,22 +1,13 @@
 package no.nav.helse.dto.deserialisering
 
-import java.util.*
 import no.nav.helse.dto.SkatteopplysningDto
 
-sealed class InntektsopplysningInnDto {
-    abstract val id: UUID
-    abstract val inntektsdata: InntektsdataInnDto
-
-    data class InfotrygdDto(
-        override val id: UUID,
-        override val inntektsdata: InntektsdataInnDto
-    ) : InntektsopplysningInnDto()
+sealed interface InntektsopplysningInnDto {
+    data object InfotrygdDto : InntektsopplysningInnDto
 
     data class ArbeidsgiverinntektDto(
-        override val id: UUID,
-        override val inntektsdata: InntektsdataInnDto,
         val kilde: KildeDto
-    ) : InntektsopplysningInnDto() {
+    ) : InntektsopplysningInnDto {
         enum class KildeDto {
             Arbeidsgiver,
             AOrdningen
@@ -24,8 +15,6 @@ sealed class InntektsopplysningInnDto {
     }
 
     data class SkattSykepengegrunnlagDto(
-        override val id: UUID,
-        override val inntektsdata: InntektsdataInnDto,
         val inntektsopplysninger: List<SkatteopplysningDto>
-    ) : InntektsopplysningInnDto()
+    ) : InntektsopplysningInnDto
 }

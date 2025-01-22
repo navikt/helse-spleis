@@ -97,9 +97,9 @@ internal fun assertInntektsgrunnlag(
     assertEquals(forventetOmregnetÅrsinntekt, inspektør.omregnetÅrsinntekt) { "omregnet årsinntekt er feil" }
     assertEquals(forventetFastsattÅrsinntekt, inspektør.fastsattÅrsinntekt) { "fastsatt årsinntekt er feil" }
     assertEquals(forventetKorrigertInntekt, inspektør.korrigertInntekt?.inntektsdata?.beløp) { "korrigert inntekt er feil" }
-    assertEquals(forventetkilde, when (inspektør.faktaavklartInntekt) {
-        is Arbeidsgiverinntekt -> inspektør.faktaavklartInntekt.kilde
-        is Infotrygd -> Arbeidsgiverinntekt.Kilde.Arbeidsgiver
+    assertEquals(forventetkilde, when (inspektør.faktaavklartInntekt.inntektsopplysning) {
+        is Arbeidsgiverinntekt -> inspektør.faktaavklartInntekt.inntektsopplysning.kilde
+        Infotrygd -> Arbeidsgiverinntekt.Kilde.Arbeidsgiver
         is SkattSykepengegrunnlag -> Arbeidsgiverinntekt.Kilde.AOrdningen
     })
 }

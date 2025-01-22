@@ -5,7 +5,7 @@ import no.nav.helse.dto.PeriodeDto
 data class ArbeidsgiverInntektsopplysningUtDto(
     val orgnummer: String,
     val gjelder: PeriodeDto,
-    val inntektsopplysning: InntektsopplysningUtDto,
+    val faktaavklartInntekt: FaktaavklartInntektUtDto,
     val korrigertInntekt: SaksbehandlerUtDto?,
     val skjønnsmessigFastsatt: SkjønnsmessigFastsattUtDto?
 )

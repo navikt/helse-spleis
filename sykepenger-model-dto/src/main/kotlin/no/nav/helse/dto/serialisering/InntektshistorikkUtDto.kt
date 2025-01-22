@@ -1,3 +1,3 @@
 package no.nav.helse.dto.serialisering
 
-data class InntektshistorikkUtDto(val historikk: List<InntektsmeldingDto>)
+data class InntektshistorikkUtDto(val historikk: List<InntektsmeldingUtDto>)

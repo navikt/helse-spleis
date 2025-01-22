@@ -49,6 +49,7 @@ import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
 import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
 import no.nav.helse.dto.deserialisering.BehandlingerInnDto
+import no.nav.helse.dto.deserialisering.FaktaavklartInntektInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeInnDto
 import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdArbeidsgiverutbetalingsperiodeInnDto
@@ -59,6 +60,7 @@ import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
 import no.nav.helse.dto.deserialisering.InntektsdataInnDto
 import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
+import no.nav.helse.dto.deserialisering.InntektsmeldingInnDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.MaksdatoresultatInnDto
 import no.nav.helse.dto.deserialisering.MinimumSykdomsgradVurderingInnDto
@@ -280,7 +282,7 @@ data class PersonData(
             fun tilDto() = ArbeidsgiverInntektsopplysningInnDto(
                 orgnummer = this.orgnummer,
                 gjelder = PeriodeDto(fom = this.fom, tom = this.tom),
-                inntektsopplysning = inntektsopplysning.tilDto(),
+                faktaavklartInntekt = inntektsopplysning.tilDto(),
                 korrigertInntekt = korrigertInntekt?.tilDto(),
                 skjønnsmessigFastsatt = skjønnsmessigFastsatt?.tilDto()
             )
@@ -338,40 +340,28 @@ data class PersonData(
                     INNTEKTSMELDING
                 }
 
-                fun tilDto() = when (kilde) {
-                    InntektsopplysningskildeData.INFOTRYGD -> InntektsopplysningInnDto.InfotrygdDto(
-                        id = this.id,
-                        inntektsdata = InntektsdataInnDto(
-                            hendelseId = this.hendelseId,
-                            dato = this.dato,
-                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
-                            tidsstempel = this.tidsstempel
-                        )
+                fun tilDto(): FaktaavklartInntektInnDto {
+                    val inntektsdata = InntektsdataInnDto(
+                        hendelseId = this.hendelseId,
+                        dato = this.dato,
+                        beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
+                        tidsstempel = this.tidsstempel
                     )
-
-                    InntektsopplysningskildeData.INNTEKTSMELDING -> InntektsopplysningInnDto.ArbeidsgiverinntektDto(
+                    return FaktaavklartInntektInnDto(
                         id = this.id,
-                        inntektsdata = InntektsdataInnDto(
-                            hendelseId = this.hendelseId,
-                            dato = this.dato,
-                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
-                            tidsstempel = this.tidsstempel
-                        ),
-                        kilde = when (this.inntektsmeldingkilde!!) {
-                            InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver
-                            InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen
+                        inntektsdata = inntektsdata,
+                        inntektsopplysning = when (kilde) {
+                            InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> InntektsopplysningInnDto.SkattSykepengegrunnlagDto(
+                                inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
+                            )
+                            InntektsopplysningskildeData.INFOTRYGD -> InntektsopplysningInnDto.InfotrygdDto
+                            InntektsopplysningskildeData.INNTEKTSMELDING -> InntektsopplysningInnDto.ArbeidsgiverinntektDto(
+                                kilde = when (this.inntektsmeldingkilde!!) {
+                                    InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver
+                                    InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen
+                                }
+                            )
                         }
-                    )
-
-                    InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> InntektsopplysningInnDto.SkattSykepengegrunnlagDto(
-                        id = this.id,
-                        inntektsdata = InntektsdataInnDto(
-                            hendelseId = this.hendelseId,
-                            dato = this.dato,
-                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
-                            tidsstempel = this.tidsstempel
-                        ),
-                        inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
                     )
                 }
             }
@@ -481,7 +471,7 @@ data class PersonData(
                 AOrdningen
             }
 
-            fun tilDto() = InntektsopplysningInnDto.ArbeidsgiverinntektDto(
+            fun tilDto() = InntektsmeldingInnDto(
                 id = this.id,
                 inntektsdata = InntektsdataInnDto(
                     hendelseId = this.hendelseId,
@@ -490,8 +480,8 @@ data class PersonData(
                     tidsstempel = this.tidsstempel
                 ),
                 kilde = when (kilde) {
-                    InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver
-                    InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen
+                    InntektsmeldingKildeDto.Arbeidsgiver -> InntektsmeldingInnDto.KildeDto.Arbeidsgiver
+                    InntektsmeldingKildeDto.AOrdningen -> InntektsmeldingInnDto.KildeDto.AOrdningen
                 }
             )
         }

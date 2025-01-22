@@ -7,8 +7,6 @@ import no.nav.helse.dto.deserialisering.InntektsdataInnDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsdataUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt
 
 data class Inntektsdata(
@@ -45,27 +43,17 @@ data class Inntektsdata(
     }
 }
 
-internal sealed class Inntektsopplysning(
-    val id: UUID,
-    val inntektsdata: Inntektsdata
-) {
-    fun funksjoneltLik(other: Inntektsopplysning) =
-        this::class == other::class && this.inntektsdata.funksjoneltLik(other.inntektsdata)
+internal sealed interface Inntektsopplysning {
 
-    internal companion object {
-        internal fun List<Inntektsopplysning>.markerFlereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {
-            if (distinctBy { it.inntektsdata.dato }.size <= 1 && none { it is SkattSykepengegrunnlag }) return
-            aktivitetslogg.varsel(Varselkode.RV_VV_2)
-        }
-
+    companion object {
         internal fun gjenopprett(dto: InntektsopplysningInnDto): Inntektsopplysning {
             return when (dto) {
-                is InntektsopplysningInnDto.InfotrygdDto -> Infotrygd.gjenopprett(dto)
+                is InntektsopplysningInnDto.InfotrygdDto -> Infotrygd
                 is InntektsopplysningInnDto.ArbeidsgiverinntektDto -> Arbeidsgiverinntekt.gjenopprett(dto)
                 is InntektsopplysningInnDto.SkattSykepengegrunnlagDto -> SkattSykepengegrunnlag.gjenopprett(dto)
             }
         }
     }
 
-    internal abstract fun dto(): InntektsopplysningUtDto
+    fun dto(): InntektsopplysningUtDto
 }

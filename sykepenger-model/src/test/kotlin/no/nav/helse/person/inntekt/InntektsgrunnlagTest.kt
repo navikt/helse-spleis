@@ -378,7 +378,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = arbeidsgiverinntekt(
+                    faktaavklartInntekt = arbeidsgiverinntekt(
                         dato = skjæringstidspunkt,
                         beløp = 25000.månedlig
                     ),
@@ -388,7 +388,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = skattSykepengegrunnlag(
+                    faktaavklartInntekt = skattSykepengegrunnlag(
                         hendelseId = UUID.randomUUID(),
                         dato = skjæringstidspunkt,
                         inntektsopplysninger = listOf(
@@ -456,7 +456,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = arbeidsgiverinntekt(
+                    faktaavklartInntekt = arbeidsgiverinntekt(
                         dato = førsteFraværsdagAG1,
                         beløp = 25000.månedlig
                     ),
@@ -466,7 +466,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = skattSykepengegrunnlag(
+                    faktaavklartInntekt = skattSykepengegrunnlag(
                         hendelseId = UUID.randomUUID(),
                         dato = skjæringstidspunkt,
                         inntektsopplysninger = listOf(
@@ -508,7 +508,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = arbeidsgiverinntekt(
+                    faktaavklartInntekt = arbeidsgiverinntekt(
                         dato = førsteFraværsdagAG1,
                         beløp = 25000.månedlig
                     ),
@@ -518,7 +518,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = arbeidsgiverinntekt(
+                    faktaavklartInntekt = arbeidsgiverinntekt(
                         dato = førsteFraværsdagAG2,
                         beløp = 25000.månedlig
                     ),
@@ -547,7 +547,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = arbeidsgiverinntekt(
+                    faktaavklartInntekt = arbeidsgiverinntekt(
                         dato = skjæringstidspunkt,
                         beløp = 25000.månedlig
                     ),
@@ -557,7 +557,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = arbeidsgiverinntekt(
+                    faktaavklartInntekt = arbeidsgiverinntekt(
                         dato = skjæringstidspunkt,
                         beløp = 25000.månedlig
                     ),
@@ -628,7 +628,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = arbeidsgiverinntekt(
+                    faktaavklartInntekt = arbeidsgiverinntekt(
                         dato = førsteFraværsdagAG1,
                         beløp = 25000.månedlig
                     ),
@@ -638,7 +638,7 @@ internal class InntektsgrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = arbeidsgiverinntekt(
+                    faktaavklartInntekt = arbeidsgiverinntekt(
                         dato = førsteFraværsdagAG2,
                         beløp = 25000.månedlig
                     ),

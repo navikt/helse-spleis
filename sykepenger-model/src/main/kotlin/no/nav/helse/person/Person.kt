@@ -81,6 +81,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
+import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.NyInntektUnderveis
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.view.PersonView
@@ -700,7 +701,7 @@ class Person private constructor(
         hendelse: Hendelse,
         skjæringstidspunkt: LocalDate,
         organisasjonsnummer: String,
-        inntekt: Arbeidsgiverinntekt,
+        inntekt: FaktaavklartInntekt,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonslogg: Subsumsjonslogg
     ): Revurderingseventyr? {
@@ -714,11 +715,11 @@ class Person private constructor(
         val endretInntektForArbeidsgiver = endretInntektsgrunnlag.inntekter.first { før -> før.inntektFør.orgnummer == organisasjonsnummer }
 
         if (endretInntektForArbeidsgiver.inntektFør.korrigertInntekt == null) {
-            when (val inntektFraFør = endretInntektForArbeidsgiver.inntektFør.inntektsopplysning) {
+            when (endretInntektForArbeidsgiver.inntektFør.faktaavklartInntekt.inntektsopplysning) {
                 is Arbeidsgiverinntekt -> {
                     arbeidsgiveropplysningerKorrigert(
                         PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                            korrigertInntektsmeldingId = inntektFraFør.inntektsdata.hendelseId,
+                            korrigertInntektsmeldingId = endretInntektForArbeidsgiver.inntektFør.faktaavklartInntekt.inntektsdata.hendelseId,
                             korrigerendeInntektektsopplysningstype = INNTEKTSMELDING,
                             korrigerendeInntektsopplysningId = inntekt.inntektsdata.hendelseId
                         )
@@ -748,11 +749,11 @@ class Person private constructor(
             .forEach {
                 val opptjeningFom = nyttGrunnlag.opptjening!!.startdatoFor(it.inntektEtter.orgnummer)
                 hendelse.subsummer(subsumsjonslogg, opptjeningFom, it.inntektEtter.orgnummer)
-                when (it.inntektFør.inntektsopplysning) {
+                when (it.inntektFør.faktaavklartInntekt.inntektsopplysning) {
                     is Arbeidsgiverinntekt -> {
                         arbeidsgiveropplysningerKorrigert(
                             PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                                korrigertInntektsmeldingId = it.inntektFør.inntektsopplysning.inntektsdata.hendelseId,
+                                korrigertInntektsmeldingId = it.inntektFør.faktaavklartInntekt.inntektsdata.hendelseId,
                                 korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
                                 korrigerendeInntektsopplysningId = hendelse.metadata.meldingsreferanseId
                             )

@@ -2,9 +2,8 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.util.*
-import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
-import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto
-import no.nav.helse.dto.serialisering.InntektsmeldingDto
+import no.nav.helse.dto.deserialisering.InntektsmeldingInnDto
+import no.nav.helse.dto.serialisering.InntektsmeldingUtDto
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 
 internal data class Inntektsmeldinginntekt(
@@ -25,7 +24,7 @@ internal data class Inntektsmeldinginntekt(
     internal fun kanLagres(other: Inntektsmeldinginntekt) = this.inntektsdata.hendelseId != other.inntektsdata.hendelseId || this.inntektsdata.dato != other.inntektsdata.dato
 
     fun dto() =
-        InntektsmeldingDto(
+        InntektsmeldingUtDto(
             id = id,
             inntektsdata = inntektsdata.dto(),
             kilde = kilde.dto()
@@ -36,20 +35,20 @@ internal data class Inntektsmeldinginntekt(
         AOrdningen;
 
         fun dto() = when (this) {
-            Arbeidsgiver -> InntektsmeldingDto.KildeDto.Arbeidsgiver
-            AOrdningen -> InntektsmeldingDto.KildeDto.AOrdningen
+            Arbeidsgiver -> InntektsmeldingUtDto.KildeDto.Arbeidsgiver
+            AOrdningen -> InntektsmeldingUtDto.KildeDto.AOrdningen
         }
 
         companion object {
-            fun gjenopprett(dto: KildeDto) = when (dto) {
-                KildeDto.Arbeidsgiver -> Arbeidsgiver
-                KildeDto.AOrdningen -> AOrdningen
+            fun gjenopprett(dto: InntektsmeldingInnDto.KildeDto) = when (dto) {
+                InntektsmeldingInnDto.KildeDto.Arbeidsgiver -> Arbeidsgiver
+                InntektsmeldingInnDto.KildeDto.AOrdningen -> AOrdningen
             }
         }
     }
 
     internal companion object {
-        internal fun gjenopprett(dto: InntektsopplysningInnDto.ArbeidsgiverinntektDto): Inntektsmeldinginntekt {
+        internal fun gjenopprett(dto: InntektsmeldingInnDto): Inntektsmeldinginntekt {
             return Inntektsmeldinginntekt(
                 id = dto.id,
                 inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata),

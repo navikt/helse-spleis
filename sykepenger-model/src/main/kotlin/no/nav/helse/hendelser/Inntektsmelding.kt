@@ -22,6 +22,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
+import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
@@ -88,10 +89,10 @@ class Inntektsmelding(
 
     private val inntektsdata = Inntektsdata(metadata.meldingsreferanseId, inntektsdato, beregnetInntekt, metadata.registrert)
 
-    internal fun korrigertInntekt() = Arbeidsgiverinntekt(
+    internal fun korrigertInntekt() = FaktaavklartInntekt(
         id = UUID.randomUUID(),
         inntektsdata = inntektsdata,
-        kilde = Arbeidsgiverinntekt.Kilde.Arbeidsgiver
+        inntektsopplysning = Arbeidsgiverinntekt(Arbeidsgiverinntekt.Kilde.Arbeidsgiver)
     )
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg, alternativInntektsdato: LocalDate) {

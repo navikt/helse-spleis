@@ -6,7 +6,7 @@ internal val ArbeidsgiverInntektsopplysning.inspektør get() = ArbeidsgiverInnte
 
 internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning) {
     val orgnummer = arbeidsgiverInntektsopplysning.orgnummer
-    val faktaavklartInntekt = arbeidsgiverInntektsopplysning.inntektsopplysning
+    val faktaavklartInntekt = arbeidsgiverInntektsopplysning.faktaavklartInntekt
     val korrigertInntekt = arbeidsgiverInntektsopplysning.korrigertInntekt
 
     val omregnetÅrsinntekt = arbeidsgiverInntektsopplysning.omregnetÅrsinntekt.beløp

@@ -287,7 +287,7 @@ internal class Inntektsgrunnlag private constructor(
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
         organisasjonsnummer: String,
-        inntekt: Arbeidsgiverinntekt,
+        inntekt: FaktaavklartInntekt,
         subsumsjonslogg: Subsumsjonslogg
     ): EndretInntektsgrunnlag? {
         val resultat = arbeidsgiverInntektsopplysninger.overstyrMedInntektsmelding(organisasjonsnummer, inntekt)
@@ -301,7 +301,7 @@ internal class Inntektsgrunnlag private constructor(
             inntekter = nyeInntekter.mapNotNull { potensiellEndret ->
                 val eksisterende = arbeidsgiverInntektsopplysninger.single { eksisterende -> potensiellEndret.orgnummer == eksisterende.orgnummer }
 
-                if (eksisterende.inntektsopplysning.id == potensiellEndret.inntektsopplysning.id && eksisterende.korrigertInntekt == potensiellEndret.korrigertInntekt) null
+                if (eksisterende.faktaavklartInntekt.id == potensiellEndret.faktaavklartInntekt.id && eksisterende.korrigertInntekt == potensiellEndret.korrigertInntekt) null
                 else EndretInntektsgrunnlag.EndretInntekt(
                     inntektFør = eksisterende,
                     inntektEtter = potensiellEndret

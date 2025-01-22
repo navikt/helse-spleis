@@ -160,9 +160,9 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
+import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
-import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
@@ -641,10 +641,10 @@ internal class Vedtaksperiode private constructor(
             hendelse = hendelse,
             skjæringstidspunkt = skjæringstidspunkt,
             organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-            inntekt = Arbeidsgiverinntekt(
+            inntekt = FaktaavklartInntekt(
                 id = UUID.randomUUID(),
                 inntektsdata = inntektsdata,
-                kilde = Arbeidsgiverinntekt.Kilde.Arbeidsgiver
+                inntektsopplysning = Arbeidsgiverinntekt(kilde = Arbeidsgiverinntekt.Kilde.Arbeidsgiver)
             ),
             aktivitetslogg = aktivitetslogg,
             subsumsjonslogg = this.jurist
@@ -1355,15 +1355,22 @@ internal class Vedtaksperiode private constructor(
         hendelse: Hendelse,
         skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
         alleForSammeArbeidsgiver: List<Vedtaksperiode>
-    ): Inntektsopplysning {
+    ): FaktaavklartInntekt {
         val inntektForArbeidsgiver = arbeidsgiver
             .avklarInntekt(skjæringstidspunkt, alleForSammeArbeidsgiver)
             // velger bort inntekten hvis situasjonen er "fom ulik skjæringstidspunktet"
             ?.takeUnless { skjæringstidspunkt.yearMonth < it.inntektsdata.dato.yearMonth }
 
-        if (inntektForArbeidsgiver != null) return Arbeidsgiverinntekt.fraInntektsmelding(inntektForArbeidsgiver)
-        if (skatteopplysning != null) return SkattSykepengegrunnlag.fraSkatt(skatteopplysning.inntektsdata, skatteopplysning.treMånederFørSkjæringstidspunkt)
-        return SkattSykepengegrunnlag.ikkeRapportert(skjæringstidspunkt, hendelse.metadata.meldingsreferanseId)
+        val (inntektsdata, opplysning) = if (inntektForArbeidsgiver != null)
+            inntektForArbeidsgiver.inntektsdata to Arbeidsgiverinntekt.fraInntektsmelding(inntektForArbeidsgiver)
+        else
+            (skatteopplysning?.inntektsdata ?: Inntektsdata.ingen(hendelse.metadata.meldingsreferanseId, skjæringstidspunkt)) to SkattSykepengegrunnlag.fraSkatt(skatteopplysning?.treMånederFørSkjæringstidspunkt)
+
+        return FaktaavklartInntekt(
+            id = UUID.randomUUID(),
+            inntektsdata = inntektsdata,
+            inntektsopplysning = opplysning
+        )
     }
 
     private fun avklarSykepengegrunnlag(
@@ -1376,12 +1383,12 @@ internal class Vedtaksperiode private constructor(
 
         val faktaavklartInntekt = inntektForArbeidsgiver(hendelse, skatteopplysning, alleForSammeArbeidsgiver)
 
-        if (faktaavklartInntekt is SkattSykepengegrunnlag)
+        if (faktaavklartInntekt.inntektsopplysning is SkattSykepengegrunnlag)
             subsummerBrukAvSkatteopplysninger(arbeidsgiver.organisasjonsnummer, faktaavklartInntekt.inntektsdata, skatteopplysning?.treMånederFørSkjæringstidspunkt ?: emptyList())
         return ArbeidsgiverInntektsopplysning(
             orgnummer = arbeidsgiver.organisasjonsnummer,
             gjelder = skjæringstidspunkt til LocalDate.MAX,
-            inntektsopplysning = faktaavklartInntekt,
+            faktaavklartInntekt = faktaavklartInntekt,
             korrigertInntekt = null,
             skjønnsmessigFastsatt = null
         )
@@ -1436,7 +1443,11 @@ internal class Vedtaksperiode private constructor(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = skatteopplysning.arbeidsgiver,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = SkattSykepengegrunnlag.fraSkatt(skatteopplysning.inntektsdata, skatteopplysning.treMånederFørSkjæringstidspunkt),
+                    faktaavklartInntekt = FaktaavklartInntekt(
+                        id = UUID.randomUUID(),
+                        inntektsdata = skatteopplysning.inntektsdata,
+                        inntektsopplysning = SkattSykepengegrunnlag.fraSkatt(skatteopplysning.treMånederFørSkjæringstidspunkt)
+                    ),
                     korrigertInntekt = null,
                     skjønnsmessigFastsatt = null
                 )

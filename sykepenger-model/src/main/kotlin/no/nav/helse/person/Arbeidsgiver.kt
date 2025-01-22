@@ -69,9 +69,9 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_26
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
+import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsdata
+import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.view.ArbeidsgiverView
@@ -1031,7 +1031,7 @@ internal class Arbeidsgiver private constructor(
     private fun korrigerVilkårsgrunnlagOgIgangsettOverstyring(
         hendelse: Hendelse,
         skjæringstidspunkt: LocalDate?,
-        inntekt: Arbeidsgiverinntekt,
+        inntekt: FaktaavklartInntekt,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonsloggMedInntektsmeldingkontekst: BehandlingSubsumsjonslogg,
         overstyring: Revurderingseventyr?
@@ -1061,7 +1061,7 @@ internal class Arbeidsgiver private constructor(
     internal fun lagreTidsnærInntektsmelding(
         skjæringstidspunkt: LocalDate,
         orgnummer: String,
-        arbeidsgiverinntekt: Arbeidsgiverinntekt,
+        arbeidsgiverinntekt: FaktaavklartInntekt,
         aktivitetslogg: IAktivitetslogg,
         nyArbeidsgiverperiode: Boolean
     ) {

@@ -371,25 +371,25 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             innslag.vilkårsgrunnlag[0].also { vilkårsgrunnlagDto ->
                 assertEquals(2, vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
                 vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger[0].also { arbeidsgiverInntektsopplysningDto ->
-                    assertInstanceOf<InntektsopplysningUtDto.ArbeidsgiverinntektDto>(arbeidsgiverInntektsopplysningDto.inntektsopplysning)
+                    assertInstanceOf<InntektsopplysningUtDto.ArbeidsgiverinntektDto>(arbeidsgiverInntektsopplysningDto.faktaavklartInntekt.inntektsopplysning)
                     assertEquals(
                         InntektDto(
                             InntektbeløpDto.Årlig(beløp = 372000.0),
                             InntektbeløpDto.MånedligDouble(beløp = 31000.0),
                             InntektbeløpDto.DagligDouble(beløp = 1430.7692307692307),
                             InntektbeløpDto.DagligInt(beløp = 1430)
-                        ), arbeidsgiverInntektsopplysningDto.inntektsopplysning.inntektsdata.beløp
+                        ), arbeidsgiverInntektsopplysningDto.faktaavklartInntekt.inntektsdata.beløp
                     )
                 }
                 vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger[1].also { arbeidsgiverInntektsopplysningDto ->
-                    assertInstanceOf<InntektsopplysningUtDto.SkattSykepengegrunnlagDto>(arbeidsgiverInntektsopplysningDto.inntektsopplysning)
+                    assertInstanceOf<InntektsopplysningUtDto.SkattSykepengegrunnlagDto>(arbeidsgiverInntektsopplysningDto.faktaavklartInntekt.inntektsopplysning)
                     assertEquals(
                         InntektDto(
                             InntektbeløpDto.Årlig(beløp = 0.0),
                             InntektbeløpDto.MånedligDouble(beløp = 0.0),
                             InntektbeløpDto.DagligDouble(beløp = 0.0),
                             InntektbeløpDto.DagligInt(beløp = 0)
-                        ), arbeidsgiverInntektsopplysningDto.inntektsopplysning.inntektsdata.beløp)
+                        ), arbeidsgiverInntektsopplysningDto.faktaavklartInntekt.inntektsdata.beløp)
                 }
             }
         }

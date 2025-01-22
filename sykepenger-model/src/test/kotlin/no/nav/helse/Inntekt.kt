@@ -25,7 +25,7 @@ internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstid
             ArbeidsgiverInntektsopplysning(
                 orgnummer = orgnr,
                 gjelder = skjæringstidspunkt til LocalDate.MAX,
-                inntektsopplysning = arbeidsgiverinntekt(skjæringstidspunkt, this),
+                faktaavklartInntekt = arbeidsgiverinntekt(skjæringstidspunkt, this),
                 korrigertInntekt = null,
                 skjønnsmessigFastsatt = null
             )
@@ -42,7 +42,7 @@ internal fun Inntekt.inntektsgrunnlag(orgnr: String, skjæringstidspunkt: LocalD
             ArbeidsgiverInntektsopplysning(
                 orgnummer = orgnr,
                 gjelder = skjæringstidspunkt til LocalDate.MAX,
-                inntektsopplysning = arbeidsgiverinntekt(skjæringstidspunkt, this),
+                faktaavklartInntekt = arbeidsgiverinntekt(skjæringstidspunkt, this),
                 korrigertInntekt = null,
                 skjønnsmessigFastsatt = null
             )
