@@ -179,8 +179,10 @@ fun opprettOgUtførArbeid(arbeidId: String, size: Int = 1, arbeider: (session: S
                     .onEach { fnr ->
                         try {
                             arbeider(session, fnr)
-                        } finally {
                             arbeidFullført(session, arbeidId, fnr)
+                        } catch (e: Exception) {
+                            log.error("feil ved arbeidId=$arbeidId: ${e.message}", e)
+                            sikkerlogg.error("feil ved arbeidId=$arbeidId, fnr=$fnr: ${e.message}", e)
                         }
                     }
             } while (arbeidsliste.isNotEmpty())
@@ -302,13 +304,10 @@ private class DataSourceConfiguration(dbUsername: DbUser) {
         password = databasePassword
 
         maximumPoolSize = 2
-        initializationFailTimeout = Duration.ofMinutes(1).toMillis()
-        connectionTimeout = Duration.ofSeconds(5).toMillis()
-        maxLifetime = Duration.ofMinutes(30).toMillis()
-        idleTimeout = Duration.ofMinutes(10).toMillis()
     }
 
-    fun dataSource(maximumPoolSize: Int = 2) = HikariDataSource(hikariConfig.apply {
+    fun dataSource(maximumPoolSize: Int = 2) = HikariDataSource(HikariConfig().apply {
+        hikariConfig.copyStateTo(this)
         this.maximumPoolSize = maximumPoolSize
     })
 }
