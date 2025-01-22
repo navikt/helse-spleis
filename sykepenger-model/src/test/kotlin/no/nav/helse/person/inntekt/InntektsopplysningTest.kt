@@ -34,15 +34,6 @@ internal class InntektsopplysningTest {
         assertTrue(im2.kanLagres(im1))
     }
 
-    @Test
-    fun `saksbehandler-likhet`() {
-        val ikkeRapportert = SkattSykepengegrunnlag.ikkeRapportert(1.januar, UUID.randomUUID())
-        val saksbehandler1 = Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, 20000.månedlig, LocalDateTime.now()), ikkeRapportert, ikkeRapportert)
-        val saksbehandler2 = Saksbehandler(UUID.randomUUID(), Inntektsdata(UUID.randomUUID(), 20.januar, 25000.månedlig, LocalDateTime.now()), ikkeRapportert, ikkeRapportert)
-
-        assertFalse(saksbehandler1.funksjoneltLik(saksbehandler2))
-    }
-
     private fun inntektsmeldinginntekt(dato: LocalDate, hendelseId: UUID) =
         Inntektsmeldinginntekt(UUID.randomUUID(), Inntektsdata(hendelseId, dato, INNTEKT, LocalDateTime.now()), Kilde.Arbeidsgiver)
 

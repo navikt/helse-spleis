@@ -5,6 +5,7 @@ import java.util.*
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.`§ 8-15`
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
@@ -17,6 +18,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt.Kilde
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
+import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
@@ -31,12 +33,6 @@ internal data class ArbeidsgiverInntektsopplysning(
 ) {
     val omregnetÅrsinntekt = korrigertInntekt?.inntektsdata ?: inntektsopplysning.inntektsdata
     val fastsattÅrsinntekt = skjønnsmessigFastsatt?.inntektsdata?.beløp ?: omregnetÅrsinntekt.beløp
-
-    init {
-        check(inntektsopplysning !is Saksbehandler) {
-            "saksbehandlerinntekt skal ligge i egen val"
-        }
-    }
 
     private fun gjelderPåSkjæringstidspunktet(skjæringstidspunkt: LocalDate) =
         skjæringstidspunkt == gjelder.start
@@ -77,17 +73,14 @@ internal data class ArbeidsgiverInntektsopplysning(
 
     private fun overstyrMedSaksbehandler(overstyringer: List<KorrigertArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
         val korrigering = overstyringer.singleOrNull { it.organisasjonsnummer == this.orgnummer } ?: return this
-        val saksbehandler = Saksbehandler(
-            id = UUID.randomUUID(),
-            inntektsdata = korrigering.inntektsdata,
-            omregnetÅrsinntekt = this.inntektsopplysning,
-            overstyrtInntekt = this.inntektsopplysning
-        )
         // bare sett inn ny inntekt hvis beløp er ulikt (speil sender inntekt- og refusjonoverstyring i samme melding)
-        if (saksbehandler.inntektsdata.beløp == omregnetÅrsinntekt.beløp && this.gjelder == korrigering.gjelder) return this
+        if (korrigering.inntektsdata.beløp == omregnetÅrsinntekt.beløp && this.gjelder == korrigering.gjelder) return this
         return copy(
             gjelder = korrigering.gjelder,
-            korrigertInntekt = saksbehandler,
+            korrigertInntekt = Saksbehandler(
+                id = UUID.randomUUID(),
+                inntektsdata = korrigering.inntektsdata
+            ),
             skjønnsmessigFastsatt = null
         )
     }
@@ -109,7 +102,19 @@ internal data class ArbeidsgiverInntektsopplysning(
         oppfylt: Boolean,
         subsumsjonslogg: Subsumsjonslogg
     ): ArbeidsgiverInntektsopplysning {
-        (korrigertInntekt ?: inntektsopplysning).subsumerArbeidsforhold(subsumsjonslogg, orgnummer, forklaring, oppfylt)
+        subsumsjonslogg.logg(
+            `§ 8-15`(
+                skjæringstidspunkt = omregnetÅrsinntekt.dato,
+                organisasjonsnummer = orgnummer,
+                inntekterSisteTreMåneder = if (korrigertInntekt == null && inntektsopplysning is SkattSykepengegrunnlag)
+                    inntektsopplysning.inntektsopplysninger.subsumsjonsformat()
+                else
+                    emptyList(),
+                forklaring = forklaring,
+                oppfylt = oppfylt
+            )
+        )
+
         return this
     }
 
@@ -234,7 +239,7 @@ internal data class ArbeidsgiverInntektsopplysning(
                     omregnedeÅrsinntekt = arbeidsgiver.inntektsopplysning.inntektsdata.beløp,
                     skjønnsfastsatt = arbeidsgiver.skjønnsmessigFastsatt?.inntektsdata?.beløp,
                     gjelder = arbeidsgiver.gjelder,
-                    inntektskilde = if (arbeidsgiver.skjønnsmessigFastsatt != null)
+                    inntektskilde = if (arbeidsgiver.skjønnsmessigFastsatt != null || arbeidsgiver.korrigertInntekt != null)
                         Inntektskilde.Saksbehandler
                     else when (arbeidsgiver.inntektsopplysning) {
                         is SkattSykepengegrunnlag -> Inntektskilde.AOrdningen
@@ -245,8 +250,6 @@ internal data class ArbeidsgiverInntektsopplysning(
                         }
 
                         is Infotrygd -> Inntektskilde.Arbeidsgiver
-
-                        is Saksbehandler -> Inntektskilde.Saksbehandler
                     }
                 )
             }
@@ -308,34 +311,13 @@ internal data class ArbeidsgiverInntektsopplysning(
             }
         }
 
-        internal fun gjenopprett(
-            dto: ArbeidsgiverInntektsopplysningInnDto,
-            inntekter: MutableMap<UUID, Inntektsopplysning>
-        ): ArbeidsgiverInntektsopplysning {
-            val inntektsopplysning = Inntektsopplysning.gjenopprett(dto.inntektsopplysning, inntekter)
+        internal fun gjenopprett(dto: ArbeidsgiverInntektsopplysningInnDto): ArbeidsgiverInntektsopplysning {
             return ArbeidsgiverInntektsopplysning(
                 orgnummer = dto.orgnummer,
                 gjelder = Periode.gjenopprett(dto.gjelder),
-                inntektsopplysning = when (val io = inntektsopplysning) {
-                    is Arbeidsgiverinntekt,
-                    is Infotrygd,
-                    is SkattSykepengegrunnlag -> io
-
-                    is Saksbehandler -> io.omregnetÅrsinntekt
-                },
-                korrigertInntekt = dto.korrigertInntekt
-                    ?.let { Saksbehandler.gjenopprett(it, inntekter) }
-                    ?.also { inntekter.putIfAbsent(it.id, inntektsopplysning) }
-                    ?: when (val io = inntektsopplysning) {
-                        is Arbeidsgiverinntekt,
-                        is Infotrygd,
-                        is SkattSykepengegrunnlag -> null
-
-                        is Saksbehandler -> io
-                    },
-                skjønnsmessigFastsatt = dto.skjønnsmessigFastsatt?.let { SkjønnsmessigFastsatt.gjenopprett(it).also { skjønnsmessig ->
-                    inntekter.putIfAbsent(skjønnsmessig.id, inntektsopplysning)
-                } }
+                inntektsopplysning = Inntektsopplysning.gjenopprett(dto.inntektsopplysning),
+                korrigertInntekt = dto.korrigertInntekt?.let { Saksbehandler.gjenopprett(it) },
+                skjønnsmessigFastsatt = dto.skjønnsmessigFastsatt?.let { SkjønnsmessigFastsatt.gjenopprett(it) }
             )
         }
     }

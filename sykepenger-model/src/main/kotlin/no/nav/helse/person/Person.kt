@@ -82,7 +82,6 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.NyInntektUnderveis
-import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.view.PersonView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -760,7 +759,6 @@ class Person private constructor(
                         )
                     }
                     is Infotrygd,
-                    is Saksbehandler,
                     is SkattSykepengegrunnlag -> { /* gjør ingenting */ }
                 }
             }

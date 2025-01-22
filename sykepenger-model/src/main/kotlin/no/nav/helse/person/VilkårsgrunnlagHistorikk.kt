@@ -27,12 +27,11 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.EndretInntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.inntekt.InntektsgrunnlagView
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
-import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.NyInntektUnderveis
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -110,13 +109,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 elementer: Map<LocalDate, VilkårsgrunnlagElement>
             ): Innslag = Innslag(id, opprettet, elementer.toMutableMap())
 
-            fun gjenopprett(alder: Alder, dto: VilkårsgrunnlagInnslagInnDto, inntekter: MutableMap<UUID, Inntektsopplysning>, grunnlagsdata: MutableMap<UUID, VilkårsgrunnlagElement>): Innslag {
+            fun gjenopprett(alder: Alder, dto: VilkårsgrunnlagInnslagInnDto, grunnlagsdata: MutableMap<UUID, VilkårsgrunnlagElement>): Innslag {
                 return Innslag(
                     id = dto.id,
                     opprettet = dto.opprettet,
                     vilkårsgrunnlag = dto.vilkårsgrunnlag.associate {
                         it.skjæringstidspunkt to grunnlagsdata.getOrPut(it.vilkårsgrunnlagId) {
-                            VilkårsgrunnlagElement.gjenopprett(alder, it, inntekter)
+                            VilkårsgrunnlagElement.gjenopprett(alder, it)
                         }
                     }.toMutableMap()
                 )
@@ -275,10 +274,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 return map { it.inntektsgrunnlag }.harUlikeGrunnbeløp()
             }
 
-            internal fun gjenopprett(alder: Alder, dto: VilkårsgrunnlagInnDto, inntekter: MutableMap<UUID, Inntektsopplysning>): VilkårsgrunnlagElement {
+            internal fun gjenopprett(alder: Alder, dto: VilkårsgrunnlagInnDto): VilkårsgrunnlagElement {
                 return when (dto) {
-                    is VilkårsgrunnlagInnDto.Infotrygd -> InfotrygdVilkårsgrunnlag.gjenopprett(alder, dto, inntekter)
-                    is VilkårsgrunnlagInnDto.Spleis -> Grunnlagsdata.gjenopprett(alder, dto, inntekter)
+                    is VilkårsgrunnlagInnDto.Infotrygd -> InfotrygdVilkårsgrunnlag.gjenopprett(alder, dto)
+                    is VilkårsgrunnlagInnDto.Spleis -> Grunnlagsdata.gjenopprett(alder, dto)
                 }
             }
         }
@@ -377,10 +376,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         )
 
         internal companion object {
-            fun gjenopprett(alder: Alder, dto: VilkårsgrunnlagInnDto.Spleis, inntekter: MutableMap<UUID, Inntektsopplysning>): Grunnlagsdata {
+            fun gjenopprett(alder: Alder, dto: VilkårsgrunnlagInnDto.Spleis): Grunnlagsdata {
                 return Grunnlagsdata(
                     skjæringstidspunkt = dto.skjæringstidspunkt,
-                    inntektsgrunnlag = Inntektsgrunnlag.gjenopprett(alder, dto.skjæringstidspunkt, dto.inntektsgrunnlag, inntekter),
+                    inntektsgrunnlag = Inntektsgrunnlag.gjenopprett(alder, dto.skjæringstidspunkt, dto.inntektsgrunnlag),
                     opptjening = Opptjening.gjenopprett(dto.skjæringstidspunkt, dto.opptjening),
                     vilkårsgrunnlagId = dto.vilkårsgrunnlagId,
                     medlemskapstatus = when (dto.medlemskapstatus) {
@@ -436,10 +435,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         ) = VilkårsgrunnlagUtDto.Infotrygd(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag)
 
         internal companion object {
-            fun gjenopprett(alder: Alder, dto: VilkårsgrunnlagInnDto.Infotrygd, inntekter: MutableMap<UUID, Inntektsopplysning>): InfotrygdVilkårsgrunnlag {
+            fun gjenopprett(alder: Alder, dto: VilkårsgrunnlagInnDto.Infotrygd): InfotrygdVilkårsgrunnlag {
                 return InfotrygdVilkårsgrunnlag(
                     skjæringstidspunkt = dto.skjæringstidspunkt,
-                    inntektsgrunnlag = Inntektsgrunnlag.gjenopprett(alder, dto.skjæringstidspunkt, dto.inntektsgrunnlag, inntekter),
+                    inntektsgrunnlag = Inntektsgrunnlag.gjenopprett(alder, dto.skjæringstidspunkt, dto.inntektsgrunnlag),
                     vilkårsgrunnlagId = dto.vilkårsgrunnlagId
                 )
             }
@@ -447,11 +446,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     }
 
     internal companion object {
-
         internal fun gjenopprett(alder: Alder, dto: VilkårsgrunnlaghistorikkInnDto, grunnlagsdata: MutableMap<UUID, VilkårsgrunnlagElement>): VilkårsgrunnlagHistorikk {
-            val inntekter = mutableMapOf<UUID, Inntektsopplysning>()
             return VilkårsgrunnlagHistorikk(
-                historikk = dto.historikk.asReversed().map { Innslag.gjenopprett(alder, it, inntekter, grunnlagsdata) }.asReversed().toMutableList()
+                historikk = dto.historikk.map { Innslag.gjenopprett(alder, it, grunnlagsdata) }.toMutableList()
             )
         }
     }

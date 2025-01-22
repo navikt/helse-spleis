@@ -65,6 +65,7 @@ import no.nav.helse.dto.deserialisering.MinimumSykdomsgradVurderingInnDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.deserialisering.OpptjeningInnDto
 import no.nav.helse.dto.deserialisering.PersonInnDto
+import no.nav.helse.dto.deserialisering.SaksbehandlerInnDto
 import no.nav.helse.dto.deserialisering.SkjønnsmessigFastsattInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingsdagInnDto
@@ -276,24 +277,13 @@ data class PersonData(
             val korrigertInntekt: KorrigertInntektsopplysningData?,
             val skjønnsmessigFastsatt: SkjønnsmessigFastsattData?
         ) {
-            fun tilDto(): ArbeidsgiverInntektsopplysningInnDto {
-                val inntektsopplysningen = this.inntektsopplysning.tilDto()
-                val skjønnsmessigFastsattOpplysning = skjønnsmessigFastsatt?.tilDto()
-
-                return ArbeidsgiverInntektsopplysningInnDto(
-                    orgnummer = this.orgnummer,
-                    gjelder = PeriodeDto(fom = this.fom, tom = this.tom),
-                    inntektsopplysning = inntektsopplysningen,
-                    korrigertInntekt = korrigertInntekt?.tilDto() ?: when (inntektsopplysningen) {
-                        is InntektsopplysningInnDto.ArbeidsgiverinntektDto,
-                        is InntektsopplysningInnDto.InfotrygdDto,
-                        is InntektsopplysningInnDto.SkattSykepengegrunnlagDto -> null
-
-                        is InntektsopplysningInnDto.SaksbehandlerDto -> inntektsopplysningen
-                    },
-                    skjønnsmessigFastsatt = skjønnsmessigFastsattOpplysning
-                )
-            }
+            fun tilDto() = ArbeidsgiverInntektsopplysningInnDto(
+                orgnummer = this.orgnummer,
+                gjelder = PeriodeDto(fom = this.fom, tom = this.tom),
+                inntektsopplysning = inntektsopplysning.tilDto(),
+                korrigertInntekt = korrigertInntekt?.tilDto(),
+                skjønnsmessigFastsatt = skjønnsmessigFastsatt?.tilDto()
+            )
 
             data class SkatteopplysningData(
                 val hendelseId: UUID,
@@ -334,7 +324,6 @@ data class PersonData(
                 val beløp: Double,
                 val tidsstempel: LocalDateTime,
                 val kilde: InntektsopplysningskildeData,
-                val overstyrtInntektId: UUID?,
                 val skatteopplysninger: List<SkatteopplysningData>?,
                 val inntektsmeldingkilde: InntektsmeldingKildeDto?
             ) {
@@ -346,8 +335,7 @@ data class PersonData(
                 enum class InntektsopplysningskildeData {
                     SKATT_SYKEPENGEGRUNNLAG,
                     INFOTRYGD,
-                    INNTEKTSMELDING,
-                    SAKSBEHANDLER
+                    INNTEKTSMELDING
                 }
 
                 fun tilDto() = when (kilde) {
@@ -375,17 +363,6 @@ data class PersonData(
                         }
                     )
 
-                    InntektsopplysningskildeData.SAKSBEHANDLER -> InntektsopplysningInnDto.SaksbehandlerDto(
-                        id = this.id,
-                        inntektsdata = InntektsdataInnDto(
-                            hendelseId = this.hendelseId,
-                            dato = this.dato,
-                            beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
-                            tidsstempel = this.tidsstempel
-                        ),
-                        overstyrtInntekt = this.overstyrtInntektId!!
-                    )
-
                     InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> InntektsopplysningInnDto.SkattSykepengegrunnlagDto(
                         id = this.id,
                         inntektsdata = InntektsdataInnDto(
@@ -403,18 +380,16 @@ data class PersonData(
                 val dato: LocalDate,
                 val hendelseId: UUID,
                 val beløp: Double,
-                val tidsstempel: LocalDateTime,
-                val overstyrtInntektId: UUID?,
+                val tidsstempel: LocalDateTime
             ) {
-                fun tilDto() = InntektsopplysningInnDto.SaksbehandlerDto(
+                fun tilDto() = SaksbehandlerInnDto(
                     id = this.id,
                     inntektsdata = InntektsdataInnDto(
                         hendelseId = this.hendelseId,
                         dato = this.dato,
                         beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
                         tidsstempel = this.tidsstempel
-                    ),
-                    overstyrtInntekt = this.overstyrtInntektId!!
+                    )
                 )
             }
             data class SkjønnsmessigFastsattData(

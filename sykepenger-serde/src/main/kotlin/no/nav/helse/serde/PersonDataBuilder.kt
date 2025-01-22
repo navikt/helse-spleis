@@ -49,6 +49,7 @@ import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.dto.serialisering.PersonUtDto
+import no.nav.helse.dto.serialisering.SaksbehandlerUtDto
 import no.nav.helse.dto.serialisering.SkjønnsmessigFastsattUtDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
@@ -818,12 +819,7 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
     kilde = when (this) {
         is InntektsopplysningUtDto.InfotrygdDto -> InntektsopplysningskildeData.INFOTRYGD
         is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> InntektsopplysningskildeData.INNTEKTSMELDING
-        is InntektsopplysningUtDto.SaksbehandlerDto -> InntektsopplysningskildeData.SAKSBEHANDLER
         is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG
-    },
-    overstyrtInntektId = when (this) {
-        is InntektsopplysningUtDto.SaksbehandlerDto -> this.overstyrtInntekt
-        else -> null
     },
     skatteopplysninger = when (this) {
         is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> this.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
@@ -839,13 +835,12 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
     }
 )
 
-private fun InntektsopplysningUtDto.SaksbehandlerDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.KorrigertInntektsopplysningData(
+private fun SaksbehandlerUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.KorrigertInntektsopplysningData(
     id = this.id,
     dato = this.inntektsdata.dato,
     hendelseId = this.inntektsdata.hendelseId,
     beløp = this.inntektsdata.beløp.månedligDouble.beløp,
-    tidsstempel = this.inntektsdata.tidsstempel,
-    overstyrtInntektId = this.overstyrtInntekt
+    tidsstempel = this.inntektsdata.tidsstempel
 )
 private fun SkjønnsmessigFastsattUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkjønnsmessigFastsattData(
     id = this.id,

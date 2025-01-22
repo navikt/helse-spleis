@@ -1,14 +1,14 @@
 package no.nav.helse.spleis.speil.builders
 
 import java.time.LocalDate
-import java.util.LinkedList
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
+import no.nav.helse.dto.serialisering.SaksbehandlerUtDto
 import no.nav.helse.dto.serialisering.SkjønnsmessigFastsattUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
@@ -211,9 +211,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             listOfNotNull(when (it.inntektsopplysning) {
                 is InntektsopplysningUtDto.InfotrygdDto -> null
                 is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> null
-                is InntektsopplysningUtDto.SaksbehandlerDto -> it.inntektsopplysning.inntektsdata.hendelseId
                 is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> null
-            }, it.skjønnsmessigFastsatt?.inntektsdata?.hendelseId)
+            }, it.korrigertInntekt?.inntektsdata?.hendelseId, it.skjønnsmessigFastsatt?.inntektsdata?.hendelseId)
         }.toSet()
 
         return ISpleisGrunnlag(
@@ -250,38 +249,11 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
     }
 
     private fun mapInntekt(dto: ArbeidsgiverInntektsopplysningUtDto, deaktivert: Boolean = false): IArbeidsgiverinntekt {
-        return mapInntekt(dto.orgnummer, dto.gjelder.fom, dto.gjelder.tom, dto.inntektsopplysning, dto.skjønnsmessigFastsatt, deaktivert)
+        return mapInntekt(dto.orgnummer, dto.gjelder.fom, dto.gjelder.tom, dto.inntektsopplysning, dto.korrigertInntekt, dto.skjønnsmessigFastsatt, deaktivert)
     }
 
-    private fun mapInntekt(orgnummer: String, fom: LocalDate, tom: LocalDate, io: InntektsopplysningUtDto, skjønnsmessigFastsattDto: SkjønnsmessigFastsattUtDto?, deaktivert: Boolean): IArbeidsgiverinntekt {
-        val omregnetÅrsinntekt = when (io) {
-            is InntektsopplysningUtDto.InfotrygdDto -> IOmregnetÅrsinntekt(IInntektkilde.Infotrygd, io.inntektsdata.beløp.årlig.beløp, io.inntektsdata.beløp.månedligDouble.beløp, null)
-            is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> {
-                val kilde = if (io.kilde == InntektsopplysningUtDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen) IInntektkilde.AOrdningen else IInntektkilde.Inntektsmelding
-                IOmregnetÅrsinntekt(
-                    kilde,
-                    io.inntektsdata.beløp.årlig.beløp,
-                    io.inntektsdata.beløp.månedligDouble.beløp,
-                    null
-                )
-            }
-
-            is InntektsopplysningUtDto.SaksbehandlerDto -> IOmregnetÅrsinntekt(IInntektkilde.Saksbehandler, io.inntektsdata.beløp.årlig.beløp, io.inntektsdata.beløp.månedligDouble.beløp, null)
-            is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> IOmregnetÅrsinntekt(
-                kilde = if (io.inntektsopplysninger.isEmpty()) IInntektkilde.IkkeRapportert else IInntektkilde.AOrdningen,
-                beløp = io.inntektsdata.beløp.årlig.beløp,
-                månedsbeløp = io.inntektsdata.beløp.månedligDouble.beløp,
-                inntekterFraAOrdningen = io.inntektsopplysninger
-                    .groupBy { it.måned }
-                    .mapValues { (_, verdier) -> verdier.sumOf { it.beløp.beløp } }
-                    .map { (måned, månedligSum) ->
-                        IInntekterFraAOrdningen(
-                            måned = måned,
-                            sum = månedligSum
-                        )
-                    }
-            )
-        }.also {
+    private fun mapInntekt(orgnummer: String, fom: LocalDate, tom: LocalDate, io: InntektsopplysningUtDto, korrigertInntekt: SaksbehandlerUtDto?, skjønnsmessigFastsattDto: SkjønnsmessigFastsattUtDto?, deaktivert: Boolean): IArbeidsgiverinntekt {
+        val omregnetÅrsinntekt = omregnetÅrsinntekt(korrigertInntekt, io).also {
             inntekter[io.id] = it
         }
         return IArbeidsgiverinntekt(
@@ -297,6 +269,47 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             },
             deaktivert = deaktivert
         )
+    }
+
+    private fun omregnetÅrsinntekt(korrigertInntekt: SaksbehandlerUtDto?, io: InntektsopplysningUtDto): IOmregnetÅrsinntekt {
+        if (korrigertInntekt != null) return IOmregnetÅrsinntekt(
+            kilde = IInntektkilde.Saksbehandler,
+            beløp = korrigertInntekt.inntektsdata.beløp.årlig.beløp,
+            månedsbeløp = korrigertInntekt.inntektsdata.beløp.månedligDouble.beløp,
+            inntekterFraAOrdningen = null
+        )
+
+        return when (io) {
+            is InntektsopplysningUtDto.InfotrygdDto -> IOmregnetÅrsinntekt(
+                kilde = IInntektkilde.Infotrygd,
+                beløp = io.inntektsdata.beløp.årlig.beløp,
+                månedsbeløp = io.inntektsdata.beløp.månedligDouble.beløp,
+                inntekterFraAOrdningen = null
+            )
+            is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> {
+                IOmregnetÅrsinntekt(
+                    kilde = if (io.kilde == InntektsopplysningUtDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen) IInntektkilde.AOrdningen else IInntektkilde.Inntektsmelding,
+                    beløp = io.inntektsdata.beløp.årlig.beløp,
+                    månedsbeløp = io.inntektsdata.beløp.månedligDouble.beløp,
+                    inntekterFraAOrdningen = null
+                )
+            }
+
+            is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> IOmregnetÅrsinntekt(
+                kilde = if (io.inntektsopplysninger.isEmpty()) IInntektkilde.IkkeRapportert else IInntektkilde.AOrdningen,
+                beløp = io.inntektsdata.beløp.årlig.beløp,
+                månedsbeløp = io.inntektsdata.beløp.månedligDouble.beløp,
+                inntekterFraAOrdningen = io.inntektsopplysninger
+                    .groupBy { it.måned }
+                    .mapValues { (_, verdier) -> verdier.sumOf { it.beløp.beløp } }
+                    .map { (måned, månedligSum) ->
+                        IInntekterFraAOrdningen(
+                            måned = måned,
+                            sum = månedligSum
+                        )
+                    }
+            )
+        }
     }
 
     private fun mapInfotrygd(infotrygdVilkårsgrunnlag: VilkårsgrunnlagUtDto.Infotrygd): IVilkårsgrunnlag {

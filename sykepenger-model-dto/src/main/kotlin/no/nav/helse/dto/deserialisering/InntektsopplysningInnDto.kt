@@ -12,12 +12,6 @@ sealed class InntektsopplysningInnDto {
         override val inntektsdata: InntektsdataInnDto
     ) : InntektsopplysningInnDto()
 
-    data class SaksbehandlerDto(
-        override val id: UUID,
-        override val inntektsdata: InntektsdataInnDto,
-        val overstyrtInntekt: UUID,
-    ) : InntektsopplysningInnDto()
-
     data class ArbeidsgiverinntektDto(
         override val id: UUID,
         override val inntektsdata: InntektsdataInnDto,

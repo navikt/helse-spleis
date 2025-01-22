@@ -6,6 +6,6 @@ data class ArbeidsgiverInntektsopplysningUtDto(
     val orgnummer: String,
     val gjelder: PeriodeDto,
     val inntektsopplysning: InntektsopplysningUtDto,
-    val korrigertInntekt: InntektsopplysningUtDto.SaksbehandlerDto?,
+    val korrigertInntekt: SaksbehandlerUtDto?,
     val skjønnsmessigFastsatt: SkjønnsmessigFastsattUtDto?
 )
