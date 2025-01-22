@@ -76,7 +76,7 @@ private fun migrateV2Task(arbeidId: String) {
         SELECT data FROM person WHERE fnr = ? LIMIT 1 FOR UPDATE SKIP LOCKED;
     """
     var migreringCounter = 0
-    opprettOgUtførArbeid(arbeidId) { session, fnr ->
+    opprettOgUtførArbeid(arbeidId, size = 50) { session, fnr ->
         session.transaction { txSession ->
             // låser ned person-raden slik at spleis ikke tar inn meldinger og overskriver mens denne podden holder på
             val data = txSession.run(queryOf(query, fnr).map { it.string("data") }.asSingle)
