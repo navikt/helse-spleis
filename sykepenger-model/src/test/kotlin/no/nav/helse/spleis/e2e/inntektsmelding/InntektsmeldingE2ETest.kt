@@ -59,6 +59,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
@@ -123,6 +125,39 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `En beregnet omgjøring som treffes av tom bit fra inntektsmeldingen må reberegnes`() {
+
+        håndterSøknad(21.november til 6.desember)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        håndterSøknad(7.desember til 13.desember)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        håndterInntektsmelding(listOf(21.november til 6.desember))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        håndterInntektsmelding(listOf(11.november.somPeriode(), 21.november til 5.desember), førsteFraværsdag = 21.november)
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+
+        håndterSøknad(18.desember til 26.desember)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
+        håndterInntektsmelding(listOf(2.desember.somPeriode(), 4.desember til 18.desember), førsteFraværsdag = 18.desember, begrunnelseForReduksjonEllerIkkeUtbetalt = "TidligereVirksomhet")
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+
+        assertVarsler(listOf(RV_IM_8, RV_IM_3), 3.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_OS_2, RV_IM_8, RV_IM_4), 1.vedtaksperiode.filter())
+    }
 
     @Test
     fun `oppgir refusjonopplysninger frem i tid, og så ombestemmer de seg`() {

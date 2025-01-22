@@ -148,7 +148,7 @@ internal class DagerFraInntektsmelding(
     private fun tomSykdomstidslinjeMenSkalValidere(periode: Periode) =
         (opprinneligPeriode == null && skalValideresAv(periode)).also {
             if (it) {
-                harValidert = periode
+                harValidert = harValidert?.oppdaterFom(periode) ?: periode
             }
         }
 
