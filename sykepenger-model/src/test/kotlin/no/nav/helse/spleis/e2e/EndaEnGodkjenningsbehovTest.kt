@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Personidentifikator
 import no.nav.helse.august
 import no.nav.helse.dsl.INNTEKT
@@ -337,6 +337,42 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                         "arbeidsgiver" to a1,
                         "omregnetÅrsinntekt" to INNTEKT.årlig,
                         "inntektskilde" to Inntektskilde.Arbeidsgiver,
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `saksbehandlerkorrigert inntekt`() {
+        tilGodkjenning(januar, a1)
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning("a1", INNTEKT/2)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertGodkjenningsbehov(
+            tags = emptySet(),
+            vedtaksperiodeId = 1.vedtaksperiode.id(a1),
+            periodeFom = 1.januar,
+            periodeTom = 31.januar,
+            periodeType = "FØRSTEGANGSBEHANDLING",
+            førstegangsbehandling = true,
+            behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().id,
+            perioderMedSammeSkjæringstidspunkt = listOf(
+                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+            ),
+            omregnedeÅrsinntekter = listOf(
+                mapOf("organisasjonsnummer" to a1, "beløp" to (INNTEKT/2).årlig)
+            ),
+            sykepengegrunnlagsfakta = mapOf(
+                "omregnetÅrsinntektTotalt" to (INNTEKT/2).årlig,
+                "sykepengegrunnlag" to (INNTEKT/2).årlig,
+                "6G" to 561_804.0,
+                "fastsatt" to "EtterHovedregel",
+                "arbeidsgivere" to listOf(
+                    mapOf(
+                        "arbeidsgiver" to a1,
+                        "omregnetÅrsinntekt" to (INNTEKT/2).årlig,
+                        "inntektskilde" to Inntektskilde.Saksbehandler,
                     )
                 )
             )

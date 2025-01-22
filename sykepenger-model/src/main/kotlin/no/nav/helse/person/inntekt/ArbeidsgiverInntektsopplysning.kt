@@ -236,7 +236,7 @@ internal data class ArbeidsgiverInntektsopplysning(
             .forEach { arbeidsgiver ->
                 builder.arbeidsgiverinntekt(
                     arbeidsgiver = arbeidsgiver.orgnummer,
-                    omregnedeÅrsinntekt = arbeidsgiver.inntektsopplysning.inntektsdata.beløp,
+                    omregnedeÅrsinntekt = arbeidsgiver.omregnetÅrsinntekt.beløp,
                     skjønnsfastsatt = arbeidsgiver.skjønnsmessigFastsatt?.inntektsdata?.beløp,
                     gjelder = arbeidsgiver.gjelder,
                     inntektskilde = if (arbeidsgiver.skjønnsmessigFastsatt != null || arbeidsgiver.korrigertInntekt != null)
