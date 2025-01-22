@@ -48,7 +48,7 @@ fun main(cliArgs: Array<String>) {
         "vacuum" -> vacuumTask()
         "avstemming" -> avstemmingTask(factory, args.getOrNull(1)?.toIntOrNull())
         "migrate" -> migrateTask(factory)
-        "migrate_v2" -> migrateV2Task(args[1].trim())
+        "migrate_v2" -> migrateV2Task(args[1].trim(), args.getOrNull(2)?.toIntOrNull() ?: 10)
         "test_speiljson" -> testSpeilJsonTask(args[1].trim())
         "migrereg" -> migrereGrunnbeløp(factory, args[1].trim())
         else -> log.error("Unknown task $task")
@@ -70,13 +70,13 @@ private fun vacuumTask() {
     )
 }
 
-private fun migrateV2Task(arbeidId: String) {
+private fun migrateV2Task(arbeidId: String, size: Int) {
     @Language("PostgreSQL")
     val query = """
         SELECT data FROM person WHERE fnr = ? LIMIT 1 FOR UPDATE SKIP LOCKED;
     """
     var migreringCounter = 0
-    opprettOgUtførArbeid(arbeidId, size = 50) { session, fnr ->
+    opprettOgUtførArbeid(arbeidId, size = size) { session, fnr ->
         session.transaction { txSession ->
             // låser ned person-raden slik at spleis ikke tar inn meldinger og overskriver mens denne podden holder på
             val data = txSession.run(queryOf(query, fnr).map { it.string("data") }.asSingle)
