@@ -67,5 +67,7 @@ spec:
       value: "true"
     - name: OPPHOER_AV_NATURALYTELSER
       value: "true"
+    - name: SEND_FASTSATT_INNTEKT_TIL_HAG
+      value: "false"
     - name: JAVA_TOOL_OPTIONS
       value: "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-dev-7ff9,-logtostderr,-minloglevel=1"
