@@ -1376,7 +1376,8 @@ internal class Vedtaksperiode private constructor(
 
         val faktaavklartInntekt = inntektForArbeidsgiver(hendelse, skatteopplysning, alleForSammeArbeidsgiver)
 
-        if (faktaavklartInntekt is SkattSykepengegrunnlag) subsummerBrukAvSkatteopplysninger(faktaavklartInntekt)
+        if (faktaavklartInntekt is SkattSykepengegrunnlag)
+            subsummerBrukAvSkatteopplysninger(arbeidsgiver.organisasjonsnummer, faktaavklartInntekt.inntektsdata, skatteopplysning?.treMånederFørSkjæringstidspunkt ?: emptyList())
         return ArbeidsgiverInntektsopplysning(
             orgnummer = arbeidsgiver.organisasjonsnummer,
             gjelder = skjæringstidspunkt til LocalDate.MAX,
@@ -1386,28 +1387,21 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun subsummerBrukAvSkatteopplysninger(inntekt: SkattSykepengegrunnlag) {
-        subsummerBrukAvSkatteopplysninger(arbeidsgiver.organisasjonsnummer, inntekt)
-    }
-    private fun subsummerGhostArbeidsgiver(orgnummer: String, inntekt: SkattSykepengegrunnlag) {
-        subsummerBrukAvSkatteopplysninger(orgnummer, inntekt)
-    }
-    private fun subsummerBrukAvSkatteopplysninger(orgnummer: String, inntekt: SkattSykepengegrunnlag) {
-        val inntekter = inntekt.inntektsopplysninger.subsumsjonsformat()
-        val beløp = inntekt.inntektsdata.beløp
+    private fun subsummerBrukAvSkatteopplysninger(orgnummer: String, inntektsdata: Inntektsdata, skatteopplysninger: List<Skatteopplysning>) {
+        val inntekter = skatteopplysninger.subsumsjonsformat()
         jurist.logg(
             `§ 8-28 ledd 3 bokstav a`(
                 organisasjonsnummer = orgnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 inntekterSisteTreMåneder = inntekter,
-                grunnlagForSykepengegrunnlagÅrlig = beløp.årlig,
-                grunnlagForSykepengegrunnlagMånedlig = beløp.månedlig
+                grunnlagForSykepengegrunnlagÅrlig = inntektsdata.beløp.årlig,
+                grunnlagForSykepengegrunnlagMånedlig = inntektsdata.beløp.månedlig
             )
         )
         jurist.logg(
             `§ 8-29`(
                 skjæringstidspunkt = skjæringstidspunkt,
-                grunnlagForSykepengegrunnlagÅrlig = beløp.årlig,
+                grunnlagForSykepengegrunnlagÅrlig = inntektsdata.beløp.årlig,
                 inntektsopplysninger = inntekter,
                 organisasjonsnummer = orgnummer
             )
@@ -1437,14 +1431,12 @@ internal class Vedtaksperiode private constructor(
             .filter { skatteopplysning -> arbeidsgivere.none { it.orgnummer == skatteopplysning.arbeidsgiver } }
             .filter { skatteopplysning -> skatteopplysning.erGhostarbeidsgiver }
             .map { skatteopplysning ->
-                val ghostopplysning = SkattSykepengegrunnlag.fraSkatt(skatteopplysning.inntektsdata, skatteopplysning.treMånederFørSkjæringstidspunkt)
-                // vi er ghost, ingen søknader på skjæringstidspunktet og
-                // inntekten fra skatt anses som ghost
-                subsummerGhostArbeidsgiver(skatteopplysning.arbeidsgiver, ghostopplysning)
+                // vi er ghost, ingen søknader på skjæringstidspunktet og inntekten fra skatt anses som ghost
+                subsummerBrukAvSkatteopplysninger(skatteopplysning.arbeidsgiver, skatteopplysning.inntektsdata, skatteopplysning.treMånederFørSkjæringstidspunkt)
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = skatteopplysning.arbeidsgiver,
                     gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    inntektsopplysning = ghostopplysning,
+                    inntektsopplysning = SkattSykepengegrunnlag.fraSkatt(skatteopplysning.inntektsdata, skatteopplysning.treMånederFørSkjæringstidspunkt),
                     korrigertInntekt = null,
                     skjønnsmessigFastsatt = null
                 )
