@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.ytelser
 
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.UNG_PERSON_FNR_2018
@@ -16,12 +17,14 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -56,8 +59,8 @@ import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -78,8 +81,32 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class YtelserE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `vilkårsgrunnlag forsvinner når foreldrepengene legges inn`() {
+        nyttVedtak(7.januar til 23.januar, arbeidsgiverperiode = listOf(1.januar.somPeriode(), 8.januar til 22.januar))
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(23.januar, Dagtype.Foreldrepengerdag)))
+
+        assertForventetFeil(
+            forklaring = "foreldrepengene legges inn på sykdomstidslinjen slik at vedtaksperioden blir stående uten et skjæringstidspunkt, og vilkårsgrunnlaget forsvinner",
+            nå = {
+                assertThrows<IllegalStateException> {
+                    håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(
+                        GradertPeriode(8.januar til 23.januar, 100)
+                    ))
+                }
+            },
+            ønsket = {
+                håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(
+                    GradertPeriode(8.januar til 23.januar, 100)
+                ))
+                assertTilstand(1.vedtaksperiode, TilstandType.AVVENTER_SIMULERING_REVURDERING)
+            }
+        )
+    }
 
     @Test
     fun `masse perioder med med andre ytelser`() {
