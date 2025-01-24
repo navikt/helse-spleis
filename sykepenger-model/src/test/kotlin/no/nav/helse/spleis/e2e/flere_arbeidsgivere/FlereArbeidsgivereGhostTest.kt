@@ -1,12 +1,12 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -45,7 +45,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
@@ -58,9 +58,9 @@ import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterAvbrytSøknad
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsforhold
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -74,13 +74,12 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
-import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
@@ -194,8 +193,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
 
-        val ghostInntektFørIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(ghost) }.inspektør.inntektsopplysning
-        assertTrue(ghostInntektFørIm is SkattSykepengegrunnlag)
+        assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
 
         // Inntektsmelding fra Ghost vi egentlig ikke trenger, men de sender den allikevel og opplyser om IkkeFravaer...
         // denne vinner over skatt i inntektsturnering
@@ -208,9 +206,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        val ghostInntektEtterIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(ghost) }.inspektør.inntektsopplysning
-        assertFalse(ghostInntektEtterIm is Arbeidsgiverinntekt)
-        assertTrue(ghostInntektEtterIm is SkattSykepengegrunnlag)
+        assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
 
         // Så kjem søknaden på ghosten læll
         val ghostSøknad = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ghost)
@@ -219,9 +215,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = ghost)
-        val ghostInntektEtterImNå = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(ghost) }.inspektør.inntektsopplysning
-        assertTrue(ghostInntektEtterImNå is Arbeidsgiverinntekt)
-        assertFalse(ghostInntektEtterImNå is SkattSykepengegrunnlag)
+        assertInntektsgrunnlag(1.januar, a2, 33_000.månedlig)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = ghost)
         håndterSimulering(1.vedtaksperiode, orgnummer = ghost)
@@ -602,10 +596,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(INNTEKT, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
-        }
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
     }
 
     @Test
@@ -637,13 +628,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(INNTEKT, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
-        }
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, INGEN, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
     }
 
     @Test
@@ -673,10 +659,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(INNTEKT, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
-        }
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
     }
 
     @Test
@@ -777,14 +760,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(360000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
-        }
-
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, 30_000.månedlig)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, INGEN, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
     }
 
@@ -813,11 +790,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(360000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
-        }
-
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, 30_000.månedlig)
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
     }
 
@@ -931,10 +904,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
-        }
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
     }
 
     @Test

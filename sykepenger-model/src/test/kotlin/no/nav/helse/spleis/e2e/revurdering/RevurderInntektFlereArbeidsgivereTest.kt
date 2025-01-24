@@ -7,6 +7,7 @@ import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.til
@@ -531,10 +532,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
             assertEquals(300000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
             assertEquals(300000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-            assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-            sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-                assertEquals(25000.månedlig, it.fastsattÅrsinntekt)
-            }
+            assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT, 25000.månedlig, forventetKorrigertInntekt = 25000.månedlig)
         }
     }
 

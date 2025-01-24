@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.brukerutbetaling
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
@@ -33,8 +34,8 @@ import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
 import no.nav.helse.spleis.e2e.assertVarsler
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -605,8 +606,9 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         )
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.januar)
         assertNotNull(vilkårsgrunnlag)
-        val inntektsopplysninger = vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør
-        assertEquals(INNTEKT + 100.månedlig, inntektsopplysninger.inntektsopplysning.inspektør.beløp)
+        with (vilkårsgrunnlag) {
+            assertInntektsgrunnlag(a1, INNTEKT + 100.månedlig)
+        }
         assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT / 2, im2.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
     }
 

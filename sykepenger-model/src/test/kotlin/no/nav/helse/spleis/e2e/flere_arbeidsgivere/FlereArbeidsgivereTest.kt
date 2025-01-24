@@ -10,6 +10,7 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
@@ -24,7 +25,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
@@ -50,10 +50,8 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.til
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -118,11 +116,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, a3)
-            val inntekter = inspektør.vilkårsgrunnlag(1.januar)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger ?: emptyList()
-            assertEquals(3, inntekter.size)
-            assertTrue(inntekter.single { it.gjelder(a1) }.inspektør.inntektsopplysning is Arbeidsgiverinntekt)
-            assertTrue(inntekter.single { it.gjelder(a2) }.inspektør.inntektsopplysning is Arbeidsgiverinntekt)
-            assertTrue(inntekter.single { it.gjelder(a3) }.inspektør.inntektsopplysning is SkattSykepengegrunnlag)
+            val inntekter = inspektør.vilkårsgrunnlag(1.januar)?.inspektør!!
+            assertInntektsgrunnlag(inntekter, a1, INNTEKT)
+            assertInntektsgrunnlag(inntekter, a2, INNTEKT)
+            assertInntektsgrunnlag(inntekter, a3, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -492,8 +489,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is Arbeidsgiverinntekt)
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkattSykepengegrunnlag)
+            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
         }
 
         a2 {
@@ -507,7 +504,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
             assertBeløpstidslinje(Beløpstidslinje.fra(februar, INNTEKT, a2Inntektsmelding.arbeidsgiver), inspektør(a2).refusjon(1.vedtaksperiode))
 
-            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkattSykepengegrunnlag)
+            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
         }
     }
 
@@ -603,10 +601,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
             assertEquals(2, inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.view().inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
-            val arbeidsgiverInntektsopplysninger = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
-            assertEquals(2, arbeidsgiverInntektsopplysninger.size)
-            assertInstanceOf<Arbeidsgiverinntekt>(arbeidsgiverInntektsopplysninger[0].inntektsopplysning)
-            assertInstanceOf<SkattSykepengegrunnlag>(arbeidsgiverInntektsopplysninger[1].inntektsopplysning)
+            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+            assertInntektsgrunnlag(1.januar, a2, INGEN, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
         }
     }
 
@@ -1252,11 +1248,9 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
-            val arbeidsgiverInntektsopplysninger = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger
-            assertEquals(2, arbeidsgiverInntektsopplysninger.size)
-            assertInstanceOf<SkattSykepengegrunnlag>(arbeidsgiverInntektsopplysninger[0].inntektsopplysning)
-            assertInstanceOf<Arbeidsgiverinntekt>(arbeidsgiverInntektsopplysninger[1].inntektsopplysning)
             assertEquals(UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE, a1.inspektør.inntektskilde(2.vedtaksperiode))
+            assertInntektsgrunnlag(3.januar, a1, INNTEKT)
+            assertInntektsgrunnlag(3.januar, a2, INGEN, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
         }
         a2 {
             val vilkårsgrunnlag = a2.inspektør.vilkårsgrunnlag(1.vedtaksperiode)
@@ -1515,5 +1509,4 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
     private val Utbetalingsdag.arbeidsgiverbeløp get() = this.økonomi.inspektør.arbeidsgiverbeløp?.dagligInt ?: 0
     private val Utbetalingsdag.personbeløp get() = this.økonomi.inspektør.personbeløp?.dagligInt ?: 0
-    private fun TestArbeidsgiverInspektør.inntektsopplysning(vedtaksperiode: UUID, orgnr: String) = vilkårsgrunnlag(vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.first { it.gjelder(orgnr) }.inspektør.inntektsopplysning
 }

@@ -4,6 +4,7 @@ import java.util.*
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.ManglerOpptjening
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.StreikEllerLockout
@@ -41,7 +42,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertEquals(INNTEKT * 1.25, inspektør.inntekt(1.vedtaksperiode).inntektsdata.beløp)
+            assertInntektsgrunnlag(1.januar, a1, INNTEKT * 1.25)
             assertEquals(refusjonFørKorrigering, inspektør.refusjon(1.vedtaksperiode))
         }
     }
@@ -50,11 +51,11 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
     fun `opplyser om korrigerert refusjon på en allerede utbetalt periode`() {
         a1 {
             nyttVedtak(januar)
-            val inntektFørKorrigering = inspektør.inntekt(1.vedtaksperiode).inntektsdata.beløp
+            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
             val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittRefusjon(INNTEKT * 1.25, emptyList()))
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            assertEquals(inntektFørKorrigering, inspektør.inntekt(1.vedtaksperiode).inntektsdata.beløp)
+            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT * 1.25, korrigerteArbeidsgiveropplysninger.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
         }
     }
@@ -68,7 +69,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertEquals(INNTEKT * 1.25, inspektør.inntekt(1.vedtaksperiode).inntektsdata.beløp)
+            assertInntektsgrunnlag(1.januar, a1, INNTEKT * 1.25)
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT * 1.25, korrigerteArbeidsgiveropplysninger.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
         }
     }
@@ -87,11 +88,11 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
     fun `opplyser om korrigerert inntekt OG refusjon på en allerede utbetalt periode - men beløpene er uendret`() {
         a1 {
             nyttVedtak(januar)
-            val inntektFørKorrigering = inspektør.inntekt(1.vedtaksperiode).inntektsdata.beløp
+            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
             val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()))
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            assertEquals(inntektFørKorrigering, inspektør.inntekt(1.vedtaksperiode).inntektsdata.beløp)
+            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
             // Burde vi unngått en overstyring her?
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, korrigerteArbeidsgiveropplysninger.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
         }

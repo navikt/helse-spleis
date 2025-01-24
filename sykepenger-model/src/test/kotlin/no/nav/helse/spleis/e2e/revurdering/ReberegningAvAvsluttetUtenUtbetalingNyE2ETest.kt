@@ -4,6 +4,7 @@ import no.nav.helse.august
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Companion.fraInntektsmelding
 import no.nav.helse.hendelser.Dagtype
@@ -47,7 +48,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -60,8 +60,8 @@ import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterKorrigerteArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -1005,12 +1005,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(a1))
 
         assertNotNull(vilkårsgrunnlag)
-
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør
-
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(riktigInntekt, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
+        with(vilkårsgrunnlag) {
+            assertInntektsgrunnlag(a1, riktigInntekt)
         }
 
         assertEquals(riktigInntekt, vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.sykepengegrunnlag)

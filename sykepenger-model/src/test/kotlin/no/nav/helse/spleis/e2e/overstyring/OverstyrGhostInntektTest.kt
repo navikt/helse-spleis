@@ -1,8 +1,10 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
@@ -13,6 +15,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
@@ -52,13 +55,8 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         assertEquals(378000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(31000.månedlig, it.fastsattÅrsinntekt)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(500.månedlig, it.fastsattÅrsinntekt)
-        }
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, 500.månedlig, forventetKorrigertInntekt = 500.månedlig, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
 
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -103,13 +101,8 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         assertEquals(378000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(31000.månedlig, it.fastsattÅrsinntekt)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(500.månedlig, it.fastsattÅrsinntekt)
-        }
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, 500.månedlig, forventetKorrigertInntekt = 500.månedlig, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
 
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

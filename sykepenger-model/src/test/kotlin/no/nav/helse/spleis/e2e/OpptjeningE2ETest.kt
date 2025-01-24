@@ -6,6 +6,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -17,10 +18,8 @@ import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_3
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
@@ -143,11 +142,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
             assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
             assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-            assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-            sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-                assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
-            }
+            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
         }
     }
 

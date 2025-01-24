@@ -4,11 +4,11 @@ import java.util.*
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
@@ -30,14 +30,13 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -50,7 +49,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.fail
 
 internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
@@ -83,16 +81,8 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         val søknad = UUID.randomUUID()
         håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), id = søknad, orgnummer = a2)
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(3.vedtaksperiode)?.inspektør ?: fail { "må ha vilkårsgrunnlag" }
-        val inntektsopplysninger = vilkårsgrunnlag.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
-
-        assertEquals(2, inntektsopplysninger.size)
-        val a1Inspektør = inntektsopplysninger.getValue(a1).inspektør
-        assertEquals(Arbeidsgiverinntekt::class, a1Inspektør.inntektsopplysning::class)
-        assertEquals(inntektA1, a1Inspektør.inntektsopplysning.inspektør.beløp)
-        val a2Inspektør = inntektsopplysninger.getValue(a2).inspektør
-        assertEquals(Arbeidsgiverinntekt::class, a2Inspektør.inntektsopplysning::class)
-        assertEquals(inntektA2, a2Inspektør.inntektsopplysning.inspektør.beløp)
+        assertInntektsgrunnlag(1.januar, a1, inntektA1, inntektA1)
+        assertInntektsgrunnlag(1.januar, a2, inntektA2, inntektA2)
 
         val overstyringerIgangsatt = observatør.overstyringIgangsatt
         assertEquals(3, overstyringerIgangsatt.size)
@@ -283,7 +273,8 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a1))
 
-        assertEquals(INNTEKT, inspektør(a2).inntekt(1.januar).inspektør.beløp)
+        assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+        assertInntektsgrunnlag(1.januar, a2, INNTEKT)
         assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, imId.arbeidsgiver), inspektør(a2).refusjon(1.vedtaksperiode))
 
         assertEquals(

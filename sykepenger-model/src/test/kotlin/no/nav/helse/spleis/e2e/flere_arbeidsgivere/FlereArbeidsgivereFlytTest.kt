@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
@@ -41,8 +42,8 @@ import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -547,13 +548,10 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-        val inntekter = vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
-        val inntekterA1 = inntekter.getValue(a1).inspektør
-        val inntekterA2 = inntekter.getValue(a2).inspektør
-
-        assertEquals(no.nav.helse.person.inntekt.Arbeidsgiverinntekt::class, inntekterA1.inntektsopplysning::class)
-        assertEquals(no.nav.helse.person.inntekt.Arbeidsgiverinntekt::class, inntekterA2.inntektsopplysning::class)
-        assertEquals(INNTEKT, inntekterA2.inntektsopplysning.inspektør.beløp)
+        with (vilkårsgrunnlag) {
+            assertInntektsgrunnlag(a1, INNTEKT, INNTEKT)
+            assertInntektsgrunnlag(a2, INNTEKT, INNTEKT)
+        }
     }
 
     @Test

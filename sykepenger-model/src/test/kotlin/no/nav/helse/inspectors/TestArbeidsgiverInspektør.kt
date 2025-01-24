@@ -1,12 +1,11 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Klassekode
@@ -169,26 +168,6 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun refusjon(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).refusjonstidslinje
     internal fun refusjon(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).refusjonstidslinje
-
-    private fun VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.arbeidsgiveropplysning() = inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnummer)
-    private fun VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.inntekt() = arbeidsgiveropplysning().inntektsopplysning
-
-    internal fun inntekt(skjæringstidspunkt: LocalDate) = vilkårsgrunnlag(skjæringstidspunkt)!!.inntekt()
-    internal fun inntekt(vedtaksperiodeIdInnhenter: IdInnhenter) = vilkårsgrunnlag(vedtaksperiodeIdInnhenter)!!.inntekt()
-    internal fun inntekt(vedtaksperiodeId: UUID) = vilkårsgrunnlag(vedtaksperiodeId)!!.inntekt()
-
-    internal fun korrigertInntekt(vedtaksperiodeId: UUID) = vilkårsgrunnlag(vedtaksperiodeId)!!.arbeidsgiveropplysning().korrigertInntekt
-    internal fun korrigertInntekt(skjæringstidspunkt: LocalDate) = vilkårsgrunnlag(skjæringstidspunkt)!!.arbeidsgiveropplysning().korrigertInntekt
-
-    internal fun skjønnsfastsatt(vedtaksperiodeId: UUID) = vilkårsgrunnlag(vedtaksperiodeId)!!.arbeidsgiveropplysning().skjønnsmessigFastsatt
-    internal fun skjønnsfastsatt(skjæringstidspunkt: LocalDate) = vilkårsgrunnlag(skjæringstidspunkt)!!.arbeidsgiveropplysning().skjønnsmessigFastsatt
-
-    internal fun omregnetÅrsinntekt(vedtaksperiodeId: UUID) = vilkårsgrunnlag(vedtaksperiodeId)!!.arbeidsgiveropplysning().omregnetÅrsinntekt.beløp
-    internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate) = vilkårsgrunnlag(skjæringstidspunkt)!!.arbeidsgiveropplysning().omregnetÅrsinntekt.beløp
-
-    internal fun fastsattInntekt(idInnhenter: IdInnhenter) = fastsattInntekt(idInnhenter.id(orgnummer))
-    internal fun fastsattInntekt(vedtaksperiodeId: UUID) = vilkårsgrunnlag(vedtaksperiodeId)!!.arbeidsgiveropplysning().fastsattÅrsinntekt
-    internal fun fastsattInntekt(skjæringstidspunkt: LocalDate) = vilkårsgrunnlag(skjæringstidspunkt)!!.arbeidsgiveropplysning().fastsattÅrsinntekt
 
     internal fun harFunksjonelleFeilEllerVerre(): Boolean = personInspektør.aktivitetslogg.harFunksjonelleFeilEllerVerre()
 }

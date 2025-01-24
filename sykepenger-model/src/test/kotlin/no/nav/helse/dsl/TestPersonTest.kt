@@ -16,7 +16,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -148,8 +147,8 @@ internal class TestPersonTest : AbstractDslTest() {
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertIngenFunksjonelleFeil()
         assertActivities()
+        assertInntektsgrunnlag(3.januar, a1, INNTEKT)
         inspektør.also {
-            assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
             assertEquals(2, it.sykdomshistorikk.size)
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Dag.Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[Dag.SykHelgedag::class])

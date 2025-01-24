@@ -5,6 +5,7 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -21,7 +22,6 @@ import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
@@ -35,6 +35,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.tilGodkjenning
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -42,7 +43,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.fail
 
 internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
@@ -52,8 +52,6 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         val fom = 1.januar(2021)
         val overstyrtInntekt = 32000.månedlig
         tilGodkjenning(fom til 31.januar(2021), 100.prosent)
-
-        assertInntektForDato(INNTEKT, fom, inspektør = inspektør)
 
         håndterInntektsmelding(
             listOf(fom til fom.plusDays(15)),
@@ -69,13 +67,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
         // assert at vi bruker den nye inntekten i beregning av penger til sjuk.
-        val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
-        val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.inntektsgrunnlag?.inspektør
-        sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(a1)?.inspektør
-            ?.also {
-                assertEquals(overstyrtInntekt, it.inntektsopplysning.inspektør.beløp)
-                assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
-            }
+        val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør!!
+        assertInntektsgrunnlag(vilkårsgrunnlagInspektør, a1, overstyrtInntekt)
     }
 
     @Test
@@ -106,10 +99,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             skjæringstidspunkt = 1.januar,
             arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a2, 500.daglig, emptyList()))
         )
-        val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
-        val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.inntektsgrunnlag?.inspektør
-        val a2Opplysninger = sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(a2)?.inspektør ?: fail { "må ha inntekt for a2" }
-        assertEquals(500.daglig, a2Opplysninger.fastsattÅrsinntekt)
+        assertInntektsgrunnlag(1.januar, a1, INNTEKT, INNTEKT)
+        assertInntektsgrunnlag(1.januar, a2, INGEN, 500.daglig, forventetKorrigertInntekt = 500.daglig, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
     }
 
     @Test

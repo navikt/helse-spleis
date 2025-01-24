@@ -6,6 +6,7 @@ import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -20,12 +21,11 @@ import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
@@ -62,12 +62,8 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterSøknad(februar)
             håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
             assertVarsler(listOf(Varselkode.RV_IM_8), 1.vedtaksperiode.filter())
-            inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
-                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                val inntektA2 = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }
-                assertInstanceOf(SkattSykepengegrunnlag::class.java, inntektA2.inspektør.inntektsopplysning)
-                assertEquals(1.januar til LocalDate.MAX, inntektA2.inspektør.gjelder)
-            }
+            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
         }
     }
 

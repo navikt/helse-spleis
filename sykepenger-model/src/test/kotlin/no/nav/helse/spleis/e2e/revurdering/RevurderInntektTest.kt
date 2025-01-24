@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDate
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Periode
@@ -25,7 +26,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
@@ -33,8 +33,8 @@ import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengTilGodkjentVedtak
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -100,13 +100,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val vilkårgrunnlagsinspektør = person.inspektør.vilkårsgrunnlagHistorikk
         assertEquals(2, vilkårgrunnlagsinspektør.antallGrunnlagsdata())
 
-        val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
-        val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.inntektsgrunnlag?.inspektør
-        sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(a1)?.inspektør
-            ?.also {
-                assertEquals(32000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
-            }
+        val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør!!
+        assertInntektsgrunnlag(vilkårsgrunnlagInspektør, a1, 32000.månedlig)
     }
 
     @Test
@@ -138,13 +133,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(506, inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
         assertEquals(-506, inspektør.utbetaling(2).arbeidsgiverOppdrag.nettoBeløp())
 
-        val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
-        val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.inntektsgrunnlag?.inspektør
-        sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(a1)?.inspektør
-            ?.also {
-                assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                assertEquals(Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
-            }
+        val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør!!
+        assertInntektsgrunnlag(vilkårsgrunnlagInspektør, a1, INNTEKT)
     }
 
     @Test

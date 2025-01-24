@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.infotrygd
 import java.util.*
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -20,7 +21,6 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
@@ -37,7 +37,6 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdTest : AbstractEndToEndTest() {
@@ -88,8 +87,8 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 15000.månedlig,
             emptyList())))
         assertEquals(antallInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertTrue(inspektør.inntekt(1.vedtaksperiode) is Infotrygd)
-        assertEquals(31000.månedlig, inspektør.inntekt(1.vedtaksperiode).inntektsdata.beløp)
+
+        assertInntektsgrunnlag(1.januar, a1, INNTEKT)
     }
 
     @Test
@@ -107,8 +106,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         assertEquals(antallInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
         assertBeløpstidslinje(Beløpstidslinje.fra(februar, 15000.månedlig, meldingsreferanse.saksbehandler), inspektør.refusjon(1.vedtaksperiode))
-        assertTrue(inspektør.inntekt(1.vedtaksperiode) is Infotrygd)
-        assertEquals(31000.månedlig, inspektør.inntekt(1.vedtaksperiode).inntektsdata.beløp)
+        assertInntektsgrunnlag(1.januar, a1, INNTEKT)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 }

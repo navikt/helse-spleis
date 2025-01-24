@@ -7,6 +7,7 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
@@ -22,12 +23,10 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.testhelpers.assertInstanceOf
-import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -57,15 +56,8 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-                    assertEquals(31000.månedlig, it.fastsattÅrsinntekt)
-                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-                }
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-                    assertEquals(31000.månedlig, it.fastsattÅrsinntekt)
-                    assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
-                }
+                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
             }
             nullstillTilstandsendringer()
             håndterOverstyrInntekt(inntekt = 15000.månedlig, skjæringstidspunkt = 1.januar, organisasjonsnummer = a2)
@@ -94,17 +86,8 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(552000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-                    assertEquals(31000.månedlig, it.fastsattÅrsinntekt)
-                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-                    assertNotNull(it.skjønnsmessigFastsatt)
-                }
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-                    assertEquals(15000.månedlig, it.fastsattÅrsinntekt)
-                    assertNotNull(it.korrigertInntekt)
-                    assertNotNull(it.skjønnsmessigFastsatt)
-                }
+                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, 15000.månedlig, forventetKorrigertInntekt = 15000.månedlig, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
             }
         }
     }
@@ -129,15 +112,8 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-                    assertEquals(31000.månedlig, it.fastsattÅrsinntekt)
-                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-                }
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-                    assertEquals(31000.månedlig, it.fastsattÅrsinntekt)
-                    assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
-                }
+                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
             }
             nullstillTilstandsendringer()
             håndterOverstyrInntekt(
@@ -159,15 +135,8 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-                    assertEquals(31000.månedlig, it.fastsattÅrsinntekt)
-                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-                }
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-                    assertEquals(40000.månedlig, it.fastsattÅrsinntekt)
-                    assertNotNull(it.korrigertInntekt)
-                }
+                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, 40000.månedlig, forventetKorrigertInntekt = 40000.månedlig, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
             }
         }
     }
@@ -192,15 +161,8 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-                    assertEquals(31000.månedlig, it.fastsattÅrsinntekt)
-                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-                }
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-                    assertEquals(31000.månedlig, it.fastsattÅrsinntekt)
-                    assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
-                }
+                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
             }
             nullstillTilstandsendringer()
             håndterOverstyrInntekt(inntekt = 0.månedlig, skjæringstidspunkt = 1.januar, organisasjonsnummer = a2)
@@ -229,17 +191,8 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-                    assertEquals(31000.månedlig, it.fastsattÅrsinntekt)
-                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-                    assertNotNull(it.skjønnsmessigFastsatt)
-                }
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-                    assertEquals(0.månedlig, it.fastsattÅrsinntekt)
-                    assertNotNull(it.korrigertInntekt)
-                    assertNotNull(it.skjønnsmessigFastsatt)
-                }
+                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, INGEN, forventetKorrigertInntekt = INGEN, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
             }
         }
     }
@@ -300,15 +253,8 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-                    assertEquals(31000.månedlig, it.fastsattÅrsinntekt)
-                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-                }
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-                    assertEquals(16000.månedlig, it.fastsattÅrsinntekt)
-                    assertNotNull(it.korrigertInntekt)
-                }
+                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, 16000.månedlig, forventetKorrigertInntekt = 16000.månedlig, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
             }
             (inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
                 val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
@@ -317,15 +263,8 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(2.vedtaksperiode))
-                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-                    assertEquals(31000.månedlig, it.fastsattÅrsinntekt)
-                    assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-                }
-                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-                    assertEquals(31000.månedlig, it.fastsattÅrsinntekt)
-                    assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
-                }
+                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
             }
             assertTilstander(
                 1.vedtaksperiode,
@@ -358,7 +297,7 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
     private fun TestPerson.TestArbeidsgiver.assertPeriode(
         periode: Periode,
         arbeidsgiverbeløp: Inntekt,
-        personbeløp: Inntekt = Inntekt.INGEN
+        personbeløp: Inntekt = INGEN
     ) =
         periode.forEach { assertDag(it, arbeidsgiverbeløp, personbeløp) }
 }

@@ -5,6 +5,7 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -60,8 +61,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertIngenFunksjonelleFeil()
         assertActivities()
+        assertInntektsgrunnlag(3.januar, a1, INNTEKT)
         inspektør.also {
-            assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
             assertEquals(2, it.sykdomshistorikk.size)
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
@@ -102,8 +103,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         assertIngenFunksjonelleFeil()
         assertActivities()
+        assertInntektsgrunnlag(3.januar, a1, INNTEKT)
         inspektør.also {
-            assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
             assertEquals(6, it.sykdomshistorikk.size)
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
             assertEquals(14, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
@@ -152,8 +153,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         assertIngenFunksjonelleFeil()
         assertActivities()
+        assertInntektsgrunnlag(8.januar, a1, INNTEKT)
         inspektør.also {
-            assertInntektForDato(INNTEKT, 8.januar, inspektør = it)
             assertEquals(6, it.sykdomshistorikk.size)
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
             assertEquals(13, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
@@ -197,8 +198,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertIngenFunksjonelleFeil()
         assertActivities()
+        assertInntektsgrunnlag(3.januar, a1, INNTEKT)
         inspektør.also {
-            assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
             assertEquals(2, it.sykdomshistorikk.size)
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
@@ -240,8 +241,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertIngenFunksjonelleFeil()
         assertActivities()
         assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
+        assertInntektsgrunnlag(3.januar, a1, INNTEKT)
         inspektør.also {
-            assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
             assertEquals(2, it.sykdomshistorikk.size)
             assertNull(it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
@@ -302,9 +303,9 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         assertIngenFunksjonelleFeil()
         assertActivities()
+        assertInntektsgrunnlag(4.januar, a1, INNTEKT)
+        assertInntektsgrunnlag(24.januar, a1, INNTEKT)
         inspektør.also {
-            assertInntektForDato(INNTEKT, 4.januar, inspektør = it)
-            assertInntektForDato(INNTEKT, 24.januar, inspektør = it)
             assertEquals(4.januar, it.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(24.januar, it.skjæringstidspunkt(2.vedtaksperiode))
             assertEquals(19, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])

@@ -10,6 +10,7 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
@@ -53,7 +54,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
@@ -76,7 +76,6 @@ import no.nav.helse.spleis.e2e.assertHarIkkeHendelseIder
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenInfo
-import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertInntektshistorikkForDato
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -85,8 +84,8 @@ import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterKorrigerteArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
@@ -224,13 +223,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(0, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<PersonObserver.Arbeidsgiverperiode>().size)
         assertEquals(1, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<PersonObserver.Refusjon>().size)
 
-        val inntektFør = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.inntektsdata.beløp
+        val inntektFør = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.faktaavklartInntekt.inntektsdata.beløp
         assertEquals(INNTEKT, inntektFør)
         val forespurtIm = håndterArbeidsgiveropplysninger(emptyList(), beregnetInntekt = (-1).månedlig, refusjon = Refusjon(100.daglig, null), orgnummer = a2, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(15.februar til 28.februar, 100.daglig), inspektør(a2).vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
 
-        val inntektEtter = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.inntektsdata.beløp
+        val inntektEtter = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.faktaavklartInntekt.inntektsdata.beløp
 
         assertEquals(INNTEKT, inntektEtter)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
@@ -248,7 +247,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         val selvbestemtIm = håndterKorrigerteArbeidsgiveropplysninger(Arbeidsgiveropplysning.OppgittRefusjon(77.daglig, emptyList()), vedtaksperiodeId = 2.vedtaksperiode, orgnummer = a2)
         assertBeløpstidslinje(Beløpstidslinje.fra(15.februar til 28.februar, 77.daglig, selvbestemtIm.arbeidsgiver), inspektør(a2).vedtaksperioder(2.vedtaksperiode).refusjonstidslinje)
 
-        val inntektEtterselvbestemtIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.inntektsopplysning.inntektsdata.beløp
+        val inntektEtterselvbestemtIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.faktaavklartInntekt.inntektsdata.beløp
         assertEquals(INNTEKT, inntektEtterselvbestemtIm)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
@@ -1560,16 +1559,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-        assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
-        assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(INNTEKT, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(no.nav.helse.person.inntekt.Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
-        }
+        assertInntektsgrunnlag(1.januar, a1, INNTEKT)
     }
 
     @Test
@@ -1800,7 +1790,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AktivitetsloggFilter.person()
         )
 
-        assertInntektForDato(INNTEKT + 1000.månedlig, 1.januar, inspektør = inspektør)
+        assertInntektsgrunnlag(1.januar, a1, INNTEKT + 1000.månedlig)
     }
 
     @Test
@@ -2241,7 +2231,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre", 1.vedtaksperiode.filter())
-        assertFunksjonellFeil(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+        assertFunksjonellFeil(RV_IM_8, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
     }
 
@@ -2411,15 +2401,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
 
-        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)
-        assertNotNull(vilkårsgrunnlag)
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør
-        assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(30000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(no.nav.helse.person.inntekt.Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
-        }
+        assertInntektsgrunnlag(1.januar, a1, 30000.månedlig)
     }
 
     @Test
@@ -2444,15 +2426,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
 
-        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)
-        assertNotNull(vilkårsgrunnlag)
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør
-        assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(30000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(no.nav.helse.person.inntekt.Arbeidsgiverinntekt::class, it.inntektsopplysning::class)
-        }
+        assertInntektsgrunnlag(1.mars, a1, 30000.månedlig)
     }
 
     @Test
@@ -2560,8 +2534,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-        val inntektsopplysningVilkårsgrunnlagA2 = inspektør(a2).vilkårsgrunnlag(25.januar)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.firstOrNull { it.inspektør.orgnummer == a2 }?.inspektør?.inntektsopplysning
-        assertTrue(inntektsopplysningVilkårsgrunnlagA2 is no.nav.helse.person.inntekt.Arbeidsgiverinntekt)
-        assertEquals(INNTEKT, inntektsopplysningVilkårsgrunnlagA2?.inspektør?.beløp)
+        assertInntektsgrunnlag(25.januar, a1, INNTEKT)
+        assertInntektsgrunnlag(25.januar, a2, INNTEKT)
     }
 }

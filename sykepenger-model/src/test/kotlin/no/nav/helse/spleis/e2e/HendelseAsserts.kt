@@ -1,13 +1,13 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import kotlin.reflect.KClass
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.AktivitetsloggAsserts
 import no.nav.helse.dsl.UNG_PERSON_FNR_2018
-import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.Varslersamler
+import no.nav.helse.dsl.a1
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
@@ -32,14 +32,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 
 internal fun assertInntektshistorikkForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {
     assertEquals(forventetInntekt, inspektør.inntektInspektør.omregnetÅrsinntekt(dato)?.sykepengegrunnlag)
-}
-
-internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {
-    val grunnlagsdataInspektør = inspektør.vilkårsgrunnlaghistorikk().grunnlagsdata(dato).inspektør
-    val sykepengegrunnlagInspektør = grunnlagsdataInspektør.inntektsgrunnlag.inspektør
-    sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[inspektør.orgnummer]?.inspektør.also {
-        assertEquals(forventetInntekt, it?.fastsattÅrsinntekt)
-    }
 }
 
 internal fun AbstractEndToEndTest.assertEtterspurt(løsning: KClass<out Hendelse>, type: Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String) {

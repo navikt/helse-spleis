@@ -5,6 +5,7 @@ import kotlin.reflect.KClass
 import no.nav.helse.august
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -41,7 +42,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
@@ -51,8 +51,8 @@ import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
@@ -80,7 +80,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.fail
 
 internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
@@ -293,11 +292,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        val vilkårsgrunnlaget = inspektør.vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "fant ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlaget.inspektør.inntektsgrunnlag.inspektør
-        val arbeidsgiverInntektsopplysning = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør
-        assertEquals(INNTEKT, arbeidsgiverInntektsopplysning.inntektsopplysning.inspektør.beløp)
-        assertEquals(Arbeidsgiverinntekt::class, arbeidsgiverInntektsopplysning.inntektsopplysning::class)
+        assertInntektsgrunnlag(1.januar, a1, INNTEKT)
     }
 
     @Test

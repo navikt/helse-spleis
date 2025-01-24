@@ -90,7 +90,7 @@ internal abstract class AbstractDslTest {
     private val testPersonAsserter get() = TestPersonAssertions(testperson.inspiser(personInspektør), jurist)
     protected fun personView() = testperson.view()
     protected fun <INSPEKTØR> inspiser(inspektør: (Person) -> INSPEKTØR) = testperson.inspiser(inspektør)
-    protected fun inspektør(orgnummer: String) = inspiser(agInspektør(orgnummer))
+    internal fun inspektør(orgnummer: String) = inspiser(agInspektør(orgnummer))
     protected fun inspektør(vedtaksperiodeId: UUID) = inspiser(personInspektør).vedtaksperiode(vedtaksperiodeId).inspektør
     protected fun inspektørForkastet(vedtaksperiodeId: UUID) = inspiser(personInspektør).forkastetVedtaksperiode(vedtaksperiodeId).inspektør
     protected operator fun <R> String.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> R) =
@@ -208,9 +208,6 @@ internal abstract class AbstractDslTest {
     protected fun TestPerson.TestArbeidsgiver.assertErIkkeOppfylt(skjæringstidspunkt: LocalDate = 1.januar) {
         testArbeidsgiverAsserter.assertErIkkeOppfylt(skjæringstidspunkt)
     }
-
-    protected fun assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt: LocalDate, vararg arbeidsgivere: String) =
-        testPersonAsserter.assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt, *arbeidsgivere)
 
     protected fun assertHarIkkeArbeidsforhold(skjæringstidspunkt: LocalDate, orgnummer: String) {
         testPersonAsserter.assertHarIkkeArbeidsforhold(skjæringstidspunkt, orgnummer)

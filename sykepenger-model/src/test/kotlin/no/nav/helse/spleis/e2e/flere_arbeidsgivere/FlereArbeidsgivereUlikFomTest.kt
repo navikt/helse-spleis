@@ -8,6 +8,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
 import no.nav.helse.dsl.a4
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -39,7 +40,6 @@ import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
@@ -49,8 +49,8 @@ import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.forlengelseTilGodkjenning
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -63,7 +63,6 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlagFlereArbeidsgivere
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.søndag
-import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -106,10 +105,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.let { arbeidsgiverInntektsopplysninger ->
-            assertTrue(arbeidsgiverInntektsopplysninger.single { it.gjelder(a1) }.inntektsopplysning is Arbeidsgiverinntekt)
-            assertTrue(arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inntektsopplysning is SkattSykepengegrunnlag)
-        }
+        assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+        assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
 
         nullstillTilstandsendringer()
         observatør.vedtaksperiodeVenter.clear()
@@ -279,15 +276,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
-        }
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 20000.månedlig, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
     }
 
     @Test
@@ -327,15 +317,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(30000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(18000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-        }
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, 30000.månedlig)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 18000.månedlig)
     }
 
     @Test
@@ -379,15 +362,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(21000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
-        }
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 21000.månedlig, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
     }
 
     @Test
@@ -1194,15 +1170,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(21000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-        }
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 21000.månedlig)
     }
 
     @Test
@@ -1237,15 +1206,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertInstanceOf<SkattSykepengegrunnlag>(it.inntektsopplysning)
-        }
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 20000.månedlig, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
     }
 
     @Test
@@ -1311,15 +1273,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(2.vedtaksperiode))
-        assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(32000.månedlig, it.inntektsopplysning.inspektør.beløp)
-            assertInstanceOf<Arbeidsgiverinntekt>(it.inntektsopplysning)
-        }
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 32000.månedlig)
     }
 
     @Test
@@ -1501,10 +1456,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
-        vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.also { inntekter ->
-            assertEquals(2, inntekter.size)
-            assertInstanceOf<SkattSykepengegrunnlag>(inntekter.getValue(a1).inspektør.inntektsopplysning)
-            assertInstanceOf<SkattSykepengegrunnlag>(inntekter.getValue(a2).inspektør.inntektsopplysning)
+        with(vilkårsgrunnlag) {
+            assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+            assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
         }
 
         assertVarsler(listOf(RV_VV_2, RV_IM_3), 1.vedtaksperiode.filter(orgnummer = a1))
@@ -1537,11 +1491,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         val vilkårsgrunnlag = inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
-        vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.also { inntekter ->
-            assertEquals(3, inntekter.size)
-            assertInstanceOf<SkattSykepengegrunnlag>(inntekter.getValue(a1).inspektør.inntektsopplysning)
-            assertInstanceOf<SkattSykepengegrunnlag>(inntekter.getValue(a2).inspektør.inntektsopplysning)
-            assertInstanceOf<SkattSykepengegrunnlag>(inntekter.getValue(a3).inspektør.inntektsopplysning)
+        with(vilkårsgrunnlag) {
+            assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+            assertInntektsgrunnlag(a2, INGEN, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+            assertInntektsgrunnlag(a3, INGEN, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
         }
 
         assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter(orgnummer = a1))

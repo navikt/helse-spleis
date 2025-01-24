@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
@@ -17,10 +18,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
-import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -51,9 +52,6 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-        assertInntektForDato(INNTEKT, 1.januar, inspektør = inspektør(a1))
-        assertInntektForDato(INNTEKT, 1.januar, inspektør = inspektør(a2))
-
         (inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
             val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
@@ -61,13 +59,8 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
             assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
             assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
             assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-            assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-            sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-                assertEquals(INNTEKT, it.fastsattÅrsinntekt)
-            }
-            sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-                assertEquals(INNTEKT, it.fastsattÅrsinntekt)
-            }
+            assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+            assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT)
         }
 
         håndterOverstyrInntekt(19000.månedlig, a1, 1.januar)
@@ -78,20 +71,15 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         (inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+            assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT, 19000.månedlig, forventetKorrigertInntekt = 19000.månedlig)
+            assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT)
+
             val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
             assertEquals(600000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
             assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
             assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
             assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-            assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-            sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-                assertEquals(19000.månedlig, it.fastsattÅrsinntekt)
-            }
-            sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-                assertEquals(INNTEKT, it.fastsattÅrsinntekt)
-            }
-
         }
     }
 
@@ -103,8 +91,6 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(19000.månedlig, a2, 1.januar)
         assertIngenFunksjonelleFeil()
-        assertInntektForDato(INNTEKT, 1.januar, inspektør = inspektør(a1))
-        assertInntektForDato(19000.månedlig, 1.januar, inspektør = inspektør(a2))
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
@@ -112,13 +98,8 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(INNTEKT, it.fastsattÅrsinntekt)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(19000.månedlig, it.fastsattÅrsinntekt)
-        }
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, 19000.månedlig, forventetKorrigertInntekt = 19000.månedlig)
     }
 
     @Test
@@ -131,8 +112,6 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(19000.månedlig, a2, 1.januar)
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-        assertInntektForDato(19000.månedlig, 1.januar, inspektør = inspektør(a2))
-        assertInntektForDato(INNTEKT, 1.januar, inspektør = inspektør(a1))
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
@@ -140,13 +119,8 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(INNTEKT, it.fastsattÅrsinntekt)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(19000.månedlig, it.fastsattÅrsinntekt)
-        }
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, 19000.månedlig, forventetKorrigertInntekt = 19000.månedlig)
     }
 
     @Test
@@ -162,12 +136,8 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(29000.månedlig, it.fastsattÅrsinntekt)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(INNTEKT, it.fastsattÅrsinntekt)
-        }
+        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT, 29000.månedlig, forventetKorrigertInntekt = 29000.månedlig)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
 
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
