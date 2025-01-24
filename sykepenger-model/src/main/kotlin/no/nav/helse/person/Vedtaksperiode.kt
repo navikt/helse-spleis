@@ -157,13 +157,12 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
-import no.nav.helse.person.inntekt.Inntektsopplysning.Arbeidsgiverinntekt
-import no.nav.helse.person.inntekt.Inntektsopplysning.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
@@ -644,7 +643,7 @@ internal class Vedtaksperiode private constructor(
             inntekt = FaktaavklartInntekt(
                 id = UUID.randomUUID(),
                 inntektsdata = inntektsdata,
-                inntektsopplysning = Arbeidsgiverinntekt
+                inntektsopplysning = Arbeidstakerinntektskilde.Arbeidsgiver
             ),
             aktivitetslogg = aktivitetslogg,
             subsumsjonslogg = this.jurist
@@ -1368,11 +1367,11 @@ internal class Vedtaksperiode private constructor(
 
         val (inntektsdata, opplysning) = if (inntektForArbeidsgiver != null)
             inntektForArbeidsgiver.inntektsdata to when (inntektForArbeidsgiver.kilde) {
-                Inntektsmeldinginntekt.Kilde.Arbeidsgiver -> Arbeidsgiverinntekt
-                Inntektsmeldinginntekt.Kilde.AOrdningen -> SkattSykepengegrunnlag.fraSkatt()
+                Inntektsmeldinginntekt.Kilde.Arbeidsgiver -> Arbeidstakerinntektskilde.Arbeidsgiver
+                Inntektsmeldinginntekt.Kilde.AOrdningen -> Arbeidstakerinntektskilde.AOrdningen.fraSkatt()
             }
         else
-            (skatteopplysning?.inntektsdata ?: Inntektsdata.ingen(hendelse.metadata.meldingsreferanseId, skjæringstidspunkt)) to SkattSykepengegrunnlag.fraSkatt(skatteopplysning?.treMånederFørSkjæringstidspunkt)
+            (skatteopplysning?.inntektsdata ?: Inntektsdata.ingen(hendelse.metadata.meldingsreferanseId, skjæringstidspunkt)) to Arbeidstakerinntektskilde.AOrdningen.fraSkatt(skatteopplysning?.treMånederFørSkjæringstidspunkt)
 
         return FaktaavklartInntekt(
             id = UUID.randomUUID(),
@@ -1392,7 +1391,7 @@ internal class Vedtaksperiode private constructor(
 
         val faktaavklartInntekt = inntektForArbeidsgiver(hendelse, aktivitetsloggTilDenSomVilkårsprøver, skatteopplysning, alleForSammeArbeidsgiver)
 
-        if (faktaavklartInntekt.inntektsopplysning is SkattSykepengegrunnlag)
+        if (faktaavklartInntekt.inntektsopplysning is Arbeidstakerinntektskilde.AOrdningen)
             subsummerBrukAvSkatteopplysninger(arbeidsgiver.organisasjonsnummer, faktaavklartInntekt.inntektsdata, skatteopplysning?.treMånederFørSkjæringstidspunkt ?: emptyList())
         return ArbeidsgiverInntektsopplysning(
             orgnummer = arbeidsgiver.organisasjonsnummer,
@@ -1456,7 +1455,7 @@ internal class Vedtaksperiode private constructor(
                     faktaavklartInntekt = FaktaavklartInntekt(
                         id = UUID.randomUUID(),
                         inntektsdata = skatteopplysning.inntektsdata,
-                        inntektsopplysning = SkattSykepengegrunnlag.fraSkatt(skatteopplysning.treMånederFørSkjæringstidspunkt)
+                        inntektsopplysning = Arbeidstakerinntektskilde.AOrdningen.fraSkatt(skatteopplysning.treMånederFørSkjæringstidspunkt)
                     ),
                     korrigertInntekt = null,
                     skjønnsmessigFastsatt = null

@@ -6,9 +6,9 @@ sealed interface InntektsopplysningUtDto {
 
     data object InfotrygdDto : InntektsopplysningUtDto
 
-    data object ArbeidsgiverinntektDto : InntektsopplysningUtDto
+    data object ArbeidsgiverDto : InntektsopplysningUtDto
 
-    data class SkattSykepengegrunnlagDto(
+    data class AOrdningenDto(
         val inntektsopplysninger: List<SkatteopplysningDto>
     ) : InntektsopplysningUtDto
 }

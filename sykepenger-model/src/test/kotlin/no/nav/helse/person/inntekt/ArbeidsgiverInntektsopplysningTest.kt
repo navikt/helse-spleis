@@ -17,7 +17,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.akti
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedInntektsmelding
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedSaksbehandler
-import no.nav.helse.person.inntekt.Inntektsopplysning.Arbeidsgiverinntekt
+import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.Arbeidsgiver
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.testhelpers.assertNotNull
@@ -59,7 +59,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             assertEquals(3000.månedlig, it[0].fastsattÅrsinntekt)
             assertEquals(2000.månedlig, it[1].fastsattÅrsinntekt)
             assertNotNull(it[0].korrigertInntekt)
-            assertInstanceOf<Arbeidsgiverinntekt>(it[1].faktaavklartInntekt.inntektsopplysning)
+            assertInstanceOf<Arbeidsgiver>(it[1].faktaavklartInntekt.inntektsopplysning)
         }
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
         original.overstyrMedSaksbehandler(forMange).also {
@@ -67,7 +67,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             assertEquals(3000.månedlig, it[0].fastsattÅrsinntekt)
             assertEquals(2000.månedlig, it[1].fastsattÅrsinntekt)
             assertNotNull(it[0].korrigertInntekt)
-            assertInstanceOf<Arbeidsgiverinntekt>(it[1].faktaavklartInntekt.inntektsopplysning)
+            assertInstanceOf<Arbeidsgiver>(it[1].faktaavklartInntekt.inntektsopplysning)
         }
     }
 

@@ -1552,11 +1552,11 @@ private fun FaktaavklartInntektUtDto.tilPersonData() =
         tidsstempel = this.inntektsdata.tidsstempel,
         kilde = when (this.inntektsopplysning) {
             is InntektsopplysningUtDto.InfotrygdDto -> "INFOTRYGD"
-            is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> "INNTEKTSMELDING"
-            is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> "SKATT_SYKEPENGEGRUNNLAG"
+            is InntektsopplysningUtDto.ArbeidsgiverDto -> "INNTEKTSMELDING"
+            is InntektsopplysningUtDto.AOrdningenDto -> "SKATT_SYKEPENGEGRUNNLAG"
         },
         skatteopplysninger = when (val io = this.inntektsopplysning) {
-            is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> io.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
+            is InntektsopplysningUtDto.AOrdningenDto -> io.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
             else -> null
         }
     )

@@ -43,20 +43,20 @@ data class Inntektsdata(
     }
 }
 
-internal sealed interface Inntektsopplysning {
+internal sealed interface Arbeidstakerinntektskilde {
 
-    data object Infotrygd : Inntektsopplysning
-    data object Arbeidsgiverinntekt : Inntektsopplysning
-    data class SkattSykepengegrunnlag(
+    data object Infotrygd : Arbeidstakerinntektskilde
+    data object Arbeidsgiver : Arbeidstakerinntektskilde
+    data class AOrdningen(
         val inntektsopplysninger: List<Skatteopplysning>
-    ) : Inntektsopplysning {
+    ) : Arbeidstakerinntektskilde {
         internal companion object {
             internal fun fraSkatt(inntektsopplysningerTreMånederFørSkjæringstidspunkt: List<Skatteopplysning>? = emptyList()) =
-                SkattSykepengegrunnlag(inntektsopplysningerTreMånederFørSkjæringstidspunkt ?: emptyList())
+                AOrdningen(inntektsopplysningerTreMånederFørSkjæringstidspunkt ?: emptyList())
 
-            internal fun gjenopprett(dto: InntektsopplysningInnDto.SkattSykepengegrunnlagDto): SkattSykepengegrunnlag {
+            internal fun gjenopprett(dto: InntektsopplysningInnDto.AOrdningenDto): AOrdningen {
                 val skatteopplysninger = dto.inntektsopplysninger.map { Skatteopplysning.gjenopprett(it) }
-                return SkattSykepengegrunnlag(
+                return AOrdningen(
                     inntektsopplysninger = skatteopplysninger
                 )
             }
@@ -64,19 +64,19 @@ internal sealed interface Inntektsopplysning {
     }
 
     companion object {
-        internal fun gjenopprett(dto: InntektsopplysningInnDto): Inntektsopplysning {
+        internal fun gjenopprett(dto: InntektsopplysningInnDto): Arbeidstakerinntektskilde {
             return when (dto) {
                 is InntektsopplysningInnDto.InfotrygdDto -> Infotrygd
-                is InntektsopplysningInnDto.ArbeidsgiverinntektDto -> Arbeidsgiverinntekt
-                is InntektsopplysningInnDto.SkattSykepengegrunnlagDto -> SkattSykepengegrunnlag.gjenopprett(dto)
+                is InntektsopplysningInnDto.ArbeidsgiverDto -> Arbeidsgiver
+                is InntektsopplysningInnDto.AOrdningenDto -> AOrdningen.gjenopprett(dto)
             }
         }
     }
 
     fun dto() = when (this) {
         Infotrygd -> InntektsopplysningUtDto.InfotrygdDto
-        Arbeidsgiverinntekt -> InntektsopplysningUtDto.ArbeidsgiverinntektDto
-        is SkattSykepengegrunnlag -> InntektsopplysningUtDto.SkattSykepengegrunnlagDto(
+        Arbeidsgiver -> InntektsopplysningUtDto.ArbeidsgiverDto
+        is AOrdningen -> InntektsopplysningUtDto.AOrdningenDto(
             inntektsopplysninger = inntektsopplysninger.map { it.dto() }
         )
     }

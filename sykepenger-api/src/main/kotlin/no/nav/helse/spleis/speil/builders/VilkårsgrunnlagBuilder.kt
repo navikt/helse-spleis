@@ -211,8 +211,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         val overstyringer = grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.flatMap {
             listOfNotNull(when (it.faktaavklartInntekt.inntektsopplysning) {
                 is InntektsopplysningUtDto.InfotrygdDto -> null
-                is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> null
-                is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> null
+                is InntektsopplysningUtDto.ArbeidsgiverDto -> null
+                is InntektsopplysningUtDto.AOrdningenDto -> null
             }, it.korrigertInntekt?.inntektsdata?.hendelseId, it.skjønnsmessigFastsatt?.inntektsdata?.hendelseId)
         }.toSet()
 
@@ -283,16 +283,16 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         return IOmregnetÅrsinntekt(
             kilde = when (io.inntektsopplysning) {
                 is InntektsopplysningUtDto.InfotrygdDto -> IInntektkilde.Infotrygd
-                is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> IInntektkilde.Inntektsmelding
-                is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> if (io.inntektsdata.beløp.årlig.beløp == 0.0) IInntektkilde.IkkeRapportert else IInntektkilde.AOrdningen
+                is InntektsopplysningUtDto.ArbeidsgiverDto -> IInntektkilde.Inntektsmelding
+                is InntektsopplysningUtDto.AOrdningenDto -> if (io.inntektsdata.beløp.årlig.beløp == 0.0) IInntektkilde.IkkeRapportert else IInntektkilde.AOrdningen
             },
             beløp = io.inntektsdata.beløp.årlig.beløp,
             månedsbeløp = io.inntektsdata.beløp.månedligDouble.beløp,
             inntekterFraAOrdningen = when (val oo = io.inntektsopplysning) {
-                is InntektsopplysningUtDto.ArbeidsgiverinntektDto,
+                is InntektsopplysningUtDto.ArbeidsgiverDto,
                 InntektsopplysningUtDto.InfotrygdDto -> null
 
-                is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> oo.inntektsopplysninger
+                is InntektsopplysningUtDto.AOrdningenDto -> oo.inntektsopplysninger
                     .groupBy { it.måned }
                     .mapValues { (_, verdier) -> verdier.sumOf { it.beløp.beløp } }
                     .map { (måned, månedligSum) ->

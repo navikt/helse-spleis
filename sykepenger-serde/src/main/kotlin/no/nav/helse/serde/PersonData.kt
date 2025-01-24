@@ -352,13 +352,13 @@ data class PersonData(
                         id = this.id,
                         inntektsdata = inntektsdata,
                         inntektsopplysning = when (kilde) {
-                            InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> InntektsopplysningInnDto.SkattSykepengegrunnlagDto(
+                            InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> InntektsopplysningInnDto.AOrdningenDto(
                                 inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
                             )
                             InntektsopplysningskildeData.INFOTRYGD -> InntektsopplysningInnDto.InfotrygdDto
                             InntektsopplysningskildeData.INNTEKTSMELDING -> when (this.inntektsmeldingkilde) {
-                                InntektsmeldingKildeDto.Arbeidsgiver, null -> InntektsopplysningInnDto.ArbeidsgiverinntektDto
-                                InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.SkattSykepengegrunnlagDto(
+                                InntektsmeldingKildeDto.Arbeidsgiver, null -> InntektsopplysningInnDto.ArbeidsgiverDto
+                                InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.AOrdningenDto(
                                     inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
                                 )
                             }

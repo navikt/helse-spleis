@@ -4,9 +4,9 @@ import no.nav.helse.dto.SkatteopplysningDto
 
 sealed interface InntektsopplysningInnDto {
     data object InfotrygdDto : InntektsopplysningInnDto
-    data object ArbeidsgiverinntektDto : InntektsopplysningInnDto
+    data object ArbeidsgiverDto : InntektsopplysningInnDto
 
-    data class SkattSykepengegrunnlagDto(
+    data class AOrdningenDto(
         val inntektsopplysninger: List<SkatteopplysningDto>
     ) : InntektsopplysningInnDto
 }
