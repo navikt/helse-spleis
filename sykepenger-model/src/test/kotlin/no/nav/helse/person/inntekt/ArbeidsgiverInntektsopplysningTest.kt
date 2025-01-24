@@ -59,7 +59,9 @@ internal class ArbeidsgiverInntektsopplysningTest {
             assertEquals(3000.månedlig, it[0].fastsattÅrsinntekt)
             assertEquals(2000.månedlig, it[1].fastsattÅrsinntekt)
             assertNotNull(it[0].korrigertInntekt)
-            assertInstanceOf<Arbeidsgiver>(it[1].faktaavklartInntekt.inntektsopplysning)
+            val inntektsopplysning = it[1].faktaavklartInntekt.inntektsopplysning
+            assertInstanceOf<Inntektsopplysning.Arbeidstaker>(inntektsopplysning)
+            assertInstanceOf<Arbeidsgiver>(inntektsopplysning.kilde)
         }
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
         original.overstyrMedSaksbehandler(forMange).also {
@@ -67,7 +69,9 @@ internal class ArbeidsgiverInntektsopplysningTest {
             assertEquals(3000.månedlig, it[0].fastsattÅrsinntekt)
             assertEquals(2000.månedlig, it[1].fastsattÅrsinntekt)
             assertNotNull(it[0].korrigertInntekt)
-            assertInstanceOf<Arbeidsgiver>(it[1].faktaavklartInntekt.inntektsopplysning)
+            val inntektsopplysning = it[1].faktaavklartInntekt.inntektsopplysning
+            assertInstanceOf<Inntektsopplysning.Arbeidstaker>(inntektsopplysning)
+            assertInstanceOf<Arbeidsgiver>(inntektsopplysning.kilde)
         }
     }
 

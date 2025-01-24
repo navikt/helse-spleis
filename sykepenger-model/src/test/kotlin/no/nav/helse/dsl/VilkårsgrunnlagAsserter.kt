@@ -10,6 +10,8 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.Arbeidsgiver
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.Infotrygd
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.AOrdningen
+import no.nav.helse.person.inntekt.Inntektsopplysning
+import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals
 
@@ -101,7 +103,8 @@ internal fun assertInntektsgrunnlag(
     assertEquals(forventetOmregnetÅrsinntekt, inspektør.omregnetÅrsinntekt) { "omregnet årsinntekt er feil" }
     assertEquals(forventetFastsattÅrsinntekt, inspektør.fastsattÅrsinntekt) { "fastsatt årsinntekt er feil" }
     assertEquals(forventetKorrigertInntekt, inspektør.korrigertInntekt?.inntektsdata?.beløp) { "korrigert inntekt er feil" }
-    assertEquals(forventetkilde, when (inspektør.faktaavklartInntekt.inntektsopplysning) {
+    assertInstanceOf<Inntektsopplysning.Arbeidstaker>(inspektør.faktaavklartInntekt.inntektsopplysning)
+    assertEquals(forventetkilde, when (inspektør.faktaavklartInntekt.inntektsopplysning.kilde) {
         is Arbeidsgiver -> Arbeidstakerkilde.Arbeidsgiver
         Infotrygd -> Arbeidstakerkilde.Arbeidsgiver
         is AOrdningen -> Arbeidstakerkilde.AOrdningen

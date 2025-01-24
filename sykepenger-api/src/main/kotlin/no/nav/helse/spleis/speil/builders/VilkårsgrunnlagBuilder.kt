@@ -8,6 +8,7 @@ import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
+import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.SaksbehandlerUtDto
 import no.nav.helse.dto.serialisering.SkjønnsmessigFastsattUtDto
@@ -209,11 +210,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
 
         val begrensning = SykepengegrunnlagsgrenseDTO.fra6GBegrensning(grunnlagsdata.inntektsgrunnlag.`6G`)
         val overstyringer = grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.flatMap {
-            listOfNotNull(when (it.faktaavklartInntekt.inntektsopplysning) {
-                is InntektsopplysningUtDto.InfotrygdDto -> null
-                is InntektsopplysningUtDto.ArbeidsgiverDto -> null
-                is InntektsopplysningUtDto.AOrdningenDto -> null
-            }, it.korrigertInntekt?.inntektsdata?.hendelseId, it.skjønnsmessigFastsatt?.inntektsdata?.hendelseId)
+            listOfNotNull(it.korrigertInntekt?.inntektsdata?.hendelseId, it.skjønnsmessigFastsatt?.inntektsdata?.hendelseId)
         }.toSet()
 
         return ISpleisGrunnlag(
@@ -272,7 +269,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         )
     }
 
-    private fun omregnetÅrsinntekt(korrigertInntekt: SaksbehandlerUtDto?, io: FaktaavklartInntektUtDto): IOmregnetÅrsinntekt {
+    private fun omregnetÅrsinntekt(korrigertInntekt: SaksbehandlerUtDto?, faktaavklartInntekt: FaktaavklartInntektUtDto): IOmregnetÅrsinntekt {
         if (korrigertInntekt != null) return IOmregnetÅrsinntekt(
             kilde = IInntektkilde.Saksbehandler,
             beløp = korrigertInntekt.inntektsdata.beløp.årlig.beløp,
@@ -281,27 +278,30 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         )
 
         return IOmregnetÅrsinntekt(
-            kilde = when (io.inntektsopplysning) {
-                is InntektsopplysningUtDto.InfotrygdDto -> IInntektkilde.Infotrygd
-                is InntektsopplysningUtDto.ArbeidsgiverDto -> IInntektkilde.Inntektsmelding
-                is InntektsopplysningUtDto.AOrdningenDto -> if (io.inntektsdata.beløp.årlig.beløp == 0.0) IInntektkilde.IkkeRapportert else IInntektkilde.AOrdningen
+            kilde = when (val io = faktaavklartInntekt.inntektsopplysning) {
+                is InntektsopplysningUtDto.ArbeidstakerDto -> when (io.kilde) {
+                    is ArbeidstakerinntektskildeUtDto.InfotrygdDto -> IInntektkilde.Infotrygd
+                    is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> IInntektkilde.Inntektsmelding
+                    is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> if (faktaavklartInntekt.inntektsdata.beløp.årlig.beløp == 0.0) IInntektkilde.IkkeRapportert else IInntektkilde.AOrdningen
+                }
             },
-            beløp = io.inntektsdata.beløp.årlig.beløp,
-            månedsbeløp = io.inntektsdata.beløp.månedligDouble.beløp,
-            inntekterFraAOrdningen = when (val oo = io.inntektsopplysning) {
-                is InntektsopplysningUtDto.ArbeidsgiverDto,
-                InntektsopplysningUtDto.InfotrygdDto -> null
+            beløp = faktaavklartInntekt.inntektsdata.beløp.årlig.beløp,
+            månedsbeløp = faktaavklartInntekt.inntektsdata.beløp.månedligDouble.beløp,
+            inntekterFraAOrdningen = when (val io = faktaavklartInntekt.inntektsopplysning) {
+                is InntektsopplysningUtDto.ArbeidstakerDto -> when (val kilde = io.kilde) {
+                    is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto,
+                    ArbeidstakerinntektskildeUtDto.InfotrygdDto -> null
 
-                is InntektsopplysningUtDto.AOrdningenDto -> oo.inntektsopplysninger
-                    .groupBy { it.måned }
-                    .mapValues { (_, verdier) -> verdier.sumOf { it.beløp.beløp } }
-                    .map { (måned, månedligSum) ->
-                        IInntekterFraAOrdningen(
-                            måned = måned,
-                            sum = månedligSum
-                        )
-                    }
-
+                    is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> kilde.inntektsopplysninger
+                        .groupBy { it.måned }
+                        .mapValues { (_, verdier) -> verdier.sumOf { it.beløp.beløp } }
+                        .map { (måned, månedligSum) ->
+                            IInntekterFraAOrdningen(
+                                måned = måned,
+                                sum = månedligSum
+                            )
+                        }
+                }
             }
         )
     }

@@ -100,14 +100,18 @@ internal data class ArbeidsgiverInntektsopplysning(
         oppfylt: Boolean,
         subsumsjonslogg: Subsumsjonslogg
     ): ArbeidsgiverInntektsopplysning {
+        val inntekterSisteTreMåneder = when (faktaavklartInntekt.inntektsopplysning) {
+            is Inntektsopplysning.Arbeidstaker -> when (faktaavklartInntekt.inntektsopplysning.kilde) {
+                is Arbeidstakerinntektskilde.AOrdningen -> faktaavklartInntekt.inntektsopplysning.kilde.inntektsopplysninger
+                Arbeidstakerinntektskilde.Arbeidsgiver,
+                Arbeidstakerinntektskilde.Infotrygd -> emptyList()
+            }
+        }
         subsumsjonslogg.logg(
             `§ 8-15`(
                 skjæringstidspunkt = omregnetÅrsinntekt.dato,
                 organisasjonsnummer = orgnummer,
-                inntekterSisteTreMåneder = if (korrigertInntekt == null && faktaavklartInntekt.inntektsopplysning is Arbeidstakerinntektskilde.AOrdningen)
-                    faktaavklartInntekt.inntektsopplysning.inntektsopplysninger.subsumsjonsformat()
-                else
-                    emptyList(),
+                inntekterSisteTreMåneder = if (korrigertInntekt == null) inntekterSisteTreMåneder.subsumsjonsformat() else emptyList(),
                 forklaring = forklaring,
                 oppfylt = oppfylt
             )
@@ -236,9 +240,11 @@ internal data class ArbeidsgiverInntektsopplysning(
                     inntektskilde = if (arbeidsgiver.skjønnsmessigFastsatt != null || arbeidsgiver.korrigertInntekt != null)
                         Inntektskilde.Saksbehandler
                     else when (arbeidsgiver.faktaavklartInntekt.inntektsopplysning) {
-                        is Arbeidstakerinntektskilde.AOrdningen -> Inntektskilde.AOrdningen
-                        Arbeidstakerinntektskilde.Arbeidsgiver -> Inntektskilde.Arbeidsgiver
-                        Arbeidstakerinntektskilde.Infotrygd -> Inntektskilde.Arbeidsgiver
+                        is Inntektsopplysning.Arbeidstaker -> when (arbeidsgiver.faktaavklartInntekt.inntektsopplysning.kilde) {
+                            is Arbeidstakerinntektskilde.AOrdningen -> Inntektskilde.AOrdningen
+                            Arbeidstakerinntektskilde.Arbeidsgiver -> Inntektskilde.Arbeidsgiver
+                            Arbeidstakerinntektskilde.Infotrygd -> Inntektskilde.Arbeidsgiver
+                        }
                     }
                 )
             }
@@ -274,7 +280,10 @@ internal data class ArbeidsgiverInntektsopplysning(
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.harGjenbrukbarInntekt(organisasjonsnummer: String) =
-            singleOrNull { it.orgnummer == organisasjonsnummer }?.faktaavklartInntekt?.inntektsopplysning is Arbeidstakerinntektskilde.Arbeidsgiver
+            singleOrNull { it.orgnummer == organisasjonsnummer }
+            ?.faktaavklartInntekt
+            ?.inntektsopplysning?.let { it as? Inntektsopplysning.Arbeidstaker }
+            ?.kilde is Arbeidstakerinntektskilde.Arbeidsgiver
 
         internal fun List<ArbeidsgiverInntektsopplysning>.lagreTidsnæreInntekter(
             skjæringstidspunkt: LocalDate,
@@ -283,7 +292,7 @@ internal data class ArbeidsgiverInntektsopplysning(
             nyArbeidsgiverperiode: Boolean
         ) {
             this.forEach {
-                val tidsnær = it.faktaavklartInntekt.inntektsopplysning as? Arbeidstakerinntektskilde.Arbeidsgiver
+                val tidsnær = (it.faktaavklartInntekt.inntektsopplysning as? Inntektsopplysning.Arbeidstaker)?.kilde as? Arbeidstakerinntektskilde.Arbeidsgiver
                 if (tidsnær != null) {
                     arbeidsgiver.lagreTidsnærInntektsmelding(
                         skjæringstidspunkt = skjæringstidspunkt,
@@ -291,7 +300,7 @@ internal data class ArbeidsgiverInntektsopplysning(
                         arbeidsgiverinntekt = FaktaavklartInntekt(
                             id = UUID.randomUUID(),
                             inntektsdata = it.faktaavklartInntekt.inntektsdata.copy(beløp = it.omregnetÅrsinntekt.beløp),
-                            inntektsopplysning = Arbeidstakerinntektskilde.Arbeidsgiver
+                            inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.Arbeidsgiver)
                         ),
                         aktivitetslogg = aktivitetslogg,
                         nyArbeidsgiverperiode = nyArbeidsgiverperiode

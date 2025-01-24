@@ -12,6 +12,7 @@ import no.nav.helse.dto.SpannerPersonDto.UtbetalingData
 import no.nav.helse.dto.SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData
+import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsopplysningstypeData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagInnslagData
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
@@ -26,6 +27,7 @@ import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.InntektsmeldingUtDto
+import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
@@ -164,9 +166,14 @@ data class SpannerPersonDto(
                 val hendelseId: UUID,
                 val beløp: InntektDto?,
                 val kilde: String,
+                val type: InntektsopplysningstypeData,
                 val tidsstempel: LocalDateTime,
                 val skatteopplysninger: List<SkatteopplysningData>?,
-            )
+            ) {
+                enum class InntektsopplysningstypeData {
+                    ARBEIDSTAKER
+                }
+            }
             data class KorrigertInntektsopplysningData(
                 val id: UUID,
                 val dato: LocalDate,
@@ -1550,14 +1557,21 @@ private fun FaktaavklartInntektUtDto.tilPersonData() =
         hendelseId = this.inntektsdata.hendelseId,
         beløp = this.inntektsdata.beløp.tilPersonData(),
         tidsstempel = this.inntektsdata.tidsstempel,
-        kilde = when (this.inntektsopplysning) {
-            is InntektsopplysningUtDto.InfotrygdDto -> "INFOTRYGD"
-            is InntektsopplysningUtDto.ArbeidsgiverDto -> "INNTEKTSMELDING"
-            is InntektsopplysningUtDto.AOrdningenDto -> "SKATT_SYKEPENGEGRUNNLAG"
+        type = when (this.inntektsopplysning) {
+            is InntektsopplysningUtDto.ArbeidstakerDto -> InntektsopplysningstypeData.ARBEIDSTAKER
+        },
+        kilde = when (val io = this.inntektsopplysning) {
+            is InntektsopplysningUtDto.ArbeidstakerDto -> when (io.kilde) {
+                is ArbeidstakerinntektskildeUtDto.InfotrygdDto -> "INFOTRYGD"
+                is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> "INNTEKTSMELDING"
+                is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> "SKATT_SYKEPENGEGRUNNLAG"
+            }
         },
         skatteopplysninger = when (val io = this.inntektsopplysning) {
-            is InntektsopplysningUtDto.AOrdningenDto -> io.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
-            else -> null
+            is InntektsopplysningUtDto.ArbeidstakerDto -> when (val kilde = io.kilde) {
+                is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> kilde.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
+                else -> null
+            }
         }
     )
 private fun SaksbehandlerUtDto.tilPersonData() =

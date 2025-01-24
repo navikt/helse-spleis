@@ -22,6 +22,7 @@ import no.nav.helse.dto.ProsentdelDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
+import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
@@ -371,7 +372,9 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             innslag.vilkårsgrunnlag[0].also { vilkårsgrunnlagDto ->
                 assertEquals(2, vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
                 vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger[0].also { arbeidsgiverInntektsopplysningDto ->
-                    assertInstanceOf<InntektsopplysningUtDto.ArbeidsgiverDto>(arbeidsgiverInntektsopplysningDto.faktaavklartInntekt.inntektsopplysning)
+                    val inntektsopplysning = arbeidsgiverInntektsopplysningDto.faktaavklartInntekt.inntektsopplysning
+                    assertInstanceOf<InntektsopplysningUtDto.ArbeidstakerDto>(inntektsopplysning)
+                    assertInstanceOf<ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto>(inntektsopplysning.kilde)
                     assertEquals(
                         InntektDto(
                             InntektbeløpDto.Årlig(beløp = 372000.0),
@@ -382,7 +385,9 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                     )
                 }
                 vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger[1].also { arbeidsgiverInntektsopplysningDto ->
-                    assertInstanceOf<InntektsopplysningUtDto.AOrdningenDto>(arbeidsgiverInntektsopplysningDto.faktaavklartInntekt.inntektsopplysning)
+                    val inntektsopplysning = arbeidsgiverInntektsopplysningDto.faktaavklartInntekt.inntektsopplysning
+                    assertInstanceOf<InntektsopplysningUtDto.ArbeidstakerDto>(inntektsopplysning)
+                    assertInstanceOf<ArbeidstakerinntektskildeUtDto.AOrdningenDto>(inntektsopplysning.kilde)
                     assertEquals(
                         InntektDto(
                             InntektbeløpDto.Årlig(beløp = 0.0),

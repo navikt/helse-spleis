@@ -26,6 +26,7 @@ import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.økonomi.Inntekt
 
@@ -92,7 +93,7 @@ class Inntektsmelding(
     internal fun korrigertInntekt() = FaktaavklartInntekt(
         id = UUID.randomUUID(),
         inntektsdata = inntektsdata,
-        inntektsopplysning = Arbeidstakerinntektskilde.Arbeidsgiver
+        inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.Arbeidsgiver)
     )
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg, alternativInntektsdato: LocalDate) {

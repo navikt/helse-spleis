@@ -61,6 +61,7 @@ import no.nav.helse.dto.deserialisering.InntektsdataInnDto
 import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.deserialisering.InntektsmeldingInnDto
+import no.nav.helse.dto.deserialisering.ArbeidstakerinntektskildeInnDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.MaksdatoresultatInnDto
 import no.nav.helse.dto.deserialisering.MinimumSykdomsgradVurderingInnDto
@@ -326,10 +327,14 @@ data class PersonData(
                 val beløp: Double,
                 val tidsstempel: LocalDateTime,
                 val kilde: InntektsopplysningskildeData,
+                val type: InntektsopplysningstypeData?, // todo: nullability kan fjernes når alle personer har fått oppdatert json
                 val skatteopplysninger: List<SkatteopplysningData>?,
                 @Deprecated("denne holder vi på å migrere oss ut av")
                 val inntektsmeldingkilde: InntektsmeldingKildeDto?
             ) {
+                enum class InntektsopplysningstypeData {
+                    ARBEIDSTAKER
+                }
                 enum class InntektsmeldingKildeDto {
                     Arbeidsgiver,
                     AOrdningen
@@ -351,17 +356,21 @@ data class PersonData(
                     return FaktaavklartInntektInnDto(
                         id = this.id,
                         inntektsdata = inntektsdata,
-                        inntektsopplysning = when (kilde) {
-                            InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> InntektsopplysningInnDto.AOrdningenDto(
-                                inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
+                        inntektsopplysning = when (type) {
+                            null, InntektsopplysningstypeData.ARBEIDSTAKER -> InntektsopplysningInnDto.ArbeidstakerDto(
+                                kilde = when (kilde) {
+                                    InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> ArbeidstakerinntektskildeInnDto.AOrdningenDto(
+                                        inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
+                                    )
+                                    InntektsopplysningskildeData.INFOTRYGD -> ArbeidstakerinntektskildeInnDto.InfotrygdDto
+                                    InntektsopplysningskildeData.INNTEKTSMELDING -> when (this.inntektsmeldingkilde) {
+                                        InntektsmeldingKildeDto.Arbeidsgiver, null -> ArbeidstakerinntektskildeInnDto.ArbeidsgiverDto
+                                        InntektsmeldingKildeDto.AOrdningen -> ArbeidstakerinntektskildeInnDto.AOrdningenDto(
+                                            inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
+                                        )
+                                    }
+                                }
                             )
-                            InntektsopplysningskildeData.INFOTRYGD -> InntektsopplysningInnDto.InfotrygdDto
-                            InntektsopplysningskildeData.INNTEKTSMELDING -> when (this.inntektsmeldingkilde) {
-                                InntektsmeldingKildeDto.Arbeidsgiver, null -> InntektsopplysningInnDto.ArbeidsgiverDto
-                                InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.AOrdningenDto(
-                                    inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
-                                )
-                            }
                         }
                     )
                 }

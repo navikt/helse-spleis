@@ -81,6 +81,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
+import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.NyInntektUnderveis
 import no.nav.helse.person.view.PersonView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -713,18 +714,21 @@ class Person private constructor(
         val endretInntektForArbeidsgiver = endretInntektsgrunnlag.inntekter.first { før -> før.inntektFør.orgnummer == organisasjonsnummer }
 
         if (endretInntektForArbeidsgiver.inntektFør.korrigertInntekt == null) {
-            when (endretInntektForArbeidsgiver.inntektFør.faktaavklartInntekt.inntektsopplysning) {
-                Arbeidstakerinntektskilde.Arbeidsgiver -> {
-                    arbeidsgiveropplysningerKorrigert(
-                        PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                            korrigertInntektsmeldingId = endretInntektForArbeidsgiver.inntektFør.faktaavklartInntekt.inntektsdata.hendelseId,
-                            korrigerendeInntektektsopplysningstype = INNTEKTSMELDING,
-                            korrigerendeInntektsopplysningId = inntekt.inntektsdata.hendelseId
+            when (val io = endretInntektForArbeidsgiver.inntektFør.faktaavklartInntekt.inntektsopplysning) {
+                is Inntektsopplysning.Arbeidstaker -> when (io.kilde) {
+                    Arbeidstakerinntektskilde.Arbeidsgiver -> {
+                        arbeidsgiveropplysningerKorrigert(
+                            PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
+                                korrigertInntektsmeldingId = endretInntektForArbeidsgiver.inntektFør.faktaavklartInntekt.inntektsdata.hendelseId,
+                                korrigerendeInntektektsopplysningstype = INNTEKTSMELDING,
+                                korrigerendeInntektsopplysningId = inntekt.inntektsdata.hendelseId
+                            )
                         )
-                    )
-                }
+                    }
 
-                else -> { /* gjør ingenting */ }
+                    is Arbeidstakerinntektskilde.AOrdningen,
+                    Arbeidstakerinntektskilde.Infotrygd -> { /* gjør ingenting */ }
+                }
             }
         }
 
@@ -747,18 +751,20 @@ class Person private constructor(
             .forEach {
                 val opptjeningFom = nyttGrunnlag.opptjening!!.startdatoFor(it.inntektEtter.orgnummer)
                 hendelse.subsummer(subsumsjonslogg, opptjeningFom, it.inntektEtter.orgnummer)
-                when (it.inntektFør.faktaavklartInntekt.inntektsopplysning) {
-                    Arbeidstakerinntektskilde.Arbeidsgiver -> {
-                        arbeidsgiveropplysningerKorrigert(
-                            PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                                korrigertInntektsmeldingId = it.inntektFør.faktaavklartInntekt.inntektsdata.hendelseId,
-                                korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
-                                korrigerendeInntektsopplysningId = hendelse.metadata.meldingsreferanseId
+                when (val io = it.inntektFør.faktaavklartInntekt.inntektsopplysning) {
+                    is Inntektsopplysning.Arbeidstaker -> when (io.kilde) {
+                        Arbeidstakerinntektskilde.Arbeidsgiver -> {
+                            arbeidsgiveropplysningerKorrigert(
+                                PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
+                                    korrigertInntektsmeldingId = it.inntektFør.faktaavklartInntekt.inntektsdata.hendelseId,
+                                    korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
+                                    korrigerendeInntektsopplysningId = hendelse.metadata.meldingsreferanseId
+                                )
                             )
-                        )
+                        }
+                        Arbeidstakerinntektskilde.Infotrygd,
+                        is Arbeidstakerinntektskilde.AOrdningen -> { /* gjør ingenting */ }
                     }
-                    Arbeidstakerinntektskilde.Infotrygd,
-                    is Arbeidstakerinntektskilde.AOrdningen -> { /* gjør ingenting */ }
                 }
             }
 

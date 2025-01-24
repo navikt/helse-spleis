@@ -7,15 +7,20 @@ import no.nav.helse.dto.deserialisering.FaktaavklartInntektInnDto
 import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
-import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.Arbeidsgiver
 
 internal data class FaktaavklartInntekt(
     val id: UUID,
     val inntektsdata: Inntektsdata,
-    val inntektsopplysning: Arbeidstakerinntektskilde
+    val inntektsopplysning: Inntektsopplysning
 ) {
-    internal fun funksjoneltLik(other: FaktaavklartInntekt) =
-        this.inntektsopplysning::class == other.inntektsopplysning::class && this.inntektsdata.funksjoneltLik(other.inntektsdata)
+    internal fun funksjoneltLik(other: FaktaavklartInntekt): Boolean {
+        if (!this.inntektsdata.funksjoneltLik(other.inntektsdata)) return false
+        return when (this.inntektsopplysning) {
+            is Inntektsopplysning.Arbeidstaker -> when (other.inntektsopplysning) {
+                is Inntektsopplysning.Arbeidstaker -> this.inntektsopplysning.kilde::class == other.inntektsopplysning.kilde::class
+            }
+        }
+    }
 
     internal fun kopierTidsnærOpplysning(
         nyDato: LocalDate,
@@ -23,7 +28,8 @@ internal data class FaktaavklartInntekt(
         nyArbeidsgiverperiode: Boolean,
         inntektshistorikk: Inntektshistorikk
     ) {
-        if (inntektsopplysning !is Arbeidsgiver) return
+        if (inntektsopplysning !is Inntektsopplysning.Arbeidstaker) return
+        if (inntektsopplysning.kilde !is Arbeidstakerinntektskilde.Arbeidsgiver) return
         if (nyDato == this.inntektsdata.dato) return
         val dagerMellom = ChronoUnit.DAYS.between(this.inntektsdata.dato, nyDato)
         if (dagerMellom >= 60) {
@@ -48,7 +54,7 @@ internal data class FaktaavklartInntekt(
         internal fun gjenopprett(dto: FaktaavklartInntektInnDto) = FaktaavklartInntekt(
             id = dto.id,
             inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata),
-            inntektsopplysning = Arbeidstakerinntektskilde.gjenopprett(dto.inntektsopplysning)
+            inntektsopplysning = Inntektsopplysning.gjenopprett(dto.inntektsopplysning)
         )
 
     }
