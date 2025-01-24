@@ -16,7 +16,9 @@ import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt.Kilde
+import no.nav.helse.person.inntekt.Inntektsopplysning.Arbeidsgiverinntekt
+import no.nav.helse.person.inntekt.Inntektsopplysning.Infotrygd
+import no.nav.helse.person.inntekt.Inntektsopplysning.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.yearMonth
@@ -238,13 +240,8 @@ internal data class ArbeidsgiverInntektsopplysning(
                         Inntektskilde.Saksbehandler
                     else when (arbeidsgiver.faktaavklartInntekt.inntektsopplysning) {
                         is SkattSykepengegrunnlag -> Inntektskilde.AOrdningen
-
-                        is Arbeidsgiverinntekt -> when (arbeidsgiver.faktaavklartInntekt.inntektsopplysning.kilde) {
-                            Kilde.Arbeidsgiver -> Inntektskilde.Arbeidsgiver
-                            Kilde.AOrdningen -> Inntektskilde.AOrdningen
-                        }
-
-                        is Infotrygd -> Inntektskilde.Arbeidsgiver
+                        Arbeidsgiverinntekt -> Inntektskilde.Arbeidsgiver
+                        Infotrygd -> Inntektskilde.Arbeidsgiver
                     }
                 )
             }
@@ -297,7 +294,7 @@ internal data class ArbeidsgiverInntektsopplysning(
                         arbeidsgiverinntekt = FaktaavklartInntekt(
                             id = UUID.randomUUID(),
                             inntektsdata = it.faktaavklartInntekt.inntektsdata.copy(beløp = it.omregnetÅrsinntekt.beløp),
-                            inntektsopplysning = Arbeidsgiverinntekt(kilde = tidsnær.kilde)
+                            inntektsopplysning = Arbeidsgiverinntekt
                         ),
                         aktivitetslogg = aktivitetslogg,
                         nyArbeidsgiverperiode = nyArbeidsgiverperiode

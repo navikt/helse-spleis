@@ -4,6 +4,7 @@ import java.util.*
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -55,7 +56,6 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -199,7 +199,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         a2 {
             håndterSøknad(februar)
             assertInntektsgrunnlag(1.januar, a1, 20_000.månedlig)
-            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
             håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(25_000.månedlig), OppgittRefusjon(25_000.månedlig, emptyList()))
         }
         a1 {

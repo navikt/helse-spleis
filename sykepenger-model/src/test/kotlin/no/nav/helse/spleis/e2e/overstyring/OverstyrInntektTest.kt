@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import no.nav.helse.desember
+import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -18,7 +19,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
@@ -100,7 +100,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a2, 500.daglig, emptyList()))
         )
         assertInntektsgrunnlag(1.januar, a1, INNTEKT, INNTEKT)
-        assertInntektsgrunnlag(1.januar, a2, INGEN, 500.daglig, forventetKorrigertInntekt = 500.daglig, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+        assertInntektsgrunnlag(1.januar, a2, INGEN, 500.daglig, forventetKorrigertInntekt = 500.daglig, forventetkilde = Arbeidstakerkilde.AOrdningen)
     }
 
     @Test

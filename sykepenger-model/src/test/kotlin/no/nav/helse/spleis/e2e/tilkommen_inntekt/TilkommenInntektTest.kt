@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.*
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
@@ -23,7 +24,6 @@ import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpsdag
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.økonomi.Inntekt.Companion.K
@@ -425,7 +425,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsler(listOf(Varselkode.RV_SV_5, Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
             assertInntektsgrunnlag(1.januar, a1, INNTEKT)
-            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
     }
 
@@ -453,7 +453,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             assertInntektsgrunnlag(1.januar, a1, inntekt)
-            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
     }
 

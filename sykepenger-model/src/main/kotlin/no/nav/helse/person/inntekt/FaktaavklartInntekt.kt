@@ -7,7 +7,7 @@ import no.nav.helse.dto.deserialisering.FaktaavklartInntektInnDto
 import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt.Kilde
+import no.nav.helse.person.inntekt.Inntektsopplysning.Arbeidsgiverinntekt
 
 internal data class FaktaavklartInntekt(
     val id: UUID,
@@ -34,10 +34,7 @@ internal data class FaktaavklartInntekt(
             aktivitetslogg.varsel(RV_IV_7)
         }
 
-        inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), this.inntektsdata.copy(dato = nyDato), when (inntektsopplysning.kilde) {
-            Kilde.Arbeidsgiver -> Inntektsmeldinginntekt.Kilde.Arbeidsgiver
-            Kilde.AOrdningen -> Inntektsmeldinginntekt.Kilde.AOrdningen
-        }))
+        inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), this.inntektsdata.copy(dato = nyDato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
         aktivitetslogg.info("Kopierte inntekt som lå lagret på ${this.inntektsdata.dato} til $nyDato")
     }
 

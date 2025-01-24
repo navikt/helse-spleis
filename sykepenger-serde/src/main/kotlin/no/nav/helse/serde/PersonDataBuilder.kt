@@ -826,14 +826,7 @@ private fun FaktaavklartInntektUtDto.tilPersonData() = PersonData.Vilkårsgrunnl
         is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> inntektsopplysning.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
         else -> null
     },
-    inntektsmeldingkilde = when (val inntektsopplysning = this.inntektsopplysning) {
-        is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> when (inntektsopplysning.kilde) {
-            InntektsopplysningUtDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.Arbeidsgiver
-            InntektsopplysningUtDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto.AOrdningen
-        }
-
-        else -> null
-    }
+    inntektsmeldingkilde = null
 )
 
 private fun SaksbehandlerUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.KorrigertInntektsopplysningData(

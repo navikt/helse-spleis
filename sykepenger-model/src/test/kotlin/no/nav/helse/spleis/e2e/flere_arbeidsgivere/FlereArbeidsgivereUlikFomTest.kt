@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -39,7 +40,6 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
@@ -106,7 +106,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         assertInntektsgrunnlag(1.januar, a1, INNTEKT)
-        assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+        assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
 
         nullstillTilstandsendringer()
         observatør.vedtaksperiodeVenter.clear()
@@ -275,7 +275,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
         assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 20000.månedlig, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 20000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
     }
 
     @Test
@@ -361,7 +361,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
         assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 21000.månedlig, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 21000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
     }
 
     @Test
@@ -1205,7 +1205,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
         assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 20000.månedlig, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 20000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
     }
 
     @Test
@@ -1453,8 +1453,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
         with(vilkårsgrunnlag) {
-            assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
-            assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+            assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
 
         assertVarsler(listOf(RV_VV_2, RV_IM_3), 1.vedtaksperiode.filter(orgnummer = a1))
@@ -1488,9 +1488,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlag = inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
         with(vilkårsgrunnlag) {
-            assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
-            assertInntektsgrunnlag(a2, INGEN, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
-            assertInntektsgrunnlag(a3, INGEN, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+            assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(a2, INGEN, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(a3, INGEN, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
 
         assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter(orgnummer = a1))

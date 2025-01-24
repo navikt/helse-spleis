@@ -327,6 +327,7 @@ data class PersonData(
                 val tidsstempel: LocalDateTime,
                 val kilde: InntektsopplysningskildeData,
                 val skatteopplysninger: List<SkatteopplysningData>?,
+                @Deprecated("denne holder vi på å migrere oss ut av")
                 val inntektsmeldingkilde: InntektsmeldingKildeDto?
             ) {
                 enum class InntektsmeldingKildeDto {
@@ -355,12 +356,12 @@ data class PersonData(
                                 inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
                             )
                             InntektsopplysningskildeData.INFOTRYGD -> InntektsopplysningInnDto.InfotrygdDto
-                            InntektsopplysningskildeData.INNTEKTSMELDING -> InntektsopplysningInnDto.ArbeidsgiverinntektDto(
-                                kilde = when (this.inntektsmeldingkilde!!) {
-                                    InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver
-                                    InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen
-                                }
-                            )
+                            InntektsopplysningskildeData.INNTEKTSMELDING -> when (this.inntektsmeldingkilde) {
+                                InntektsmeldingKildeDto.Arbeidsgiver, null -> InntektsopplysningInnDto.ArbeidsgiverinntektDto
+                                InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.SkattSykepengegrunnlagDto(
+                                    inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
+                                )
+                            }
                         }
                     )
                 }

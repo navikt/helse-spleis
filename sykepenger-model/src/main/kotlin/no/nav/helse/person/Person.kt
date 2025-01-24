@@ -79,11 +79,11 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.inntekt.Infotrygd
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
+import no.nav.helse.person.inntekt.Inntektsopplysning.Arbeidsgiverinntekt
+import no.nav.helse.person.inntekt.Inntektsopplysning.Infotrygd
+import no.nav.helse.person.inntekt.Inntektsopplysning.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.NyInntektUnderveis
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.view.PersonView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -716,7 +716,7 @@ class Person private constructor(
 
         if (endretInntektForArbeidsgiver.inntektFør.korrigertInntekt == null) {
             when (endretInntektForArbeidsgiver.inntektFør.faktaavklartInntekt.inntektsopplysning) {
-                is Arbeidsgiverinntekt -> {
+                Arbeidsgiverinntekt -> {
                     arbeidsgiveropplysningerKorrigert(
                         PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
                             korrigertInntektsmeldingId = endretInntektForArbeidsgiver.inntektFør.faktaavklartInntekt.inntektsdata.hendelseId,
@@ -750,7 +750,7 @@ class Person private constructor(
                 val opptjeningFom = nyttGrunnlag.opptjening!!.startdatoFor(it.inntektEtter.orgnummer)
                 hendelse.subsummer(subsumsjonslogg, opptjeningFom, it.inntektEtter.orgnummer)
                 when (it.inntektFør.faktaavklartInntekt.inntektsopplysning) {
-                    is Arbeidsgiverinntekt -> {
+                    Arbeidsgiverinntekt -> {
                         arbeidsgiveropplysningerKorrigert(
                             PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
                                 korrigertInntektsmeldingId = it.inntektFør.faktaavklartInntekt.inntektsdata.hendelseId,
@@ -759,7 +759,7 @@ class Person private constructor(
                             )
                         )
                     }
-                    is Infotrygd,
+                    Infotrygd,
                     is SkattSykepengegrunnlag -> { /* gjør ingenting */ }
                 }
             }

@@ -281,9 +281,9 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         )
 
         return IOmregnetÅrsinntekt(
-            kilde = when (val oo = io.inntektsopplysning) {
+            kilde = when (io.inntektsopplysning) {
                 is InntektsopplysningUtDto.InfotrygdDto -> IInntektkilde.Infotrygd
-                is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> if (oo.kilde == InntektsopplysningUtDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen) IInntektkilde.AOrdningen else IInntektkilde.Inntektsmelding
+                is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> IInntektkilde.Inntektsmelding
                 is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> if (io.inntektsdata.beløp.årlig.beløp == 0.0) IInntektkilde.IkkeRapportert else IInntektkilde.AOrdningen
             },
             beløp = io.inntektsdata.beløp.årlig.beløp,

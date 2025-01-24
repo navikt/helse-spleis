@@ -3,7 +3,9 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt.Kilde
+import no.nav.helse.person.inntekt.Inntektsopplysning.Arbeidsgiverinntekt
+import no.nav.helse.person.inntekt.Inntektsopplysning.Infotrygd
+import no.nav.helse.person.inntekt.Inntektsopplysning.SkattSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 
 internal fun arbeidsgiverinntekt(
@@ -13,7 +15,7 @@ internal fun arbeidsgiverinntekt(
     FaktaavklartInntekt(
         id = UUID.randomUUID(),
         inntektsdata = Inntektsdata(UUID.randomUUID(), dato, beløp, LocalDateTime.now()),
-        inntektsopplysning = Arbeidsgiverinntekt(kilde = Kilde.Arbeidsgiver)
+        inntektsopplysning = Arbeidsgiverinntekt
     )
 
 internal fun infotrygd(id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) =

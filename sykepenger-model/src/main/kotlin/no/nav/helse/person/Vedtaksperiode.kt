@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
@@ -157,13 +157,13 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.Inntektsgrunnlag
-import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsdata
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
+import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsopplysning.Arbeidsgiverinntekt
+import no.nav.helse.person.inntekt.Inntektsopplysning.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
@@ -644,7 +644,7 @@ internal class Vedtaksperiode private constructor(
             inntekt = FaktaavklartInntekt(
                 id = UUID.randomUUID(),
                 inntektsdata = inntektsdata,
-                inntektsopplysning = Arbeidsgiverinntekt(kilde = Arbeidsgiverinntekt.Kilde.Arbeidsgiver)
+                inntektsopplysning = Arbeidsgiverinntekt
             ),
             aktivitetslogg = aktivitetslogg,
             subsumsjonslogg = this.jurist
@@ -1367,7 +1367,10 @@ internal class Vedtaksperiode private constructor(
             }
 
         val (inntektsdata, opplysning) = if (inntektForArbeidsgiver != null)
-            inntektForArbeidsgiver.inntektsdata to Arbeidsgiverinntekt.fraInntektsmelding(inntektForArbeidsgiver)
+            inntektForArbeidsgiver.inntektsdata to when (inntektForArbeidsgiver.kilde) {
+                Inntektsmeldinginntekt.Kilde.Arbeidsgiver -> Arbeidsgiverinntekt
+                Inntektsmeldinginntekt.Kilde.AOrdningen -> SkattSykepengegrunnlag.fraSkatt()
+            }
         else
             (skatteopplysning?.inntektsdata ?: Inntektsdata.ingen(hendelse.metadata.meldingsreferanseId, skjæringstidspunkt)) to SkattSykepengegrunnlag.fraSkatt(skatteopplysning?.treMånederFørSkjæringstidspunkt)
 

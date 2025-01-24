@@ -5,6 +5,7 @@ import no.nav.helse.april
 import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
@@ -49,7 +50,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.assertNotNull
@@ -119,7 +119,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             val inntekter = inspektør.vilkårsgrunnlag(1.januar)?.inspektør!!
             assertInntektsgrunnlag(inntekter, a1, INNTEKT)
             assertInntektsgrunnlag(inntekter, a2, INNTEKT)
-            assertInntektsgrunnlag(inntekter, a3, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+            assertInntektsgrunnlag(inntekter, a3, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -364,7 +364,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             assertInntektsgrunnlag(19.januar, a1, INNTEKT)
-            assertInntektsgrunnlag(19.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+            assertInntektsgrunnlag(19.januar, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
         a1 {
             nyPeriode(24.januar til 31.januar)
@@ -436,7 +436,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             assertInntektsgrunnlag(1.januar, a1, INNTEKT)
-            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         }
         a2 {
@@ -496,7 +496,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalt()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertInntektsgrunnlag(1.januar, a1, INNTEKT)
-            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
 
         a2 {
@@ -511,7 +511,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertBeløpstidslinje(Beløpstidslinje.fra(februar, INNTEKT, a2Inntektsmelding.arbeidsgiver), inspektør(a2).refusjon(1.vedtaksperiode))
 
             assertInntektsgrunnlag(1.januar, a1, INNTEKT)
-            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
     }
 
@@ -607,7 +607,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertEquals(2, inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.view().inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
             assertInntektsgrunnlag(1.januar, a1, INNTEKT)
-            assertInntektsgrunnlag(1.januar, a2, INGEN, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, a2, INGEN, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
     }
 
@@ -1254,7 +1254,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
             assertEquals(UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE, a1.inspektør.inntektskilde(2.vedtaksperiode))
             assertInntektsgrunnlag(3.januar, a1, INNTEKT)
-            assertInntektsgrunnlag(3.januar, a2, INGEN, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
+            assertInntektsgrunnlag(3.januar, a2, INGEN, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
         a2 {
             val vilkårsgrunnlag = a2.inspektør.vilkårsgrunnlag(1.vedtaksperiode)

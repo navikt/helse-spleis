@@ -166,7 +166,6 @@ data class SpannerPersonDto(
                 val kilde: String,
                 val tidsstempel: LocalDateTime,
                 val skatteopplysninger: List<SkatteopplysningData>?,
-                val inntektsmeldingkilde: ArbeidsgiverData.InntektsmeldingData.KildeData?
             )
             data class KorrigertInntektsopplysningData(
                 val id: UUID,
@@ -1558,14 +1557,6 @@ private fun FaktaavklartInntektUtDto.tilPersonData() =
         },
         skatteopplysninger = when (val io = this.inntektsopplysning) {
             is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> io.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
-            else -> null
-        },
-        inntektsmeldingkilde = when (val io = this.inntektsopplysning) {
-            is InntektsopplysningUtDto.ArbeidsgiverinntektDto -> when (io.kilde) {
-                InntektsopplysningUtDto.ArbeidsgiverinntektDto.KildeDto.Arbeidsgiver -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.Arbeidsgiver
-                InntektsopplysningUtDto.ArbeidsgiverinntektDto.KildeDto.AOrdningen -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.AOrdningen
-            }
-
             else -> null
         }
     )

@@ -7,9 +7,9 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.Arbeidsgiverinntekt
-import no.nav.helse.person.inntekt.Infotrygd
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsopplysning.Arbeidsgiverinntekt
+import no.nav.helse.person.inntekt.Inntektsopplysning.Infotrygd
+import no.nav.helse.person.inntekt.Inntektsopplysning.SkattSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals
 
@@ -20,7 +20,7 @@ internal fun TestPerson.TestArbeidsgiver.assertInntektsgrunnlag(
     forventetOmregnetÅrsinntekt: Inntekt = forventetFaktaavklartInntekt,
     forventetFastsattÅrsinntekt: Inntekt = forventetOmregnetÅrsinntekt,
     forventetKorrigertInntekt: Inntekt? = null,
-    forventetkilde: Arbeidsgiverinntekt.Kilde = Arbeidsgiverinntekt.Kilde.Arbeidsgiver
+    forventetkilde: Arbeidstakerkilde = Arbeidstakerkilde.Arbeidsgiver
 ) {
     assertInntektsgrunnlag(inspektør.vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør, orgnummer, forventetFaktaavklartInntekt, forventetOmregnetÅrsinntekt, forventetFastsattÅrsinntekt, forventetKorrigertInntekt, forventetkilde)
 }
@@ -31,7 +31,7 @@ internal fun AbstractDslTest.assertInntektsgrunnlag(
     forventetOmregnetÅrsinntekt: Inntekt = forventetFaktaavklartInntekt,
     forventetFastsattÅrsinntekt: Inntekt = forventetOmregnetÅrsinntekt,
     forventetKorrigertInntekt: Inntekt? = null,
-    forventetkilde: Arbeidsgiverinntekt.Kilde = Arbeidsgiverinntekt.Kilde.Arbeidsgiver
+    forventetkilde: Arbeidstakerkilde = Arbeidstakerkilde.Arbeidsgiver
 ) {
     assertInntektsgrunnlag(inspektør(orgnummer).vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør, orgnummer, forventetFaktaavklartInntekt, forventetOmregnetÅrsinntekt, forventetFastsattÅrsinntekt, forventetKorrigertInntekt, forventetkilde)
 }
@@ -42,7 +42,7 @@ internal fun AbstractPersonTest.assertInntektsgrunnlag(
     forventetOmregnetÅrsinntekt: Inntekt = forventetFaktaavklartInntekt,
     forventetFastsattÅrsinntekt: Inntekt = forventetOmregnetÅrsinntekt,
     forventetKorrigertInntekt: Inntekt? = null,
-    forventetkilde: Arbeidsgiverinntekt.Kilde = Arbeidsgiverinntekt.Kilde.Arbeidsgiver
+    forventetkilde: Arbeidstakerkilde = Arbeidstakerkilde.Arbeidsgiver
 ) {
     assertInntektsgrunnlag(inspektør.vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør, orgnummer, forventetFaktaavklartInntekt, forventetOmregnetÅrsinntekt, forventetFastsattÅrsinntekt, forventetKorrigertInntekt, forventetkilde)
 }
@@ -53,7 +53,7 @@ internal fun VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.assertInntektsgru
     forventetOmregnetÅrsinntekt: Inntekt = forventetFaktaavklartInntekt,
     forventetFastsattÅrsinntekt: Inntekt = forventetOmregnetÅrsinntekt,
     forventetKorrigertInntekt: Inntekt? = null,
-    forventetkilde: Arbeidsgiverinntekt.Kilde = Arbeidsgiverinntekt.Kilde.Arbeidsgiver
+    forventetkilde: Arbeidstakerkilde = Arbeidstakerkilde.Arbeidsgiver
 ) {
     assertInntektsgrunnlag(inspektør, orgnummer, forventetFaktaavklartInntekt, forventetOmregnetÅrsinntekt, forventetFastsattÅrsinntekt, forventetKorrigertInntekt, forventetkilde)
 }
@@ -62,7 +62,7 @@ internal fun ArbeidsgiverInntektsopplysning.assertInntektsgrunnlag(
     forventetOmregnetÅrsinntekt: Inntekt = forventetFaktaavklartInntekt,
     forventetFastsattÅrsinntekt: Inntekt = forventetOmregnetÅrsinntekt,
     forventetKorrigertInntekt: Inntekt? = null,
-    forventetkilde: Arbeidsgiverinntekt.Kilde = Arbeidsgiverinntekt.Kilde.Arbeidsgiver
+    forventetkilde: Arbeidstakerkilde = Arbeidstakerkilde.Arbeidsgiver
 ) {
     assertInntektsgrunnlag(inspektør, forventetFaktaavklartInntekt, forventetOmregnetÅrsinntekt, forventetFastsattÅrsinntekt, forventetKorrigertInntekt, forventetkilde)
 }
@@ -74,7 +74,7 @@ internal fun assertInntektsgrunnlag(
     forventetOmregnetÅrsinntekt: Inntekt = forventetFaktaavklartInntekt,
     forventetFastsattÅrsinntekt: Inntekt = forventetOmregnetÅrsinntekt,
     forventetKorrigertInntekt: Inntekt? = null,
-    forventetkilde: Arbeidsgiverinntekt.Kilde = Arbeidsgiverinntekt.Kilde.Arbeidsgiver
+    forventetkilde: Arbeidstakerkilde = Arbeidstakerkilde.Arbeidsgiver
 ) {
     val actual = inspektør
         .inntektsgrunnlag
@@ -84,6 +84,10 @@ internal fun assertInntektsgrunnlag(
     assertInntektsgrunnlag(actual.inspektør, forventetFaktaavklartInntekt, forventetOmregnetÅrsinntekt, forventetFastsattÅrsinntekt, forventetKorrigertInntekt, forventetkilde)
 }
 
+internal enum class Arbeidstakerkilde {
+    Arbeidsgiver,
+    AOrdningen
+}
 
 internal fun assertInntektsgrunnlag(
     inspektør: ArbeidsgiverInntektsopplysningInspektør,
@@ -91,15 +95,15 @@ internal fun assertInntektsgrunnlag(
     forventetOmregnetÅrsinntekt: Inntekt = forventetFaktaavklartInntekt,
     forventetFastsattÅrsinntekt: Inntekt = forventetOmregnetÅrsinntekt,
     forventetKorrigertInntekt: Inntekt? = null,
-    forventetkilde: Arbeidsgiverinntekt.Kilde = Arbeidsgiverinntekt.Kilde.Arbeidsgiver
+    forventetkilde: Arbeidstakerkilde = Arbeidstakerkilde.Arbeidsgiver
 ) {
     assertEquals(forventetFaktaavklartInntekt, inspektør.faktaavklartInntekt.inntektsdata.beløp) { "faktaavklart inntekt er feil" }
     assertEquals(forventetOmregnetÅrsinntekt, inspektør.omregnetÅrsinntekt) { "omregnet årsinntekt er feil" }
     assertEquals(forventetFastsattÅrsinntekt, inspektør.fastsattÅrsinntekt) { "fastsatt årsinntekt er feil" }
     assertEquals(forventetKorrigertInntekt, inspektør.korrigertInntekt?.inntektsdata?.beløp) { "korrigert inntekt er feil" }
     assertEquals(forventetkilde, when (inspektør.faktaavklartInntekt.inntektsopplysning) {
-        is Arbeidsgiverinntekt -> inspektør.faktaavklartInntekt.inntektsopplysning.kilde
-        Infotrygd -> Arbeidsgiverinntekt.Kilde.Arbeidsgiver
-        is SkattSykepengegrunnlag -> Arbeidsgiverinntekt.Kilde.AOrdningen
+        is Arbeidsgiverinntekt -> Arbeidstakerkilde.Arbeidsgiver
+        Infotrygd -> Arbeidstakerkilde.Arbeidsgiver
+        is SkattSykepengegrunnlag -> Arbeidstakerkilde.AOrdningen
     })
 }

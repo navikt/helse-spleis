@@ -6,14 +6,7 @@ sealed interface InntektsopplysningUtDto {
 
     data object InfotrygdDto : InntektsopplysningUtDto
 
-    data class ArbeidsgiverinntektDto(
-        val kilde: KildeDto
-    ) : InntektsopplysningUtDto {
-        enum class KildeDto {
-            Arbeidsgiver,
-            AOrdningen
-        }
-    }
+    data object ArbeidsgiverinntektDto : InntektsopplysningUtDto
 
     data class SkattSykepengegrunnlagDto(
         val inntektsopplysninger: List<SkatteopplysningDto>

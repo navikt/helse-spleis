@@ -45,15 +45,39 @@ data class Inntektsdata(
 
 internal sealed interface Inntektsopplysning {
 
+    data object Infotrygd : Inntektsopplysning
+    data object Arbeidsgiverinntekt : Inntektsopplysning
+    data class SkattSykepengegrunnlag(
+        val inntektsopplysninger: List<Skatteopplysning>
+    ) : Inntektsopplysning {
+        internal companion object {
+            internal fun fraSkatt(inntektsopplysningerTreMånederFørSkjæringstidspunkt: List<Skatteopplysning>? = emptyList()) =
+                SkattSykepengegrunnlag(inntektsopplysningerTreMånederFørSkjæringstidspunkt ?: emptyList())
+
+            internal fun gjenopprett(dto: InntektsopplysningInnDto.SkattSykepengegrunnlagDto): SkattSykepengegrunnlag {
+                val skatteopplysninger = dto.inntektsopplysninger.map { Skatteopplysning.gjenopprett(it) }
+                return SkattSykepengegrunnlag(
+                    inntektsopplysninger = skatteopplysninger
+                )
+            }
+        }
+    }
+
     companion object {
         internal fun gjenopprett(dto: InntektsopplysningInnDto): Inntektsopplysning {
             return when (dto) {
                 is InntektsopplysningInnDto.InfotrygdDto -> Infotrygd
-                is InntektsopplysningInnDto.ArbeidsgiverinntektDto -> Arbeidsgiverinntekt.gjenopprett(dto)
+                is InntektsopplysningInnDto.ArbeidsgiverinntektDto -> Arbeidsgiverinntekt
                 is InntektsopplysningInnDto.SkattSykepengegrunnlagDto -> SkattSykepengegrunnlag.gjenopprett(dto)
             }
         }
     }
 
-    fun dto(): InntektsopplysningUtDto
+    fun dto() = when (this) {
+        Infotrygd -> InntektsopplysningUtDto.InfotrygdDto
+        Arbeidsgiverinntekt -> InntektsopplysningUtDto.ArbeidsgiverinntektDto
+        is SkattSykepengegrunnlag -> InntektsopplysningUtDto.SkattSykepengegrunnlagDto(
+            inntektsopplysninger = inntektsopplysninger.map { it.dto() }
+        )
+    }
 }
