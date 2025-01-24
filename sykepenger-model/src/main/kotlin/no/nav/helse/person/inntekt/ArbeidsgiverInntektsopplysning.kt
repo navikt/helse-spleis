@@ -17,7 +17,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt.Kilde
-import no.nav.helse.person.inntekt.FaktaavklartInntekt.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.yearMonth
@@ -218,10 +217,6 @@ internal data class ArbeidsgiverInntektsopplysning(
         ) {
             if (none { opptjening.startdatoFor(it.orgnummer) == null }) return
             aktivitetslogg.varsel(Varselkode.RV_VV_1)
-        }
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.markerFlereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {
-            return map { it.faktaavklartInntekt }.markerFlereArbeidsgivere(aktivitetslogg)
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.fastsattInntekt(

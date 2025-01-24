@@ -364,7 +364,6 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
 
             assertEquals(100, inspektør.utbetalinger(1.vedtaksperiode).last().utbetalingstidslinje[17.januar].økonomi.inspektør.totalGrad)
-            assertVarsler(listOf(Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
         }
     }
 

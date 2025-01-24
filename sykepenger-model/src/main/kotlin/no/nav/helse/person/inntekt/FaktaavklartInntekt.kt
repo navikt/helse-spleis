@@ -2,11 +2,10 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.deserialisering.FaktaavklartInntektInnDto
 import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.inntekt.Arbeidsgiverinntekt.Kilde
 
@@ -49,11 +48,6 @@ internal data class FaktaavklartInntekt(
     )
 
     internal companion object {
-        internal fun List<FaktaavklartInntekt>.markerFlereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {
-            if (distinctBy { it.inntektsdata.dato }.size <= 1 && none { it.inntektsopplysning is SkattSykepengegrunnlag }) return
-            aktivitetslogg.varsel(Varselkode.RV_VV_2)
-        }
-
         internal fun gjenopprett(dto: FaktaavklartInntektInnDto) = FaktaavklartInntekt(
             id = dto.id,
             inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata),

@@ -216,11 +216,13 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a3 { håndterInntektsmelding(listOf(2.januar til 17.januar)) }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+            assertInntektsgrunnlag(1.januar, a2, INNTEKT)
+            assertInntektsgrunnlag(1.januar, a3, INNTEKT)
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
@@ -259,11 +261,13 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+            assertInntektsgrunnlag(1.januar, a2, INNTEKT)
+            assertInntektsgrunnlag(1.januar, a3, INNTEKT)
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
@@ -357,9 +361,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             )
             håndterInntektsmelding(listOf(3.januar til 17.januar, 19.januar.somPeriode()), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
-            assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
+            assertInntektsgrunnlag(19.januar, a1, INNTEKT)
+            assertInntektsgrunnlag(19.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
         }
         a1 {
             nyPeriode(24.januar til 31.januar)
@@ -428,9 +433,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSøknad(17.januar til 31.januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
-            assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
+            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidsgiverinntekt.Kilde.AOrdningen)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         }
         a2 {
@@ -596,7 +602,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSøknad(15.januar til 31.januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
-            assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
 
             assertEquals(2, inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.view().inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
@@ -816,8 +821,9 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
+            assertInntektsgrunnlag(1.januar(2021), a1, INNTEKT)
+            assertInntektsgrunnlag(1.januar(2021), a2, 1000.månedlig)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
         }
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
@@ -1176,7 +1182,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { håndterInntektsmelding(listOf(17.januar til 1.februar)) }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
-            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             assertEquals(0, a1.inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistDagTeller)
         }
@@ -1245,7 +1250,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSøknad(19.januar til 22.januar)
             håndterInntektsmelding(listOf(4.januar til 19.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
-            assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
             assertEquals(UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE, a1.inspektør.inntektskilde(2.vedtaksperiode))

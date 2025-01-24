@@ -80,7 +80,6 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
@@ -94,7 +93,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSøknad(Sykdom(15.januar, 15.februar, 50.prosent))
             håndterYtelser(1.vedtaksperiode)
 
-            assertVarsler(listOf(Varselkode.RV_VV_2, Varselkode.RV_SØ_13, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_SØ_13, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
             assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
             assertEquals(15.januar til 15.februar, inspektør.periode(2.vedtaksperiode))
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
@@ -192,7 +191,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_IM_4), 1.vedtaksperiode.filter())
         }
 
         a2 {
@@ -487,7 +486,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_IM_4), 1.vedtaksperiode.filter())
         }
 
         a2 {
@@ -610,7 +609,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_IM_4), 1.vedtaksperiode.filter())
         }
 
         a2 {

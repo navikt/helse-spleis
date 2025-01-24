@@ -1353,13 +1353,18 @@ internal class Vedtaksperiode private constructor(
 
     private fun inntektForArbeidsgiver(
         hendelse: Hendelse,
+        aktivitetsloggTilDenSomVilkårsprøver: IAktivitetslogg,
         skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
         alleForSammeArbeidsgiver: List<Vedtaksperiode>
     ): FaktaavklartInntekt {
         val inntektForArbeidsgiver = arbeidsgiver
             .avklarInntekt(skjæringstidspunkt, alleForSammeArbeidsgiver)
             // velger bort inntekten hvis situasjonen er "fom ulik skjæringstidspunktet"
-            ?.takeUnless { skjæringstidspunkt.yearMonth < it.inntektsdata.dato.yearMonth }
+            ?.takeUnless {
+                (skjæringstidspunkt.yearMonth < it.inntektsdata.dato.yearMonth).also { harUlikFom ->
+                    if (harUlikFom) aktivitetsloggTilDenSomVilkårsprøver.varsel(Varselkode.RV_VV_2)
+                }
+            }
 
         val (inntektsdata, opplysning) = if (inntektForArbeidsgiver != null)
             inntektForArbeidsgiver.inntektsdata to Arbeidsgiverinntekt.fraInntektsmelding(inntektForArbeidsgiver)
@@ -1375,13 +1380,14 @@ internal class Vedtaksperiode private constructor(
 
     private fun avklarSykepengegrunnlag(
         hendelse: Hendelse,
+        aktivitetsloggTilDenSomVilkårsprøver: IAktivitetslogg,
         skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
         vedtaksperioderMedSammeSkjæringstidspunkt: List<Vedtaksperiode>
     ): ArbeidsgiverInntektsopplysning {
         val alleForSammeArbeidsgiver = vedtaksperioderMedSammeSkjæringstidspunkt
             .filter { it.arbeidsgiver === this.arbeidsgiver }
 
-        val faktaavklartInntekt = inntektForArbeidsgiver(hendelse, skatteopplysning, alleForSammeArbeidsgiver)
+        val faktaavklartInntekt = inntektForArbeidsgiver(hendelse, aktivitetsloggTilDenSomVilkårsprøver, skatteopplysning, alleForSammeArbeidsgiver)
 
         if (faktaavklartInntekt.inntektsopplysning is SkattSykepengegrunnlag)
             subsummerBrukAvSkatteopplysninger(arbeidsgiver.organisasjonsnummer, faktaavklartInntekt.inntektsdata, skatteopplysning?.treMånederFørSkjæringstidspunkt ?: emptyList())
@@ -1417,6 +1423,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun inntektsgrunnlagArbeidsgivere(
         hendelse: Hendelse,
+        aktivitetslogg: IAktivitetslogg,
         skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>
     ): List<ArbeidsgiverInntektsopplysning> {
         // hvilke arbeidsgivere skal inngå i sykepengegrunnlaget?
@@ -1429,7 +1436,7 @@ internal class Vedtaksperiode private constructor(
             .distinctBy { it.arbeidsgiver }
             .map { vedtaksperiode ->
                 val skatteopplysningForArbeidsgiver = skatteopplysninger.firstOrNull { it.arbeidsgiver == vedtaksperiode.arbeidsgiver.organisasjonsnummer }
-                vedtaksperiode.avklarSykepengegrunnlag(hendelse, skatteopplysningForArbeidsgiver, perioderMedSammeSkjæringstidspunkt)
+                vedtaksperiode.avklarSykepengegrunnlag(hendelse, aktivitetslogg, skatteopplysningForArbeidsgiver, perioderMedSammeSkjæringstidspunkt)
             }
     }
 
@@ -1456,11 +1463,13 @@ internal class Vedtaksperiode private constructor(
 
     private fun avklarSykepengegrunnlag(
         hendelse: Hendelse,
+        aktivitetslogg: IAktivitetslogg,
         skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>
     ): Inntektsgrunnlag {
-        val inntektsgrunnlagArbeidsgivere = inntektsgrunnlagArbeidsgivere(hendelse, skatteopplysninger)
+        val inntektsgrunnlagArbeidsgivere = inntektsgrunnlagArbeidsgivere(hendelse, aktivitetslogg, skatteopplysninger)
         // ghosts er alle inntekter fra skatt, som vi ikke har søknad for og som skal vektlegges som ghost
         val ghosts = ghostArbeidsgivere(inntektsgrunnlagArbeidsgivere, skatteopplysninger)
+        if (ghosts.isNotEmpty()) aktivitetslogg.varsel(Varselkode.RV_VV_2)
         val inntektene = inntektsgrunnlagArbeidsgivere + ghosts
         return Inntektsgrunnlag.opprett(person.alder, inntektene, skjæringstidspunkt, jurist)
     }
@@ -1474,6 +1483,7 @@ internal class Vedtaksperiode private constructor(
 
         val sykepengegrunnlag = avklarSykepengegrunnlag(
             hendelse = vilkårsgrunnlag,
+            aktivitetslogg = aktivitetslogg,
             skatteopplysninger = skatteopplysninger
         )
         vilkårsgrunnlag.valider(aktivitetslogg, sykepengegrunnlag, jurist)

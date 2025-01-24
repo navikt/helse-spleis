@@ -30,12 +30,10 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.nesteDag
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -446,98 +444,6 @@ internal class InntektsgrunnlagTest {
     }
 
     @Test
-    fun `lager varsel ved flere arbeidsgivere med ghost`() {
-        val skjæringstidspunkt = 1.mars
-        val førsteFraværsdagAG1 = skjæringstidspunkt
-        val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
-            alder = UNG_PERSON_FØDSELSDATO.alder,
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a1,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    faktaavklartInntekt = arbeidsgiverinntekt(
-                        dato = førsteFraværsdagAG1,
-                        beløp = 25000.månedlig
-                    ),
-                    korrigertInntekt = null,
-                    skjønnsmessigFastsatt = null
-                ),
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a2,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    faktaavklartInntekt = skattSykepengegrunnlag(
-                        hendelseId = UUID.randomUUID(),
-                        dato = skjæringstidspunkt,
-                        inntektsopplysninger = listOf(
-                            Skatteopplysning(
-                                hendelseId = UUID.randomUUID(),
-                                beløp = 25000.månedlig,
-                                måned = 1.januar.yearMonth,
-                                type = LØNNSINNTEKT,
-                                fordel = "",
-                                beskrivelse = "",
-                                tidsstempel = LocalDateTime.now()
-                            )
-                        )
-                    ),
-                    korrigertInntekt = null,
-                    skjønnsmessigFastsatt = null
-                )
-            ),
-            deaktiverteArbeidsforhold = emptyList(),
-            vurdertInfotrygd = false
-        )
-
-
-        Aktivitetslogg().also { aktivitetslogg ->
-            inntektsgrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
-            aktivitetslogg.assertVarsel(RV_VV_2)
-        }
-    }
-
-    @Test
-    fun `lager varsel ved flere arbeidsgivere med ulik startdato`() {
-        val skjæringstidspunkt = 1.mars
-        val førsteFraværsdagAG1 = skjæringstidspunkt
-        val førsteFraværsdagAG2 = skjæringstidspunkt.nesteDag
-        val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
-            alder = UNG_PERSON_FØDSELSDATO.alder,
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a1,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    faktaavklartInntekt = arbeidsgiverinntekt(
-                        dato = førsteFraværsdagAG1,
-                        beløp = 25000.månedlig
-                    ),
-                    korrigertInntekt = null,
-                    skjønnsmessigFastsatt = null
-                ),
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a2,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    faktaavklartInntekt = arbeidsgiverinntekt(
-                        dato = førsteFraværsdagAG2,
-                        beløp = 25000.månedlig
-                    ),
-                    korrigertInntekt = null,
-                    skjønnsmessigFastsatt = null
-                )
-            ),
-            deaktiverteArbeidsforhold = emptyList(),
-            vurdertInfotrygd = false
-        )
-
-
-        Aktivitetslogg().also { aktivitetslogg ->
-            inntektsgrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
-            aktivitetslogg.assertVarsel(RV_VV_2)
-        }
-    }
-
-    @Test
     fun `lager varsel dersom en arbeidsgiver i sykepengegrunnlaget ikke har registrert opptjening`() {
         val skjæringstidspunkt = 1.mars
         val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
@@ -612,47 +518,6 @@ internal class InntektsgrunnlagTest {
 
         Aktivitetslogg().also { aktivitetslogg ->
             inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjeningMedA2)
-            aktivitetslogg.assertVarsler(emptyList())
-        }
-    }
-
-    @Test
-    fun `ikke varsel ved flere arbeidsgivere med samme startdato`() {
-        val skjæringstidspunkt = 1.mars
-        val førsteFraværsdagAG1 = skjæringstidspunkt
-        val førsteFraværsdagAG2 = skjæringstidspunkt
-        val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
-            alder = UNG_PERSON_FØDSELSDATO.alder,
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a1,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    faktaavklartInntekt = arbeidsgiverinntekt(
-                        dato = førsteFraværsdagAG1,
-                        beløp = 25000.månedlig
-                    ),
-                    korrigertInntekt = null,
-                    skjønnsmessigFastsatt = null
-                ),
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = a2,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
-                    faktaavklartInntekt = arbeidsgiverinntekt(
-                        dato = førsteFraværsdagAG2,
-                        beløp = 25000.månedlig
-                    ),
-                    korrigertInntekt = null,
-                    skjønnsmessigFastsatt = null
-                )
-            ),
-            deaktiverteArbeidsforhold = emptyList(),
-            vurdertInfotrygd = false
-        )
-
-
-        Aktivitetslogg().also { aktivitetslogg ->
-            inntektsgrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
             aktivitetslogg.assertVarsler(emptyList())
         }
     }

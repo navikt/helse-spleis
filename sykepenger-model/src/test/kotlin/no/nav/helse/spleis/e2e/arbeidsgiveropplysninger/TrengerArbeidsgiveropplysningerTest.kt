@@ -419,7 +419,6 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 a2 to (2.januar til 31.januar)
             )
         )
-        assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter(a1))
         assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
