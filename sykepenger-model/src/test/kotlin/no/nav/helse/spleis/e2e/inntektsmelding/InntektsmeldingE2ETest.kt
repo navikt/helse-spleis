@@ -247,8 +247,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         val selvbestemtIm = håndterKorrigerteArbeidsgiveropplysninger(Arbeidsgiveropplysning.OppgittRefusjon(77.daglig, emptyList()), vedtaksperiodeId = 2.vedtaksperiode, orgnummer = a2)
         assertBeløpstidslinje(Beløpstidslinje.fra(15.februar til 28.februar, 77.daglig, selvbestemtIm.arbeidsgiver), inspektør(a2).vedtaksperioder(2.vedtaksperiode).refusjonstidslinje)
 
-        val inntektEtterselvbestemtIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.faktaavklartInntekt.inntektsdata.beløp
-        assertEquals(INNTEKT, inntektEtterselvbestemtIm)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+            assertInntektsgrunnlag(a2, INNTEKT)
+        }
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
@@ -1557,7 +1559,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
 
-        assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+        }
     }
 
     @Test
@@ -1786,7 +1790,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AktivitetsloggFilter.person()
         )
 
-        assertInntektsgrunnlag(1.januar, a1, INNTEKT + 1000.månedlig)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, INNTEKT + 1000.månedlig)
+        }
     }
 
     @Test
@@ -2397,7 +2403,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
 
-        assertInntektsgrunnlag(1.januar, a1, 30000.månedlig)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, 30000.månedlig)
+        }
     }
 
     @Test
@@ -2422,7 +2430,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
 
-        assertInntektsgrunnlag(1.mars, a1, 30000.månedlig)
+        assertInntektsgrunnlag(1.mars, forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, 30000.månedlig)
+        }
     }
 
     @Test
@@ -2530,7 +2540,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-        assertInntektsgrunnlag(25.januar, a1, INNTEKT)
-        assertInntektsgrunnlag(25.januar, a2, INNTEKT)
+        assertInntektsgrunnlag(25.januar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+            assertInntektsgrunnlag(a2, INNTEKT)
+        }
     }
 }

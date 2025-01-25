@@ -217,6 +217,7 @@ internal class Inntektsgrunnlag private constructor(
         minsteinntekt = minsteinntekt,
         oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav,
         arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
+        deaktiverteArbeidsgiverInntektsopplysninger = deaktiverteArbeidsforhold,
         deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.map { it.orgnummer },
         tilkommendeInntekter = tilkommendeInntekter
     )
@@ -429,6 +430,7 @@ internal data class InntektsgrunnlagView(
     val minsteinntekt: Inntekt,
     val oppfyllerMinsteinntektskrav: Boolean,
     val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
+    val deaktiverteArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     val deaktiverteArbeidsforhold: List<String>,
     val tilkommendeInntekter: List<NyInntektUnderveis>
 )

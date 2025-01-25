@@ -14,15 +14,12 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_3
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class OpptjeningE2ETest : AbstractDslTest() {
@@ -135,14 +132,9 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-            val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-            assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-            assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-            assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
-            assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+            }
         }
     }
 

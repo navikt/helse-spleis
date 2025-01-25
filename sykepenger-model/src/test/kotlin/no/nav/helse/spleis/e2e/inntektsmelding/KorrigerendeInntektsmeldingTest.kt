@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.somPeriode
@@ -306,7 +307,9 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
         assertVarsler(listOf(RV_IM_3, Varselkode.RV_OS_2, RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
-        assertEquals(INNTEKT * 1.1, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.omregnetÅrsinntekt)
+        assertInntektsgrunnlag(15.januar, forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, INNTEKT * 1.1)
+        }
     }
 
     @Test

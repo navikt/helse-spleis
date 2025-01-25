@@ -37,7 +37,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -69,11 +68,9 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
@@ -105,8 +102,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        assertInntektsgrunnlag(1.januar, a1, INNTEKT)
-        assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+            assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        }
 
         nullstillTilstandsendringer()
         observatør.vedtaksperiodeVenter.clear()
@@ -267,15 +266,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-        assertEquals(612000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-        assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-        assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 20000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        assertInntektsgrunnlag(28.februar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+            assertInntektsgrunnlag(a2, 20000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        }
     }
 
     @Test
@@ -308,15 +302,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-        assertEquals(576000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-        assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-        assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertInntektsgrunnlag(vilkårsgrunnlag, a1, 30000.månedlig)
-        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 18000.månedlig)
+        assertInntektsgrunnlag(1.mars, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, 30000.månedlig)
+            assertInntektsgrunnlag(a2, 18000.månedlig)
+        }
     }
 
     @Test
@@ -353,15 +342,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-        assertEquals(624000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-        assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-        assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 21000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        assertInntektsgrunnlag(28.februar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+            assertInntektsgrunnlag(a2, 21000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        }
     }
 
     @Test
@@ -1010,8 +994,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertInntektsgrunnlag(1.mars, a1, 10000.månedlig)
-        assertInntektsgrunnlag(1.mars, a2, 19000.månedlig)
+        assertInntektsgrunnlag(1.mars, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, 10000.månedlig)
+            assertInntektsgrunnlag(a2, 19000.månedlig)
+        }
     }
 
     @Test
@@ -1161,15 +1147,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-        assertEquals(624000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-        assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-        assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 21000.månedlig)
+        assertInntektsgrunnlag(1.mars, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+            assertInntektsgrunnlag(a2, 21000.månedlig)
+        }
     }
 
     @Test
@@ -1197,15 +1178,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-        assertEquals(612000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-        assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-        assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 20000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        assertInntektsgrunnlag(28.februar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+            assertInntektsgrunnlag(a2, 20000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        }
     }
 
     @Test
@@ -1262,15 +1238,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2, orgnummer = a1)
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(2.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-        assertEquals(756000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-        assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-        assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(2.vedtaksperiode))
-        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-        assertInntektsgrunnlag(vilkårsgrunnlag, a2, 32000.månedlig)
+        assertInntektsgrunnlag(21.januar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+            assertInntektsgrunnlag(a2, 32000.månedlig)
+        }
     }
 
     @Test
@@ -1451,8 +1422,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
-        with(vilkårsgrunnlag) {
+        assertInntektsgrunnlag(20.januar, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
             assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
@@ -1486,8 +1456,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        val vilkårsgrunnlag = inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
-        with(vilkårsgrunnlag) {
+        assertInntektsgrunnlag(31.januar, forventetAntallArbeidsgivere = 3) {
             assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
             assertInntektsgrunnlag(a2, INGEN, forventetkilde = Arbeidstakerkilde.AOrdningen)
             assertInntektsgrunnlag(a3, INGEN, forventetkilde = Arbeidstakerkilde.AOrdningen)

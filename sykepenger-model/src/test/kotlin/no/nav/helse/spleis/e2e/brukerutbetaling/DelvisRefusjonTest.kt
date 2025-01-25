@@ -45,7 +45,6 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlagFlereArbeidsgivere
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
-import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -604,9 +603,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.januar)
-        assertNotNull(vilkårsgrunnlag)
-        with (vilkårsgrunnlag) {
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
             assertInntektsgrunnlag(a1, INNTEKT + 100.månedlig)
         }
         assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT / 2, im2.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))

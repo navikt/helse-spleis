@@ -32,7 +32,6 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -526,13 +525,10 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             håndterOverstyrInntekt(skjæringstidspunkt = 1.januar, inntekt = 25000.månedlig)
-        }
 
-        (inspiser(personInspektør).vilkårsgrunnlagHistorikk.grunnlagsdata(1.januar).inspektør).also { vilkårsgrunnlag ->
-            val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-            assertEquals(300000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-            assertEquals(300000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-            assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT, 25000.månedlig, forventetKorrigertInntekt = 25000.månedlig)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, 25000.månedlig, forventetKorrigertInntekt = 25000.månedlig)
+            }
         }
     }
 

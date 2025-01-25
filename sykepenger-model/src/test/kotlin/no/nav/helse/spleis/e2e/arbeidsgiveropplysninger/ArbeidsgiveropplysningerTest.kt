@@ -184,8 +184,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-            assertInntektsgrunnlag(1.januar, a1, 20_000.månedlig, 20_000.månedlig)
-            assertInntektsgrunnlag(1.januar, a2, 25_000.månedlig, 25_000.månedlig)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, 20_000.månedlig, 20_000.månedlig)
+                assertInntektsgrunnlag(a2, 25_000.månedlig, 25_000.månedlig)
+            }
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, 25_000.månedlig), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
         }
     }
@@ -198,8 +200,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(februar)
-            assertInntektsgrunnlag(1.januar, a1, 20_000.månedlig)
-            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, 20_000.månedlig)
+                assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            }
             håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(25_000.månedlig), OppgittRefusjon(25_000.månedlig, emptyList()))
         }
         a1 {
@@ -210,8 +214,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-            assertInntektsgrunnlag(1.januar, a1, 20_000.månedlig)
-            assertInntektsgrunnlag(1.januar, a2, 25_000.månedlig, 25_000.månedlig)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, 20_000.månedlig)
+                assertInntektsgrunnlag(a2, 25_000.månedlig, 25_000.månedlig)
+            }
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(februar, 25_000.månedlig), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
         }
     }

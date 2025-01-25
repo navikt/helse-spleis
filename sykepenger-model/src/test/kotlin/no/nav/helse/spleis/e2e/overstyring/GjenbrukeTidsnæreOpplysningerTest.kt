@@ -944,7 +944,9 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-            assertInntektsgrunnlag(1.januar, a1, INNTEKT, INNTEKT - 50.daglig, forventetKorrigertInntekt = INNTEKT - 50.daglig)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, INNTEKT - 50.daglig, forventetKorrigertInntekt = INNTEKT - 50.daglig)
+            }
         }
     }
 
@@ -1001,8 +1003,12 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-            assertInntektsgrunnlag(1.januar, a1, INNTEKT, INNTEKT - 500.daglig, forventetKorrigertInntekt = INNTEKT - 500.daglig)
-            assertInntektsgrunnlag(1.februar, a1, INNTEKT - 500.daglig, forventetFastsattÅrsinntekt = INNTEKT - 500.daglig)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, INNTEKT - 500.daglig, forventetKorrigertInntekt = INNTEKT - 500.daglig)
+            }
+            assertInntektsgrunnlag(1.februar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT - 500.daglig, forventetFastsattÅrsinntekt = INNTEKT - 500.daglig)
+            }
         }
     }
 
@@ -1048,8 +1054,12 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-            assertInntektsgrunnlag(1.januar, a1, beregnetInntektIM, forventetFastsattÅrsinntekt = skjønnsmessigFastsattInntekt)
-            assertInntektsgrunnlag(1.februar, a1, beregnetInntektIM, forventetFastsattÅrsinntekt = beregnetInntektIM)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, beregnetInntektIM, forventetFastsattÅrsinntekt = skjønnsmessigFastsattInntekt)
+            }
+            assertInntektsgrunnlag(1.februar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, beregnetInntektIM, forventetFastsattÅrsinntekt = beregnetInntektIM)
+            }
         }
     }
 
@@ -1087,9 +1097,9 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            inntektsopplysning(8.januar).let {
-                assertEquals(INNTEKT, it.inspektør.beløp)
-                assertEquals(inntektsmeldingId, it.inspektør.hendelseId)
+
+            assertInntektsgrunnlag(8.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, forventetKildeId = inntektsmeldingId)
             }
 
             // Skjønnsmessig fastsetter
@@ -1099,15 +1109,9 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            inntektsopplysning(8.januar).let {
-                assertEquals(INNTEKT, it.inspektør.beløp)
-                assertEquals(inntektsmeldingId, it.inspektør.hendelseId)
+            assertInntektsgrunnlag(8.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, forventetFastsattÅrsinntekt = INNTEKT * 1.25, forventetKildeId = inntektsmeldingId)
             }
-            skjønnsfastsatt(8.januar).let {
-                assertEquals(INNTEKT * 1.25, it.inspektør.beløp)
-                assertEquals(skjønnsmessigId, it.inspektør.hendelseId)
-            }
-
             // Flytter skjæringstidspunkt ved å legge til sykdomsdager i snuten
             håndterOverstyrTidslinje((1.januar til 7.januar).map { manuellSykedag(it) })
             assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
@@ -1118,9 +1122,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            inntektsopplysning(1.januar).let {
-                assertEquals(INNTEKT, it.inspektør.beløp)
-                assertEquals(inntektsmeldingId, it.inspektør.hendelseId)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, forventetKildeId = inntektsmeldingId)
             }
         }
     }
@@ -1136,9 +1139,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            inntektsopplysning(8.januar).let {
-                assertEquals(INNTEKT, it.inspektør.beløp)
-                assertEquals(inntektsmeldingId, it.inspektør.hendelseId)
+            assertInntektsgrunnlag(8.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, forventetKildeId = inntektsmeldingId)
             }
 
             // Overstyrer en gang
@@ -1149,9 +1151,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            korrigertInntekt(8.januar).let {
-                assertEquals(overstyring1Inntekt, it.inspektør.beløp)
-                assertEquals(overstyring1Id, it.inspektør.hendelseId)
+            assertInntektsgrunnlag(8.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, overstyring1Inntekt, forventetKorrigertInntekt = overstyring1Inntekt, forventetKildeId = inntektsmeldingId)
             }
 
             // Overstyrer en gang til
@@ -1162,9 +1163,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            korrigertInntekt(8.januar).let {
-                assertEquals(overstyring2Inntekt, it.inspektør.beløp)
-                assertEquals(overstyring2Id, it.inspektør.hendelseId)
+            assertInntektsgrunnlag(8.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, overstyring2Inntekt, forventetKorrigertInntekt = overstyring2Inntekt, forventetKildeId = inntektsmeldingId)
             }
 
             // Flytter skjæringstidspunkt ved å legge til sykdomsdager i snuten
@@ -1177,9 +1177,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            inntektsopplysning(1.januar).let {
-                assertEquals(overstyring2Inntekt, it.inspektør.beløp)
-                assertEquals(inntektsmeldingId, it.inspektør.hendelseId)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, overstyring2Inntekt, forventetKildeId = inntektsmeldingId)
             }
         }
     }
@@ -1195,16 +1194,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
         }
 
     }
-
-    private fun TestPerson.TestArbeidsgiver.inntektsopplysning(skjæringstidspunkt: LocalDate) =
-        inspektør.vilkårsgrunnlag(skjæringstidspunkt)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.singleOrNull { it.inspektør.orgnummer == this.orgnummer }?.inspektør?.faktaavklartInntekt ?: error("Forventet å finne inntektsopplysning for ${this.orgnummer} på $skjæringstidspunkt")
-
-
-    private fun TestPerson.TestArbeidsgiver.korrigertInntekt(skjæringstidspunkt: LocalDate) =
-        inspektør.vilkårsgrunnlag(skjæringstidspunkt)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.singleOrNull { it.inspektør.orgnummer == this.orgnummer }?.inspektør?.korrigertInntekt ?: error("Forventet å finne inntektsopplysning for ${this.orgnummer} på $skjæringstidspunkt")
-
-    private fun TestPerson.TestArbeidsgiver.skjønnsfastsatt(skjæringstidspunkt: LocalDate) =
-        inspektør.vilkårsgrunnlag(skjæringstidspunkt)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.singleOrNull { it.inspektør.orgnummer == this.orgnummer }?.inspektør?.skjønnsmessigFastsatt ?: error("Forventet å finne inntektsopplysning for ${this.orgnummer} på $skjæringstidspunkt")
 
     private fun TestPerson.TestArbeidsgiver.assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: Melding) {
         val dagen = inspektør.sykdomstidslinje[dato]

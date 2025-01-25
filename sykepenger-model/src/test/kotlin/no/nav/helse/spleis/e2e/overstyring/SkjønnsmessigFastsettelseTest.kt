@@ -33,7 +33,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.fail
 
 internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
 
@@ -95,9 +94,10 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         }
 
         a1 {
-            val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.januar)?.inspektør ?: fail { "forventer vilkårsgrunnlag" }
-            assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT, forventetFastsattÅrsinntekt = INNTEKT + 500.månedlig)
-            assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, forventetFastsattÅrsinntekt = INNTEKT - 500.månedlig)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, INNTEKT, forventetFastsattÅrsinntekt = INNTEKT + 500.månedlig)
+                assertInntektsgrunnlag(a2, INNTEKT, forventetFastsattÅrsinntekt = INNTEKT - 500.månedlig)
+            }
         }
     }
 
@@ -144,9 +144,10 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         }
 
         a1 {
-            val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.januar)?.inspektør ?: fail { "forventer vilkårsgrunnlag" }
-            assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-            assertInntektsgrunnlag(vilkårsgrunnlag, a2, inntektVedNyIM)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+                assertInntektsgrunnlag(a2, inntektVedNyIM)
+            }
         }
     }
 
@@ -180,9 +181,10 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         a1 {
             val im = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 20000.månedlig, refusjon = Refusjon(20000.månedlig, opphørsdato = 31.januar))
 
-            val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.januar)?.inspektør ?: fail { "forventer vilkårsgrunnlag" }
-            assertInntektsgrunnlag(vilkårsgrunnlag, a1, 20_000.månedlig, forventetFastsattÅrsinntekt = 19_000.månedlig)
-            assertInntektsgrunnlag(vilkårsgrunnlag, a2, 20_000.månedlig, forventetFastsattÅrsinntekt = 21_000.månedlig)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, 20_000.månedlig, forventetFastsattÅrsinntekt = 19_000.månedlig)
+                assertInntektsgrunnlag(a2, 20_000.månedlig, forventetFastsattÅrsinntekt = 21_000.månedlig)
+            }
         }
     }
 
@@ -195,9 +197,17 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertInntektsgrunnlag(1.januar, a1, INNTEKT, forventetFastsattÅrsinntekt = INNTEKT * 2)
+        a1 {
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, forventetFastsattÅrsinntekt = INNTEKT * 2)
+            }
+        }
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 3)))
-        assertInntektsgrunnlag(1.januar, a1, INNTEKT, forventetFastsattÅrsinntekt = INNTEKT * 3)
+        a1 {
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, forventetFastsattÅrsinntekt = INNTEKT * 3)
+            }
+        }
     }
 
     @Test
@@ -205,10 +215,11 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         nyttVedtak(januar)
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        val sykepengegrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør
-        assertInntektsgrunnlag(1.januar, a1, INNTEKT, INNTEKT, forventetFastsattÅrsinntekt = INNTEKT * 2)
-        assertEquals(INNTEKT * 2, sykepengegrunnlag.beregningsgrunnlag)
-        assertEquals(INNTEKT, sykepengegrunnlag.omregnetÅrsinntekt)
+        a1 {
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, INNTEKT, forventetFastsattÅrsinntekt = INNTEKT * 2)
+            }
+        }
     }
 
     @Test
@@ -225,9 +236,17 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
     fun `saksbehandler-inntekt overstyres av en skjønnsmessig med samme beløp`() {
         nyttVedtak(januar)
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
-        assertInntektsgrunnlag(1.januar, a1, INNTEKT, INNTEKT * 2, forventetKorrigertInntekt = INNTEKT * 2)
+        a1 {
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, INNTEKT * 2, forventetKorrigertInntekt = INNTEKT * 2)
+            }
+        }
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
-        assertInntektsgrunnlag(1.januar, a1, INNTEKT, INNTEKT * 2, forventetKorrigertInntekt = INNTEKT * 2)
+        a1 {
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, INNTEKT * 2, forventetKorrigertInntekt = INNTEKT * 2)
+            }
+        }
         assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
     }
 
@@ -250,7 +269,9 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             val im = håndterInntektsmelding(listOf(1.januar til 16.januar), inntekt)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+            }
             assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         }
     }
@@ -259,7 +280,13 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
     fun `korrigert IM etter skjønnsfastsettelse på flere AG`() {
         (a1 og a2 og a3).nyeVedtak(januar)
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a3, inntekt = INNTEKT * 3)))
-        a3 { assertInntektsgrunnlag(1.januar, a3, 20000.månedlig, INNTEKT * 3, forventetKorrigertInntekt = INNTEKT * 3) }
+        a3 {
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 3) {
+                assertInntektsgrunnlag(a1, 20000.månedlig)
+                assertInntektsgrunnlag(a2, 20000.månedlig)
+                assertInntektsgrunnlag(a3, 20000.månedlig, INNTEKT * 3, forventetKorrigertInntekt = INNTEKT * 3)
+            }
+        }
         håndterSkjønnsmessigFastsettelse(
             skjæringstidspunkt = 1.januar,
             arbeidsgiveropplysninger = listOf(
@@ -268,18 +295,26 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
                 OverstyrtArbeidsgiveropplysning(orgnummer = a3, inntekt = INNTEKT * 2)
             )
         )
-        a1 { assertInntektsgrunnlag(1.januar, a1, 20000.månedlig, forventetFastsattÅrsinntekt = INNTEKT * 2) }
-        a2 { assertInntektsgrunnlag(1.januar, a2, 20000.månedlig, forventetFastsattÅrsinntekt = INNTEKT * 2) }
-        a3 { assertInntektsgrunnlag(1.januar, a3, 20000.månedlig, INNTEKT * 3, forventetFastsattÅrsinntekt = INNTEKT * 2, forventetKorrigertInntekt = INNTEKT * 3) }
+        a1 {
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 3) {
+                assertInntektsgrunnlag(a1, 20000.månedlig, forventetFastsattÅrsinntekt = INNTEKT * 2)
+                assertInntektsgrunnlag(a2, 20000.månedlig, forventetFastsattÅrsinntekt = INNTEKT * 2)
+                assertInntektsgrunnlag(a3, 20000.månedlig, INNTEKT * 3, forventetFastsattÅrsinntekt = INNTEKT * 2, forventetKorrigertInntekt = INNTEKT * 3)
+            }
+        }
 
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
 
-        a1 { assertInntektsgrunnlag(1.januar, a1, INNTEKT) }
-        a2 { assertInntektsgrunnlag(1.januar, a2, 20000.månedlig) }
-        a3 { assertInntektsgrunnlag(1.januar, a3, 20000.månedlig, INNTEKT * 3, forventetKorrigertInntekt = INNTEKT * 3) }
+        a1 {
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 3) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+                assertInntektsgrunnlag(a2, 20000.månedlig)
+                assertInntektsgrunnlag(a3, 20000.månedlig, INNTEKT * 3, forventetKorrigertInntekt = INNTEKT * 3)
+            }
+        }
     }
 
     @Test
@@ -293,7 +328,11 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 3)
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertInntektsgrunnlag(1.januar, a1, INNTEKT * 3)
+        a1 {
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT * 3)
+            }
+        }
     }
 
     @Test
@@ -306,10 +345,14 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
 
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
 
-            assertInntektsgrunnlag(1.januar, a1, INNTEKT * 2, forventetFastsattÅrsinntekt = INNTEKT * 2)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT * 2, forventetFastsattÅrsinntekt = INNTEKT * 2)
+            }
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT)))
 
-            assertInntektsgrunnlag(1.januar, a1, INNTEKT * 2, INNTEKT, forventetKorrigertInntekt = INNTEKT)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT * 2, INNTEKT, forventetKorrigertInntekt = INNTEKT)
+            }
             håndterYtelser(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
         }
@@ -351,20 +394,26 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            assertInntektsgrunnlag(1.januar, a1, inntektsmeldingInntekt)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, inntektsmeldingInntekt)
+            }
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, inntektsmeldingInntekt, inntektsmeldingId.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
 
             // Saksbehandler skjønnsmessig fastsetter
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsfastsattInntekt)))
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            assertInntektsgrunnlag(1.januar, a1, inntektsmeldingInntekt, forventetFastsattÅrsinntekt = skjønnsfastsattInntekt)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, inntektsmeldingInntekt, forventetFastsattÅrsinntekt = skjønnsfastsattInntekt)
+            }
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, inntektsmeldingInntekt, inntektsmeldingId.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
 
             // Saksbehandler endrer kun refusjon, men beholder inntekt
             val overstyrInntektOgRefusjonId = UUID.randomUUID()
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = inntektsmeldingInntekt, refusjonsopplysninger = listOf(Triple(1.januar, null, skjønnsfastsattInntekt)))), hendelseId = overstyrInntektOgRefusjonId)
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            assertInntektsgrunnlag(1.januar, a1, inntektsmeldingInntekt, forventetFastsattÅrsinntekt = skjønnsfastsattInntekt)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, inntektsmeldingInntekt, forventetFastsattÅrsinntekt = skjønnsfastsattInntekt)
+            }
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, skjønnsfastsattInntekt, overstyrInntektOgRefusjonId.saksbehandler), inspektør.refusjon(1.vedtaksperiode))
         }
     }
@@ -385,20 +434,26 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+            }
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, inntektsmeldingInntekt, inntektsmeldingId.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
 
             // Saksbehandler skjønnsmessig fastsetter
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsfastsattInntekt)))
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            assertInntektsgrunnlag(1.januar, a1, INNTEKT, forventetFastsattÅrsinntekt = skjønnsfastsattInntekt)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, forventetFastsattÅrsinntekt = skjønnsfastsattInntekt)
+            }
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, inntektsmeldingInntekt, inntektsmeldingId.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
 
             // Saksbehandler endrer refusjon og inntekt til INNTEKT * 2
             val overstyrInntektOgRefusjonId = UUID.randomUUID()
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsfastsattInntekt, refusjonsopplysninger = listOf(Triple(1.januar, null, skjønnsfastsattInntekt)))), hendelseId = overstyrInntektOgRefusjonId)
             assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            assertInntektsgrunnlag(1.januar, a1, INNTEKT, skjønnsfastsattInntekt, forventetKorrigertInntekt = skjønnsfastsattInntekt)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT, skjønnsfastsattInntekt, forventetKorrigertInntekt = skjønnsfastsattInntekt)
+            }
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, skjønnsfastsattInntekt, overstyrInntektOgRefusjonId.saksbehandler), inspektør.refusjon(1.vedtaksperiode))
         }
     }

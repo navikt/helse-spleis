@@ -88,7 +88,9 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
             emptyList())))
         assertEquals(antallInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
-        assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+        }
     }
 
     @Test
@@ -106,7 +108,9 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         assertEquals(antallInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
         assertBeløpstidslinje(Beløpstidslinje.fra(februar, 15000.månedlig, meldingsreferanse.saksbehandler), inspektør.refusjon(1.vedtaksperiode))
-        assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+        }
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 }

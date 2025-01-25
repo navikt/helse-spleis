@@ -81,8 +81,10 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         val søknad = UUID.randomUUID()
         håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), id = søknad, orgnummer = a2)
 
-        assertInntektsgrunnlag(1.januar, a1, inntektA1, inntektA1)
-        assertInntektsgrunnlag(1.januar, a2, inntektA2, inntektA2)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, inntektA1, inntektA1)
+            assertInntektsgrunnlag(a2, inntektA2, inntektA2)
+        }
 
         val overstyringerIgangsatt = observatør.overstyringIgangsatt
         assertEquals(3, overstyringerIgangsatt.size)
@@ -273,8 +275,10 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a1))
 
-        assertInntektsgrunnlag(1.januar, a1, INNTEKT)
-        assertInntektsgrunnlag(1.januar, a2, INNTEKT)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+            assertInntektsgrunnlag(a2, INNTEKT)
+        }
         assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, imId.arbeidsgiver), inspektør(a2).refusjon(1.vedtaksperiode))
 
         assertEquals(

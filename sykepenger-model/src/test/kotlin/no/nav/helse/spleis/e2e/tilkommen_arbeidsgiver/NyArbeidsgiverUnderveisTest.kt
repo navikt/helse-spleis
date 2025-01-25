@@ -62,8 +62,10 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterSøknad(februar)
             håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
             assertVarsler(listOf(Varselkode.RV_IM_8), 1.vedtaksperiode.filter())
-            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
-            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+                assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            }
         }
     }
 

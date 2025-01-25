@@ -76,7 +76,6 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -993,17 +992,12 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)
-
         assertInfo(RV_RV_1.varseltekst, 1.vedtaksperiode.filter(a1))
         assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(a1))
 
-        assertNotNull(vilkårsgrunnlag)
-        with(vilkårsgrunnlag) {
+        assertInntektsgrunnlag(22.januar, forventetAntallArbeidsgivere = 1) {
             assertInntektsgrunnlag(a1, riktigInntekt)
         }
-
-        assertEquals(riktigInntekt, vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.sykepengegrunnlag)
 
         val utbetaling = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode)
         val utbetalingInspektør = utbetaling.inspektør

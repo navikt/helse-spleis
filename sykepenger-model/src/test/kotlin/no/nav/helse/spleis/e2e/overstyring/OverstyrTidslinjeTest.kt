@@ -292,7 +292,9 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertInntektsgrunnlag(1.januar, a1, INNTEKT)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+        }
     }
 
     @Test

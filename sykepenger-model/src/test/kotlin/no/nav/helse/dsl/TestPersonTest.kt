@@ -147,7 +147,11 @@ internal class TestPersonTest : AbstractDslTest() {
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertIngenFunksjonelleFeil()
         assertActivities()
-        assertInntektsgrunnlag(3.januar, a1, INNTEKT)
+        a1 {
+            assertInntektsgrunnlag(3.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+            }
+        }
         inspektør.also {
             assertEquals(2, it.sykdomshistorikk.size)
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Dag.Sykedag::class])

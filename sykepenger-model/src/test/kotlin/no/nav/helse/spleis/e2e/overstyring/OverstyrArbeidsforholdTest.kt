@@ -17,8 +17,6 @@ import no.nav.helse.hentFeltFraBehov
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.november
-import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
-import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
@@ -37,6 +35,7 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlagFlereArbeidsgivere
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -106,14 +105,10 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-        assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-        assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-        assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
-        assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+            assertInntektsgrunnlag(a2, INGEN, forventetkilde = Arbeidstakerkilde.AOrdningen, deaktivert = true)
+        }
     }
 
     @Test
@@ -158,14 +153,15 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
+        assertInntektsgrunnlag(1.januar(2017), forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+        }
 
-        assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-        assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-        assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
-        assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 3) {
+            assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(a2, INNTEKT)
+            assertInntektsgrunnlag(a3, INGEN, forventetkilde = Arbeidstakerkilde.AOrdningen, deaktivert = true)
+        }
     }
 
     @Test
@@ -224,15 +220,11 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-        assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-        assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-        assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-        assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 3) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+            assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(a3, 4000.årlig, forventetkilde = Arbeidstakerkilde.AOrdningen, deaktivert = true)
+        }
     }
 
     @Test
@@ -260,15 +252,10 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         assertVarsel(Varselkode.RV_VV_8, 1.vedtaksperiode.filter(orgnummer = a2))
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        val vilkårsgrunnlag = inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-        assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-        assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-        assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a2).inntektskilde(1.vedtaksperiode))
-        assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT)
-        assertInntektsgrunnlag(vilkårsgrunnlag, a3, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a2, INNTEKT)
+            assertInntektsgrunnlag(a3, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        }
     }
 
     @Test
@@ -322,14 +309,10 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-        assertEquals(45600.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-        assertEquals(45600.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-        assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
-        assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertInntektsgrunnlag(vilkårsgrunnlag, a1, 3800.månedlig)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, 3800.månedlig)
+            assertInntektsgrunnlag(a2, 300.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen, deaktivert = true)
+        }
         assertVarsel(RV_SV_1, 1.vedtaksperiode.filter(a1))
     }
 
@@ -371,14 +354,10 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-        assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-        assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-        assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
-        assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+            assertInntektsgrunnlag(a2, 1000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen, deaktivert = true)
+        }
         assertVarsel(RV_OV_1, 1.vedtaksperiode.filter(a1))
         assertInstanceOf(Utbetalingsdag.AvvistDag::class.java, inspektør.sisteUtbetalingUtbetalingstidslinje()[31.januar])
     }

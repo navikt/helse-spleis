@@ -100,8 +100,9 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val vilkårgrunnlagsinspektør = person.inspektør.vilkårsgrunnlagHistorikk
         assertEquals(2, vilkårgrunnlagsinspektør.antallGrunnlagsdata())
 
-        val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør!!
-        assertInntektsgrunnlag(vilkårsgrunnlagInspektør, a1, 32000.månedlig)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, 32000.månedlig)
+        }
     }
 
     @Test
@@ -133,8 +134,9 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(506, inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
         assertEquals(-506, inspektør.utbetaling(2).arbeidsgiverOppdrag.nettoBeløp())
 
-        val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør!!
-        assertInntektsgrunnlag(vilkårsgrunnlagInspektør, a1, INNTEKT)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+        }
     }
 
     @Test

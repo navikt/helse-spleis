@@ -10,7 +10,6 @@ import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -66,9 +65,9 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
-        // assert at vi bruker den nye inntekten i beregning av penger til sjuk.
-        val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør!!
-        assertInntektsgrunnlag(vilkårsgrunnlagInspektør, a1, overstyrtInntekt)
+        assertInntektsgrunnlag(1.januar(2021), forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, overstyrtInntekt)
+        }
     }
 
     @Test
@@ -99,8 +98,10 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             skjæringstidspunkt = 1.januar,
             arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a2, 500.daglig, emptyList()))
         )
-        assertInntektsgrunnlag(1.januar, a1, INNTEKT, INNTEKT)
-        assertInntektsgrunnlag(1.januar, a2, INGEN, 500.daglig, forventetKorrigertInntekt = 500.daglig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, INNTEKT, INNTEKT)
+            assertInntektsgrunnlag(a2, INGEN, 500.daglig, forventetKorrigertInntekt = 500.daglig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        }
     }
 
     @Test

@@ -63,7 +63,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.fail
 
 internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
@@ -542,15 +541,14 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode) ?: fail("Mangler vilkårsgrunnlag")
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-        with (vilkårsgrunnlag) {
-            assertInntektsgrunnlag(a1, INNTEKT, INNTEKT)
-            assertInntektsgrunnlag(a2, INNTEKT, INNTEKT)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+            assertInntektsgrunnlag(a2, INNTEKT)
         }
     }
 

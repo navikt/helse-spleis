@@ -21,7 +21,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -29,9 +28,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class RevurderGhostInntektTest : AbstractDslTest() {
@@ -49,15 +46,10 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertPeriode(17.januar til 31.januar, 1080.daglig)
-            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
-                val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
-                assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-                assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+                assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
             }
             nullstillTilstandsendringer()
             håndterOverstyrInntekt(inntekt = 15000.månedlig, skjæringstidspunkt = 1.januar, organisasjonsnummer = a2)
@@ -79,15 +71,9 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 AVSLUTTET
             )
             assertPeriode(17.januar til 31.januar, 1431.daglig)
-            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
-                val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-                assertEquals(552000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-                assertEquals(552000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, 15000.månedlig, forventetKorrigertInntekt = 15000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+                assertInntektsgrunnlag(a2, INNTEKT, 15000.månedlig, forventetKorrigertInntekt = 15000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
             }
         }
     }
@@ -105,15 +91,9 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertPeriode(17.januar til 31.januar, 1080.daglig)
-            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
-                val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-                assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-                assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+                assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
             }
             nullstillTilstandsendringer()
             håndterOverstyrInntekt(
@@ -128,15 +108,9 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             håndterUtbetalt()
             assertPeriode(17.januar til 31.januar, 943.daglig)
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
-            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
-                val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-                assertEquals(852000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-                assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, 40000.månedlig, forventetKorrigertInntekt = 40000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+                assertInntektsgrunnlag(a2, INNTEKT, 40000.månedlig, forventetKorrigertInntekt = 40000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
             }
         }
     }
@@ -154,15 +128,9 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertPeriode(17.januar til 31.januar, 1080.daglig)
-            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
-                val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-                assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-                assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+                assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
             }
             nullstillTilstandsendringer()
             håndterOverstyrInntekt(inntekt = 0.månedlig, skjæringstidspunkt = 1.januar, organisasjonsnummer = a2)
@@ -184,15 +152,9 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
                 TIL_UTBETALING,
                 AVSLUTTET
             )
-            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
-                val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-                assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-                assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, INGEN, forventetKorrigertInntekt = INGEN, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+                assertInntektsgrunnlag(a2, INNTEKT, INGEN, forventetKorrigertInntekt = INGEN, forventetkilde = Arbeidstakerkilde.AOrdningen)
             }
         }
     }
@@ -246,25 +208,14 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             assertPeriode(17.mars til 31.mars, 1080.daglig)
-            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
-                val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
-                assertEquals(564000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-                assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, 16000.månedlig, forventetKorrigertInntekt = 16000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+                assertInntektsgrunnlag(a2, INNTEKT, 16000.månedlig, forventetKorrigertInntekt = 16000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
             }
-            (inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
-                val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
-
-                assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-                assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
-                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(2.vedtaksperiode))
-                assertInntektsgrunnlag(vilkårsgrunnlag, a1, INNTEKT)
-                assertInntektsgrunnlag(vilkårsgrunnlag, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(1.mars, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+                assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
             }
             assertTilstander(
                 1.vedtaksperiode,

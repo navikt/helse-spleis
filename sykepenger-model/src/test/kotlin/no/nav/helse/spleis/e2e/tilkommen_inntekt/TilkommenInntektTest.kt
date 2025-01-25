@@ -424,8 +424,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsler(listOf(Varselkode.RV_SV_5, Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
-            assertInntektsgrunnlag(1.januar, a1, INNTEKT)
-            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+                assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            }
         }
     }
 
@@ -452,8 +454,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             )
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
-            assertInntektsgrunnlag(1.januar, a1, inntekt)
-            assertInntektsgrunnlag(1.januar, a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, inntekt)
+                assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            }
         }
     }
 
@@ -475,8 +479,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 )
             )
             assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
-            assertInntektsgrunnlag(1.januar, a1, inntekt)
-            assertInntektsgrunnlag(1.januar, a2, inntekt)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, inntekt)
+                assertInntektsgrunnlag(a2, inntekt)
+            }
         }
     }
 
