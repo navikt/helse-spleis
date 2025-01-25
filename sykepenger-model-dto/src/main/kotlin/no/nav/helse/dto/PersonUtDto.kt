@@ -132,11 +132,6 @@ sealed class MedlemskapsvurderingDto {
     data object UavklartMedBrukerspørsmål : MedlemskapsvurderingDto()
 }
 
-data class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto(
-    val orgnummer: String,
-    val inntektsopplysninger: List<SkatteopplysningDto>
-)
-
 data class SkatteopplysningDto(
     val hendelseId: UUID,
     val beløp: InntektbeløpDto.MånedligDouble,
