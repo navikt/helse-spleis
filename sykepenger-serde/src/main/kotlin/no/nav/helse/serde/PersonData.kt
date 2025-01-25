@@ -46,6 +46,7 @@ import no.nav.helse.dto.UtbetaltDagDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
+import no.nav.helse.dto.deserialisering.ArbeidstakerinntektskildeInnDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
 import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
 import no.nav.helse.dto.deserialisering.BehandlingerInnDto
@@ -61,7 +62,6 @@ import no.nav.helse.dto.deserialisering.InntektsdataInnDto
 import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.deserialisering.InntektsmeldingInnDto
-import no.nav.helse.dto.deserialisering.ArbeidstakerinntektskildeInnDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.MaksdatoresultatInnDto
 import no.nav.helse.dto.deserialisering.MinimumSykdomsgradVurderingInnDto
@@ -327,17 +327,11 @@ data class PersonData(
                 val beløp: Double,
                 val tidsstempel: LocalDateTime,
                 val kilde: InntektsopplysningskildeData,
-                val type: InntektsopplysningstypeData?, // todo: nullability kan fjernes når alle personer har fått oppdatert json
-                val skatteopplysninger: List<SkatteopplysningData>?,
-                @Deprecated("denne holder vi på å migrere oss ut av")
-                val inntektsmeldingkilde: InntektsmeldingKildeDto?
+                val type: InntektsopplysningstypeData,
+                val skatteopplysninger: List<SkatteopplysningData>?
             ) {
                 enum class InntektsopplysningstypeData {
                     ARBEIDSTAKER
-                }
-                enum class InntektsmeldingKildeDto {
-                    Arbeidsgiver,
-                    AOrdningen
                 }
 
                 enum class InntektsopplysningskildeData {
@@ -357,18 +351,13 @@ data class PersonData(
                         id = this.id,
                         inntektsdata = inntektsdata,
                         inntektsopplysning = when (type) {
-                            null, InntektsopplysningstypeData.ARBEIDSTAKER -> InntektsopplysningInnDto.ArbeidstakerDto(
+                            InntektsopplysningstypeData.ARBEIDSTAKER -> InntektsopplysningInnDto.ArbeidstakerDto(
                                 kilde = when (kilde) {
                                     InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> ArbeidstakerinntektskildeInnDto.AOrdningenDto(
                                         inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
                                     )
                                     InntektsopplysningskildeData.INFOTRYGD -> ArbeidstakerinntektskildeInnDto.InfotrygdDto
-                                    InntektsopplysningskildeData.INNTEKTSMELDING -> when (this.inntektsmeldingkilde) {
-                                        InntektsmeldingKildeDto.Arbeidsgiver, null -> ArbeidstakerinntektskildeInnDto.ArbeidsgiverDto
-                                        InntektsmeldingKildeDto.AOrdningen -> ArbeidstakerinntektskildeInnDto.AOrdningenDto(
-                                            inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
-                                        )
-                                    }
+                                    InntektsopplysningskildeData.INNTEKTSMELDING -> ArbeidstakerinntektskildeInnDto.ArbeidsgiverDto
                                 }
                             )
                         }

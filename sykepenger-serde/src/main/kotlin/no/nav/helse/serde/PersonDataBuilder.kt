@@ -834,8 +834,7 @@ private fun FaktaavklartInntektUtDto.tilPersonData() = PersonData.Vilkårsgrunnl
             is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> kilde.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
             else -> null
         }
-    },
-    inntektsmeldingkilde = null
+    }
 )
 
 private fun SaksbehandlerUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.KorrigertInntektsopplysningData(
