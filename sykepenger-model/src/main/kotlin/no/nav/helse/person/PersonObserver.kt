@@ -210,11 +210,6 @@ interface PersonObserver {
                         )
                     )
 
-                    is FastsattInntekt -> mapOf(
-                        "opplysningstype" to "FastsattInntekt",
-                        "fastsattInntekt" to forespurtOpplysning.fastsattInntekt.månedlig
-                    )
-
                     is Refusjon -> mapOf(
                         "opplysningstype" to "Refusjon",
                         "forslag" to emptyList<Nothing>()
@@ -230,7 +225,6 @@ interface PersonObserver {
     }
 
     data object Inntekt : ForespurtOpplysning()
-    data class FastsattInntekt(val fastsattInntekt: no.nav.helse.økonomi.Inntekt) : ForespurtOpplysning()
     data object Arbeidsgiverperiode : ForespurtOpplysning()
     data object Refusjon : ForespurtOpplysning()
 

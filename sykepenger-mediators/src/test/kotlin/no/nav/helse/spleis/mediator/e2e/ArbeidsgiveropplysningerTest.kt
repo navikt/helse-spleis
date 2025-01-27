@@ -71,7 +71,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "@forårsaket_av"
         )
 
-        JSONAssert.assertEquals(forventetResultatFastsattInntekt, faktiskResultat, JSONCompareMode.STRICT)
+        JSONAssert.assertEquals(forventetResultatUtenForespurtInntekt, faktiskResultat, JSONCompareMode.STRICT)
     }
 
     @Test
@@ -200,7 +200,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
     }
 
     @Language("json")
-    val forventetResultatFastsattInntekt = """
+    val forventetResultatUtenForespurtInntekt = """
         {
           "@event_name": "trenger_opplysninger_fra_arbeidsgiver",
           "organisasjonsnummer": "ag2",
@@ -223,10 +223,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             }
           ],
           "forespurteOpplysninger": [
-            {
-              "opplysningstype": "FastsattInntekt",
-              "fastsattInntekt": 31000.0
-            },
             {
               "opplysningstype": "Refusjon",
               "forslag": []

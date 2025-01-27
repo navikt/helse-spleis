@@ -117,7 +117,6 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                     PersonObserver.FørsteFraværsdag(a1, 1.mars)
                 ),
                 forespurteOpplysninger = listOf(
-                    PersonObserver.FastsattInntekt(INNTEKT),
                     PersonObserver.Refusjon,
                     PersonObserver.Arbeidsgiverperiode
                 ),

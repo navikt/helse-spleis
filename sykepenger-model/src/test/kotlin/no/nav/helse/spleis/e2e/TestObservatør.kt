@@ -164,7 +164,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
             PersonObserver.Arbeidsgiverperiode -> Arbeidsgiveropplysning.OppgittArbeidgiverperiode::class
             is PersonObserver.Inntekt -> Arbeidsgiveropplysning.OppgittInntekt::class
             PersonObserver.Refusjon -> Arbeidsgiveropplysning.OppgittRefusjon::class
-            is PersonObserver.FastsattInntekt -> null
         }
 
     override fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {

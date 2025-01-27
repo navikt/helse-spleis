@@ -1,7 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -41,11 +40,6 @@ internal data class ArbeidsgiverInntektsopplysning(
 
     private fun omregnetÅrsinntekt(acc: Inntekt, skjæringstidspunkt: LocalDate): Inntekt {
         return acc + omregnetÅrsinntekt(skjæringstidspunkt)
-    }
-
-    private fun fastsattÅrsinntekt(dagen: LocalDate): Inntekt {
-        if (dagen > gjelder.endInclusive) return INGEN
-        return fastsattÅrsinntekt
     }
 
     private fun beregningsgrunnlag(skjæringstidspunkt: LocalDate): Inntekt {
@@ -194,7 +188,7 @@ internal data class ArbeidsgiverInntektsopplysning(
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.skjønnsfastsett(other: List<SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt>): List<ArbeidsgiverInntektsopplysning> {
-            check (this.size == other.size) { "alle inntektene må skjønnsfastsettes" }
+            check(this.size == other.size) { "alle inntektene må skjønnsfastsettes" }
             return this.map { inntekt -> inntekt.skjønnsfastsett(other) }
         }
 
@@ -220,14 +214,6 @@ internal data class ArbeidsgiverInntektsopplysning(
         ) {
             if (none { opptjening.startdatoFor(it.orgnummer) == null }) return
             aktivitetslogg.varsel(Varselkode.RV_VV_1)
-        }
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.fastsattInntekt(
-            skjæringstidspunkt: LocalDate,
-            organisasjonsnummer: String
-        ): PersonObserver.FastsattInntekt? {
-            val fastsattOpplysning = singleOrNull { it.gjelder(organisasjonsnummer) } ?: return null
-            return PersonObserver.FastsattInntekt(fastsattOpplysning.fastsattÅrsinntekt(skjæringstidspunkt))
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.berik(builder: UtkastTilVedtakBuilder) = this
@@ -281,9 +267,9 @@ internal data class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.harGjenbrukbarInntekt(organisasjonsnummer: String) =
             singleOrNull { it.orgnummer == organisasjonsnummer }
-            ?.faktaavklartInntekt
-            ?.inntektsopplysning?.let { it as? Inntektsopplysning.Arbeidstaker }
-            ?.kilde is Arbeidstakerinntektskilde.Arbeidsgiver
+                ?.faktaavklartInntekt
+                ?.inntektsopplysning?.let { it as? Inntektsopplysning.Arbeidstaker }
+                ?.kilde is Arbeidstakerinntektskilde.Arbeidsgiver
 
         internal fun List<ArbeidsgiverInntektsopplysning>.lagreTidsnæreInntekter(
             skjæringstidspunkt: LocalDate,

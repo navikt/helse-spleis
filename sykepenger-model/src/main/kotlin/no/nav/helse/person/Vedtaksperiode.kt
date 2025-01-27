@@ -1545,11 +1545,9 @@ internal class Vedtaksperiode private constructor(
 
     private fun sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode: Arbeidsgiverperiode? = finnArbeidsgiverperiode(), skalInnhenteInntektFraAOrdningen: Boolean = false) {
         checkNotNull(arbeidsgiverperiode) { "Må ha arbeidsgiverperiode før vi sier dette." }
-        val fastsattInntekt = vilkårsgrunnlag?.fastsattInntekt(arbeidsgiver.organisasjonsnummer)
 
         val forespurteOpplysninger = listOfNotNull(
-            PersonObserver.Inntekt.takeIf { fastsattInntekt == null },
-            fastsattInntekt?.takeIf { Toggle.SendFastsattInntektTilHag.enabled },
+            PersonObserver.Inntekt.takeIf { vilkårsgrunnlag == null },
             PersonObserver.Refusjon,
             forespurtArbeidsgiverperiode(arbeidsgiverperiode)
         )
