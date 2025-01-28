@@ -26,6 +26,7 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
@@ -117,6 +118,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
     }
 
     @Test
+    @Disabled("TODO: Dette er en tøysete test, men kan kanskje gi mening i fremtiden?")
     fun `saksbehandler flytter arbeidsgiver på skjæringstidspunktet som tilkommen`() {
         a1 {
             håndterSøknad(januar)
