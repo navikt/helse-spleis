@@ -241,16 +241,15 @@ internal data class ArbeidsgiverInntektsopplysning(
                     arbeidsgiver = arbeidsgiver.orgnummer,
                     omregnedeÅrsinntekt = arbeidsgiver.omregnetÅrsinntekt.beløp,
                     skjønnsfastsatt = arbeidsgiver.skjønnsmessigFastsatt?.inntektsdata?.beløp,
-                    gjelder = arbeidsgiver.gjelder,
-                    inntektskilde = if (arbeidsgiver.skjønnsmessigFastsatt != null || arbeidsgiver.korrigertInntekt != null)
-                        Inntektskilde.Saksbehandler
-                    else when (arbeidsgiver.faktaavklartInntekt.inntektsopplysning) {
-                        is Inntektsopplysning.Arbeidstaker -> when (arbeidsgiver.faktaavklartInntekt.inntektsopplysning.kilde) {
-                            is Arbeidstakerinntektskilde.AOrdningen -> Inntektskilde.AOrdningen
-                            Arbeidstakerinntektskilde.Arbeidsgiver -> Inntektskilde.Arbeidsgiver
-                            Arbeidstakerinntektskilde.Infotrygd -> Inntektskilde.Arbeidsgiver
+                    inntektskilde =
+                        if (arbeidsgiver.skjønnsmessigFastsatt != null || arbeidsgiver.korrigertInntekt != null) Inntektskilde.Saksbehandler
+                        else when (arbeidsgiver.faktaavklartInntekt.inntektsopplysning) {
+                            is Inntektsopplysning.Arbeidstaker -> when (arbeidsgiver.faktaavklartInntekt.inntektsopplysning.kilde) {
+                                is Arbeidstakerinntektskilde.AOrdningen -> Inntektskilde.AOrdningen
+                                Arbeidstakerinntektskilde.Arbeidsgiver -> Inntektskilde.Arbeidsgiver
+                                Arbeidstakerinntektskilde.Infotrygd -> Inntektskilde.Arbeidsgiver
+                            }
                         }
-                    }
                 )
             }
 

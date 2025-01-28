@@ -141,11 +141,11 @@ internal class UtkastTilVedtakBuilder(
         if (inngangsvilkårFraInfotrygd) tags.add(Tag.InngangsvilkårFraInfotrygd)
     }
 
-    private data class Arbeidsgiverinntekt(val arbeidsgiver: String, val omregnedeÅrsinntekt: Double, val skjønnsfastsatt: Double?, val gjelder: Periode, val inntektskilde: Inntektskilde)
+    private data class Arbeidsgiverinntekt(val arbeidsgiver: String, val omregnedeÅrsinntekt: Double, val skjønnsfastsatt: Double?, val inntektskilde: Inntektskilde)
 
     private val arbeidsgiverinntekter = mutableSetOf<Arbeidsgiverinntekt>()
-    internal fun arbeidsgiverinntekt(arbeidsgiver: String, omregnedeÅrsinntekt: Inntekt, skjønnsfastsatt: Inntekt?, gjelder: Periode, inntektskilde: Inntektskilde) = apply {
-        arbeidsgiverinntekter.add(Arbeidsgiverinntekt(arbeidsgiver, omregnedeÅrsinntekt.årlig, skjønnsfastsatt?.årlig, gjelder, inntektskilde))
+    internal fun arbeidsgiverinntekt(arbeidsgiver: String, omregnedeÅrsinntekt: Inntekt, skjønnsfastsatt: Inntekt?, inntektskilde: Inntektskilde) = apply {
+        arbeidsgiverinntekter.add(Arbeidsgiverinntekt(arbeidsgiver, omregnedeÅrsinntekt.årlig, skjønnsfastsatt?.årlig, inntektskilde))
     }
 
     private val tilkomneArbeidsgivere = mutableSetOf<String>()
