@@ -122,7 +122,7 @@ internal data class ArbeidsgiverInntektsopplysning(
                     inntektstidslinje = Inntektstidslinje(
                         skjæringstidspunkt = skjæringstidspunkt,
                         beløpstidslinje = Beløpstidslinje(), // TODO: Skal lagres på arbeidsgiverInntektsopplysning
-                        fastsattÅrsinntekt = arbeidsgiverInntektsopplysning.fastsattÅrsinntekt.takeUnless { arbeidsgiverInntektsopplysning.faktaavklartInntekt.inntektsdata.beløp == INGEN } // TODO: takeUnless { arbeidsgiverInntektsopplysning.faktaavklartInntekt == null }
+                        fastsattÅrsinntekt = arbeidsgiverInntektsopplysning.fastsattÅrsinntekt
                     )
                 )
             }
