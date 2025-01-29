@@ -26,7 +26,7 @@ spec:
           application: spre-styringsinfo
           access: read
         - team: tbd
-          application: spesialist-migrering
+          application: spesialist-sidegig
           access: readwrite
         - team: tbd
           application: spregulering

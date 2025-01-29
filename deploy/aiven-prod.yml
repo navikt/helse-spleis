@@ -117,7 +117,7 @@ spec:
           application: spesialist
           access: readwrite
         - team: tbd
-          application: spesialist-migrering
+          application: spesialist-sidegig
           access: readwrite
         - team: tbd
           application: spinnvill
