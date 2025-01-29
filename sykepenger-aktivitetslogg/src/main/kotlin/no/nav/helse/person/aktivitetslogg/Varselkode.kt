@@ -65,7 +65,7 @@ enum class Varselkode(
     RV_SØ_44("I søknaden er det oppgitt at den sykmeldte har et arbeidsforhold som ikke er registrert i AA-registeret."),
 
     // OO: Out-of-order
-    RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne."),
+    RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne.", avviklet = true),
     RV_OO_2("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", avviklet = true),
 
     // IM: Inntektsmelding

@@ -14,7 +14,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -46,7 +45,6 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertVarsler(listOf(Varselkode.RV_IM_3), 1.vedtaksperiode.filter())
-        assertVarsler(listOf(RV_OO_1), 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -69,8 +67,6 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
-
-        assertVarsel(RV_OO_1, 3.vedtaksperiode.filter())
     }
 
     @Test

@@ -2492,7 +2492,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterSøknad(januar)
 
-        assertVarsel(Varselkode.RV_OO_1, 3.vedtaksperiode.filter())
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
 
         assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())

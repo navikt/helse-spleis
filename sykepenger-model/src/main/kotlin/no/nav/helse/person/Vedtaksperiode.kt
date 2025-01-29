@@ -131,7 +131,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
@@ -292,11 +291,6 @@ internal class Vedtaksperiode private constructor(
         check(tilstand is Start)
         registrerKontekst(aktivitetslogg)
         person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId, id, arbeidsgiver.organisasjonsnummer)
-
-        val harSenereUtbetalinger = person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(this)).isNotEmpty()
-        val harSenereAUU = person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_UTEN_UTBETALING(this)).isNotEmpty()
-        if (harSenereUtbetalinger || harSenereAUU) aktivitetslogg.varsel(RV_OO_1)
-
         arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(aktivitetslogg, this, arbeidsgivere)
 
         infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)

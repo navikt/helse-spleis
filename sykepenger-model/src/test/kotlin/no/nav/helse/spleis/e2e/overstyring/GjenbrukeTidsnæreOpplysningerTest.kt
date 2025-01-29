@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import kotlin.reflect.KClass
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
@@ -253,7 +253,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent))
-            assertVarsel(Varselkode.RV_OO_1, 3.vedtaksperiode.filter())
             assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)

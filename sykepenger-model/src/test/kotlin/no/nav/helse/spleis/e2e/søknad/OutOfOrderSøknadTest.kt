@@ -24,7 +24,6 @@ import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -50,7 +49,6 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(9.januar, 16.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 8.januar, 100.prosent))
 
-        assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
         assertEquals(listOf(1.januar til 8.januar, 9.januar til 16.januar), inspektør.sykdomstidslinje.inspektør.låstePerioder)
     }
 
@@ -83,7 +81,6 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-        assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
 
         håndterInntektsmelding(listOf(1.februar til 16.februar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)

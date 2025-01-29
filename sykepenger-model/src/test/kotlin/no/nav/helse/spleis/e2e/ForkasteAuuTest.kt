@@ -59,7 +59,6 @@ internal class ForkasteAuuTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterSøknad(Sykdom(1.januar, 25.januar, 100.prosent), utenlandskSykmelding = true)
-            assertVarsel(Varselkode.RV_OO_1, 3.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)

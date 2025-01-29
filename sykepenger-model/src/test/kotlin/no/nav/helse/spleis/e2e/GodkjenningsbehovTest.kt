@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.INNTEKT
@@ -287,7 +287,6 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         nyttVedtak(februar)
         håndterSøknad(januar)
 
-        assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
@@ -317,7 +316,6 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         nyttVedtak(mars)
         håndterSøknad(januar)
 
-        assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 

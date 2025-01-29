@@ -49,7 +49,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
@@ -402,7 +401,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
             tilGodkjenning(januar)
-            assertVarsler(2.vedtaksperiode, RV_OO_1)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 

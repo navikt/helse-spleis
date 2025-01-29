@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e.refusjon
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -140,7 +140,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertEquals(Beløpstidslinje(), inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje)
             håndterSøknad(1.februar til 16.februar)
-            assertVarsel(Varselkode.RV_OO_1, 3.vedtaksperiode.filter())
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isNotEmpty())
@@ -828,7 +827,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(mars)
             nyPeriode(januar)
-            assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
             nyPeriode(februar)
             assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
 
@@ -842,7 +840,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(april)
             nyPeriode(januar)
-            assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
             nyPeriode(februar)
             nyPeriode(mars)
 
@@ -876,7 +873,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(februar)
             nyPeriode(januar)
-            assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
             assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isNotEmpty())
         }
@@ -888,7 +884,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             nyttVedtak(januar, beregnetInntekt = INNTEKT)
             nyttVedtak(mars, beregnetInntekt = INNTEKT * 1.1)
             nyPeriode(februar)
-            assertVarsel(Varselkode.RV_OO_1, 3.vedtaksperiode.filter())
 
             assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.all { it.beløp == INNTEKT })
         }

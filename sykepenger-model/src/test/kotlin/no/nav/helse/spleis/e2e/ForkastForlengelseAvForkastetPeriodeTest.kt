@@ -1,12 +1,11 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.april
-import no.nav.helse.februar
-import no.nav.helse.fredag
 import no.nav.helse.den
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
-import no.nav.helse.til
+import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -31,6 +30,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_31
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_33
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_37
+import no.nav.helse.til
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -183,7 +183,6 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
 
         nyPeriode(februar)
 
-        assertVarsel(Varselkode.RV_OO_1, 5.vedtaksperiode.filter())
         assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
 
         assertTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)

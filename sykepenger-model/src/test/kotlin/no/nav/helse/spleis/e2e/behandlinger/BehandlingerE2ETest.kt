@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.behandlinger
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
@@ -687,9 +687,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(10.januar, 15.januar, 100.prosent))
             håndterSøknad(Sykdom(5.januar, 9.januar, 100.prosent))
-            assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
             håndterSøknad(Sykdom(1.januar, 4.januar, 100.prosent))
-            assertVarsel(Varselkode.RV_OO_1, 3.vedtaksperiode.filter())
 
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(3, behandlinger.size)
@@ -744,7 +742,6 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
             håndterSøknad(februar)
 
-            assertVarsel(Varselkode.RV_OO_1, 4.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
 
             assertTilstand(4.vedtaksperiode, TIL_INFOTRYGD)

@@ -30,7 +30,6 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -50,7 +49,6 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         tilGodkjenning(januar, a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
         håndterUtbetalt()
-        assertVarsel(RV_OO_1, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
     }

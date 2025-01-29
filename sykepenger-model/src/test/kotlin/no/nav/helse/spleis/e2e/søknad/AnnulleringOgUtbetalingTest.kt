@@ -154,7 +154,6 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         nullstillTilstandsendringer()
         nyPeriode(5.februar til 15.februar, a1)
-        assertVarsel(Varselkode.RV_OO_1, 3.vedtaksperiode.filter())
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
 
         håndterYtelser(1.vedtaksperiode)

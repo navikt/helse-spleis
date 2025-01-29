@@ -107,7 +107,6 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         nyPeriode(januar)
 
-        assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET, TilstandType.AVVENTER_REVURDERING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
 

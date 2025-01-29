@@ -36,7 +36,6 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Overlapper med foreldrepenger`
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
@@ -53,8 +52,8 @@ import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengTilGodkjenning
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.forlengelseTilGodkjenning
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -139,7 +138,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(26.januar, 31.januar, 100.prosent))
         håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(26.januar til 31.januar, 100)))
 
-        assertVarsler(listOf(RV_OO_1, `Overlapper med foreldrepenger`), 3.vedtaksperiode.filter())
+        assertVarsel(`Overlapper med foreldrepenger`, 3.vedtaksperiode.filter())
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
@@ -204,7 +203,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(april, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         nyPeriode(10.februar til 28.februar)
-        assertVarsel(RV_OO_1, 3.vedtaksperiode.filter())
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             10.februar
@@ -274,7 +272,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar til 25.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
-        assertVarsler(listOf(RV_OO_1, Varselkode.RV_OS_2), 2.vedtaksperiode.filter())
+        assertVarsel(Varselkode.RV_OS_2, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
@@ -292,7 +290,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar til 25.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
-        assertVarsel(RV_OO_1, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
@@ -305,7 +302,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     fun `out of order periode med 18 dagers gap - revurderingen er uten endringer`() {
         nyttVedtak(19.februar til 15.mars)
         nyttVedtak(januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        assertVarsel(RV_OO_1, 2.vedtaksperiode.filter())
         håndterYtelser(1.vedtaksperiode)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
@@ -328,8 +324,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(29.januar til 15.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         nyPeriode(17.januar til 25.januar)
-
-        assertVarsel(RV_OO_1, 3.vedtaksperiode.filter())
 
         håndterArbeidsgiveropplysninger(
             listOf(1.januar til 15.januar, 17.januar til 17.januar),
@@ -453,7 +447,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         nyPeriode(17.januar til 28.januar)
-        assertVarsel(RV_OO_1, 3.vedtaksperiode.filter())
 
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
@@ -503,7 +496,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         nyttVedtak(januar, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
 
-        assertVarsel(RV_OO_1, 3.vedtaksperiode.filter())
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -514,7 +506,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(16.januar til 30.januar)
         nullstillTilstandsendringer()
         nyPeriode(1.januar til 15.januar)
-        assertVarsel(RV_OO_1, 2.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
     }
@@ -526,7 +517,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         nyPeriode(1.januar til 15.januar)
 
-        assertVarsel(RV_OO_1, 3.vedtaksperiode.filter())
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -538,7 +528,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         nyPeriode(1.januar til 15.januar, a1)
 
-        assertVarsel(RV_OO_1, 2.vedtaksperiode.filter(orgnummer = a1))
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a2)
@@ -549,7 +538,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(mars, orgnummer = a2)
         nyPeriode(januar, a1)
 
-        assertVarsel(RV_OO_1, 1.vedtaksperiode.filter(orgnummer = a1))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
     }
@@ -647,7 +635,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         nyPeriode(februar, a2)
         nyPeriode(februar, a3)
-        assertVarsel(RV_OO_1, 1.vedtaksperiode.filter(orgnummer = a2))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a3)
@@ -704,7 +691,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(februar, a2)
         nyPeriode(februar, a3)
 
-        assertVarsel(RV_OO_1, 1.vedtaksperiode.filter(orgnummer = a2))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a3)
@@ -761,7 +747,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 3.vedtaksperiode
         )
 
-        assertVarsel(RV_OO_1, 3.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
@@ -848,7 +833,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         nyPeriode(januar)
 
-        assertVarsel(RV_OO_1, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
         assertIngenInfo("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding", 1.vedtaksperiode.filter())
@@ -876,7 +860,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         nyPeriode(1.februar til 25.februar)
-        assertVarsel(RV_OO_1, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         håndterArbeidsgiveropplysninger(
             listOf(1.februar til 16.februar),
@@ -916,7 +899,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true)
 
-        assertVarsel(RV_OO_1, 2.vedtaksperiode.filter())
         assertFunksjonellFeil(RV_SØ_10, 2.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -933,7 +915,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertEquals(0, inspektør.sisteMaksdato(2.vedtaksperiode).gjenståendeDager)
 
         nyttVedtak(1.mars til 26.mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
-        assertVarsel(RV_OO_1, 3.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
 
         //Når out-of-order perioden for mars kommer inn, så er det dager i mai som skal bli avvist pga maksdato
@@ -950,8 +931,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         forlengVedtak(mai)
 
         nyttVedtak(januar, vedtaksperiodeIdInnhenter = 4.vedtaksperiode)
-
-        assertVarsel(RV_OO_1, 4.vedtaksperiode.filter())
     }
 
     @Test
@@ -996,7 +975,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         assertVarsler(emptyList(), 2.vedtaksperiode.filter())
-        assertVarsler(listOf(RV_OO_1), 3.vedtaksperiode.filter())
     }
 
     @Test
@@ -1008,7 +986,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         nyttVedtak(1.februar til 25.februar, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
-        assertVarsel(RV_OO_1, 3.vedtaksperiode.filter())
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
@@ -1086,7 +1063,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         val februarId = 2.vedtaksperiode
 
-        assertVarsel(RV_OO_1, februarId.filter())
         assertVarsel(Varselkode.RV_IV_7, marsId.filter())
 
         håndterInntektsmelding(listOf(1.februar til 16.februar))
@@ -1106,7 +1082,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(januar)
         val januarId = 3.vedtaksperiode
 
-        assertVarsel(RV_OO_1, januarId.filter())
         assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
 
         assertSisteTilstand(januarId, AVVENTER_VILKÅRSPRØVING)
@@ -1132,7 +1107,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         val februarId = 1.vedtaksperiode
         val januarId = 2.vedtaksperiode
 
-        assertVarsel(RV_OO_1, 2.vedtaksperiode.filter())
         assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
         assertSisteTilstand(februarId, AVVENTER_REVURDERING)
         assertSisteTilstand(januarId, AVVENTER_VILKÅRSPRØVING)
@@ -1172,7 +1146,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(20.januar til 31.januar)
 
         assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
-        assertVarsel(RV_OO_1, 2.vedtaksperiode.filter())
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
     }
@@ -1185,7 +1158,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         val februarId = 1.vedtaksperiode
         val januarId = 2.vedtaksperiode
 
-        assertVarsel(RV_OO_1, 2.vedtaksperiode.filter())
         assertSisteTilstand(februarId, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(januarId, AVVENTER_INNTEKTSMELDING)
 
