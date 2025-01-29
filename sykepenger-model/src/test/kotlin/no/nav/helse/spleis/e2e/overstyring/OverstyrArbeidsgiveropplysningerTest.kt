@@ -6,6 +6,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
 import no.nav.helse.dsl.assertInntektsgrunnlag
+import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
@@ -43,17 +44,46 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.tilYtelser
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `endre inntekt når faktaavklart inntekt er 0 kr`() {
+        tilYtelser(januar, 100.prosent, a1, beregnetInntekt = INGEN, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
+            OverstyrtArbeidsgiveropplysning(a1, INNTEKT)
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, INGEN, INNTEKT, forventetKorrigertInntekt = INNTEKT)
+        }
+        inspektør.utbetaling(1).also { utbetaling ->
+            assertEquals(15741, utbetaling.nettobeløp)
+            utbetaling.utbetalingstidslinje.forEach { utbetalingsdag ->
+                assertEquals(INNTEKT, utbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
+                assertEquals(INGEN, utbetalingsdag.økonomi.inspektør.arbeidsgiverbeløp)
+            }
+            utbetaling.utbetalingstidslinje.subset(17.januar til 31.januar)
+                .filterNot { it.dato.erHelg() }
+                .forEach { utbetalingsdag ->
+                    assertEquals(1431.daglig, utbetalingsdag.økonomi.inspektør.personbeløp)
+                }
+        }
+    }
 
     @Test
     fun `Overstyring av refusjon skal gjelde også på forlengelser`() {
