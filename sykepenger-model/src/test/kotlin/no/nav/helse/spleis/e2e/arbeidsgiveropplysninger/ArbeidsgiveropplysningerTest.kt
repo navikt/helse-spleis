@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
-import java.util.*
-import no.nav.helse.Toggle
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
@@ -343,7 +342,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `oppgir at det er opphør av naturalytelser`() = Toggle.OpphørAvNaturalytelser.enable {
+    fun `oppgir at det er opphør av naturalytelser`() {
         a1 {
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(
@@ -353,13 +352,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 OpphørAvNaturalytelser,
             )
-            if (Toggle.OpphørAvNaturalytelser.enabled) {
-                assertVarsel(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-            } else {
-                assertFunksjonellFeil(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
-                assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            }
+            assertFunksjonellFeil(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
     }
 

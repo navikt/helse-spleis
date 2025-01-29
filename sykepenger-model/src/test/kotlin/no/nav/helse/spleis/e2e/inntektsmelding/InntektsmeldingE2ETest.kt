@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import java.util.*
-import no.nav.helse.Toggle
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -190,17 +189,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `oppgir at det er opphør av naturalytelser`() = Toggle.OpphørAvNaturalytelser.enable {
+    fun `oppgir at det er opphør av naturalytelser`() {
         nyPeriode(januar)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             opphørAvNaturalytelser = listOf(Inntektsmelding.OpphørAvNaturalytelse(1000.månedlig, 1.januar, "TELEFON"))
         )
-        if (Toggle.OpphørAvNaturalytelser.enabled) {
-            assertVarsel(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
-        } else {
-            assertFunksjonellFeil(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
-        }
+        assertFunksjonellFeil(Varselkode.RV_IM_7, 1.vedtaksperiode.filter())
     }
 
     @Test

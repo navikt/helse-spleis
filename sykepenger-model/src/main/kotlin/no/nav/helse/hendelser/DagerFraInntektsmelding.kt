@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.Toggle
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
@@ -219,11 +218,7 @@ internal class DagerFraInntektsmelding(
                     keyValue("naturalytelser", opphørAvNaturalytelser)
                 )
             }
-            if (Toggle.OpphørAvNaturalytelser.enabled) {
-                aktivitetslogg.varsel(Varselkode.RV_IM_7)
-            } else {
-                aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_7)
-            }
+            aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_7)
         }
         if (harFlereInntektsmeldinger) aktivitetslogg.varsel(Varselkode.RV_IM_22)
         validerBegrunnelseForReduksjonEllerIkkeUtbetalt(aktivitetslogg)
