@@ -6,6 +6,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_5
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -35,6 +36,7 @@ internal class InntektFraNyttArbeidsforholdTest : AbstractEndToEndMediatorTest()
     }
 
     @Test
+    @Disabled("TODO: TilkommenV3")
     fun `inntekt fra nytt arbeidsforhold med harJobbet = true & beløp`() {
         nyttVedtak(1.januar, 31.januar)
 

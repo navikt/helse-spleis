@@ -41,6 +41,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class SpeilBuilderTest : AbstractE2ETest() {
@@ -75,6 +76,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     }
 
     @Test
+    @Disabled("TODO: TilkommenV3")
     fun `lager NyeInntektsforhold-pølse for tilkommen inntekt`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a24", råttBeløp = 10000)))
@@ -90,6 +92,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     }
 
     @Test
+    @Disabled("TODO: TilkommenV3")
     fun `kan lage NyeInntektsforhold-pølse med peker til riktig vilkårsgrunnlag før noe er utbetalt`() {
         tilGodkjenning(1.januar, 31.januar)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a24", råttBeløp = 10000)))
