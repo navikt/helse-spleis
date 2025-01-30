@@ -419,6 +419,7 @@ class Person private constructor(
     fun håndter(påminnelse: PersonPåminnelse, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler personpåminnelse")
         aktivitetslogg.info("Håndterer påminnelse for person")
+        vilkårsgrunnlagHistorikk.loggTilkommendeInntekter(aktivitetslogg)
         håndterGjenoppta(påminnelse, aktivitetslogg)
     }
 
