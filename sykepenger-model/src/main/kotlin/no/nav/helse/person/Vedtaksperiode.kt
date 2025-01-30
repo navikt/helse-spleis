@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
@@ -131,6 +131,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_9
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
@@ -1763,6 +1764,13 @@ internal class Vedtaksperiode private constructor(
             type
         )
         vedtaksperiode.person.vedtaksperiodePåminnet(id, arbeidsgiver.organisasjonsnummer, påminnelse)
+        if (vilkårsgrunnlag?.inntektsgrunnlag?.harTilkommendeInntekter() == true) {
+            if (!arbeidsgiver.kanForkastes(vedtaksperiode, aktivitetslogg)) {
+                return aktivitetslogg.info("Klarte ikke forkaste periode med tilkommen inntekt i inntektsgrunnlaget")
+            }
+            aktivitetslogg.funksjonellFeil(RV_IV_9)
+            return vedtaksperiode.forkast(påminnelse, aktivitetslogg)
+        }
         val beregnetMakstid = { tilstandsendringstidspunkt: LocalDateTime -> makstid(tilstandsendringstidspunkt) }
         if (påminnelse.nåddMakstid(beregnetMakstid)) return håndterMakstid(vedtaksperiode, påminnelse, aktivitetslogg)
         håndter(vedtaksperiode, påminnelse, aktivitetslogg)

@@ -280,6 +280,8 @@ internal class Inntektsgrunnlag private constructor(
 
     internal fun harTilkommendeInntekter(periode: Periode) = tilkommendeInntekter.any { it.beløpstidslinje.subset(periode).isNotEmpty() }
 
+    internal fun harTilkommendeInntekter() = tilkommendeInntekter.isNotEmpty()
+
     internal fun nyeArbeidsgiverInntektsopplysninger(
         organisasjonsnummer: String,
         inntekt: FaktaavklartInntekt,
