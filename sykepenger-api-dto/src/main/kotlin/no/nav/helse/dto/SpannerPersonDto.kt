@@ -496,6 +496,7 @@ data class SpannerPersonDto(
                     val refusjonstidslinje: BeløpstidslinjeData,
                     val dokumentsporing: DokumentsporingData,
                     val arbeidsgiverperiode: List<PeriodeData>,
+                    val dagerNavOvertarAnsvar: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData
                 )
             }
@@ -1112,6 +1113,12 @@ private fun BehandlingendringUtDto.tilPersonData() =
         refusjonstidslinje = refusjonstidslinje.tilPersonData(),
         dokumentsporing = dokumentsporing.tilPersonData(),
         arbeidsgiverperiode = arbeidsgiverperioder.map {
+            SpannerPersonDto.ArbeidsgiverData.PeriodeData(
+                it.fom,
+                it.tom
+            )
+        },
+        dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map {
             SpannerPersonDto.ArbeidsgiverData.PeriodeData(
                 it.fom,
                 it.tom

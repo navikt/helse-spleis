@@ -24,5 +24,6 @@ data class BehandlingendringUtDto(
     val utbetalingstidslinje: UtbetalingstidslinjeUtDto,
     val refusjonstidslinje: BeløpstidslinjeDto,
     val arbeidsgiverperioder: List<PeriodeDto>,
+    val dagerNavOvertarAnsvar: List<PeriodeDto>,
     val maksdatoresultat: MaksdatoresultatUtDto,
 )

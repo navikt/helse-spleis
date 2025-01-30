@@ -22,5 +22,6 @@ data class BehandlingendringInnDto(
     val skjæringstidspunkt: LocalDate,
     val skjæringstidspunkter: List<LocalDate>,
     val arbeidsgiverperiode: List<PeriodeDto>,
+    val dagerNavOvertarAnsvar: List<PeriodeDto>,
     val maksdatoresultat: MaksdatoresultatInnDto
 )

@@ -878,6 +878,7 @@ data class PersonData(
                     val refusjonstidslinje: BeløpstidslinjeData,
                     val dokumentsporing: DokumentsporingData,
                     val arbeidsgiverperioder: List<PeriodeData>,
+                    val dagerNavOvertarAnsvar: List<PeriodeData>?, // todo: fjerne null
                     val maksdatoresultat: MaksdatoresultatData
                 ) {
                     fun tilDto() = BehandlingendringInnDto(
@@ -894,6 +895,21 @@ data class PersonData(
                         skjæringstidspunkt = skjæringstidspunkt,
                         skjæringstidspunkter = skjæringstidspunkter,
                         arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() },
+                        dagerNavOvertarAnsvar = dagerNavOvertarAnsvar?.map { it.tilDto() }
+                            ?: sykdomstidslinje // migrerer inn alle sykedagNav-dager som ligger på vedtaksperioden
+                                .dager
+                                .filter { it.type == SykdomstidslinjeData.JsonDagType.SYKEDAG_NAV }
+                                .map { it.dato?.rangeTo(it.dato) ?: (it.fom!!.rangeTo(it.tom!!)) }
+                                .flatMap { it.start.datesUntil(it.endInclusive.plusDays(1)).toList() }
+                                .filter { sykNav -> arbeidsgiverperioder.any { agp -> sykNav in agp.fom.rangeUntil(agp.tom) } }
+                                .fold(emptyList<PeriodeDto>()) { resultat, sykNav ->
+                                    val last = resultat.lastOrNull()
+                                    when {
+                                        last == null -> listOf(PeriodeDto(sykNav, sykNav))
+                                        last.tom.plusDays(1) == sykNav -> resultat.dropLast(1) + last.copy(tom = sykNav)
+                                        else -> resultat.plusElement(PeriodeDto(sykNav, sykNav))
+                                    }
+                                },
                         maksdatoresultat = maksdatoresultat.tilDto()
                     )
                 }

@@ -18,6 +18,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.UtbetalingHendelse
@@ -393,6 +394,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 faktaavklarteInntekter = faktaavklarteInntekter,
                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
                 arbeidsgiverperiode = arbeidsgiverperiode,
+                dagerNavOvertarAnsvar = gjeldende.dagerNavOvertarAnsvar,
                 refusjonstidslinje = refusjonstidslinje
             )
             return builder.result(sykdomstidslinje)
@@ -427,6 +429,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val skjæringstidspunkt: LocalDate,
             val skjæringstidspunkter: List<LocalDate>,
             val arbeidsgiverperiode: List<Periode>,
+            val dagerNavOvertarAnsvar: List<Periode>,
             val maksdatoresultat: Maksdatoresultat
         ) {
 
@@ -497,6 +500,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         skjæringstidspunkt = dto.skjæringstidspunkt,
                         skjæringstidspunkter = dto.skjæringstidspunkter,
                         arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) },
+                        dagerNavOvertarAnsvar = dto.dagerNavOvertarAnsvar.map { Periode.gjenopprett(it) },
                         maksdatoresultat = dto.maksdatoresultat.let { Maksdatoresultat.gjenopprett(it) }
                     )
                 }
@@ -524,6 +528,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 skjæringstidspunkt: LocalDate = this.skjæringstidspunkt,
                 skjæringstidspunkter: List<LocalDate> = this.skjæringstidspunkter,
                 arbeidsgiverperiode: List<Periode> = this.arbeidsgiverperiode,
+                dagerNavOvertarAnsvar: List<Periode> = this.dagerNavOvertarAnsvar,
                 maksdatoresultat: Maksdatoresultat = this.maksdatoresultat
             ) = copy(
                 id = UUID.randomUUID(),
@@ -539,6 +544,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 skjæringstidspunkt = skjæringstidspunkt,
                 skjæringstidspunkter = skjæringstidspunkter,
                 arbeidsgiverperiode = arbeidsgiverperiode,
+                dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                 maksdatoresultat = maksdatoresultat,
             )
 
@@ -575,6 +581,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 periode: Periode,
                 dokument: Dokumentsporing,
                 sykdomstidslinje: Sykdomstidslinje,
+                dagerNavOvertarAnsvar: List<Periode>,
                 beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                 beregnArbeidsgiverperiode: (Periode) -> List<Periode>
             ): Endring {
@@ -590,6 +597,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     skjæringstidspunkt = nyttSkjæringstidspunkt,
                     skjæringstidspunkter = alleSkjæringstidspunkter,
                     arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode),
+                    dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                     maksdatoresultat = Maksdatoresultat.IkkeVurdert
                 )
             }
@@ -685,6 +693,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     utbetalingstidslinje = this.utbetalingstidslinje.dto(),
                     refusjonstidslinje = this.refusjonstidslinje.dto(),
                     arbeidsgiverperioder = this.arbeidsgiverperiode.map { it.dto() },
+                    dagerNavOvertarAnsvar = this.dagerNavOvertarAnsvar.map { it.dto() },
                     maksdatoresultat = this.maksdatoresultat.dto()
                 )
             }
@@ -886,7 +895,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             if (hendelseperiode == null) return endringer.last().kopierUtenEndring(dokumentsporing, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
             val oppdatertPeriode = this.periode.oppdaterFom(hendelseperiode)
             val sykdomstidslinje = arbeidsgiver.oppdaterSykdom(dokumentsporing.id, hendelseSykdomstidslinje).subset(oppdatertPeriode)
-            return endringer.last().kopierMedEndring(oppdatertPeriode, dokumentsporing, sykdomstidslinje, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+            // todo: ta dette inn som parameter, og så unngår vi å ha en sykdomstidslinjedag for opplysningen
+            val dagerNavOvertarAnsvar = sykdomstidslinje.filterIsInstance<SykedagNav>().map { it.dato }.grupperSammenhengendePerioder()
+            return endringer.last().kopierMedEndring(oppdatertPeriode, dokumentsporing, sykdomstidslinje, dagerNavOvertarAnsvar, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
         }
 
         private fun oppdaterMedRefusjonstidslinje(dokumentsporing: Dokumentsporing?, nyeRefusjonsopplysninger: Beløpstidslinje) {
@@ -1135,6 +1146,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             skjæringstidspunkt = IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT,
                             skjæringstidspunkter = emptyList(),
                             arbeidsgiverperiode = emptyList(),
+                            dagerNavOvertarAnsvar = emptyList(),
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert
                         )
                     ),
