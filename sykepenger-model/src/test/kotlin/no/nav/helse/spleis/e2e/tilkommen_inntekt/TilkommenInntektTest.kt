@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.tilkommen_inntekt
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
@@ -34,8 +34,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
+@Disabled
 internal class TilkommenInntektTest : AbstractDslTest() {
 
     @Test

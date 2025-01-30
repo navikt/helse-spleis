@@ -131,10 +131,8 @@ class Søknad(
 
     private fun validerTilkomneInntekter(aktivitetslogg: IAktivitetslogg) {
         if (tilkomneInntekter.isEmpty()) return
-        if (tålerTilkommenInntekt()) aktivitetslogg.varsel(RV_SV_5) else aktivitetslogg.varsel(RV_IV_9)
+        aktivitetslogg.funksjonellFeil(RV_IV_9)
     }
-
-    private fun tålerTilkommenInntekt() = perioder.none { it is Søknadsperiode.Ferie || it is Søknadsperiode.Permisjon }
 
     private fun validerInntektskilder(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?) {
         if (ikkeJobbetIDetSisteFraAnnetArbeidsforhold) aktivitetslogg.varsel(RV_SØ_44)
@@ -173,12 +171,7 @@ class Søknad(
         arbeidsgiveren.fjern(sykdomsperiode)
     }
 
-    internal fun nyeInntekterUnderveis(aktivitetslogg: IAktivitetslogg): List<NyInntektUnderveis> {
-        val tilkommetkilde = Kilde(metadata.meldingsreferanseId, Avsender.SYKMELDT, metadata.registrert)
-        return if (!tålerTilkommenInntekt()) emptyList() else tilkomneInntekter.map { tilkommenInntekt ->
-            tilkommenInntekt.beløpstidslinje(tilkommetkilde).also { tilkommenInntekt.loggMetadata(aktivitetslogg) }
-        }
-    }
+    internal fun nyeInntekterUnderveis(aktivitetslogg: IAktivitetslogg): List<NyInntektUnderveis> = emptyList()
 
     class Merknad(private val type: String) {
         private companion object {
