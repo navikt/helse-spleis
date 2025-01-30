@@ -892,7 +892,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun omgjøreEtterInfotrygdendring(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
-        if (!forventerInntekt()) return
+        if (!skalOmgjøres()) return
         behandlinger.sikreNyBehandling(
             arbeidsgiver,
             hendelse.metadata.behandlingkilde,
@@ -1135,13 +1135,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(): Boolean {
         return vilkårsgrunnlag?.harNødvendigInntektForVilkårsprøving(arbeidsgiver.organisasjonsnummer) == false
-    }
-
-    private fun måInnhenteInntektEllerRefusjon(): Boolean {
-        val arbeidsgiverperiode = finnArbeidsgiverperiode() ?: return false
-        if (!arbeidsgiverperiode.forventerInntekt(periode)) return false
-        if (harInntektOgRefusjon()) return false
-        return true
     }
 
     private fun harTilkomneInntekter(): Boolean {
@@ -1786,8 +1779,18 @@ internal class Vedtaksperiode private constructor(
         return behandlinger.harVærtBeregnet() || forventerInntekt()
     }
 
+    private fun skalOmgjøres(): Boolean {
+        return forventerInntekt()
+    }
+
     private fun forventerInntekt(): Boolean {
-        return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode)
+        return finnArbeidsgiverperiode()?.forventerInntekt(periode) == true
+    }
+
+    private fun måInnhenteInntektEllerRefusjon(): Boolean {
+        if (!skalBehandlesISpeil()) return false
+        if (harInntektOgRefusjon()) return false
+        return true
     }
 
     private fun trengerGodkjenning(aktivitetslogg: IAktivitetslogg) {
@@ -3186,17 +3189,13 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.behandlinger.bekreftÅpenBehandling(vedtaksperiode.arbeidsgiver)
         }
 
-        private fun skalOmgjøres(vedtaksperiode: Vedtaksperiode): Boolean {
-            return vedtaksperiode.forventerInntekt()
-        }
-
         override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak {
-            if (!skalOmgjøres(vedtaksperiode)) return HJELP.utenBegrunnelse
+            if (!vedtaksperiode.skalOmgjøres()) return HJELP.utenBegrunnelse
             return HJELP fordi VIL_OMGJØRES
         }
 
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) =
-            if (!skalOmgjøres(vedtaksperiode)) null
+            if (!vedtaksperiode.skalOmgjøres()) null
             else vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
 
         override fun igangsettOverstyring(
@@ -3210,7 +3209,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.person.beregnSkjæringstidspunkt(),
                 vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
             )
-            if (skalOmgjøres(vedtaksperiode)) {
+            if (vedtaksperiode.skalOmgjøres()) {
                 revurdering.inngåSomEndring(vedtaksperiode, aktivitetslogg, vedtaksperiode.periode)
                 revurdering.loggDersomKorrigerendeSøknad(
                     aktivitetslogg,
@@ -3244,7 +3243,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            if (!skalOmgjøres(vedtaksperiode) && vedtaksperiode.behandlinger.erAvsluttet()) return aktivitetslogg.info("Forventer ikke inntekt. Vil forbli i AvsluttetUtenUtbetaling")
+            if (!vedtaksperiode.skalOmgjøres() && vedtaksperiode.behandlinger.erAvsluttet()) return aktivitetslogg.info("Forventer ikke inntekt. Vil forbli i AvsluttetUtenUtbetaling")
             påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
                 aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
                 vedtaksperiode.person.igangsettOverstyring(it, aktivitetslogg)

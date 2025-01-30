@@ -135,9 +135,6 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     internal companion object {
         internal fun fiktiv(førsteUtbetalingsdag: LocalDate) = Arbeidsgiverperiode(emptyList(), førsteUtbetalingsdag)
 
-        internal fun forventerInntekt(arbeidsgiverperiode: Arbeidsgiverperiode?, periode: Periode) =
-            arbeidsgiverperiode?.forventerInntekt(periode) ?: false
-
         private fun Periode.justerForHelg() = when (endInclusive.dayOfWeek) {
             DayOfWeek.SATURDAY -> start til endInclusive.plusDays(1)
             DayOfWeek.FRIDAY -> start til endInclusive.plusDays(2)
