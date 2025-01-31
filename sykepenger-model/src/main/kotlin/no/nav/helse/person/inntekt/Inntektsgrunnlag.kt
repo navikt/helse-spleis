@@ -285,11 +285,9 @@ internal class Inntektsgrunnlag private constructor(
 
     internal fun harTilkommendeInntekter() = tilkommendeInntekter.isNotEmpty()
     internal fun periodeMedTilkommendeInntekter(): Periode? {
-        val klasket = tilkommendeInntekter.map { it.beløpstidslinje }.reduce(Beløpstidslinje::plus)
-        val beløpsdager = klasket.filterIsInstance<Beløpsdag>()
-        val total = beløpsdager.map(Beløpsdag::beløp).reduce(Inntekt::plus)
-        return if (total == INGEN) null
-        else beløpsdager.minOf { it.dato } til beløpsdager.maxOf { it.dato }
+        val beløpsdager = tilkommendeInntekter.flatMap { it.beløpstidslinje.filterIsInstance<Beløpsdag>() }.filter { it.beløp > INGEN }
+        if (beløpsdager.isEmpty()) return null
+        return beløpsdager.minOf { it.dato } til beløpsdager.maxOf { it.dato }
     }
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
