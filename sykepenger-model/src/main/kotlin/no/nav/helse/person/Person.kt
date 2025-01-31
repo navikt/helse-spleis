@@ -418,7 +418,11 @@ class Person private constructor(
 
     fun håndter(påminnelse: PersonPåminnelse, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler personpåminnelse")
-        vilkårsgrunnlagHistorikk.loggTilkommendeInntekter(aktivitetslogg)
+        val harAktivPeriode: (skjæringstidspunkt: LocalDate, periode: Periode) -> Boolean = { skjæringstidspunkt, periode ->
+            arbeidsgivere.vedtaksperioder { it.skjæringstidspunkt == skjæringstidspunkt && it.periode.overlapperMed(periode) }.isNotEmpty()
+        }
+        vilkårsgrunnlagHistorikk.loggTilkommendeInntekter(aktivitetslogg, harAktivPeriode)
+
         //håndterGjenoppta(påminnelse, aktivitetslogg)
     }
 

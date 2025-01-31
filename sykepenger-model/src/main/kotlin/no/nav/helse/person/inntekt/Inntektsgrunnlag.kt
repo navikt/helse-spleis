@@ -24,6 +24,7 @@ import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.beløp.Beløpsdag
+import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
@@ -283,8 +284,12 @@ internal class Inntektsgrunnlag private constructor(
     internal fun harTilkommendeInntekter(periode: Periode) = tilkommendeInntekter.any { it.beløpstidslinje.subset(periode).isNotEmpty() }
 
     internal fun harTilkommendeInntekter() = tilkommendeInntekter.isNotEmpty()
-    internal fun harTilkommendeInntekterPåEkte() = tilkommendeInntekter.any {
-        it.beløpstidslinje.filterIsInstance<Beløpsdag>().map(Beløpsdag::beløp).reduce(Inntekt::plus) > INGEN
+    internal fun periodeMedTilkommendeInntekter(): Periode? {
+        val klasket = tilkommendeInntekter.map { it.beløpstidslinje }.reduce(Beløpstidslinje::plus)
+        val beløpsdager = klasket.filterIsInstance<Beløpsdag>()
+        val total = beløpsdager.map(Beløpsdag::beløp).reduce(Inntekt::plus)
+        return if (total == INGEN) null
+        else beløpsdager.minOf { it.dato } til beløpsdager.maxOf { it.dato }
     }
 
     internal fun nyeArbeidsgiverInntektsopplysninger(

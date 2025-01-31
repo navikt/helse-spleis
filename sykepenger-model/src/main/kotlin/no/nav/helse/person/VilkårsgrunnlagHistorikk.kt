@@ -68,7 +68,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         return forrigeInnslag()?.vilkårsgrunnlagFor(skjæringstidspunkt)?.er6GBegrenset() == false
     }
 
-    internal fun loggTilkommendeInntekter(aktivitetslogg: IAktivitetslogg) = sisteInnlag()?.loggTilkommendeInntekter(aktivitetslogg)
+    internal fun loggTilkommendeInntekter(aktivitetslogg: IAktivitetslogg, harAktivPeriode: (skjæringstidspunkt: LocalDate, periode: Periode) -> Boolean) = sisteInnlag()?.loggTilkommendeInntekter(aktivitetslogg, harAktivPeriode)
 
     internal class Innslag private constructor(
         internal val id: UUID,
@@ -104,8 +104,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return vilkårsgrunnlag.filter { (dato, _) -> dato in sykefraværstilfeller }
         }
 
-        internal fun loggTilkommendeInntekter(aktivitetslogg: IAktivitetslogg) {
-            val skjæringstidspunkt = vilkårsgrunnlag.filterValues { it.inntektsgrunnlag.harTilkommendeInntekterPåEkte() }.keys.takeUnless { it.isEmpty() } ?: return
+        internal fun loggTilkommendeInntekter(aktivitetslogg: IAktivitetslogg, harAktivPeriode: (skjæringstidspunkt: LocalDate, periode: Periode) -> Boolean) {
+            val skjæringstidspunkt = vilkårsgrunnlag.filterValues { it.inntektsgrunnlag.periodeMedTilkommendeInntekter() != null }.mapNotNull { (skjæringstidspunkt, vilkårsgrunnlag) ->
+                if (harAktivPeriode(skjæringstidspunkt, vilkårsgrunnlag.inntektsgrunnlag.periodeMedTilkommendeInntekter()!!)) skjæringstidspunkt
+                else null
+            }.takeUnless { it.isEmpty() } ?: return
             aktivitetslogg.info("Har tilkommende inntekter på skjæringstidspunktene ${skjæringstidspunkt.joinToString()}")
         }
 
