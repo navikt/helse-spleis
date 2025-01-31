@@ -105,7 +105,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         internal fun loggTilkommendeInntekter(aktivitetslogg: IAktivitetslogg) {
-            val skjæringstidspunkt = vilkårsgrunnlag.filterValues { it.inntektsgrunnlag.harTilkommendeInntekter() }.keys.takeUnless { it.isEmpty() } ?: return
+            val skjæringstidspunkt = vilkårsgrunnlag.filterValues { it.inntektsgrunnlag.harTilkommendeInntekterPåEkte() }.keys.takeUnless { it.isEmpty() } ?: return
             aktivitetslogg.info("Har tilkommende inntekter på skjæringstidspunktene ${skjæringstidspunkt.joinToString()}")
         }
 

@@ -23,6 +23,7 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
+import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
@@ -51,6 +52,7 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
 internal class Inntektsgrunnlag private constructor(
     private val alder: Alder,
@@ -281,6 +283,9 @@ internal class Inntektsgrunnlag private constructor(
     internal fun harTilkommendeInntekter(periode: Periode) = tilkommendeInntekter.any { it.beløpstidslinje.subset(periode).isNotEmpty() }
 
     internal fun harTilkommendeInntekter() = tilkommendeInntekter.isNotEmpty()
+    internal fun harTilkommendeInntekterPåEkte() = tilkommendeInntekter.any {
+        it.beløpstidslinje.filterIsInstance<Beløpsdag>().map(Beløpsdag::beløp).reduce(Inntekt::plus) > INGEN
+    }
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
         organisasjonsnummer: String,
