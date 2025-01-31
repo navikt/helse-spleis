@@ -20,6 +20,7 @@ import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Hendelse
+import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
@@ -37,6 +38,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.*
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.Utbetalingpåminnelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
@@ -66,6 +68,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_26
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_9
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -530,6 +533,17 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg.kontekst(this)
         søknad.slettSykmeldingsperioderSomDekkes(sykmeldingsperioder)
         opprettVedtaksperiodeOgHåndter(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
+    }
+
+    internal fun håndter(
+        tilkommenInntekt: TilkommenInntekt,
+        aktivitetslogg: IAktivitetslogg,
+        metadata: HendelseMetadata
+    ) {
+        aktivitetslogg.kontekst(this)
+        if (vedtaksperioder.any { it.periode.overlapperMed(tilkommenInntekt.periode) }) return aktivitetslogg.funksjonellFeil(RV_IV_9)
+        val vedtaksperiode = tilkommenInntekt.lagVedtaksperiode(aktivitetslogg, metadata, person, this, subsumsjonslogg)
+        registrerNyVedtaksperiode(vedtaksperiode)
     }
 
     private fun opprettVedtaksperiodeOgHåndter(

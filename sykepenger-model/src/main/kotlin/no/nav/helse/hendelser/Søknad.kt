@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.Alder
+import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 22-13 ledd 3`
 import no.nav.helse.etterlevelse.`§ 8-9 ledd 1`
@@ -56,7 +57,7 @@ class Søknad(
     private val egenmeldinger: List<Periode>,
     private val søknadstype: Søknadstype,
     registrert: LocalDateTime,
-    private val tilkomneInntekter: List<TilkommenInntekt>
+    internal val tilkomneInntekter: List<TilkommenInntekt>
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         organisasjonsnummer = orgnummer
@@ -131,6 +132,7 @@ class Søknad(
 
     private fun validerTilkomneInntekter(aktivitetslogg: IAktivitetslogg) {
         if (tilkomneInntekter.isEmpty()) return
+        if (Toggle.TilkommenInntektV3.enabled) return
         aktivitetslogg.funksjonellFeil(RV_IV_9)
     }
 
@@ -156,7 +158,8 @@ class Søknad(
     internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, arbeidsgiver: Arbeidsgiver, subsumsjonslogg: Subsumsjonslogg): Vedtaksperiode {
         requireNotNull(sykdomstidslinje.periode()) { "ugyldig søknad: tidslinjen er tom" }
         return Vedtaksperiode(
-            søknad = this,
+            egenmeldingsperioder = egenmeldingsperioder(),
+            metadata = metadata,
             aktivitetslogg = aktivitetslogg,
             person = person,
             arbeidsgiver = arbeidsgiver,
@@ -192,12 +195,13 @@ class Søknad(
     class TilkommenInntekt(
         fom: LocalDate,
         tom: LocalDate,
-        private val orgnummer: String,
+        internal val orgnummer: String,
         private val råttBeløp: Int,
     ) {
-        private val periode = fom til tom
+        internal val periode = fom til tom
         private val antallVirkedager = (fom til tom.nesteDag).ukedager()
         private val smurtBeløp = (råttBeløp / antallVirkedager).daglig
+        internal val behandlingsporing = Behandlingsporing.Arbeidsgiver(orgnummer)
         internal fun beløpstidslinje(kilde: Kilde) = NyInntektUnderveis(
             orgnummer = orgnummer,
             beløpstidslinje = Beløpstidslinje(periode.map {
@@ -205,9 +209,20 @@ class Søknad(
             })
         )
 
-        internal fun loggMetadata(aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.info("Rått beløp: $råttBeløp og antall virkedager i $periode: $antallVirkedager har ført til anvendt daglig beløp: ${smurtBeløp.daglig}")
+        internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, metadata: HendelseMetadata, person: Person, arbeidsgiver: Arbeidsgiver, subsumsjonslogg: Subsumsjonslogg): Vedtaksperiode {
+            return Vedtaksperiode(
+                egenmeldingsperioder = emptyList(),
+                metadata = metadata,
+                aktivitetslogg = aktivitetslogg,
+                person = person,
+                arbeidsgiver = arbeidsgiver,
+                sykdomstidslinje = Sykdomstidslinje.arbeidsdager(periode, Hendelseskilde("Søknad", metadata.meldingsreferanseId, metadata.registrert)),
+                dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
+                sykmeldingsperiode = periode,
+                subsumsjonslogg = subsumsjonslogg
+            )
         }
+
     }
 
     class Søknadstype(private val type: String) {

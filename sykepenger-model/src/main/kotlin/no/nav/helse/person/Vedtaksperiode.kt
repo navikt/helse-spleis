@@ -207,7 +207,8 @@ internal class Vedtaksperiode private constructor(
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode>, BehandlingObserver {
 
     internal constructor(
-        søknad: Søknad,
+        egenmeldingsperioder: List<Periode>,
+        metadata: HendelseMetadata,
         aktivitetslogg: IAktivitetslogg,
         person: Person,
         arbeidsgiver: Arbeidsgiver,
@@ -221,14 +222,14 @@ internal class Vedtaksperiode private constructor(
         id = UUID.randomUUID(),
         tilstand = Start,
         behandlinger = Behandlinger(),
-        egenmeldingsperioder = søknad.egenmeldingsperioder(),
+        egenmeldingsperioder = egenmeldingsperioder,
         opprettet = LocalDateTime.now(),
         subsumsjonslogg = subsumsjonslogg
     ) {
         registrerKontekst(aktivitetslogg)
         val periode = checkNotNull(sykdomstidslinje.periode()) { "sykdomstidslinjen er tom" }
         person.vedtaksperiodeOpprettet(id, arbeidsgiver.organisasjonsnummer, periode, periode.start, opprettet)
-        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, dokumentsporing, søknad.metadata.behandlingkilde)
+        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, dokumentsporing, metadata.behandlingkilde)
     }
 
     private val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()
