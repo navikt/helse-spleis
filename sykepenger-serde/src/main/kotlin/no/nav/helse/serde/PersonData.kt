@@ -901,7 +901,6 @@ data class PersonData(
                                 .filter { it.type == SykdomstidslinjeData.JsonDagType.SYKEDAG_NAV }
                                 .map { it.dato?.rangeTo(it.dato) ?: (it.fom!!.rangeTo(it.tom!!)) }
                                 .flatMap { it.start.datesUntil(it.endInclusive.plusDays(1)).toList() }
-                                .filter { sykNav -> arbeidsgiverperioder.any { agp -> sykNav in agp.fom.rangeUntil(agp.tom) } }
                                 .fold(emptyList<PeriodeDto>()) { resultat, sykNav ->
                                     val last = resultat.lastOrNull()
                                     when {
