@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.INNTEKT
@@ -10,9 +10,7 @@ import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSi
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.til
 import no.nav.helse.hentFeltFraBehov
 import no.nav.helse.inspectors.inspektør
@@ -364,27 +362,6 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
                 forventetTag = "InntektFraAOrdningenLagtTilGrunn"
             )
         }
-
-    @Test
-    fun `tagger perioder innenfor arbeidsgiverperioden`() {
-        nyPeriode(1.januar til 10.januar)
-        håndterInntektsmelding(
-            emptyList(),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
-            førsteFraværsdag = 1.januar
-        )
-        assertVarsel(Varselkode.RV_IM_25, 1.vedtaksperiode.filter())
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
-        håndterYtelser(1.vedtaksperiode)
-        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-        hendelselogg.assertHarTag(
-            vedtaksperiode = 1.vedtaksperiode,
-            forventetTag = "InnenforArbeidsgiverperioden"
-        )
-    }
 
     @Test
     fun `markerer godkjenningsbehov som har brukt skatteinntekter istedenfor inntektsmelding med riktig tag for flere arbeidsgivere med ulik start`() = Toggle.InntektsmeldingSomIkkeKommer.enable {

@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -19,7 +19,6 @@ import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterHove
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -216,7 +215,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
     fun `sender ikke avsluttet uten vedtak fordi saksbehandler ikke overstyrer perioden inn i AvsluttetUtenUtbetaling`() {
         val søknadId = håndterSøknad(1.januar til 16.januar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        håndterInntektsmelding(
+        val inntektsmeldingId = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, null, emptyList()),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "noe"
@@ -230,15 +229,13 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         }
         val overstyringId = UUID.randomUUID()
         håndterOverstyrTidslinje(liste, meldingsreferanseId = overstyringId)
-        håndterYtelser(1.vedtaksperiode)
-
         assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
-        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         val utbetaling = inspektør.utbetaling(0)
         assertEquals(Utbetalingstatus.FORKASTET, utbetaling.tilstand)
         1.vedtaksperiode.assertIngenVedtakFattet()
-        assertEquals(1, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
-        assertEquals(setOf(søknadId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.single().hendelseIder)
+        assertEquals(2, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
+        assertEquals(setOf(søknadId, inntektsmeldingId, overstyringId),1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
     }
 
     @Test

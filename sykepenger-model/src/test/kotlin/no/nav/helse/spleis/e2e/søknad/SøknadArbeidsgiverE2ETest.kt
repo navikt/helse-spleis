@@ -99,11 +99,8 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         (13.januar til 15.januar).forEach { dato ->
             assertEquals(Dag.Feriedag::class, inspektør.sykdomstidslinje[dato]::class) { "$dato er av annen dagtype" }
         }
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-
         assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
-        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
+        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
@@ -122,11 +119,8 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         (13.januar til 15.januar).forEach { dato ->
             assertEquals(Dag.Feriedag::class, inspektør.sykdomstidslinje[dato]::class) { "$dato er av annen dagtype" }
         }
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-
         assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
@@ -560,8 +554,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), Arbeid(17.januar, 18.januar))
-        håndterYtelser(1.vedtaksperiode)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
         assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
     }

@@ -1785,7 +1785,7 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiver.arbeidsgiverperiodeInkludertForkastet(periode, sykdomstidslinje)
 
     private fun skalBehandlesISpeil(): Boolean {
-        return behandlinger.harVærtBeregnet() || forventerInntekt()
+        return forventerInntekt()
     }
 
     private fun skalOmgjøres(): Boolean {

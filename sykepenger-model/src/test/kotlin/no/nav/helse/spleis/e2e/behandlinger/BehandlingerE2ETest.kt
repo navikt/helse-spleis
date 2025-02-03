@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.behandlinger
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
@@ -33,13 +33,11 @@ import no.nav.helse.mars
 import no.nav.helse.person.BehandlingView.TilstandView
 import no.nav.helse.person.BehandlingView.TilstandView.ANNULLERT_PERIODE
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
-import no.nav.helse.person.BehandlingView.TilstandView.BEREGNET_OMGJØRING
 import no.nav.helse.person.BehandlingView.TilstandView.REVURDERT_VEDTAK_AVVIST
 import no.nav.helse.person.BehandlingView.TilstandView.UBEREGNET_REVURDERING
 import no.nav.helse.person.BehandlingView.TilstandView.VEDTAK_FATTET
 import no.nav.helse.person.BehandlingView.TilstandView.VEDTAK_IVERKSATT
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -601,7 +599,6 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         }
         a2 {
             håndterInntektsmelding(listOf(2.januar til 17.januar))
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
         a1 {
             håndterYtelser(1.vedtaksperiode)
@@ -616,13 +613,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             }
         }
         a2 {
-            håndterYtelser(1.vedtaksperiode)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
-                assertEquals(BEREGNET_OMGJØRING, behandlinger[1].tilstand)
+                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[1].tilstand)
             }
-            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
@@ -672,12 +668,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterOverstyrTidslinje((1.januar til 15.januar).map { ManuellOverskrivingDag(it, Dagtype.Permisjonsdag) })
 
             håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Permisjon(1.januar, 10.januar), Permisjon(14.januar, 15.januar))
-            håndterYtelser(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(2, behandlinger.size)
+                assertEquals(3, behandlinger.size)
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
-                assertEquals(BEREGNET_OMGJØRING, behandlinger[1].tilstand)
+                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[1].tilstand)
+                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[2].tilstand)
             }
         }
     }

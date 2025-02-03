@@ -5,6 +5,7 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.UNG_PERSON_FNR_2018
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
@@ -148,11 +149,13 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         håndterOverstyrTidslinje(forlengelse.map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
-        håndterYtelser(2.vedtaksperiode)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
-        håndterSøknad(februar)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        observatør.vedtaksperiodeVenter.clear()
+        assertUgyldigSituasjon("En vedtaksperiode i AVSLUTTET_UTEN_UTBETALING trenger hjelp fordi VIL_OMGJØRES!") { håndterSøknad(februar) }
+        val venter = observatør.vedtaksperiodeVenter.single { it.vedtaksperiodeId == 2.vedtaksperiode.id(a1) }
+        assertEquals("HJELP", venter.venterPå.venteårsak.hva)
+        assertEquals("VIL_OMGJØRES", venter.venterPå.venteårsak.hvorfor)
     }
 
     @Test

@@ -87,9 +87,8 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     fun `Overstyring av hele perioden til andre ytelser`() {
         tilGodkjenning(januar, a1)
         håndterOverstyrTidslinje(januar.map { ManuellOverskrivingDag(it, Dagtype.Pleiepengerdag) })
-        håndterYtelser(1.vedtaksperiode)
         // Vet ikke om det er ønskelig, men er sånn det er da
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
