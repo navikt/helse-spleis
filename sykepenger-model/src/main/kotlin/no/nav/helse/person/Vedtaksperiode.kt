@@ -268,7 +268,8 @@ internal class Vedtaksperiode private constructor(
         skjæringstidspunkter = behandlinger.skjæringstidspunkter(),
         egenmeldingsperioder = egenmeldingsperioder,
         behandlinger = behandlinger.view(),
-        førsteFraværsdag = førsteFraværsdag
+        førsteFraværsdag = førsteFraværsdag,
+        skalBehandlesISpeil = skalBehandlesISpeil()
     )
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
@@ -3709,7 +3710,8 @@ internal data class VedtaksperiodeView(
     val skjæringstidspunkter: List<LocalDate>,
     val egenmeldingsperioder: List<Periode>,
     val behandlinger: BehandlingerView,
-    val førsteFraværsdag: LocalDate?
+    val førsteFraværsdag: LocalDate?,
+    val skalBehandlesISpeil: Boolean
 ) {
     val sykdomstidslinje = behandlinger.behandlinger.last().endringer.last().sykdomstidslinje
     val refusjonstidslinje = behandlinger.behandlinger.last().endringer.last().refusjonstidslinje
