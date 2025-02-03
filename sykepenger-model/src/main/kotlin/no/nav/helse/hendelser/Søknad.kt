@@ -200,7 +200,7 @@ class Søknad(
     ) {
         internal val periode = fom til tom
         private val antallVirkedager = (fom til tom.nesteDag).ukedager()
-        private val smurtBeløp = (råttBeløp / antallVirkedager).daglig
+        private val smurtBeløp = if (antallVirkedager == 0) 0.daglig else (råttBeløp / antallVirkedager).daglig
         internal val behandlingsporing = Behandlingsporing.Arbeidsgiver(orgnummer)
         internal fun beløpstidslinje(kilde: Kilde) = NyInntektUnderveis(
             orgnummer = orgnummer,
