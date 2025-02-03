@@ -62,9 +62,6 @@ internal class UtkastTilVedtakBuilder(
         if (utbetalingFraFørsteDagEtterAGP) {
             tags.add(Tag.IngenNyArbeidsgiverperiode)
         }
-        if (arbeidsgiverperiode.periode()?.contains(periode) == true) {
-            tags.add(Tag.InnenforArbeidsgiverperioden)
-        }
     }
 
     private val hendelseIder = mutableSetOf<UUID>()
@@ -338,7 +335,6 @@ internal class UtkastTilVedtakBuilder(
         Forlengelse,
         Førstegangsbehandling,
         Revurdering,
-        InnenforArbeidsgiverperioden,
         IngenNyArbeidsgiverperiode,
         Grunnbeløpsregulering,
         EnArbeidsgiver,
