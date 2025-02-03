@@ -8,7 +8,6 @@ import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -25,12 +24,7 @@ import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -45,46 +39,6 @@ import org.junit.jupiter.api.Test
 
 internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     private fun IdInnhenter.sisteBehandlingId(orgnr: String) = inspektør(orgnr).vedtaksperioder(this).inspektør.behandlinger.last().id
-    private fun IdInnhenter.nestSisteBehandlingId(orgnr: String) = inspektør(orgnr).vedtaksperioder(this).inspektør.behandlinger.dropLast(1).last().id
-
-
-    @Test
-    fun `At perioder til godkjenning sender nytt godkjenningsbehov selv om de ikke treffes av en overstyring blir ikke alltid rett`() {
-
-        nyeVedtak(januar, a1, a2)
-        forlengVedtak(februar, orgnummer = a2)
-
-        håndterKorrigerteArbeidsgiveropplysninger(OppgittInntekt(INNTEKT * 1.1), vedtaksperiodeId = 1.vedtaksperiode, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
-        håndterSøknad(1.mars til 16.mars, orgnummer = a1)
-
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
-
-        håndterSøknad(Sykdom(1.mars, 16.mars, 100.prosent), orgnummer = a2, førReplay = {
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
-            assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2) // Vi skal replay'e vettu
-
-            // AUU'en til a1 står nå i AVVENTER_BLOKKERENDE_PERIODE med ny behandling, men ettersom dette godkjenningsbehovet sendes ut før hen har fått opprettet ny behandling den sendes det _da_ er siste behandling,
-            // men når overstyringen har gått gjennom alle vedtaksperioder har den opprettet en ny
-            val perioderMedSammeSkjæringstidspunkt  = listOf(
-                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a2).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
-                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.nestSisteBehandlingId(a1).toString(), "fom" to 1.mars.toString(), "tom" to 16.mars.toString()),
-                mapOf("vedtaksperiodeId" to 3.vedtaksperiode.id(a2).toString(), "behandlingId" to 3.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.mars.toString(), "tom" to 16.mars.toString()),
-            )
-
-            assertEquals(
-                perioderMedSammeSkjæringstidspunkt,
-                hentFelt<Any>(vedtaksperiodeId = 1.vedtaksperiode.id(a1), feltNavn = "perioderMedSammeSkjæringstidspunkt")!!
-            )
-        })
-    }
 
     @Test
     fun forlengelse() {

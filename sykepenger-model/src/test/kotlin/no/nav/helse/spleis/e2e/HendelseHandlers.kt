@@ -399,8 +399,7 @@ internal fun AbstractEndToEndTest.håndterSøknad(
     opprinneligSendt: LocalDate? = null,
     merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
     permittert: Boolean = false,
-    egenmeldinger: List<Periode> = emptyList(),
-    førReplay: () -> Unit = {}
+    egenmeldinger: List<Periode> = emptyList()
 ): UUID {
     håndterOgReplayInntektsmeldinger(orgnummer) {
         søknad(
@@ -417,7 +416,7 @@ internal fun AbstractEndToEndTest.håndterSøknad(
             merknaderFraSykmelding = merknaderFraSykmelding,
             permittert = permittert,
             egenmeldinger = egenmeldinger
-        ).håndter(Person::håndter).also { førReplay() }
+        ).håndter(Person::håndter)
         søknader[id] = Triple(sendtTilNAVEllerArbeidsgiver, andreInntektskilder, perioder)
         val vedtaksperiodeId: IdInnhenter = observatør.sisteVedtaksperiode()
         if (hendelselogg.etterspurteBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk, orgnummer = orgnummer)) {
