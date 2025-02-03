@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -105,7 +104,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(Sykdom(31.januar, 15.februar, 100.prosent))
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertEquals(31.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             håndterInntektsmelding(listOf(31.januar til 15.februar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())

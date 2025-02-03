@@ -614,9 +614,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         }
         a2 {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(2, behandlinger.size)
+                assertEquals(1, behandlinger.size)
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[1].tilstand)
             }
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         }

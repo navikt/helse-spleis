@@ -27,8 +27,8 @@ import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -139,12 +139,12 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         assertEquals(5.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(5.februar til 23.februar, inspektør.periode(2.vedtaksperiode))
         assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
 
         assertEquals(24.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         assertEquals(24.februar til 28.februar, inspektør.periode(3.vedtaksperiode))
         assertEquals(emptyList<Any>(), inspektør.arbeidsgiverperiode(3.vedtaksperiode))
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test
@@ -166,12 +166,12 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         assertEquals(5.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(5.februar til 23.februar, inspektør.periode(2.vedtaksperiode))
         assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
 
         assertEquals(24.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         assertEquals(24.februar til 28.februar, inspektør.periode(3.vedtaksperiode))
         assertEquals(listOf(24.februar til 28.februar), inspektør.arbeidsgiverperiode(3.vedtaksperiode))
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test
@@ -193,7 +193,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         assertEquals(5.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(5.februar til 23.februar, inspektør.periode(2.vedtaksperiode))
         assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
 
         assertEquals(24.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         assertEquals(24.februar til 12.mars, inspektør.periode(3.vedtaksperiode))

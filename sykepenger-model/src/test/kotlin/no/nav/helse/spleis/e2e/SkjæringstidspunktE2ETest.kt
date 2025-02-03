@@ -58,7 +58,7 @@ internal class SkjæringstidspunktE2ETest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(1.mars, 31.mars))
         assertEquals(1.mars, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test

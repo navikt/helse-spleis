@@ -38,6 +38,7 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
                 START,
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
                 AVSLUTTET_UTEN_UTBETALING,
             )
 
@@ -79,19 +80,20 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
                 START,
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
                 AVSLUTTET_UTEN_UTBETALING,
             )
 
             håndterSykmelding(Sykmeldingsperiode(3.mars, 7.mars))
             håndterSøknad(3.mars til 7.mars)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
 
             håndterSykmelding(Sykmeldingsperiode(8.mars, 26.mars))
             håndterInntektsmelding(
                 listOf(Periode(3.mars, 18.mars))
             )
 
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
 
             håndterSøknad(8.mars til 26.mars)
             håndterVilkårsgrunnlag(3.vedtaksperiode)
@@ -123,9 +125,9 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
             håndterSøknad(13.januar til 19.januar)
             håndterSøknad(20.januar til 1.februar)
 
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
 
             nullstillTilstandsendringer()

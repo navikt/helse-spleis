@@ -73,7 +73,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(13.januar, 26.januar, 100.prosent), orgnummer = a1)
 
         håndterSøknad(Sykdom(13.januar, 26.januar, 100.prosent), orgnummer = a2)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),

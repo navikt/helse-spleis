@@ -565,7 +565,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(5.januar, søndag den 21.januar, 100.prosent), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         nullstillTilstandsendringer()
         // Perioden som står i AvventerGodkjenningRevurdering får ikke noe signal om overstyring igangsatt ettersom disse periodene er _etter_ 1.vedtaksperiode
         // Allikevel kan den ikke beregnes på nytt, fordi mursteinssituasjonen som nå har oppstått gjør at vi mangler refusjonsopplysninger på 22.januar

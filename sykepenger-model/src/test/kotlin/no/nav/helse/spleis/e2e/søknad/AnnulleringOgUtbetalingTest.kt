@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e.søknad
 
-import java.util.UUID
+import java.util.*
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
@@ -22,7 +22,7 @@ import no.nav.helse.lørdag
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -509,7 +509,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
             assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
             assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-            assertTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
             håndterUtbetalt()
 

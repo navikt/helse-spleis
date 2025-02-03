@@ -128,7 +128,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a3 {
             håndterSøknad(5.januar til 10.januar)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
         a1 {
             håndterYtelser(1.vedtaksperiode)
@@ -1318,6 +1318,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 START,
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
                 AVSLUTTET_UTEN_UTBETALING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVSLUTTET_UTEN_UTBETALING,
@@ -1335,6 +1336,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 START,
                 AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
                 AVSLUTTET_UTEN_UTBETALING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVSLUTTET_UTEN_UTBETALING

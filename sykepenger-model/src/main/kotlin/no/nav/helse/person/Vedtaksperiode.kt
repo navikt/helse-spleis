@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
@@ -2716,10 +2716,7 @@ internal class Vedtaksperiode private constructor(
                 return true
             }
             vedtaksperiode.videreførEksisterendeOpplysninger(hendelse.metadata.behandlingkilde, aktivitetslogg)
-            if (!vedtaksperiode.skalBehandlesISpeil()) {
-                vedtaksperiode.tilstand(aktivitetslogg, AvsluttetUtenUtbetaling)
-                return true
-            }
+
             if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) return false
             vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
             return true
