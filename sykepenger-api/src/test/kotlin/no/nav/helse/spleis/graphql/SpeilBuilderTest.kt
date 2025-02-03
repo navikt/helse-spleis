@@ -149,7 +149,6 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         håndterOverstyrTidslinje((1.januar til 16.januar).map {
             ManuellOverskrivingDag(it, Dagtype.Sykedag, 100)
         }, meldingsreferanseId = idOverstyring)
-        håndterYtelserTilGodkjenning()
         val speilJson = speilApi()
         val generasjoner = speilJson.arbeidsgivere.single().generasjoner
         assertEquals(2, generasjoner.size)
