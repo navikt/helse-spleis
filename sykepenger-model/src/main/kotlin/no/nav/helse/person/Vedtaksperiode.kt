@@ -319,6 +319,7 @@ internal class Vedtaksperiode private constructor(
         check(tilstand is Start)
         registrerKontekst(aktivitetslogg)
         aktivitetslogg.info("Håndterer tilkommen inntekt oppgitt på søknad")
+        oppdaterHistorikk(tilkommenInntekt.metadata.behandlingkilde, tilkommenInntekt.dokumentsporing, tilkommenInntekt.sykdomstidslinje, aktivitetslogg) {} // TODO: mer validering?
         tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
     }
 
