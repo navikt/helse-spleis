@@ -14,7 +14,6 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
@@ -115,15 +114,11 @@ internal data class ArbeidsgiverInntektsopplysning(
     }
 
     internal companion object {
-        internal fun List<ArbeidsgiverInntektsopplysning>.faktaavklarteInntekter(skjæringstidspunkt: LocalDate) = this
+        internal fun List<ArbeidsgiverInntektsopplysning>.faktaavklarteInntekter() = this
             .map { arbeidsgiverInntektsopplysning ->
                 VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt(
                     organisasjonsnummer = arbeidsgiverInntektsopplysning.orgnummer,
-                    inntektstidslinje = Inntektstidslinje(
-                        skjæringstidspunkt = skjæringstidspunkt,
-                        beløpstidslinje = Beløpstidslinje(), // TODO: Skal lagres på arbeidsgiverInntektsopplysning
-                        fastsattÅrsinntekt = arbeidsgiverInntektsopplysning.fastsattÅrsinntekt
-                    )
+                    fastsattÅrsinntekt = arbeidsgiverInntektsopplysning.fastsattÅrsinntekt
                 )
             }
 

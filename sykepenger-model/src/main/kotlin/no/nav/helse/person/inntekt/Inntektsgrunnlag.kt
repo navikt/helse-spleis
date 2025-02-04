@@ -24,7 +24,6 @@ import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.beløp.Beløpsdag
-import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
@@ -408,7 +407,7 @@ internal class Inntektsgrunnlag private constructor(
     internal fun faktaavklarteInntekter() = VilkårsprøvdSkjæringstidspunkt(
         skjæringstidspunkt = skjæringstidspunkt,
         `6G` = `6G`,
-        inntekter = arbeidsgiverInntektsopplysninger.faktaavklarteInntekter(skjæringstidspunkt),
+        inntekter = arbeidsgiverInntektsopplysninger.faktaavklarteInntekter(),
         tilkommendeInntekter = this.tilkommendeInntekter.map { VilkårsprøvdSkjæringstidspunkt.NyInntektUnderveis(it.orgnummer, it.beløpstidslinje) },
         deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.orgnummer }
     )

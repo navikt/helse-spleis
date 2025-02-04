@@ -13,7 +13,6 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
-import no.nav.helse.person.inntekt.Inntektstidslinje
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
@@ -1036,11 +1035,7 @@ internal class UtbetalingstidslinjeBuilderTest {
             faktaavklarteInntekter = ArbeidsgiverFaktaavklartInntekt(
                 skjæringstidspunkt = 1.januar,
                 `6G` = Grunnbeløp.`6G`.beløp(1.januar),
-                inntektstidslinje = Inntektstidslinje(
-                    skjæringstidspunkt = 1.januar,
-                    beløpstidslinje = Beløpstidslinje(),
-                    fastsattÅrsinntekt = 31000.månedlig
-                )
+                fastsattÅrsinntekt = 31000.månedlig
             ),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
