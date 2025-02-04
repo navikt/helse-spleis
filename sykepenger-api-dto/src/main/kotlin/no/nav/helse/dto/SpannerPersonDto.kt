@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.RefusjonservitørData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
@@ -16,6 +16,7 @@ import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.Arbeidsgive
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagInnslagData
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
+import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.BehandlingendringUtDto
 import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
@@ -27,7 +28,6 @@ import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.InntektsmeldingUtDto
-import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
@@ -328,6 +328,7 @@ data class SpannerPersonDto(
             val skjæringstidspunkt: LocalDate?,
             val sykdomstidslinje: List<DagData>,
             val refusjonstidslinje: List<BeløpstidslinjeperiodeData>,
+            val inntektsendringer: List<BeløpstidslinjeperiodeData>,
             val refusjonstidslinjeHensyntattUbrukteRefusjonsopplysninger: List<BeløpstidslinjeperiodeData>,
             val utbetalingstidslinje: List<Any>,
             val arbeidsgiverperiode: List<PeriodeData>,
@@ -363,6 +364,7 @@ data class SpannerPersonDto(
                         skjæringstidspunkt = skjæringstidspunkt,
                         arbeidsgiverperiode = gjeldendeEndring.arbeidsgiverperiode,
                         refusjonstidslinje = gjeldendeEndring.refusjonstidslinje.perioder,
+                        inntektsendringer = gjeldendeEndring.inntektsendringer.perioder,
                         refusjonstidslinjeHensyntattUbrukteRefusjonsopplysninger = if (behandling.id == sisteBehandlingId) sisteRefusjonstidslinje!!.perioder else emptyList(),
                         utbetalingstidslinje = gjeldendeEndring.utbetalingstidslinje.dager,
                         forbrukteDager = gjeldendeEndring.maksdatoresultat.forbrukteDagerAntall,
@@ -494,6 +496,7 @@ data class SpannerPersonDto(
                     val sykdomstidslinje: SykdomstidslinjeData,
                     val utbetalingstidslinje: UtbetalingstidslinjeData,
                     val refusjonstidslinje: BeløpstidslinjeData,
+                    val inntektsendringer: BeløpstidslinjeData,
                     val dokumentsporing: DokumentsporingData,
                     val arbeidsgiverperiode: List<PeriodeData>,
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
@@ -1111,6 +1114,7 @@ private fun BehandlingendringUtDto.tilPersonData() =
         sykdomstidslinje = sykdomstidslinje.tilPersonData(),
         utbetalingstidslinje = utbetalingstidslinje.tilPersonData(),
         refusjonstidslinje = refusjonstidslinje.tilPersonData(),
+        inntektsendringer = inntektsendringer.tilPersonData(),
         dokumentsporing = dokumentsporing.tilPersonData(),
         arbeidsgiverperiode = arbeidsgiverperioder.map {
             SpannerPersonDto.ArbeidsgiverData.PeriodeData(
