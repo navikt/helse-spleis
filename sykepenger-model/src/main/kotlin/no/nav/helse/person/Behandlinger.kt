@@ -55,12 +55,12 @@ import no.nav.helse.sykdomstidslinje.Dag.SykedagNav
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverFaktaavklartInntekt
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderVedtaksperiode
+import no.nav.helse.økonomi.Inntekt
 
 internal class Behandlinger private constructor(behandlinger: List<Behandling>) {
     internal constructor() : this(emptyList())
@@ -79,9 +79,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     private val observatører = mutableListOf<BehandlingObserver>()
 
     val sisteBehandlingId get() = behandlinger.last().id
-    internal fun initiellBehandling(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, inntektsendinger: Beløpstidslinje, dokumentsporing: Dokumentsporing, behandlingkilde: Behandlingkilde) {
+    internal fun initiellBehandling(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, inntektsendringer: Beløpstidslinje, dokumentsporing: Dokumentsporing, behandlingkilde: Behandlingkilde) {
         check(behandlinger.isEmpty())
-        val behandling = Behandling.nyBehandling(this.observatører, sykdomstidslinje, inntektsendinger, dokumentsporing, sykmeldingsperiode, behandlingkilde)
+        val behandling = Behandling.nyBehandling(this.observatører, sykdomstidslinje, inntektsendringer, dokumentsporing, sykmeldingsperiode, behandlingkilde)
         leggTilNyBehandling(behandling)
     }
 
@@ -96,7 +96,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     )
 
     internal fun arbeidsgiverperiode() = ArbeidsgiverperiodeForVedtaksperiode(periode(), behandlinger.last().arbeidsgiverperiode)
-    internal fun lagUtbetalingstidslinje(faktaavklarteInntekter: ArbeidsgiverFaktaavklartInntekt) = behandlinger.last().lagUtbetalingstidslinje(faktaavklarteInntekter)
+    internal fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt?, `6G`: Inntekt) = behandlinger.last().lagUtbetalingstidslinje(fastsattÅrsinntekt, `6G`)
 
     internal val maksdato get() = behandlinger.last().maksdato
     internal fun utbetalingstidslinje() = behandlinger.last().utbetalingstidslinje()
@@ -339,6 +339,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val maksdato get() = gjeldende.maksdatoresultat
         val sykdomstidslinje get() = endringer.last().sykdomstidslinje
         val refusjonstidslinje get() = endringer.last().refusjonstidslinje
+        val inntektsendringer get() = endringer.last().inntektsendringer
 
         constructor(observatører: List<BehandlingObserver>, tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde, observatører) {
             check(observatører.isNotEmpty()) {
@@ -389,13 +390,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         fun utbetalingstidslinje() = gjeldende.utbetalingstidslinje
-        fun lagUtbetalingstidslinje(faktaavklarteInntekter: ArbeidsgiverFaktaavklartInntekt): Utbetalingstidslinje {
+        fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt?, `6G`: Inntekt): Utbetalingstidslinje {
             val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
-                faktaavklarteInntekter = faktaavklarteInntekter,
+                fastsattÅrsinntekt = fastsattÅrsinntekt,
                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
                 arbeidsgiverperiode = arbeidsgiverperiode,
                 dagerNavOvertarAnsvar = gjeldende.dagerNavOvertarAnsvar,
-                refusjonstidslinje = refusjonstidslinje
+                refusjonstidslinje = refusjonstidslinje,
+                inntektsendringer = inntektsendringer,
+                skjæringstidspunkt = skjæringstidspunkt,
+                `6G` = `6G`
             )
             return builder.result(sykdomstidslinje)
         }
