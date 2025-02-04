@@ -38,7 +38,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Søknad.*
+import no.nav.helse.hendelser.Søknad.TilkommenInntekt
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.Utbetalingpåminnelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
@@ -55,7 +55,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.arbeidsgiverperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
-import no.nav.helse.person.Vedtaksperiode.Companion.harIngenSporingTilInntektsmeldingISykefraværet
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
@@ -1133,10 +1132,6 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.firstOrNull { other ->
             vedtaksperiode.erVedtaksperiodeRettFør(other)
         }
-
-    internal fun harIngenSporingTilInntektsmeldingISykefraværet(): Boolean {
-        return vedtaksperioder.harIngenSporingTilInntektsmeldingISykefraværet()
-    }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Arbeidsgiver", mapOf("organisasjonsnummer" to organisasjonsnummer))

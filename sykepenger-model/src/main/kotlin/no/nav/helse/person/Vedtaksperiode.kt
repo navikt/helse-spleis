@@ -247,7 +247,7 @@ internal class Vedtaksperiode private constructor(
 
     // 💡Må ikke forveksles med `førsteFraværsdag` 💡
     // F.eks. januar med agp 1-10 & 16-21 så er `førsteFraværsdag` 16.januar, mens `startdatoPåSammenhengendeVedtaksperioder` er 1.januar
-    internal val startdatoPåSammenhengendeVedtaksperioder
+    private val startdatoPåSammenhengendeVedtaksperioder
         get() = arbeidsgiver.startdatoPåSammenhengendeVedtaksperioder(
             this
         )
@@ -2938,10 +2938,6 @@ internal class Vedtaksperiode private constructor(
             checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Forventer vilkårsgrunnlag for å beregne utbetaling" }
             vedtaksperiode.trengerYtelser(aktivitetslogg)
             aktivitetslogg.info("Forespør sykdoms- og inntektshistorikk")
-            val infotrygda = vedtaksperiode.vilkårsgrunnlag is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
-            if (vedtaksperiode.arbeidsgiver.harIngenSporingTilInntektsmeldingISykefraværet() && !infotrygda) {
-                aktivitetslogg.info("Inntektsmeldingen kunne ikke tolkes. Vi har ingen dokumentsporing til inntektsmeldingen i sykefraværet.")
-            }
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = BEREGNING.utenBegrunnelse
@@ -3444,10 +3440,6 @@ internal class Vedtaksperiode private constructor(
             beregnArbeidsgiverperiode: (Periode) -> List<Periode>
         ) {
             forEach { it.behandlinger.beregnSkjæringstidspunkt(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode) }
-        }
-
-        internal fun List<Vedtaksperiode>.harIngenSporingTilInntektsmeldingISykefraværet(): Boolean {
-            return all { !it.behandlinger.harHåndtertInntektTidligere() && !it.behandlinger.harHåndtertDagerTidligere() }
         }
 
         internal fun List<Vedtaksperiode>.aktiveSkjæringstidspunkter(): Set<LocalDate> {
