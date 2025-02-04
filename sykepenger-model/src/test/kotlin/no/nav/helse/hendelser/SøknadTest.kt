@@ -291,7 +291,7 @@ internal class SøknadTest {
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
         egenmeldinger: List<Periode> = emptyList(),
         ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false,
-        tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
+        inntekterFraNyeArbeidsforhold: List<Søknad.InntektFraNyttArbeidsforhold> = emptyList()
     ) {
         aktivitetslogg = Aktivitetslogg()
         søknad = hendelsefabrikk.lagSøknad(
@@ -303,7 +303,7 @@ internal class SøknadTest {
             merknaderFraSykmelding = merknaderFraSykmelding,
             permittert = permittert,
             egenmeldinger = egenmeldinger,
-            tilkomneInntekter = tilkomneInntekter
+            inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold
         )
     }
 }

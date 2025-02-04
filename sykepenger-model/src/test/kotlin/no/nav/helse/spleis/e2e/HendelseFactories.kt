@@ -123,7 +123,7 @@ internal fun AbstractEndToEndTest.søknad(
     merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
     permittert: Boolean = false,
     egenmeldinger: List<Periode> = emptyList(),
-    tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
+    inntekterFraNyeArbeidsforhold: List<Søknad.InntektFraNyttArbeidsforhold> = emptyList()
 ) = ArbeidsgiverHendelsefabrikk(orgnummer).lagSøknad(
     perioder = perioder,
     andreInntektskilder = andreInntektskilder,
@@ -137,7 +137,7 @@ internal fun AbstractEndToEndTest.søknad(
     sendTilGosys = sendTilGosys,
     opprinneligSendt = opprinneligSendt,
     egenmeldinger = egenmeldinger,
-    tilkomneInntekter = tilkomneInntekter
+    inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold
 )
 
 internal fun AbstractEndToEndTest.inntektsmelding(

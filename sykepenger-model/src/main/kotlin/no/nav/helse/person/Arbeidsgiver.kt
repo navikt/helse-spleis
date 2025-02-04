@@ -20,7 +20,6 @@ import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Hendelse
-import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
@@ -38,7 +37,6 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Søknad.TilkommenInntekt
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.Utbetalingpåminnelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
@@ -534,14 +532,13 @@ internal class Arbeidsgiver private constructor(
         opprettVedtaksperiodeOgHåndter(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
     }
 
-    internal fun håndter(
-        tilkommenInntekt: TilkommenInntekt,
-        aktivitetslogg: IAktivitetslogg,
-        metadata: HendelseMetadata
+    internal fun håndterTilkommenInntekt(
+        tilkommenInntekt: Søknad.TilkommenInntekt,
+        aktivitetslogg: IAktivitetslogg
     ) {
         aktivitetslogg.kontekst(this)
         if (vedtaksperioder.any { it.periode.overlapperMed(tilkommenInntekt.periode) }) return aktivitetslogg.funksjonellFeil(RV_IV_9)
-        val vedtaksperiode = tilkommenInntekt.lagVedtaksperiode(aktivitetslogg, metadata, person, this, subsumsjonslogg)
+        val vedtaksperiode = tilkommenInntekt.lagVedtaksperiode(aktivitetslogg, person, this, subsumsjonslogg)
         registrerNyVedtaksperiode(vedtaksperiode)
         vedtaksperiode.håndterTilkommenInntekt(tilkommenInntekt, aktivitetslogg)
     }

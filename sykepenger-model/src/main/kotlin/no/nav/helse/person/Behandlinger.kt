@@ -79,9 +79,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     private val observatører = mutableListOf<BehandlingObserver>()
 
     val sisteBehandlingId get() = behandlinger.last().id
-    internal fun initiellBehandling(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, behandlingkilde: Behandlingkilde) {
+    internal fun initiellBehandling(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, inntektsendinger: Beløpstidslinje, dokumentsporing: Dokumentsporing, behandlingkilde: Behandlingkilde) {
         check(behandlinger.isEmpty())
-        val behandling = Behandling.nyBehandling(this.observatører, sykdomstidslinje, dokumentsporing, sykmeldingsperiode, behandlingkilde)
+        val behandling = Behandling.nyBehandling(this.observatører, sykdomstidslinje, inntektsendinger, dokumentsporing, sykmeldingsperiode, behandlingkilde)
         leggTilNyBehandling(behandling)
     }
 
@@ -1133,7 +1133,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal companion object {
             val List<Behandling>.sykmeldingsperiode get() = first().periode
             val List<Behandling>.dokumentsporing get() = map { it.dokumentsporing }.takeUnless { it.isEmpty() }?.reduce(Set<Dokumentsporing>::plus) ?: emptySet()
-            fun nyBehandling(observatører: List<BehandlingObserver>, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, sykmeldingsperiode: Periode, behandlingkilde: Behandlingkilde) =
+            fun nyBehandling(observatører: List<BehandlingObserver>, sykdomstidslinje: Sykdomstidslinje, inntektsendringer: Beløpstidslinje, dokumentsporing: Dokumentsporing, sykmeldingsperiode: Periode, behandlingkilde: Behandlingkilde) =
                 Behandling(
                     observatører = observatører,
                     tilstand = Tilstand.Uberegnet,
@@ -1148,7 +1148,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             sykmeldingsperiode = sykmeldingsperiode,
                             utbetalingstidslinje = Utbetalingstidslinje(),
                             refusjonstidslinje = Beløpstidslinje(),
-                            inntektsendringer = Beløpstidslinje(),
+                            inntektsendringer = inntektsendringer,
                             periode = checkNotNull(sykdomstidslinje.periode()) { "kan ikke opprette behandling på tom sykdomstidslinje" },
                             skjæringstidspunkt = IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT,
                             skjæringstidspunkter = emptyList(),

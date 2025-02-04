@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import kotlin.math.roundToInt
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
@@ -205,8 +205,9 @@ class Person private constructor(
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(søknad.behandlingsporing, aktivitetslogg)
         søknad.forUng(aktivitetslogg, alder)
         arbeidsgiver.håndter(søknad, aktivitetslogg, arbeidsgivere.toList(), infotrygdhistorikk)
-        if (Toggle.TilkommenInntektV3.enabled && !aktivitetslogg.harFunksjonelleFeilEllerVerre()) søknad.tilkomneInntekter.forEach {
-            finnEllerOpprettArbeidsgiver(it.behandlingsporing, aktivitetslogg).håndter(it, aktivitetslogg, søknad.metadata)
+        if (Toggle.TilkommenInntektV3.enabled && !aktivitetslogg.harFunksjonelleFeilEllerVerre()) søknad.tilkomneInntekter().forEach {
+            finnEllerOpprettArbeidsgiver(it.behandlingsporing, aktivitetslogg)
+                .håndterTilkommenInntekt(it, aktivitetslogg)
         }
         håndterGjenoppta(søknad, aktivitetslogg)
     }

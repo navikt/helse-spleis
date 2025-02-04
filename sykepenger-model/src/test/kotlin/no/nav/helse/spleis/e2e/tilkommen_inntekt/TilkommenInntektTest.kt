@@ -14,9 +14,9 @@ import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Søknad.InntektFraNyttArbeidsforhold
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Søknad.TilkommenInntekt
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -45,13 +45,13 @@ internal class TilkommenInntektTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
 
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000)))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000)))
             assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             assertUtbetalingsbeløp(2.vedtaksperiode, 1231, 1431, subset = 1.februar til 28.februar)
 
             // Korrigerende søknad som angrer den tilkomne inntekten
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = emptyList())
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), inntekterFraNyeArbeidsforhold = emptyList())
             håndterYtelser(2.vedtaksperiode)
             assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431, subset = 1.februar til 28.februar)
         }
@@ -61,7 +61,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
     fun `forlengelse uten tilkommet inntekt - etter periode med tilkommet inntekt`() {
         a1 {
             nyttVedtak(januar)
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000)))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000)))
             assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -88,7 +88,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterSøknad(
                 Sykdom(1.februar, 28.februar, 100.prosent),
-                tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000))
+                inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000))
             )
             assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
@@ -134,7 +134,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterSøknad(
                 Sykdom(1.februar, 28.februar, 100.prosent),
-                tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000))
+                inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000))
             )
             assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
@@ -143,8 +143,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterUtbetalt()
             håndterSøknad(
                 Sykdom(1.mars, 31.mars, 100.prosent),
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(fom = 1.mars, tom = 31.mars, orgnummer = a2, råttBeløp = 8000)
+                inntekterFraNyeArbeidsforhold = listOf(
+                    InntektFraNyttArbeidsforhold(fom = 1.mars, tom = 31.mars, orgnummer = a2, råttBeløp = 8000)
                 )
             )
             assertVarsel(Varselkode.RV_SV_5, 3.vedtaksperiode.filter())
@@ -236,7 +236,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
 
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a3, råttBeløp = 4000)))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(fom = 1.februar, tom = 28.februar, orgnummer = a3, råttBeløp = 4000)))
             assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -291,8 +291,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(
+                inntekterFraNyeArbeidsforhold = listOf(
+                    InntektFraNyttArbeidsforhold(
                         fom = 20.januar,
                         tom = 31.januar,
                         orgnummer = a2,
@@ -333,8 +333,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             tilGodkjenning(januar, beregnetInntekt = 31000.00.månedlig)
             håndterSøknad(
                 Sykdom(1.februar, 28.februar, 100.prosent),
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(
+                inntekterFraNyeArbeidsforhold = listOf(
+                    InntektFraNyttArbeidsforhold(
                         fom = 1.februar,
                         tom = 28.februar,
                         orgnummer = "a2",
@@ -362,8 +362,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
             håndterSøknad(
                 Sykdom(1.februar, 28.februar, 100.prosent),
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(
+                inntekterFraNyeArbeidsforhold = listOf(
+                    InntektFraNyttArbeidsforhold(
                         fom = 1.februar,
                         tom = 28.februar,
                         orgnummer = "a2",
@@ -387,8 +387,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             nyttVedtak(januar, beregnetInntekt = 31000.månedlig)
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(
+                inntekterFraNyeArbeidsforhold = listOf(
+                    InntektFraNyttArbeidsforhold(
                         fom = 1.januar,
                         tom = 31.januar,
                         orgnummer = "a2",
@@ -414,8 +414,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
                 orgnummer = a1,
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(
+                inntekterFraNyeArbeidsforhold = listOf(
+                    InntektFraNyttArbeidsforhold(
                         fom = 1.januar,
                         tom = 31.januar,
                         orgnummer = a2,
@@ -445,8 +445,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterSøknad(
                 Sykdom(1.februar, 28.februar, 100.prosent),
                 orgnummer = a1,
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(
+                inntekterFraNyeArbeidsforhold = listOf(
+                    InntektFraNyttArbeidsforhold(
                         fom = 15.februar,
                         tom = 28.februar,
                         orgnummer = a2,
@@ -471,8 +471,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterSøknad(
                 Sykdom(1.februar, 28.februar, 100.prosent),
                 orgnummer = a1,
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(
+                inntekterFraNyeArbeidsforhold = listOf(
+                    InntektFraNyttArbeidsforhold(
                         fom = 15.februar,
                         tom = 28.februar,
                         orgnummer = a2,
@@ -495,7 +495,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             assertIkkeTilkommenInntektTag(1.vedtaksperiode)
             assertTrue(tags(1.vedtaksperiode).contains("EnArbeidsgiver"))
 
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar, "a3", 100)))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(1.februar, 28.februar, "a3", 100)))
             assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -532,7 +532,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             assertIkkeTilkommenInntektTag(1.vedtaksperiode)
             assertTrue(tags(1.vedtaksperiode).contains("FlereArbeidsgivere"))
 
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar, "a3", 100)))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(1.februar, 28.februar, "a3", 100)))
             assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)

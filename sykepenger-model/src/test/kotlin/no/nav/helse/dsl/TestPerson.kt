@@ -165,10 +165,10 @@ internal class TestPerson(
 
         internal fun håndterSøknad(
             periode: Periode,
-            tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
+            inntekterFraNyeArbeidsforhold: List<Søknad.InntektFraNyttArbeidsforhold> = emptyList()
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, 100.prosent),
-            tilkomneInntekter = tilkomneInntekter
+            inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold
         )
 
         internal fun håndterArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning): UUID {
@@ -199,7 +199,7 @@ internal class TestPerson(
             sendTilGosys: Boolean = false,
             registrert: LocalDateTime = LocalDateTime.now(),
             merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
-            tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
+            inntekterFraNyeArbeidsforhold: List<Søknad.InntektFraNyttArbeidsforhold> = emptyList()
         ) =
             behovsamler.fangInntektsmeldingReplay({
                 vedtaksperiodesamler.fangVedtaksperiode {
@@ -217,7 +217,7 @@ internal class TestPerson(
                         sendTilGosys = sendTilGosys,
                         registrert = registrert,
                         merknaderFraSykmelding = merknaderFraSykmelding,
-                        tilkomneInntekter = tilkomneInntekter
+                        inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold
                     ).håndter(Person::håndter)
                 }?.also {
                     if (behovsamler.harBehov(it, Sykepengehistorikk)) {

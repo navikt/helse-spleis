@@ -7,10 +7,10 @@ import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.GradertPeriode
+import no.nav.helse.hendelser.Søknad.InntektFraNyttArbeidsforhold
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Søknad.TilkommenInntekt
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -32,8 +32,8 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
             håndterSøknad(
                 Sykdom(1.februar, 28.februar, 100.prosent),
                 Permisjon(20.februar, 28.februar),
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(1.februar, 28.februar, a2, 10000)
+                inntekterFraNyeArbeidsforhold = listOf(
+                    InntektFraNyttArbeidsforhold(1.februar, 28.februar, a2, 10000)
                 )
             )
             assertForventetFeil(
@@ -51,8 +51,8 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
             håndterSøknad(
                 Sykdom(1.februar, 28.februar, 100.prosent),
                 Ferie(20.februar, 28.februar),
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(1.februar, 28.februar, a2, 10000)
+                inntekterFraNyeArbeidsforhold = listOf(
+                    InntektFraNyttArbeidsforhold(1.februar, 28.februar, a2, 10000)
                 )
             )
             assertForventetFeil(
@@ -70,13 +70,13 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
                 Ferie(20.januar, 31.januar),
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(1.februar, 28.februar, a2, 10000)
+                inntekterFraNyeArbeidsforhold = listOf(
+                    InntektFraNyttArbeidsforhold(1.februar, 28.februar, a2, 10000)
                 )
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsler(1.vedtaksperiode, RV_IV_9)
-            assertEquals(emptyList<TilkommenInntekt>(), inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.view().inntektsgrunnlag.tilkommendeInntekter)
+            assertEquals(emptyList<InntektFraNyttArbeidsforhold>(), inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.view().inntektsgrunnlag.tilkommendeInntekter)
         }
     }
 
@@ -87,13 +87,13 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
             forlengVedtak(februar)
             håndterSøknad(
                 Sykdom(1.februar, 28.februar, 100.prosent),
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(1.februar, 28.februar, a2, 10000)
+                inntekterFraNyeArbeidsforhold = listOf(
+                    InntektFraNyttArbeidsforhold(1.februar, 28.februar, a2, 10000)
                 )
             )
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsler(2.vedtaksperiode, RV_IV_9)
-            assertEquals(emptyList<TilkommenInntekt>(), inspektør.vilkårsgrunnlag(1.januar)!!.view().inntektsgrunnlag.tilkommendeInntekter)
+            assertEquals(emptyList<InntektFraNyttArbeidsforhold>(), inspektør.vilkårsgrunnlag(1.januar)!!.view().inntektsgrunnlag.tilkommendeInntekter)
         }
     }
 
@@ -103,8 +103,8 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterSøknad(
                 Sykdom(1.februar, 28.februar, 100.prosent),
-                tilkomneInntekter = listOf(
-                    TilkommenInntekt(1.februar, 28.februar, a2, 10000)
+                inntekterFraNyeArbeidsforhold = listOf(
+                    InntektFraNyttArbeidsforhold(1.februar, 28.februar, a2, 10000)
                 )
             )
             assertForventetFeil(

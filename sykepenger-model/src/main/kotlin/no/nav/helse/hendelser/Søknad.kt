@@ -57,7 +57,7 @@ class Søknad(
     private val egenmeldinger: List<Periode>,
     private val søknadstype: Søknadstype,
     registrert: LocalDateTime,
-    internal val tilkomneInntekter: List<TilkommenInntekt>
+    private val inntekterFraNyeArbeidsforhold: List<InntektFraNyttArbeidsforhold>
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         organisasjonsnummer = orgnummer
@@ -102,6 +102,23 @@ class Søknad(
         return egenmeldinger
     }
 
+    internal fun tilkomneInntekter(): List<TilkommenInntekt> {
+        return inntekterFraNyeArbeidsforhold.mapNotNull {
+            val periode = it.fom til it.tom
+            val antallVirkedager = (it.fom til it.tom.nesteDag).ukedager()
+            if (antallVirkedager == 0) return@mapNotNull null
+            val smurtBeløp = (it.råttBeløp / antallVirkedager).daglig
+            val tilkommenKilde = Kilde(metadata.meldingsreferanseId, Avsender.SYKMELDT, metadata.innsendt)
+            TilkommenInntekt(
+                orgnummer = it.orgnummer,
+                periode = periode,
+                inntektstidslinje = Beløpstidslinje(periode.map { dato -> Beløpsdag(dato, smurtBeløp, tilkommenKilde) }),
+                metadata = metadata,
+                sykdomstidslinje = Sykdomstidslinje.arbeidsdager(periode, kilde)
+            )
+        }
+    }
+
     internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, refusjonstidslinje: Beløpstidslinje, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
         valider(aktivitetslogg, subsumsjonslogg)
         validerInntektskilder(aktivitetslogg, vilkårsgrunnlag)
@@ -131,7 +148,7 @@ class Søknad(
     }
 
     private fun validerTilkomneInntekter(aktivitetslogg: IAktivitetslogg) {
-        if (tilkomneInntekter.isEmpty()) return
+        if (inntekterFraNyeArbeidsforhold.isEmpty()) return
         if (Toggle.TilkommenInntektV3.enabled) return
         aktivitetslogg.funksjonellFeil(RV_IV_9)
     }
@@ -174,7 +191,7 @@ class Søknad(
         arbeidsgiveren.fjern(sykdomsperiode)
     }
 
-    internal fun nyeInntekterUnderveis(aktivitetslogg: IAktivitetslogg): List<NyInntektUnderveis> = emptyList()
+    internal fun nyeInntekterUnderveis(aktivitetslogg: IAktivitetslogg): List<NyInntektUnderveis> = emptyList() // TODO: fjerne når vi er helt løskoblet fra gammel tilkommen inntekt
 
     class Merknad(private val type: String) {
         private companion object {
@@ -192,37 +209,37 @@ class Søknad(
         }
     }
 
-    class TilkommenInntekt(
-        fom: LocalDate,
-        tom: LocalDate,
+    data class InntektFraNyttArbeidsforhold(
+        internal val fom: LocalDate,
+        internal val tom: LocalDate,
         internal val orgnummer: String,
-        private val råttBeløp: Int,
-    ) {
-        internal val periode = fom til tom
-        private val antallVirkedager = (fom til tom.nesteDag).ukedager()
-        private val smurtBeløp = if (antallVirkedager == 0) 0.daglig else (råttBeløp / antallVirkedager).daglig
-        internal val behandlingsporing = Behandlingsporing.Arbeidsgiver(orgnummer)
-        internal fun beløpstidslinje(kilde: Kilde) = NyInntektUnderveis(
-            orgnummer = orgnummer,
-            beløpstidslinje = Beløpstidslinje(periode.map {
-                Beløpsdag(it, smurtBeløp, kilde)
-            })
-        )
+        internal val råttBeløp: Int
+    )
 
-        internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, metadata: HendelseMetadata, person: Person, arbeidsgiver: Arbeidsgiver, subsumsjonslogg: Subsumsjonslogg): Vedtaksperiode {
+    class TilkommenInntekt(
+        orgnummer: String,
+        internal val periode: Periode,
+        private val inntektstidslinje: Beløpstidslinje,
+        internal val sykdomstidslinje: Sykdomstidslinje,
+        internal val metadata: HendelseMetadata
+    ) {
+        internal val behandlingsporing = Behandlingsporing.Arbeidsgiver(orgnummer)
+        internal val dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId)
+
+        internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, arbeidsgiver: Arbeidsgiver, subsumsjonslogg: Subsumsjonslogg): Vedtaksperiode {
             return Vedtaksperiode(
                 egenmeldingsperioder = emptyList(),
                 metadata = metadata,
                 aktivitetslogg = aktivitetslogg,
                 person = person,
                 arbeidsgiver = arbeidsgiver,
-                sykdomstidslinje = Sykdomstidslinje.arbeidsdager(periode, Hendelseskilde("Søknad", metadata.meldingsreferanseId, metadata.registrert)),
-                dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
+                sykdomstidslinje = sykdomstidslinje,
+                inntektsendringer = inntektstidslinje,
+                dokumentsporing = dokumentsporing,
                 sykmeldingsperiode = periode,
                 subsumsjonslogg = subsumsjonslogg
             )
         }
-
     }
 
     class Søknadstype(private val type: String) {

@@ -10,6 +10,8 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -22,7 +24,7 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
             assertUgyldigSituasjon("peker på søknaden") { // TODO: tenk litt på dokumentsporing, vi har lovet flex at på sis-topicet ALDRI har en søknad hører til flere vedtaksperioder
                 håndterSøknad(
                     februar,
-                    tilkomneInntekter = listOf(Søknad.TilkommenInntekt(1.februar, 28.februar, a2, 1000)),
+                    inntekterFraNyeArbeidsforhold = listOf(Søknad.InntektFraNyttArbeidsforhold(1.februar, 28.februar, a2, 1000)),
                 )
             }
             assertEquals(2, inspektør.vedtaksperiodeTeller)
@@ -31,6 +33,11 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
         a2 {
             assertEquals(1, inspektør.vedtaksperiodeTeller)
             assertTilstand(1.vedtaksperiode, TilstandType.AVVENTER_BLOKKERENDE_PERIODE)
+            assertBeløpstidslinje(
+                inspektør(1.vedtaksperiode).inntektsendringer,
+                februar,
+                50.daglig
+            )
         }
     }
 }

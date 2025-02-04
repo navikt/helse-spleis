@@ -10,8 +10,8 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Søknad.InntektFraNyttArbeidsforhold
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Søknad.TilkommenInntekt
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -79,7 +79,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     @Disabled("TODO: TilkommenV3")
     fun `lager NyeInntektsforhold-pølse for tilkommen inntekt`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a24", råttBeløp = 10000)))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(fom = 1.februar, tom = 28.februar, orgnummer = "a24", råttBeløp = 10000)))
         håndterYtelser()
 
         val nyeInntektsforholdPølse = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.nyeInntektsforhold!!.single()
@@ -95,7 +95,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     @Disabled("TODO: TilkommenV3")
     fun `kan lage NyeInntektsforhold-pølse med peker til riktig vilkårsgrunnlag før noe er utbetalt`() {
         tilGodkjenning(1.januar, 31.januar)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a24", råttBeløp = 10000)))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(fom = 1.februar, tom = 28.februar, orgnummer = "a24", råttBeløp = 10000)))
 
         val nyeInntektsforholdPølser = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.nyeInntektsforhold!!.single()
         assertEquals(1.februar til 28.februar, nyeInntektsforholdPølser.fom til nyeInntektsforholdPølser.tom)

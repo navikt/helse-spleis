@@ -215,6 +215,7 @@ internal class Vedtaksperiode private constructor(
         sykdomstidslinje: Sykdomstidslinje,
         dokumentsporing: Dokumentsporing,
         sykmeldingsperiode: Periode,
+        inntektsendringer: Beløpstidslinje = Beløpstidslinje(),
         subsumsjonslogg: Subsumsjonslogg
     ) : this(
         person = person,
@@ -229,7 +230,7 @@ internal class Vedtaksperiode private constructor(
         registrerKontekst(aktivitetslogg)
         val periode = checkNotNull(sykdomstidslinje.periode()) { "sykdomstidslinjen er tom" }
         person.vedtaksperiodeOpprettet(id, arbeidsgiver.organisasjonsnummer, periode, periode.start, opprettet)
-        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, dokumentsporing, metadata.behandlingkilde)
+        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, inntektsendringer, dokumentsporing, metadata.behandlingkilde)
     }
 
     private val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()

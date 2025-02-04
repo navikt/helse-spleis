@@ -22,6 +22,7 @@ internal class VedtaksperiodeInspektør(view: VedtaksperiodeView) {
     internal val arbeidsgiverperiode get() = behandlinger.last().endringer.last().arbeidsgiverperiode
 
     internal val sykdomstidslinje get() = behandlinger.last().endringer.last().sykdomstidslinje
+    internal val inntektsendringer get() = behandlinger.last().endringer.last().inntektsendringer
 
     internal val maksdatoer = view.behandlinger.behandlinger
         .flatMap { it.endringer.map { it.maksdatoresultat } }

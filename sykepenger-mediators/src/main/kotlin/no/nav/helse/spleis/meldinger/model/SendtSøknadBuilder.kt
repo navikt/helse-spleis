@@ -3,6 +3,7 @@ package no.nav.helse.spleis.meldinger.model
 import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.InntektFraNyttArbeidsforhold
 import no.nav.helse.hendelser.Søknad.Merknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -11,14 +12,13 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
-import no.nav.helse.hendelser.Søknad.TilkommenInntekt
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class SendtSøknadBuilder : SøknadBuilder() {
     private val perioder = mutableListOf<Søknadsperiode>()
     private val merkander = mutableListOf<Merknad>()
-    private val tilkomneInntekter = mutableListOf<TilkommenInntekt>()
+    private val inntekterFraNyeArbeidsforhold = mutableListOf<InntektFraNyttArbeidsforhold>()
     private var opprinneligSendt: LocalDateTime? = null
     private var harAndreInntektskilder: Boolean = false
     private var ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false
@@ -44,7 +44,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         egenmeldinger = egenmeldinger,
         registrert = registrert,
         søknadstype = søknadstype,
-        tilkomneInntekter = tilkomneInntekter
+        inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold
     )
 
     fun arbeidsledigsøknad() {
@@ -106,9 +106,9 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         this.opprinneligSendt = opprinneligSendt
     }
 
-    fun tilkommenInntekt(fom: LocalDate, tom: LocalDate, orgnummer: String, beløp: Int) {
-        tilkomneInntekter.add(
-            TilkommenInntekt(
+    fun inntektFraNyttArbeidsforhold(fom: LocalDate, tom: LocalDate, orgnummer: String, beløp: Int) {
+        inntekterFraNyeArbeidsforhold.add(
+            InntektFraNyttArbeidsforhold(
                 fom = fom,
                 tom = tom,
                 orgnummer = orgnummer,

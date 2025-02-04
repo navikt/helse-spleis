@@ -46,7 +46,7 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, override val meldings
 
             packet["inntektFraNyttArbeidsforhold"].takeIf(JsonNode::isArray)?.filter { it.path("harJobbet").asBoolean() }?.forEach {
                 val beløp =  it.path("belop").takeUnless { belop -> belop.isMissingOrNull() }?.asInt() ?: error("Det skal angivelig aldri skje at harJobbet = true & belop er null, men her er vi!")
-                builder.tilkommenInntekt(
+                builder.inntektFraNyttArbeidsforhold(
                     fom = it.path("fom").asLocalDate(),
                     tom = it.path("tom").asLocalDate(),
                     orgnummer = it.path("arbeidsstedOrgnummer").asText(),

@@ -283,9 +283,9 @@ internal abstract class AbstractDslTest {
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
         sykmeldingSkrevet: LocalDateTime? = null,
         sendTilGosys: Boolean = false,
-        tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
+        inntekterFraNyeArbeidsforhold: List<Søknad.InntektFraNyttArbeidsforhold> = emptyList()
     ) =
-        this { håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, sendTilGosys = sendTilGosys, tilkomneInntekter = tilkomneInntekter) }
+        this { håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, sendTilGosys = sendTilGosys, inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold) }
 
     protected fun String.håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
@@ -448,9 +448,9 @@ internal abstract class AbstractDslTest {
         sykmeldingSkrevet: LocalDateTime? = null,
         orgnummer: String = a1,
         sendTilGosys: Boolean = false,
-        tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
+        inntekterFraNyeArbeidsforhold: List<Søknad.InntektFraNyttArbeidsforhold> = emptyList()
     ) =
-        bareÈnArbeidsgiver(orgnummer).håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, sendTilGosys = sendTilGosys, tilkomneInntekter = tilkomneInntekter)
+        bareÈnArbeidsgiver(orgnummer).håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, sendTilGosys = sendTilGosys, inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold)
 
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,

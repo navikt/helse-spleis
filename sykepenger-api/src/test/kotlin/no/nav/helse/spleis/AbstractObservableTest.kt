@@ -98,7 +98,7 @@ internal abstract class AbstractObservableTest {
         egenmeldinger = egenmeldinger,
         søknadstype = Søknad.Søknadstype.Arbeidstaker,
         registrert = LocalDateTime.now(),
-        tilkomneInntekter = emptyList()
+        inntekterFraNyeArbeidsforhold = emptyList()
     )
 
     protected fun utbetalinghistorikk() = UtbetalingshistorikkEtterInfotrygdendring(
