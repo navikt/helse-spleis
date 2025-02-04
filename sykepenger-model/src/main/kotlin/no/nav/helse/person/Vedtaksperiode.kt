@@ -173,7 +173,6 @@ import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverFaktaavklartInntekt
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
 import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
@@ -187,6 +186,7 @@ import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.yearMonth
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
@@ -2044,12 +2044,9 @@ internal class Vedtaksperiode private constructor(
                 arbeidsgiver !in faktaavklarteInntekter.deaktiverteArbeidsforhold
             }
             .mapValues { (arbeidsgiver, vedtaksperioder) ->
-                val inntektForArbeidsgiver = faktaavklarteInntekter.forArbeidsgiver(arbeidsgiver) ?: error(
-                    "Det er en arbeidsgiver som ikke inngår i SP: $arbeidsgiver som har søknader: ${vedtaksperioder.joinToString { "${it.periode}" }}.\n" +
-                        "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
-                )
+                val fastsattÅrsinntekt = faktaavklarteInntekter.forArbeidsgiver(arbeidsgiver)
                 vedtaksperioder.map {
-                    it.behandlinger.lagUtbetalingstidslinje(inntektForArbeidsgiver)
+                    it.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, grunnlagsdata.inntektsgrunnlag.`6G`)
                 }
             }
         // nå vi må lage en ghost-tidslinje per arbeidsgiver for de som eksisterer i sykepengegrunnlaget.
@@ -3166,25 +3163,17 @@ internal class Vedtaksperiode private constructor(
         private fun lagUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode): Utbetalingstidslinje {
             val inntekter = vedtaksperiode.vilkårsgrunnlag?.faktaavklarteInntekter()
             val inntektForArbeidsgiver = inntektForAUU(vedtaksperiode, inntekter)
-            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektForArbeidsgiver)
+            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektForArbeidsgiver, Grunnbeløp.`6G`.beløp(vedtaksperiode.skjæringstidspunkt))
         }
 
-        private fun inntektForAUU(vedtaksperiode: Vedtaksperiode, inntekter: VilkårsprøvdSkjæringstidspunkt?): ArbeidsgiverFaktaavklartInntekt {
+        private fun inntektForAUU(vedtaksperiode: Vedtaksperiode, inntekter: VilkårsprøvdSkjæringstidspunkt?): Inntekt {
             if (inntekter == null || vedtaksperiode.arbeidsgiver.organisasjonsnummer in inntekter.deaktiverteArbeidsforhold)
-                return defaultinntektForAUU(vedtaksperiode.skjæringstidspunkt)
+                return INGEN
             return inntekter.forArbeidsgiver(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
                 ?: error(
                     "Det er en arbeidsgiver som ikke inngår i SP: ${vedtaksperiode.arbeidsgiver} som har søknader: ${vedtaksperiode.periode}.\n" +
                         "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
                 )
-        }
-
-        private fun defaultinntektForAUU(skjæringstidspunkt: LocalDate): ArbeidsgiverFaktaavklartInntekt {
-            return ArbeidsgiverFaktaavklartInntekt(
-                skjæringstidspunkt = skjæringstidspunkt,
-                `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt),
-                fastsattÅrsinntekt = INGEN
-            )
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {

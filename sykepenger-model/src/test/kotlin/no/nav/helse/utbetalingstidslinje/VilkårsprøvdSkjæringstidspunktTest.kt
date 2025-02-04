@@ -19,7 +19,6 @@ internal class VilkårsprøvdSkjæringstidspunktTest {
     @Test
     fun ghosttidslinjer() {
         val vilkårsgrunnlag = VilkårsprøvdSkjæringstidspunkt(
-            skjæringstidspunkt = 1.januar,
             `6G` = Grunnbeløp.`6G`.beløp(1.januar),
             inntekter = listOf(
                 VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt("a1", fastsattÅrsinntekt = 1000.daglig),
@@ -44,7 +43,6 @@ internal class VilkårsprøvdSkjæringstidspunktTest {
     @Test
     fun `nye inntekter underveis`() {
         val vilkårsgrunnlag = VilkårsprøvdSkjæringstidspunkt(
-            skjæringstidspunkt = 1.januar,
             `6G` = Grunnbeløp.`6G`.beløp(1.januar),
             inntekter = listOf(
                 VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt("a1", fastsattÅrsinntekt = 1000.daglig)

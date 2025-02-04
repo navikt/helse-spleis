@@ -68,7 +68,7 @@ internal class Inntektsgrunnlag private constructor(
         arbeidsgiverInntektsopplysninger.validerSkjønnsmessigAltEllerIntet()
     }
 
-    private val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())
+    internal val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())
 
     // sum av alle inntekter foruten skjønnsmessig fastsatt beløp; da brukes inntekten den fastsatte
     private val omregnetÅrsinntekt = arbeidsgiverInntektsopplysninger.totalOmregnetÅrsinntekt(skjæringstidspunkt)
@@ -405,7 +405,6 @@ internal class Inntektsgrunnlag private constructor(
     )
 
     internal fun faktaavklarteInntekter() = VilkårsprøvdSkjæringstidspunkt(
-        skjæringstidspunkt = skjæringstidspunkt,
         `6G` = `6G`,
         inntekter = arbeidsgiverInntektsopplysninger.faktaavklarteInntekter(),
         tilkommendeInntekter = this.tilkommendeInntekter.map { VilkårsprøvdSkjæringstidspunkt.NyInntektUnderveis(it.orgnummer, it.beløpstidslinje) },

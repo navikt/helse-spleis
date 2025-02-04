@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.desember
 import no.nav.helse.dsl.SubsumsjonsListLog
@@ -27,18 +27,15 @@ import no.nav.helse.juni
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.beløp.UkjentDag
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -51,11 +48,12 @@ internal class VilkårsgrunnlagHistorikkTest {
     private val inspektør get() = Vilkårgrunnlagsinspektør(historikk.view())
     private val subsumsjonslogg = SubsumsjonsListLog()
     private val jurist = BehandlingSubsumsjonslogg(
-        subsumsjonslogg, listOf(
-        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    )
+        subsumsjonslogg,
+        listOf(
+            Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+            Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
+        )
     )
 
     companion object {
@@ -123,54 +121,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller[1])
         assertNull(historikk.vilkårsgrunnlagFor(gammeltSkjæringstidspunkt)) { "skal ikke beholde vilkårsgrunnlag for skjæringstidspunkter som ikke finnes" }
         assertNull(historikk.vilkårsgrunnlagFor(nyttSkjæringstidspunkt)) { "skal ikke ha vilkårsgrunnlag for skjæringstidspunkt som ikke er vilkårsprøvd" }
-    }
-
-    @Test
-    fun `setter inntekt på økonomi`() {
-        val inntekt = 21000.månedlig
-        val grunnlag = VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            skjæringstidspunkt = 1.januar,
-            inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar),
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID()
-        )
-        val økonomi: Økonomi = grunnlag.faktaavklarteInntekter().forArbeidsgiver(ORGNR)!!.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, UkjentDag)
-        assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
-    }
-
-    @Test
-    fun `setter inntekt på økonomi om vurdering ikke er ok`() {
-        val inntekt = 21000.månedlig
-        val grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            skjæringstidspunkt = 1.januar,
-            inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar),
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            vurdertOk = false,
-            meldingsreferanseId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID()
-        )
-        val økonomi: Økonomi = grunnlagsdata.faktaavklarteInntekter().forArbeidsgiver(ORGNR)!!.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, UkjentDag)
-        assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
-    }
-
-    @Test
-    fun `feiler dersom inntekt ikke finnes for orgnr`() {
-        val inntekt = 21000.månedlig
-        val grunnlag = VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            skjæringstidspunkt = 1.januar,
-            inntektsgrunnlag = inntekt.inntektsgrunnlag("et annet orgnr"),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar),
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID()
-        )
-        val resultat = grunnlag.faktaavklarteInntekter().forArbeidsgiver(ORGNR)?.medInntektHvisFinnes(31.desember(2017), Økonomi.ikkeBetalt(), NormalArbeidstaker, UkjentDag)
-        assertNull(resultat)
     }
 
     @Test
