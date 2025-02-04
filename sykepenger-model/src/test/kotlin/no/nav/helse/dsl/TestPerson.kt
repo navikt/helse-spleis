@@ -163,7 +163,13 @@ internal class TestPerson(
 
         internal fun håndterAvbruttSøknad(sykmeldingsperiode: Periode) = arbeidsgiverHendelsefabrikk.lagAvbruttSøknad(sykmeldingsperiode).håndter(Person::håndter)
 
-        internal fun håndterSøknad(periode: Periode) = håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
+        internal fun håndterSøknad(
+            periode: Periode,
+            tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
+        ) = håndterSøknad(
+            Sykdom(periode.start, periode.endInclusive, 100.prosent),
+            tilkomneInntekter = tilkomneInntekter
+        )
 
         internal fun håndterArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning): UUID {
             val hendelse = arbeidsgiverHendelsefabrikk.lagArbeidsgiveropplysninger(vedtaksperiodeId = vedtaksperiodeId, opplysninger = opplysninger)

@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
@@ -543,6 +543,7 @@ internal class Arbeidsgiver private constructor(
         if (vedtaksperioder.any { it.periode.overlapperMed(tilkommenInntekt.periode) }) return aktivitetslogg.funksjonellFeil(RV_IV_9)
         val vedtaksperiode = tilkommenInntekt.lagVedtaksperiode(aktivitetslogg, metadata, person, this, subsumsjonslogg)
         registrerNyVedtaksperiode(vedtaksperiode)
+        vedtaksperiode.håndterTilkommenInntekt(tilkommenInntekt, aktivitetslogg)
     }
 
     private fun opprettVedtaksperiodeOgHåndter(
