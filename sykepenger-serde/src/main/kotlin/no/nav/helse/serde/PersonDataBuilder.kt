@@ -34,6 +34,7 @@ import no.nav.helse.dto.UtbetaltDagDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
+import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.BehandlingendringUtDto
 import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
@@ -45,7 +46,6 @@ import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.InntektsmeldingUtDto
-import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
@@ -404,6 +404,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     sykdomstidslinje = sykdomstidslinje.tilPersonData(),
     utbetalingstidslinje = utbetalingstidslinje.tilPersonData(),
     refusjonstidslinje = refusjonstidslinje.tilPersonData(),
+    inntektsendringer = inntektsendringer.tilPersonData(),
     dokumentsporing = dokumentsporing.tilPersonData(),
     arbeidsgiverperioder = arbeidsgiverperioder.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },

@@ -23,6 +23,7 @@ data class BehandlingendringUtDto(
     val sykdomstidslinje: SykdomstidslinjeDto,
     val utbetalingstidslinje: UtbetalingstidslinjeUtDto,
     val refusjonstidslinje: BeløpstidslinjeDto,
+    val inntektsendringer: BeløpstidslinjeDto,
     val arbeidsgiverperioder: List<PeriodeDto>,
     val dagerNavOvertarAnsvar: List<PeriodeDto>,
     val maksdatoresultat: MaksdatoresultatUtDto,
