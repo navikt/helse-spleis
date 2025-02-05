@@ -170,13 +170,6 @@ internal class SykdomstidslinjeBuilder(
                 grad = it.grad.prosent.roundToInt()
             )
 
-            is SykdomstidslinjeDagDto.SykedagNavDto -> Sykdomstidslinjedag(
-                dagen = it.dato,
-                type = SykdomstidslinjedagType.SYKEDAG_NAV,
-                kilde = it.kilde.tilKildeDTO(),
-                grad = it.grad.prosent.roundToInt()
-            )
-
             is SykdomstidslinjeDagDto.UkjentDagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
                 type = SykdomstidslinjedagType.ARBEIDSDAG,

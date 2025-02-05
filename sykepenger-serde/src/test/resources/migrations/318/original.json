@@ -1,0 +1,223 @@
+{
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1",
+      "sykdomshistorikk": [
+        {
+          "hendelseSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "SYKEDAG_NAV",
+                "dato": "2018-01-01",
+                "kilde": {
+                  "id": "a45f3ab6-aa3a-4469-9bc9-b2af101dfeef",
+                  "type": "OverstyrTidslinje"
+                }
+              }
+            ]
+          },
+          "beregnetSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "SYKEDAG_NAV",
+                "dato": "2017-12-31",
+                "kilde": {
+                  "id": "e19b1189-43cb-4c24-ae73-47ad7b480cc7",
+                  "type": "InntektsmeldingDager"
+                }
+              },
+              {
+                "type": "SYKEDAG_NAV",
+                "dato": "2018-01-01",
+                "kilde": {
+                  "id": "a45f3ab6-aa3a-4469-9bc9-b2af101dfeef",
+                  "type": "OverstyrTidslinje"
+                }
+              },
+              {
+                "type": "SYKEDAG_NAV",
+                "fom": "2018-01-02",
+                "tom": "2018-01-15",
+                "kilde": {
+                  "id": "e19b1189-43cb-4c24-ae73-47ad7b480cc7",
+                  "type": "InntektsmeldingDager"
+                }
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": "2018-01-16",
+                "tom": "2018-01-31",
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "hendelseSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "SYKEDAG_NAV",
+                "fom": "2017-12-31",
+                "tom": "2018-01-15",
+                "kilde": {
+                  "id": "e19b1189-43cb-4c24-ae73-47ad7b480cc7",
+                  "type": "InntektsmeldingDager"
+                }
+              }
+            ]
+          },
+          "beregnetSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "SYKEDAG_NAV",
+                "fom": "2017-12-31",
+                "tom": "2018-01-15",
+                "kilde": {
+                  "id": "e19b1189-43cb-4c24-ae73-47ad7b480cc7",
+                  "type": "InntektsmeldingDager"
+                }
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": "2018-01-16",
+                "tom": "2018-01-31",
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "hendelseSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "SYKEDAG",
+                "fom": "2018-01-01",
+                "tom": "2018-01-31",
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                }
+              }
+            ]
+          },
+          "beregnetSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "SYKEDAG",
+                "fom": "2018-01-01",
+                "tom": "2018-01-31",
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "endringer": [
+                {
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG_NAV",
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-16",
+                        "kilde": {
+                          "id": "e19b1189-43cb-4c24-ae73-47ad7b480cc7",
+                          "type": "InntektsmeldingDager"
+                        }
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": "2018-01-17",
+                        "tom": "2018-01-31",
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "endringer": [
+                {
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG_NAV",
+                        "dato": "2018-01-01",
+                        "kilde": {
+                          "id": "a45f3ab6-aa3a-4469-9bc9-b2af101dfeef",
+                          "type": "OverstyrTidslinje"
+                        }
+                      },
+                      {
+                        "type": "SYKEDAG_NAV",
+                        "fom": "2018-01-02",
+                        "tom": "2018-01-16",
+                        "kilde": {
+                          "id": "e19b1189-43cb-4c24-ae73-47ad7b480cc7",
+                          "type": "InntektsmeldingDager"
+                        }
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": "2018-01-17",
+                        "tom": "2018-01-31",
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "behandlinger": []
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 317
+}

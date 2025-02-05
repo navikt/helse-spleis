@@ -56,7 +56,6 @@ internal class Arbeidsgiverperiodeberegner(
                     sykedag(dag.dato)
                 }
 
-                is Dag.SykedagNav -> sykedagNav(dag.dato)
                 is Dag.UkjentDag -> {
                     if (dag.dato.erHelg()) tilstand.feriedag(this, dag.dato)
                     else arbeidsdag(dag.dato)
@@ -117,12 +116,6 @@ internal class Arbeidsgiverperiodeberegner(
         tilstand.sykdomsdag(this, dato)
     }
 
-    private fun sykedagNav(dato: LocalDate) {
-        fridager.somSykedager()
-        arbeidsgiverperiodeteller.inc()
-        tilstand.sykdomsdagNav(this, dato)
-    }
-
     private fun egenmeldingsdag(dato: LocalDate) {
         fridager.somSykedager()
         arbeidsgiverperiodeteller.inc()
@@ -165,7 +158,6 @@ internal class Arbeidsgiverperiodeberegner(
             )
         }
 
-        fun sykdomsdagNav(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) = sykdomsdag(builder, dato)
         fun egenmeldingsdag(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) = sykdomsdag(builder, dato)
         fun foreldetDag(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) = sykdomsdag(builder, dato)
 
@@ -200,17 +192,6 @@ internal class Arbeidsgiverperiodeberegner(
     }
 
     private object Arbeidsgiverperiode : Tilstand {
-        override fun sykdomsdagNav(
-            builder: Arbeidsgiverperiodeberegner,
-            dato: LocalDate
-        ) {
-            builder.aktivArbeidsgiverperioderesultat = builder.arbeidsgiverperiodeResultatet(dato).utvideMed(
-                dato = dato,
-                arbeidsgiverperiode = dato,
-                utbetalingsperiode = dato
-            )
-        }
-
         override fun sykdomsdag(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) {
             builder.aktivArbeidsgiverperioderesultat = builder.arbeidsgiverperiodeResultatet(dato).utvideMed(
                 dato = dato,
@@ -234,16 +215,6 @@ internal class Arbeidsgiverperiodeberegner(
     }
 
     private object ArbeidsgiverperiodeSisteDag : Tilstand {
-        override fun sykdomsdagNav(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) {
-            builder.aktivArbeidsgiverperioderesultat = builder.arbeidsgiverperiodeResultatet(dato).utvideMed(
-                dato = dato,
-                arbeidsgiverperiode = dato,
-                utbetalingsperiode = dato,
-                fullstendig = true
-            )
-            builder.tilstand(Utbetaling)
-        }
-
         override fun sykdomsdag(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) {
             builder.aktivArbeidsgiverperioderesultat = builder.arbeidsgiverperiodeResultatet(dato).utvideMed(
                 dato = dato,
@@ -298,7 +269,6 @@ internal class Arbeidsgiverperiodeberegner(
         override fun andreYtelser(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) = oppholdsdag(builder, dato)
 
         override fun sykdomsdag(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) = throw IllegalStateException()
-        override fun sykdomsdagNav(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) = throw IllegalStateException()
         override fun egenmeldingsdag(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) = throw IllegalStateException()
         override fun foreldetDag(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) = throw IllegalStateException()
         override fun feriedagSomSyk(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) = throw IllegalStateException()

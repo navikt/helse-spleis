@@ -267,7 +267,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()), IkkeUtbetaltArbeidsgiverperiode(ManglerOpptjening))
             assertEquals("SSSHH SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
             assertEquals(listOf(3.januar til 18.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
-            assertTrue(inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.filterIsInstance<Dag.SykedagNav>().all { it.økonomi.grad == 69.prosent })
+            assertTrue(inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.filterIsInstance<Dag.Sykedag>().all { it.økonomi.grad == 69.prosent })
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
         }

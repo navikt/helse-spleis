@@ -23,7 +23,6 @@ import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.FORELDET
 import no.nav.helse.testhelpers.H
-import no.nav.helse.testhelpers.N
 import no.nav.helse.testhelpers.P
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.U
@@ -418,12 +417,6 @@ internal class SkjæringstidspunktTest {
         assertSkjæringstidspunkt(10.januar, 10.januar til 12.januar, tidslinje)
         assertSkjæringstidspunkt(null, 18.januar til 20.januar, tidslinje)
         assertSkjæringstidspunkt(10.januar, 1.januar til 20.januar, tidslinje)
-    }
-
-    @Test
-    fun `Sykedager Nav`() {
-        val tidslinje = 5.N
-        assertFørsteDagErSkjæringstidspunkt(tidslinje)
     }
 
     @Test

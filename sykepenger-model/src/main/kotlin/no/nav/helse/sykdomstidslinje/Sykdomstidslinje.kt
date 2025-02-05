@@ -32,7 +32,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
 import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.sykdomstidslinje.Dag.SykedagNav
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
@@ -169,7 +168,6 @@ class Sykdomstidslinje private constructor(
                     is Permisjonsdag -> "P"
                     is FriskHelgedag -> "R"
                     is ForeldetSykedag -> "K"
-                    is SykedagNav -> "N"
                     is AndreYtelser -> "Y"
                 }
         }?.trim() ?: "Tom tidslinje"
@@ -213,25 +211,6 @@ class Sykdomstidslinje private constructor(
                                     if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else Sykedag(it, økonomi, kilde)
                                 }
 
-                            }
-                        )
-                    ))
-
-        internal fun sykedagerNav(
-            førsteDato: LocalDate,
-            sisteDato: LocalDate,
-            grad: Prosentdel,
-            kilde: Hendelseskilde
-        ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(
-                        toMap(
-                            { it },
-                            {
-                                Økonomi.sykdomsgrad(grad).let { økonomi ->
-                                    if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else SykedagNav(it, økonomi, kilde)
-                                }
                             }
                         )
                     ))

@@ -1,0 +1,1989 @@
+{
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1",
+      "sykdomshistorikk": [
+        {
+          "hendelseSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "SYKEDAG",
+                "dato": "2018-01-01",
+                "kilde": {
+                  "id": "a45f3ab6-aa3a-4469-9bc9-b2af101dfeef",
+                  "type": "OverstyrTidslinje"
+                }
+              }
+            ]
+          },
+          "beregnetSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "ARBEIDSGIVERDAG",
+                "dato": "2017-12-31",
+                "kilde": {
+                  "id": "e19b1189-43cb-4c24-ae73-47ad7b480cc7",
+                  "type": "InntektsmeldingDager"
+                },
+                "fom": null,
+                "tom": null
+              },
+              {
+                "type": "SYKEDAG",
+                "dato": "2018-01-01",
+                "kilde": {
+                  "id": "a45f3ab6-aa3a-4469-9bc9-b2af101dfeef",
+                  "type": "OverstyrTidslinje"
+                },
+                "fom": null,
+                "tom": null
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-02"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-03"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-04"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-05"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-06"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-07"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-08"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-09"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-10"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-11"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-12"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-13"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-14"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-15"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-16"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-17"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-18"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-19"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-20"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-21"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-22"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-23"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-24"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-25"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-26"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-27"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-28"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-29"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-30"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-31"
+              }
+            ]
+          }
+        },
+        {
+          "hendelseSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "ARBEIDSGIVERDAG",
+                "fom": "2017-12-31",
+                "tom": "2018-01-15",
+                "kilde": {
+                  "id": "e19b1189-43cb-4c24-ae73-47ad7b480cc7",
+                  "type": "InntektsmeldingDager"
+                }
+              }
+            ]
+          },
+          "beregnetSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "ARBEIDSGIVERDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "e19b1189-43cb-4c24-ae73-47ad7b480cc7",
+                  "type": "InntektsmeldingDager"
+                },
+                "dato": "2017-12-31"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-01"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-02"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-03"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-04"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-05"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-06"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-07"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-08"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-09"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-10"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-11"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-12"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-13"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-14"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-15"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-16"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-17"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-18"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-19"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-20"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-21"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-22"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-23"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-24"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-25"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-26"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-27"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-28"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-29"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-30"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-31"
+              }
+            ]
+          }
+        },
+        {
+          "hendelseSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "SYKEDAG",
+                "fom": "2018-01-01",
+                "tom": "2018-01-31",
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                }
+              }
+            ]
+          },
+          "beregnetSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-01"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-02"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-03"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-04"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-05"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-06"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-07"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-08"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-09"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-10"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-11"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-12"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-13"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-14"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-15"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-16"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-17"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-18"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-19"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-20"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-21"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-22"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-23"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-24"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-25"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-26"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-27"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-28"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-29"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-30"
+              },
+              {
+                "type": "SYKEDAG",
+                "fom": null,
+                "tom": null,
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                },
+                "dato": "2018-01-31"
+              }
+            ]
+          }
+        }
+      ],
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-01"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-02"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-03"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-04"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-05"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-06"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-07"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-08"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-09"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-10"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-11"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-12"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-13"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-14"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-15"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-16"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-17"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-18"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-19"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-20"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-21"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-22"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-23"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-24"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-25"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-26"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-27"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-28"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-29"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-30"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-31"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "endringer": [
+                {
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-01"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-02"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-03"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-04"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-05"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-06"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-07"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-08"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-09"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-10"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-11"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-12"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-13"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-14"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-15"
+                      },
+                      {
+                        "type": "ARBEIDSGIVERDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "e19b1189-43cb-4c24-ae73-47ad7b480cc7",
+                          "type": "InntektsmeldingDager"
+                        },
+                        "dato": "2018-01-16"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-17"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-18"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-19"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-20"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-21"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-22"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-23"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-24"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-25"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-26"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-27"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-28"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-29"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-30"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-31"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "endringer": [
+                {
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "dato": "2018-01-01",
+                        "kilde": {
+                          "id": "a45f3ab6-aa3a-4469-9bc9-b2af101dfeef",
+                          "type": "OverstyrTidslinje"
+                        },
+                        "fom": null,
+                        "tom": null
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-02"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-03"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-04"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-05"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-06"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-07"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-08"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-09"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-10"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-11"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-12"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-13"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-14"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-15"
+                      },
+                      {
+                        "type": "ARBEIDSGIVERDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "e19b1189-43cb-4c24-ae73-47ad7b480cc7",
+                          "type": "InntektsmeldingDager"
+                        },
+                        "dato": "2018-01-16"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-17"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-18"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-19"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-20"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-21"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-22"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-23"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-24"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-25"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-26"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-27"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-28"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-29"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-30"
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "fom": null,
+                        "tom": null,
+                        "kilde": {
+                          "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                          "type": "Søknad"
+                        },
+                        "dato": "2018-01-31"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "behandlinger": []
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 318
+}
