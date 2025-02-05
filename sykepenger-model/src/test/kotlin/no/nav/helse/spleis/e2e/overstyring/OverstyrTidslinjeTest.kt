@@ -6,7 +6,6 @@ import no.nav.helse.august
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -17,6 +16,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -297,6 +297,15 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `saksbehandler endrer dager nav overtar ansvar for`() {
+        nyttVedtak(januar)
+        håndterOverstyrTidslinje((1.januar til 16.januar).map { ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100) })
+        assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+        assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+    }
+
+    @Test
     fun `ferie uten sykmelding mellom to perioder`() {
         nyttVedtak(juni)
 
@@ -317,7 +326,8 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
-        assertEquals("SHH SSSSSHH SSSSSHH SSSSSHH SSSSSHJ JJJJJJJ JJJJJJJ JJJJJJJ JJJJJJJ JJNSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomstidslinje.toShortString())
+        assertEquals(listOf(1.august.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertEquals("SHH SSSSSHH SSSSSHH SSSSSHH SSSSSHJ JJJJJJJ JJJJJJJ JJJJJJJ JJJJJJJ JJSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomstidslinje.toShortString())
 
         assertEquals(1.august, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(1.juli til 31.august, inspektør.periode(2.vedtaksperiode))
@@ -627,17 +637,18 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        val agp = (1.januar til 16.januar).filterNot { it.erHelg() }
-        agp.forEach {
-            assertSykdomstidslinjedag(it, Dag.SykedagNav::class, "Inntektsmelding")
-        }
+
+        assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+
         val førsteUtbetalingsdag = inspektør.utbetaling(0).arbeidsgiverOppdrag[0].fom
         assertEquals(1.januar, førsteUtbetalingsdag)
-        håndterOverstyrTidslinje(agp.map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
+        håndterOverstyrTidslinje((1.januar til 16.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
+
+        assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+
         håndterYtelser(1.vedtaksperiode)
-        agp.forEach {
-            assertSykdomstidslinjedag(it, Dag.Sykedag::class, OverstyrTidslinje::class)
-        }
         val førsteUtbetalingsdagEtterOverstyring = inspektør.utbetaling(1).arbeidsgiverOppdrag[0].fom
         assertEquals(17.januar, førsteUtbetalingsdagEtterOverstyring)
         assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())

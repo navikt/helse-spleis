@@ -22,6 +22,7 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.person.BehandlingView.TilstandView.UBEREGNET_OMGJØRING
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -1213,17 +1214,19 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             listOf(1.januar til 16.januar),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
-        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
 
-        assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(listOf(2.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertInntektshistorikkForDato(INNTEKT, 1.januar, inspektør)
-        assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
+        assertTrue(im !in observatør.inntektsmeldingIkkeHåndtert)
         assertFunksjonellFeil(RV_IM_8, 1.vedtaksperiode.filter())
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.let {
-            assertEquals(4, it.size)
-            assertTrue(it.all { behalding -> behalding.tilstand == AVSLUTTET_UTEN_VEDTAK })
-            assertEquals(im, it[3].kilde.meldingsreferanseId)
+            assertEquals(3, it.size)
+            assertEquals(AVSLUTTET_UTEN_VEDTAK, it[0].tilstand)
+            assertEquals(AVSLUTTET_UTEN_VEDTAK, it[1].tilstand)
+            assertEquals(UBEREGNET_OMGJØRING, it[2].tilstand)
+            assertEquals(im, it[2].kilde.meldingsreferanseId)
         }
     }
 

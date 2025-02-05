@@ -59,6 +59,8 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertEquals(6.juli til 18.august, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
         assertEquals("ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+        assertEquals(listOf(31.juli til 15.august), inspektør.arbeidsgiverperioden(2.vedtaksperiode))
+        assertEquals(listOf(31.juli, 8.juli), inspektør.skjæringstidspunkter(2.vedtaksperiode))
 
         håndterInntektsmelding(
             listOf(25.juni til 5.juli, 8.juli til 12.juli),
@@ -66,23 +68,27 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
 
-        assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_4, RV_IM_24, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
-        assertEquals("ARR AAAAARR AAAAARR AAAAARR AAAAARR ANSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
-        assertEquals(listOf(7.august til 18.august), inspektør.arbeidsgiverperioden(2.vedtaksperiode))
-        assertEquals(7.august, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_4, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
+        assertEquals("ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+        assertEquals(listOf(31.juli til 15.august), inspektør.arbeidsgiverperioden(2.vedtaksperiode))
+        assertEquals(31.juli, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(listOf(31.juli, 8.juli), inspektør.skjæringstidspunkter(2.vedtaksperiode))
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterOverstyrTidslinje((9.juli til 13.juli).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
-        val tidslinje = "ARR SSSSSRR AAAAARR AAAAARR AAAAARR ANSSSHH SSSSSH"
+        val tidslinje = "ARG SSSSS?? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH"
         assertEquals(tidslinje, inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
-
+        assertVarsler(listOf(Varselkode.RV_IV_11, Varselkode.RV_IM_3, Varselkode.RV_IM_4, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
         assertDoesNotThrow { håndterYtelser(2.vedtaksperiode) }
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
 
         håndterOverstyrTidslinje((14.juli til 6.august).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
-        assertEquals("ARR SSSSSJJ JJJJJJJ JJJJJJJ JJJJJJJ JNSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
-        assertEquals(listOf(25.juni til 5.juli, 9.juli til 13.juli), inspektør.arbeidsgiverperioden(2.vedtaksperiode))
-        assertEquals(7.august, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals("ARG SSSSSJJ JJJJJJJ JJJJJJJ JSSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+        assertEquals(listOf(25.juni til 5.juli, 8.juli til 12.juli), inspektør.arbeidsgiverperioden(2.vedtaksperiode))
+        assertEquals(31.juli, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(listOf(31.juli, 8.juli), inspektør.skjæringstidspunkter(2.vedtaksperiode))
         håndterYtelser(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
     }
