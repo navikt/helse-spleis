@@ -1,0 +1,60 @@
+{
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1",
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "dagerNavOvertarAnsvar": [],
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG_NAV",
+                        "dato": "2018-01-01"
+                      },
+                      {
+                        "type": "SYKEDAG_NAV",
+                        "fom": "2018-01-02",
+                        "tom": "2018-01-05"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode":         {
+            "behandlinger": [
+              {
+                "endringer": [
+                  {
+                    "sykdomstidslinje": {
+                      "dager": [
+                        {
+                          "type": "SYKEDAG_NAV",
+                          "dato": "2018-01-01"
+                        },
+                        {
+                          "type": "SYKEDAG_NAV",
+                          "fom": "2018-01-02",
+                          "tom": "2018-01-05"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

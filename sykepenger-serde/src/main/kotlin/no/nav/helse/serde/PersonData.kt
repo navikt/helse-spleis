@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import kotlin.streams.asSequence
 import no.nav.helse.dto.AlderDto
 import no.nav.helse.dto.ArbeidsforholdDto
@@ -879,7 +879,7 @@ data class PersonData(
                     val inntektsendringer: BeløpstidslinjeData?, // todo: fjerne null
                     val dokumentsporing: DokumentsporingData,
                     val arbeidsgiverperioder: List<PeriodeData>,
-                    val dagerNavOvertarAnsvar: List<PeriodeData>?, // todo: fjerne null
+                    val dagerNavOvertarAnsvar: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData
                 ) {
                     fun tilDto() = BehandlingendringInnDto(
@@ -897,20 +897,7 @@ data class PersonData(
                         skjæringstidspunkt = skjæringstidspunkt,
                         skjæringstidspunkter = skjæringstidspunkter,
                         arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() },
-                        dagerNavOvertarAnsvar = dagerNavOvertarAnsvar?.map { it.tilDto() }
-                            ?: sykdomstidslinje // migrerer inn alle sykedagNav-dager som ligger på vedtaksperioden
-                                .dager
-                                .filter { it.type == SykdomstidslinjeData.JsonDagType.SYKEDAG_NAV }
-                                .map { it.dato?.rangeTo(it.dato) ?: (it.fom!!.rangeTo(it.tom!!)) }
-                                .flatMap { it.start.datesUntil(it.endInclusive.plusDays(1)).toList() }
-                                .fold(emptyList<PeriodeDto>()) { resultat, sykNav ->
-                                    val last = resultat.lastOrNull()
-                                    when {
-                                        last == null -> listOf(PeriodeDto(sykNav, sykNav))
-                                        last.tom.plusDays(1) == sykNav -> resultat.dropLast(1) + last.copy(tom = sykNav)
-                                        else -> resultat.plusElement(PeriodeDto(sykNav, sykNav))
-                                    }
-                                },
+                        dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map { it.tilDto() },
                         maksdatoresultat = maksdatoresultat.tilDto()
                     )
                 }
