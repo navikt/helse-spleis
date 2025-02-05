@@ -23,7 +23,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
-import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat.Bestemmelse.IKKE_VURDERT
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -233,9 +232,6 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
                         val førsteDag = it.sykdomstidslinje[it.periode.start]
                         val normalSykdomstidslinje = førsteDag === førsteIkkeUkjenteDag
                         if (normalSykdomstidslinje) return
-                        // Inntektsmeldingen driver selvfølgelig å lager noen ukjente dager i snuten når første fraværsdag blir SykedagNav 🫠
-                        val førsteIkkeUkjenteDagErSykedagNav = it.sykdomstidslinje.inspektør.dager[it.sykdomstidslinje.inspektør.førsteIkkeUkjenteDag] is Dag.SykedagNav
-                        if (førsteIkkeUkjenteDagErSykedagNav) return
 
                         error(
                             """

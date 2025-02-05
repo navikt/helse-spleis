@@ -41,14 +41,6 @@ internal val Int.S
         INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal val Int.N
-    get() = Sykdomstidslinje.sykedagerNav(
-        dagensDato,
-        dagensDato.plusDays(this.toLong() - 1),
-        100.prosent,
-        INGEN
-    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
-
 internal fun Int.S(melding: Melding) = this.S(Hendelseskilde(melding, UUID.randomUUID(), LocalDateTime.now()))
 
 internal fun Int.S(hendelseskilde: Hendelseskilde, grad: Prosentdel = 100.prosent) = Sykdomstidslinje.sykedager(

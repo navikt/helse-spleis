@@ -949,17 +949,6 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         fom = null,
         tom = null
     )
-
-    is SykdomstidslinjeDagDto.SykedagNavDto -> DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG_NAV,
-        kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
-        other = null,
-        melding = null,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
 }
 
 private fun HendelseskildeDto.tilPersonData() =

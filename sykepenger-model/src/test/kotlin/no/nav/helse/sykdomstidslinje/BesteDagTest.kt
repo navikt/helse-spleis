@@ -28,7 +28,6 @@ internal class BesteDagTest {
         private val sykedagFraSaksbehandler = Dag.Sykedag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
         private val egenmeldingsdagFraSaksbehandler = Dag.Arbeidsgiverdag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
         private val arbeidsdagFraSaksbehandler = Dag.Arbeidsdag(1.januar, TestEvent.saksbehandler)
-        private val sykedagNavFraSaksbehandler = Dag.SykedagNav(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
         private val andreYtelser = Dag.AndreYtelser(1.januar, TestEvent.testkilde, Dag.AndreYtelser.AnnenYtelse.Foreldrepenger)
     }
 
@@ -40,8 +39,6 @@ internal class BesteDagTest {
         sammenhengendeSykdom betyr_at sykedagFraSøknad slår arbeidsdagFraSøknad
         sammenhengendeSykdom betyr_at ferieFraSøknad slår arbeidsdagFraSøknad
         sammenhengendeSykdom betyr_at permisjonFraSøknad slår arbeidsdagFraSøknad
-        sammenhengendeSykdom betyr_at sykedagNavFraSaksbehandler slår arbeidsdagFraSøknad
-        sammenhengendeSykdom betyr_at sykedagNavFraSaksbehandler slår permisjonFraSøknad
     }
 
     @Test
@@ -75,9 +72,6 @@ internal class BesteDagTest {
         ferieFraSaksbehandler mot arbeidIkkeGjenopptattDag gir arbeidIkkeGjenopptattDag
         arbeidIkkeGjenopptattDag mot ferieFraSaksbehandler gir ferieFraSaksbehandler
 
-        sykedagNavFraSaksbehandler mot arbeidIkkeGjenopptattDag gir arbeidIkkeGjenopptattDag
-        arbeidIkkeGjenopptattDag mot sykedagNavFraSaksbehandler gir sykedagNavFraSaksbehandler
-
         sykedagFraSaksbehandler mot arbeidIkkeGjenopptattDag gir arbeidIkkeGjenopptattDag
         arbeidIkkeGjenopptattDag mot sykedagFraSaksbehandler gir sykedagFraSaksbehandler
     }
@@ -90,18 +84,6 @@ internal class BesteDagTest {
         arbeidsdagFraSaksbehandler slår permisjonFraSøknad
         arbeidsdagFraSaksbehandler slår arbeidsgiverdagFraInntektsmelding
         arbeidsdagFraSaksbehandler slår ukjentDag
-    }
-
-    @Test
-    fun `sykedag nav fra saksbehandler`() {
-        sykedagNavFraSaksbehandler slår arbeidsdagFraSøknad
-        sykedagNavFraSaksbehandler mot arbeidsdagFraSaksbehandler gir arbeidsdagFraSaksbehandler
-        arbeidsdagFraSaksbehandler mot sykedagNavFraSaksbehandler gir sykedagNavFraSaksbehandler
-        sykedagNavFraSaksbehandler slår sykedagFraSøknad
-        sykedagNavFraSaksbehandler slår ferieFraSøknad
-        sykedagNavFraSaksbehandler slår permisjonFraSøknad
-        sykedagNavFraSaksbehandler slår arbeidsgiverdagFraInntektsmelding
-        sykedagNavFraSaksbehandler slår ukjentDag
     }
 
     @Test

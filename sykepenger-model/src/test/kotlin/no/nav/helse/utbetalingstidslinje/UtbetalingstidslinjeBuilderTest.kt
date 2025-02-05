@@ -13,13 +13,11 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
-import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.K
-import no.nav.helse.testhelpers.N
 import no.nav.helse.testhelpers.P
 import no.nav.helse.testhelpers.PROBLEM
 import no.nav.helse.testhelpers.R
@@ -36,6 +34,7 @@ import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -69,7 +68,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `kort - skal utbetales`() {
-        undersøke(15.N)
+        undersøke(15.S, dagerNavOvertarAnsvar = listOf(1.januar til 15.januar))
         assertEquals(15, inspektør.size)
         assertEquals(4, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(11, inspektør.arbeidsgiverperiodedagNavTeller)
@@ -78,13 +77,13 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 15.januar,
                 arbeidsgiverperiode = listOf(1.januar til 15.januar),
-                utbetalingsperioder = listOf(1.januar til 5.januar, 8.januar til 12.januar, 15.januar.somPeriode()),
+                utbetalingsperioder = emptyList(),
                 oppholdsperioder = emptyList(),
                 fullstendig = false,
                 sisteDag = null
             ), perioder.single()
         )
-        assertTrue(perioder.first().somArbeidsgiverperiode().forventerInntekt(1.januar til 15.januar))
+        assertFalse(perioder.first().somArbeidsgiverperiode().forventerInntekt(1.januar til 15.januar))
     }
 
     @Test
@@ -109,7 +108,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `enkel - SykedagNav`() {
-        undersøke(31.N)
+        undersøke(31.S, dagerNavOvertarAnsvar = listOf(1.januar til 31.januar))
         assertEquals(31, inspektør.size)
         assertEquals(12, inspektør.arbeidsgiverperiodedagNavTeller)
         assertEquals(4, inspektør.arbeidsgiverperiodeDagTeller)
@@ -120,7 +119,7 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 31.januar,
                 arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(1.januar til 5.januar, 8.januar til 12.januar, 15.januar til 31.januar),
+                utbetalingsperioder = listOf(17.januar til 31.januar),
                 oppholdsperioder = emptyList(),
                 fullstendig = true,
                 sisteDag = null
@@ -1026,7 +1025,7 @@ internal class UtbetalingstidslinjeBuilderTest {
     private lateinit var utbetalingstidslinje: Utbetalingstidslinje
     private val perioder: MutableList<Arbeidsgiverperioderesultat> = mutableListOf()
 
-    private fun undersøke(tidslinje: Sykdomstidslinje, infotrygdBetalteDager: List<Periode> = emptyList()) {
+    private fun undersøke(tidslinje: Sykdomstidslinje, infotrygdBetalteDager: List<Periode> = emptyList(), dagerNavOvertarAnsvar: List<Periode> = emptyList()) {
         val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller)
         val arbeidsgiverperioder = arbeidsgiverperiodeberegner.resultat(tidslinje, infotrygdBetalteDager)
         perioder.addAll(arbeidsgiverperioder)
@@ -1035,7 +1034,7 @@ internal class UtbetalingstidslinjeBuilderTest {
             fastsattÅrsinntekt = 31000.månedlig,
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
-            dagerNavOvertarAnsvar = tidslinje.filterIsInstance<Dag.SykedagNav>().map { it.dato }.grupperSammenhengendePerioder(),
+            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje(),
             inntektsendringer = Beløpstidslinje(),
             `6G` = Grunnbeløp.`6G`.beløp(1.januar),

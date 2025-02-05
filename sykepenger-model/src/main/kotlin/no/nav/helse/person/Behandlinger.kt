@@ -50,7 +50,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.sykdomstidslinje.Dag.SykedagNav
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -487,8 +486,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is Arbeidsgiverdag,
                         is ForeldetSykedag,
                         is SykHelgedag,
-                        is Sykedag,
-                        is SykedagNav -> true
+                        is Sykedag -> true
 
                         is Dag.AndreYtelser,
                         is Dag.ArbeidIkkeGjenopptattDag,
@@ -1115,7 +1113,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             // sjekker om det finnes en dagtype som gir rett på utbetaling mellom agp og det ekstra skjæringstidspunktet
             val harSykdomMellomAGPOgSkjæringstidspunktet = sykdomstidslinje
                 .subset(mellomliggendePeriode)
-                .any { dag -> dag is Sykedag || dag is SykedagNav }
+                .any { dag -> dag is Sykedag }
 
             return harSykdomMellomAGPOgSkjæringstidspunktet
         }

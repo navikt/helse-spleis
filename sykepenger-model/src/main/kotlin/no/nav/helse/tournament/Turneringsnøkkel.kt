@@ -31,7 +31,6 @@ internal enum class Turneringsnøkkel {
     Saksbehandlerdag,
     Arbeidsgiverdag_SB,
     Arbeidsdag_SB,
-    SykedagNav_IM,
     AndreYtelserDag,
     UkjentDag,
     UbestemtDag;
@@ -45,7 +44,6 @@ internal enum class Turneringsnøkkel {
             dag is Arbeidsdag && dag.kommerFra("Inntektsmelding") -> Arbeidsdag_IM
             dag is Arbeidsdag && dag.kommerFra(Søknad::class) -> Arbeidsdag_SØ
             dag is Arbeidsgiverdag && dag.kommerFra("Inntektsmelding") -> Arbeidsgiverdag_IM
-            dag is Dag.SykedagNav && dag.kommerFra("Inntektsmelding") -> SykedagNav_IM
             dag is Arbeidsgiverdag && dag.kommerFra(Søknad::class) -> Arbeidsgiverdag_SØ
             dag is ArbeidsgiverHelgedag && dag.kommerFra("Inntektsmelding") -> ArbeidsgiverHelgedag_IM
             dag is SykHelgedag && dag.kommerFra("Inntektsmelding") -> ArbeidsgiverHelgedag_IM

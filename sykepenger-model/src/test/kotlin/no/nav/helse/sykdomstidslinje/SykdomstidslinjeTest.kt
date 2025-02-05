@@ -17,7 +17,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.F
-import no.nav.helse.testhelpers.N
 import no.nav.helse.testhelpers.P
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.TestEvent
@@ -219,12 +218,6 @@ internal class SykdomstidslinjeTest {
         assertEquals(setOf(1.januar, 31.januar), resultat.inspektør.dager.filterValues { it !is Dag.UkjentDag }.keys)
         assertEquals(tidslinje1, tidslinje2 + resultat)
         assertEquals(Sykdomstidslinje(), tidslinje2 - tidslinje1)
-    }
-
-    @Test
-    fun `sykedager Nav`() {
-        val tidslinje = 7.N
-        assertEquals("NNNNNHH", tidslinje.toShortString())
     }
 
     @Test

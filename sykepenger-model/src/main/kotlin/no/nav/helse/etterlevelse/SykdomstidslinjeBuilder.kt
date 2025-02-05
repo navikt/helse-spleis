@@ -31,7 +31,6 @@ internal class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) {
             is Dag.ForeldetSykedag,
             is Dag.FriskHelgedag,
             is Dag.ProblemDag,
-            is Dag.SykedagNav,
             is Dag.UkjentDag -> null // gjør ingenting med disse
         }
     }

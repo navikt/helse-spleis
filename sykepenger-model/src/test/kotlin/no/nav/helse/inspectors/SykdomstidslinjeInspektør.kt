@@ -45,7 +45,6 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) {
                 is Feriedag,
                 is FriskHelgedag,
                 is Permisjonsdag,
-                is Dag.SykedagNav,
                 is UkjentDag -> set(dag, dag.dato, dag.kilde)
             }
         }

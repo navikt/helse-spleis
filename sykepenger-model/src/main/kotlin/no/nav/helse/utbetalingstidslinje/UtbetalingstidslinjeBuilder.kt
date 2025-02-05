@@ -194,14 +194,6 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
                     else helg(builder, dag.dato, dag.økonomi)
                 }
 
-                is Dag.SykedagNav -> {
-                    if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.økonomi)
-                    else when (dag.dato.erHelg()) {
-                        true -> helg(builder, dag.dato, dag.økonomi)
-                        false -> navDag(builder, dag.dato, dag.økonomi)
-                    }
-                }
-
                 is Dag.AndreYtelser -> {
                     // andreytelse-dagen er fridag hvis den overlapper med en agp-dag, eller om vedtaksperioden ikke har noen agp -- fordi andre ytelsen spiser opp alt
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, Økonomi.ikkeBetalt())
@@ -264,7 +256,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
     private fun erAGP(dato: LocalDate) = arbeidsgiverperiode.any { dato in it }
     private fun erAGPNavAnsvar(dato: LocalDate) = dagerNavOvertarAnsvar.any { dato in it }
     private fun arbeidsgiverperiodedag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi) {
-        if (erAGPNavAnsvar(dato))
+        if (erAGPNavAnsvar(dato) && !dato.erHelg())
             return builder.addArbeidsgiverperiodedagNav(dato, medInntektOrThrow(dato, økonomi))
         builder.addArbeidsgiverperiodedag(dato, medInntektHvisFinnes(dato, økonomi.ikkeBetalt()))
     }

@@ -48,7 +48,6 @@ sealed class Dag(
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
             when (venstre) {
                 is Sykedag,
-                is SykedagNav,
                 is SykHelgedag,
                 is Arbeidsgiverdag,
                 is ArbeidsgiverHelgedag -> venstre
@@ -56,7 +55,6 @@ sealed class Dag(
                 is Feriedag,
                 is Permisjonsdag -> when (høyre) {
                     is Sykedag,
-                    is SykedagNav,
                     is SykHelgedag,
                     is Arbeidsgiverdag,
                     is ArbeidsgiverHelgedag -> høyre
@@ -87,7 +85,6 @@ sealed class Dag(
                 is SykdomstidslinjeDagDto.ProblemDagDto -> ProblemDag.gjenopprett(dag)
                 is SykdomstidslinjeDagDto.SykHelgedagDto -> SykHelgedag.gjenopprett(dag)
                 is SykdomstidslinjeDagDto.SykedagDto -> Sykedag.gjenopprett(dag)
-                is SykdomstidslinjeDagDto.SykedagNavDto -> SykedagNav.gjenopprett(dag)
                 is SykdomstidslinjeDagDto.UkjentDagDto -> UkjentDag.gjenopprett(dag)
             }
         }
@@ -272,24 +269,6 @@ sealed class Dag(
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.SykHelgedagDto): SykHelgedag {
                 return SykHelgedag(
-                    dato = dto.dato,
-                    økonomi = Økonomi.sykdomsgrad(Prosentdel.gjenopprett(dto.grad)),
-                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
-                )
-            }
-        }
-    }
-
-    internal class SykedagNav(
-        dato: LocalDate,
-        val økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) : Dag(dato, kilde) {
-        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.SykedagNavDto(dato, kilde, økonomi.dto().grad)
-
-        internal companion object {
-            fun gjenopprett(dto: SykdomstidslinjeDagDto.SykedagNavDto): SykedagNav {
-                return SykedagNav(
                     dato = dto.dato,
                     økonomi = Økonomi.sykdomsgrad(Prosentdel.gjenopprett(dto.grad)),
                     kilde = Hendelseskilde.gjenopprett(dto.kilde)
