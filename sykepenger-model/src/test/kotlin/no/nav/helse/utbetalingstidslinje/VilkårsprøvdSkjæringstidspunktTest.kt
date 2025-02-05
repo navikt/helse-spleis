@@ -28,7 +28,7 @@ internal class VilkårsprøvdSkjæringstidspunktTest {
             deaktiverteArbeidsforhold = emptyList()
         )
 
-        vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(
+        vilkårsgrunnlag.medGhostOgTilkommenInntekt(
             mapOf(
                 "a1" to listOf(tidslinjeOf(16.AP, 8.NAV)),
                 "a2" to listOf(tidslinjeOf(20.UTELATE, 8.AP))
@@ -53,7 +53,7 @@ internal class VilkårsprøvdSkjæringstidspunktTest {
             deaktiverteArbeidsforhold = emptyList()
         )
 
-        vilkårsgrunnlag.medGhostOgNyeInntekterUnderveis(
+        vilkårsgrunnlag.medGhostOgTilkommenInntekt(
             mapOf(
                 "a1" to listOf(tidslinjeOf(16.AP, 8.NAV))
             )

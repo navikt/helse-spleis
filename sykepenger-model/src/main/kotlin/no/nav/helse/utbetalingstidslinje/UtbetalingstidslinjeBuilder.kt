@@ -21,53 +21,58 @@ internal class VilkårsprøvdSkjæringstidspunkt(
     val tilkommendeInntekter: List<NyInntektUnderveis>,
     val deaktiverteArbeidsforhold: List<String>
 ) {
-    private val inntekter = inntekter.associate { inntekt -> inntekt.organisasjonsnummer to inntekt.fastsattÅrsinntekt }
+    private val inntekterFraInntektsgrunnlaget = inntekter.associate { inntekt -> inntekt.organisasjonsnummer to inntekt.fastsattÅrsinntekt }
 
-    internal fun forArbeidsgiver(organisasjonsnummer: String): Inntekt? = inntekter[organisasjonsnummer]
+    internal fun forArbeidsgiver(organisasjonsnummer: String): Inntekt? = inntekterFraInntektsgrunnlaget[organisasjonsnummer]
 
-    internal fun medGhostOgNyeInntekterUnderveis(utbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
-        val tilkomne = utbetalingstidslinjer
-            .filterNot { (orgnr,_) -> orgnr in inntekter.keys }
+    internal fun medGhostOgTilkommenInntekt(utbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
+        val beregningsperiode = utbetalingstidslinjer.values.flatten().map { it.periode() }.periode()!!
+
+        // Lager Utbetalingstidslinje for alle arbeidsgivere fra inntektsgrunnlaget
+        val fraInntektsgrunnlag = inntekterFraInntektsgrunnlaget.mapValues { (orgnr, fastsattÅrsinntekt) ->
+            // De som ikke har noen beregnede utbetalingstidslinjer er ghost for hele beregningsperioden
+            val beregnedetidslinjer = utbetalingstidslinjer[orgnr] ?: emptyList()
+            val ghosttidslinje = ghosttidslinje(beregningsperiode, fastsattÅrsinntekt, `6G`, beregnedetidslinjer)
+            beregnedetidslinjer.fold(ghosttidslinje, Utbetalingstidslinje::plus)
+        }
+
+        val tilkomneV2 = nyeInntekterUnderveis(beregningsperiode)
+
+        // Lager Utbetalingstidslinje for arbeidsgiverne som ikke er i inntektsgrunnlaget (tilkommen)
+        // Her er ikke ghosttidslinjer aktuelt ettersom ghost må være i inntektsgrunnlaget (på skjæringstidspunktet)
+        val tilkomneV3 = utbetalingstidslinjer
+            .filterKeys { orgnr -> orgnr !in inntekterFraInntektsgrunnlaget.keys }
             .mapValues { (_, utbetalingstidslinjer) -> utbetalingstidslinjer.reduce(Utbetalingstidslinje::plus) }
             .filterValues { it.isNotEmpty() }
-        return nyeInntekterUnderveis(ghosttidslinjer(utbetalingstidslinjer)) + tilkomne
+
+        return fraInntektsgrunnlag + tilkomneV2 + tilkomneV3
     }
 
     private fun ghosttidslinje(beregningsperiode: Periode, fastsattÅrsinntekt: Inntekt, `6G`: Inntekt, arbeidsgiverlinjer: List<Utbetalingstidslinje>): Utbetalingstidslinje {
-        // fjerner perioder med registrert vedtaksperiode
-        val ghostperioder = arbeidsgiverlinjer.fold(listOf(beregningsperiode)) { result, linje ->
-            result.dropLast(1) + (result.lastOrNull()?.trim(linje.periode()) ?: emptyList())
-        }
+        val beregnedePerioderForArbeidsgiver = arbeidsgiverlinjer.map { it.periode() }
+        val ghostdagerForArbeidsgiver = beregningsperiode
+            .filterNot { dato -> beregnedePerioderForArbeidsgiver.any { beregnetPeriode -> dato in beregnetPeriode } }
 
-        // lager faktiske ghost-tidslinjer fra brudd-periodene
-        val ghosttidslinje = ghostperioder.map { periode ->
-            Utbetalingstidslinje.Builder().apply {
-                periode.forEach { dag ->
-                    if (dag.erHelg()) addFridag(dag, Økonomi.ikkeBetalt())
-                    else addArbeidsdag(
-                        dag, Økonomi.ikkeBetalt().inntekt(
+        // Lager en ghosttidslinje for de dagene i beregningsperioden arbeidsgiveren ikke er beregnet
+        return with(Utbetalingstidslinje.Builder()) {
+            ghostdagerForArbeidsgiver.forEach { dato ->
+                if (dato.erHelg()) addFridag(dato, Økonomi.ikkeBetalt())
+                else addArbeidsdag(
+                    dato = dato,
+                    økonomi = Økonomi.ikkeBetalt().inntekt(
                         aktuellDagsinntekt = fastsattÅrsinntekt,
                         beregningsgrunnlag = fastsattÅrsinntekt,
                         dekningsgrunnlag = INGEN,
                         `6G` = `6G`,
                         refusjonsbeløp = INGEN
                     )
-                    )
-                }
-            }.build()
+                )
+            }
+            build()
         }
-        return (ghosttidslinje + arbeidsgiverlinjer).fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
     }
 
-    private fun ghosttidslinjer(utbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
-        val beregningsperiode = utbetalingstidslinjer.values.flatten().map { it.periode() }.periode()!!
-        return inntekter
-            .mapValues { (orgnr, fastsattÅrsinntekt) -> ghosttidslinje(beregningsperiode, fastsattÅrsinntekt, `6G`, utbetalingstidslinjer[orgnr] ?: emptyList()) }
-            .filterValues { it.isNotEmpty() }
-    }
-
-    private fun nyeInntekterUnderveis(utbetalingstidslinjer: Map<String, Utbetalingstidslinje>): Map<String, Utbetalingstidslinje> {
-        val beregningsperiode = utbetalingstidslinjer.values.map { it.periode() }.periode()!!
+    private fun nyeInntekterUnderveis(beregningsperiode: Periode): Map<String, Utbetalingstidslinje> {
         val tilkommendeInntekterTidslinje = tilkommendeInntekter.associate { nyInntekt ->
             val tilkommenInntektTidslinje = Utbetalingstidslinje.Builder().apply {
                 beregningsperiode.forEach { dato ->
@@ -91,9 +96,7 @@ internal class VilkårsprøvdSkjæringstidspunkt(
             }.build()
             nyInntekt.orgnummer to tilkommenInntektTidslinje
         }
-        // hvis vi skal kunne ha søknad og tilkommen inntekt for en og samme arbeidsgiver så må vi
-        // gjøre en litt bedre merging enn Map.plus() her :)
-        return utbetalingstidslinjer + tilkommendeInntekterTidslinje
+        return tilkommendeInntekterTidslinje
     }
 
     data class FaktaavklartInntekt(
