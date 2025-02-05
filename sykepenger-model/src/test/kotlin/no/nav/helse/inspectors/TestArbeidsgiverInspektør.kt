@@ -169,5 +169,8 @@ internal class TestArbeidsgiverInspektør(
     internal fun refusjon(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).refusjonstidslinje
     internal fun refusjon(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).refusjonstidslinje
 
+    internal fun dagerNavOvertarAnsvar(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).dagerNavOvertarAnsvar
+    internal fun dagerNavOvertarAnsvar(vedtaksperiodeId: IdInnhenter) = vedtaksperioder.getValue(vedtaksperiodeId.id(orgnummer)).dagerNavOvertarAnsvar
+
     internal fun harFunksjonelleFeilEllerVerre(): Boolean = personInspektør.aktivitetslogg.harFunksjonelleFeilEllerVerre()
 }

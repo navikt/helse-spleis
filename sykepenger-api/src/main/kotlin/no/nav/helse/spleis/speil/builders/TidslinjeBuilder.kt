@@ -20,7 +20,11 @@ import no.nav.helse.spleis.speil.dto.UtbetalingsdagDTO
 import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagType
 import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagUtenGrad
 
-internal class SykdomstidslinjeBuilder(private val dto: SykdomstidslinjeDto, periode: PeriodeDto) {
+internal class SykdomstidslinjeBuilder(
+    private val dto: SykdomstidslinjeDto,
+    periode: PeriodeDto,
+    private val dagerNavOvertarAnsvar: List<PeriodeDto>
+) {
     private val tidslinje by lazy {
         (periode.fom.datesUntil(periode.tom.plusDays(1)).map { dag ->
             // Hvis vi ikke finner dagen på sykdomstidslinjen antar vi det er en arbeidsdag
@@ -112,7 +116,7 @@ internal class SykdomstidslinjeBuilder(private val dto: SykdomstidslinjeDto, per
 
             is SykdomstidslinjeDagDto.ArbeidsgiverdagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = SykdomstidslinjedagType.ARBEIDSGIVERDAG,
+                type = if (dagerNavOvertarAnsvar.any { (fom, tom) -> it.dato in (fom..tom) }) SykdomstidslinjedagType.SYKEDAG_NAV else SykdomstidslinjedagType.ARBEIDSGIVERDAG,
                 kilde = it.kilde.tilKildeDTO(),
                 grad = it.grad.prosent.roundToInt()
             )
@@ -161,7 +165,7 @@ internal class SykdomstidslinjeBuilder(private val dto: SykdomstidslinjeDto, per
 
             is SykdomstidslinjeDagDto.SykedagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = SykdomstidslinjedagType.SYKEDAG,
+                type = if (dagerNavOvertarAnsvar.any { (fom, tom) -> it.dato in (fom..tom) }) SykdomstidslinjedagType.SYKEDAG_NAV else SykdomstidslinjedagType.SYKEDAG,
                 kilde = it.kilde.tilKildeDTO(),
                 grad = it.grad.prosent.roundToInt()
             )

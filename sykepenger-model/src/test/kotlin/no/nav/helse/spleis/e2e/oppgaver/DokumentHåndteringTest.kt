@@ -389,7 +389,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             listOf(10.januar til 26.januar),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
-        assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
         assertFunksjonellFeil(RV_IM_8)
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)

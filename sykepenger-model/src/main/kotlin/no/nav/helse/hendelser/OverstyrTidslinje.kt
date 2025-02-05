@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.nesteDag
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.AAP
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Dagpenger
@@ -40,7 +41,7 @@ enum class Dagtype {
 class OverstyrTidslinje(
     meldingsreferanseId: UUID,
     organisasjonsnummer: String,
-    dager: List<ManuellOverskrivingDag>,
+    private val dager: List<ManuellOverskrivingDag>,
     opprettet: LocalDateTime,
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
@@ -60,10 +61,15 @@ class OverstyrTidslinje(
     var sykdomstidslinje: Sykdomstidslinje
         private set
 
+    private val dagerNavOvertarAnsvar = dager
+        .filter { it.type == Dagtype.SykedagNav }
+        .map { it.dato }
+
     init {
         sykdomstidslinje = dager.map {
             when (it.type) {
-                Dagtype.Sykedag -> Sykdomstidslinje.sykedager(
+                Dagtype.Sykedag,
+                 Dagtype.SykedagNav -> Sykdomstidslinje.sykedager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     grad = it.grad!!.prosent, // Sykedager må ha grad
@@ -98,13 +104,6 @@ class OverstyrTidslinje(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     grad = 100.prosent,
-                    kilde = kilde
-                )
-
-                Dagtype.SykedagNav -> Sykdomstidslinje.sykedagerNav(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
-                    grad = it.grad!!.prosent, // Sykedager må ha grad
                     kilde = kilde
                 )
 
@@ -161,6 +160,14 @@ class OverstyrTidslinje(
         periode = checkNotNull(sykdomstidslinje.periode()) {
             "Overstyr tidslinje må ha minst én overstyrt dag"
         }
+    }
+
+    internal fun dagerNavOvertarAnsvar(eksisterendeDagerNavOvertarAnsvar: List<Periode>): List<Periode> {
+        val utenDagerSaksbehandlerHarEndretPå = eksisterendeDagerNavOvertarAnsvar
+            .flatten()
+            .filterNot { dag -> dager.any { overstyrtDag -> dag == overstyrtDag.dato } }
+
+        return (utenDagerSaksbehandlerHarEndretPå + dagerNavOvertarAnsvar).grupperSammenhengendePerioder()
     }
 
     internal fun vurdertTilOgMed(dato: LocalDate) {

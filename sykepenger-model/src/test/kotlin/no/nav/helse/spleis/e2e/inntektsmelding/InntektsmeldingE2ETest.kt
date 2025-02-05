@@ -149,12 +149,16 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
         håndterInntektsmelding(listOf(2.desember.somPeriode(), 4.desember til 18.desember), førsteFraværsdag = 18.desember, begrunnelseForReduksjonEllerIkkeUtbetalt = "TidligereVirksomhet")
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertEquals(listOf(2.desember.somPeriode(), 4.desember til 6.desember), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertEquals(listOf(7.desember til 13.desember), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertEquals(listOf(18.desember.somPeriode()), inspektør.vedtaksperioder(3.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
 
-        assertVarsler(listOf(RV_IM_8, RV_IM_3), 3.vedtaksperiode.filter())
-        assertVarsler(listOf(RV_OS_2, RV_IM_8, RV_IM_4), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_OS_2, RV_IM_8, RV_IM_4, RV_IM_24), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_8), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_8), 3.vedtaksperiode.filter())
     }
 
     @Test
@@ -312,12 +316,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 5.februar,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
-        assertVarsel(Varselkode.RV_IM_25, 1.vedtaksperiode.filter())
-        assertForventetFeil(
-            forklaring = "Padder arbeidsgiverdager. Påvirker ikke beregningen, skjæringstidpunktet blir fortsatt riktig.",
-            nå = { assertEquals(1.februar til 28.februar, inspektør.periode(1.vedtaksperiode)) },
-            ønsket = { assertEquals(5.februar til 28.februar, inspektør.periode(1.vedtaksperiode)) }
-        )
+        assertVarsler(listOf(Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
+        assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertEquals(5.februar til 28.februar, inspektør.periode(1.vedtaksperiode))
     }
 
     @Test
@@ -421,9 +423,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 16.januar,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
         )
-        assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.size)
+        assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.size)
         assertEquals(AVSLUTTET_UTEN_VEDTAK, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.first().tilstand)
-        assertEquals(AVSLUTTET_UTEN_VEDTAK, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().tilstand)
     }
 
     @Test

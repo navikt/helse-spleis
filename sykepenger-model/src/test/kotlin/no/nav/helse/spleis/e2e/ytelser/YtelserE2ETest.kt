@@ -5,7 +5,6 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.UNG_PERSON_FNR_2018
-import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
@@ -127,7 +126,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Det er fotsatt mulig å bli en AUU som vil omgjøres om man kombinerer snax som begrunnelseForReduksjonEllerIkkeUtbetalt og andre ytelser`() {
+    fun `Det er ikke mulig å bli en AUU som vil omgjøres om man kombinerer snæx som begrunnelseForReduksjonEllerIkkeUtbetalt og andre ytelser`() {
         håndterSøknad(1.januar til 15.januar) // Denne må være kortere enn 16 dager
         nullstillTilstandsendringer()
         håndterInntektsmelding(
@@ -151,11 +150,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(forlengelse.map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
-        observatør.vedtaksperiodeVenter.clear()
-        assertUgyldigSituasjon("En vedtaksperiode i AVSLUTTET_UTEN_UTBETALING trenger hjelp fordi VIL_OMGJØRES!") { håndterSøknad(februar) }
-        val venter = observatør.vedtaksperiodeVenter.single { it.vedtaksperiodeId == 2.vedtaksperiode.id(a1) }
-        assertEquals("HJELP", venter.venterPå.venteårsak.hva)
-        assertEquals("VIL_OMGJØRES", venter.venterPå.venteårsak.hvorfor)
+        håndterSøknad(februar)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
 
     @Test

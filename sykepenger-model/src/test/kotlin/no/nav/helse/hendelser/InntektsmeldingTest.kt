@@ -224,11 +224,12 @@ internal class InntektsmeldingTest {
             førsteFraværsdag = 1.januar,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
-        val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), januar)?.sykdomstidslinje
+        val bit = dager.bitAvInntektsmelding(Aktivitetslogg(), januar)
         dager.valider(aktivitetslogg, januar, vedtaksperiodeId = UUID.randomUUID())
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
         aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IM_8)
-        assertNull(nyTidslinje)
+        assertEquals(0, bit?.sykdomstidslinje?.count())
+        assertEquals(listOf(1.januar.somPeriode()), bit?.dagerNavOvertarAnsvar)
     }
 
     @Test

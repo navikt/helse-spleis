@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
@@ -168,12 +168,10 @@ import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
 import no.nav.helse.person.refusjon.Refusjonsservitør
-import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
-import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverFaktaavklartInntekt
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -191,7 +189,6 @@ import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import no.nav.helse.økonomi.Økonomi
 
 internal class Vedtaksperiode private constructor(
     private val person: Person,
@@ -387,7 +384,8 @@ internal class Vedtaksperiode private constructor(
             AvventerVilkårsprøving,
             AvventerVilkårsprøvingRevurdering,
             TilUtbetaling -> {
-                oppdaterHistorikk(hendelse.metadata.behandlingkilde, overstyrTidslinje(hendelse.metadata.meldingsreferanseId), hendelse.sykdomstidslinje, aktivitetslogg) {
+                val dagerNavOvertarAnsvar = behandlinger.dagerNavOvertarAnsvar
+                oppdaterHistorikk(hendelse.metadata.behandlingkilde, overstyrTidslinje(hendelse.metadata.meldingsreferanseId), hendelse.sykdomstidslinje, aktivitetslogg, hendelse.dagerNavOvertarAnsvar(dagerNavOvertarAnsvar)) {
                     // ingen validering å gjøre :(
                 }
                 aktivitetslogg.info("Igangsetter overstyring av tidslinje")
@@ -552,7 +550,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterBitAvArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, arbeidsgiverperiodetidslinje: Sykdomstidslinje): Revurderingseventyr {
         registrerKontekst(aktivitetslogg)
-        val bitAvArbeidsgiverperiode = BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, arbeidsgiverperiodetidslinje)
+        val bitAvArbeidsgiverperiode = BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, arbeidsgiverperiodetidslinje, emptyList())
         when (tilstand) {
             AvventerInntektsmelding,
             AvsluttetUtenUtbetaling,
@@ -761,20 +759,12 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun sykNavBit(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, perioderNavUtbetaler: List<Periode>): BitAvArbeidsgiverperiode? {
-        val sykdomstidslinje = perioderNavUtbetaler.flatMap { periodeNavUtbetaler ->
-            if (!periodeNavUtbetaler.overlapperMed(this.periode)) emptyList()
-            else periodeNavUtbetaler.subset(this.periode).map { dato ->
-                val grad = when (val dag = sykdomstidslinje[dato]) {
-                    is Dag.Sykedag -> dag.økonomi
-                    is Dag.ForeldetSykedag -> dag.økonomi
-                    is Dag.SykHelgedag -> dag.økonomi
-                    else -> Økonomi.sykdomsgrad(100.prosent)
-                }.grad
-                Sykdomstidslinje.sykedagerNav(dato, dato, grad, Hendelseskilde("Inntektsmelding", arbeidsgiveropplysninger.metadata.meldingsreferanseId, arbeidsgiveropplysninger.metadata.innsendt))
-            }
-        }.merge()
-        if (sykdomstidslinje.periode() == null) return null
-        return BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, sykdomstidslinje)
+        val dagerNavOvertarAnsvar = perioderNavUtbetaler
+            .filter { it.overlapperMed(this.periode) }
+            .map { it.subset(this.periode) }
+
+        if (dagerNavOvertarAnsvar.isEmpty()) return null
+        return BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, Sykdomstidslinje(), dagerNavOvertarAnsvar)
     }
 
     private fun <T> dokumentsporingFraArbeidsgiveropplysning(hendelse: T, dokumentsporing: (meldingsreferanseId: UUID) -> Dokumentsporing) where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
@@ -856,7 +846,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg.info("Forkaster egenmeldinger oppgitt i sykmelding etter at arbeidsgiverperiode fra inntektsmeldingen er håndtert: $egenmeldingsperioder")
             egenmeldingsperioder = emptyList()
         }
-        oppdaterHistorikk(hendelse.metadata.behandlingkilde, inntektsmeldingDager(hendelse.metadata.meldingsreferanseId), bit.sykdomstidslinje, aktivitetslogg, validering = validering)
+        oppdaterHistorikk(hendelse.metadata.behandlingkilde, inntektsmeldingDager(hendelse.metadata.meldingsreferanseId), bit.sykdomstidslinje, aktivitetslogg, bit.dagerNavOvertarAnsvar, validering = validering)
     }
 
     internal fun håndterHistorikkFraInfotrygd(
@@ -1254,19 +1244,21 @@ internal class Vedtaksperiode private constructor(
         dokumentsporing: Dokumentsporing,
         hendelseSykdomstidslinje: Sykdomstidslinje,
         aktivitetslogg: IAktivitetslogg,
+        dagerNavOvertarAnsvar: List<Periode>? = null,
         validering: () -> Unit
     ) {
         val haddeFlereSkjæringstidspunkt = behandlinger.harFlereSkjæringstidspunkt()
         behandlinger.håndterEndring(
-            person,
-            arbeidsgiver,
-            behandlingkilde,
-            dokumentsporing,
-            hendelseSykdomstidslinje,
-            aktivitetslogg,
-            person.beregnSkjæringstidspunkt(),
-            arbeidsgiver.beregnArbeidsgiverperiode(),
-            validering
+            person = person,
+            arbeidsgiver = arbeidsgiver,
+            behandlingkilde = behandlingkilde,
+            dokumentsporing = dokumentsporing,
+            hendelseSykdomstidslinje = hendelseSykdomstidslinje,
+            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
+            aktivitetslogg = aktivitetslogg,
+            beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
+            beregnArbeidsgiverperiode = arbeidsgiver.beregnArbeidsgiverperiode(),
+            validering = validering
         )
         if (!haddeFlereSkjæringstidspunkt && behandlinger.harFlereSkjæringstidspunkt()) {
             aktivitetslogg.varsel(RV_IV_11)
@@ -1797,11 +1789,11 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiver.arbeidsgiverperiodeInkludertForkastet(periode, sykdomstidslinje)
 
     private fun skalBehandlesISpeil(): Boolean {
-        return forventerInntekt()
+        return forventerInntekt() || behandlinger.navOvertarAnsvar()
     }
 
     private fun skalOmgjøres(): Boolean {
-        return forventerInntekt()
+        return forventerInntekt() || behandlinger.navOvertarAnsvar()
     }
 
     private fun forventerInntekt(): Boolean {
@@ -3245,11 +3237,10 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ) {
             vedtaksperiode.håndterDager(dager, aktivitetslogg)
-            if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) {
-                if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, aktivitetslogg))
-                    return vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
-                return vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, aktivitetslogg, lagUtbetalingstidslinje(vedtaksperiode))
-            }
+
+            if (!aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
+            if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, aktivitetslogg)) return
+            vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
@@ -3711,6 +3702,7 @@ internal data class VedtaksperiodeView(
 ) {
     val sykdomstidslinje = behandlinger.behandlinger.last().endringer.last().sykdomstidslinje
     val refusjonstidslinje = behandlinger.behandlinger.last().endringer.last().refusjonstidslinje
+    val dagerNavOvertarAnsvar = behandlinger.behandlinger.last().endringer.last().dagerNavOvertarAnsvar
 }
 
 private val HendelseMetadata.behandlingkilde
