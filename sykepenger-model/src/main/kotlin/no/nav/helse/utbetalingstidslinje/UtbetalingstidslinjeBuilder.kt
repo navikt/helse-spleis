@@ -26,7 +26,11 @@ internal class VilkårsprøvdSkjæringstidspunkt(
     internal fun forArbeidsgiver(organisasjonsnummer: String): Inntekt? = inntekter[organisasjonsnummer]
 
     internal fun medGhostOgNyeInntekterUnderveis(utbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
-        return nyeInntekterUnderveis(ghosttidslinjer(utbetalingstidslinjer))
+        val tilkomne = utbetalingstidslinjer
+            .filterNot { (orgnr,_) -> orgnr in inntekter.keys }
+            .mapValues { (_, utbetalingstidslinjer) -> utbetalingstidslinjer.reduce(Utbetalingstidslinje::plus) }
+            .filterValues { it.isNotEmpty() }
+        return nyeInntekterUnderveis(ghosttidslinjer(utbetalingstidslinjer)) + tilkomne
     }
 
     private fun ghosttidslinje(beregningsperiode: Periode, fastsattÅrsinntekt: Inntekt, `6G`: Inntekt, arbeidsgiverlinjer: List<Utbetalingstidslinje>): Utbetalingstidslinje {

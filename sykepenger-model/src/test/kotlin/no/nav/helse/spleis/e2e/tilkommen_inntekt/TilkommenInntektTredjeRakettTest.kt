@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.tilkommen_inntekt
 
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
@@ -44,16 +43,7 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
             assertUgyldigSituasjon("peker på søknaden") {
                 håndterYtelser(2.vedtaksperiode)
             }
-            assertForventetFeil(
-                "har ikke hensyntatt tilkommen inntekt på utbetalingstidslinjen ennå",
-                nå = {
-                    assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431)
-                },
-                ønsket = {
-                    assertUtbetalingsbeløp(2.vedtaksperiode, 1381, 1431)
-                }
-            )
-
+            assertUtbetalingsbeløp(2.vedtaksperiode, 1381, 1431)
         }
     }
 }
