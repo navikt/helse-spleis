@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.person.beløp.Dag as Beløpstidslinjedag
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
@@ -129,34 +128,31 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
         error("Har ingen refusjonsopplysninger på vilkårsgrunnlag for utbetalingsdag $dato")
     }
 
-    private fun refusjonsbeløp(dato: LocalDate, refusjon: Beløpstidslinjedag, aktuellDagsinntekt: Inntekt, refusjonsopplysningFinnesIkkeStrategi: (LocalDate, Inntekt) -> Inntekt): Inntekt {
-        val refusjonFraBehandling = refusjon.takeIf { it is Beløpsdag }?.beløp
+    private fun refusjonsbeløp(dato: LocalDate, aktuellDagsinntekt: Inntekt, refusjonsopplysningFinnesIkkeStrategi: (LocalDate, Inntekt) -> Inntekt): Inntekt {
+        val refusjonFraBehandling = refusjonstidslinje[dato].takeIf { it is Beløpsdag }?.beløp
         return refusjonFraBehandling ?: refusjonsopplysningFinnesIkkeStrategi(dato, aktuellDagsinntekt)
     }
 
     internal fun medInntektHvisFinnes(
         dato: LocalDate,
         økonomi: Økonomi,
-        regler: ArbeidsgiverRegler,
-        refusjon: Beløpstidslinjedag // TODO: hvorfor tar vi inne denne, når vi har funksjonen over
+        regler: ArbeidsgiverRegler
     ): Økonomi {
-        return medInntekt(dato, økonomi, regler, refusjon, lagDefaultRefusjonsbeløpHvisMangler)
+        return medInntekt(dato, økonomi, regler, lagDefaultRefusjonsbeløpHvisMangler)
     }
 
-    internal fun medInntektOrThrow(
+    private fun medInntektOrThrow(
         dato: LocalDate,
         økonomi: Økonomi,
         regler: ArbeidsgiverRegler,
-        refusjon: Beløpstidslinjedag,
     ): Økonomi {
-        return medInntekt(dato, økonomi, regler, refusjon, krevRefusjonsbeløpHvisMangler)
+        return medInntekt(dato, økonomi, regler, krevRefusjonsbeløpHvisMangler)
     }
 
     private fun medInntekt(
         dato: LocalDate,
         økonomi: Økonomi,
         regler: ArbeidsgiverRegler,
-        refusjon: Beløpstidslinjedag,
         refusjonsopplysningFinnesIkkeStrategi: (LocalDate, Inntekt) -> Inntekt
     ): Økonomi {
         val aktuellDagsinntekt = inntektstidslinje[dato]
@@ -165,7 +161,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
             beregningsgrunnlag = fastsattÅrsinntekt ?: INGEN,
             dekningsgrunnlag = aktuellDagsinntekt * regler.dekningsgrad(),
             `6G` = if (dato < skjæringstidspunkt) INGEN else `6G`,
-            refusjonsbeløp = refusjonsbeløp(dato, refusjon, aktuellDagsinntekt, refusjonsopplysningFinnesIkkeStrategi)
+            refusjonsbeløp = refusjonsbeløp(dato, aktuellDagsinntekt, refusjonsopplysningFinnesIkkeStrategi)
         )
     }
 
@@ -227,7 +223,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
 
                 is Dag.ForeldetSykedag -> {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.økonomi)
-                    else builder.addForeldetDag(dag.dato, medInntektHvisFinnes(dag.dato, dag.økonomi, regler, refusjonstidslinje[dag.dato]))
+                    else builder.addForeldetDag(dag.dato, medInntektHvisFinnes(dag.dato, dag.økonomi, regler))
                 }
 
                 is Dag.ArbeidIkkeGjenopptattDag -> {
@@ -265,27 +261,27 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
     private fun erAGPNavAnsvar(dato: LocalDate) = dagerNavOvertarAnsvar.any { dato in it }
     private fun arbeidsgiverperiodedag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi) {
         if (erAGPNavAnsvar(dato))
-            return builder.addArbeidsgiverperiodedagNav(dato, medInntektOrThrow(dato, økonomi, regler, refusjonstidslinje[dato]))
-        builder.addArbeidsgiverperiodedag(dato, medInntektHvisFinnes(dato, økonomi.ikkeBetalt(), regler, refusjonstidslinje[dato]))
+            return builder.addArbeidsgiverperiodedagNav(dato, medInntektOrThrow(dato, økonomi, regler))
+        builder.addArbeidsgiverperiodedag(dato, medInntektHvisFinnes(dato, økonomi.ikkeBetalt(), regler))
     }
 
     private fun avvistDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi, begrunnelse: Begrunnelse) {
-        builder.addAvvistDag(dato, medInntektHvisFinnes(dato, økonomi, regler, refusjonstidslinje[dato]), listOf(begrunnelse))
+        builder.addAvvistDag(dato, medInntektHvisFinnes(dato, økonomi, regler), listOf(begrunnelse))
     }
 
     private fun helg(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi) {
-        builder.addHelg(dato, medInntektHvisFinnes(dato, økonomi.ikkeBetalt(), regler, refusjonstidslinje[dato]))
+        builder.addHelg(dato, medInntektHvisFinnes(dato, økonomi.ikkeBetalt(), regler))
     }
 
     private fun navDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi) {
-        builder.addNAVdag(dato, medInntektOrThrow(dato, økonomi, regler, refusjonstidslinje[dato]))
+        builder.addNAVdag(dato, medInntektOrThrow(dato, økonomi, regler))
     }
 
     private fun fridag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
-        builder.addFridag(dato, medInntektHvisFinnes(dato, Økonomi.ikkeBetalt(), regler, refusjonstidslinje[dato]))
+        builder.addFridag(dato, medInntektHvisFinnes(dato, Økonomi.ikkeBetalt(), regler))
     }
 
     private fun arbeidsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
-        builder.addArbeidsdag(dato, medInntektHvisFinnes(dato, Økonomi.ikkeBetalt(), regler, refusjonstidslinje[dato]))
+        builder.addArbeidsdag(dato, medInntektHvisFinnes(dato, Økonomi.ikkeBetalt(), regler))
     }
 }
