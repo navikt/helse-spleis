@@ -21,7 +21,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiodeTest {
     @Test
     fun `setter inntekt på økonomi`() {
         val utbetalingstidslinjeBuilderVedtaksperiode = utbetalingstidslinjeBuilderVedtaksperiode()
-        val økonomi: Økonomi = utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker)
+        val økonomi: Økonomi = utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt())
         assertEquals(21000.månedlig, økonomi.inspektør.aktuellDagsinntekt)
     }
 
@@ -29,7 +29,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiodeTest {
     fun `setter inntekt på økonomi om vurdering ikke er ok`() {
         val inntekt = 21000.månedlig
         val utbetalingstidslinjeBuilderVedtaksperiode = utbetalingstidslinjeBuilderVedtaksperiode()
-        val økonomi: Økonomi = utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker)
+        val økonomi: Økonomi = utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt())
         assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
     }
 
@@ -37,8 +37,8 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiodeTest {
     fun `henter fastsatt inntekt selv om det er oppgitt inntektsendringer på skjæringstidspunktet`() {
         val inntekt = 21000.månedlig
         val utbetalingstidslinjeBuilderVedtaksperiode = utbetalingstidslinjeBuilderVedtaksperiode(inntektsendringer = Avsender.SYKMELDT.beløpstidslinje(1.januar til 2.januar, inntekt * 2))
-        val inntekt1 = utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker).inspektør.aktuellDagsinntekt
-        val inntekt2 = utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(2.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker).inspektør.aktuellDagsinntekt
+        val inntekt1 = utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt()).inspektør.aktuellDagsinntekt
+        val inntekt2 = utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(2.januar, Økonomi.ikkeBetalt()).inspektør.aktuellDagsinntekt
         assertEquals(inntekt, inntekt1)
         assertEquals(inntekt * 2, inntekt2)
     }
@@ -48,7 +48,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiodeTest {
         val utbetalingstidslinjeBuilderVedtaksperiode = utbetalingstidslinjeBuilderVedtaksperiode(fastsattÅrsinntekt = null)
 
         assertThrows<IllegalStateException> {
-            utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker)
+            utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt())
         }
     }
 
