@@ -6,14 +6,15 @@ import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.Toggle
+import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 22-13 ledd 3`
 import no.nav.helse.etterlevelse.`§ 8-9 ledd 1`
+import no.nav.helse.hendelser.Avsender.SYKMELDT
 import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
-import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
@@ -36,7 +37,6 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
-import no.nav.helse.ukedager
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel
@@ -66,7 +66,7 @@ class Søknad(
     )
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
-        avsender = Avsender.SYKMELDT,
+        avsender = SYKMELDT,
         innsendt = sendtTilNAVEllerArbeidsgiver,
         registrert = registrert,
         automatiskBehandling = false
@@ -107,10 +107,15 @@ class Søknad(
     internal fun tilkomneInntekter(): List<TilkommenInntekt> {
         return inntekterFraNyeArbeidsforhold.mapNotNull {
             val periode = it.fom til it.tom
-            val antallVirkedager = (it.fom til it.tom.nesteDag).ukedager()
+            val antallVirkedager = sykdomstidslinje.subset(periode)
+                .filterNot { dag -> dag is Dag.Feriedag || dag is Dag.Permisjonsdag }
+                .map(Dag::dato)
+                .filterNot(LocalDate::erHelg)
+                .count()
             if (antallVirkedager == 0) return@mapNotNull null
             val smurtBeløp = (it.råttBeløp / antallVirkedager).daglig
-            val tilkommenKilde = Kilde(metadata.meldingsreferanseId, Avsender.SYKMELDT, metadata.innsendt)
+            val tilkommenKilde = Kilde(metadata.meldingsreferanseId, SYKMELDT, metadata.innsendt)
+
             TilkommenInntekt(
                 orgnummer = it.orgnummer,
                 periode = periode,
