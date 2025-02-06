@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
@@ -2046,7 +2046,7 @@ internal class Vedtaksperiode private constructor(
             .mapValues { (arbeidsgiver, vedtaksperioder) ->
                 val fastsattÅrsinntekt = faktaavklarteInntekter.forArbeidsgiver(arbeidsgiver)
                 vedtaksperioder.map {
-                    it.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, grunnlagsdata.inntektsgrunnlag.`6G`)
+                    it.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, faktaavklarteInntekter.`6G`)
                 }
             }
         // nå vi må lage en ghost-tidslinje per arbeidsgiver for de som eksisterer i sykepengegrunnlaget.

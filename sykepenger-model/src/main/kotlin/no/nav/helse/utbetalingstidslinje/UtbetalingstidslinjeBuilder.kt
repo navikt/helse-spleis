@@ -16,7 +16,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Økonomi
 
 internal class VilkårsprøvdSkjæringstidspunkt(
-    private val `6G`: Inntekt,
+    internal val `6G`: Inntekt,
     inntekter: List<FaktaavklartInntekt>,
     val tilkommendeInntekter: List<NyInntektUnderveis>,
     val deaktiverteArbeidsforhold: List<String>
