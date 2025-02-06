@@ -27,19 +27,18 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal) : Compara
             subsumsjonslogg.block(GRENSE.toDouble())
         }
 
-        internal fun Collection<Pair<Prosentdel, Double>>.average(tilkommet: Double, total: Double): Prosentdel {
-            return map { it.first to it.second.toBigDecimal(mc) }.average(tilkommet.toBigDecimal(mc), total.toBigDecimal(mc))
+        internal fun Collection<Pair<Prosentdel, Double>>.average(total: Double): Prosentdel {
+            return map { it.first to it.second.toBigDecimal(mc) }.average(total.toBigDecimal(mc))
         }
 
-        private fun Collection<Pair<Prosentdel, BigDecimal>>.average(tilkommet: BigDecimal, total: BigDecimal): Prosentdel {
+        private fun Collection<Pair<Prosentdel, BigDecimal>>.average(total: BigDecimal): Prosentdel {
             require(total > BigDecimal.ZERO) {
                 "Kan ikke dele på 0"
             }
-            val teller = maxOf(BigDecimal.ZERO, this.sumOf { it.first.brøkdel.multiply(it.second, mc) } - tilkommet)
-            val totalInntektstapGrad = teller.divide(total, mc).coerceAtMost(BigDecimal.ONE)
-            return Prosentdel(totalInntektstapGrad)
+            val teller = this.sumOf { it.first.not().brøkdel.multiply(it.second, mc) }
+            val totalInntektsbevaringsgrad = teller.divide(total, mc).coerceAtMost(BigDecimal.ONE)
+            return Prosentdel(totalInntektsbevaringsgrad).not()
         }
-
         val Number.prosent get() = Prosentdel(this.toDouble().toBigDecimal(mc).divide(HUNDRE_PROSENT, mc))
 
         fun gjenopprett(dto: ProsentdelDto) = dto.prosent.prosent
