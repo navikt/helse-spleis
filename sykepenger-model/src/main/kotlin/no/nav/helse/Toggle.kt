@@ -39,9 +39,9 @@ class Toggle private constructor(enabled: Boolean) {
     internal operator fun plus(toggle: Toggle) = listOf(this, toggle)
 
     companion object {
-        val InntektsmeldingSomIkkeKommer = fraEnv("INNTEKTSMELDING_SOM_IKKEKOMMER", false)
+        val InntektsmeldingSomIkkeKommer = fraEnv("INNTEKTSMELDING_SOM_IKKE_KOMMER", false)
         val SendFeriepengeOppdrag = fraEnv("SEND_FERIEPENGEOPPDRAG", false) // Denne MÅ settes til false når man er ferdig å kjøre feriepenger. Ref. den mystiske feriepengejobben som startet av seg selv (?) 08.08.2024
-        val TilkommenInntektV3 = Toggle(false)
+        val TilkommenInntektV3 = fraEnv("TILKOMMEN_INNTEKT_V3", false)
 
         fun fraEnv(navn: String, defaultValue: Boolean) = Toggle(System.getenv(navn)?.lowercase()?.toBooleanStrictOrNull() ?: defaultValue)
         fun Iterable<Toggle>.enable(block: () -> Unit) {
