@@ -511,15 +511,15 @@ internal class ØkonomiTest {
         val a = 80.prosent.sykdomsgrad.inntekt(50000.månedlig, beregningsgrunnlag = 50000.månedlig, `6G` = `6G`)
         val b = 100.prosent.sykdomsgrad.inntekt(
             30000.månedlig,
-            beregningsgrunnlag = INGEN,
+            beregningsgrunnlag = INGEN, // <-- beregningsgrunnlag = INGEN er et klassisk tegn på tilkommen inntekt
             refusjonsbeløp = INGEN,
             `6G` = `6G`
         )
         val betalte = listOf(a, b).betal().also {
-            assertEquals(15, it.totalSykdomsgrad().toDouble().toInt())
+            assertEquals(87, it.totalSykdomsgrad().toDouble().toInt())
         }
-        assertUtbetaling(betalte[0], 344.0, 0.0)
-        assertUtbetaling(betalte[1], 0.0, 0.0)
+        assertUtbetaling(betalte[0], 1846.0, 0.0)
+        assertUtbetaling(betalte[1], 0.0, 45.0)
     }
 
     @Test
@@ -533,9 +533,9 @@ internal class ØkonomiTest {
             `6G` = `6G`
         )
         val betalte = listOf(a, b).betal().also {
-            assertEquals(0, it.totalSykdomsgrad().toDouble().toInt())
+            assertEquals(38, it.totalSykdomsgrad().toDouble().toInt())
         }
-        assertUtbetaling(betalte[0], 0.0, 0.0)
+        assertUtbetaling(betalte[0], 548.0, 0.0)
         assertUtbetaling(betalte[1], 0.0, 0.0)
     }
 
@@ -546,7 +546,7 @@ internal class ØkonomiTest {
         val b = 100.prosent.sykdomsgrad.inntekt(10000.månedlig, beregningsgrunnlag = INGEN, `6G` = `6G`)
         val betalte = listOf(a, b).betal()
         assertUtbetaling(betalte[0], 0.0, 0.0)
-        assertUtbetaling(betalte[1], 0.0, 0.0)
+        assertUtbetaling(betalte[1], 462.0, 969.0)
     }
 
     @Test

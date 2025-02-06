@@ -42,21 +42,15 @@ class Økonomi private constructor(
             return økonomiList.first().totalGrad
         }
 
+        private fun List<Økonomi>.aktuellDagsinntekt() = map { it.aktuellDagsinntekt }.summer()
         private fun List<Økonomi>.beregningsgrunnlag() = map { it.beregningsgrunnlag }.summer()
-        private fun List<Økonomi>.tilkommet() = filter { it.beregningsgrunnlag == INGEN }.map { it.aktuellDagsinntekt }.summer()
 
         private fun totalSykdomsgrad(økonomiList: List<Økonomi>, gradStrategi: (Økonomi) -> Prosentdel): Prosentdel {
-            val beregningsgrunnlag = økonomiList.beregningsgrunnlag()
-            if (beregningsgrunnlag == INGEN) {
+            val aktuellDagsinntekt = økonomiList.aktuellDagsinntekt()
+            if (aktuellDagsinntekt == INGEN) {
                 return (økonomiList.sumOf { gradStrategi(it).times(100.0) } / økonomiList.size).prosent
             }
-            val tilkommet = økonomiList.firstNotNullOfOrNull { it.grunnbeløpgrense }?.let { grunnbeløp ->
-                // Er det litt rart at vi må justerte den tilkomne inntekten med grunnbeløpet?
-                val sykepengegrunnlagBegrenset6G = minOf(beregningsgrunnlag, grunnbeløp)
-                val ratio = (sykepengegrunnlagBegrenset6G ratio beregningsgrunnlag)
-                if (ratio > 0.prosent) økonomiList.tilkommet() * ratio.resiprok() else INGEN
-            } ?: INGEN
-            val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { gradStrategi(it) to it.beregningsgrunnlag }, tilkommet, beregningsgrunnlag)
+            val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { gradStrategi(it) to it.aktuellDagsinntekt }, aktuellDagsinntekt)
             return totalgrad
         }
 
