@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.time.temporal.Temporal
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.SimuleringResultatDto
@@ -583,6 +583,10 @@ internal class TestPerson(
             personHendelsefabrikk.lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, overstyringer, hendelseId, tidsstempel)
                 .håndter(Person::håndter)
 
+
+        internal fun håndterUtbetalingshistorikk(vedtaksperiodeId: UUID) {
+            arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikk(vedtaksperiodeId).håndter(Person::håndter)
+        }
         internal fun håndterUtbetalingshistorikkEtterInfotrygdendring(
             utbetalinger: List<Infotrygdperiode> = listOf(),
             inntektshistorikk: List<Inntektsopplysning> = emptyList(),
