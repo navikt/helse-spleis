@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
@@ -315,7 +315,7 @@ internal class Vedtaksperiode private constructor(
         check(tilstand is Start)
         registrerKontekst(aktivitetslogg)
         aktivitetslogg.info("Håndterer tilkommen inntekt oppgitt på søknad")
-        oppdaterHistorikk(tilkommenInntekt.metadata.behandlingkilde, tilkommenInntekt.dokumentsporing, tilkommenInntekt.sykdomstidslinje, aktivitetslogg) {} // TODO: mer validering?
+        oppdaterHistorikk(tilkommenInntekt.metadata.behandlingkilde, tilkommenInntekt.dokumentsporing, tilkommenInntekt.sykdomstidslinje, aktivitetslogg) {}
         tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
     }
 

@@ -303,6 +303,9 @@ enum class Varselkode(
         val `Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader` = RV_SØ_42
         val `Arbeidsledigsøknad er lagt til grunn` = RV_SØ_43
 
+        val `Tilkommen inntekt som ikke støttes`= RV_IV_9
+        val `Tilkommen inntekt som støttes` = RV_SV_5
+
         fun IAktivitetslogg.varsel(varselkode: Varselkode, detaljer: String) {
             varsel(varselkode)
             info("${varselkode.name} detaljer: $detaljer")

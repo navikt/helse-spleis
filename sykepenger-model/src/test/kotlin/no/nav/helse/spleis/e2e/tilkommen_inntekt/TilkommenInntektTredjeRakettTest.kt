@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -45,6 +46,7 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
             assertUgyldigSituasjon("peker på søknaden") {
                 håndterYtelser(2.vedtaksperiode)
             }
+            assertVarsler(2.vedtaksperiode, Varselkode.`Tilkommen inntekt som støttes`)
             assertUtbetalingsbeløp(2.vedtaksperiode, 1382, 1431)
         }
     }
@@ -76,6 +78,7 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
             assertUgyldigSituasjon("peker på søknaden") {
                 håndterYtelser(2.vedtaksperiode)
             }
+            assertVarsler(2.vedtaksperiode, Varselkode.`Tilkommen inntekt som støttes`)
             assertUtbetalingsbeløp(2.vedtaksperiode, forventetArbeidsgiverbeløp = 2136, forventetArbeidsgiverRefusjonsbeløp = 4292)
         }
     }

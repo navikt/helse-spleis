@@ -26,6 +26,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøknad er lagt til grunn`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen`
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som ikke støttes`
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som støttes`
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
@@ -149,8 +151,9 @@ class Søknad(
 
     private fun validerTilkomneInntekter(aktivitetslogg: IAktivitetslogg) {
         if (inntekterFraNyeArbeidsforhold.isEmpty()) return
-        if (Toggle.TilkommenInntektV3.enabled) return
-        aktivitetslogg.funksjonellFeil(RV_IV_9)
+        // Varselet må legges på her slik at det blir på perioden som er til behandling, for perioden med tilkommen er jo en AUU
+        if (Toggle.TilkommenInntektV3.enabled) return aktivitetslogg.varsel(`Tilkommen inntekt som støttes`)
+        aktivitetslogg.funksjonellFeil(`Tilkommen inntekt som ikke støttes`)
     }
 
     private fun validerInntektskilder(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?) {
@@ -217,7 +220,7 @@ class Søknad(
     )
 
     class TilkommenInntekt(
-        orgnummer: String,
+        private val orgnummer: String,
         internal val periode: Periode,
         private val inntektstidslinje: Beløpstidslinje,
         internal val sykdomstidslinje: Sykdomstidslinje,
@@ -226,7 +229,13 @@ class Søknad(
         internal val behandlingsporing = Behandlingsporing.Arbeidsgiver(orgnummer)
         internal val dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId)
 
-        internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, arbeidsgiver: Arbeidsgiver, subsumsjonslogg: Subsumsjonslogg): Vedtaksperiode {
+        internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, arbeidsgiver: Arbeidsgiver, subsumsjonslogg: Subsumsjonslogg, eksisterendeVedtaksperioder: List<Periode>): Vedtaksperiode? {
+            val overlapp = eksisterendeVedtaksperioder.mapNotNull { it.overlappendePeriode(periode) }
+            if (overlapp.isNotEmpty()) {
+                aktivitetslogg.varsel(`Tilkommen inntekt som ikke støttes`)
+                aktivitetslogg.info("Tilkommen inntekt som ikke støttes: Eksisterende vedtaksperiode(r) ${overlapp.joinToString()} på $orgnummer overlapper med den tilkomne inntekten i $periode")
+                return null
+            }
             return Vedtaksperiode(
                 egenmeldingsperioder = emptyList(),
                 metadata = metadata,

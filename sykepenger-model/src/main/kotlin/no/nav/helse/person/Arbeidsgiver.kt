@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
@@ -65,7 +65,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_26
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_9
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -537,8 +536,7 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg: IAktivitetslogg
     ) {
         aktivitetslogg.kontekst(this)
-        if (vedtaksperioder.any { it.periode.overlapperMed(tilkommenInntekt.periode) }) return aktivitetslogg.funksjonellFeil(RV_IV_9)
-        val vedtaksperiode = tilkommenInntekt.lagVedtaksperiode(aktivitetslogg, person, this, subsumsjonslogg)
+        val vedtaksperiode = tilkommenInntekt.lagVedtaksperiode(aktivitetslogg, person, this, subsumsjonslogg, vedtaksperioder.map { it.periode }) ?: return
         registrerNyVedtaksperiode(vedtaksperiode)
         vedtaksperiode.håndterTilkommenInntekt(tilkommenInntekt, aktivitetslogg)
     }
