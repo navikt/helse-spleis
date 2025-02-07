@@ -5,6 +5,7 @@ import java.util.UUID
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
+import no.nav.helse.Toggle
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.BehandlingView
@@ -139,8 +140,16 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
         val søknadIder = hendelseIder.intersect(søknader.keys)
         søknadIder.forEach { søknadId ->
             val eier = søknader[søknadId]
-            if (eier == null) søknader[søknadId] = vedtaksperiodeId
-            else check(eier == vedtaksperiodeId) { "Både vedtaksperiode $eier og $vedtaksperiodeId peker på søknaden $søknadId" }
+            if (eier == null) {
+                søknader[søknadId] = vedtaksperiodeId
+                return@forEach
+            }
+            if (eier == vedtaksperiodeId) return@forEach
+            when (Toggle.TilkommenInntektV3.enabled) {
+                false -> error("Både vedtaksperiode $eier og $vedtaksperiodeId peker på søknaden $søknadId")
+                // TODO: tenk litt på dokumentsporing, vi har lovet flex at på sis-topicet tilhører ALDRI én søknad flere vedtaksperioder
+                true -> { println("TODO: TilkommenV3: Heeei!!! Fiks meg på en bedre måte en dette her da!!") }
+            }
         }
     }
 
