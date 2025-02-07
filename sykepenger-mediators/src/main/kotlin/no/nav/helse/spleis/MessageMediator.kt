@@ -259,7 +259,7 @@ internal class MessageMediator(
     }
 
     private fun severeErrorHandler(err: Exception, message: HendelseMessage) {
-        errorHandler("kritisk feil", err, message.toJson(), message.secureDiagnosticinfo())
+        errorHandler("kritisk feil (podden dør!!)", err, message.toJson(), message.secureDiagnosticinfo())
         throw err
     }
 
