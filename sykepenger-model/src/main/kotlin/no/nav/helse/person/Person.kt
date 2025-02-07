@@ -480,7 +480,6 @@ class Person private constructor(
 
     fun håndter(hendelse: Grunnbeløpsregulering, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler grunnbeløpsendring")
-        return // todo: midlertidig :)
         if (arbeidsgivere.håndter(hendelse, aktivitetslogg)) return håndterGjenoppta(hendelse, aktivitetslogg)
         observers.forEach { hendelse.sykefraværstilfelleIkkeFunnet(it) }
     }
