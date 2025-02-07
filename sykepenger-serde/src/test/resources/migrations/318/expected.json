@@ -309,7 +309,7 @@
                 "dato": "2018-01-28"
               },
               {
-                "type": "SYKEDAG",
+                "type": "FERIE",
                 "fom": null,
                 "tom": null,
                 "kilde": {
@@ -319,7 +319,7 @@
                 "dato": "2018-01-29"
               },
               {
-                "type": "SYKEDAG",
+                "type": "FERIE",
                 "fom": null,
                 "tom": null,
                 "kilde": {
@@ -329,7 +329,7 @@
                 "dato": "2018-01-30"
               },
               {
-                "type": "SYKEDAG",
+                "type": "FERIE",
                 "fom": null,
                 "tom": null,
                 "kilde": {
@@ -648,7 +648,7 @@
                 "dato": "2018-01-28"
               },
               {
-                "type": "SYKEDAG",
+                "type": "FERIE",
                 "fom": null,
                 "tom": null,
                 "kilde": {
@@ -658,7 +658,7 @@
                 "dato": "2018-01-29"
               },
               {
-                "type": "SYKEDAG",
+                "type": "FERIE",
                 "fom": null,
                 "tom": null,
                 "kilde": {
@@ -668,7 +668,7 @@
                 "dato": "2018-01-30"
               },
               {
-                "type": "SYKEDAG",
+                "type": "FERIE",
                 "fom": null,
                 "tom": null,
                 "kilde": {
@@ -686,6 +686,15 @@
               {
                 "type": "SYKEDAG",
                 "fom": "2018-01-01",
+                "tom": "2018-01-28",
+                "kilde": {
+                  "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
+                  "type": "Søknad"
+                }
+              },
+              {
+                "type": "FERIE",
+                "fom": "2018-01-29",
                 "tom": "2018-01-31",
                 "kilde": {
                   "id": "c549e36f-0c42-4702-a745-feafe4bf45a9",
@@ -977,7 +986,7 @@
                 "dato": "2018-01-28"
               },
               {
-                "type": "SYKEDAG",
+                "type": "FERIE",
                 "fom": null,
                 "tom": null,
                 "kilde": {
@@ -987,7 +996,7 @@
                 "dato": "2018-01-29"
               },
               {
-                "type": "SYKEDAG",
+                "type": "FERIE",
                 "fom": null,
                 "tom": null,
                 "kilde": {
@@ -997,7 +1006,7 @@
                 "dato": "2018-01-30"
               },
               {
-                "type": "SYKEDAG",
+                "type": "FERIE",
                 "fom": null,
                 "tom": null,
                 "kilde": {

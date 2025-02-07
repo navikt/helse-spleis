@@ -64,27 +64,31 @@ internal class V318FjerneSykNavSomSykdomstidslinjedagtype : JsonMigration(versio
             )
             .datoer()
             .map { (dato, dag) ->
-                val kilde = dag.path("kilde").somKilde()
-                val nyDagtype = when {
-                    kilde.type.lowercase().contains("inntektsmelding") -> {
-                        val dagFørSykNav = sykNavDager[dato]?.let { historikk ->
-                            // finner det siste historikk-innslaget som har registrert dagen med samme kilde
-                            val indeksTilSiste = historikk.indexOfLast { historiskDag -> historiskDag.kilde.id == kilde.id }
-                            // finner dagtypen forut før endringen
-                            historikk.drop(indeksTilSiste + 1).firstOrNull { historiskDag ->
-                                historiskDag.dagtype != "SYKEDAG_NAV"
+                if (dag.path("type").asText() != "SYKEDAG_NAV") {
+                    dag
+                } else {
+                    val kilde = dag.path("kilde").somKilde()
+                    val nyDagtype = when {
+                        kilde.type.lowercase().contains("inntektsmelding") -> {
+                            val dagFørSykNav = sykNavDager[dato]?.let { historikk ->
+                                // finner det siste historikk-innslaget som har registrert dagen med samme kilde
+                                val indeksTilSiste = historikk.indexOfLast { historiskDag -> historiskDag.kilde.id == kilde.id }
+                                // finner dagtypen forut før endringen
+                                historikk.drop(indeksTilSiste + 1).firstOrNull { historiskDag ->
+                                    historiskDag.dagtype != "SYKEDAG_NAV"
+                                }
+                            }
+                            if (dagFørSykNav == null) {
+                                "ARBEIDSGIVERDAG"
+                            } else {
+                                dag.replace("kilde", dagFørSykNav.node.path("kilde"))
+                                dagFørSykNav.dagtype
                             }
                         }
-                        if (dagFørSykNav == null) {
-                            "ARBEIDSGIVERDAG"
-                        } else {
-                            dag.replace("kilde", dagFørSykNav.node.path("kilde"))
-                            dagFørSykNav.dagtype
-                        }
+                        else -> "SYKEDAG"
                     }
-                    else -> "SYKEDAG"
+                    dag.put("type", nyDagtype)
                 }
-                dag.put("type", nyDagtype)
             }
 
         val nySykdomstidslinje = (sykdomstidslinje as ObjectNode)
