@@ -842,11 +842,10 @@ class Person private constructor(
         when (hendelse) {
             is Sykmelding -> { /* Sykmelding fører ikke til endringer i tiltander, så sender ikke signal etter håndtering av den */
             }
-
             else -> {
-                val nestemann = arbeidsgivere.nestemann() ?: return
-                val eventer = arbeidsgivere.venter(nestemann)
-                    .map { it.event() }
+                val eventer = arbeidsgivere.nestemann()?.let { nestemann ->
+                    arbeidsgivere.venter(nestemann).map { it.event() }
+                } ?: emptyList()
                 observers.forEach { it.vedtaksperioderVenter(eventer) }
             }
         }
