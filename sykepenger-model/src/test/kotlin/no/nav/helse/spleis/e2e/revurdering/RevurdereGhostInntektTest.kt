@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -185,7 +186,7 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             håndterUtbetalt()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            assertPeriode(17.mars til 31.mars, 1080.daglig)
+            assertPeriode(17.mars til 31.mars, 1080.daglig, vedtaksperiodeId = 2.vedtaksperiode)
             håndterOverstyrInntekt(
                 inntekt = 15000.månedlig,
                 skjæringstidspunkt = 1.januar,
@@ -207,7 +208,7 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             håndterUtbetalt()
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            assertPeriode(17.mars til 31.mars, 1080.daglig)
+            assertPeriode(17.mars til 31.mars, 1080.daglig, vedtaksperiodeId = 2.vedtaksperiode)
 
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
@@ -237,8 +238,8 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt) {
-        inspektør(orgnummer).sisteUtbetalingUtbetalingstidslinje()[dato].let {
+    private fun TestPerson.TestArbeidsgiver.assertDag(vedtaksperiodeId: UUID, dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt) {
+        inspektør(orgnummer).utbetalingstidslinjer(vedtaksperiodeId)[dato].let {
             if (it is Utbetalingsdag.NavHelgDag) return
             assertEquals(arbeidsgiverbeløp, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)
@@ -248,7 +249,8 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
     private fun TestPerson.TestArbeidsgiver.assertPeriode(
         periode: Periode,
         arbeidsgiverbeløp: Inntekt,
-        personbeløp: Inntekt = INGEN
+        personbeløp: Inntekt = INGEN,
+        vedtaksperiodeId: UUID = 1.vedtaksperiode
     ) =
-        periode.forEach { assertDag(it, arbeidsgiverbeløp, personbeløp) }
+        periode.forEach { assertDag(vedtaksperiodeId, it, arbeidsgiverbeløp, personbeløp) }
 }

@@ -153,7 +153,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
 
             håndterYtelser(1.vedtaksperiode)
 
-            assertEquals(0, inspektør.utbetaling(0).utbetalingstidslinje.inspektør.avvistDagTeller)
+            assertEquals(0, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistDagTeller)
         }
     }
 }

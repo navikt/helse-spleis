@@ -73,16 +73,16 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         }
         inspektør.utbetaling(1).also { utbetaling ->
             assertEquals(15741, utbetaling.nettobeløp)
-            utbetaling.utbetalingstidslinje.forEach { utbetalingsdag ->
-                assertEquals(INNTEKT, utbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
-                assertEquals(INGEN, utbetalingsdag.økonomi.inspektør.arbeidsgiverbeløp)
-            }
-            utbetaling.utbetalingstidslinje.subset(17.januar til 31.januar)
-                .filterNot { it.dato.erHelg() }
-                .forEach { utbetalingsdag ->
-                    assertEquals(1431.daglig, utbetalingsdag.økonomi.inspektør.personbeløp)
-                }
         }
+        inspektør.utbetalingstidslinjer(1.vedtaksperiode).forEach { utbetalingsdag ->
+            assertEquals(INNTEKT, utbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
+            assertEquals(INGEN, utbetalingsdag.økonomi.inspektør.arbeidsgiverbeløp)
+        }
+        inspektør.utbetalingstidslinjer(1.vedtaksperiode).subset(17.januar til 31.januar)
+            .filterNot { it.dato.erHelg() }
+            .forEach { utbetalingsdag ->
+                assertEquals(1431.daglig, utbetalingsdag.økonomi.inspektør.personbeløp)
+            }
     }
 
     @Test

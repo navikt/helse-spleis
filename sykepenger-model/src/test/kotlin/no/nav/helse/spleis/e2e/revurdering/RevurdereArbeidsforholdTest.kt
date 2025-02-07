@@ -290,7 +290,7 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            assertEquals(100, inspektør.utbetalinger(1.vedtaksperiode).last().utbetalingstidslinje[17.januar].økonomi.inspektør.totalGrad)
+            assertEquals(100, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].økonomi.inspektør.totalGrad)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
                 assertInntektsgrunnlag(a2, INGEN, forventetkilde = Arbeidstakerkilde.AOrdningen, deaktivert = true)
@@ -510,7 +510,7 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
     }
 
     private fun TestPerson.TestArbeidsgiver.assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt) {
-        inspektør(orgnummer).sisteUtbetalingUtbetalingstidslinje()[dato].let {
+        inspektør(orgnummer).utbetalingstidslinjer(1.vedtaksperiode)[dato].let {
             if (it is Utbetalingsdag.NavHelgDag) return
             assertEquals(arbeidsgiverbeløp, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)
@@ -520,7 +520,7 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
     private fun TestPerson.TestArbeidsgiver.assertPeriode(
         periode: Periode,
         arbeidsgiverbeløp: Inntekt,
-        personbeløp: Inntekt = Inntekt.INGEN
+        personbeløp: Inntekt = INGEN
     ) =
         periode.forEach { assertDag(it, arbeidsgiverbeløp, personbeløp) }
 }

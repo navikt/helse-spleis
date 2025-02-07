@@ -345,12 +345,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            val dagsatsFørstegangs =
-                inspektør.utbetaling(0).utbetalingstidslinje.inspektør.navdager.last().økonomi.inspektør.arbeidsgiverbeløp
+            val dagsatsFørstegangs = inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.last().økonomi.inspektør.arbeidsgiverbeløp
             assertEquals(1431.daglig, dagsatsFørstegangs)
             håndterYtelser(2.vedtaksperiode)
-            val dagsatsForlengelse =
-                inspektør.sisteUtbetaling().utbetalingstidslinje.inspektør.navdager.last().økonomi.inspektør.arbeidsgiverbeløp
+            val dagsatsForlengelse = inspektør.utbetalingstidslinjer(2.vedtaksperiode).inspektør.navdager.last().økonomi.inspektør.arbeidsgiverbeløp
             assertEquals(931.daglig, dagsatsForlengelse)
         }
     }

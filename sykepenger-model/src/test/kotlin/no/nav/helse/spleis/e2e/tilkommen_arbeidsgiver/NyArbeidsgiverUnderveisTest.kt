@@ -143,13 +143,11 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            inspektør.utbetaling(1).also { utbetalingInspektør ->
-                utbetalingInspektør.utbetalingstidslinje[1.januar].also { dag ->
-                    assertEquals(100, dag.økonomi.inspektør.totalGrad)
-                }
-                utbetalingInspektør.utbetalingstidslinje[10.januar].also { dag ->
-                    assertEquals(83, dag.økonomi.inspektør.totalGrad)
-                }
+            inspektør.utbetalingstidslinjer(1.vedtaksperiode)[1.januar].also { dag ->
+                assertEquals(100, dag.økonomi.inspektør.totalGrad)
+            }
+            inspektør.utbetalingstidslinjer(1.vedtaksperiode)[10.januar].also { dag ->
+                assertEquals(83, dag.økonomi.inspektør.totalGrad)
             }
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.also { vilkårsgrunnlagInspektør ->
                 assertEquals(INNTEKT, vilkårsgrunnlagInspektør.inntektsgrunnlag.inspektør.sykepengegrunnlag)

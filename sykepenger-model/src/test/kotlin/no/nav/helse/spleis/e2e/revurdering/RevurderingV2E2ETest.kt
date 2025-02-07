@@ -20,6 +20,7 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -113,10 +114,10 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar)
         forlengVedtak(mars)
         nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(19.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 19.januar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(19.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 19.januar, 0.0)
         assertDiff(-1431)
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
@@ -134,13 +135,13 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         forlengTilGodkjenning(februar)
         nullstillTilstandsendringer()
 
-        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
 
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
         val utbetalinger = inspektør.utbetalinger(2.vedtaksperiode)
         assertEquals(1, utbetalinger.size)
@@ -160,10 +161,10 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar)
         forlengVedtak(mars)
         nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(5.februar, 1431.0)
+        assertDag<Sykedag, NavDag>(2.vedtaksperiode, 5.februar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.februar, Feriedag)))
         håndterYtelser(2.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(5.februar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(2.vedtaksperiode, 5.februar, 0.0)
         assertDiff(-1431)
         assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
@@ -181,10 +182,10 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar)
         forlengVedtak(mars)
         nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(5.mars, 1431.0)
+        assertDag<Sykedag, NavDag>(3.vedtaksperiode, 5.mars, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.mars, Feriedag)))
         håndterYtelser(3.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(5.mars, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(3.vedtaksperiode, 5.mars, 0.0)
         assertDiff(-1431)
         assertVarsel(RV_UT_23, 3.vedtaksperiode.filter())
         håndterSimulering(3.vedtaksperiode)
@@ -202,14 +203,14 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar)
         forlengVedtak(mars)
         nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(31.januar, 1431.0)
-        assertDag<Sykedag, NavDag>(1.februar, 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 31.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(2.vedtaksperiode, 1.februar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Feriedag)))
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(31.januar, 0.0)
-        assertDag<Dag.Feriedag, Utbetalingsdag.UkjentDag>(1.februar, null, null)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 31.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.UkjentDag>(2.vedtaksperiode, 1.februar, null, null)
         assertDiff(-1431)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -241,12 +242,12 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdere dager i arbeidsgiverperioden på tidligere utbetaling`() {
         nyttVedtak(januar)
-        assertDag<Sykedag, ArbeidsgiverperiodeDag>(5.januar, 0.0)
+        assertDag<Sykedag, ArbeidsgiverperiodeDag>(1.vedtaksperiode, 5.januar, 0.0)
         nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
-        assertDag<Dag.Feriedag, ArbeidsgiverperiodeDag>(5.januar, 0.0)
+        assertDag<Dag.Feriedag, ArbeidsgiverperiodeDag>(1.vedtaksperiode, 5.januar, 0.0)
         assertDiff(0)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -257,10 +258,10 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
-        assertDag<Sykedag, ArbeidsgiverperiodeDag>(5.januar, 0.0)
+        assertDag<Sykedag, ArbeidsgiverperiodeDag>(1.vedtaksperiode, 5.januar, 0.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
-        assertDag<Dag.Feriedag, ArbeidsgiverperiodeDag>(5.januar, 0.0)
+        assertDag<Dag.Feriedag, ArbeidsgiverperiodeDag>(1.vedtaksperiode, 5.januar, 0.0)
         assertDiff(0)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -271,7 +272,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             val februarutbetaling = inspektør.utbetaling(1)
             assertEquals(revurdering.korrelasjonsId, januarutbetaling.korrelasjonsId)
             assertEquals(revurdering.korrelasjonsId, februarutbetaling.korrelasjonsId)
-            assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", revurdering.utbetalingstidslinje.toString().trim())
+            assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString().trim())
             assertEquals(januar, januarutbetaling.periode)
             assertEquals(1.januar til 28.februar, februarutbetaling.periode)
             assertEquals(januar, revurdering.periode)
@@ -304,7 +305,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(31.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 31.januar, 0.0)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -312,7 +313,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(10.februar, Feriedag)))
 
-        assertDag<Dag.Feriedag, Utbetalingsdag.UkjentDag>(10.februar, null, null)
+        assertDag<Dag.Feriedag, Utbetalingsdag.UkjentDag>(1.vedtaksperiode, 10.februar, null, null)
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING)
@@ -320,7 +321,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.april, Feriedag)))
 
-        assertDag<Dag.Feriedag, Utbetalingsdag.UkjentDag>(20.april, null, null)
+        assertDag<Dag.Feriedag, Utbetalingsdag.UkjentDag>(1.vedtaksperiode, 20.april, null, null)
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING)
@@ -332,12 +333,12 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         forlengVedtak(mars)
         nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(15.februar, 1431.0)
-        assertDag<Sykedag, NavDag>(19.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 19.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(2.vedtaksperiode, 15.februar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(15.februar, Feriedag)))
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(19.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 19.januar, 0.0)
         assertDiff(-1431)
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
@@ -346,7 +347,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
         håndterYtelser(2.vedtaksperiode)
         assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(15.februar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(2.vedtaksperiode, 15.februar, 0.0)
         assertDiff(-1431)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
@@ -357,15 +358,15 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdere nyere arbeidsgiverperiode så revurdere eldste`() {
         nyttVedtak(januar)
-        assertDag<Sykedag, NavDag>(19.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 19.januar, 1431.0)
         nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        assertDag<Sykedag, NavDag>(19.mars, 1431.0)
+        assertDag<Sykedag, NavDag>(2.vedtaksperiode, 19.mars, 1431.0)
         forlengVedtak(april)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.mars, Feriedag)))
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(19.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 19.januar, 0.0)
         assertDiff(-1431)
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
@@ -373,7 +374,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterYtelser(2.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(19.mars, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(2.vedtaksperiode, 19.mars, 0.0)
         assertDiff(-1431)
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 2.vedtaksperiode.filter())
 
@@ -390,10 +391,10 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(mars)
         nullstillTilstandsendringer()
 
-        assertDag<Sykedag, NavDag>(15.februar, 1431.0)
+        assertDag<Sykedag, NavDag>(3.vedtaksperiode, 15.februar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(15.februar, Feriedag)))
         håndterYtelser(3.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(15.februar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(3.vedtaksperiode, 15.februar, 0.0)
         assertDiff(-1431)
         assertVarsel(RV_UT_23, 3.vedtaksperiode.filter())
         håndterSimulering(3.vedtaksperiode)
@@ -409,7 +410,9 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             assertEquals(revurdering.korrelasjonsId, januar2utbetaling.korrelasjonsId)
             assertEquals(revurdering.korrelasjonsId, februarutbetaling.korrelasjonsId)
             assertEquals(revurdering.korrelasjonsId, marsutbetaling.korrelasjonsId)
-            assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNNAAFF AAAAAHH NNNFNHH NNNNNHH NNN", revurdering.utbetalingstidslinje.toString().trim())
+            assertEquals("PPPPPPP PPPPPPP PPNNNH", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString().trim())
+            assertEquals("H NNNNNHH NNN", inspektør.utbetalingstidslinjer(2.vedtaksperiode).toString().trim())
+            assertEquals("HH NNNFNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(3.vedtaksperiode).toString().trim())
             assertEquals(1.januar til 20.januar, januar1utbetaling.periode)
             assertEquals(januar, januar2utbetaling.periode)
             assertEquals(1.januar til 28.februar, februarutbetaling.periode)
@@ -437,8 +440,8 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             }
         }
 
-        assertDag<SykHelgedag, NavHelgDag>(21.januar, 0.0)
-        assertDag<Sykedag, NavDag>(19.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 19.januar, 1431.0)
+        assertDag<SykHelgedag, NavHelgDag>(2.vedtaksperiode, 21.januar, 0.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(21.januar, Feriedag)))
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Feriedag)))
 
@@ -460,8 +463,8 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
-        assertDag<Dag.Feriedag, Utbetalingsdag.UkjentDag>(21.januar, null, null)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(19.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 19.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.UkjentDag>(2.vedtaksperiode, 21.januar, null, null)
         assertDiff(-1431)
 
         håndterSimulering(1.vedtaksperiode)
@@ -554,11 +557,11 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(20.mars, 1431.0)
+        assertDag<Sykedag, NavDag>(2.vedtaksperiode, 20.mars, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.mars, Feriedag)))
         håndterYtelser(2.vedtaksperiode)
         assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(20.mars, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(2.vedtaksperiode, 20.mars, 0.0)
         assertDiff(-1431)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Feriedag)))
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
@@ -570,10 +573,10 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(20.mars, 1431.0)
+        assertDag<Sykedag, NavDag>(2.vedtaksperiode, 20.mars, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.mars, Feriedag)))
         håndterYtelser(2.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(20.mars, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(2.vedtaksperiode, 20.mars, 0.0)
         assertDiff(-1431)
         assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
@@ -587,10 +590,10 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         forlengVedtak(februar)
         nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(5.februar, 1431.0)
+        assertDag<Sykedag, NavDag>(2.vedtaksperiode, 5.februar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.februar, Feriedag)))
         håndterYtelser(2.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(5.februar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(2.vedtaksperiode, 5.februar, 0.0)
         assertDiff(-1431)
         assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
@@ -603,10 +606,10 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     fun `revudering påvirkes ikke av gjenoppta behandling ved avsluttet uten utbetaling`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
-        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
@@ -637,11 +640,11 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdert periode til utbetaling blir revurdert`() {
         nyttVedtak(januar)
-        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -657,11 +660,11 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdering på tidligere skjæringstidspunkt mens nyere førstegangsbehandling står i avventer simulering`() {
         nyttVedtak(januar)
-        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
         tilSimulering(mars, 100.prosent, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
@@ -676,11 +679,11 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdering på tidligere skjæringstidspunkt mens nyere førstegangsbehandling står i avventer godkjenning`() {
         nyttVedtak(januar)
-        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
         tilGodkjenning(mars, 100.prosent, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
@@ -694,12 +697,12 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdering på tidligere skjæringstidspunkt mens nyere forlengelse står i avventer simulering`() {
         nyttVedtak(januar)
-        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
         nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         forlengTilSimulering(april, 100.prosent)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
@@ -717,12 +720,12 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdering på tidligere skjæringstidspunkt mens nyere forlengelse står i avventer godkjenning`() {
         nyttVedtak(januar)
-        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
         nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         forlengTilGodkjenning(april, 100.prosent)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
@@ -742,10 +745,10 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(19.mars, 1431.0)
+        assertDag<Sykedag, NavDag>(2.vedtaksperiode, 19.mars, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.mars, Feriedag)))
         håndterYtelser(2.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(19.mars, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(2.vedtaksperiode, 19.mars, 0.0)
         assertDiff(-1431)
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 2.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
@@ -764,10 +767,10 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(19.mars, 1431.0)
+        assertDag<Sykedag, NavDag>(2.vedtaksperiode, 19.mars, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.mars, Feriedag)))
         håndterYtelser(2.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(19.mars, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(2.vedtaksperiode, 19.mars, 0.0)
         assertDiff(-1431)
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
@@ -785,12 +788,13 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `fire skjæringstidspunkter der første og siste blir revurdert - kun skjæringstidspunkter med endring i utbetaling skal utbetales`() {
         nyttVedtak(januar)
-        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
         nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nyttVedtak(mai, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
         nyttVedtak(juli, vedtaksperiodeIdInnhenter = 4.vedtaksperiode)
 
         nullstillTilstandsendringer()
+        assertDag<Sykedag, NavDag>(4.vedtaksperiode, 17.juli, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
@@ -799,7 +803,6 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(4.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
         nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(17.juli, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.juli, Feriedag)))
 
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -809,7 +812,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
@@ -845,7 +848,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterYtelser(4.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.juli, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(4.vedtaksperiode, 17.juli, 0.0)
         assertDiff(-1431)
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 4.vedtaksperiode.filter())
         håndterSimulering(4.vedtaksperiode)
@@ -861,12 +864,13 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `fire skjæringstidspunkter der første og siste blir revurdert - kun skjæringstidspunkter med endring i utbetaling skal utbetales - første skjæringstidspunkt har forlengelse`() {
         nyttVedtak(1.desember(2017) til 31.desember(2017))
-        assertDag<Sykedag, NavDag>(19.desember(2017), 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 19.desember(2017), 1431.0)
         forlengVedtak(januar)
         nyttVedtak(mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
         nyttVedtak(mai, vedtaksperiodeIdInnhenter = 4.vedtaksperiode)
         nyttVedtak(juli, vedtaksperiodeIdInnhenter = 5.vedtaksperiode)
 
+        assertDag<Sykedag, NavDag>(5.vedtaksperiode, 17.juli, 1431.0)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.desember(2017), Feriedag)))
 
@@ -877,7 +881,6 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(5.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
         nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(17.juli, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.juli, Feriedag)))
 
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -888,7 +891,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(19.desember(2017), 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 19.desember(2017), 0.0)
         assertDiff(-1431)
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
@@ -992,18 +995,18 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdere frem og tilbake mellom feriedag og sykedag hvor første overstyring blir utbetalt`() {
         nyttVedtak(januar)
-        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Sykedag, 100)))
         håndterYtelser(1.vedtaksperiode)
-        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
+        assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
         assertDiff(1431)
     }
 
@@ -1081,12 +1084,10 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertVarsler(listOf(RV_VV_4, RV_UT_23), 2.vedtaksperiode.filter())
         assertEquals(19, inspektør.sykdomstidslinje.inspektør.grader[17.januar])
         assertEquals(19, inspektør.sykdomstidslinje.inspektør.grader[16.februar])
-        val utbetalingstidslinje = inspektør.utbetalingUtbetalingstidslinje(3)
-        assertEquals(1.januar til 28.februar, utbetalingstidslinje.periode())
-        utbetalingstidslinje[17.januar].økonomi.inspektør.also { økonomi ->
+        inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].økonomi.inspektør.also { økonomi ->
             assertEquals(19, økonomi.totalGrad)
         }
-        utbetalingstidslinje[16.februar].økonomi.inspektør.also { økonomi ->
+        inspektør.utbetalingstidslinjer(2.vedtaksperiode)[16.februar].økonomi.inspektør.also { økonomi ->
             assertEquals(19, økonomi.totalGrad)
         }
     }
@@ -1113,11 +1114,11 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         }
     }
 
-    private inline fun <reified D : Dag, reified UD : Utbetalingsdag> assertDag(dato: LocalDate, arbeidsgiverbeløp: Double?, personbeløp: Double? = 0.0) {
+    private inline fun <reified D : Dag, reified UD : Utbetalingsdag> assertDag(vedtaksperiodeId: IdInnhenter, dato: LocalDate, arbeidsgiverbeløp: Double?, personbeløp: Double? = 0.0) {
         inspektør.sykdomshistorikk.sykdomstidslinje()[dato].let {
             assertTrue(it is D) { "Forventet at $dato er ${D::class.simpleName} men var ${it::class.simpleName}" }
         }
-        inspektør.sisteUtbetalingUtbetalingstidslinje()[dato].let {
+        inspektør.utbetalingstidslinjer(vedtaksperiodeId)[dato].let {
             assertTrue(it is UD) { "Forventet at $dato er ${UD::class.simpleName} men var ${it::class.simpleName}" }
             assertEquals(arbeidsgiverbeløp?.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp?.daglig, it.økonomi.inspektør.personbeløp)

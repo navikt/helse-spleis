@@ -336,8 +336,6 @@ internal class UtbetalingTest {
         val utbetaling1Inspektør = utbetaling1.inspektør
         val utbetaling2Inspektør = utbetaling2.inspektør
 
-        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNNANHH NNNNNHH NNNNNHH NNNNNHH NNNAAHH NNNNNHH NNNNNHH NNNNNHH NNNNNH", utbetaling1Inspektør.utbetalingstidslinje.toString())
-        assertEquals(1.januar til 31.mars, utbetaling1Inspektør.utbetalingstidslinje.periode())
         assertEquals(3, utbetaling1Inspektør.arbeidsgiverOppdrag.size)
         utbetaling1Inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
             assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
@@ -360,8 +358,6 @@ internal class UtbetalingTest {
 
         assertEquals(utbetaling1Inspektør.korrelasjonsId, utbetaling2Inspektør.korrelasjonsId)
         assertEquals(utbetaling1Inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetaling2Inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
-        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", utbetaling2Inspektør.utbetalingstidslinje.toString())
-        assertEquals(1.januar til 31.januar, utbetaling2Inspektør.utbetalingstidslinje.periode())
         assertEquals(1, utbetaling2Inspektør.arbeidsgiverOppdrag.size)
         utbetaling2Inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
             assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
@@ -408,10 +404,6 @@ internal class UtbetalingTest {
         val utbetaling1Inspektør = utbetaling1.inspektør
         val utbetaling2Inspektør = utbetaling2.inspektør
 
-        assertEquals("?P", utbetaling1Inspektør.utbetalingstidslinje.toString())
-        assertEquals("FFFFFFF FFFFFFF FFFFFFF FFFFFFF FFFPP", utbetaling2Inspektør.utbetalingstidslinje.toString())
-        assertEquals(1.februar til 2.februar, utbetaling1Inspektør.utbetalingstidslinje.periode())
-        assertEquals(1.januar til 2.februar, utbetaling2Inspektør.utbetalingstidslinje.periode())
         assertEquals(utbetaling2Inspektør.korrelasjonsId, utbetaling1Inspektør.korrelasjonsId)
 
         assertEquals(1, utbetaling1Inspektør.arbeidsgiverOppdrag.size)
@@ -471,7 +463,6 @@ internal class UtbetalingTest {
             100,
             148
         ).first.also { it.opprett(aktivitetslogg) }
-        assertEquals(1.januar til sisteDato, utbetaling.inspektør.utbetalingstidslinje.periode())
         assertEquals(1.januar til sisteDato, utbetaling.inspektør.periode)
     }
 
@@ -615,9 +606,7 @@ internal class UtbetalingTest {
     fun `kan forkaste utbetalt utbetaling dersom den er annullert`() {
         val tidslinje = tidslinjeOf(16.AP, 32.NAV).betale()
         val utbetaling = opprettUtbetaling(tidslinje.fremTilOgMed(31.januar))
-        val annullert = opprettUtbetaling(tidslinje.fremTilOgMed(17.februar), tidligere = utbetaling).let {
-            annuller(it)
-        } ?: fail { "Kunne ikke annullere" }
+        val annullert = annuller(opprettUtbetaling(tidslinje.fremTilOgMed(17.februar), tidligere = utbetaling)) ?: fail { "Kunne ikke annullere" }
         assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(annullert)))
     }
 
@@ -787,9 +776,6 @@ internal class UtbetalingTest {
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
     ) = opprettUbetaltUtbetaling(tidslinje, null, periode, fødselsnummer, orgnummer, utbetalingsaker, aktivitetslogg)
         .also { godkjenn(it) }
-
-    private fun opprettGodkjentUtbetaling() =
-        opprettGodkjentUtbetaling(beregnUtbetalinger(tidslinjeOf(16.AP, 5.NAV(3000))))
 
     private fun opprettUbetaltUtbetaling(
         tidslinje: Utbetalingstidslinje,

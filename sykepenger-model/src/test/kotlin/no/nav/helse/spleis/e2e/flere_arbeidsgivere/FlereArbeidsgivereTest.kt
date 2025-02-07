@@ -1522,12 +1522,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
         }
-        a1 {
-            inspektør.utbetalinger(2.vedtaksperiode).last().inspektør.utbetalingstidslinje.also { utbetalingstidslinje ->
-                assertEquals(100, utbetalingstidslinje[12.januar].økonomi.inspektør.totalGrad)
-            }
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
-        }
+        a1 { assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING) }
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
     }
 

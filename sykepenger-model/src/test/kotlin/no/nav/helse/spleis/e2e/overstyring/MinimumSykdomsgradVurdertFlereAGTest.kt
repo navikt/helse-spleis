@@ -49,10 +49,9 @@ internal class MinimumSykdomsgradVurdertFlereAGTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-        val avvistedager1 =
-            inspektør(a1).utbetalinger(1.vedtaksperiode).single().inspektør.utbetalingstidslinje.inspektør.avvistedager
-        assertTrue(inspektør(a1).utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.all { it.økonomi.inspektør.grad == 15.prosent })
-        assertTrue(inspektør(a1).utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.all { it.økonomi.inspektør.totalGrad == 18 })
+        val avvistedager1 = inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager
+        assertTrue(inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.all { it.økonomi.inspektør.grad == 15.prosent })
+        assertTrue(inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.all { it.økonomi.inspektør.totalGrad == 18 })
         assertEquals(11, avvistedager1.size)
         assertTrue(avvistedager1.all { it.begrunnelser == listOf(Begrunnelse.MinimumSykdomsgrad) })
         assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter(a1))
@@ -60,20 +59,19 @@ internal class MinimumSykdomsgradVurdertFlereAGTest : AbstractEndToEndTest() {
         håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = emptyList(), perioderMedMinimumSykdomsgradVurdertIkkeOK = listOf(januar))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
-        assertEquals(11, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
-        assertTrue(inspektør(a1).utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.all { it.økonomi.inspektør.grad == 15.prosent })
-        assertTrue(inspektør(a1).utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.all { it.økonomi.inspektør.totalGrad == 18 })
+        assertEquals(11, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
+        assertTrue(inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.all { it.økonomi.inspektør.grad == 15.prosent })
+        assertTrue(inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.all { it.økonomi.inspektør.totalGrad == 18 })
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        val avvistedager2 =
-            inspektør(a2).utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager
+        val avvistedager2 = inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager
         assertEquals(11, avvistedager2.size)
         assertTrue(avvistedager2.all { it.begrunnelser == listOf(Begrunnelse.MinimumSykdomsgrad) })
         assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter(a2))
-        assertTrue(inspektør(a2).utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.all { it.økonomi.inspektør.grad == 20.prosent })
-        assertTrue(inspektør(a2).utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.all { it.økonomi.inspektør.totalGrad == 18 })
+        assertTrue(inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.all { it.økonomi.inspektør.grad == 20.prosent })
+        assertTrue(inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.all { it.økonomi.inspektør.totalGrad == 18 })
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)

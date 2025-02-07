@@ -533,7 +533,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     private fun TestPerson.TestArbeidsgiver.assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN, aktuellDagsinntekt: Inntekt = INGEN) {
-        inspektør.sisteUtbetalingUtbetalingstidslinje()[dato].let {
+        inspektør.utbetalingstidslinjer(1.vedtaksperiode)[dato].let {
             assertEquals(arbeidsgiverbeløp, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)
             assertEquals(aktuellDagsinntekt, it.økonomi.inspektør.aktuellDagsinntekt)

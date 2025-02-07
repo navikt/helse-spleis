@@ -438,7 +438,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        val utbetalingUtbetalingstidslinje = inspektør.utbetalingUtbetalingstidslinje(0)
+        val utbetalingUtbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
         assertEquals(3.januar til 26.januar, utbetalingUtbetalingstidslinje.periode())
     }
 

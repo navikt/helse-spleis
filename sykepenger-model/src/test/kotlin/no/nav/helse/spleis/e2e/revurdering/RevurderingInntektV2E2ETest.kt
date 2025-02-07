@@ -130,7 +130,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         )
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
-        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
+        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString().trim())
     }
 
     @Test
@@ -156,7 +156,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
-        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
+        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString().trim())
     }
 
     @Test
@@ -183,7 +183,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertDiff(-3047)
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
-        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
+        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString().trim())
     }
 
     @Test
@@ -212,7 +212,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertDiff(-3047)
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
-        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
+        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString().trim())
     }
 
     @Test
@@ -252,7 +252,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertEquals(33235, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.totalbeløp())
         assertEquals("SSSSSHH SSSSSHH SSSSSFF FFFFFFF FSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
-        assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
+        assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString().trim())
     }
 
     @Test
@@ -370,7 +370,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             assertEquals(januarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
             assertEquals(februarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
 
-            assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", revurdering.utbetalingstidslinje.toString().trim())
+            assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString().trim())
             assertEquals(januar, januarutbetaling.periode)
             assertEquals(1.januar til 28.februar, februarutbetaling.periode)
             assertEquals(januar, revurdering.periode)
@@ -669,7 +669,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         inspektør.sykdomshistorikk.tidslinje(0)[dato].let {
             assertTrue(it is D) { "Forventet ${D::class.simpleName} men var ${it::class.simpleName}" }
         }
-        inspektør.sisteUtbetalingUtbetalingstidslinje()[dato].let {
+        inspektør.utbetalingstidslinjer(1.vedtaksperiode)[dato].let {
             assertTrue(it is UD) { "Forventet ${UD::class.simpleName} men var ${it::class.simpleName}" }
             assertEquals(arbeidsgiverbeløp, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)

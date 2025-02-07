@@ -1015,8 +1015,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        val utbetaling1 = inspektør(a1).utbetaling(0)
-        assertEquals(75, utbetaling1.utbetalingstidslinje[1.januar].økonomi.inspektør.totalGrad)
+        assertEquals(75, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[1.januar].økonomi.inspektør.totalGrad)
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)

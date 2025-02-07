@@ -535,13 +535,26 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
         assertEquals(2, inspektør(a1).antallUtbetalinger)
-        assertEquals(1, inspektør(a2).antallUtbetalinger)
+        assertEquals(2, inspektør(a2).antallUtbetalinger)
 
         val sisteUtbetalingA1 = inspektør(a1).sisteUtbetaling()
         assertEquals(1.januar til 10.februar, sisteUtbetalingA1.periode)
-        assertEquals(100, sisteUtbetalingA1.utbetalingstidslinje[31.januar].økonomi.inspektør.totalGrad)
-        assertEquals(100, sisteUtbetalingA1.utbetalingstidslinje[1.februar].økonomi.inspektør.totalGrad)
+        assertEquals(100, inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode)[31.januar].økonomi.inspektør.totalGrad)
+        assertEquals(100, inspektør(a2).utbetalingstidslinjer(2.vedtaksperiode)[1.februar].økonomi.inspektør.totalGrad)
     }
 
     @Test
@@ -1520,7 +1533,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        val utbetalingstidslinje = inspektør(a2).utbetalingUtbetalingstidslinje(0)
+        val utbetalingstidslinje = inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode)
 
         assertEquals(0.daglig, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.personbeløp)
         assertNotNull(utbetalingstidslinje[31.mai(2023)].erAvvistMed(Begrunnelse.MinimumSykdomsgrad))

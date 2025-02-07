@@ -535,7 +535,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         }
         inspektør(a2).utbetalinger(1.vedtaksperiode).also { utbetalinger ->
             assertEquals(3, utbetalinger.size)
-            assertEquals(100, utbetalinger.last().inspektør.utbetalingstidslinje[18.januar].økonomi.inspektør.totalGrad)
+            assertEquals(100, inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode)[18.januar].økonomi.inspektør.totalGrad)
         }
         inspektør(a2).utbetalinger(2.vedtaksperiode).also { utbetalinger ->
             assertEquals(1, utbetalinger.size)

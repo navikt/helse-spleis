@@ -40,10 +40,7 @@ internal class SamletSykdomsgradE2ETest : AbstractDslTest() {
         a1 {
             håndterYtelser(2.vedtaksperiode)
             assertVarsel(RV_VV_4, 2.vedtaksperiode.filter())
-
-            inspektør.utbetaling(1).also {
-                assertEquals(listOf(5.februar, 6.februar, 7.februar, 8.februar, 9.februar), it.utbetalingstidslinje.inspektør.avvistedatoer)
-            }
+            assertEquals(listOf(5.februar, 6.februar, 7.februar, 8.februar, 9.februar), inspektør.utbetalingstidslinjer(2.vedtaksperiode).inspektør.avvistedatoer)
         }
     }
 
@@ -59,7 +56,7 @@ internal class SamletSykdomsgradE2ETest : AbstractDslTest() {
 
             assertVarsel(RV_VV_4, 1.vedtaksperiode.filter())
             assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetalingtilstand(0))
-            val utbetalingstidslinje = inspektør.utbetalingUtbetalingstidslinje(0)
+            val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
             assertTrue(utbetalingstidslinje[17.januar] is Utbetalingsdag.AvvistDag)
             assertTrue(utbetalingstidslinje[18.januar] is Utbetalingsdag.AvvistDag)
             assertTrue(utbetalingstidslinje[19.januar] is Utbetalingsdag.AvvistDag)
@@ -94,7 +91,7 @@ internal class SamletSykdomsgradE2ETest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-            val utbetalingstidslinje = inspektør.utbetalingUtbetalingstidslinje(1)
+            val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
             assertTrue(utbetalingstidslinje[17.januar] is Utbetalingsdag.AvvistDag)
             assertTrue(utbetalingstidslinje[18.januar] is Utbetalingsdag.AvvistDag)
             assertTrue(utbetalingstidslinje[19.januar] is Utbetalingsdag.AvvistDag)

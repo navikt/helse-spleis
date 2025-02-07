@@ -207,7 +207,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
     }
 
     private fun assertDag(dato: LocalDate, orgnummer: String, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt) {
-        inspektør(orgnummer).sisteUtbetalingUtbetalingstidslinje()[dato].let {
+        inspektør(orgnummer).utbetalingstidslinjer(1.vedtaksperiode)[dato].let {
             if (it is NavHelgDag) return
             assertEquals(arbeidsgiverbeløp, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)

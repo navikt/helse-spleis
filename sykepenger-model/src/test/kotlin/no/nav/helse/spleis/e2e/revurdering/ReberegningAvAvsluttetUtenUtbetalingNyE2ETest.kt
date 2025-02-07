@@ -999,10 +999,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             assertInntektsgrunnlag(a1, riktigInntekt)
         }
 
-        val utbetaling = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode)
-        val utbetalingInspektør = utbetaling.inspektør
-
-        val førsteUtbetalingsdag = utbetalingInspektør.utbetalingstidslinje[7.februar]
+        val førsteUtbetalingsdag = inspektør.utbetalingstidslinjer(1.vedtaksperiode)[7.februar]
         assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
         assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.arbeidsgiverRefusjonsbeløp)
 
@@ -1062,7 +1059,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        inspektør(a1).sisteUtbetalingUtbetalingstidslinje()[17.januar].let {
+        inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode)[17.januar].let {
             assertEquals(1080.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
             assertEquals(beregnetInntektA1, it.økonomi.inspektør.aktuellDagsinntekt)
