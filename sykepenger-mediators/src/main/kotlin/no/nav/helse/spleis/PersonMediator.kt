@@ -331,7 +331,6 @@ internal class PersonMediator(
     }
 
     override fun vedtaksperioderVenter(eventer: List<PersonObserver.VedtaksperiodeVenterEvent>) {
-        if (eventer.isEmpty()) return
         queueMessage(JsonMessage.newMessage("vedtaksperioder_venter", mapOf(
             "vedtaksperioder" to eventer.map { event ->
                 mapOf(
