@@ -2,9 +2,11 @@ package no.nav.helse.spleis.e2e.tilkommen_inntekt
 
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.fredag
@@ -134,4 +136,41 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
         }
     }
 
+    @Test
+    fun `Sykmeldte oppfatter a2 som tilkommen, men a1 mener (uten å vite det) at a2 er en ghost`() = Toggle.TilkommenInntektV3.enable {
+        a1 {
+            håndterSøknad(januar, inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(fom = 5.januar, tom = 31.januar, orgnummer = a2, 10_000)))
+            /** TODO:  Lolzi, den "fangSisteVedtaksperiode"-tingen om skal håndtere dette for oss i testene har jo nå plukket opp a2 sin vedtaksperiode
+            Det kan man sikkert fikse der, men det gadd jeg ikke nå */
+            håndterUtbetalingshistorikk(1.vedtaksperiode)
+            assertEquals(1.januar, inspektør.vedtaksperioder(1.vedtaksperiode).skjæringstidspunkt)
+            assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
+
+        }
+        a2 {
+            assertEquals(1.januar, inspektør.vedtaksperioder(1.vedtaksperiode).skjæringstidspunkt)
+            assertEquals(5.januar til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
+            assertBeløpstidslinje(inspektør(1.vedtaksperiode).inntektsendringer, 5.januar til 31.januar, 526.daglig)
+
+        }
+        a1 {
+            håndterInntektsmelding(listOf(5.januar til 20.januar))
+            assertEquals(5.januar, inspektør.vedtaksperioder(1.vedtaksperiode).skjæringstidspunkt)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)// Flex har jo funnet arbeidsgivceren 5.januar, så da finner jo vi og det
+            // Så nå er jo plutselig a2 en ghost med inntektsendringer på seg
+            assertInntektsgrunnlag(5.januar, 2) {
+                assertInntektsgrunnlag(a1, forventetkilde = Arbeidstakerkilde.Arbeidsgiver, forventetFaktaavklartInntekt = INNTEKT)
+                assertInntektsgrunnlag(a2, forventetkilde = Arbeidstakerkilde.AOrdningen, forventetFaktaavklartInntekt = INNTEKT)
+            }
+        }
+        a2 {
+            assertBeløpstidslinje(inspektør(1.vedtaksperiode).inntektsendringer, 5.januar til 31.januar, 526.daglig)
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertVarsler(1.vedtaksperiode, Varselkode.`Tilkommen inntekt som støttes`)
+        }
+    }
 }
