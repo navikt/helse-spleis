@@ -426,7 +426,7 @@ class Person private constructor(
         }
         vilkårsgrunnlagHistorikk.loggTilkommendeInntekter(aktivitetslogg, harAktivPeriode)
 
-        //håndterGjenoppta(påminnelse, aktivitetslogg)
+        håndterGjenoppta(påminnelse, aktivitetslogg)
     }
 
     fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
