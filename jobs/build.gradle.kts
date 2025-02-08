@@ -16,7 +16,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation(project(":sykepenger-model"))
     implementation(project(":sykepenger-serde"))
-    implementation(libs.bundles.database)
+    implementation(libs.postgresql)
+    implementation(libs.hikari)
     implementation(libs.cloudsql)
 }
 

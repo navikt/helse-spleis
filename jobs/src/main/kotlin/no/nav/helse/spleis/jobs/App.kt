@@ -4,7 +4,8 @@ import com.github.navikt.tbd_libs.kafka.AivenConfig
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import java.time.Duration
+import java.sql.Connection
+import java.sql.ResultSet
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -14,9 +15,6 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotliquery.Session
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
@@ -60,7 +58,9 @@ private fun vacuumTask() {
     val ds = DataSourceConfiguration(DbUser.SPLEIS).dataSource()
     log.info("Commencing VACUUM FULL")
     val duration = measureTime {
-        sessionOf(ds).use { session -> session.run(queryOf(("VACUUM FULL person")).asExecute) }
+        ds.connection.use { connection ->
+            connection.createStatement().execute("VACUUM FULL person")
+        }
     }
     log.info(
         "VACUUM FULL completed after {} hour(s), {} minute(s) and {} second(s)",
@@ -76,27 +76,28 @@ private fun migrateV2Task(arbeidId: String, size: Int) {
         SELECT data FROM person WHERE fnr = ? LIMIT 1 FOR UPDATE SKIP LOCKED;
     """
     var migreringCounter = 0
-    opprettOgUtførArbeid(arbeidId, size = size) { session, fnr ->
-        session.transaction { txSession ->
+    opprettOgUtførArbeid(arbeidId, size = size) { connection, fnr ->
+        connection.transaction {
             // låser ned person-raden slik at spleis ikke tar inn meldinger og overskriver mens denne podden holder på
-            val data = txSession.run(queryOf(query, fnr).map { it.string("data") }.asSingle)
+            val data = prepareStatement(query).use { stmt ->
+                stmt.setLong(1, fnr)
+                stmt.executeQuery().singleOrNull { it.getString("data") }
+            }
             if (data != null) {
                 migreringCounter += 1
                 log.info("[$migreringCounter] Utfører migrering")
                 val time = measureTimeMillis {
                     val dto = SerialisertPerson(data).tilPersonDto()
+                    check(dto.fødselsnummer.toLong() == fnr) { "fnr samsvarer ikke" }
                     val gjenopprettetPerson = Person.gjenopprett(EmptyLog, dto)
                     val resultat = gjenopprettetPerson.dto().tilPersonData().tilSerialisertPerson()
                     check(
-                        1 == txSession.run(
-                            queryOf(
-                                "UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE fnr=:ident", mapOf(
-                                "skjemaversjon" to resultat.skjemaVersjon,
-                                "data" to resultat.json,
-                                "ident" to fnr
-                            )
-                            ).asUpdate
-                        )
+                        1 == prepareStatement("UPDATE person SET skjema_versjon=?, data=? WHERE fnr=?;").use { stmt ->
+                            stmt.setInt(1, resultat.skjemaVersjon)
+                            stmt.setString(2, resultat.json)
+                            stmt.setLong(3, fnr)
+                            stmt.executeUpdate()
+                        }
                     )
                 }
                 log.info("[$migreringCounter] Utført på $time ms")
@@ -105,81 +106,106 @@ private fun migrateV2Task(arbeidId: String, size: Int) {
     }
 }
 
-private fun fåLås(session: Session, arbeidId: String): Boolean {
+private fun fåLås(connection: Connection, arbeidId: String): Boolean {
     // oppretter en lås som varer ut levetiden til sesjonen.
     // returnerer umiddelbart med true/false avhengig om vi fikk låsen eller ikke
     @Language("PostgreSQL")
     val query = "SELECT pg_try_advisory_lock(1337)"
-    return session.run(queryOf(query).map { it.boolean(1) }.asSingle)!!
+    return connection.prepareStatement(query).use { stmt ->
+        stmt.executeQuery().single { rs -> rs.getBoolean(1) }
+    }
 }
 
-private fun fyllArbeidstabell(session: Session, arbeidId: String) {
+private fun fyllArbeidstabell(connection: Connection, arbeidId: String) {
     @Language("PostgreSQL")
     val query = """
         INSERT INTO arbeidstabell (arbeid_id,fnr,arbeid_startet,arbeid_ferdig)
         SELECT ?, fnr, null, null from person
         ON CONFLICT (arbeid_id,fnr) DO NOTHING; 
     """
-    session.run(queryOf(query, arbeidId).asExecute)
+    connection.prepareStatement(query).use { stmt ->
+        stmt.setString(1, arbeidId)
+        stmt.execute()
+    }
 }
 
-private fun hentArbeid(session: Session, arbeidId: String, size: Int = 500): List<Long> {
+private fun hentArbeid(connection: Connection, arbeidId: String, size: Int = 500): List<Long> {
     @Language("PostgreSQL")
     val query = """
     select fnr from arbeidstabell where arbeid_startet IS NULL and arbeid_id = ? limit $size for update skip locked; 
     """
 
     @Language("PostgreSQL")
-    val oppdater = "update arbeidstabell set arbeid_startet=now() where arbeid_id=? and fnr IN(%s)"
-    return session.transaction { txSession ->
-        txSession.run(queryOf(query, arbeidId).map { it.long("fnr") }.asList).also { personer ->
+    val oppdater = "update arbeidstabell set arbeid_startet=now() where arbeid_id=? and fnr = ANY(?)"
+    return connection.transaction {
+        prepareStatement(query).use { stmt ->
+            stmt.setString(1, arbeidId)
+            stmt.executeQuery().mapNotNull { it.getLong(1) }
+        }.also { personer ->
             if (personer.isNotEmpty()) {
-                txSession.run(queryOf(String.format(oppdater, personer.joinToString { "?" }), arbeidId, *personer.toTypedArray()).asUpdate)
+                val affectedRows = prepareStatement(oppdater).use { stmt ->
+                    stmt.setString(1, arbeidId)
+                    stmt.setArray(2, createArrayOf("BIGINT", personer.toTypedArray()))
+                    stmt.executeUpdate()
+                }
+                check(affectedRows == personer.size) {
+                    "forventet å oppdatere nøyaktig ${personer.size} rader"
+                }
             }
         }
     }
 }
 
-private fun arbeidFullført(session: Session, arbeidId: String, fnr: Long) {
+private fun arbeidFullført(connection: Connection, arbeidId: String, fnr: Long) {
     @Language("PostgreSQL")
     val query = "update arbeidstabell set arbeid_ferdig=now() where arbeid_id=? and fnr=?"
-    session.run(queryOf(query, arbeidId, fnr).asUpdate)
+    val affectedRows = connection.prepareStatement(query).use { stmt ->
+        stmt.setString(1, arbeidId)
+        stmt.setLong(2, fnr)
+        stmt.executeUpdate()
+    }
+    check(affectedRows == 1) {
+        "forventet å oppdatere nøyaktig én rad"
+    }
 }
 
-private fun arbeidFinnes(session: Session, arbeidId: String): Boolean {
+private fun arbeidFinnes(connection: Connection, arbeidId: String): Boolean {
     @Language("PostgreSQL")
     val query = "SELECT COUNT(1) as antall FROM arbeidstabell where arbeid_id=?"
-    val antall = session.run(queryOf(query, arbeidId).map { it.long("antall") }.asSingle) ?: 0
+    val antall = connection.prepareStatement(query).use { stmt ->
+        stmt.setString(1, arbeidId)
+        stmt.executeQuery().single { rs -> rs.getLong(1) }
+    }
     return antall > 0
 }
 
-private fun klargjørEllerVentPåTilgjengeligArbeid(session: Session, arbeidId: String) {
-    if (fåLås(session, arbeidId)) {
-        if (arbeidFinnes(session, arbeidId)) return
-        return fyllArbeidstabell(session, arbeidId)
+private fun klargjørEllerVentPåTilgjengeligArbeid(connection: Connection, arbeidId: String) {
+    if (fåLås(connection, arbeidId)) {
+        if (arbeidFinnes(connection, arbeidId)) return
+        return fyllArbeidstabell(connection, arbeidId)
     }
 
     log.info("Venter på at arbeid skal bli tilgjengelig")
-    while (!arbeidFinnes(session, arbeidId)) {
+    while (!arbeidFinnes(connection, arbeidId)) {
         log.info("Arbeid finnes ikke ennå, venter litt")
         runBlocking { delay(250) }
     }
 }
 
-fun opprettOgUtførArbeid(arbeidId: String, size: Int = 1, arbeider: (session: Session, fnr: Long) -> Unit) {
+fun opprettOgUtførArbeid(arbeidId: String, size: Int = 1, arbeider: (connection: Connection, fnr: Long) -> Unit) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource(maximumPoolSize = 1).use { ds ->
-        sessionOf(ds).use { session ->
-            klargjørEllerVentPåTilgjengeligArbeid(session, arbeidId)
+        ds.connection.use { connection ->
+            klargjørEllerVentPåTilgjengeligArbeid(connection, arbeidId)
             do {
                 log.info("Forsøker å hente arbeid")
-                val arbeidsliste = hentArbeid(session, arbeidId, size)
+                val arbeidsliste = hentArbeid(connection, arbeidId, size)
                     .also {
                         if (it.isNotEmpty()) log.info("Fikk ${it.size} stk")
                     }
                     .onEach { fnr ->
                         try {
-                            arbeider(session, fnr)
-                            arbeidFullført(session, arbeidId, fnr)
+                            arbeider(connection, fnr)
+                            arbeidFullført(connection, arbeidId, fnr)
                         } catch (e: Exception) {
                             log.error("feil ved arbeidId=$arbeidId: ${e.message}", e)
                             sikkerlogg.error("feil ved arbeidId=$arbeidId, fnr=$fnr: ${e.message}", e)
@@ -206,19 +232,22 @@ private fun testSpeilJsonTask(arbeidId: String) {
     }*/
 }
 
-fun hentPerson(session: Session, fnr: Long) =
-    session.run(queryOf("SELECT data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fnr).map {
-        it.string("data")
-    }.asSingle)
+fun hentPerson(connection: Connection, fnr: Long) =
+    connection.prepareStatement("SELECT data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1").use { stmt ->
+        stmt.setLong(1, fnr)
+        stmt.executeQuery().single { rs -> rs.getString("data") }
+    }
 
 private fun migrateTask(factory: ConsumerProducerFactory) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
         var count = 0L
         factory.createProducer().use { producer ->
-            sessionOf(ds).use { session ->
-                session.run(queryOf("SELECT fnr FROM person").map { row ->
-                    row.string("fnr").padStart(11, '0')
-                }.asList)
+            ds.connection.use { connection ->
+                connection.prepareStatement("SELECT fnr FROM person").use { stmt ->
+                    stmt.executeQuery().mapNotNull { row ->
+                        row.getLong("fnr").toString().padStart(11, '0')
+                    }
+                }
             }.forEach { fnr ->
                 count += 1
                 producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagMigrate(fnr)))
@@ -245,18 +274,19 @@ private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: I
     // hvor én bøtte tilsvarer én dag i måneden. Tallet 28 (pga februar) ble valgt slik at vi sikrer oss at vi avstemmer
     // alle personer hver måned. Dag 29, 30, 31 avstemmes 0 personer siden det er umulig å ha disse rest-verdiene
 
-    sessionOf(ds).use { session ->
+    ds.connection.use { connection ->
         @Language("PostgreSQL")
         val statement = """
             SELECT fnr
             FROM person
-            WHERE (1 + mod(fnr, 28)) = :dayOfMonth AND (sist_avstemt is null or sist_avstemt < now() - interval '1 day')
+            WHERE (1 + mod(fnr, 28)) = ? AND (sist_avstemt is null or sist_avstemt < now() - interval '1 day')
             """
-        session.run(queryOf(statement, mapOf("dayOfMonth" to dayOfMonth)).map { row ->
-            row.string("fnr")
-        }.asList).forEach { fnr ->
-            val fnrStr = fnr.padStart(11, '0')
-            producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagAvstemming(fnrStr)))
+        connection.prepareStatement(statement).use { stmt ->
+            stmt.setInt(1, dayOfMonth)
+            stmt.executeQuery().mapNotNull { it.getLong(1) }
+        }.forEach { fnr ->
+            val fnrStr = fnr.toString().padStart(11, '0')
+            producer.send(ProducerRecord("tbd.rapid.v1", fnrStr, lagAvstemming(fnrStr)))
         }
     }
 
@@ -316,4 +346,49 @@ private enum class DbUser(private val dbUserPrefix: String) {
     SPLEIS("DATABASE"), AVSTEMMING("DATABASE_SPLEIS_AVSTEMMING"), MIGRATE("DATABASE_SPLEIS_MIGRATE");
 
     override fun toString() = dbUserPrefix
+}
+
+// krever minst én rad og at mapping-funksjonen ikke returnerer null
+fun <R> ResultSet.single(map: (ResultSet) -> R?): R {
+    check(next()) { "forventet én rad" }
+    return checkNotNull(map(this)) { "forventet ikke en null-verdi" }
+}
+
+// returnerer null hvis result-settet er tomt eller at mapping-funksjonen gir null
+fun <R> ResultSet.singleOrNull(map: (ResultSet) -> R?): R? {
+    if (!next()) return null
+    return map(this)
+}
+
+fun <R> ResultSet.mapNotNull(map: (ResultSet) -> R?): List<R> =
+    map(map).filterNotNull()
+
+// siden flere av ResultSet-funksjonene returnerer potensielt null
+// så føles det mer riktig å anta at map-funksjonen kan gi en nullable R.
+// f.eks. vil ResultSet.getString() returnere `null` hvis kolonnen er lagret som `null` i databasen.
+// i kotlin vil typen bli seende som `String!`, som kan godtas både som `String` og `String?` i kotlin.
+// Det kan dessuten være legitimt bruksområde å hente ut rader, men bevare `null`-verdien. derfor foretas det ingen filtrering her.
+// bruk `mapNotNull()` for å fjerne null-rader / gjøre listen not-null
+fun <R> ResultSet.map(map: (ResultSet) -> R?): List<R?> {
+    return buildList {
+        while (next()) {
+            add(map(this@map))
+        }
+    }
+}
+
+fun <R> Connection.transaction(block: Connection.() -> R): R {
+    return try {
+        autoCommit = false
+        block().also { commit() }
+    } catch (err: Exception) {
+        try {
+            rollback()
+        } catch (suppressed: Exception) {
+            err.addSuppressed(suppressed)
+        }
+        throw err
+    } finally {
+        autoCommit = true
+    }
 }
