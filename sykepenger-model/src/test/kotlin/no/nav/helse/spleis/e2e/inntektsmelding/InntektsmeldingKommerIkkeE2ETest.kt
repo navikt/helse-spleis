@@ -5,6 +5,7 @@ import java.time.YearMonth
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
+import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -120,6 +121,16 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
                 forelagteOpplysninger.skatteinntekter
             )
             assertEquals(0.0, forelagteOpplysninger.omregnetÅrsinntekt)
+        }
+    }
+
+    @Test
+    fun `skal ikke slippe gjennom ting som har ventet veldig lenge`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+        val cutoff = 10.februar(2025)
+        a1 {
+            håndterSøknad(januar)
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = cutoff.minusDays(1).minusMonths(3).atStartOfDay())
+            assertIngenBehov(1.vedtaksperiode, Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlagForArbeidsgiver)
         }
     }
 

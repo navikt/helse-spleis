@@ -2662,7 +2662,8 @@ internal class Vedtaksperiode private constructor(
             if (påminnelse.når(Flagg("trengerReplay"))) return vedtaksperiode.trengerInntektsmeldingReplay()
 
             val ventetMinst3Måneder = påminnelse.når(VentetMinst(Period.ofMonths(3)))
-            val påTideMedSkatt = ventetMinst3Måneder && (Toggle.InntektsmeldingSomIkkeKommer.enabled || påminnelse.når(Flagg("ønskerInntektFraAOrdningen")))
+            val ikkeForGammel = !påminnelse.når(Påminnelse.Predikat.VentetFørCutoff)
+            val påTideMedSkatt = ventetMinst3Måneder && ikkeForGammel && (Toggle.InntektsmeldingSomIkkeKommer.enabled || påminnelse.når(Flagg("ønskerInntektFraAOrdningen")))
 
             if (påTideMedSkatt) {
                 aktivitetslogg.info("Nå henter vi inntekt fra skatt!")
