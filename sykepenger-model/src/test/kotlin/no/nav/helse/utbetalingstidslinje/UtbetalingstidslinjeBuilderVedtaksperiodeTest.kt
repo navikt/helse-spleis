@@ -14,7 +14,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class UtbetalingstidslinjeBuilderVedtaksperiodeTest {
 
@@ -47,9 +46,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiodeTest {
     fun `feiler dersom orgnr ikke finnes i inntektsgrunnlaget eller det forekommer inntektsendringer`() {
         val utbetalingstidslinjeBuilderVedtaksperiode = utbetalingstidslinjeBuilderVedtaksperiode(fastsattÅrsinntekt = null)
 
-        assertThrows<IllegalStateException> {
-            utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt())
-        }
+        assertEquals(Inntekt.INGEN, utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt()).inspektør.aktuellDagsinntekt)
     }
 
     private fun utbetalingstidslinjeBuilderVedtaksperiode(

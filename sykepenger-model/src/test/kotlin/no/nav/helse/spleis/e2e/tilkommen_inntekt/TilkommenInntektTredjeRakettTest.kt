@@ -10,6 +10,7 @@ import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.fredag
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Søknad.InntektFraNyttArbeidsforhold
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
@@ -25,6 +26,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.torsdag
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -90,6 +92,20 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar.somPeriode()) // Syk og ingen tilkommen her
             assertUtbetalingsbeløp(1.vedtaksperiode, 842, 1431, subset = 18.januar til 31.januar)
+            assertInntektsgrunnlag(1.januar, 2) {
+                assertInntektsgrunnlag(a1, forventetkilde = Arbeidstakerkilde.Arbeidsgiver, forventetFaktaavklartInntekt = INNTEKT)
+                assertInntektsgrunnlag(a2, forventetkilde = Arbeidstakerkilde.AOrdningen, forventetFaktaavklartInntekt = INGEN)
+            }
+            håndterOverstyrArbeidsforhold(1.januar, OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "Tilkommen arbeidsgiver"))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar.somPeriode()) // Syk og ingen tilkommen her
+            assertUtbetalingsbeløp(1.vedtaksperiode, 842, 1431, subset = 18.januar til 31.januar)
+            assertInntektsgrunnlag(1.januar, 2) {
+                assertInntektsgrunnlag(a1, forventetkilde = Arbeidstakerkilde.Arbeidsgiver, forventetFaktaavklartInntekt = INNTEKT)
+                assertInntektsgrunnlag(a2, forventetkilde = Arbeidstakerkilde.AOrdningen, forventetFaktaavklartInntekt = INGEN, deaktivert = true)
+            }
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
         }

@@ -12,9 +12,6 @@ class Inntektstidslinje(
     internal operator fun get(dato: LocalDate): Inntekt {
         val dag = inntektsendringer[dato]
         if (dag is Beløpsdag) return dag.beløp // Direktetreff
-        return fastsattÅrsinntekt ?: error(
-            "Vi har en vedtaksperiode som hverken har fastsatt inntekt på skjæringstidspunktet eller inntektsendringer underveis.\n" +
-                "Finner ingen inntekt for dato $dato."
-        )
+        return fastsattÅrsinntekt ?: Inntekt.INGEN
     }
 }

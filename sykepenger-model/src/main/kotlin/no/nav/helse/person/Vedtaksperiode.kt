@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
@@ -2040,9 +2040,6 @@ internal class Vedtaksperiode private constructor(
             .groupBy { it.arbeidsgiver.organisasjonsnummer }
         val faktaavklarteInntekter = grunnlagsdata.faktaavklarteInntekter()
         val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning
-            .filterKeys { arbeidsgiver ->
-                arbeidsgiver !in faktaavklarteInntekter.deaktiverteArbeidsforhold
-            }
             .mapValues { (arbeidsgiver, vedtaksperioder) ->
                 val fastsattÅrsinntekt = faktaavklarteInntekter.forArbeidsgiver(arbeidsgiver)
                 vedtaksperioder.map {
