@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
-import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import kotlin.reflect.KClass
 import no.nav.helse.Toggle
 import no.nav.helse.april
@@ -21,6 +20,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.november
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -100,11 +100,12 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Skal sende med et flagg for å innhente inntekter fra a-ordningen etter å ha ventet på inntektsmelding lengre enn 3 måneder`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+        person = createTestPerson(IDENTIFIKATOR_SOM_KAN_BEHANDLES_UTEN_IM, FØDSELSDATO_SOM_KAN_BEHANDLES_UTEN_IM)
         nyPeriode(januar)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         assertFalse(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().innhentInntektFraAOrdningen)
 
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, LocalDateTime.now().minusMonths(3))
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(), nå = 10.februar(2025).atStartOfDay())
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         assertTrue(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().innhentInntektFraAOrdningen)
     }

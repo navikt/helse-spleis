@@ -261,6 +261,7 @@ internal fun påminnelse(
     vedtaksperiodeId: UUID,
     påminnetTilstand: TilstandType,
     tilstandsendringstidspunkt: LocalDateTime,
+    nå: LocalDateTime = LocalDateTime.now(),
     orgnummer: String = a1,
     antallGangerPåminnet: Int = 1,
     skalReberegnes: Boolean = false
@@ -272,6 +273,7 @@ internal fun påminnelse(
         antallGangerPåminnet = antallGangerPåminnet,
         tilstand = påminnetTilstand,
         tilstandsendringstidspunkt = tilstandsendringstidspunkt,
+        nå = nå,
         påminnelsestidspunkt = LocalDateTime.now(),
         nestePåminnelsestidspunkt = LocalDateTime.now(),
         flagg = mutableSetOf<String>().apply {

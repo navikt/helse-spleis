@@ -820,6 +820,7 @@ internal fun AbstractEndToEndTest.håndterPåminnelse(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     påminnetTilstand: TilstandType,
     tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now(),
+    nå: LocalDateTime = LocalDateTime.now(),
     orgnummer: String = a1,
     antallGangerPåminnet: Int = 1,
     skalReberegnes: Boolean = false
@@ -828,6 +829,7 @@ internal fun AbstractEndToEndTest.håndterPåminnelse(
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer),
         påminnetTilstand = påminnetTilstand,
         tilstandsendringstidspunkt = tilstandsendringstidspunkt,
+        nå = nå,
         orgnummer = orgnummer,
         antallGangerPåminnet = antallGangerPåminnet,
         skalReberegnes = skalReberegnes

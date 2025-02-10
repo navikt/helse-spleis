@@ -1,8 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.INNTEKT
@@ -17,6 +16,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.november
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -49,10 +49,11 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `sender med inntektskilder i sykepengegrunnlaget i godkjenningsbehovet`() {
+        person = createTestPerson(IDENTIFIKATOR_SOM_KAN_BEHANDLES_UTEN_IM, FØDSELSDATO_SOM_KAN_BEHANDLES_UTEN_IM)
         nyPeriode(januar, orgnummer = a1)
         nyPeriode(januar, orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(3), orgnummer = a2)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(), nå = 10.februar(2025).atStartOfDay(), orgnummer = a2)
         håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, orgnummer = a2)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -65,8 +66,9 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `sender med inntektskilde saksbehandler i sykepengegrunnlaget i godkjenningsbehovet ved skjønnsmessig fastsettelse -- AOrdning på orginal inntekt`() {
+        person = createTestPerson(IDENTIFIKATOR_SOM_KAN_BEHANDLES_UTEN_IM, FØDSELSDATO_SOM_KAN_BEHANDLES_UTEN_IM)
         nyPeriode(januar, a1)
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(3), orgnummer = a1)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(), nå = 10.februar(2025).atStartOfDay(), orgnummer = a1)
         håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -345,11 +347,13 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     @Test
     fun `markerer godkjenningsbehov som har brukt skatteinntekter istedenfor inntektsmelding med riktig tag`() =
         Toggle.InntektsmeldingSomIkkeKommer.enable {
+            person = createTestPerson(IDENTIFIKATOR_SOM_KAN_BEHANDLES_UTEN_IM, FØDSELSDATO_SOM_KAN_BEHANDLES_UTEN_IM)
             nyPeriode(januar)
             håndterPåminnelse(
                 1.vedtaksperiode,
                 AVVENTER_INNTEKTSMELDING,
-                tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(3)
+                tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
+                nå = 10.februar(2025).atStartOfDay()
             )
             håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode)
             assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())

@@ -585,6 +585,10 @@ internal abstract class AbstractDslTest {
         testperson = TestPerson(observatør = observatør, fødselsdato = fødselsdato, deferredLog = deferredLog, jurist = jurist)
     }
 
+    protected fun medPersonidentifikator(personidentifikator: Personidentifikator) {
+        testperson = TestPerson(observatør = observatør, personidentifikator = personidentifikator, deferredLog = deferredLog, jurist = jurist)
+    }
+
     @BeforeEach
     fun setup() {
         jurist = SubsumsjonsListLog()

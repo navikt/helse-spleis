@@ -3,11 +3,13 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
@@ -30,6 +32,9 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     internal val søknader = mutableMapOf<UUID, Triple<LocalDate, Boolean, Array<out Søknadsperiode>>>()
     internal val inntektsmeldinger = mutableMapOf<UUID, InnsendtInntektsmelding>()
     internal val inntekter = mutableMapOf<UUID, Inntekt>()
+
+    internal val IDENTIFIKATOR_SOM_KAN_BEHANDLES_UTEN_IM = Personidentifikator("30019212345")
+    internal val FØDSELSDATO_SOM_KAN_BEHANDLES_UTEN_IM = 30.januar(1992)
 
     @BeforeEach
     internal fun abstractSetup() {

@@ -2,15 +2,22 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime
 import java.time.YearMonth
+import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
+import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.november
+import no.nav.helse.oktober
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -30,6 +37,108 @@ import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
+    private val FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER = "30019412345"
+    private val FNR_SOM_IKKE_SKAL_SLIPPE_GJENNOM_INNGANGFILTER = "12019412345"
+
+    @Test
+    fun `event om at vi bruker skatteopplysninger`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+        medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
+        val inntektFraSkatt = 10000.månedlig
+        a1 {
+            håndterSøknad(januar)
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                TilstandType.AVVENTER_INNTEKTSMELDING,
+                tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
+                nåtidspunkt = 10.februar(2025).atStartOfDay()
+            )
+            håndterSykepengegrunnlagForArbeidsgiver(
+                1.vedtaksperiode,
+                1.januar,
+                listOf(
+                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
+                )
+            )
+            assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            val event = observatør.skatteinntekterLagtTilGrunnEventer.single()
+            val forventet = PersonObserver.SkatteinntekterLagtTilGrunnEvent(
+                organisasjonsnummer = a1,
+                vedtaksperiodeId = 1.vedtaksperiode,
+                behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().id,
+                skjæringstidspunkt = 1.januar,
+                skatteinntekter = listOf(
+                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(desember(2017), 10000.0),
+                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(november(2017), 10000.0),
+                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(oktober(2017), 10000.0)
+                ),
+                omregnetÅrsinntekt = 120000.0
+            )
+            assertEquals(forventet, event)
+        }
+    }
+
+    @Test
+    fun `event om at vi bruker skatteopplysninger med sprø minus`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+        medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
+        val inntektFraSkatt = 10000.månedlig
+        val sprøInntektFraSkatt = 30000.månedlig * -1
+        a1 {
+            håndterSøknad(januar)
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                TilstandType.AVVENTER_INNTEKTSMELDING,
+                tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
+                nåtidspunkt = 10.februar(2025).atStartOfDay()
+            )
+            håndterSykepengegrunnlagForArbeidsgiver(
+                1.vedtaksperiode, 1.januar, listOf(
+                ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+                ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+                ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), sprøInntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
+            )
+            )
+            assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
+            håndterYtelser(1.vedtaksperiode)
+
+            val event = observatør.skatteinntekterLagtTilGrunnEventer.single()
+            val forventet = PersonObserver.SkatteinntekterLagtTilGrunnEvent(
+                organisasjonsnummer = a1,
+                vedtaksperiodeId = 1.vedtaksperiode,
+                behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().id,
+                skjæringstidspunkt = 1.januar,
+                skatteinntekter = listOf(
+                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(desember(2017), 10000.0),
+                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(november(2017), 10000.0),
+                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(oktober(2017), -30000.0),
+                ),
+                omregnetÅrsinntekt = 0.0
+            )
+            assertEquals(forventet, event)
+        }
+    }
+
+    @Test
+    fun `skal forkaste personer vi ville hentet skatteinntekter for, men som har et fødselsnummer som ikke passerer inngangsfilter`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+        medPersonidentifikator(Personidentifikator(FNR_SOM_IKKE_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
+        a1 {
+            håndterSøknad(januar)
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                TilstandType.AVVENTER_INNTEKTSMELDING,
+                tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
+                nåtidspunkt = 10.februar(2025).atStartOfDay()
+            )
+            assertIngenBehov(1.vedtaksperiode, Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlagForArbeidsgiver)
+            assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
+        }
+    }
+
     @Test
     fun `lager ikke påminnelse om vedtaksperioden har ventet mindre enn tre måneder`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         val nå = LocalDateTime.now()
@@ -43,8 +152,10 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
     @Test
     fun `lager påminnelse om vedtaksperioden har ventet mer enn tre måneder`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
-        val nå = LocalDateTime.now()
-        val tilstandsendringstidspunkt = nå.minusMonths(3)
+        medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
+
+        val nå = 10.februar(2025).atStartOfDay()
+        val tilstandsendringstidspunkt = 10.november(2024).atStartOfDay()
         a1 {
             håndterSøknad(januar)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt, nå)
