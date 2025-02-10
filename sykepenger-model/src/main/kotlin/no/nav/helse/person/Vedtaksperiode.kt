@@ -610,7 +610,9 @@ internal class Vedtaksperiode private constructor(
         val alle = (endringer + hovedopplysning).distinctBy { it.fom }
         val sisteTom = ubrukteRefusjonsopplysningerEtter(ubrukteRefusjonsopplysninger).lastOrNull()?.dato
         val refusjonstidslinje = alle.sortedBy { it.fom }.mapWithNext { nåværende, neste ->
-            Beløpstidslinje.fra(periode = nåværende.fom til (neste?.fom?.forrigeDag ?: (sisteTom ?: nåværende.fom)), beløp = nåværende.beløp, kilde = Kilde(hendelse.metadata.meldingsreferanseId, Avsender.ARBEIDSGIVER, hendelse.metadata.innsendt))
+            // Om vi har et neste element tar vi dens forrige dag. Ellers tar vi den største datoen av det vi kjenner til og nåværende fom'en
+            val tom = neste?.fom?.forrigeDag ?: (listOfNotNull(sisteTom, nåværende.fom).max())
+            Beløpstidslinje.fra(periode = nåværende.fom til tom, beløp = nåværende.beløp, kilde = Kilde(hendelse.metadata.meldingsreferanseId, Avsender.ARBEIDSGIVER, hendelse.metadata.innsendt))
         }.reduce(Beløpstidslinje::plus)
         val servitør = Refusjonsservitør.fra(refusjonstidslinje)
 
