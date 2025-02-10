@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
@@ -20,6 +21,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverper
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon.Refusjonsendring
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OpphørAvNaturalytelser
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
@@ -54,9 +56,11 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -65,6 +69,25 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
+
+    @Test
+    fun `Arbeidsgiver korrigerer ubrukte refusjonsopplysninger`() {
+        a1 {
+            håndterSøknad(januar)
+            val id1 = håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)), OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, endringer = listOf(Refusjonsendring(1.februar, 0.daglig))))
+            val kilde1 = Kilde(id1, ARBEIDSGIVER, LocalDateTime.now())
+            assertBeløpstidslinje(
+                Beløpstidslinje.fra(1.februar.somPeriode(), 0.daglig, kilde1),
+                inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar)
+            )
+            val id2 = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittRefusjon(INNTEKT, endringer = listOf(Refusjonsendring(2.februar, 0.daglig))))
+            val kilde2 = Kilde(id2, ARBEIDSGIVER, LocalDateTime.now())
+            assertBeløpstidslinje(
+                Beløpstidslinje.fra(1.februar.somPeriode(), INNTEKT, kilde2) + Beløpstidslinje.fra(2.februar.somPeriode(), 0.daglig, kilde2),
+                inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar)
+            )
+        }
+    }
 
     @Test
     fun `tøysete egenmeldingsdag skaper loop av forespørsler`() {
@@ -149,7 +172,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 OppgittInntekt(25_000.månedlig),
-                OppgittRefusjon(25_000.månedlig, listOf(OppgittRefusjon.Refusjonsendring(1.februar, INGEN)))
+                OppgittRefusjon(25_000.månedlig, listOf(Refusjonsendring(1.februar, INGEN)))
             )
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver1.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
             assertBeløpstidslinje(Beløpstidslinje.fra(1.februar.somPeriode(), INGEN, arbeidsgiver1.arbeidsgiver), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
