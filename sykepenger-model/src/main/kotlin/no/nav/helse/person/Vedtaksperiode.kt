@@ -131,7 +131,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_9
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
@@ -950,7 +949,7 @@ internal class Vedtaksperiode private constructor(
 
         checkNotNull(vilkårsgrunnlag).valider(aktivitetslogg, arbeidsgiver.organisasjonsnummer)
         infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
-        ytelser.valider(aktivitetslogg, periode, skjæringstidspunkt, maksdatoresultat.maksdato, harTilkomneInntekter(), erForlengelse())
+        ytelser.valider(aktivitetslogg, periode, skjæringstidspunkt, maksdatoresultat.maksdato, erForlengelse())
 
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(ytelser, aktivitetslogg)
 
@@ -1135,16 +1134,12 @@ internal class Vedtaksperiode private constructor(
     internal fun erVedtaksperiodeRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje)
 
-    internal fun erForlengelse(): Boolean = arbeidsgiver
+    private fun erForlengelse(): Boolean = arbeidsgiver
         .finnVedtaksperiodeRettFør(this)
         ?.takeIf { it.skalBehandlesISpeil() } != null
 
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(): Boolean {
         return vilkårsgrunnlag?.harNødvendigInntektForVilkårsprøving(arbeidsgiver.organisasjonsnummer) == false
-    }
-
-    private fun harTilkomneInntekter(): Boolean {
-        return vilkårsgrunnlag?.harTilkommendeInntekter(periode) == true
     }
 
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, aktivitetslogg: IAktivitetslogg): Boolean {
@@ -1277,13 +1272,6 @@ internal class Vedtaksperiode private constructor(
             søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, jurist)
         }
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
-        person.oppdaterVilkårsgrunnlagMedInntektene(
-            skjæringstidspunkt,
-            aktivitetslogg,
-            periode,
-            søknad.nyeInntekterUnderveis(aktivitetslogg),
-            jurist
-        )
         nesteTilstand()?.also { tilstand(aktivitetslogg, it) }
     }
 
@@ -1299,13 +1287,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad, aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Søknad har trigget en revurdering")
-        person.oppdaterVilkårsgrunnlagMedInntektene(
-            skjæringstidspunkt,
-            aktivitetslogg,
-            periode,
-            søknad.nyeInntekterUnderveis(aktivitetslogg),
-            jurist
-        )
         oppdaterHistorikk(søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
             if (søknad.delvisOverlappende) aktivitetslogg.varsel(`Mottatt søknad som delvis overlapper`)
             søknad.valider(FunksjonelleFeilTilVarsler(aktivitetslogg), vilkårsgrunnlag, refusjonstidslinje, jurist)
@@ -1771,13 +1752,6 @@ internal class Vedtaksperiode private constructor(
             type
         )
         vedtaksperiode.person.vedtaksperiodePåminnet(id, arbeidsgiver.organisasjonsnummer, påminnelse)
-        if (vilkårsgrunnlag?.inntektsgrunnlag?.harTilkommendeInntekter() == true) {
-            if (!arbeidsgiver.kanForkastes(vedtaksperiode, aktivitetslogg)) {
-                return aktivitetslogg.info("Klarte ikke forkaste periode med tilkommen inntekt i inntektsgrunnlaget")
-            }
-            aktivitetslogg.funksjonellFeil(RV_IV_9)
-            return vedtaksperiode.forkast(påminnelse, aktivitetslogg)
-        }
         val beregnetMakstid = { tilstandsendringstidspunkt: LocalDateTime -> makstid(tilstandsendringstidspunkt) }
         if (påminnelse.nåddMakstid(beregnetMakstid)) return håndterMakstid(vedtaksperiode, påminnelse, aktivitetslogg)
         håndter(vedtaksperiode, påminnelse, aktivitetslogg)

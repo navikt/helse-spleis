@@ -32,7 +32,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntek
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.person.inntekt.NyInntektUnderveis
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
@@ -198,8 +197,6 @@ class Søknad(
     internal fun slettSykmeldingsperioderSomDekkes(arbeidsgiveren: Sykmeldingsperioder) {
         arbeidsgiveren.fjern(sykdomsperiode)
     }
-
-    internal fun nyeInntekterUnderveis(aktivitetslogg: IAktivitetslogg): List<NyInntektUnderveis> = emptyList() // TODO: fjerne når vi er helt løskoblet fra gammel tilkommen inntekt
 
     class Merknad(private val type: String) {
         private companion object {
