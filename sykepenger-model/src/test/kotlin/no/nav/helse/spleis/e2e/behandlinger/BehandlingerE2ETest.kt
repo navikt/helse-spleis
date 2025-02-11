@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.behandlinger
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
@@ -79,7 +79,6 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 beregnetInntekt = INNTEKT,
                 refusjon = Inntektsmelding.Refusjon(INGEN, null)
             )
-            assertInfo("Fant ikke vilkårsgrunnlag på skjæringstidspunkt 2018-01-01", 1.vedtaksperiode.filter()) // Men refusjonsopplysningene blir lagt på behandlignen
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)

@@ -14,13 +14,12 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_9
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_5
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
@@ -74,9 +73,12 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
                     InntektFraNyttArbeidsforhold(1.februar, 28.februar, a2, 10000)
                 )
             )
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            assertVarsler(1.vedtaksperiode, RV_IV_9)
-            assertEquals(emptyList<InntektFraNyttArbeidsforhold>(), inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.view().inntektsgrunnlag.tilkommendeInntekter)
+            assertVarsel(RV_IV_9, 1.vedtaksperiode.filter())
+            assertForventetFeil(
+                forklaring = "Støtter ikke korrigert søknad ennå, ønsket oppførsel er fortsatt ukjent",
+                nå = {},
+                ønsket = { fail("""\_(ツ)_/¯""") }
+            )
         }
     }
 
@@ -91,9 +93,12 @@ internal class TilkommenInntektFørsteRakettTest : AbstractDslTest() {
                     InntektFraNyttArbeidsforhold(1.februar, 28.februar, a2, 10000)
                 )
             )
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            assertVarsler(2.vedtaksperiode, RV_IV_9)
-            assertEquals(emptyList<InntektFraNyttArbeidsforhold>(), inspektør.vilkårsgrunnlag(1.januar)!!.view().inntektsgrunnlag.tilkommendeInntekter)
+            assertVarsel(RV_IV_9, 2.vedtaksperiode.filter())
+            assertForventetFeil(
+                forklaring = "Støtter ikke korrigert søknad ennå, ønsket oppførsel er fortsatt ukjent",
+                nå = {},
+                ønsket = { fail("""\_(ツ)_/¯""") }
+            )
         }
     }
 

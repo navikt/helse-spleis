@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import kotlin.math.roundToInt
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
@@ -82,7 +82,6 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsopplysning
-import no.nav.helse.person.inntekt.NyInntektUnderveis
 import no.nav.helse.person.view.PersonView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -421,11 +420,6 @@ class Person private constructor(
 
     fun håndter(påminnelse: PersonPåminnelse, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler personpåminnelse")
-        val harAktivPeriode: (skjæringstidspunkt: LocalDate, periode: Periode) -> Boolean = { skjæringstidspunkt, periode ->
-            arbeidsgivere.vedtaksperioder { it.skjæringstidspunkt == skjæringstidspunkt && it.periode.overlapperMed(periode) }.isNotEmpty()
-        }
-        vilkårsgrunnlagHistorikk.loggTilkommendeInntekter(aktivitetslogg, harAktivPeriode)
-
         håndterGjenoppta(påminnelse, aktivitetslogg)
     }
 
@@ -682,25 +676,6 @@ class Person private constructor(
         observers.forEach {
             it.søknadHåndtert(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
         }
-    }
-
-    internal fun oppdaterVilkårsgrunnlagMedInntektene(
-        skjæringstidspunkt: LocalDate,
-        aktivitetslogg: IAktivitetslogg,
-        periode: Periode,
-        nyeInntekter: List<NyInntektUnderveis>,
-        subsumsjonslogg: Subsumsjonslogg
-    ) {
-        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
-        if (grunnlag == null) {
-            aktivitetslogg.info("Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt")
-            return
-        }
-        nyeInntekter.forEach { inntekt ->
-            finnEllerOpprettArbeidsgiver(inntekt.orgnummer.tilYrkesaktivitet(), aktivitetslogg)
-        }
-        val nyttGrunnlag = grunnlag.tilkomneInntekterFraSøknaden(aktivitetslogg, periode, nyeInntekter, subsumsjonslogg) ?: return
-        nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
     }
 
     internal fun nyeArbeidsgiverInntektsopplysninger(

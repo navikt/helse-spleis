@@ -6,7 +6,6 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
@@ -23,9 +22,8 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.beløp.Beløpsdag
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.økonomi.Inntekt.Companion.K
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -34,6 +32,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
@@ -74,145 +73,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             assertUtbetalingsbeløp(2.vedtaksperiode, 1231, 1431, subset = 1.februar til 28.februar)
             assertUtbetalingsbeløp(3.vedtaksperiode, 1431, 1431, subset = 1.mars til 31.mars)
 
-            inspektør.vilkårsgrunnlag(3.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
-                assertEquals(1, tilkommendeInntekter.size)
-                assertEquals(a2, tilkommendeInntekter.single().orgnummer)
-                assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
+            a2 {
+                assertBeløpstidslinje(inspektør(1.vedtaksperiode).inntektsendringer, februar, 181.daglig)
+                assertEquals(1, inspektør.vedtaksperiodeTeller)
             }
-        }
-    }
-
-    @Test
-    fun `overstyrer tilkommen inntekt`() {
-        a1 {
-            nyttVedtak(januar)
-            håndterSøknad(
-                Sykdom(1.februar, 28.februar, 100.prosent),
-                inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000))
-            )
-            assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-            håndterUtbetalt()
-            assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
-            assertUtbetalingsbeløp(2.vedtaksperiode, 1231, 1431, subset = 1.februar til 28.februar)
-            inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
-                assertEquals(1, tilkommendeInntekter.size)
-                assertEquals(a2, tilkommendeInntekter.single().orgnummer)
-                assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
-                assertEquals(200.daglig, tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp)
-            }
-            håndterOverstyrArbeidsgiveropplysninger(
-                skjæringstidspunkt = 1.januar,
-                arbeidsgiveropplysninger = listOf(
-                    OverstyrtArbeidsgiveropplysning(
-                        orgnummer = a2,
-                        inntekt = 250.daglig,
-                        gjelder = 1.februar til 28.februar
-                    )
-                )
-            )
-            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
-            assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
-            håndterYtelser(2.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
-            assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
-            assertUtbetalingsbeløp(2.vedtaksperiode, 1181, 1431, subset = 1.februar til 28.februar)
-            inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
-                assertEquals(1, tilkommendeInntekter.size)
-                assertEquals(a2, tilkommendeInntekter.single().orgnummer)
-                assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
-                assertEquals(250.daglig, tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp)
-            }
-        }
-    }
-
-    @Test
-    fun `overstyrer seneste tilkommen inntekt`() {
-        a1 {
-            nyttVedtak(januar)
-            håndterSøknad(
-                Sykdom(1.februar, 28.februar, 100.prosent),
-                inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(fom = 1.februar, tom = 28.februar, orgnummer = a2, råttBeløp = 4000))
-            )
-            assertVarsel(Varselkode.RV_SV_5, 2.vedtaksperiode.filter())
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-            håndterUtbetalt()
-            håndterSøknad(
-                Sykdom(1.mars, 31.mars, 100.prosent),
-                inntekterFraNyeArbeidsforhold = listOf(
-                    InntektFraNyttArbeidsforhold(fom = 1.mars, tom = 31.mars, orgnummer = a2, råttBeløp = 8000)
-                )
-            )
-            assertVarsel(Varselkode.RV_SV_5, 3.vedtaksperiode.filter())
-            håndterYtelser(3.vedtaksperiode)
-            håndterSimulering(3.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
-            håndterUtbetalt()
-            inspektør.vilkårsgrunnlag(3.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
-                assertEquals(1, tilkommendeInntekter.size)
-                assertEquals(a2, tilkommendeInntekter.single().orgnummer)
-                assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
-                assertEquals(200.daglig, tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp)
-                assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.mars])
-                assertEquals(363.daglig, tilkommendeInntekter.single().beløpstidslinje[1.mars].beløp)
-            }
-            håndterOverstyrArbeidsgiveropplysninger(
-                skjæringstidspunkt = 1.januar,
-                arbeidsgiveropplysninger = listOf(
-                    OverstyrtArbeidsgiveropplysning(
-                        orgnummer = a2,
-                        inntekt = 400.daglig,
-                        gjelder = 1.mars til 31.mars
-                    )
-                )
-            )
-            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
-            assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET)
-            assertSisteTilstand(3.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
-            inspektør.vilkårsgrunnlag(3.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
-                assertEquals(1, tilkommendeInntekter.size)
-                assertEquals(a2, tilkommendeInntekter.single().orgnummer)
-                assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
-                assertEquals(200.daglig, tilkommendeInntekter.single().beløpstidslinje[1.februar].beløp)
-                assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.mars])
-                assertEquals(400.daglig, tilkommendeInntekter.single().beløpstidslinje[1.mars].beløp)
-            }
-        }
-    }
-
-    @Test
-    fun `overstyre inn tilkommen inntekt fra blanke ark`() {
-        a1 {
-            nyttVedtak(januar)
-            håndterOverstyrArbeidsgiveropplysninger(
-                skjæringstidspunkt = 1.januar,
-                arbeidsgiveropplysninger = listOf(
-                    OverstyrtArbeidsgiveropplysning(
-                        orgnummer = a2,
-                        inntekt = 400.daglig,
-                        gjelder = 5.januar til 31.januar
-                    )
-                )
-            )
-            assertForventetFeil(
-                forklaring = "Tilkommen inntekt kan dukke opp om informasjonen er tilgjengelig for saxbehandler senere enn når søknaden blir sendt",
-                nå = {
-                    inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
-                        assertEquals(0, tilkommendeInntekter.size)
-                    }
-                },
-                ønsket = {
-                    inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
-                        assertEquals(1, tilkommendeInntekter.size)
-                        assertEquals(a2, tilkommendeInntekter.single().orgnummer)
-                        assertEquals(400.daglig, tilkommendeInntekter.single().beløpstidslinje[5.januar].beløp)
-                    }
-                }
-            )
         }
     }
 
@@ -250,18 +114,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
 
             assertForventetFeil(
                 forklaring = "søknad for februar uten tilkommet inntekt fjerner inntektene fra vilkårsgrunnlaget",
-                nå = {
-                    inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
-                        assertEquals(0, tilkommendeInntekter.size)
-                    }
-                },
-                ønsket = {
-                    inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inntektsgrunnlag.inspektør.tilkommendeInntekter.also { tilkommendeInntekter ->
-                        assertEquals(1, tilkommendeInntekter.size)
-                        assertEquals(a3, tilkommendeInntekter.single().orgnummer)
-                        assertInstanceOf<Beløpsdag>(tilkommendeInntekter.single().beløpstidslinje[1.februar])
-                    }
-                }
+                nå = {},
+                ønsket = { fail("""\_(ツ)_/¯""") }
             )
         }
 

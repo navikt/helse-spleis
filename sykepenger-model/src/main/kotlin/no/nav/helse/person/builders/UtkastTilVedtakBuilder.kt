@@ -145,11 +145,6 @@ internal class UtkastTilVedtakBuilder(
         arbeidsgiverinntekter.add(Arbeidsgiverinntekt(arbeidsgiver, omregnedeÅrsinntekt.årlig, skjønnsfastsatt?.årlig, inntektskilde))
     }
 
-    private val tilkomneArbeidsgivere = mutableSetOf<String>()
-    internal fun tilkommetInntekt(arbeidsgiver: String) {
-        tilkomneArbeidsgivere.add(arbeidsgiver)
-    }
-
     private val build by lazy { Build() }
     internal fun buildGodkjenningsbehov() = build.godkjenningsbehov
     internal fun buildUtkastTilVedtak() = build.utkastTilVedtak
@@ -162,8 +157,7 @@ internal class UtkastTilVedtakBuilder(
 
         init {
             check(arbeidsgiverinntekter.isNotEmpty()) { "Forventet ikke at det ikke er noen arbeidsgivere i sykepengegrunnlaget." }
-            if (tilkomneArbeidsgivere.isNotEmpty()) tags.add(Tag.TilkommenInntekt)
-            if (arbeidsgiverinntekter.size + tilkomneArbeidsgivere.size == 1) tags.add(Tag.EnArbeidsgiver) else tags.add(Tag.FlereArbeidsgivere)
+            if (arbeidsgiverinntekter.size == 1) tags.add(Tag.EnArbeidsgiver) else tags.add(Tag.FlereArbeidsgivere)
             if (arbeidsgiverinntekter.single { it.arbeidsgiver == arbeidsgiver }.inntektskilde == Inntektskilde.AOrdningen) tags.add(Tag.InntektFraAOrdningenLagtTilGrunn)
         }
 
@@ -350,7 +344,7 @@ internal class UtkastTilVedtakBuilder(
         Avslag,
         DelvisInnvilget,
         Innvilget,
-        TilkommenInntekt,
+        TilkommenInntekt, // TODO: TilkommenV3 legge på denne etterhvert
         Ferie,
         InntektFraAOrdningenLagtTilGrunn,
     }

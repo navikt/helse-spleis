@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.nesteDag
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.beløp.UkjentDag
 import no.nav.helse.person.inntekt.Inntektstidslinje
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -18,7 +17,6 @@ import no.nav.helse.økonomi.Økonomi
 internal class VilkårsprøvdSkjæringstidspunkt(
     internal val `6G`: Inntekt,
     inntekter: List<FaktaavklartInntekt>,
-    val tilkommendeInntekter: List<NyInntektUnderveis>,
     val deaktiverteArbeidsforhold: List<String>
 ) {
     private val inntekterFraInntektsgrunnlaget = inntekter.associate { inntekt -> inntekt.organisasjonsnummer to inntekt.fastsattÅrsinntekt }
@@ -36,16 +34,14 @@ internal class VilkårsprøvdSkjæringstidspunkt(
             beregnedetidslinjer.fold(ghosttidslinje, Utbetalingstidslinje::plus)
         }
 
-        val tilkomneV2 = nyeInntekterUnderveis(beregningsperiode)
-
         // Lager Utbetalingstidslinje for arbeidsgiverne som ikke er i inntektsgrunnlaget (tilkommen)
         // Her er ikke ghosttidslinjer aktuelt ettersom ghost må være i inntektsgrunnlaget (på skjæringstidspunktet)
-        val tilkomneV3 = utbetalingstidslinjer
+        val tilkomneInntekter = utbetalingstidslinjer
             .filterKeys { orgnr -> orgnr !in inntekterFraInntektsgrunnlaget.keys }
             .mapValues { (_, utbetalingstidslinjer) -> utbetalingstidslinjer.reduce(Utbetalingstidslinje::plus) }
             .filterValues { it.isNotEmpty() }
 
-        return fraInntektsgrunnlag + tilkomneV2 + tilkomneV3
+        return fraInntektsgrunnlag + tilkomneInntekter
     }
 
     private fun ghosttidslinje(beregningsperiode: Periode, fastsattÅrsinntekt: Inntekt, `6G`: Inntekt, arbeidsgiverlinjer: List<Utbetalingstidslinje>): Utbetalingstidslinje {
@@ -72,41 +68,9 @@ internal class VilkårsprøvdSkjæringstidspunkt(
         }
     }
 
-    private fun nyeInntekterUnderveis(beregningsperiode: Periode): Map<String, Utbetalingstidslinje> {
-        val tilkommendeInntekterTidslinje = tilkommendeInntekter.associate { nyInntekt ->
-            val tilkommenInntektTidslinje = Utbetalingstidslinje.Builder().apply {
-                beregningsperiode.forEach { dato ->
-                    when (val beløpsdag = nyInntekt.beløpstidslinje[dato]) {
-                        is Beløpsdag -> {
-                            addArbeidsdag(
-                                dato, Økonomi.ikkeBetalt().inntekt(
-                                aktuellDagsinntekt = beløpsdag.beløp,
-                                beregningsgrunnlag = INGEN,
-                                `6G` = `6G`,
-                                refusjonsbeløp = INGEN
-                            )
-                            )
-                        }
-
-                        is UkjentDag -> {
-                            addArbeidsdag(dato, Økonomi.ikkeBetalt())
-                        }
-                    }
-                }
-            }.build()
-            nyInntekt.orgnummer to tilkommenInntektTidslinje
-        }
-        return tilkommendeInntekterTidslinje
-    }
-
     data class FaktaavklartInntekt(
         val organisasjonsnummer: String,
         val fastsattÅrsinntekt: Inntekt
-    )
-
-    data class NyInntektUnderveis(
-        val orgnummer: String,
-        val beløpstidslinje: Beløpstidslinje
     )
 }
 

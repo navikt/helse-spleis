@@ -786,7 +786,6 @@ private fun InntektsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagE
     grunnbeløp = this.`6G`.årlig.beløp,
     arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilPersonData() },
     deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilPersonData() },
-    tilkommendeInntekter = this.tilkommendeInntekter.map { it.tilPersonData() },
     vurdertInfotrygd = this.vurdertInfotrygd
 )
 

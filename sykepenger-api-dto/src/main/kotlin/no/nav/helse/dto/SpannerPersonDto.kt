@@ -120,7 +120,6 @@ data class SpannerPersonDto(
             val grunnbeløp: Double?,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
-            val tilkommendeInntekter: List<NyInntektUnderveisData>,
             val vurdertInfotrygd: Boolean,
             val totalOmregnetÅrsinntekt: InntektbeløpDto.Årlig,
             val beregningsgrunnlag: InntektbeløpDto.Årlig,
@@ -358,6 +357,7 @@ data class SpannerPersonDto(
             private val sisteBehandlingId: UUID?,
             private val sisteRefusjonstidslinje: BeløpstidslinjeData?
         ) {
+            @Suppress("unused", "Denne vises i Spanner sånn at man slipper å gå på siste behandling på siste endring")
             val gjeldende = behandlinger.last().let { behandling ->
                 behandling.endringer.last().let { gjeldendeEndring ->
                     Gjeldende(
@@ -1525,7 +1525,6 @@ private fun InntektsgrunnlagUtDto.tilPersonData() =
         grunnbeløp = this.`6G`.årlig.beløp,
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilPersonData() },
         deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilPersonData() },
-        tilkommendeInntekter = this.tilkommendeInntekter.map { it.tilPersonData() },
         vurdertInfotrygd = this.vurdertInfotrygd,
         totalOmregnetÅrsinntekt = totalOmregnetÅrsinntekt.årlig,
         beregningsgrunnlag = beregningsgrunnlag.årlig,

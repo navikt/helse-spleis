@@ -1,14 +1,15 @@
 package no.nav.helse.spleis.speil.builders
 
 import java.time.LocalDate
-import java.util.*
+import java.util.LinkedList
+import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
+import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
-import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.SaksbehandlerUtDto
 import no.nav.helse.dto.serialisering.SkjønnsmessigFastsattUtDto
@@ -20,7 +21,6 @@ import no.nav.helse.spleis.speil.dto.NyttInntektsforholdPeriodeDTO
 import no.nav.helse.spleis.speil.dto.SkjønnsmessigFastsattDTO
 import no.nav.helse.spleis.speil.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
 internal abstract class IVilkårsgrunnlag(
@@ -219,17 +219,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             beregningsgrunnlag = grunnlagsdata.inntektsgrunnlag.beregningsgrunnlag.årlig.beløp,
             omregnetÅrsinntekt = grunnlagsdata.inntektsgrunnlag.totalOmregnetÅrsinntekt.årlig.beløp,
             inntekter = inntekter(grunnlagsdata.inntektsgrunnlag),
-            nyeInntekterUnderveis = grunnlagsdata.inntektsgrunnlag.tilkommendeInntekter.flatMap { nyInntekt ->
-                nyInntekt.beløpstidslinje.perioder.map { nyInntektperiode ->
-                    INyInntektUnderveis(
-                        arbeidsgiver = nyInntekt.orgnummer,
-                        fom = nyInntektperiode.fom,
-                        tom = nyInntektperiode.tom,
-                        dagligbeløp = nyInntektperiode.dagligBeløp,
-                        månedligBeløp = nyInntektperiode.dagligBeløp.daglig.månedlig,
-                    )
-                }
-            },
+            nyeInntekterUnderveis = emptyList(), // TODO TilkommenV3 må finne ut om dette kan fjernes
             sykepengegrunnlag = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag.årlig.beløp,
             grunnbeløp = begrensning.grunnbeløp,
             sykepengegrunnlagsgrense = begrensning,

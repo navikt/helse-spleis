@@ -11,7 +11,6 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-10 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-51 ledd 2`
-import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
@@ -23,8 +22,6 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
-import no.nav.helse.person.beløp.Beløpsdag
-import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.berik
@@ -45,21 +42,16 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.vali
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTRYGD
-import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.finnEndringsdato
-import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.merge
-import no.nav.helse.person.inntekt.NyInntektUnderveis.Companion.overstyrMedSaksbehandler
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
 internal class Inntektsgrunnlag private constructor(
     private val alder: Alder,
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
-    private val tilkommendeInntekter: List<NyInntektUnderveis>,
     private val vurdertInfotrygd: Boolean,
     `6G`: Inntekt? = null
 ) : Comparable<Inntekt> {
@@ -88,7 +80,7 @@ internal class Inntektsgrunnlag private constructor(
         skjæringstidspunkt: LocalDate,
         subsumsjonslogg: Subsumsjonslogg,
         vurdertInfotrygd: Boolean = false
-    ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, emptyList(), emptyList(), vurdertInfotrygd) {
+    ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, emptyList(), vurdertInfotrygd) {
         subsumsjonslogg.apply {
             logg(
                 `§ 8-10 ledd 2 punktum 1`(
@@ -159,7 +151,7 @@ internal class Inntektsgrunnlag private constructor(
             vurdertInfotrygd: Boolean,
             `6G`: Inntekt? = null
         ): Inntektsgrunnlag {
-            return Inntektsgrunnlag(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, emptyList(), vurdertInfotrygd, `6G`)
+            return Inntektsgrunnlag(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd, `6G`)
         }
 
         fun gjenopprett(alder: Alder, skjæringstidspunkt: LocalDate, dto: InntektsgrunnlagInnDto): Inntektsgrunnlag {
@@ -168,7 +160,6 @@ internal class Inntektsgrunnlag private constructor(
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiverInntektsopplysninger = dto.arbeidsgiverInntektsopplysninger.map { ArbeidsgiverInntektsopplysning.gjenopprett(it) },
                 deaktiverteArbeidsforhold = dto.deaktiverteArbeidsforhold.map { ArbeidsgiverInntektsopplysning.gjenopprett(it) },
-                tilkommendeInntekter = dto.tilkommendeInntekter.map { NyInntektUnderveis.gjenopprett(it) },
                 vurdertInfotrygd = dto.vurdertInfotrygd,
                 `6G` = Inntekt.gjenopprett(dto.`6G`)
             )
@@ -219,8 +210,7 @@ internal class Inntektsgrunnlag private constructor(
         oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav,
         arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
         deaktiverteArbeidsgiverInntektsopplysninger = deaktiverteArbeidsforhold,
-        deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.map { it.orgnummer },
-        tilkommendeInntekter = tilkommendeInntekter
+        deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.map { it.orgnummer }
     )
 
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
@@ -266,27 +256,12 @@ internal class Inntektsgrunnlag private constructor(
 
     internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonslogg: Subsumsjonslogg): EndretInntektsgrunnlag? {
         val resultat = this.arbeidsgiverInntektsopplysninger.overstyrMedSaksbehandler(hendelse.arbeidsgiveropplysninger)
-        val kilde = Kilde(hendelse.metadata.meldingsreferanseId, Avsender.SAKSBEHANDLER, hendelse.metadata.registrert)
-        return lagEndring(resultat, subsumsjonslogg, tilkommendeInntekter.overstyrMedSaksbehandler(kilde, skjæringstidspunkt, hendelse.arbeidsgiveropplysninger))
+        return lagEndring(resultat, subsumsjonslogg)
     }
 
     internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, subsumsjonslogg: Subsumsjonslogg): EndretInntektsgrunnlag? {
         val resultat = this.arbeidsgiverInntektsopplysninger.skjønnsfastsett(hendelse.arbeidsgiveropplysninger)
         return lagEndring(resultat, subsumsjonslogg)
-    }
-
-    internal fun tilkomneInntekterFraSøknaden(søknad: IAktivitetslogg, periode: Periode, nyeInntekter: List<NyInntektUnderveis>, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag? {
-        if (this.tilkommendeInntekter.isEmpty() && nyeInntekter.isEmpty()) return null
-        return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, tilkommendeInntekter = this.tilkommendeInntekter.merge(periode, nyeInntekter))
-    }
-
-    internal fun harTilkommendeInntekter(periode: Periode) = tilkommendeInntekter.any { it.beløpstidslinje.subset(periode).isNotEmpty() }
-
-    internal fun harTilkommendeInntekter() = tilkommendeInntekter.isNotEmpty()
-    internal fun periodeMedTilkommendeInntekter(): Periode? {
-        val beløpsdager = tilkommendeInntekter.flatMap { it.beløpstidslinje.filterIsInstance<Beløpsdag>() }.filter { it.beløp > INGEN }
-        if (beløpsdager.isEmpty()) return null
-        return beløpsdager.minOf { it.dato } til beløpsdager.maxOf { it.dato }
     }
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
@@ -298,8 +273,8 @@ internal class Inntektsgrunnlag private constructor(
         return lagEndring(resultat, subsumsjonslogg)
     }
 
-    private fun lagEndring(nyeInntekter: List<ArbeidsgiverInntektsopplysning>, subsumsjonslogg: Subsumsjonslogg, nyeInntekterUnderveis: List<NyInntektUnderveis> = tilkommendeInntekter): EndretInntektsgrunnlag? {
-        val nyttInntektsgrunnlag = kopierSykepengegrunnlagOgValiderMinsteinntekt(nyeInntekter, deaktiverteArbeidsforhold, nyeInntekterUnderveis, subsumsjonslogg)
+    private fun lagEndring(nyeInntekter: List<ArbeidsgiverInntektsopplysning>, subsumsjonslogg: Subsumsjonslogg): EndretInntektsgrunnlag? {
+        val nyttInntektsgrunnlag = kopierSykepengegrunnlagOgValiderMinsteinntekt(nyeInntekter, deaktiverteArbeidsforhold, subsumsjonslogg)
         val endringFom = nyttInntektsgrunnlag.finnEndringsdato(this) ?: return null
         return EndretInntektsgrunnlag(
             inntekter = nyeInntekter.mapNotNull { potensiellEndret ->
@@ -320,10 +295,9 @@ internal class Inntektsgrunnlag private constructor(
     private fun kopierSykepengegrunnlagOgValiderMinsteinntekt(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
-        tilkommendeInntekter: List<NyInntektUnderveis>,
         subsumsjonslogg: Subsumsjonslogg
     ): Inntektsgrunnlag {
-        return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, tilkommendeInntekter = tilkommendeInntekter).apply {
+        return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold).apply {
             subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, subsumsjonslogg)
         }
     }
@@ -331,14 +305,12 @@ internal class Inntektsgrunnlag private constructor(
     private fun kopierSykepengegrunnlag(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
-        nyttSkjæringstidspunkt: LocalDate = skjæringstidspunkt,
-        tilkommendeInntekter: List<NyInntektUnderveis> = this.tilkommendeInntekter
+        nyttSkjæringstidspunkt: LocalDate = skjæringstidspunkt
     ) = Inntektsgrunnlag(
         alder = alder,
         skjæringstidspunkt = nyttSkjæringstidspunkt,
         arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
         deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
-        tilkommendeInntekter = tilkommendeInntekter,
         vurdertInfotrygd = vurdertInfotrygd
     )
 
@@ -364,18 +336,16 @@ internal class Inntektsgrunnlag private constructor(
             seksG = `6G`,
             inngangsvilkårFraInfotrygd = vurdertInfotrygd
         )
-        tilkommendeInntekter.forEach { builder.tilkommetInntekt(it.orgnummer) }
         arbeidsgiverInntektsopplysninger.berik(builder)
     }
 
     override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
     internal fun er6GBegrenset() = begrensning == ER_6G_BEGRENSET
-    internal fun finnEndringsdato(other: Inntektsgrunnlag): LocalDate? {
+    private fun finnEndringsdato(other: Inntektsgrunnlag): LocalDate? {
         check(this.skjæringstidspunkt == other.skjæringstidspunkt) {
             "Skal bare sammenlikne med samme skjæringstidspunkt"
         }
         return arbeidsgiverInntektsopplysninger.finnEndringsdato(other.arbeidsgiverInntektsopplysninger)
-            ?: tilkommendeInntekter.finnEndringsdato(other.tilkommendeInntekter)
     }
 
     fun harGjenbrukbarInntekt(organisasjonsnummer: String) =
@@ -392,7 +362,6 @@ internal class Inntektsgrunnlag private constructor(
     internal fun dto() = InntektsgrunnlagUtDto(
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.dto() },
         deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.dto() },
-        tilkommendeInntekter = this.tilkommendeInntekter.map { it.dto() },
         vurdertInfotrygd = this.vurdertInfotrygd,
         `6G` = this.`6G`.dto(),
         sykepengegrunnlag = this.sykepengegrunnlag.dto(),
@@ -407,7 +376,6 @@ internal class Inntektsgrunnlag private constructor(
     internal fun faktaavklarteInntekter() = VilkårsprøvdSkjæringstidspunkt(
         `6G` = `6G`,
         inntekter = arbeidsgiverInntektsopplysninger.faktaavklarteInntekter(),
-        tilkommendeInntekter = this.tilkommendeInntekter.map { VilkårsprøvdSkjæringstidspunkt.NyInntektUnderveis(it.orgnummer, it.beløpstidslinje) },
         deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.orgnummer }
     )
 }
@@ -435,6 +403,5 @@ internal data class InntektsgrunnlagView(
     val oppfyllerMinsteinntektskrav: Boolean,
     val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     val deaktiverteArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-    val deaktiverteArbeidsforhold: List<String>,
-    val tilkommendeInntekter: List<NyInntektUnderveis>
+    val deaktiverteArbeidsforhold: List<String>
 )
