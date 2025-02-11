@@ -13,6 +13,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -22,6 +23,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
@@ -81,7 +83,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
 
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+            assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -131,7 +133,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
 
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+            assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -164,7 +166,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
 
         a1 {
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+            assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -231,6 +233,43 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             }
         }
     }
+
+    @Test
+    fun `Litt snedig at det er mulig å deaktivere en arbeidsgiver som er skjønnsmessig fastsatt?`() {
+        (a1 og a2).nyeVedtak(januar, inntekt = 20_000.månedlig)
+        a1 {
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(
+                OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = 40_000.månedlig),
+                OverstyrtArbeidsgiveropplysning(orgnummer = a2, inntekt = 40_000.månedlig),
+            ))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertInntektsgrunnlag(1.januar, 2) {
+                assertInntektsgrunnlag(a1, 20_000.månedlig, forventetFastsattÅrsinntekt = 40_000.månedlig)
+                assertInntektsgrunnlag(a2, 20_000.månedlig, forventetFastsattÅrsinntekt = 40_000.månedlig)
+            }
+        }
+        a1 {
+            håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, true, "foo"))
+            håndterYtelser(1.vedtaksperiode)
+            assertInntektsgrunnlag(1.januar, 2) {
+                assertInntektsgrunnlag(a1, 20_000.månedlig, forventetFastsattÅrsinntekt = 40_000.månedlig)
+                assertInntektsgrunnlag(a2, 20_000.månedlig, forventetFastsattÅrsinntekt = 40_000.månedlig, deaktivert = true)
+            }
+        }
+        a2 {
+            assertVarsler(1.vedtaksperiode, RV_UT_23)
+        }
+    }
+
 
     @Test
     fun `saksbehandler-inntekt overstyres av en skjønnsmessig med samme beløp`() {
@@ -370,7 +409,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
                 listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag, 100))
             )
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+            assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
