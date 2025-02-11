@@ -86,8 +86,6 @@ internal data class ArbeidsgiverInntektsopplysning(
         )
     }
 
-    private fun rullTilbake() = copy(skjønnsmessigFastsatt = null)
-
     private fun deaktiver(
         forklaring: String,
         oppfylt: Boolean,
@@ -114,6 +112,8 @@ internal data class ArbeidsgiverInntektsopplysning(
     }
 
     internal companion object {
+        private fun List<ArbeidsgiverInntektsopplysning>.rullTilbakeSkjønnsmessigFastsatt() = map { it.copy(skjønnsmessigFastsatt = null) }
+
         internal fun List<ArbeidsgiverInntektsopplysning>.faktaavklarteInntekter() = this
             .map { arbeidsgiverInntektsopplysning ->
                 VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt(
@@ -135,7 +135,7 @@ internal data class ArbeidsgiverInntektsopplysning(
             forklaring: String,
             subsumsjonslogg: Subsumsjonslogg
         ) =
-            this.fjernInntekt(deaktiverte, orgnummer, forklaring, true, subsumsjonslogg)
+            rullTilbakeSkjønnsmessigFastsatt().fjernInntekt(deaktiverte, orgnummer, forklaring, true, subsumsjonslogg)
 
         internal fun List<ArbeidsgiverInntektsopplysning>.aktiver(
             aktiveres: List<ArbeidsgiverInntektsopplysning>,
@@ -143,7 +143,7 @@ internal data class ArbeidsgiverInntektsopplysning(
             forklaring: String,
             subsumsjonslogg: Subsumsjonslogg
         ): Pair<List<ArbeidsgiverInntektsopplysning>, List<ArbeidsgiverInntektsopplysning>> {
-            val (deaktiverte, aktiverte) = this.fjernInntekt(aktiveres, orgnummer, forklaring, false, subsumsjonslogg)
+            val (deaktiverte, aktiverte) = rullTilbakeSkjønnsmessigFastsatt().fjernInntekt(aktiveres, orgnummer, forklaring, false, subsumsjonslogg)
             // Om inntektene i sykepengegrunnlaget var skjønnsmessig fastsatt før aktivering sikrer vi at alle "rulles tilbake" slik at vi ikke lager et sykepengegrunnlag med mix av SkjønnsmessigFastsatt & andre inntektstyper.
             return deaktiverte to aktiverte.map { it.copy(skjønnsmessigFastsatt = null) }
         }
@@ -170,7 +170,7 @@ internal data class ArbeidsgiverInntektsopplysning(
         ): List<ArbeidsgiverInntektsopplysning> {
             val endringen = this.map { inntekt -> inntekt.overstyrMedInntektsmelding(organisasjonsnummer, nyInntekt) }
             if (skalSkjønnsmessigFastsattRullesTilbake(endringen)) {
-                return endringen.map { it.rullTilbake() }
+                return endringen.rullTilbakeSkjønnsmessigFastsatt()
             }
             return endringen
         }
@@ -180,7 +180,7 @@ internal data class ArbeidsgiverInntektsopplysning(
         ): List<ArbeidsgiverInntektsopplysning> {
             val endringen = this.map { inntekt -> inntekt.overstyrMedSaksbehandler(other) }
             if (skalSkjønnsmessigFastsattRullesTilbake(endringen)) {
-                return endringen.map { it.rullTilbake() }
+                return endringen.rullTilbakeSkjønnsmessigFastsatt()
             }
             return endringen
         }
