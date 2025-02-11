@@ -247,6 +247,9 @@
                   "refusjonstidslinje": {
                     "perioder": []
                   },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
                   "dokumentsporing": {
                     "dokumentId": "befbc8c7-b284-4d62-9d50-c673c28b699e",
                     "dokumenttype": "Søknad"
@@ -306,6 +309,9 @@
                   "refusjonstidslinje": {
                     "perioder": []
                   },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
                   "dokumentsporing": {
                     "dokumentId": "7d228eea-34b8-45f5-823f-cb8d63b27268",
                     "dokumenttype": "InntektsmeldingDager"
@@ -363,6 +369,9 @@
                     "dager": []
                   },
                   "refusjonstidslinje": {
+                    "perioder": []
+                  },
+                  "inntektsendringer": {
                     "perioder": []
                   },
                   "dokumentsporing": {
@@ -536,6 +545,9 @@
                       }
                     ]
                   },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
                   "dokumentsporing": {
                     "dokumentId": "7d228eea-34b8-45f5-823f-cb8d63b27268",
                     "dokumenttype": "InntektsmeldingInntekt"
@@ -632,6 +644,9 @@
                   "refusjonstidslinje": {
                     "perioder": []
                   },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
                   "dokumentsporing": {
                     "dokumentId": "7d228eea-34b8-45f5-823f-cb8d63b27268",
                     "dokumenttype": "InntektsmeldingDager"
@@ -691,6 +706,9 @@
                   "refusjonstidslinje": {
                     "perioder": []
                   },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
                   "dokumentsporing": {
                     "dokumentId": "7d228eea-34b8-45f5-823f-cb8d63b27268",
                     "dokumenttype": "InntektsmeldingInntekt"
@@ -748,6 +766,9 @@
                     "dager": []
                   },
                   "refusjonstidslinje": {
+                    "perioder": []
+                  },
+                  "inntektsendringer": {
                     "perioder": []
                   },
                   "dokumentsporing": {
@@ -988,6 +1009,9 @@
                         "tidsstempel": "2022-08-31T10:10:43.425835"
                       }
                     ]
+                  },
+                  "inntektsendringer": {
+                    "perioder": []
                   },
                   "dokumentsporing": {
                     "dokumentId": "2b632e9a-5bd4-48cb-b9be-c0a8b51975cb",

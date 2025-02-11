@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import kotlin.streams.asSequence
 import no.nav.helse.dto.AlderDto
 import no.nav.helse.dto.ArbeidsforholdDto
@@ -875,7 +875,7 @@ data class PersonData(
                     val sykdomstidslinje: SykdomstidslinjeData,
                     val utbetalingstidslinje: UtbetalingstidslinjeData,
                     val refusjonstidslinje: BeløpstidslinjeData,
-                    val inntektsendringer: BeløpstidslinjeData?, // todo: fjerne null
+                    val inntektsendringer: BeløpstidslinjeData,
                     val dokumentsporing: DokumentsporingData,
                     val arbeidsgiverperioder: List<PeriodeData>,
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
@@ -892,7 +892,7 @@ data class PersonData(
                         sykdomstidslinje = this.sykdomstidslinje.tilDto(),
                         utbetalingstidslinje = this.utbetalingstidslinje.tilDto(),
                         refusjonstidslinje = this.refusjonstidslinje.tilDto(),
-                        inntektsendringer = this.inntektsendringer?.tilDto() ?: BeløpstidslinjeDto(emptyList()),
+                        inntektsendringer = this.inntektsendringer.tilDto(),
                         skjæringstidspunkt = skjæringstidspunkt,
                         skjæringstidspunkter = skjæringstidspunkter,
                         arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() },

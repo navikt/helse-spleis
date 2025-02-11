@@ -167,6 +167,9 @@
                   "refusjonstidslinje": {
                     "perioder": []
                   },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
                   "dokumentsporing": {
                     "dokumentId": "6c9d8b03-e3e3-4a7f-9056-b0d7535bd28e",
                     "dokumenttype": "Søknad"
@@ -388,6 +391,9 @@
                         "tidsstempel": "2022-08-31T09:52:08.472441"
                       }
                     ]
+                  },
+                  "inntektsendringer": {
+                    "perioder": []
                   },
                   "dokumentsporing": {
                     "dokumentId": "6c9d8b03-e3e3-4a7f-9056-b0d7535bd28e",
