@@ -28,7 +28,7 @@ internal class PåminnelserRiver(
         message.require("påminnelsestidspunkt", JsonNode::asLocalDateTime)
         message.require("nestePåminnelsestidspunkt", JsonNode::asLocalDateTime)
         message.requireAny("tilstand", TilstandType.entries.map(Enum<*>::name))
-        message.interestedIn("ønskerReberegning", "flagg")
+        message.interestedIn("flagg")
     }
 
     override fun createMessage(packet: JsonMessage) = PåminnelseMessage(

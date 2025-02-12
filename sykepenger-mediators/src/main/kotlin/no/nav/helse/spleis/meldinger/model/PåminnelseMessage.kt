@@ -18,10 +18,7 @@ internal class PåminnelseMessage(packet: JsonMessage, override val meldingspori
     private val tilstandsendringstidspunkt = packet["tilstandsendringstidspunkt"].asLocalDateTime()
     private val påminnelsestidspunkt = packet["påminnelsestidspunkt"].asLocalDateTime()
     private val nestePåminnelsestidspunkt = packet["nestePåminnelsestidspunkt"].asLocalDateTime()
-    private val ønskerReberegning = packet["ønskerReberegning"].takeIf { it.isBoolean }?.booleanValue() ?: false
-    private val flagg = packet["flagg"].map { it.asText() }.toMutableList().apply {
-        if (ønskerReberegning) add("ønskerReberegning") // TODO: Bakoverkompatibel med Spock / Spout - må endre til å sette flagget der så kan vi jo fjerne denna
-    }.toSet()
+    private val flagg = packet["flagg"].map { it.asText() }.toSet()
 
     private val påminnelse
         get() = Påminnelse(
