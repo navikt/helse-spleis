@@ -324,6 +324,7 @@ data class SpannerPersonDto(
             val refusjonstidslinje: List<BeløpstidslinjeperiodeData>,
             val inntektsendringer: List<BeløpstidslinjeperiodeData>,
             val refusjonstidslinjeHensyntattUbrukteRefusjonsopplysninger: List<BeløpstidslinjeperiodeData>,
+            val dagerNavOvertarAnsvar: List<PeriodeData>,
             val utbetalingstidslinje: List<Any>,
             val arbeidsgiverperiode: List<PeriodeData>,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
@@ -368,7 +369,8 @@ data class SpannerPersonDto(
                         sykdomstidslinje = gjeldendeEndring.sykdomstidslinje.dager,
                         arbeidsgiverInntektsopplysninger = vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger ?: emptyList(),
                         personOppdrag = utbetaling?.personOppdrag?.takeUnless { it.linjer.isEmpty() },
-                        arbeidsgiverOppdrag = utbetaling?.arbeidsgiverOppdrag?.takeUnless { it.linjer.isEmpty() }
+                        arbeidsgiverOppdrag = utbetaling?.arbeidsgiverOppdrag?.takeUnless { it.linjer.isEmpty() },
+                        dagerNavOvertarAnsvar = gjeldendeEndring.dagerNavOvertarAnsvar
                     )
                 }
             }
