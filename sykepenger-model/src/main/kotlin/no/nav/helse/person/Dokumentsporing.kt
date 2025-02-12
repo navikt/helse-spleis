@@ -4,7 +4,10 @@ import java.util.*
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.DokumenttypeDto
 
-class Dokumentsporing private constructor(val id: UUID, val dokumentType: DokumentType) {
+data class Dokumentsporing(
+    val id: UUID,
+    val dokumentType: DokumentType
+) {
 
     companion object {
         internal fun søknad(id: UUID) = Dokumentsporing(id, DokumentType.Søknad)
@@ -43,16 +46,6 @@ class Dokumentsporing private constructor(val id: UUID, val dokumentType: Dokume
                 }
             )
         }
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is Dokumentsporing) return false
-        if (other === this) return true
-        return this.id == other.id && this.dokumentType == other.dokumentType
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(id, dokumentType)
     }
 
     override fun toString() = "$dokumentType ($id)"
