@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
@@ -42,12 +42,6 @@ class Inntektsmelding(
     private val førsteFraværsdag: LocalDate?,
     mottatt: LocalDateTime
 ) : Hendelse {
-
-    init {
-        if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) {
-            error("Inntektsmelding må enten ha første fraværsdag eller arbeidsgiverperioder satt.")
-        }
-    }
 
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         organisasjonsnummer = orgnummer

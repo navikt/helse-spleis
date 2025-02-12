@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.fail
 
 internal class InntektsmeldingTest {
@@ -42,11 +41,6 @@ internal class InntektsmeldingTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var inntektsmelding: Inntektsmelding
     private lateinit var dager: DagerFraInntektsmelding
-
-    @Test
-    fun `inntektsmelding uten arbeidsgiverperiode og førsteFraværsdag er null`() {
-        assertThrows<IllegalStateException> { inntektsmelding(emptyList(), førsteFraværsdag = null) }
-    }
 
     @Test
     fun `periode dersom første fraværsdag er kant i kant med arbeidsgiverperioden`() {

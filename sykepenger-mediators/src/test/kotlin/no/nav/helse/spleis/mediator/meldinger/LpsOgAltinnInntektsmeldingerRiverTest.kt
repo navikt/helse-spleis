@@ -81,6 +81,32 @@ internal class LpsOgAltinnInntektsmeldingerRiverTest : RiverTest() {
         inntektsdato = null
     ).asObjectNode().toJson()
 
+    private val InvalidInntektsmeldingUtenAgpOgFørsteFraværsdag = Inntektsmeldingkontrakt(
+        inntektsmeldingId = UUID.randomUUID().toString(),
+        arbeidstakerFnr = "fødselsnummer",
+        arbeidstakerAktorId = "aktørId",
+        virksomhetsnummer = "virksomhetsnummer",
+        arbeidsgiverFnr = null,
+        arbeidsgiverAktorId = null,
+        arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
+        arbeidsforholdId = null,
+        beregnetInntekt = BigDecimal.ONE,
+        refusjon = Refusjon(beloepPrMnd = null, opphoersdato = null),
+        endringIRefusjoner = listOf(EndringIRefusjon(endringsdato = LocalDate.now(), beloep = BigDecimal.ONE)),
+        opphoerAvNaturalytelser = emptyList(),
+        gjenopptakelseNaturalytelser = emptyList(),
+        arbeidsgiverperioder = emptyList(),
+        status = Status.GYLDIG,
+        arkivreferanse = "",
+        ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
+        foersteFravaersdag = null,
+        mottattDato = LocalDateTime.now(),
+        naerRelasjon = null,
+        innsenderTelefon = "tlfnr",
+        innsenderFulltNavn = "SPLEIS MEDIATOR",
+        inntektsdato = null
+    ).asObjectNode().toJson()
+
     private val ValidInntektsmeldingJson = ValidInntektsmelding.toJson()
     private val ValidInntektsmeldingWithUnknownFieldsJson =
         ValidInntektsmelding.put(UUID.randomUUID().toString(), "foobar").toJson()
@@ -98,6 +124,7 @@ internal class LpsOgAltinnInntektsmeldingerRiverTest : RiverTest() {
 
     @Test
     fun `invalid messages`() {
+        assertIgnored(InvalidInntektsmeldingUtenAgpOgFørsteFraværsdag)
         assertIgnored(InvalidJson)
         assertIgnored(UnknownJson)
         assertIgnored(ValidInntektsmeldingMedVedtaksperiodeId)

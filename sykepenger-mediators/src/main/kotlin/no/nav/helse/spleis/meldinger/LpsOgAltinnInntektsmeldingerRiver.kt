@@ -25,7 +25,12 @@ internal class LpsOgAltinnInntektsmeldingerRiver(
         standardInntektsmeldingvalidering(message)
         message.requireKey("beregnetInntekt")
         message.interestedIn("harFlereInntektsmeldinger", "avsenderSystem")
-        message.interestedIn("foersteFravaersdag", JsonNode::asLocalDate)
+        message.interestedIn("foersteFravaersdag")
+        message.require("arbeidsgiverperioder") { agp ->
+            if (agp.size() == 0) {
+                message.requireKey("foersteFravaersdag")
+            }
+        }
     }
 
     override fun createMessage(packet: JsonMessage): InntektsmeldingMessage {
