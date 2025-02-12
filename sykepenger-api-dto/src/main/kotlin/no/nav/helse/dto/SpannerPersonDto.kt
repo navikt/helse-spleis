@@ -129,11 +129,6 @@ data class SpannerPersonDto(
             val oppfyllerMinsteinntektskrav: Boolean
         )
 
-        data class NyInntektUnderveisData(
-            val orgnummer: String,
-            val beløpstidslinje: BeløpstidslinjeData
-        )
-
         data class ArbeidsgiverInntektsopplysningData(
             val orgnummer: String,
             val fom: LocalDate,
@@ -1543,11 +1538,6 @@ private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() =
         korrigertInntekt = this.korrigertInntekt?.tilPersonData(),
         skjønnsmessigFastsatt = this.skjønnsmessigFastsatt?.tilPersonData()
     )
-
-private fun NyInntektUnderveisDto.tilPersonData() = VilkårsgrunnlagElementData.NyInntektUnderveisData(
-    orgnummer = this.orgnummer,
-    beløpstidslinje = this.beløpstidslinje.tilPersonData()
-)
 
 private fun FaktaavklartInntektUtDto.tilPersonData() =
     ArbeidsgiverInntektsopplysningData.InntektsopplysningData(

@@ -26,7 +26,6 @@ import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.MaksdatobestemmelseDto
-import no.nav.helse.dto.NyInntektUnderveisDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.ProsentdelDto
@@ -256,16 +255,6 @@ data class PersonData(
                 deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
                 vurdertInfotrygd = this.vurdertInfotrygd,
                 `6G` = InntektbeløpDto.Årlig(grunnbeløp!!)
-            )
-        }
-
-        data class NyInntektUnderveisData(
-            val orgnummer: String,
-            val beløpstidslinje: BeløpstidslinjeData
-        ) {
-            fun tilDto() = NyInntektUnderveisDto(
-                orgnummer = orgnummer,
-                beløpstidslinje = beløpstidslinje.tilDto()
             )
         }
 

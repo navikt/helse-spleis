@@ -17,7 +17,6 @@ import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
-import no.nav.helse.dto.NyInntektUnderveisDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.RefusjonsservitørDto
 import no.nav.helse.dto.SatstypeDto
@@ -796,11 +795,6 @@ private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() = PersonData.Vil
     inntektsopplysning = this.faktaavklartInntekt.tilPersonData(),
     korrigertInntekt = this.korrigertInntekt?.tilPersonData(),
     skjønnsmessigFastsatt = this.skjønnsmessigFastsatt?.tilPersonData()
-)
-
-private fun NyInntektUnderveisDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.NyInntektUnderveisData(
-    orgnummer = this.orgnummer,
-    beløpstidslinje = this.beløpstidslinje.tilPersonData()
 )
 
 private fun FaktaavklartInntektUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData(
