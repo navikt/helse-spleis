@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Søknad.InntektFraNyttArbeidsforhold
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -20,7 +19,6 @@ import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.speil.dto.AnnullertPeriode
 import no.nav.helse.spleis.speil.dto.BeregnetPeriode
-import no.nav.helse.spleis.speil.dto.GhostPeriodeDTO
 import no.nav.helse.spleis.speil.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.spleis.speil.dto.Inntektkilde
 import no.nav.helse.spleis.speil.dto.Periodetilstand
@@ -41,7 +39,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class SpeilBuilderTest : AbstractE2ETest() {
@@ -73,38 +70,6 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
             .filter { sammenslåttDag -> perioder.any { sammenslåttDag.dagen in it } }
             .map { it.utbetalingsinfo?.totalGrad }
         assertTrue(totalgrader.all { it == forventet }) { "Her er det noe som ikke er $forventet: $totalgrader" }
-    }
-
-    @Test
-    @Disabled("TODO: TilkommenV3")
-    fun `lager NyeInntektsforhold-pølse for tilkommen inntekt`() {
-        nyttVedtak(1.januar, 31.januar)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(fom = 1.februar, tom = 28.februar, orgnummer = "a24", råttBeløp = 10000)))
-        håndterYtelser()
-
-        val nyeInntektsforholdPølse = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.nyeInntektsforhold!!.single()
-        assertEquals(1.februar til 28.februar, nyeInntektsforholdPølse.fom til nyeInntektsforholdPølse.tom)
-        assertEquals(1.januar, nyeInntektsforholdPølse.skjæringstidspunkt)
-        assertEquals(10000.0 / 20, nyeInntektsforholdPølse.dagligBeløp)
-        assertEquals(10833, nyeInntektsforholdPølse.månedligBeløp.toInt())
-
-        assertEquals(emptyList<GhostPeriodeDTO>(), speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.ghostPerioder)
-    }
-
-    @Test
-    @Disabled("TODO: TilkommenV3")
-    fun `kan lage NyeInntektsforhold-pølse med peker til riktig vilkårsgrunnlag før noe er utbetalt`() {
-        tilGodkjenning(1.januar, 31.januar)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(fom = 1.februar, tom = 28.februar, orgnummer = "a24", råttBeløp = 10000)))
-
-        val nyeInntektsforholdPølser = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.nyeInntektsforhold!!.single()
-        assertEquals(1.februar til 28.februar, nyeInntektsforholdPølser.fom til nyeInntektsforholdPølser.tom)
-
-        val førstegangs = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a1" }!!.generasjoner.single().perioder.find { it.fom == 1.januar } as BeregnetPeriode
-        val vilkårsgrunnlagIdFørstegangssøknad = førstegangs.vilkårsgrunnlagId
-        val vilkårsgrunnlag = speilApi().vilkårsgrunnlag.keys
-        assertEquals(1, vilkårsgrunnlag.size)
-        assertTrue(vilkårsgrunnlagIdFørstegangssøknad in vilkårsgrunnlag)
     }
 
     @Test

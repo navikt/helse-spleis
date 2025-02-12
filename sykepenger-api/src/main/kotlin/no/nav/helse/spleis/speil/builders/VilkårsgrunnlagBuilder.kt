@@ -17,7 +17,6 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.spleis.speil.dto.GhostPeriodeDTO
 import no.nav.helse.spleis.speil.dto.InfotrygdVilkårsgrunnlag
-import no.nav.helse.spleis.speil.dto.NyttInntektsforholdPeriodeDTO
 import no.nav.helse.spleis.speil.dto.SkjønnsmessigFastsattDTO
 import no.nav.helse.spleis.speil.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag
@@ -28,7 +27,6 @@ internal abstract class IVilkårsgrunnlag(
     val beregningsgrunnlag: Double,
     val sykepengegrunnlag: Double,
     val inntekter: List<IArbeidsgiverinntekt>,
-    val nyeInntekterUnderveis: List<INyInntektUnderveis>,
     val id: UUID
 ) {
     abstract fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag
@@ -58,7 +56,6 @@ internal class ISpleisGrunnlag(
     inntekter: List<IArbeidsgiverinntekt>,
     sykepengegrunnlag: Double,
     id: UUID,
-    nyeInntekterUnderveis: List<INyInntektUnderveis>,
     val overstyringer: Set<UUID>,
     val omregnetÅrsinntekt: Double,
     val grunnbeløp: Int,
@@ -68,7 +65,7 @@ internal class ISpleisGrunnlag(
     val oppfyllerKravOmMinstelønn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?
-) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, nyeInntekterUnderveis, id) {
+) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, id) {
 
     override fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag {
         return SpleisVilkårsgrunnlag(
@@ -112,7 +109,7 @@ internal class IInfotrygdGrunnlag(
     inntekter: List<IArbeidsgiverinntekt>,
     sykepengegrunnlag: Double,
     id: UUID
-) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, emptyList(), id) {
+) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, id) {
 
     override fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag {
         return InfotrygdVilkårsgrunnlag(
@@ -133,27 +130,10 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
     internal fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) =
         vilkårsgrunnlagIBruk.all { (_, a) -> a.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer) }
 
-    internal fun nyeInntekterUnderveis(orgnummer: String) =
-        tilgjengeligeVilkårsgrunnlag.firstOrNull()?.flatMap { (_, vilkårsgrunnlag) ->
-            vilkårsgrunnlag.nyeInntekterUnderveis
-                .filter { it.arbeidsgiver == orgnummer }
-                .map {
-                    NyttInntektsforholdPeriodeDTO(
-                        id = UUID.randomUUID(),
-                        fom = it.fom,
-                        tom = it.tom,
-                        dagligBeløp = it.dagligbeløp,
-                        månedligBeløp = it.månedligBeløp,
-                        skjæringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt
-                    )
-                }
-        } ?: emptyList()
 
     internal fun arbeidsgivere() = vilkårsgrunnlagIBruk
         .flatMap { (_, grunnlag) ->
-            val arbeidsgivereFraInntektsgrunnlag = grunnlag.inntekter.map { it.arbeidsgiver }
-            val tilkommetArbeidsgivere = grunnlag.nyeInntekterUnderveis.map { it.arbeidsgiver }
-            (arbeidsgivereFraInntektsgrunnlag + tilkommetArbeidsgivere)
+            grunnlag.inntekter.map { it.arbeidsgiver }
         }
         .toSet()
 
@@ -219,7 +199,6 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             beregningsgrunnlag = grunnlagsdata.inntektsgrunnlag.beregningsgrunnlag.årlig.beløp,
             omregnetÅrsinntekt = grunnlagsdata.inntektsgrunnlag.totalOmregnetÅrsinntekt.årlig.beløp,
             inntekter = inntekter(grunnlagsdata.inntektsgrunnlag),
-            nyeInntekterUnderveis = emptyList(), // TODO TilkommenV3 må finne ut om dette kan fjernes
             sykepengegrunnlag = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag.årlig.beløp,
             grunnbeløp = begrensning.grunnbeløp,
             sykepengegrunnlagsgrense = begrensning,

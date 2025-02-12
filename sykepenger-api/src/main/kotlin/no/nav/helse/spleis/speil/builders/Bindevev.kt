@@ -10,14 +10,6 @@ import no.nav.helse.spleis.speil.dto.Inntektkilde
 import no.nav.helse.spleis.speil.dto.Refusjonselement
 import no.nav.helse.spleis.speil.dto.SkjønnsmessigFastsattDTO
 
-internal data class INyInntektUnderveis(
-    val arbeidsgiver: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val dagligbeløp: Double,
-    val månedligBeløp: Double
-)
-
 internal data class IArbeidsgiverinntekt(
     val arbeidsgiver: String,
     val fom: LocalDate,
@@ -36,9 +28,6 @@ internal data class IArbeidsgiverinntekt(
             deaktivert = deaktivert
         )
     }
-
-    internal fun erTilkommenInntekt(skjæringstidspunkt: LocalDate) =
-        fom > skjæringstidspunkt
 }
 
 internal data class IArbeidsgiverrefusjon(

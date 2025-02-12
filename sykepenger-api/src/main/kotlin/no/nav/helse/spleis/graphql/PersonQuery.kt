@@ -12,7 +12,6 @@ import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.dto.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.dto.GraphQLGhostPeriode
-import no.nav.helse.spleis.graphql.dto.GraphQLNyttInntektsforholdPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLPerson
 import no.nav.helse.spleis.speil.dto.PersonDTO
 import no.nav.helse.spleis.speil.serializePersonForSpeil
@@ -73,17 +72,6 @@ private fun mapTilDto(person: PersonDTO, fnr: String, aktørId: String, hendelse
                         vilkarsgrunnlagId = periode.vilkårsgrunnlagId,
                         deaktivert = periode.deaktivert,
                         organisasjonsnummer = arbeidsgiver.organisasjonsnummer
-                    )
-                },
-                nyeInntektsforholdPerioder = arbeidsgiver.nyeInntektsforhold.map { periode ->
-                    GraphQLNyttInntektsforholdPeriode(
-                        id = periode.id,
-                        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                        fom = periode.fom,
-                        tom = periode.tom,
-                        dagligBelop = periode.dagligBeløp,
-                        manedligBelop = periode.månedligBeløp,
-                        skjaeringstidspunkt = periode.skjæringstidspunkt
                     )
                 }
             )

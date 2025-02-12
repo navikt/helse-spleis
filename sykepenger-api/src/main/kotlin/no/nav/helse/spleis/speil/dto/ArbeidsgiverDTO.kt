@@ -10,8 +10,7 @@ data class ArbeidsgiverDTO(
     val organisasjonsnummer: String,
     val id: UUID,
     val generasjoner: List<SpeilGenerasjonDTO>,
-    val ghostPerioder: List<GhostPeriodeDTO> = emptyList(),
-    val nyeInntektsforhold: List<NyttInntektsforholdPeriodeDTO> = emptyList()
+    val ghostPerioder: List<GhostPeriodeDTO> = emptyList()
 ) {
     private companion object {
         fun List<ArbeidsgiverDTO>.sykefraværstilfeller() = this
@@ -23,11 +22,10 @@ data class ArbeidsgiverDTO(
     }
 
     internal fun erTom(vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk) = ghostPerioder.isEmpty()
-        && nyeInntektsforhold.isEmpty()
         && generasjoner.isEmpty()
         && vilkårsgrunnlagHistorikk.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer)
 
-    internal fun medGhostperioderOgNyeInntektsforholdperioder(vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk, arbeidsgivere: List<ArbeidsgiverDTO>): ArbeidsgiverDTO {
+    internal fun medGhostperioder(vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk, arbeidsgivere: List<ArbeidsgiverDTO>): ArbeidsgiverDTO {
         val sykefraværstilfeller = arbeidsgivere.sykefraværstilfeller()
         val potensielleGhostperioder = vilkårsgrunnlagHistorikk.potensielleGhostsperioder(organisasjonsnummer, sykefraværstilfeller)
 
@@ -35,10 +33,7 @@ data class ArbeidsgiverDTO(
             fjernDagerMedSykdom(ghostperiode, GhostPeriodeDTO::brytOpp)
         })
 
-        return copy(
-            ghostPerioder = ghostsperioder,
-            nyeInntektsforhold = vilkårsgrunnlagHistorikk.nyeInntekterUnderveis(organisasjonsnummer)
-        )
+        return copy(ghostPerioder = ghostsperioder)
     }
 
     private fun <Ting> fjernDagerMedSykdom(ghostperiode: Ting, oppbrytningsfunksjon: Ting.(ClosedRange<LocalDate>) -> List<Ting>): List<Ting> {

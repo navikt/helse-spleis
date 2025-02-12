@@ -35,8 +35,7 @@ internal class PersonBuilder(
                         )
                     }
                 (arbeidsgivere + arbeidsgivereFraVilkårsgrunnlag).map {
-                    it
-                        .medGhostperioderOgNyeInntektsforholdperioder(vilkårsgrunnlagHistorikk, arbeidsgivere)
+                    it.medGhostperioder(vilkårsgrunnlagHistorikk, arbeidsgivere)
                 }
             }
             .filterNot { it.erTom(vilkårsgrunnlagHistorikk) }

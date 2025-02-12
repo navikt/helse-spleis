@@ -33,6 +33,8 @@ data class GraphQLArbeidsgiver(
     val organisasjonsnummer: String,
     val id: UUID,
     val generasjoner: List<GraphQLGenerasjon>,
-    val ghostPerioder: List<GraphQLGhostPeriode>,
-    val nyeInntektsforholdPerioder: List<GraphQLNyttInntektsforholdPeriode>
-)
+    val ghostPerioder: List<GraphQLGhostPeriode>
+) {
+    @Suppress("unused", "TODO: TilkommenV3: Denne må være her helt til Speilvendt er klar for å ikke bruke denne/om V3 må mappes inn som dette her")
+    val nyeInntektsforholdPerioder: List<GraphQLNyttInntektsforholdPeriode> = emptyList()
+}
