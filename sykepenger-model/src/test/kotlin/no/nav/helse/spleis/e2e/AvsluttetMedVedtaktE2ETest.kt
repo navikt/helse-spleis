@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.util.*
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -227,15 +226,14 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         val liste = (1..16).map {
             ManuellOverskrivingDag(it.januar, Dagtype.Feriedag)
         }
-        val overstyringId = UUID.randomUUID()
-        håndterOverstyrTidslinje(liste, meldingsreferanseId = overstyringId)
+        håndterOverstyrTidslinje(liste)
         assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         val utbetaling = inspektør.utbetaling(0)
         assertEquals(Utbetalingstatus.FORKASTET, utbetaling.tilstand)
         1.vedtaksperiode.assertIngenVedtakFattet()
         assertEquals(2, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
-        assertEquals(setOf(søknadId, inntektsmeldingId, overstyringId),1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
+        assertEquals(setOf(søknadId, inntektsmeldingId),1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
     }
 
     @Test
@@ -267,8 +265,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
     @Test
     fun `sender med tidligere dokumenter etter revurdering`() {
         nyttVedtak(januar)
-        val overstyringId = UUID.randomUUID()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)), meldingsreferanseId = overstyringId)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
@@ -278,7 +275,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertEquals(2, observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode.id(a1)).size)
         val nyttVedtak = observatør.avsluttetMedVedtakEvent.getValue(1.vedtaksperiode.id(a1))
-        assertEquals(tidligereVedtak.hendelseIder.plus(overstyringId), nyttVedtak.hendelseIder)
+        assertEquals(tidligereVedtak.hendelseIder, nyttVedtak.hendelseIder)
     }
 
     private val IdInnhenter.avsluttetUtenVedtakEventer get() = observatør.avsluttetUtenVedtakEventer.getValue(id(a1))

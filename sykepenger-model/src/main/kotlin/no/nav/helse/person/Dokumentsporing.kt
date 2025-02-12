@@ -23,7 +23,7 @@ class Dokumentsporing private constructor(val id: UUID, val dokumentType: Dokume
         internal fun andreYtelser(id: UUID) = Dokumentsporing(id, DokumentType.AndreYtelser)
         internal fun tilkommenInntektFraSøknad(id: UUID) = Dokumentsporing(id, DokumentType.TilkommenInntektFraSøknad)
 
-        internal fun Iterable<Dokumentsporing>.ider() = filterNot { it.dokumentType == DokumentType.TilkommenInntektFraSøknad }.map { it.id }.toSet()
+        internal fun Iterable<Dokumentsporing>.ider() = filter { it.dokumentType.ekstern }.map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.søknadIder() = filter { it.dokumentType == DokumentType.Søknad }.map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.sisteInntektsmeldingDagerId() = lastOrNull { it.dokumentType == DokumentType.InntektsmeldingDager }?.id
         internal fun Iterable<Dokumentsporing>.sisteInntektsmeldingInntektId() = lastOrNull { it.dokumentType == DokumentType.InntektsmeldingInntekt }?.id
