@@ -86,8 +86,6 @@ internal data class ArbeidsgiverInntektsopplysning(
         )
     }
 
-    private fun rullTilbake() = copy(skjønnsmessigFastsatt = null)
-
     private fun deaktiver(
         forklaring: String,
         oppfylt: Boolean,
@@ -114,6 +112,9 @@ internal data class ArbeidsgiverInntektsopplysning(
     }
 
     internal companion object {
+        private fun List<ArbeidsgiverInntektsopplysning>.rullTilbakeEventuellSkjønnsmessigFastsettelse() =
+            map { it.copy(skjønnsmessigFastsatt = null) }
+
         internal fun List<ArbeidsgiverInntektsopplysning>.faktaavklarteInntekter() = this
             .map { arbeidsgiverInntektsopplysning ->
                 VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt(
@@ -134,8 +135,13 @@ internal data class ArbeidsgiverInntektsopplysning(
             orgnummer: String,
             forklaring: String,
             subsumsjonslogg: Subsumsjonslogg
-        ) =
-            this.fjernInntekt(deaktiverte, orgnummer, forklaring, true, subsumsjonslogg)
+        ): Pair<List<ArbeidsgiverInntektsopplysning>, List<ArbeidsgiverInntektsopplysning>> {
+            // Om inntektene i sykepengegrunnlaget var skjønnsmessig fastsatt før _deaktivering_ må vi først
+            // rulle tilbake eventuell skjønnsmessig fastsettelse ettersom en skjønnsmessig fastsettelse blir gjort
+            // for hele sykepengegrunnlaget, og når noe _deaktiveres_ kan ikke den skjønnsmessige fastsettelsen gjelde lenger
+            // og det må eventuelt gjøres en ny skjønnsmessig fastsettelse gitt arbeidsgiverne som nå er aktive.
+            return this.rullTilbakeEventuellSkjønnsmessigFastsettelse().fjernInntekt(deaktiverte.rullTilbakeEventuellSkjønnsmessigFastsettelse(), orgnummer, forklaring, true, subsumsjonslogg)
+        }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.aktiver(
             aktiveres: List<ArbeidsgiverInntektsopplysning>,
@@ -143,9 +149,11 @@ internal data class ArbeidsgiverInntektsopplysning(
             forklaring: String,
             subsumsjonslogg: Subsumsjonslogg
         ): Pair<List<ArbeidsgiverInntektsopplysning>, List<ArbeidsgiverInntektsopplysning>> {
-            val (deaktiverte, aktiverte) = this.fjernInntekt(aktiveres, orgnummer, forklaring, false, subsumsjonslogg)
-            // Om inntektene i sykepengegrunnlaget var skjønnsmessig fastsatt før aktivering sikrer vi at alle "rulles tilbake" slik at vi ikke lager et sykepengegrunnlag med mix av SkjønnsmessigFastsatt & andre inntektstyper.
-            return deaktiverte to aktiverte.map { it.copy(skjønnsmessigFastsatt = null) }
+            // Om inntektene i sykepengegrunnlaget var skjønnsmessig fastsatt før _aktivering_ må vi først
+            // rulle tilbake eventuell skjønnsmessig fastsettelse ettersom en skjønnsmessig fastsettelse blir gjort
+            // for hele sykepengegrunnlaget, og når noe _aktiveres_ kan ikke den skjønnsmessige fastsettelsen gjelde lenger
+            // og det må eventuelt gjøres en ny skjønnsmessig fastsettelse gitt arbeidsgiverne som nå er aktive.
+            return this.rullTilbakeEventuellSkjønnsmessigFastsettelse().fjernInntekt(aktiveres.rullTilbakeEventuellSkjønnsmessigFastsettelse(), orgnummer, forklaring, false, subsumsjonslogg)
         }
 
         // flytter inntekt for *orgnummer* fra *this* til *deaktiverte*
@@ -170,7 +178,7 @@ internal data class ArbeidsgiverInntektsopplysning(
         ): List<ArbeidsgiverInntektsopplysning> {
             val endringen = this.map { inntekt -> inntekt.overstyrMedInntektsmelding(organisasjonsnummer, nyInntekt) }
             if (skalSkjønnsmessigFastsattRullesTilbake(endringen)) {
-                return endringen.map { it.rullTilbake() }
+                return endringen.rullTilbakeEventuellSkjønnsmessigFastsettelse()
             }
             return endringen
         }
@@ -180,7 +188,7 @@ internal data class ArbeidsgiverInntektsopplysning(
         ): List<ArbeidsgiverInntektsopplysning> {
             val endringen = this.map { inntekt -> inntekt.overstyrMedSaksbehandler(other) }
             if (skalSkjønnsmessigFastsattRullesTilbake(endringen)) {
-                return endringen.map { it.rullTilbake() }
+                return endringen.rullTilbakeEventuellSkjønnsmessigFastsettelse()
             }
             return endringen
         }

@@ -235,7 +235,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Litt snedig at det er mulig å deaktivere en arbeidsgiver som er skjønnsmessig fastsatt?`() {
+    fun `Ved deaktivering av arbeidsgivere må eventuell skjønnsmessig fastsettelse rulles tilbake`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 20_000.månedlig)
         a1 {
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(
@@ -261,9 +261,10 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, true, "foo"))
             håndterYtelser(1.vedtaksperiode)
             assertInntektsgrunnlag(1.januar, 2) {
-                assertInntektsgrunnlag(a1, 20_000.månedlig, forventetFastsattÅrsinntekt = 40_000.månedlig)
-                assertInntektsgrunnlag(a2, 20_000.månedlig, forventetFastsattÅrsinntekt = 40_000.månedlig, deaktivert = true)
+                assertInntektsgrunnlag(a1, 20_000.månedlig, forventetFastsattÅrsinntekt = 20_000.månedlig)
+                assertInntektsgrunnlag(a2, 20_000.månedlig, forventetFastsattÅrsinntekt = 20_000.månedlig, deaktivert = true)
             }
+            assertVarsler(1.vedtaksperiode, RV_UT_23)
         }
         a2 {
             assertVarsler(1.vedtaksperiode, RV_UT_23)
