@@ -7,19 +7,13 @@ import no.nav.helse.dto.DokumenttypeDto
 class Dokumentsporing private constructor(val id: UUID, val dokumentType: DokumentType) {
 
     companion object {
-        internal fun sykmelding(id: UUID) = Dokumentsporing(id, DokumentType.Sykmelding)
         internal fun søknad(id: UUID) = Dokumentsporing(id, DokumentType.Søknad)
         internal fun inntektsmeldingInntekt(id: UUID) = Dokumentsporing(id, DokumentType.InntektsmeldingInntekt)
         internal fun inntektsmeldingRefusjon(id: UUID) = Dokumentsporing(id, DokumentType.InntektsmeldingRefusjon)
         internal fun inntektsmeldingDager(id: UUID) = Dokumentsporing(id, DokumentType.InntektsmeldingDager)
         internal fun inntektFraAOrdingen(id: UUID) = Dokumentsporing(id, DokumentType.InntektFraAOrdningen)
         internal fun overstyrTidslinje(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrTidslinje)
-        internal fun overstyrInntekt(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrInntekt)
-        internal fun overstyrRefusjon(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrRefusjon)
         internal fun overstyrArbeidsgiveropplysninger(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrArbeidsgiveropplysninger)
-        internal fun overstyrArbeidsforhold(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrArbeidsforhold)
-        internal fun skjønnsmessigFastsettelse(id: UUID) = Dokumentsporing(id, DokumentType.SkjønnsmessigFastsettelse)
-        internal fun grunnbeløpendring(id: UUID) = Dokumentsporing(id, DokumentType.SkjønnsmessigFastsettelse) // TODO: bytte DokumentType
         internal fun andreYtelser(id: UUID) = Dokumentsporing(id, DokumentType.AndreYtelser)
         internal fun tilkommenInntektFraSøknad(id: UUID) = Dokumentsporing(id, DokumentType.TilkommenInntektFraSøknad)
 
