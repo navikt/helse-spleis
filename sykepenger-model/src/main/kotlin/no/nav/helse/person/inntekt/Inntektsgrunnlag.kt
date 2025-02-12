@@ -232,23 +232,27 @@ internal class Inntektsgrunnlag private constructor(
         arbeidsgiverInntektsopplysninger.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
     }
 
-    internal fun aktiver(orgnummer: String, forklaring: String, subsumsjonslogg: Subsumsjonslogg) =
-        deaktiverteArbeidsforhold.aktiver(arbeidsgiverInntektsopplysninger, orgnummer, forklaring, subsumsjonslogg)
+    internal fun aktiver(orgnummer: String, forklaring: String, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
+        if (arbeidsgiverInntektsopplysninger.any { it.gjelder(orgnummer) }) return this // Unngår å aktivere om det allerede er aktivt ettersom det ruller tilbake eventuell skjønnsmessig fastsettelse
+        return deaktiverteArbeidsforhold.aktiver(arbeidsgiverInntektsopplysninger, orgnummer, forklaring, subsumsjonslogg)
             .let { (deaktiverte, aktiverte) ->
                 kopierSykepengegrunnlag(
                     arbeidsgiverInntektsopplysninger = aktiverte,
                     deaktiverteArbeidsforhold = deaktiverte
                 )
             }
+    }
 
-    internal fun deaktiver(orgnummer: String, forklaring: String, subsumsjonslogg: Subsumsjonslogg) =
-        arbeidsgiverInntektsopplysninger.deaktiver(deaktiverteArbeidsforhold, orgnummer, forklaring, subsumsjonslogg)
+    internal fun deaktiver(orgnummer: String, forklaring: String, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
+        if (deaktiverteArbeidsforhold.any { it.gjelder(orgnummer) }) return this // Unngår å deaktivere om det allerede er deaktivert ettersom det ruller tilbake eventuell skjønnsmessig fastsettelse
+        return arbeidsgiverInntektsopplysninger.deaktiver(deaktiverteArbeidsforhold, orgnummer, forklaring, subsumsjonslogg)
             .let { (aktiverte, deaktiverte) ->
                 kopierSykepengegrunnlag(
                     arbeidsgiverInntektsopplysninger = aktiverte,
                     deaktiverteArbeidsforhold = deaktiverte
                 )
             }
+    }
 
     internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
         return hendelse.overstyr(this, subsumsjonslogg)
