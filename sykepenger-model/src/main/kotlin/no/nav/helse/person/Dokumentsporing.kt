@@ -24,8 +24,9 @@ class Dokumentsporing private constructor(val id: UUID, val dokumentType: Dokume
         internal fun skjønnsmessigFastsettelse(id: UUID) = Dokumentsporing(id, DokumentType.SkjønnsmessigFastsettelse)
         internal fun grunnbeløpendring(id: UUID) = Dokumentsporing(id, DokumentType.SkjønnsmessigFastsettelse) // TODO: bytte DokumentType
         internal fun andreYtelser(id: UUID) = Dokumentsporing(id, DokumentType.AndreYtelser)
+        internal fun tilkommenInntektFraSøknad(id: UUID) = Dokumentsporing(id, DokumentType.TilkommenInntektFraSøknad)
 
-        internal fun Iterable<Dokumentsporing>.ider() = map { it.id }.toSet()
+        internal fun Iterable<Dokumentsporing>.ider() = filterNot { it.dokumentType == DokumentType.TilkommenInntektFraSøknad }.map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.søknadIder() = filter { it.dokumentType == DokumentType.Søknad }.map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.sisteInntektsmeldingDagerId() = lastOrNull { it.dokumentType == DokumentType.InntektsmeldingDager }?.id
         internal fun Iterable<Dokumentsporing>.sisteInntektsmeldingInntektId() = lastOrNull { it.dokumentType == DokumentType.InntektsmeldingInntekt }?.id
@@ -46,6 +47,7 @@ class Dokumentsporing private constructor(val id: UUID, val dokumentType: Dokume
                     DokumentType.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
                     DokumentType.SkjønnsmessigFastsettelse -> KontekstType.SkjønnsmessigFastsettelse
                     DokumentType.AndreYtelser -> KontekstType.AndreYtelser
+                    DokumentType.TilkommenInntektFraSøknad -> KontekstType.Søknad
                 },
                 verdi = it.id.toString()
             )
@@ -68,6 +70,7 @@ class Dokumentsporing private constructor(val id: UUID, val dokumentType: Dokume
                     DokumenttypeDto.Sykmelding -> DokumentType.Sykmelding
                     DokumenttypeDto.Søknad -> DokumentType.Søknad
                     DokumenttypeDto.AndreYtelser -> DokumentType.AndreYtelser
+                    DokumenttypeDto.TilkommenInntektFraSøknad -> DokumentType.TilkommenInntektFraSøknad
                 }
             )
         }
@@ -101,6 +104,7 @@ class Dokumentsporing private constructor(val id: UUID, val dokumentType: Dokume
             DokumentType.OverstyrArbeidsforhold -> DokumenttypeDto.OverstyrArbeidsforhold
             DokumentType.SkjønnsmessigFastsettelse -> DokumenttypeDto.SkjønnsmessigFastsettelse
             DokumentType.AndreYtelser -> DokumenttypeDto.AndreYtelser
+            DokumentType.TilkommenInntektFraSøknad -> DokumenttypeDto.TilkommenInntektFraSøknad
         }
     )
 }

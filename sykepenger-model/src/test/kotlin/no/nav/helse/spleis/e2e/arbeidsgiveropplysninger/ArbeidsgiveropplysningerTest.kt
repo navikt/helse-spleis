@@ -532,6 +532,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 DokumentType.OverstyrArbeidsgiveropplysninger,
                 DokumentType.OverstyrArbeidsforhold,
                 DokumentType.SkjønnsmessigFastsettelse,
+                DokumentType.TilkommenInntektFraSøknad,
                 DokumentType.AndreYtelser -> false
             } }
         assertEquals(forventet.toSet(), faktisk.toSet())

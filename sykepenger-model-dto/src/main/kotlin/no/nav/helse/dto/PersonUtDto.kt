@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 data class AlderDto(val fødselsdato: LocalDate, val dødsdato: LocalDate?)
 
@@ -115,6 +115,7 @@ sealed class DokumenttypeDto {
     data object OverstyrArbeidsforhold : DokumenttypeDto()
     data object SkjønnsmessigFastsettelse : DokumenttypeDto()
     data object AndreYtelser : DokumenttypeDto()
+    data object TilkommenInntektFraSøknad : DokumenttypeDto()
 }
 
 data class BehandlingkildeDto(

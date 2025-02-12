@@ -229,7 +229,7 @@ class Søknad(
         internal val metadata: HendelseMetadata
     ) {
         internal val behandlingsporing = Behandlingsporing.Arbeidsgiver(orgnummer)
-        internal val dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId)
+        internal val dokumentsporing = Dokumentsporing.tilkommenInntektFraSøknad(metadata.meldingsreferanseId)
 
         internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, arbeidsgiver: Arbeidsgiver, subsumsjonslogg: Subsumsjonslogg, eksisterendeVedtaksperioder: List<Periode>): Vedtaksperiode? {
             val overlapp = eksisterendeVedtaksperioder.mapNotNull { it.overlappendePeriode(periode) }

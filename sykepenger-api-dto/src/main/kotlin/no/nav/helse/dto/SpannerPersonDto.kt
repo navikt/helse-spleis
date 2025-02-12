@@ -451,6 +451,7 @@ data class SpannerPersonDto(
                 OverstyrArbeidsforhold,
                 SkjønnsmessigFastsettelse,
                 AndreYtelser,
+                TilkommenInntektFraSøknad,
                 System
             }
 
@@ -1152,6 +1153,7 @@ private fun DokumentsporingDto.tilPersonData() =
             DokumenttypeDto.Sykmelding -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.Sykmelding
             DokumenttypeDto.Søknad -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.Søknad
             DokumenttypeDto.AndreYtelser -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.AndreYtelser
+            DokumenttypeDto.TilkommenInntektFraSøknad -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.TilkommenInntektFraSøknad
         }
     )
 

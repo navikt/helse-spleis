@@ -767,6 +767,7 @@ data class PersonData(
                         DokumentTypeData.OverstyrArbeidsforhold -> DokumenttypeDto.OverstyrArbeidsforhold
                         DokumentTypeData.SkjønnsmessigFastsettelse -> DokumenttypeDto.SkjønnsmessigFastsettelse
                         DokumentTypeData.AndreYtelser -> DokumenttypeDto.AndreYtelser
+                        DokumentTypeData.TilkommenInntektFraSøknad -> DokumenttypeDto.TilkommenInntektFraSøknad
                     }
                 )
             }
@@ -784,7 +785,8 @@ data class PersonData(
                 OverstyrArbeidsgiveropplysninger,
                 OverstyrArbeidsforhold,
                 SkjønnsmessigFastsettelse,
-                AndreYtelser
+                AndreYtelser,
+                TilkommenInntektFraSøknad
             }
 
             data class BehandlingData(
