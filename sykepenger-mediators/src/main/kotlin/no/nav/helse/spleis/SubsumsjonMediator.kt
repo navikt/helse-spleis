@@ -120,17 +120,7 @@ internal class SubsumsjonMediator(
         KontekstType.Fødselsnummer -> "fodselsnummer"
         KontekstType.Organisasjonsnummer -> "organisasjonsnummer"
         KontekstType.Vedtaksperiode -> "vedtaksperiode"
-        KontekstType.Sykmelding -> "sykmelding"
-        KontekstType.Søknad -> "soknad"
-        KontekstType.Inntektsmelding -> "inntektsmelding"
-        KontekstType.InntektFraAOrdningen -> "inntektFraAOrdningen"
-        KontekstType.OverstyrTidslinje -> "overstyrtidslinje"
-        KontekstType.OverstyrArbeidsgiveropplysninger -> "overstyrarbeidsgiveropplysninger"
-        KontekstType.OverstyrInntekt -> "overstyrinntekt"
-        KontekstType.OverstyrRefusjon -> "overstyrrefusjon"
-        KontekstType.OverstyrArbeidsforhold -> "overstyrarbeidsforhold"
-        KontekstType.SkjønnsmessigFastsettelse -> "skjønnsmessigfastsettelse"
-        KontekstType.AndreYtelser -> "andreytelser"
+        KontekstType.Behandling -> "behandling"
     }
 
     data class SubsumsjonEvent(

@@ -49,8 +49,6 @@ class BehandlingSubsumsjonslogg(
     fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: List<Subsumsjonskontekst>) =
         kopierMedKontekst(listOf(Subsumsjonskontekst(KontekstType.Vedtaksperiode, vedtaksperiodeId.toString())) + hendelseIder)
 
-    fun medInntektsmelding(inntektsmeldingId: UUID) = kopierMedKontekst(listOf(Subsumsjonskontekst(KontekstType.Inntektsmelding, inntektsmeldingId.toString())))
-
     private fun kopierMedKontekst(kontekster: List<Subsumsjonskontekst>) =
         BehandlingSubsumsjonslogg(this, this.kontekster + kontekster)
 }

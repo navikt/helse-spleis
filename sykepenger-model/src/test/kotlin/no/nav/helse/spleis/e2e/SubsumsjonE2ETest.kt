@@ -622,7 +622,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val inntekt = 260000.årlig
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        val im = håndterInntektsmelding(
+        håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = inntekt,
             førsteFraværsdag = 1.januar
@@ -634,8 +634,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 1.januar(2020),
             sporing = listOf(
                 Subsumsjonskontekst(KontekstType.Fødselsnummer, UNG_PERSON_FNR_2018.toString()),
-                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, a1),
-                Subsumsjonskontekst(KontekstType.Inntektsmelding, im.toString())
+                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, a1)
             ),
             input = mapOf("årligInntekt" to 260000.0),
             output = mapOf("dagligInntekt" to 1000.0)

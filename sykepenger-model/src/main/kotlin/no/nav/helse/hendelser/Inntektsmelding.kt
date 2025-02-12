@@ -2,9 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.etterlevelse.KontekstType
-import no.nav.helse.etterlevelse.Subsumsjonskontekst
+import java.util.*
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-10 ledd 3`
 import no.nav.helse.forrigeDag
@@ -169,11 +167,6 @@ class Inntektsmelding(
         aktivitetslogg.info("Inntektsmelding ikke håndtert")
         person.emitInntektsmeldingIkkeHåndtert(this, behandlingsporing.organisasjonsnummer, harPeriodeInnenfor16Dager)
     }
-
-    internal fun subsumsjonskontekst() = Subsumsjonskontekst(
-        type = KontekstType.Inntektsmelding,
-        verdi = metadata.meldingsreferanseId.toString()
-    )
 
     internal fun skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode: Periode?): Boolean {
         if (sykdomstidslinjeperiode == null) return false // har ikke noe sykdom for arbeidsgiveren

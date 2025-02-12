@@ -1000,7 +1000,7 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg: IAktivitetslogg,
         overstyring: Revurderingseventyr?
     ) {
-        val subsumsjonsloggMedInntektsmeldingkontekst = subsumsjonsloggMedInntektsmeldingkontekst(inntektsmelding)
+        val subsumsjonsloggMedInntektsmeldingkontekst = subsumsjonslogg()
         val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk, subsumsjonsloggMedInntektsmeldingkontekst)
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
 
@@ -1059,12 +1059,13 @@ internal class Arbeidsgiver private constructor(
         person.igangsettOverstyring(overstyringFraInntektsmelding, aktivitetslogg)
     }
 
-    private fun subsumsjonsloggMedInntektsmeldingkontekst(inntektsmelding: Inntektsmelding) =
+    private fun subsumsjonslogg() =
         BehandlingSubsumsjonslogg(
-            subsumsjonslogg, listOf(
-            Subsumsjonskontekst(KontekstType.Fødselsnummer, person.personidentifikator.toString()),
-            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer)
-        ) + inntektsmelding.subsumsjonskontekst()
+            parent = subsumsjonslogg,
+            kontekster = listOf(
+                Subsumsjonskontekst(KontekstType.Fødselsnummer, person.personidentifikator.toString()),
+                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer)
+            )
         )
 
     internal fun lagreTidsnærInntektsmelding(

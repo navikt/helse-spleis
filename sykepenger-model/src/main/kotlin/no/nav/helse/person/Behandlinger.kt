@@ -36,7 +36,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingDagerId
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingInntektId
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
-import no.nav.helse.person.Dokumentsporing.Companion.tilSubsumsjonsformat
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.aktivitetslogg.Aktivitet
@@ -233,11 +232,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun subsumsjonslogg(subsumsjonslogg: Subsumsjonslogg, vedtaksperiodeId: UUID, fødselsnummer: String, organisasjonsnummer: String) =
         BehandlingSubsumsjonslogg(
-            subsumsjonslogg, listOf(
-            Subsumsjonskontekst(KontekstType.Fødselsnummer, fødselsnummer),
-            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer),
-            Subsumsjonskontekst(KontekstType.Vedtaksperiode, vedtaksperiodeId.toString()),
-        ) + behandlinger.dokumentsporing.tilSubsumsjonsformat()
+            parent = subsumsjonslogg,
+            kontekster = listOf(
+                Subsumsjonskontekst(KontekstType.Fødselsnummer, fødselsnummer),
+                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer),
+                Subsumsjonskontekst(KontekstType.Vedtaksperiode, vedtaksperiodeId.toString()),
+                Subsumsjonskontekst(KontekstType.Behandling, behandlinger.last().id.toString())
+            )
         )
 
     internal fun hendelseIder() = behandlinger.dokumentsporing
@@ -1222,9 +1223,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     avsluttet = null,
                     kilde = behandlingkilde
                 )
-
-            fun List<Behandling>.jurist(jurist: BehandlingSubsumsjonslogg, vedtaksperiodeId: UUID) =
-                jurist.medVedtaksperiode(vedtaksperiodeId, dokumentsporing.tilSubsumsjonsformat())
 
             internal fun List<Behandling>.harGjenbrukbarInntekt(organisasjonsnummer: String) = forrigeEndringMedGjenbrukbarInntekt(organisasjonsnummer) != null
             internal fun List<Behandling>.lagreGjenbrukbarInntekt(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg) {

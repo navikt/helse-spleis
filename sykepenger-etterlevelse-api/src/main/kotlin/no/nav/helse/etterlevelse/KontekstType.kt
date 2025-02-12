@@ -4,17 +4,7 @@ enum class KontekstType {
     Fødselsnummer,
     Organisasjonsnummer,
     Vedtaksperiode,
-    Sykmelding,
-    Søknad,
-    Inntektsmelding,
-    InntektFraAOrdningen,
-    OverstyrTidslinje,
-    OverstyrInntekt,
-    OverstyrRefusjon,
-    OverstyrArbeidsgiveropplysninger,
-    OverstyrArbeidsforhold,
-    SkjønnsmessigFastsettelse,
-    AndreYtelser
+    Behandling
 }
 
 data class Subsumsjonskontekst(
