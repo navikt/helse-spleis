@@ -41,6 +41,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     private val FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER = "30019412345"
     private val FNR_SOM_IKKE_SKAL_SLIPPE_GJENNOM_INNGANGFILTER = "12019412345"
 
+    @Disabled
     @Test
     fun `event om at vi bruker skatteopplysninger`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
@@ -82,6 +83,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         }
     }
 
+    @Disabled
     @Test
     fun `event om at vi bruker skatteopplysninger med sprø minus`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
@@ -152,6 +154,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         }
     }
 
+    @Disabled
     @Test
     fun `lager påminnelse om vedtaksperioden har ventet mer enn tre måneder`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))

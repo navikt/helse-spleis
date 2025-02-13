@@ -2633,7 +2633,7 @@ internal class Vedtaksperiode private constructor(
             val påTideMedSkatt = ventetMinst3Måneder && ikkeForGammel && (Toggle.InntektsmeldingSomIkkeKommer.enabled || påminnelse.når(Flagg("ønskerInntektFraAOrdningen")))
 
             if (påTideMedSkatt) {
-                val inngangsfilter = true // (30..31).contains(vedtaksperiode.person.personidentifikator.toString().take(2).toInt())
+                val inngangsfilter = false // (30..31).contains(vedtaksperiode.person.personidentifikator.toString().take(2).toInt())
                 if (!inngangsfilter) {
                     aktivitetslogg.info("Behandler ikke vedtaksperiode uten inntektsmelding fordi personen ikke slipper gjennom inngangsfilteret")
                     return vedtaksperiode.forkast(påminnelse, aktivitetslogg)
