@@ -34,7 +34,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
@@ -135,9 +134,9 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
                 behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().id,
                 skjæringstidspunkt = 1.januar,
                 skatteinntekter = listOf(
-                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(desember(2017), 10000.0),
-                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(november(2017), 10000.0),
-                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(oktober(2017), 10000.0)
+                    Skatteinntekt(desember(2017), 10000.0),
+                    Skatteinntekt(november(2017), 10000.0),
+                    Skatteinntekt(oktober(2017), 10000.0)
                 ),
                 omregnetÅrsinntekt = 120000.0
             )
@@ -177,9 +176,9 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
                 behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().id,
                 skjæringstidspunkt = 1.januar,
                 skatteinntekter = listOf(
-                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(desember(2017), 10000.0),
-                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(november(2017), 10000.0),
-                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(oktober(2017), -30000.0),
+                    Skatteinntekt(desember(2017), 10000.0),
+                    Skatteinntekt(november(2017), 10000.0),
+                    Skatteinntekt(oktober(2017), -30000.0),
                 ),
                 omregnetÅrsinntekt = 0.0
             )
@@ -187,7 +186,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         }
     }
 
-    @Disabled
     @Test
     fun `skal forkaste personer vi ville hentet skatteinntekter for, men som har et fødselsnummer som ikke passerer inngangsfilter`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         medPersonidentifikator(Personidentifikator(FNR_SOM_IKKE_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
