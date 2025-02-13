@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -73,7 +74,7 @@ internal class InntektsmeldingTilRefusjonstidslinjeTest {
     }
 
     private companion object {
-        private val meldingsreferanseId = UUID.fromString("00000000-0000-0000-0000-000000000000")
+        private val meldingsreferanseId = MeldingsreferanseId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
         private val mottatt = 1.januar.atStartOfDay()
         private val kilde = Kilde(meldingsreferanseId, Avsender.ARBEIDSGIVER, mottatt)
 

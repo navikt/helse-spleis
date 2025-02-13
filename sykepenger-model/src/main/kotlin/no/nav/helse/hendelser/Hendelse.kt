@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.AvsenderDto
+import no.nav.helse.dto.MeldingsreferanseDto
 
 enum class Avsender {
     SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM;
@@ -36,8 +37,18 @@ sealed interface Behandlingsporing {
     data class Arbeidsgiver(val organisasjonsnummer: String) : Behandlingsporing
 }
 
+// en value-class for uuid-er som representerer @id til en melding fra kafka
+@JvmInline
+value class MeldingsreferanseId(val id: UUID) {
+    fun dto() = MeldingsreferanseDto(id)
+
+    companion object {
+        fun gjenopprett(dto: MeldingsreferanseDto) = MeldingsreferanseId(dto.id)
+    }
+}
+
 data class HendelseMetadata(
-    val meldingsreferanseId: UUID,
+    val meldingsreferanseId: MeldingsreferanseId,
     val avsender: Avsender,
 
     // tidspunktet meldingen ble registrert (lest inn) av fagsystemet

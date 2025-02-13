@@ -9,6 +9,7 @@ import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -124,7 +125,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 false -> Medlemskapsvurdering.Medlemskapstatus.Nei
             },
             vurdertOk = harOpptjening && harMinimumInntekt && erMedlem,
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vilkårsgrunnlagId = UUID.randomUUID()
         )
     }

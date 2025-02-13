@@ -6,7 +6,7 @@ import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.utbetalingslinjer.Utbetaling
 
 class AnnullerUtbetaling(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     organisasjonsnummer: String,
     override val utbetalingId: UUID,
     private val saksbehandlerIdent: String,

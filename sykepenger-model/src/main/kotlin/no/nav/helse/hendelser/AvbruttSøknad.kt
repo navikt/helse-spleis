@@ -1,12 +1,11 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.person.Sykmeldingsperioder
 
 class AvbruttSøknad(
     private val periode: Periode,
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     orgnummer: String,
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(

@@ -6,6 +6,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -207,14 +208,16 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             orgnummer = a2,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "ja"
-        )
-        assertEquals(imId, observatør.inntektsmeldingIkkeHåndtert.single())
+        ).let {
+            MeldingsreferanseId(it)
+        }
+        assertEquals(imId.id, observatør.inntektsmeldingIkkeHåndtert.single())
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
-        val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        val søknadId = MeldingsreferanseId(håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2))
 
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a1))
 
-        assertBeløpstidslinje(inspektør(a2).vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT, imId)
+        assertBeløpstidslinje(inspektør(a2).vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT, imId.id)
 
         assertEquals(
             setOf(
@@ -253,8 +256,8 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             orgnummer = a2,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "ja"
-        )
-        assertEquals(imId, observatør.inntektsmeldingIkkeHåndtert.single())
+        ).let { MeldingsreferanseId(it) }
+        assertEquals(imId.id, observatør.inntektsmeldingIkkeHåndtert.single())
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterArbeidsgiveropplysninger(
@@ -271,7 +274,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2) // a2 sent til festen, men med ting liggende i vilkårsgrunnlaget
-        val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        val søknadId = MeldingsreferanseId(håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2))
 
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a1))
 
@@ -279,7 +282,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             assertInntektsgrunnlag(a1, INNTEKT)
             assertInntektsgrunnlag(a2, INNTEKT)
         }
-        assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, imId.arbeidsgiver), inspektør(a2).refusjon(1.vedtaksperiode))
+        assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, imId.id.arbeidsgiver), inspektør(a2).refusjon(1.vedtaksperiode))
 
         assertEquals(
             setOf(

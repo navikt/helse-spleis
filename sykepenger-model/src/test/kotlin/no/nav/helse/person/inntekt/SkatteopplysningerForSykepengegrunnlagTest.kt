@@ -8,6 +8,7 @@ import java.util.*
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
@@ -227,7 +228,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
     ) =
         SkatteopplysningerForSykepengegrunnlag(
             arbeidsgiver = "arbeidsgiver",
-            hendelseId = UUID.randomUUID(),
+            hendelseId = MeldingsreferanseId(UUID.randomUUID()),
             skjæringstidspunkt = skjæringstidspunkt,
             inntektsopplysninger = skatteopplysninger,
             ansattPerioder = ansattPerioder,
@@ -236,7 +237,7 @@ class SkatteopplysningerForSykepengegrunnlagTest {
 
     private fun opplysning(måned: YearMonth, beløp: Inntekt = 1000.daglig) =
         Skatteopplysning(
-            hendelseId = UUID.randomUUID(),
+            hendelseId = MeldingsreferanseId(UUID.randomUUID()),
             beløp = beløp,
             måned = måned,
             type = LØNNSINNTEKT,

@@ -188,7 +188,7 @@ internal class SykdomstidslinjeBuilder(
                 "OverstyrTidslinje" -> SykdomstidslinjedagKildetype.Saksbehandler
                 else -> SykdomstidslinjedagKildetype.Ukjent
             },
-            id = meldingsreferanseId
+            id = meldingsreferanseId.id
         )
 
     fun build() = tidslinje.toList()

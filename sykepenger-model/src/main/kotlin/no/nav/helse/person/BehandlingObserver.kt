@@ -3,7 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.Hendelse
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
@@ -30,12 +30,12 @@ internal interface BehandlingObserver {
     fun nyBehandling(
         id: UUID,
         periode: Periode,
-        meldingsreferanseId: UUID,
+        meldingsreferanseId: MeldingsreferanseId,
         innsendt: LocalDateTime,
         registert: LocalDateTime,
         avsender: Avsender,
         type: PersonObserver.BehandlingOpprettetEvent.Type,
-        søknadIder: Set<UUID>
+        søknadIder: Set<MeldingsreferanseId>
     )
 
     fun utkastTilVedtak(

@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
-import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.harInntektFor
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.økonomi.Inntekt
@@ -29,7 +28,7 @@ data class ArbeidsgiverInntekt(
         val fordel: String,
         val beskrivelse: String
     ) {
-        internal fun somInntekt(meldingsreferanseId: UUID) = Skatteopplysning(
+        internal fun somInntekt(meldingsreferanseId: MeldingsreferanseId) = Skatteopplysning(
             meldingsreferanseId,
             inntekt,
             yearMonth,

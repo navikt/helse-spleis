@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -37,7 +36,7 @@ class Foreldrepenger(
         aktivitetslogg.varsel(Varselkode.`Forlenger foreldrepenger med mer enn 14 dager`)
     }
 
-    override fun sykdomstidslinje(meldingsreferanseId: UUID, registrert: LocalDateTime): Sykdomstidslinje {
+    override fun sykdomstidslinje(meldingsreferanseId: MeldingsreferanseId, registrert: LocalDateTime): Sykdomstidslinje {
         if (foreldrepengeytelse.isEmpty()) return Sykdomstidslinje()
         val hendelseskilde = Hendelseskilde(Ytelser::class, meldingsreferanseId, registrert)
         val førsteDag = foreldrepengeytelse.map { it.periode }.minOf { it.start }

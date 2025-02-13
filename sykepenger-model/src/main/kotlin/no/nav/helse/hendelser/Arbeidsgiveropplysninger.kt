@@ -163,7 +163,7 @@ sealed interface Arbeidsgiveropplysning {
 }
 
 class Arbeidsgiveropplysninger(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     innsendt: LocalDateTime,
     registrert: LocalDateTime,
     organisasjonsnummer: String,
@@ -187,7 +187,7 @@ class Arbeidsgiveropplysninger(
 }
 
 class KorrigerteArbeidsgiveropplysninger(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     innsendt: LocalDateTime,
     registrert: LocalDateTime,
     organisasjonsnummer: String,

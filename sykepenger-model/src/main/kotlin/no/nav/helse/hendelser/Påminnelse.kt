@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
-import java.util.UUID
+import java.util.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.PersonObserver
@@ -11,7 +11,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Påminnelse(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
     private val antallGangerPåminnet: Int,

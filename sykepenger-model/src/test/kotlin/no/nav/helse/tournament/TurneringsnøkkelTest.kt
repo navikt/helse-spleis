@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Hendelseskilde.Companion.INGEN
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
@@ -66,7 +67,7 @@ internal class TurneringsnøkkelTest {
             val inntektsmelding = Inntektsmelding.kilde
         }
 
-        val kilde: Hendelseskilde = Hendelseskilde(this::class, UUID.randomUUID(), LocalDateTime.now())
+        val kilde: Hendelseskilde = Hendelseskilde(this::class, MeldingsreferanseId(UUID.randomUUID()), LocalDateTime.now())
 
         // Objects impersonating real-life sources of sickness timeline days
         object Inntektsmelding : TestHendelse()

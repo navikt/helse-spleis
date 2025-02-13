@@ -2,12 +2,11 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.PersonObserver
 
 class Grunnbeløpsregulering(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     private val skjæringstidspunkt: LocalDate,
     opprettet: LocalDateTime
 ) : Hendelse, OverstyrInntektsgrunnlag {

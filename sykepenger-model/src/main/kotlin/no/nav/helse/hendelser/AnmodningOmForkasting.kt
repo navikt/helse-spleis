@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 
 class AnmodningOmForkasting(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     internal val force: Boolean

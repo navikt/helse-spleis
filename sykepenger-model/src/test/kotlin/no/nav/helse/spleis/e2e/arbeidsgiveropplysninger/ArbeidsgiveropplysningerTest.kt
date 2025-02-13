@@ -26,6 +26,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.OpphørAvNaturalytelser
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -75,13 +76,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             val id1 = håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)), OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, endringer = listOf(Refusjonsendring(1.februar, 0.daglig))))
-            val kilde1 = Kilde(id1, ARBEIDSGIVER, LocalDateTime.now())
+            val kilde1 = Kilde(MeldingsreferanseId(id1), ARBEIDSGIVER, LocalDateTime.now())
             assertBeløpstidslinje(
                 Beløpstidslinje.fra(1.februar.somPeriode(), 0.daglig, kilde1),
                 inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar)
             )
             val id2 = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittRefusjon(INNTEKT, endringer = listOf(Refusjonsendring(2.februar, 0.daglig))))
-            val kilde2 = Kilde(id2, ARBEIDSGIVER, LocalDateTime.now())
+            val kilde2 = Kilde(MeldingsreferanseId(id2), ARBEIDSGIVER, LocalDateTime.now())
             assertBeløpstidslinje(
                 Beløpstidslinje.fra(1.februar.somPeriode(), INNTEKT, kilde2) + Beløpstidslinje.fra(2.februar.somPeriode(), 0.daglig, kilde2),
                 inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar)
@@ -484,7 +485,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittInntekt(INNTEKT),
                 OppgittRefusjon(INNTEKT, emptyList()),
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar))
-            )
+            ).let { MeldingsreferanseId(it) }
             assertDokumentsporingPåSisteBehandling(
                 1.vedtaksperiode,
                 Dokumentsporing.inntektsmeldingDager(id),
@@ -495,7 +496,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             val idKorrigert = håndterKorrigerteArbeidsgiveropplysninger(
                 1.vedtaksperiode,
                 OppgittInntekt(INNTEKT * 1.10)
-            )
+            ).let { MeldingsreferanseId(it) }
             assertDokumentsporingPåSisteBehandling(
                 1.vedtaksperiode,
                 Dokumentsporing.inntektsmeldingDager(id),

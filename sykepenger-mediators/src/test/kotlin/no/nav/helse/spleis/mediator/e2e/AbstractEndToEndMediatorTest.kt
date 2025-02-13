@@ -94,7 +94,7 @@ internal abstract class AbstractEndToEndMediatorTest {
     protected lateinit var hendelseRepository: HendelseRepository
     private lateinit var hendelseMediator: HendelseMediator
     private lateinit var messageMediator: MessageMediator
-    private lateinit var dataSource: TestDataSource
+    protected lateinit var dataSource: TestDataSource
     protected lateinit var subsumsjoner: MutableList<JsonNode>
 
     @BeforeEach

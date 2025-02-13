@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -91,7 +92,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             val refusjonsopplysningerPeriode = refusjonsopplysninger.perioderMedBeløp.single()
             assertEquals(1.januar til 31.januar, refusjonsopplysningerPeriode)
             assertTrue(refusjonsopplysninger.subset(1.januar til 9.januar).all { it.beløp == INNTEKT })
-            assertTrue(refusjonsopplysninger.subset(10.januar til 31.januar).all { it.beløp == INGEN && it.kilde.meldingsreferanseId == korrigertIm })
+            assertTrue(refusjonsopplysninger.subset(10.januar til 31.januar).all { it.beløp == INGEN && it.kilde.meldingsreferanseId.id == korrigertIm })
         }
     }
 
@@ -394,8 +395,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     fun `korrigert søknad lager ny endring`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-            val søknad2 = UUID.randomUUID()
-            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(19.januar, 20.januar), søknadId = søknad2)
+            val søknad2 = MeldingsreferanseId(UUID.randomUUID())
+            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(19.januar, 20.januar), søknadId = søknad2.id)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
                 assertEquals(3, behandlinger.single().endringer.size)
@@ -426,16 +427,17 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     @Test
     fun `korrigert søknad etter fattet vedtak lager ny behandling`() {
         a1 {
-            val søknad1 = UUID.randomUUID()
-            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), søknadId = søknad1)
+            val søknad1 = MeldingsreferanseId(UUID.randomUUID())
+            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), søknadId = søknad1.id)
             val im = håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
+                .let { MeldingsreferanseId(it) }
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             val vedtakFattetTidspunkt = LocalDateTime.now()
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjenttidspunkt = vedtakFattetTidspunkt)
-            val søknad2 = UUID.randomUUID()
-            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(19.januar, 20.januar), søknadId = søknad2)
+            val søknad2 = MeldingsreferanseId(UUID.randomUUID())
+            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(19.januar, 20.januar), søknadId = søknad2.id)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
@@ -524,9 +526,11 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar)
-            val inntektsmeldingId = håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
-            assertTrue(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
-            assertFalse(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
+            val inntektsmeldingId = håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars).let {
+                MeldingsreferanseId(it)
+            }
+            assertTrue(inntektsmeldingId.id in observatør.inntektsmeldingIkkeHåndtert)
+            assertFalse(inntektsmeldingId.id in observatør.inntektsmeldingHåndtert.map { it.first })
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
                 assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
@@ -534,7 +538,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 val sisteBehandling = behandlinger.last()
-                assertEquals(inntektsmeldingId, sisteBehandling.kilde.meldingsreferanseId)
+                assertEquals(inntektsmeldingId.id, sisteBehandling.kilde.meldingsreferanseId)
                 assertEquals(Dokumentsporing.inntektsmeldingDager(inntektsmeldingId), sisteBehandling.endringer.single().dokumentsporing)
                 assertEquals(UBEREGNET_REVURDERING, sisteBehandling.tilstand)
             }
@@ -547,18 +551,18 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     @Test
     fun `delvis overlappende søknad i uberegnet`() {
         a1 {
-            val søknad1 = UUID.randomUUID()
-            val søknad2 = UUID.randomUUID()
-            håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), søknadId = søknad1)
-            håndterSøknad(Sykdom(3.januar, 27.januar, 100.prosent), søknadId = søknad2)
+            val søknad1 = MeldingsreferanseId(UUID.randomUUID())
+            val søknad2 = MeldingsreferanseId(UUID.randomUUID())
+            håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), søknadId = søknad1.id)
+            håndterSøknad(Sykdom(3.januar, 27.januar, 100.prosent), søknadId = søknad2.id)
             inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().also { behandling ->
-                assertEquals(søknad1, behandling.kilde.meldingsreferanseId)
+                assertEquals(søknad1.id, behandling.kilde.meldingsreferanseId)
                 assertEquals(2, behandling.endringer.size)
                 assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer.last().dokumentsporing)
                 assertEquals(3.januar, behandling.endringer.last().skjæringstidspunkt)
             }
             inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.single().also { behandling ->
-                assertEquals(søknad2, behandling.kilde.meldingsreferanseId)
+                assertEquals(søknad2.id, behandling.kilde.meldingsreferanseId)
                 assertEquals(Dokumentsporing.søknad(søknad2), behandling.endringer.single().dokumentsporing)
             }
         }
@@ -570,12 +574,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(8.august, 21.august, 100.prosent))
             nullstillTilstandsendringer()
             håndterSykmelding(Sykmeldingsperiode(10.august, 31.august))
-            val overlappende = UUID.randomUUID()
-            håndterSøknad(Sykdom(10.august, 31.august, 100.prosent), søknadId = overlappende)
+            val overlappende = MeldingsreferanseId(UUID.randomUUID())
+            håndterSøknad(Sykdom(10.august, 31.august, 100.prosent), søknadId = overlappende.id)
             assertEquals(8.august til 21.august, inspektør.periode(1.vedtaksperiode))
             assertEquals(10.august til 31.august, inspektør.periode(2.vedtaksperiode))
             inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().also { behandling ->
-                assertEquals(overlappende, behandling.kilde.meldingsreferanseId)
+                assertEquals(overlappende.id, behandling.kilde.meldingsreferanseId)
                 assertEquals(Dokumentsporing.søknad(overlappende), behandling.endringer.single().dokumentsporing)
             }
             assertVarsler(listOf(Varselkode.`Mottatt søknad som delvis overlapper`), 1.vedtaksperiode.filter())

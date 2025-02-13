@@ -12,6 +12,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.erHelg
 import no.nav.helse.februar
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -361,7 +362,7 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
         skalBeregnesManuelt: Boolean = false
     ) =
         UtbetalingshistorikkForFeriepenger(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             utbetalinger = utbetalinger,
             feriepengehistorikk = emptyList(),
             arbeidskategorikoder = arbeidskategorikoder,

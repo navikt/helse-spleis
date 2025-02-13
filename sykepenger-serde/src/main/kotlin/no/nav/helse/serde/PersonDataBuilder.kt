@@ -101,7 +101,7 @@ private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
 private fun InntektsmeldingUtDto.tilPersonData() = PersonData.ArbeidsgiverData.InntektsmeldingData(
     id = this.id,
     dato = this.inntektsdata.dato,
-    hendelseId = this.inntektsdata.hendelseId,
+    hendelseId = this.inntektsdata.hendelseId.id,
     beløp = this.inntektsdata.beløp.månedligDouble.beløp,
     kilde = when (this.kilde) {
         InntektsmeldingUtDto.KildeDto.Arbeidsgiver -> InntektsmeldingKildeDto.Arbeidsgiver
@@ -113,7 +113,7 @@ private fun InntektsmeldingUtDto.tilPersonData() = PersonData.ArbeidsgiverData.I
 private fun SykdomshistorikkElementDto.tilPersonData() = PersonData.SykdomshistorikkData(
     id = this.id,
     tidsstempel = this.tidsstempel,
-    hendelseId = this.hendelseId,
+    hendelseId = this.hendelseId?.id,
     hendelseSykdomstidslinje = this.hendelseSykdomstidslinje.tilPersonData(),
     beregnetSykdomstidslinje = this.beregnetSykdomstidslinje.tilPersonData(),
 )
@@ -301,7 +301,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
 
 private fun HendelseskildeDto.tilPersonData() = PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData(
     type = this.type,
-    id = this.meldingsreferanseId,
+    id = this.meldingsreferanseId.id,
     tidsstempel = this.tidsstempel
 )
 
@@ -365,7 +365,7 @@ private fun BehandlingUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Vedtak
 )
 
 private fun BehandlingkildeDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.KildeData(
-    meldingsreferanseId = this.meldingsreferanseId,
+    meldingsreferanseId = this.meldingsreferanseId.id,
     innsendt = this.innsendt,
     registrert = this.registert,
     avsender = this.avsender.tilPersonData()
@@ -418,7 +418,7 @@ private fun MaksdatoresultatUtDto.tilPersonData() = PersonData.ArbeidsgiverData.
 )
 
 private fun DokumentsporingDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentsporingData(
-    dokumentId = this.id,
+    dokumentId = this.id.id,
     dokumenttype = when (type) {
         DokumenttypeDto.InntektsmeldingDager -> PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingDager
         DokumenttypeDto.InntektsmeldingInntekt -> PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingInntekt
@@ -688,7 +688,7 @@ private fun UtbetaltDagDto.tilPersonData() = PersonData.ArbeidsgiverData.Feriepe
 private fun InfotrygdhistorikkelementUtDto.tilPersonData() = PersonData.InfotrygdhistorikkElementData(
     id = this.id,
     tidsstempel = this.tidsstempel,
-    hendelseId = this.hendelseId,
+    hendelseId = this.hendelseId.id,
     ferieperioder = this.ferieperioder.map { it.tilPersonData() },
     arbeidsgiverutbetalingsperioder = this.arbeidsgiverutbetalingsperioder.map { it.tilPersonData() },
     personutbetalingsperioder = this.personutbetalingsperioder.map { it.tilPersonData() },
@@ -759,7 +759,7 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagE
         else -> null
     },
     meldingsreferanseId = when (this) {
-        is VilkårsgrunnlagUtDto.Spleis -> this.meldingsreferanseId
+        is VilkårsgrunnlagUtDto.Spleis -> this.meldingsreferanseId?.id
         else -> null
     },
     vilkårsgrunnlagId = this.vilkårsgrunnlagId
@@ -801,7 +801,7 @@ private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() = PersonData.Vil
 private fun FaktaavklartInntektUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData(
     id = this.id,
     dato = this.inntektsdata.dato,
-    hendelseId = this.inntektsdata.hendelseId,
+    hendelseId = this.inntektsdata.hendelseId.id,
     beløp = this.inntektsdata.beløp.månedligDouble.beløp,
     tidsstempel = this.inntektsdata.tidsstempel,
     type = when (this.inntektsopplysning) {
@@ -825,20 +825,20 @@ private fun FaktaavklartInntektUtDto.tilPersonData() = PersonData.Vilkårsgrunnl
 private fun SaksbehandlerUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.KorrigertInntektsopplysningData(
     id = this.id,
     dato = this.inntektsdata.dato,
-    hendelseId = this.inntektsdata.hendelseId,
+    hendelseId = this.inntektsdata.hendelseId.id,
     beløp = this.inntektsdata.beløp.månedligDouble.beløp,
     tidsstempel = this.inntektsdata.tidsstempel
 )
 private fun SkjønnsmessigFastsattUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkjønnsmessigFastsattData(
     id = this.id,
     dato = this.inntektsdata.dato,
-    hendelseId = this.inntektsdata.hendelseId,
+    hendelseId = this.inntektsdata.hendelseId.id,
     beløp = this.inntektsdata.beløp.månedligDouble.beløp,
     tidsstempel = this.inntektsdata.tidsstempel
 )
 
 private fun SkatteopplysningDto.tilPersonDataSkattopplysning() = SkatteopplysningData(
-    hendelseId = this.hendelseId,
+    hendelseId = this.hendelseId.id,
     beløp = this.beløp.beløp,
     måned = this.måned,
     type = when (this.type) {
@@ -858,7 +858,7 @@ private fun BeløpstidslinjeDto.tilPersonData() = PersonData.BeløpstidslinjeDat
             fom = it.fom,
             tom = it.tom,
             dagligBeløp = it.dagligBeløp,
-            meldingsreferanseId = it.kilde.meldingsreferanseId,
+            meldingsreferanseId = it.kilde.meldingsreferanseId.id,
             avsender = it.kilde.avsender.tilPersonData(),
             tidsstempel = it.kilde.tidsstempel
         )

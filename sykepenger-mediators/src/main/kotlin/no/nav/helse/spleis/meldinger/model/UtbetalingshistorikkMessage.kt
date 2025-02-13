@@ -7,7 +7,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDate
-import java.util.UUID
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -104,7 +104,7 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val mel
 
     private val inntektshistorikk = packet.inntektshistorikk()
 
-    private fun infotrygdhistorikk(meldingsreferanseId: UUID) =
+    private fun infotrygdhistorikk(meldingsreferanseId: MeldingsreferanseId) =
         InfotrygdhistorikkElement.opprett(
             oppdatert = besvart,
             hendelseId = meldingsreferanseId,

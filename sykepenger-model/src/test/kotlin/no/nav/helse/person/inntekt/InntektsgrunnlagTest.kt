@@ -24,6 +24,7 @@ import no.nav.helse.etterlevelse.folketrygdloven
 import no.nav.helse.etterlevelse.førstePunktum
 import no.nav.helse.etterlevelse.paragraf
 import no.nav.helse.februar
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.til
 import no.nav.helse.inntektsgrunnlag
 import no.nav.helse.inspectors.inspektør
@@ -391,7 +392,7 @@ internal class InntektsgrunnlagTest {
                         dato = skjæringstidspunkt,
                         inntektsopplysninger = listOf(
                             Skatteopplysning(
-                                hendelseId = UUID.randomUUID(),
+                                hendelseId = MeldingsreferanseId(UUID.randomUUID()),
                                 beløp = 25000.månedlig,
                                 måned = 1.januar.yearMonth,
                                 type = LØNNSINNTEKT,

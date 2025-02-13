@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -175,13 +176,13 @@ internal class TestPerson(
             val hendelse = arbeidsgiverHendelsefabrikk.lagArbeidsgiveropplysninger(vedtaksperiodeId = vedtaksperiodeId, opplysninger = opplysninger)
             observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *hendelse.toTypedArray())
             hendelse.håndter(Person::håndter)
-            return hendelse.metadata.meldingsreferanseId
+            return hendelse.metadata.meldingsreferanseId.id
         }
 
         internal fun håndterKorrigerteArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning): UUID {
             val hendelse = arbeidsgiverHendelsefabrikk.lagKorrigerteArbeidsgiveropplysninger(vedtaksperiodeId = vedtaksperiodeId, opplysninger = opplysninger)
             hendelse.håndter(Person::håndter)
-            return hendelse.metadata.meldingsreferanseId
+            return hendelse.metadata.meldingsreferanseId.id
         }
 
         internal fun håndterSøknad(
@@ -267,7 +268,7 @@ internal class TestPerson(
         ): UUID {
 
             val arbeidsgiveropplysninger = Arbeidsgiveropplysninger(
-                meldingsreferanseId = id,
+                meldingsreferanseId = MeldingsreferanseId(id),
                 innsendt = mottatt,
                 registrert = mottatt.plusSeconds(1),
                 organisasjonsnummer = this.orgnummer,
@@ -532,7 +533,7 @@ internal class TestPerson(
         ): UUID {
             val inntektFraOrdningen = arbeidsgiverHendelsefabrikk.lagSykepengegrunnlagForArbeidsgiver(vedtaksperiodeId, skjæringstidspunkt, inntekter)
             inntektFraOrdningen.håndter(Person::håndter)
-            return inntektFraOrdningen.metadata.meldingsreferanseId
+            return inntektFraOrdningen.metadata.meldingsreferanseId.id
         }
 
         internal fun håndterPåminnelse(

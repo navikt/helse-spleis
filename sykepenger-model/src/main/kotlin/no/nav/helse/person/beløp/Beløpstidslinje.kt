@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.*
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
@@ -89,7 +90,7 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
                     tom = dag.dato,
                     dagligBeløp = dag.beløp.daglig,
                     kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(
-                        meldingsreferanseId = dag.kilde.meldingsreferanseId,
+                        meldingsreferanseId = dag.kilde.meldingsreferanseId.dto(),
                         avsender = dag.kilde.avsender.dto(),
                         tidsstempel = dag.kilde.tidsstempel
                     )
@@ -114,7 +115,7 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
                             dato = dato,
                             beløp = it.dagligBeløp.daglig,
                             kilde = Kilde(
-                                meldingsreferanseId = it.kilde.meldingsreferanseId,
+                                meldingsreferanseId = MeldingsreferanseId.gjenopprett(it.kilde.meldingsreferanseId),
                                 avsender = Avsender.gjenopprett(it.kilde.avsender),
                                 tidsstempel = it.kilde.tidsstempel
                             )

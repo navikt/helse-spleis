@@ -18,6 +18,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.gjenopprettFraJSONtekst
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.personLogg
@@ -45,10 +46,12 @@ internal abstract class AbstractPersonTest {
         private fun overgangFraInfotrygdPerson(jurist: Subsumsjonslogg) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", jurist).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
-                    UUID.randomUUID(), a1, UUID.randomUUID().toString(),
-                    InfotrygdhistorikkElement.opprett(
+                    meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                    organisasjonsnummer = a1,
+                    vedtaksperiodeId = UUID.randomUUID().toString(),
+                    element = InfotrygdhistorikkElement.opprett(
                         LocalDateTime.now(),
-                        UUID.randomUUID(),
+                        MeldingsreferanseId(UUID.randomUUID()),
                         listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT)),
                         listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true)),
                         emptyMap()
@@ -62,10 +65,12 @@ internal abstract class AbstractPersonTest {
         private fun pingPongPerson(jurist: Subsumsjonslogg) = gjenopprettFraJSON("/personer/pingpong.json", jurist).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
-                    UUID.randomUUID(), a1, UUID.randomUUID().toString(),
-                    InfotrygdhistorikkElement.opprett(
+                    meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                    organisasjonsnummer = a1,
+                    vedtaksperiodeId = UUID.randomUUID().toString(),
+                    element = InfotrygdhistorikkElement.opprett(
                         LocalDateTime.now(),
-                        UUID.randomUUID(),
+                        MeldingsreferanseId(UUID.randomUUID()),
                         listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, INNTEKT)),
                         listOf(Inntektsopplysning(a1, 1.februar, INNTEKT, true)),
                         emptyMap()

@@ -128,5 +128,5 @@ private fun assertInntektsgrunnlag(
         Infotrygd -> Arbeidstakerkilde.Arbeidsgiver
         is AOrdningen -> Arbeidstakerkilde.AOrdningen
     })
-    if (forventetKildeId != null) assertEquals(forventetKildeId, inspektør.faktaavklartInntekt.inntektsdata.hendelseId)
+    if (forventetKildeId != null) assertEquals(forventetKildeId, inspektør.faktaavklartInntekt.inntektsdata.hendelseId.id)
 }

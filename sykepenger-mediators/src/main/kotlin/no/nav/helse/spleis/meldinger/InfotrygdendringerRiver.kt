@@ -2,7 +2,6 @@ package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -24,7 +23,7 @@ internal class InfotrygdendringerRiver(
 
     override fun createMessage(packet: JsonMessage) = InfotrygdendringMessage(
         packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
+        id = packet.meldingsreferanseId(),
         fødselsnummer = packet["fødselsnummer"].asText()
     )
     )

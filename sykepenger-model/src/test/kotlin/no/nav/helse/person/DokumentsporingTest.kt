@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
-import java.util.UUID
+import java.util.*
+import no.nav.helse.hendelser.MeldingsreferanseId
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -8,7 +9,7 @@ internal class DokumentsporingTest {
 
     @Test
     fun `to like sporinger i et set`() {
-        val søknad = UUID.randomUUID()
+        val søknad = MeldingsreferanseId(UUID.randomUUID())
         val sporing1 = Dokumentsporing.søknad(søknad)
         val sporing2 = Dokumentsporing.søknad(søknad)
         val set = setOf(sporing1, sporing2)

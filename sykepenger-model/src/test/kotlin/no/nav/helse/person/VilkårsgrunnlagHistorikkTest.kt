@@ -14,6 +14,7 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
@@ -79,7 +80,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, skjæringstidspunkt),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 vurdertOk = true,
-                meldingsreferanseId = UUID.randomUUID(),
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
         }
@@ -108,7 +109,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 vurdertOk = true,
-                meldingsreferanseId = UUID.randomUUID(),
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
         )
@@ -126,7 +127,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     @Test
     fun `korrekt antall innslag i vilkårsgrunnlagshistorikken ved én vilkårsprøving`() {
         val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = UUID.randomUUID().toString(),
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
@@ -150,7 +151,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     @Test
     fun `Registrerer subsumsjoner ved validering av vilkårsgrunnlag`() {
         val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = UUID.randomUUID().toString(),
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
@@ -168,7 +169,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `ny vilkårsprøving på samme skjæringstidspunkt overskriver gammel vilkårsprøving - medfører nytt innslag`() {
         val arbeidsforhold = arbeidsforhold
         val vilkårsgrunnlag1 = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = UUID.randomUUID().toString(),
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
@@ -178,7 +179,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = UUID.randomUUID().toString(),
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
@@ -215,7 +216,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     @Test
     fun `vilkårsprøving på to ulike skjæringstidspunkt medfører to innslag der siste innslag har vilkårsprøving for begge skjæringstidspunktene`() {
         val vilkårsgrunnlag1 = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = UUID.randomUUID().toString(),
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
@@ -225,7 +226,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = UUID.randomUUID().toString(),
             skjæringstidspunkt = 2.januar,
             orgnummer = "ORGNUMMER",
@@ -247,7 +248,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `Finner vilkårsgrunnlag for skjæringstidspunkt - ok`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = UUID.randomUUID().toString(),
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
@@ -271,7 +272,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `Finner vilkårsgrunnlag for skjæringstidspunkt - ikke ok`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = UUID.randomUUID().toString(),
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
@@ -295,7 +296,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `Avviser kun utbetalingsdager som har likt skjæringstidspunkt som et vilkårsgrunnlag som ikke er ok`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val vilkårsgrunnlag1 = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = UUID.randomUUID().toString(),
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
@@ -310,7 +311,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             jurist
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = UUID.randomUUID().toString(),
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
@@ -335,7 +336,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `Avslår vilkår for minimum inntekt med riktig begrunnelse for personer under 67 år`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = UUID.randomUUID().toString(),
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",
@@ -369,7 +370,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val fødselsdato = 1.januar(1950)
         val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = UUID.randomUUID().toString(),
             skjæringstidspunkt = 1.januar,
             orgnummer = "ORGNUMMER",

@@ -13,6 +13,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -87,14 +88,13 @@ internal class RestApiTest {
         val fom = LocalDate.of(2018, 9, 10)
         val tom = fom.plusDays(16)
         val sykeperioder = listOf(Sykmeldingsperiode(fom, tom))
-        val vedtaksperiodeId = UUID.randomUUID()
         val sykmelding = Sykmelding(
-            meldingsreferanseId = vedtaksperiodeId,
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             orgnummer = ORGNUMMER,
             sykeperioder = sykeperioder
         )
         val inntektsmelding = Inntektsmelding(
-            meldingsreferanseId = vedtaksperiodeId,
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             refusjon = Inntektsmelding.Refusjon(
                 beløp = 12000.månedlig,
                 opphørsdato = null

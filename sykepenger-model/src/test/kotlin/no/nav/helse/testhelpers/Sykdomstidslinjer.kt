@@ -7,6 +7,7 @@ import java.util.stream.Collectors
 import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Hendelseskilde.Companion.INGEN
 import no.nav.helse.hendelser.Melding
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.januar
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
@@ -41,7 +42,7 @@ internal val Int.S
         INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal fun Int.S(melding: Melding) = this.S(Hendelseskilde(melding, UUID.randomUUID(), LocalDateTime.now()))
+internal fun Int.S(melding: Melding) = this.S(Hendelseskilde(melding, MeldingsreferanseId(UUID.randomUUID()), LocalDateTime.now()))
 
 internal fun Int.S(hendelseskilde: Hendelseskilde, grad: Prosentdel = 100.prosent) = Sykdomstidslinje.sykedager(
     dagensDato,
@@ -58,7 +59,7 @@ internal val Int.U
         INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal fun Int.U(hendelsekilde: Hendelseskilde = INGEN.copy(meldingsreferanseId = UUID.randomUUID())) = Sykdomstidslinje.arbeidsgiverdager(
+internal fun Int.U(hendelsekilde: Hendelseskilde = INGEN.copy(meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()))) = Sykdomstidslinje.arbeidsgiverdager(
     dagensDato,
     dagensDato.plusDays(this.toLong() - 1),
     100.prosent,

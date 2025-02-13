@@ -3,22 +3,19 @@ package no.nav.helse.spleis.mediator.e2e
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
 import java.math.BigDecimal
 import java.time.LocalDate
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
-import no.nav.helse.spleis.MessageMediator
-import no.nav.helse.spleis.db.HendelseRepository
-import no.nav.helse.spleis.mediator.TestHendelseMediator
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Naturalytelse
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
@@ -321,26 +318,24 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `Behandler ikke melding hvis den allerede er behandlet`() {
-        val hendelseRepository: HendelseRepository = mockk(relaxed = true)
-        every { hendelseRepository.erBehandlet(any()) } returnsMany (listOf(false, true))
-
-        MessageMediator(
-            rapidsConnection = testRapid,
-            hendelseRepository = hendelseRepository,
-            hendelseMediator = TestHendelseMediator()
-        )
-
         val (meldingId, message) = meldingsfabrikk.lagNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 25.januar, sykmeldingsgrad = 100))
+
         testRapid.sendTestMessage(message)
+        assertTrue(hendelseRepository.erBehandlet(MeldingsreferanseId(meldingId.toUUID())))
+        val behandletTidspunktFørDuplikat = sessionOf(dataSource.ds).use { session ->
+            session.run(queryOf("select behandlet_tidspunkt from melding WHERE melding_id = ?", meldingId).map { it.localDateTime(1) }.asSingle)
+        }!!
         testRapid.sendTestMessage(message)
-        verify(exactly = 1) { hendelseRepository.markerSomBehandlet(eq(meldingId.toUUID())) }
-        verify(exactly = 2) { hendelseRepository.erBehandlet(any()) }
+        val behandletTidspunktEtterDuplikat = sessionOf(dataSource.ds).use { session ->
+            session.run(queryOf("select behandlet_tidspunkt from melding WHERE melding_id = ?", meldingId).map { it.localDateTime(1) }.asSingle)
+        }!!
+        assertEquals(behandletTidspunktFørDuplikat, behandletTidspunktEtterDuplikat)
     }
 
     @Test
     fun `Behandler melding hvis den tidligere har prøvd å behandle melding, men kræsjet`() {
         val (ugyldigSøknadId, ugyldigSøknad) = meldingsfabrikk.lagNySøknad(SoknadsperiodeDTO(fom = 25.januar, tom = 1.januar, sykmeldingsgrad = 100))
-        val meldingId = ugyldigSøknadId.toUUID()
+        val meldingId = MeldingsreferanseId(ugyldigSøknadId.toUUID())
         assertThrows<IllegalArgumentException> {
             testRapid.sendTestMessage(ugyldigSøknad)
         }
@@ -348,7 +343,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertFalse(hendelseRepository.erBehandlet(meldingId))
         val (_, message) = meldingsfabrikk.lagNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 25.januar, sykmeldingsgrad = 100))
         val medSammeId = (jacksonObjectMapper().readTree(message) as ObjectNode).also {
-            it.put("@id", meldingId.toString())
+            it.put("@id", meldingId.id.toString())
         }.toString()
         testRapid.sendTestMessage(medSammeId)
         assertTrue(hendelseRepository.erBehandlet(meldingId))

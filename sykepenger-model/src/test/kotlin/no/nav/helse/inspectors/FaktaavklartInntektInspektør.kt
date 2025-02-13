@@ -9,7 +9,7 @@ internal val FaktaavklartInntekt.inspektør get() = FaktaavklartInntektInspektø
 
 internal class FaktaavklartInntektInspektør(inntekt: FaktaavklartInntekt) {
     val beløp: Inntekt = inntekt.inntektsdata.beløp
-    val hendelseId: UUID = inntekt.inntektsdata.hendelseId
+    val hendelseId: UUID = inntekt.inntektsdata.hendelseId.id
     val tidsstempel: LocalDateTime = inntekt.inntektsdata.tidsstempel
     val opplysningstype = inntekt.inntektsopplysning
 }

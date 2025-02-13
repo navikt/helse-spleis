@@ -23,6 +23,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
@@ -70,7 +71,7 @@ internal fun AbstractEndToEndTest.utbetaling(
     utbetalingId: UUID? = null
 ) =
     UtbetalingHendelse(
-        meldingsreferanseId = meldingsreferanseId,
+        meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
         utbetalingId = utbetalingId ?: person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId").let { UUID.fromString(it) },
@@ -87,7 +88,7 @@ internal fun AbstractEndToEndTest.feriepengeutbetaling(
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) =
     UtbetalingHendelse(
-        meldingsreferanseId = meldingsreferanseId,
+        meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
         utbetalingId = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId").let { UUID.fromString(it) },
@@ -207,7 +208,7 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
     inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
 ): Vilkårsgrunnlag {
     return Vilkårsgrunnlag(
-        meldingsreferanseId = UUID.randomUUID(),
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         skjæringstidspunkt = skjæringstidspunkt,
         orgnummer = orgnummer,
@@ -225,7 +226,7 @@ internal fun utbetalingpåminnelse(
     orgnummer: String = a1
 ): Utbetalingpåminnelse {
     return Utbetalingpåminnelse(
-        meldingsreferanseId = UUID.randomUUID(),
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         organisasjonsnummer = orgnummer,
         utbetalingId = utbetalingId,
         antallGangerPåminnet = 0,
@@ -241,7 +242,7 @@ internal fun sykepengegrunnlagForArbeidsgiver(
     orgnummer: String = a1,
 ): SykepengegrunnlagForArbeidsgiver {
     return SykepengegrunnlagForArbeidsgiver(
-        meldingsreferanseId = UUID.randomUUID(),
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         vedtaksperiodeId = vedtaksperiodeId,
         skjæringstidspunkt = skjæringstidspunkt,
         orgnummer = orgnummer,
@@ -267,7 +268,7 @@ internal fun påminnelse(
     skalReberegnes: Boolean = false
 ): Påminnelse {
     return Påminnelse(
-        meldingsreferanseId = UUID.randomUUID(),
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         antallGangerPåminnet = antallGangerPåminnet,
@@ -291,13 +292,13 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
     besvart: LocalDateTime = LocalDateTime.now(),
 ): Utbetalingshistorikk {
     return Utbetalingshistorikk(
-        meldingsreferanseId = UUID.randomUUID(),
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         besvart = LocalDateTime.now(),
         element = InfotrygdhistorikkElement.opprett(
             oppdatert = besvart,
-            hendelseId = UUID.randomUUID(),
+            hendelseId = MeldingsreferanseId(UUID.randomUUID()),
             perioder = utbetalinger,
             inntekter = inntektshistorikk,
             arbeidskategorikoder = emptyMap()
@@ -313,10 +314,10 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
     besvart: LocalDateTime = LocalDateTime.now(),
 ): UtbetalingshistorikkEtterInfotrygdendring {
     return UtbetalingshistorikkEtterInfotrygdendring(
-        meldingsreferanseId = meldingsreferanseId,
+        meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
         element = InfotrygdhistorikkElement.opprett(
             oppdatert = besvart,
-            hendelseId = meldingsreferanseId,
+            hendelseId = MeldingsreferanseId(meldingsreferanseId),
             perioder = utbetalinger,
             inntekter = inntektshistorikk,
             arbeidskategorikoder = arbeidskategorikoder
@@ -341,7 +342,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkForFeriepenger(
     skalBeregnesManuelt: Boolean
 ): UtbetalingshistorikkForFeriepenger {
     return UtbetalingshistorikkForFeriepenger(
-        meldingsreferanseId = UUID.randomUUID(),
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         utbetalinger = utbetalinger,
         feriepengehistorikk = feriepengehistorikk,
         arbeidskategorikoder = arbeidskategorikoder,
@@ -364,7 +365,7 @@ internal fun AbstractEndToEndTest.ytelser(
 ): Ytelser {
     val meldingsreferanseId = UUID.randomUUID()
     return Ytelser(
-        meldingsreferanseId = meldingsreferanseId,
+        meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         foreldrepenger = Foreldrepenger(
@@ -403,7 +404,7 @@ internal fun AbstractEndToEndTest.simulering(
     simuleringsresultat: SimuleringResultatDto? = standardSimuleringsresultat(orgnummer)
 ) = person.personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter, orgnummer).filter { it.type == Aktivitet.Behov.Behovtype.Simulering }.map { simuleringsBehov ->
     Simulering(
-        meldingsreferanseId = UUID.randomUUID(),
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         orgnummer = orgnummer,
         fagsystemId = simuleringsBehov.detaljer().getValue("fagsystemId") as String,
@@ -470,7 +471,7 @@ internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
             )
     ),
 ) = Utbetalingsgodkjenning(
-    meldingsreferanseId = UUID.randomUUID(),
+    meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
     organisasjonsnummer = orgnummer,
     utbetalingId = utbetalingId,
     vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),

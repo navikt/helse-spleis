@@ -29,7 +29,7 @@ import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.økonomi.Inntekt
 
 class Inntektsmelding(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     private val refusjon: Refusjon,
     orgnummer: String,
     private val beregnetInntekt: Inntekt,
@@ -116,7 +116,7 @@ class Inntektsmelding(
         val endringerIRefusjon: List<EndringIRefusjon> = emptyList()
     ) {
 
-        internal fun refusjonstidslinje(refusjonsdato: LocalDate, meldingsreferanseId: UUID, tidsstempel: LocalDateTime): Beløpstidslinje {
+        internal fun refusjonstidslinje(refusjonsdato: LocalDate, meldingsreferanseId: MeldingsreferanseId, tidsstempel: LocalDateTime): Beløpstidslinje {
             val kilde = Kilde(meldingsreferanseId, ARBEIDSGIVER, tidsstempel)
 
             val opphørIRefusjon = opphørsdato?.let {
@@ -161,7 +161,7 @@ class Inntektsmelding(
         val overlapperMedForkastet = forkastede.overlapperMed(dager)
         val harPeriodeInnenfor16Dager = dager.harPeriodeInnenfor16Dager(vedtaksperioder)
         if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
-            person.emitInntektsmeldingFørSøknadEvent(metadata.meldingsreferanseId, relevanteSykmeldingsperioder, behandlingsporing.organisasjonsnummer)
+            person.emitInntektsmeldingFørSøknadEvent(metadata.meldingsreferanseId.id, relevanteSykmeldingsperioder, behandlingsporing.organisasjonsnummer)
             return aktivitetslogg.info("Inntektsmelding før søknad - er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
         }
         aktivitetslogg.info("Inntektsmelding ikke håndtert")

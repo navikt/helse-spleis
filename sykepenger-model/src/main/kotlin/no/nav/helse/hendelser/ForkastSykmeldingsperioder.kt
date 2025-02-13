@@ -1,11 +1,10 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.person.Sykmeldingsperioder
 
 class ForkastSykmeldingsperioder(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     organisasjonsnummer: String,
     private val periode: Periode
 ) : Hendelse {

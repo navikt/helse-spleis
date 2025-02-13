@@ -2,13 +2,12 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Sykmelding(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     orgnummer: String,
     sykeperioder: List<Sykmeldingsperiode>
 ) : Hendelse {

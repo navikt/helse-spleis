@@ -1,33 +1,34 @@
 package no.nav.helse.person
 
-import java.util.*
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.DokumenttypeDto
+import no.nav.helse.hendelser.MeldingsreferanseId
 
 data class Dokumentsporing(
-    val id: UUID,
+    val id: MeldingsreferanseId,
     val dokumentType: DokumentType
 ) {
 
     companion object {
-        internal fun søknad(id: UUID) = Dokumentsporing(id, DokumentType.Søknad)
-        internal fun inntektsmeldingInntekt(id: UUID) = Dokumentsporing(id, DokumentType.InntektsmeldingInntekt)
-        internal fun inntektsmeldingRefusjon(id: UUID) = Dokumentsporing(id, DokumentType.InntektsmeldingRefusjon)
-        internal fun inntektsmeldingDager(id: UUID) = Dokumentsporing(id, DokumentType.InntektsmeldingDager)
-        internal fun inntektFraAOrdingen(id: UUID) = Dokumentsporing(id, DokumentType.InntektFraAOrdningen)
-        internal fun overstyrTidslinje(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrTidslinje)
-        internal fun overstyrArbeidsgiveropplysninger(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrArbeidsgiveropplysninger)
-        internal fun andreYtelser(id: UUID) = Dokumentsporing(id, DokumentType.AndreYtelser)
-        internal fun tilkommenInntektFraSøknad(id: UUID) = Dokumentsporing(id, DokumentType.TilkommenInntektFraSøknad)
+        internal fun søknad(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.Søknad)
+        internal fun inntektsmeldingInntekt(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.InntektsmeldingInntekt)
+        internal fun inntektsmeldingRefusjon(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.InntektsmeldingRefusjon)
+        internal fun inntektsmeldingDager(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.InntektsmeldingDager)
+        internal fun inntektFraAOrdingen(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.InntektFraAOrdningen)
+        internal fun overstyrTidslinje(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.OverstyrTidslinje)
+        internal fun overstyrArbeidsgiveropplysninger(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.OverstyrArbeidsgiveropplysninger)
+        internal fun andreYtelser(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.AndreYtelser)
+        internal fun tilkommenInntektFraSøknad(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.TilkommenInntektFraSøknad)
 
-        internal fun Iterable<Dokumentsporing>.ider() = filter { it.dokumentType.ekstern }.map { it.id }.toSet()
+        internal fun Iterable<Dokumentsporing>.eksterneIder() = filter { it.dokumentType.ekstern }.map { it.id }.toSet()
+        internal fun Iterable<Dokumentsporing>.ider() = eksterneIder().map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.søknadIder() = filter { it.dokumentType == DokumentType.Søknad }.map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.sisteInntektsmeldingDagerId() = lastOrNull { it.dokumentType == DokumentType.InntektsmeldingDager }?.id
         internal fun Iterable<Dokumentsporing>.sisteInntektsmeldingInntektId() = lastOrNull { it.dokumentType == DokumentType.InntektsmeldingInntekt }?.id
 
         internal fun gjenopprett(dto: DokumentsporingDto): Dokumentsporing {
             return Dokumentsporing(
-                id = dto.id,
+                id = MeldingsreferanseId.gjenopprett(dto.id),
                 dokumentType = when (dto.type) {
                     DokumenttypeDto.InntektsmeldingDager -> DokumentType.InntektsmeldingDager
                     DokumenttypeDto.InntektsmeldingInntekt -> DokumentType.InntektsmeldingInntekt
@@ -51,7 +52,7 @@ data class Dokumentsporing(
     override fun toString() = "$dokumentType ($id)"
 
     internal fun dto() = DokumentsporingDto(
-        id = this.id,
+        id = this.id.dto(),
         type = when (dokumentType) {
             DokumentType.Sykmelding -> DokumenttypeDto.Sykmelding
             DokumentType.Søknad -> DokumenttypeDto.Søknad

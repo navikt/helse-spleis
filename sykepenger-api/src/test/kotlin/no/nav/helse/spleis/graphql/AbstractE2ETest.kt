@@ -252,7 +252,7 @@ internal abstract class AbstractE2ETest {
             inntekter = skatteinntekter
         )
         skatteinntekter.håndter(Person::håndter)
-        return skatteinntekter.metadata.meldingsreferanseId
+        return skatteinntekter.metadata.meldingsreferanseId.id
     }
 
     protected fun håndterVilkårsgrunnlag(arbeidsgivere: List<Pair<String, Inntekt>> = listOf(a1 to INNTEKT)) {

@@ -2,11 +2,10 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.person.inntekt.Inntektsdata
 
 class SkjønnsmessigFastsettelse(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     private val skjæringstidspunkt: LocalDate,
     val arbeidsgiveropplysninger: List<SkjønnsfastsattInntekt>,
     opprettet: LocalDateTime

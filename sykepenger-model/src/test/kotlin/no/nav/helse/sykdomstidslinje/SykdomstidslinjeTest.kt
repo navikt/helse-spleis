@@ -7,6 +7,7 @@ import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.Hendelseskilde
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -43,7 +44,7 @@ internal class SykdomstidslinjeTest {
 
     @Test
     fun `Like sykdomstidslinjer med samme kilde er like`() {
-        val meldingsreferanse = UUID.randomUUID()
+        val meldingsreferanse = MeldingsreferanseId(UUID.randomUUID())
         val nå = LocalDateTime.now()
         val kilde = Hendelseskilde.INGEN.copy(meldingsreferanseId = meldingsreferanse, tidsstempel = nå)
         val kilde2 = kilde.copy(meldingsreferanseId = meldingsreferanse)
@@ -52,7 +53,7 @@ internal class SykdomstidslinjeTest {
         resetSeed()
         val sykdomstidslinje2 = 5.S(kilde2)
         resetSeed()
-        val sykdomstidslinje3 = 5.S(kilde.copy(meldingsreferanseId = UUID.randomUUID()))
+        val sykdomstidslinje3 = 5.S(kilde.copy(meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())))
         assertEquals(sykdomstidslinje1, sykdomstidslinje2)
         assertNotEquals(sykdomstidslinje1, sykdomstidslinje3)
     }

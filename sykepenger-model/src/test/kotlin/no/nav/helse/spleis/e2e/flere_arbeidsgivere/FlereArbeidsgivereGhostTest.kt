@@ -11,6 +11,7 @@ import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -206,7 +207,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             beregnetInntekt = 33000.månedlig,
             orgnummer = ghost,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer"
-        )
+        ).let { MeldingsreferanseId(it) }
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
@@ -218,7 +219,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         }
 
         // Så kjem søknaden på ghosten læll
-        val ghostSøknad = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ghost)
+        val ghostSøknad = MeldingsreferanseId(håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ghost))
 
         assertVarsel(RV_IM_4, 2.vedtaksperiode.filter(orgnummer = a1))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
@@ -249,7 +250,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertVarsel(RV_IM_8, 1.vedtaksperiode.filter(ghost))
 
-        assertBeløpstidslinje(inspektør(a2).vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, 33000.månedlig, ghostIM)
+        assertBeløpstidslinje(inspektør(a2).vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, 33000.månedlig, ghostIM.id)
         assertEquals(setOf(Dokumentsporing.søknad(ghostSøknad), Dokumentsporing.inntektsmeldingDager(ghostIM), Dokumentsporing.inntektsmeldingInntekt(ghostIM)), inspektør(ghost).hendelser(1.vedtaksperiode))
     }
 

@@ -1,10 +1,9 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 
-class PersonPåminnelse(meldingsreferanseId: UUID) : Hendelse {
+class PersonPåminnelse(meldingsreferanseId: MeldingsreferanseId) : Hendelse {
     override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(

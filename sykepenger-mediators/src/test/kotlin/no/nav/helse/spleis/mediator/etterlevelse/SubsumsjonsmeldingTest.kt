@@ -14,6 +14,7 @@ import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 2`
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.januar
 import no.nav.helse.spleis.Meldingsporing
@@ -37,7 +38,7 @@ internal class SubsumsjonsmeldingTest {
     fun beforeEach() {
         val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
             it.requireKey("@event_name")
-        }, Meldingsporing(UUID.randomUUID(), fnr))
+        }, Meldingsporing(MeldingsreferanseId(UUID.randomUUID()), fnr))
         subsumsjonMediator = SubsumsjonMediator(eksempelmelding, versjonAvKode)
         testRapid = TestRapid()
     }

@@ -110,7 +110,7 @@ internal class SpeilGenerasjonerBuilder(
         return UberegnetPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
             behandlingId = generasjon.id,
-            kilde = generasjon.kilde.meldingsreferanseId,
+            kilde = generasjon.kilde.meldingsreferanseId.id,
             fom = sisteEndring.periode.fom,
             tom = sisteEndring.periode.tom,
             sammenslåttTidslinje = sykdomstidslinje.merge(utbetalingstidslinje),
@@ -148,7 +148,7 @@ internal class SpeilGenerasjonerBuilder(
         return BeregnetPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
             behandlingId = generasjon.id,
-            kilde = generasjon.kilde.meldingsreferanseId,
+            kilde = generasjon.kilde.meldingsreferanseId.id,
             fom = sisteEndring.periode.fom,
             tom = sisteEndring.periode.tom,
             sammenslåttTidslinje = sykdomstidslinje.merge(utbetalingstidslinje),
@@ -175,7 +175,7 @@ internal class SpeilGenerasjonerBuilder(
         return AnnullertPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
             behandlingId = generasjon.id,
-            kilde = generasjon.kilde.meldingsreferanseId,
+            kilde = generasjon.kilde.meldingsreferanseId.id,
             fom = sisteEndring.periode.fom,
             tom = sisteEndring.periode.tom,
             opprettet = generasjon.endringer.first().tidsstempel,
@@ -216,7 +216,7 @@ internal class SpeilGenerasjonerBuilder(
             .takeWhile { it.id != generasjon.id }
             .plus(generasjon)
             .flatMap { it.endringer }
-            .map { it.dokumentsporing.id }
+            .map { it.dokumentsporing.id.id }
             .toSet()
     }
 
@@ -447,7 +447,7 @@ internal class SpeilGenerasjonerBuilder(
                     fom = nåværende.fom,
                     tom = neste?.fom?.forrigeDag,
                     beløp = nåværende.dagligBeløp.daglig.månedlig,
-                    meldingsreferanseId = nåværende.kilde.meldingsreferanseId
+                    meldingsreferanseId = nåværende.kilde.meldingsreferanseId.id
                 )
             }
         }

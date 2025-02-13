@@ -17,6 +17,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
@@ -289,7 +290,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         opptjening: Opptjening,
         val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         val vurdertOk: Boolean,
-        val meldingsreferanseId: UUID?,
+        val meldingsreferanseId: MeldingsreferanseId?,
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjening) {
         internal fun validerFørstegangsvurdering(aktivitetslogg: IAktivitetslogg) {
@@ -360,7 +361,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål -> MedlemskapsvurderingDto.UavklartMedBrukerspørsmål
             },
             vurdertOk = vurdertOk,
-            meldingsreferanseId = meldingsreferanseId
+            meldingsreferanseId = meldingsreferanseId?.dto()
         )
 
         internal companion object {
@@ -377,7 +378,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                         MedlemskapsvurderingDto.VetIkke -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
                     },
                     vurdertOk = dto.vurdertOk,
-                    meldingsreferanseId = dto.meldingsreferanseId
+                    meldingsreferanseId = dto.meldingsreferanseId?.let { MeldingsreferanseId.gjenopprett(it) }
                 )
             }
         }
@@ -453,7 +454,7 @@ internal data class VilkårsgrunnlagView(
     val skjæringstidspunkt: LocalDate,
     val vurdertOk: Boolean,
     val type: VilkårsgrunnlagTypeView,
-    val meldingsreferanseId: UUID?,
+    val meldingsreferanseId: MeldingsreferanseId?,
     val inntektsgrunnlag: InntektsgrunnlagView,
     val opptjening: OpptjeningView?
 ) {

@@ -40,6 +40,7 @@ import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
@@ -242,7 +243,8 @@ internal class Vedtaksperiode private constructor(
             this
         )
     private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
-    private val hendelseIder get() = behandlinger.dokumentsporing()
+    private val eksterneIder get() = behandlinger.eksterneIder()
+    private val eksterneIderSet get() = eksterneIder.map { it.id }.toSet()
     private val refusjonstidslinje get() = behandlinger.refusjonstidslinje()
 
     init {
@@ -283,7 +285,7 @@ internal class Vedtaksperiode private constructor(
     ) {
         check(tilstand is Start)
         registrerKontekst(aktivitetslogg)
-        person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId, id, arbeidsgiver.organisasjonsnummer)
+        person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId.id, id, arbeidsgiver.organisasjonsnummer)
         arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(aktivitetslogg, this, arbeidsgivere)
 
         infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
@@ -316,7 +318,7 @@ internal class Vedtaksperiode private constructor(
         if (!søknad.erRelevant(this.periode)) return false
         registrerKontekst(aktivitetslogg)
 
-        person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId, id, arbeidsgiver.organisasjonsnummer)
+        person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId.id, id, arbeidsgiver.organisasjonsnummer)
 
         when (tilstand) {
             AvventerBlokkerendePeriode,
@@ -404,9 +406,9 @@ internal class Vedtaksperiode private constructor(
             behandlinger.sisteInntektsmeldingDagerId()?.let {
                 person.arbeidsgiveropplysningerKorrigert(
                     PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                        korrigerendeInntektsopplysningId = hendelse.metadata.meldingsreferanseId,
+                        korrigerendeInntektsopplysningId = hendelse.metadata.meldingsreferanseId.id,
                         korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
-                        korrigertInntektsmeldingId = it
+                        korrigertInntektsmeldingId = it.id
                     )
                 )
             }
@@ -428,7 +430,7 @@ internal class Vedtaksperiode private constructor(
         inntektsmelding.inntektHåndtert()
         if (!behandlinger.oppdaterDokumentsporing(inntektsmelding.dokumentsporing)) return true
         person.emitInntektsmeldingHåndtert(
-            inntektsmelding.metadata.meldingsreferanseId,
+            inntektsmelding.metadata.meldingsreferanseId.id,
             id,
             arbeidsgiver.organisasjonsnummer
         )
@@ -477,7 +479,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterArbeidsgiveropplysninger(eventyr: List<List<Revurderingseventyr>>, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Boolean {
-        person.emitInntektsmeldingHåndtert(hendelse.metadata.meldingsreferanseId, id, arbeidsgiver.organisasjonsnummer)
+        person.emitInntektsmeldingHåndtert(hendelse.metadata.meldingsreferanseId.id, id, arbeidsgiver.organisasjonsnummer)
         val tidligsteEventyr = eventyr.flatten().tidligsteEventyr()
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return true.also { forkast(hendelse, aktivitetslogg) }
         if (tidligsteEventyr != null) person.igangsettOverstyring(tidligsteEventyr, aktivitetslogg)
@@ -762,7 +764,7 @@ internal class Vedtaksperiode private constructor(
         return BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, Sykdomstidslinje(), dagerNavOvertarAnsvar)
     }
 
-    private fun <T> dokumentsporingFraArbeidsgiveropplysning(hendelse: T, dokumentsporing: (meldingsreferanseId: UUID) -> Dokumentsporing) where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
+    private fun <T> dokumentsporingFraArbeidsgiveropplysning(hendelse: T, dokumentsporing: (meldingsreferanseId: MeldingsreferanseId) -> Dokumentsporing) where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
         behandlinger.sikreNyBehandling(
             arbeidsgiver = arbeidsgiver,
             behandlingkilde = hendelse.metadata.behandlingkilde,
@@ -1183,7 +1185,7 @@ internal class Vedtaksperiode private constructor(
                     organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                     vedtaksperiodeId = id,
                     gjeldendeTilstand = gjeldendeTilstand,
-                    hendelser = hendelseIder,
+                    hendelser = eksterneIderSet,
                     fom = periode.start,
                     tom = periode.endInclusive,
                     behandletIInfotrygd = person.erBehandletIInfotrygd(periode),
@@ -1313,9 +1315,9 @@ internal class Vedtaksperiode private constructor(
         korrigertInntektsmeldingId?.let {
             person.arbeidsgiveropplysningerKorrigert(
                 PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                    korrigerendeInntektsopplysningId = dager.hendelse.metadata.meldingsreferanseId,
+                    korrigerendeInntektsopplysningId = dager.hendelse.metadata.meldingsreferanseId.id,
                     korrigerendeInntektektsopplysningstype = Inntektsopplysningstype.INNTEKTSMELDING,
-                    korrigertInntektsmeldingId = it
+                    korrigertInntektsmeldingId = it.id
                 )
             )
         }
@@ -1618,7 +1620,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiodeId = id,
             gjeldendeTilstand = tilstand.type,
             forrigeTilstand = previousState.type,
-            hendelser = hendelseIder,
+            hendelser = eksterneIderSet,
             makstid = makstid(),
             fom = periode.start,
             tom = periode.endInclusive,
@@ -1644,7 +1646,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiodeId = id,
                 behandlingId = behandlingId,
                 periode = periode,
-                hendelseIder = hendelseIder,
+                hendelseIder = eksterneIderSet,
                 skjæringstidspunkt = skjæringstidspunkt,
                 avsluttetTidspunkt = tidsstempel
             )
@@ -1660,7 +1662,7 @@ internal class Vedtaksperiode private constructor(
         val utkastTilVedtakBuilder = utkastTilVedtakBuilder()
         // Til ettertanke: Her er vi aldri innom "behandlinger"-nivå, så får ikke "Grunnbeløpsregulering"-tag, men AvsluttetMedVedtak har jo ikke tags nå uansett.
         behandling.berik(utkastTilVedtakBuilder)
-        person.avsluttetMedVedtak(utkastTilVedtakBuilder.buildAvsluttedMedVedtak(vedtakFattetTidspunkt, hendelseIder))
+        person.avsluttetMedVedtak(utkastTilVedtakBuilder.buildAvsluttedMedVedtak(vedtakFattetTidspunkt, eksterneIder))
         person.gjenopptaBehandling(aktivitetslogg)
     }
 
@@ -1697,22 +1699,22 @@ internal class Vedtaksperiode private constructor(
     override fun nyBehandling(
         id: UUID,
         periode: Periode,
-        meldingsreferanseId: UUID,
+        meldingsreferanseId: MeldingsreferanseId,
         innsendt: LocalDateTime,
         registert: LocalDateTime,
         avsender: Avsender,
         type: PersonObserver.BehandlingOpprettetEvent.Type,
-        søknadIder: Set<UUID>
+        søknadIder: Set<MeldingsreferanseId>
     ) {
         val event = PersonObserver.BehandlingOpprettetEvent(
             organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
             vedtaksperiodeId = this.id,
-            søknadIder = behandlinger.søknadIder() + søknadIder,
+            søknadIder = (behandlinger.søknadIder() + søknadIder).map { it.id }.toSet(),
             behandlingId = id,
             fom = periode.start,
             tom = periode.endInclusive,
             type = type,
-            kilde = PersonObserver.BehandlingOpprettetEvent.Kilde(meldingsreferanseId, innsendt, registert, avsender)
+            kilde = PersonObserver.BehandlingOpprettetEvent.Kilde(meldingsreferanseId.id, innsendt, registert, avsender)
         )
         person.nyBehandling(event)
     }
@@ -1861,7 +1863,7 @@ internal class Vedtaksperiode private constructor(
             venterTil = venterTil(venterPå)
         )
         behandlinger.behandlingVenter(builder)
-        builder.hendelseIder(hendelseIder)
+        builder.hendelseIder(eksterneIder)
         return builder.build()
     }
 

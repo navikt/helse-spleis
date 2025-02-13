@@ -3,16 +3,16 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.SkatteopplysningDto
 import no.nav.helse.etterlevelse.Inntektsubsumsjon
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.isWithinRangeOf
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 
 data class Skatteopplysning(
-    val hendelseId: UUID,
+    val hendelseId: MeldingsreferanseId,
     val beløp: Inntekt,
     val måned: YearMonth,
     val type: Inntekttype,
@@ -64,7 +64,7 @@ data class Skatteopplysning(
 
         fun gjenopprett(dto: SkatteopplysningDto): Skatteopplysning {
             return Skatteopplysning(
-                hendelseId = dto.hendelseId,
+                hendelseId = MeldingsreferanseId.gjenopprett(dto.hendelseId),
                 beløp = Inntekt.gjenopprett(dto.beløp),
                 måned = dto.måned,
                 type = when (dto.type) {
@@ -81,7 +81,7 @@ data class Skatteopplysning(
     }
 
     internal fun dto() = SkatteopplysningDto(
-        hendelseId = this.hendelseId,
+        hendelseId = this.hendelseId.dto(),
         beløp = this.beløp.dtoMånedligDouble(),
         måned = this.måned,
         type = when (this.type) {

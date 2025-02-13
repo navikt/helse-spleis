@@ -745,7 +745,7 @@ private fun InntektsmeldingUtDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData(
         id = this.id,
         dato = this.inntektsdata.dato,
-        hendelseId = this.inntektsdata.hendelseId,
+        hendelseId = this.inntektsdata.hendelseId.id,
         beløp = this.inntektsdata.beløp.tilPersonData(),
         tidsstempel = this.inntektsdata.tidsstempel,
         kilde = when (this.kilde) {
@@ -757,7 +757,7 @@ private fun InntektsmeldingUtDto.tilPersonData() =
 private fun SykdomshistorikkElementDto.tilPersonData() = SpannerPersonDto.SykdomshistorikkData(
     id = this.id,
     tidsstempel = this.tidsstempel,
-    hendelseId = this.hendelseId,
+    hendelseId = this.hendelseId?.id,
     hendelseSykdomstidslinje = this.hendelseSykdomstidslinje.tilPersonData(),
     beregnetSykdomstidslinje = this.beregnetSykdomstidslinje.tilPersonData(),
 )
@@ -952,7 +952,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
 private fun HendelseskildeDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.KildeData(
         type = this.type,
-        id = this.meldingsreferanseId,
+        id = this.meldingsreferanseId.id,
         tidsstempel = this.tidsstempel
     )
 
@@ -1072,7 +1072,7 @@ private fun BehandlingUtDto.tilPersonData() =
 
 private fun BehandlingkildeDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.KildeData(
-        meldingsreferanseId = this.meldingsreferanseId,
+        meldingsreferanseId = this.meldingsreferanseId.id,
         innsendt = this.innsendt,
         registrert = this.registert,
         avsender = this.avsender.tilPersonData()
@@ -1138,7 +1138,7 @@ private fun MaksdatoresultatUtDto.tilPersonData() = SpannerPersonDto.Arbeidsgive
 
 private fun DokumentsporingDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentsporingData(
-        dokumentId = this.id,
+        dokumentId = this.id.id,
         dokumenttype = when (type) {
             DokumenttypeDto.InntektsmeldingDager -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingDager
             DokumenttypeDto.InntektsmeldingInntekt -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.InntektsmeldingInntekt
@@ -1420,7 +1420,7 @@ private fun InfotrygdhistorikkelementUtDto.tilPersonData() =
     SpannerPersonDto.InfotrygdhistorikkElementData(
         id = this.id,
         tidsstempel = this.tidsstempel,
-        hendelseId = this.hendelseId,
+        hendelseId = this.hendelseId.id,
         ferieperioder = this.ferieperioder.map { it.tilPersonData() },
         arbeidsgiverutbetalingsperioder = this.arbeidsgiverutbetalingsperioder.map { it.tilPersonData() },
         personutbetalingsperioder = this.personutbetalingsperioder.map { it.tilPersonData() },
@@ -1495,7 +1495,7 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = VilkårsgrunnlagElementData(
         else -> null
     },
     meldingsreferanseId = when (this) {
-        is VilkårsgrunnlagUtDto.Spleis -> this.meldingsreferanseId
+        is VilkårsgrunnlagUtDto.Spleis -> this.meldingsreferanseId?.id
         else -> null
     },
     vilkårsgrunnlagId = this.vilkårsgrunnlagId
@@ -1547,7 +1547,7 @@ private fun FaktaavklartInntektUtDto.tilPersonData() =
     ArbeidsgiverInntektsopplysningData.InntektsopplysningData(
         id = this.id,
         dato = this.inntektsdata.dato,
-        hendelseId = this.inntektsdata.hendelseId,
+        hendelseId = this.inntektsdata.hendelseId.id,
         beløp = this.inntektsdata.beløp.tilPersonData(),
         tidsstempel = this.inntektsdata.tidsstempel,
         type = when (this.inntektsopplysning) {
@@ -1571,7 +1571,7 @@ private fun SaksbehandlerUtDto.tilPersonData() =
     ArbeidsgiverInntektsopplysningData.KorrigertInntektsopplysningData(
         id = this.id,
         dato = this.inntektsdata.dato,
-        hendelseId = this.inntektsdata.hendelseId,
+        hendelseId = this.inntektsdata.hendelseId.id,
         beløp = this.inntektsdata.beløp.tilPersonData(),
         tidsstempel = this.inntektsdata.tidsstempel
     )
@@ -1579,14 +1579,14 @@ private fun SkjønnsmessigFastsattUtDto.tilPersonData() =
     ArbeidsgiverInntektsopplysningData.SkjønnsmessigFastsattData(
         id = this.id,
         dato = this.inntektsdata.dato,
-        hendelseId = this.inntektsdata.hendelseId,
+        hendelseId = this.inntektsdata.hendelseId.id,
         beløp = this.inntektsdata.beløp.tilPersonData(),
         tidsstempel = this.inntektsdata.tidsstempel
     )
 
 private fun SkatteopplysningDto.tilPersonDataSkattopplysning() =
     ArbeidsgiverInntektsopplysningData.SkatteopplysningData(
-        hendelseId = this.hendelseId,
+        hendelseId = this.hendelseId.id,
         beløp = this.beløp.beløp,
         måned = this.måned,
         type = when (this.type) {
@@ -1606,7 +1606,7 @@ private fun BeløpstidslinjeDto.tilPersonData() = SpannerPersonDto.Beløpstidsli
             fom = it.fom,
             tom = it.tom,
             dagligBeløp = it.dagligBeløp,
-            meldingsreferanseId = it.kilde.meldingsreferanseId,
+            meldingsreferanseId = it.kilde.meldingsreferanseId.id,
             avsender = it.kilde.avsender.tilPersonData(),
             tidsstempel = it.kilde.tidsstempel
         )

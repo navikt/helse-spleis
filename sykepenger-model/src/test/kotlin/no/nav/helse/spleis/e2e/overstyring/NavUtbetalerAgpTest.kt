@@ -11,6 +11,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -197,19 +198,19 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
 
     @Test
     fun `hullete AGP sammen med begrunnelse for reduksjon blir kastet ut foreløpig`() {
-        val søknad = håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
-        val im = håndterInntektsmelding(
+        val søknad = MeldingsreferanseId(håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent)))
+        val im = MeldingsreferanseId(håndterInntektsmelding(
             listOf(1.januar til 5.januar, 10.januar til 20.januar),
             refusjon = Refusjon(INGEN, null),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "NoeSomUmuligKanVæreIListaViIkkeTillater",
-        )
+        ))
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         assertEquals(listOf(1.januar til 5.januar, 10.januar til 20.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
         assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
         assertFunksjonellFeil(RV_IM_23)
         assertEquals(setOf(Dokumentsporing.søknad(søknad), Dokumentsporing.inntektsmeldingDager(im)), inspektør.hendelser(1.vedtaksperiode).toSet())
         assertTrue(observatør.inntektsmeldingHåndtert.isEmpty())
-        assertEquals(im, observatør.inntektsmeldingIkkeHåndtert.single())
+        assertEquals(im.id, observatør.inntektsmeldingIkkeHåndtert.single())
     }
 
     @Test

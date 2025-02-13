@@ -8,6 +8,7 @@ import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Utbetalingshistorikk
@@ -150,10 +151,12 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
     }.also {
         person.håndter(
             Utbetalingshistorikk(
-                UUID.randomUUID(), a1, UUID.randomUUID().toString(),
-                InfotrygdhistorikkElement.opprett(
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                organisasjonsnummer = a1,
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                element = InfotrygdhistorikkElement.opprett(
                     oppdatert = LocalDateTime.now(),
-                    hendelseId = UUID.randomUUID(),
+                    hendelseId = MeldingsreferanseId(UUID.randomUUID()),
                     perioder = listOf(
                         Friperiode(fom = 1.februar, tom = 28.februar)
                     ),

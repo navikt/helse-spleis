@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.Toggle
 import no.nav.helse.erHelg
@@ -23,12 +22,25 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøknad er lagt til grunn`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som ikke støttes`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som støttes`
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_17
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_22
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_29
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_30
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_44
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_5
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_7
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_YS_1
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
@@ -41,7 +53,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel
 
 class Søknad(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     private val orgnummer: String,
     private val perioder: List<Søknadsperiode>,
     private val andreInntektskilder: Boolean,

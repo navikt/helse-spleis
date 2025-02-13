@@ -9,6 +9,7 @@ import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.SubsumsjonInspektør
@@ -45,8 +46,8 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val skjæringstidspunkt = 1.januar
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntekt(skjæringstidspunkt, 1000.månedlig), null, null)
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, arbeidsgiverinntekt(skjæringstidspunkt, 2000.månedlig), null, null)
-        val a1Overstyrt = OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Inntektsdata(UUID.randomUUID(), skjæringstidspunkt, 3000.månedlig, LocalDateTime.now()), OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse("", null))
-        val a3Overstyrt = OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning("a3", skjæringstidspunkt til LocalDate.MAX, Inntektsdata(UUID.randomUUID(), skjæringstidspunkt, 4000.månedlig, LocalDateTime.now()), OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse("", null))
+        val a1Overstyrt = OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Inntektsdata(MeldingsreferanseId(UUID.randomUUID()), skjæringstidspunkt, 3000.månedlig, LocalDateTime.now()), OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse("", null))
+        val a3Overstyrt = OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning("a3", skjæringstidspunkt til LocalDate.MAX, Inntektsdata(MeldingsreferanseId(UUID.randomUUID()), skjæringstidspunkt, 4000.månedlig, LocalDateTime.now()), OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse("", null))
 
         val original = listOf(a1Opplysning, a2Opplysning)
         val expected = listOf(a1Opplysning, a2Opplysning)
@@ -102,9 +103,9 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val skjæringstidspunkt = 1.januar
         val skattA1 = skattSykepengegrunnlag(
             UUID.randomUUID(), skjæringstidspunkt, listOf(
-            Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(1).yearMonth, LØNNSINNTEKT, "", ""),
-            Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(2).yearMonth, LØNNSINNTEKT, "", ""),
-            Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(3).yearMonth, LØNNSINNTEKT, "", "")
+            Skatteopplysning(MeldingsreferanseId(UUID.randomUUID()), 1000.månedlig, skjæringstidspunkt.minusMonths(1).yearMonth, LØNNSINNTEKT, "", ""),
+            Skatteopplysning(MeldingsreferanseId(UUID.randomUUID()), 1000.månedlig, skjæringstidspunkt.minusMonths(2).yearMonth, LØNNSINNTEKT, "", ""),
+            Skatteopplysning(MeldingsreferanseId(UUID.randomUUID()), 1000.månedlig, skjæringstidspunkt.minusMonths(3).yearMonth, LØNNSINNTEKT, "", "")
         )
         )
         val arbeidsgiverinntektA2 = arbeidsgiverinntekt(skjæringstidspunkt, 2000.månedlig)

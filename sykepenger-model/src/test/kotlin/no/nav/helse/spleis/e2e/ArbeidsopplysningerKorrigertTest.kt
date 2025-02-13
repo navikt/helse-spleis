@@ -235,7 +235,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
         assertVarsler(listOf(Varselkode.RV_OS_2, Varselkode.RV_IV_7), 1.vedtaksperiode.filter())
         val expected = ArbeidsgiveropplysningerKorrigertEvent(
             korrigertInntektsmeldingId = korrigertInntektsmeldingId,
-            korrigerendeInntektsopplysningId = korrigerendeInntektsopplysningId,
+            korrigerendeInntektsopplysningId = korrigerendeInntektsopplysningId.id,
             korrigerendeInntektektsopplysningstype = SAKSBEHANDLER
         )
         val actual = observatør.arbeidsgiveropplysningerKorrigert.single()

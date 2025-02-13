@@ -2,14 +2,13 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 
 class OverstyrArbeidsforhold(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     private val skjæringstidspunkt: LocalDate,
     private val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>,
     opprettet: LocalDateTime

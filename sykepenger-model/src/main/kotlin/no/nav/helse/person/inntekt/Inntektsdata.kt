@@ -5,10 +5,10 @@ import no.nav.helse.dto.serialisering.InntektsdataUtDto
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import no.nav.helse.hendelser.MeldingsreferanseId
 
 data class Inntektsdata(
-    val hendelseId: UUID,
+    val hendelseId: MeldingsreferanseId,
     val dato: LocalDate,
     val beløp: Inntekt,
     val tidsstempel: LocalDateTime
@@ -18,14 +18,14 @@ data class Inntektsdata(
         this.dato == other.dato && this.beløp == other.beløp
 
     fun dto() = InntektsdataUtDto(
-        hendelseId = hendelseId,
+        hendelseId = hendelseId.dto(),
         dato = dato,
         beløp = beløp.dto(),
         tidsstempel = tidsstempel
     )
 
     companion object {
-        fun ingen(hendelseId: UUID, dato: LocalDate, tidsstempel: LocalDateTime = LocalDateTime.now()) = Inntektsdata(
+        fun ingen(hendelseId: MeldingsreferanseId, dato: LocalDate, tidsstempel: LocalDateTime = LocalDateTime.now()) = Inntektsdata(
             hendelseId = hendelseId,
             dato = dato,
             beløp = Inntekt.Companion.INGEN,
@@ -33,7 +33,7 @@ data class Inntektsdata(
         )
 
         fun gjenopprett(dto: InntektsdataInnDto) = Inntektsdata(
-            hendelseId = dto.hendelseId,
+            hendelseId = MeldingsreferanseId.gjenopprett(dto.hendelseId),
             dato = dto.dato,
             beløp = Inntekt.Companion.gjenopprett(dto.beløp),
             tidsstempel = dto.tidsstempel

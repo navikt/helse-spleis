@@ -2,14 +2,14 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag.AnsattPeriode.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.yearMonth
 
 // § 8-28-inntekter fra skatteetaten
 internal data class SkatteopplysningerForSykepengegrunnlag(
     val arbeidsgiver: String,
-    val hendelseId: UUID,
+    val hendelseId: MeldingsreferanseId,
     val skjæringstidspunkt: LocalDate,
     val inntektsopplysninger: List<Skatteopplysning>,
     val ansattPerioder: List<AnsattPeriode>,

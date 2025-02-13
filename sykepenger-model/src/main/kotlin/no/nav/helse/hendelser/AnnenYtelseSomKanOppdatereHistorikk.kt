@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.AnnenYtelseSomKanOppdatereHistorikk.Companion.HvorforIkkeOppdatereHistorikk.FLERE_IKKE_SAMMENHENGENDE_INNSLAG
 import no.nav.helse.hendelser.AnnenYtelseSomKanOppdatereHistorikk.Companion.HvorforIkkeOppdatereHistorikk.FLYTTER_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.hendelser.AnnenYtelseSomKanOppdatereHistorikk.Companion.HvorforIkkeOppdatereHistorikk.GRADERT_YTELSE
@@ -61,6 +60,6 @@ abstract class AnnenYtelseSomKanOppdatereHistorikk {
     }
 
     internal abstract fun skalOppdatereHistorikk(vedtaksperiode: Periode, skjæringstidspunkt: LocalDate, vedtaksperiodeRettEtter: Periode? = null): Pair<Boolean, HvorforIkkeOppdatereHistorikk?>
-    internal abstract fun sykdomstidslinje(meldingsreferanseId: UUID, registrert: LocalDateTime): Sykdomstidslinje
+    internal abstract fun sykdomstidslinje(meldingsreferanseId: MeldingsreferanseId, registrert: LocalDateTime): Sykdomstidslinje
 
 }

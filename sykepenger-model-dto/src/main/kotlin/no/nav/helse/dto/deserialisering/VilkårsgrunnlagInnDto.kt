@@ -3,6 +3,7 @@ package no.nav.helse.dto.deserialisering
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.dto.MedlemskapsvurderingDto
+import no.nav.helse.dto.MeldingsreferanseDto
 
 sealed class VilkårsgrunnlagInnDto {
     abstract val vilkårsgrunnlagId: UUID
@@ -16,7 +17,7 @@ sealed class VilkårsgrunnlagInnDto {
         val opptjening: OpptjeningInnDto,
         val medlemskapstatus: MedlemskapsvurderingDto,
         val vurdertOk: Boolean,
-        val meldingsreferanseId: UUID?
+        val meldingsreferanseId: MeldingsreferanseDto?
     ) : VilkårsgrunnlagInnDto()
 
     data class Infotrygd(

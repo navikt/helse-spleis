@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.hendelser.Hendelseskilde
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
@@ -19,7 +20,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 class InfotrygdhistorikkElement private constructor(
     val id: UUID,
     val tidsstempel: LocalDateTime,
-    val hendelseId: UUID,
+    val hendelseId: MeldingsreferanseId,
     perioder: List<Infotrygdperiode>,
     inntekter: List<Inntektsopplysning>,
     private val arbeidskategorikoder: Map<String, LocalDate>,
@@ -30,7 +31,7 @@ class InfotrygdhistorikkElement private constructor(
         private set
     private val inntekter = Inntektsopplysning.sorter(inntekter)
     val perioder = Infotrygdperiode.sorter(perioder)
-    private val kilde = Hendelseskilde("Infotrygdhistorikk", id, tidsstempel)
+    private val kilde = Hendelseskilde("Infotrygdhistorikk", hendelseId, tidsstempel)
 
     init {
         if (!erTom()) requireNotNull(hendelseId) { "HendelseID må være satt når elementet inneholder data" }
@@ -39,7 +40,7 @@ class InfotrygdhistorikkElement private constructor(
     companion object {
         fun opprett(
             oppdatert: LocalDateTime,
-            hendelseId: UUID,
+            hendelseId: MeldingsreferanseId,
             perioder: List<Infotrygdperiode>,
             inntekter: List<Inntektsopplysning>,
             arbeidskategorikoder: Map<String, LocalDate>
@@ -59,7 +60,7 @@ class InfotrygdhistorikkElement private constructor(
             return InfotrygdhistorikkElement(
                 id = dto.id,
                 tidsstempel = dto.tidsstempel,
-                hendelseId = dto.hendelseId,
+                hendelseId = MeldingsreferanseId.gjenopprett(dto.hendelseId),
                 perioder = dto.arbeidsgiverutbetalingsperioder.map { ArbeidsgiverUtbetalingsperiode.gjenopprett(it) } +
                     dto.personutbetalingsperioder.map { PersonUtbetalingsperiode.gjenopprett(it) } +
                     dto.ferieperioder.map { Friperiode.gjenopprett(it) },
@@ -149,7 +150,7 @@ class InfotrygdhistorikkElement private constructor(
     internal fun dto() = InfotrygdhistorikkelementUtDto(
         id = this.id,
         tidsstempel = this.tidsstempel,
-        hendelseId = this.hendelseId,
+        hendelseId = this.hendelseId.dto(),
         ferieperioder = this.perioder.filterIsInstance<Friperiode>().map { it.dto() },
         arbeidsgiverutbetalingsperioder = this.perioder.filterIsInstance<ArbeidsgiverUtbetalingsperiode>().map { it.dto() },
         personutbetalingsperioder = this.perioder.filterIsInstance<PersonUtbetalingsperiode>().map { it.dto() },

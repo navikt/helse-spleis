@@ -7,6 +7,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.mediator.databaseContainer
@@ -36,9 +37,9 @@ internal class HendelseRepositoryTest {
 
     @Test
     fun `skal klare å hente ny overstyr arbeidsgiveropplysninger-hendelse fra db`() {
-        val hendelseId = UUID.randomUUID()
+        val hendelseId = MeldingsreferanseId(UUID.randomUUID())
         val (id, navn) = lagre(TestMessages.overstyrArbeidsgiveropplysninger(hendelseId))
-        assertEquals(hendelseId, id)
+        assertEquals(hendelseId.id, id)
         assertEquals("OVERSTYRARBEIDSGIVEROPPLYSNINGER", navn)
     }
 
@@ -60,7 +61,7 @@ private object TestMessages {
             validate(packet)
         }
 
-    fun overstyrArbeidsgiveropplysninger(id: UUID): OverstyrArbeidsgiveropplysningerMessage {
+    fun overstyrArbeidsgiveropplysninger(id: MeldingsreferanseId): OverstyrArbeidsgiveropplysningerMessage {
         val now = LocalDateTime.now()
 
         @Language("JSON")

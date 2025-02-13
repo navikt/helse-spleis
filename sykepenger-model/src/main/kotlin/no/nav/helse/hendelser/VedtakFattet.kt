@@ -1,12 +1,12 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Avsender.SYSTEM
 
 class VedtakFattet(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     override val utbetalingId: UUID,

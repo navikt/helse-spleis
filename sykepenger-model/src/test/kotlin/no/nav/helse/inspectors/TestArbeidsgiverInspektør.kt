@@ -147,7 +147,7 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun hendelser(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter.id(orgnummer)).inspektør.hendelser
     internal fun hendelseIder(vedtaksperiodeIdInnhenter: IdInnhenter) = hendelseIder(vedtaksperiodeIdInnhenter.id(orgnummer))
-    internal fun hendelseIder(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.hendelseIder
+    internal fun hendelseIder(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.hendelseIder.map { it.id }.toSet()
 
     internal fun sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.utbetalinger.last().arbeidsgiverOppdrag().fagsystemId
 

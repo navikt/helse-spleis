@@ -1,12 +1,12 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 
 class UtbetalingHendelse(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     orgnummer: String,
     override val fagsystemId: String,
     override val utbetalingId: UUID,

@@ -1,14 +1,13 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 
 class UtbetalingshistorikkEtterInfotrygdendring(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     private val element: InfotrygdhistorikkElement,
     besvart: LocalDateTime
 ) : Hendelse {

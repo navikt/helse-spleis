@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
-import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.IMessageMediator
@@ -34,7 +33,7 @@ internal class SykepengegrunnlagForArbeidsgiverRiver(
 
     override fun createMessage(packet: JsonMessage) = SykepengegrunnlagForArbeidsgiverMessage(
         packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
+        id = packet.meldingsreferanseId(),
         fødselsnummer = packet["fødselsnummer"].asText()
     )
     )

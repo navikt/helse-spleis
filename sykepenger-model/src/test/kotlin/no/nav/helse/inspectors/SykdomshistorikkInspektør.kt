@@ -16,7 +16,7 @@ internal class SykdomshistorikkInspektør(historikk: Collection<Sykdomshistorikk
     init {
         historikk.forEach { innslag ->
             innslag.hendelseId?.let {
-                perioderPerHendelse.getOrPut(it) { mutableListOf() }.add(innslag.hendelseSykdomstidslinje)
+                perioderPerHendelse.getOrPut(it.id) { mutableListOf() }.add(innslag.hendelseSykdomstidslinje)
             }
             tidslinjer.add(innslag.beregnetSykdomstidslinje)
         }

@@ -6,8 +6,10 @@ import java.util.UUID
 import kotlin.math.roundToInt
 import no.nav.helse.april
 import no.nav.helse.august
+import no.nav.helse.dto.MeldingsreferanseDto
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
 import no.nav.helse.februar
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -43,7 +45,7 @@ internal class InfotrygdhistorikkElementTest {
             InfotrygdhistorikkelementInnDto(
                 id = UUID.randomUUID(),
                 tidsstempel = tidsstempel,
-                hendelseId = hendelseId,
+                hendelseId = MeldingsreferanseDto(hendelseId),
                 ferieperioder = emptyList(),
                 arbeidsgiverutbetalingsperioder = emptyList(),
                 personutbetalingsperioder = emptyList(),
@@ -522,7 +524,7 @@ internal class InfotrygdhistorikkElementTest {
     ) =
         InfotrygdhistorikkElement.opprett(
             oppdatert = oppdatert,
-            hendelseId = hendelseId,
+            hendelseId = MeldingsreferanseId(hendelseId),
             perioder = perioder,
             inntekter = inntekter,
             arbeidskategorikoder = arbeidskategorikoder

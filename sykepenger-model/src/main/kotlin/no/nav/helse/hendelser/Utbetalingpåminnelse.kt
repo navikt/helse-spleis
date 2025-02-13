@@ -1,12 +1,12 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 
 class Utbetalingpåminnelse(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     organisasjonsnummer: String,
     override val utbetalingId: UUID,
     private val antallGangerPåminnet: Int,

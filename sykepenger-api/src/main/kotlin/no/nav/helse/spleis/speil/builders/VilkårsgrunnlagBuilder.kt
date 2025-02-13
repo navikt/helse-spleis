@@ -189,9 +189,12 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         }
 
         val begrensning = SykepengegrunnlagsgrenseDTO.fra6GBegrensning(grunnlagsdata.inntektsgrunnlag.`6G`)
-        val overstyringer = grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.flatMap {
-            listOfNotNull(it.korrigertInntekt?.inntektsdata?.hendelseId, it.skjønnsmessigFastsatt?.inntektsdata?.hendelseId)
-        }.toSet()
+        val overstyringer = grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger
+            .flatMap {
+                listOfNotNull(it.korrigertInntekt?.inntektsdata?.hendelseId, it.skjønnsmessigFastsatt?.inntektsdata?.hendelseId)
+            }
+            .map { it.id }
+            .toSet()
 
         return ISpleisGrunnlag(
             skjæringstidspunkt = grunnlagsdata.skjæringstidspunkt,
@@ -202,7 +205,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             sykepengegrunnlag = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag.årlig.beløp,
             grunnbeløp = begrensning.grunnbeløp,
             sykepengegrunnlagsgrense = begrensning,
-            meldingsreferanseId = grunnlagsdata.meldingsreferanseId,
+            meldingsreferanseId = grunnlagsdata.meldingsreferanseId?.id,
             antallOpptjeningsdagerErMinst = grunnlagsdata.opptjening.opptjeningsdager,
             oppfyllerKravOmMinstelønn = grunnlagsdata.inntektsgrunnlag.oppfyllerMinsteinntektskrav,
             oppfyllerKravOmOpptjening = grunnlagsdata.opptjening.erOppfylt,

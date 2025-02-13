@@ -307,7 +307,7 @@ class Person private constructor(
         if (!infotrygdhistorikk.harHistorikk()) return
         val hendelseId = infotrygdhistorikk.siste.hendelseId
         val perioder = infotrygdhistorikk.siste.perioder
-        val event = alleVedtaksperioder.fold(PersonObserver.OverlappendeInfotrygdperioder(emptyList(), hendelseId.toString())) { result, vedtaksperiode ->
+        val event = alleVedtaksperioder.fold(PersonObserver.OverlappendeInfotrygdperioder(emptyList(), hendelseId.id)) { result, vedtaksperiode ->
             vedtaksperiode.overlappendeInfotrygdperioder(result, perioder)
         }
         observers.forEach { it.overlappendeInfotrygdperioder(event) }
@@ -656,7 +656,7 @@ class Person private constructor(
 
     internal fun emitInntektsmeldingIkkeHåndtert(hendelse: Hendelse, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) {
         observers.forEach {
-            it.inntektsmeldingIkkeHåndtert(hendelse.metadata.meldingsreferanseId, organisasjonsnummer, harPeriodeInnenfor16Dager)
+            it.inntektsmeldingIkkeHåndtert(hendelse.metadata.meldingsreferanseId.id, organisasjonsnummer, harPeriodeInnenfor16Dager)
         }
     }
 
@@ -701,9 +701,9 @@ class Person private constructor(
                     Arbeidstakerinntektskilde.Arbeidsgiver -> {
                         arbeidsgiveropplysningerKorrigert(
                             PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                                korrigertInntektsmeldingId = endretInntektForArbeidsgiver.inntektFør.faktaavklartInntekt.inntektsdata.hendelseId,
+                                korrigertInntektsmeldingId = endretInntektForArbeidsgiver.inntektFør.faktaavklartInntekt.inntektsdata.hendelseId.id,
                                 korrigerendeInntektektsopplysningstype = INNTEKTSMELDING,
-                                korrigerendeInntektsopplysningId = inntekt.inntektsdata.hendelseId
+                                korrigerendeInntektsopplysningId = inntekt.inntektsdata.hendelseId.id
                             )
                         )
                     }
@@ -738,9 +738,9 @@ class Person private constructor(
                         Arbeidstakerinntektskilde.Arbeidsgiver -> {
                             arbeidsgiveropplysningerKorrigert(
                                 PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                                    korrigertInntektsmeldingId = it.inntektFør.faktaavklartInntekt.inntektsdata.hendelseId,
+                                    korrigertInntektsmeldingId = it.inntektFør.faktaavklartInntekt.inntektsdata.hendelseId.id,
                                     korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
-                                    korrigerendeInntektsopplysningId = hendelse.metadata.meldingsreferanseId
+                                    korrigerendeInntektsopplysningId = hendelse.metadata.meldingsreferanseId.id
                                 )
                             )
                         }

@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.februar
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -402,7 +403,7 @@ internal class InfotrygdhistorikkTest {
     ) =
         InfotrygdhistorikkElement.opprett(
             oppdatert = oppdatert,
-            hendelseId = hendelseId,
+            hendelseId = MeldingsreferanseId(hendelseId),
             perioder = perioder,
             inntekter = inntekter,
             arbeidskategorikoder = arbeidskategorikoder

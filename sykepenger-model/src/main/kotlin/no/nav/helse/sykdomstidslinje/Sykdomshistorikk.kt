@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.SykdomshistorikkDto
 import no.nav.helse.dto.SykdomshistorikkElementDto
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.tournament.Dagturnering
 
@@ -22,7 +23,7 @@ internal class Sykdomshistorikk private constructor(
 
     fun view() = SykdomshistorikkView(elementer = elementer.map { it.view() })
 
-    internal fun håndter(meldingsreferanseId: UUID, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
+    internal fun håndter(meldingsreferanseId: MeldingsreferanseId, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
         elementer.add(0, Element.opprett(this, meldingsreferanseId, sykdomstidslinje))
         return sykdomstidslinje()
     }
@@ -37,7 +38,7 @@ internal class Sykdomshistorikk private constructor(
 
     class Element private constructor(
         val id: UUID = UUID.randomUUID(),
-        val hendelseId: UUID? = null,
+        val hendelseId: MeldingsreferanseId? = null,
         val tidsstempel: LocalDateTime = LocalDateTime.now(),
         val hendelseSykdomstidslinje: Sykdomstidslinje,
         val beregnetSykdomstidslinje: Sykdomstidslinje
@@ -54,7 +55,7 @@ internal class Sykdomshistorikk private constructor(
 
             internal fun opprett(
                 sykdomshistorikk: Sykdomshistorikk,
-                meldingsreferanseId: UUID,
+                meldingsreferanseId: MeldingsreferanseId,
                 hendelseSykdomstidslinje: Sykdomstidslinje
             ): Element {
                 val beregnetSykdomstidslinje = if (!sykdomshistorikk.isEmpty())
@@ -80,7 +81,7 @@ internal class Sykdomshistorikk private constructor(
             internal fun gjenopprett(dto: SykdomshistorikkElementDto): Element {
                 return Element(
                     id = dto.id,
-                    hendelseId = dto.hendelseId,
+                    hendelseId = dto.hendelseId?.let { MeldingsreferanseId.gjenopprett(it) },
                     tidsstempel = dto.tidsstempel,
                     hendelseSykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.hendelseSykdomstidslinje),
                     beregnetSykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.beregnetSykdomstidslinje)
@@ -98,7 +99,7 @@ internal class Sykdomshistorikk private constructor(
 
         internal fun dto() = SykdomshistorikkElementDto(
             id = id,
-            hendelseId = hendelseId,
+            hendelseId = hendelseId?.dto(),
             tidsstempel = tidsstempel,
             hendelseSykdomstidslinje = hendelseSykdomstidslinje.dto(),
             beregnetSykdomstidslinje = beregnetSykdomstidslinje.dto(),
@@ -122,7 +123,7 @@ internal class Sykdomshistorikk private constructor(
 internal data class SykdomshistorikkView(val elementer: List<SykdomshistorikkElementView>)
 internal data class SykdomshistorikkElementView(
     val id: UUID,
-    val hendelseId: UUID?,
+    val hendelseId: MeldingsreferanseId?,
     val tidsstempel: LocalDateTime,
     val hendelseSykdomstidslinje: Sykdomstidslinje,
     val beregnetSykdomstidslinje: Sykdomstidslinje

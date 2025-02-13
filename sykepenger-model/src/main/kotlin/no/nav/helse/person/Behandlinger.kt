@@ -17,6 +17,7 @@ import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Simulering
@@ -32,6 +33,7 @@ import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbarInnte
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbarInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentsporing
+import no.nav.helse.person.Dokumentsporing.Companion.eksterneIder
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingDagerId
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingInntektId
@@ -119,7 +121,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.last().behandlingVenter(builder)
     }
 
-    internal fun validerFerdigBehandlet(meldingsreferanseId: UUID, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
+    internal fun validerFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
     internal fun gjelderIkkeFor(hendelse: UtbetalingsavgjørelseHendelse) = siste?.gjelderFor(hendelse) != true
     internal fun erHistorikkEndretSidenBeregning(infotrygdhistorikk: Infotrygdhistorikk) =
         infotrygdhistorikk.harEndretHistorikk(siste!!)
@@ -242,7 +244,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         )
 
     internal fun hendelseIder() = behandlinger.dokumentsporing
-    internal fun dokumentsporing() = behandlinger.dokumentsporing.ider()
+    internal fun eksterneIder() = behandlinger.dokumentsporing.eksterneIder()
     internal fun søknadIder() = behandlinger.dokumentsporing.søknadIder()
     internal fun sisteInntektsmeldingDagerId() = behandlinger.dokumentsporing.sisteInntektsmeldingDagerId()
     internal fun harHåndtertDagerTidligere() = behandlinger.dokumentsporing.sisteInntektsmeldingDagerId() != null
@@ -315,14 +317,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     internal class Behandlingkilde(
-        val meldingsreferanseId: UUID,
+        val meldingsreferanseId: MeldingsreferanseId,
         val innsendt: LocalDateTime,
         val registert: LocalDateTime,
         val avsender: Avsender
     ) {
         fun view() = BehandlingkildeView(meldingsreferanseId, innsendt, registert, avsender)
         internal fun dto() = BehandlingkildeDto(
-            meldingsreferanseId = this.meldingsreferanseId,
+            meldingsreferanseId = this.meldingsreferanseId.dto(),
             innsendt = this.innsendt,
             registert = this.registert,
             avsender = avsender.dto()
@@ -331,7 +333,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal companion object {
             fun gjenopprett(dto: BehandlingkildeDto): Behandlingkilde {
                 return Behandlingkilde(
-                    meldingsreferanseId = dto.meldingsreferanseId,
+                    meldingsreferanseId = MeldingsreferanseId.gjenopprett(dto.meldingsreferanseId),
                     innsendt = dto.innsendt,
                     registert = dto.registert,
                     avsender = Avsender.gjenopprett(dto.avsender)
@@ -1185,8 +1187,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return tillaterOverlappendeUtbetalingerForkasting(aktivitetslogg, arbeidsgiverUtbetalinger)
         }
 
-        internal fun validerFerdigBehandlet(meldingsreferanseId: UUID, aktivitetslogg: IAktivitetslogg) = tilstand.validerFerdigBehandlet(this, meldingsreferanseId, aktivitetslogg)
-        private fun valideringFeilet(meldingsreferanseId: UUID, aktivitetslogg: IAktivitetslogg, feil: String) {
+        internal fun validerFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = tilstand.validerFerdigBehandlet(this, meldingsreferanseId, aktivitetslogg)
+        private fun valideringFeilet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg, feil: String) {
             // Om de er hendelsen vi håndterer nå som har skapt situasjonen feiler vi fremfor å gå videre.
             if (kilde.meldingsreferanseId == meldingsreferanseId) error(feil)
             // Om det er krøll fra tidligere logger vi bare
@@ -1392,7 +1394,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             fun tillaterNyBehandling(behandling: Behandling, other: Behandling): Boolean = false
             fun håndterUtbetalinghendelse(behandling: Behandling, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) = false
-            fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: UUID, aktivitetslogg: IAktivitetslogg) {
+            fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {
                 behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} burde vært ferdig behandlet, men står i tilstand ${behandling.tilstand::class.simpleName}")
             }
 
@@ -1784,7 +1786,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return behandling.nyBehandlingMedEndring(arbeidsgiver, behandlingkilde, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, UberegnetOmgjøring)
                 }
 
-                override fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: UUID, aktivitetslogg: IAktivitetslogg) {
+                override fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {
                     if (behandling.avsluttet != null && behandling.vedtakFattet == null) return
                     behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} er ferdig behandlet i tilstand AvsluttetUtenVedtak, men med uventede tidsstempler.")
                 }
@@ -1843,7 +1845,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>
                 ) = behandling.nyBehandlingMedEndring(arbeidsgiver, behandlingkilde, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, UberegnetRevurdering)
 
-                override fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: UUID, aktivitetslogg: IAktivitetslogg) {
+                override fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {
                     if (behandling.avsluttet != null && behandling.vedtakFattet != null) return
                     behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} er ferdig behandlet i tilstand VedtakIverksatt, men med uventede tidsstempler.")
                 }
@@ -1894,7 +1896,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     error("forventer ikke å forkaste en periode som allerde er i $this")
                 }
 
-                override fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: UUID, aktivitetslogg: IAktivitetslogg) {
+                override fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {
                     if (behandling.avsluttet != null && behandling.vedtakFattet == null) return
                     behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} er ferdig behandlet i tiltand TilInfotrygd, men med uventede tidsstempler.")
                 }
@@ -1969,7 +1971,7 @@ internal data class BehandlingendringView(
 )
 
 internal data class BehandlingkildeView(
-    val meldingsreferanseId: UUID,
+    val meldingsreferanseId: MeldingsreferanseId,
     val innsendt: LocalDateTime,
     val registert: LocalDateTime,
     val avsender: Avsender

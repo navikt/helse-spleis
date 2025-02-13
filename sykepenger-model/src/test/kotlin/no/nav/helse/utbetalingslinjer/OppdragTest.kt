@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.februar
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -343,7 +344,7 @@ internal class OppdragTest {
         )
         )
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger)
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "orgnr", oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), "orgnr", oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag1))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
@@ -372,7 +373,7 @@ internal class OppdragTest {
             )
         )
         )
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "orgnr", oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), "orgnr", oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         assertFalse(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
 
@@ -400,8 +401,8 @@ internal class OppdragTest {
             )
         )
         )
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "orgnr", oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
-        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "orgnr", oppdrag2.fagsystemId, UUID.randomUUID(), Oppdragstatus.AVVIST, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), "orgnr", oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), "orgnr", oppdrag2.fagsystemId, UUID.randomUUID(), Oppdragstatus.AVVIST, "", 1234L, LocalDateTime.now()))
         assertFalse(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
 
@@ -429,8 +430,8 @@ internal class OppdragTest {
             )
         )
         )
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "orgnr", oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
-        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "orgnr", oppdrag2.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), "orgnr", oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), "orgnr", oppdrag2.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
 
@@ -570,7 +571,7 @@ internal class OppdragTest {
 
         oppdrag.lagreOverføringsinformasjon(
             UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
                 orgnummer = "5678",
                 fagsystemId = oppdrag.fagsystemId,
                 utbetalingId = UUID.randomUUID(),
@@ -605,7 +606,7 @@ internal class OppdragTest {
 
         oppdrag.lagreOverføringsinformasjon(
             UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
                 orgnummer = "5678",
                 fagsystemId = oppdrag.fagsystemId,
                 utbetalingId = UUID.randomUUID(),
@@ -619,7 +620,7 @@ internal class OppdragTest {
         val aksepteringstidspunkt = overføringstidspunkt.plusSeconds(3)
         oppdrag.lagreOverføringsinformasjon(
             UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
                 orgnummer = "5678",
                 fagsystemId = oppdrag.fagsystemId,
                 utbetalingId = UUID.randomUUID(),
@@ -652,7 +653,7 @@ internal class OppdragTest {
 
         oppdrag.lagreOverføringsinformasjon(
             UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
                 orgnummer = "5678",
                 fagsystemId = "${UUID.randomUUID()}",
                 utbetalingId = UUID.randomUUID(),
@@ -665,7 +666,7 @@ internal class OppdragTest {
 
         oppdrag.lagreOverføringsinformasjon(
             UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
                 orgnummer = "5678",
                 fagsystemId = "${UUID.randomUUID()}",
                 utbetalingId = UUID.randomUUID(),

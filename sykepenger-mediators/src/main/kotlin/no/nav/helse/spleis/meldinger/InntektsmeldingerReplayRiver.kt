@@ -30,7 +30,7 @@ internal class InntektsmeldingerReplayRiver(
 
     override fun createMessage(packet: JsonMessage) = InntektsmeldingerReplayMessage(
         packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
+        id = packet.meldingsreferanseId(),
         fødselsnummer = packet["fødselsnummer"].asText()
     )
     )

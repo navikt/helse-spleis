@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Annullering
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Arbeidsforhold
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiveropplysninger
@@ -103,14 +102,14 @@ class Revurderingseventyr private constructor(
 
         fun dersomInngått(aktivitetslogg: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {}
 
-        fun emitOverstyringIgangsattEvent(person: Person, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode, meldingsreferanseId: UUID) {
+        fun emitOverstyringIgangsattEvent(person: Person, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode, meldingsreferanseId: MeldingsreferanseId) {
             person.emitOverstyringIgangsattEvent(
                 PersonObserver.OverstyringIgangsatt(
                     årsak = navn(),
                     berørtePerioder = vedtaksperioder,
                     skjæringstidspunkt = skjæringstidspunkt,
                     periodeForEndring = periodeForEndring,
-                    meldingsreferanseId = meldingsreferanseId
+                    meldingsreferanseId = meldingsreferanseId.id
                 )
             )
         }
@@ -164,7 +163,7 @@ class Revurderingseventyr private constructor(
                 vedtaksperioder: List<VedtaksperiodeData>,
                 skjæringstidspunkt: LocalDate,
                 periodeForEndring: Periode,
-                meldingsreferanseId: UUID
+                meldingsreferanseId: MeldingsreferanseId
             ) { /* trenger ikke fortelle om en reberegning */
             }
 

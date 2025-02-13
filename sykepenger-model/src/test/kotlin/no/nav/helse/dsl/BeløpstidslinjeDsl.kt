@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Avsender.SYKMELDT
 import no.nav.helse.hendelser.Avsender.SYSTEM
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.beløp.Beløpsdag
@@ -15,14 +16,14 @@ import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.økonomi.Inntekt
 
 object BeløpstidslinjeDsl {
-    val ArbeidsgiverId = UUID.fromString("00000000-0000-0000-0000-000000000000")
-    val SaksbehandlerId = UUID.fromString("00000000-0000-0000-0000-000000000001")
-    val SykmeldtId = UUID.fromString("00000000-0000-0000-0000-000000000002")
-    val SystemId = UUID.fromString("00000000-0000-0000-0000-000000000003")
-    val Arbeidsgiver = Kilde(ArbeidsgiverId, ARBEIDSGIVER, LocalDateTime.now())
-    val Saksbehandler = Kilde(SaksbehandlerId, SAKSBEHANDLER, LocalDateTime.now())
-    val Sykmeldt = Kilde(SykmeldtId, SYKMELDT, LocalDateTime.now())
-    val Systemet = Kilde(SystemId, SYSTEM, LocalDateTime.now())
+    val ArbeidsgiverId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
+    val SaksbehandlerId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000001")
+    val SykmeldtId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000002")
+    val SystemId: UUID = UUID.fromString("00000000-0000-0000-0000-000000000003")
+    val Arbeidsgiver = Kilde(MeldingsreferanseId(ArbeidsgiverId), ARBEIDSGIVER, LocalDateTime.now())
+    val Saksbehandler = Kilde(MeldingsreferanseId(SaksbehandlerId), SAKSBEHANDLER, LocalDateTime.now())
+    val Sykmeldt = Kilde(MeldingsreferanseId(SykmeldtId), SYKMELDT, LocalDateTime.now())
+    val Systemet = Kilde(MeldingsreferanseId(SystemId), SYSTEM, LocalDateTime.now())
 
     infix fun Inntekt.fra(fra: LocalDate) = Triple(Systemet, this, fra)
     infix fun Inntekt.kun(kun: LocalDate) = fra(kun) til kun

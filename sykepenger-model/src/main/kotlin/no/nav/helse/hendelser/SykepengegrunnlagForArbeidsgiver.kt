@@ -2,13 +2,13 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.Skatteopplysning
 
 class SykepengegrunnlagForArbeidsgiver(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     private val vedtaksperiodeId: UUID,
     private val skjæringstidspunkt: LocalDate,
     orgnummer: String,

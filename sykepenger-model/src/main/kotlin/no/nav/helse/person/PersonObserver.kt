@@ -449,7 +449,7 @@ interface PersonObserver {
 
     data class OverlappendeInfotrygdperioder(
         val overlappendeInfotrygdperioder: List<OverlappendeInfotrygdperiodeEtterInfotrygdendring>,
-        val infotrygdhistorikkHendelseId: String
+        val infotrygdhistorikkHendelseId: UUID
     )
 
     data class OverlappendeInfotrygdperiodeEtterInfotrygdendring(

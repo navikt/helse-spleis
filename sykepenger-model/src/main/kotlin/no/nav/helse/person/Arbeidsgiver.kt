@@ -24,6 +24,7 @@ import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -643,7 +644,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun lagreInntektFraAOrdningen(
-        meldingsreferanseId: UUID,
+        meldingsreferanseId: MeldingsreferanseId,
         skjæringstidspunkt: LocalDate,
         omregnetÅrsinntekt: Inntekt
     ) {
@@ -912,7 +913,7 @@ internal class Arbeidsgiver private constructor(
         return revurderingseventyr
     }
 
-    internal fun oppdaterSykdom(meldingsreferanseId: UUID, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
+    internal fun oppdaterSykdom(meldingsreferanseId: MeldingsreferanseId, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
         return sykdomshistorikk.håndter(meldingsreferanseId, sykdomstidslinje)
     }
 
@@ -963,7 +964,7 @@ internal class Arbeidsgiver private constructor(
         val egenmeldingsperioder = vedtaksperioder.egenmeldingsperioder()
         if (egenmeldingsperioder.isEmpty()) return arbeidsgiverperiode(periode)
 
-        val tøyseteKilde = Hendelseskilde(Søknad::class, UUID.randomUUID(), LocalDateTime.now())
+        val tøyseteKilde = Hendelseskilde(Søknad::class, MeldingsreferanseId(UUID.randomUUID()), LocalDateTime.now())
         val egenmeldingstidslinje = egenmeldingsperioder
             .map { Sykdomstidslinje.arbeidsgiverdager(it.start, it.endInclusive, 100.prosent, tøyseteKilde) }
             .merge()

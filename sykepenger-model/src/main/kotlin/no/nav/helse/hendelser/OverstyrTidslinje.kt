@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.nesteDag
@@ -39,7 +38,7 @@ enum class Dagtype {
 }
 
 class OverstyrTidslinje(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     organisasjonsnummer: String,
     private val dager: List<ManuellOverskrivingDag>,
     opprettet: LocalDateTime,

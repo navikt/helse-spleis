@@ -6,6 +6,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -249,11 +250,11 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             ), observatør.inntektsmeldingHåndtert
         )
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
-        val søknad = håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
-        val im = håndterInntektsmelding(
+        val søknad = MeldingsreferanseId(håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent)))
+        val im = MeldingsreferanseId(håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 10.februar
-        )
+        ))
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
         assertEquals(hendelserHåndtertFør, inspektør.hendelser(1.vedtaksperiode))
         assertEquals(
@@ -265,7 +266,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             ), inspektør.hendelser(2.vedtaksperiode)
         )
         assertEquals(2, observatør.inntektsmeldingHåndtert.size)
-        assertEquals(im to 2.vedtaksperiode.id(a1), observatør.inntektsmeldingHåndtert.last())
+        assertEquals(im.id to 2.vedtaksperiode.id(a1), observatør.inntektsmeldingHåndtert.last())
     }
 
     @Test
@@ -304,13 +305,11 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
     @Test
     fun `Inntektsmelding håndteres av flere`() {
-        val søknad1 = håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
-        val søknad2 = håndterSøknad(Sykdom(11.januar, 16.januar, 100.prosent))
-        val søknad3 = håndterSøknad(Sykdom(17.januar, 20.januar, 100.prosent))
-        val søknad4 = håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
-        val im = håndterInntektsmelding(
-            listOf(1.januar til 16.januar)
-        )
+        val søknad1 = MeldingsreferanseId(håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent)))
+        val søknad2 = MeldingsreferanseId(håndterSøknad(Sykdom(11.januar, 16.januar, 100.prosent)))
+        val søknad3 = MeldingsreferanseId(håndterSøknad(Sykdom(17.januar, 20.januar, 100.prosent)))
+        val søknad4 = MeldingsreferanseId(håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent)))
+        val im = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar)))
 
         assertEquals(
             setOf(
@@ -344,16 +343,16 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
         assertEquals(
             listOf(
-                søknad1 to 1.vedtaksperiode.id(a1),
-                søknad2 to 2.vedtaksperiode.id(a1),
-                søknad3 to 3.vedtaksperiode.id(a1),
-                søknad4 to 4.vedtaksperiode.id(a1)
+                søknad1.id to 1.vedtaksperiode.id(a1),
+                søknad2.id to 2.vedtaksperiode.id(a1),
+                søknad3.id to 3.vedtaksperiode.id(a1),
+                søknad4.id to 4.vedtaksperiode.id(a1)
             ), observatør.søknadHåndtert
         )
         assertEquals(
             listOf(
-                im to 3.vedtaksperiode.id(a1), // inntekt
-                im to 4.vedtaksperiode.id(a1) // inntekt
+                im.id to 3.vedtaksperiode.id(a1), // inntekt
+                im.id to 4.vedtaksperiode.id(a1) // inntekt
             ), observatør.inntektsmeldingHåndtert
         )
     }
@@ -605,9 +604,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     @Test
     fun `Skal legge til hendelsesid for korrigerende inntektsmelding på alle vedtaksperioder den treffer`() {
         nyPeriode(1.januar til 10.januar)
-        val im1 = håndterInntektsmelding(
-            listOf(1.januar til 16.januar)
-        )
+        val im1 = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar)))
         nyPeriode(11.januar til 31.januar)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -615,10 +612,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        val im2 = håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT * 1.1
-        )
+        val im2 = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1))
 
         assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
 

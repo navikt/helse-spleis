@@ -1,13 +1,13 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.utbetalingslinjer.Fagområde
 
 class Simulering(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     val vedtaksperiodeId: String,
     orgnummer: String,
     override val fagsystemId: String,

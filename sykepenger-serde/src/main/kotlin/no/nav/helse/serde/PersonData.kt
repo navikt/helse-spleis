@@ -26,6 +26,7 @@ import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.MaksdatobestemmelseDto
+import no.nav.helse.dto.MeldingsreferanseDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.ProsentdelDto
@@ -119,7 +120,7 @@ data class PersonData(
         fun tilDto() = InfotrygdhistorikkelementInnDto(
             id = this.id,
             tidsstempel = this.tidsstempel,
-            hendelseId = this.hendelseId,
+            hendelseId = MeldingsreferanseDto(this.hendelseId),
             ferieperioder = this.ferieperioder.map { it.tilDto() },
             arbeidsgiverutbetalingsperioder = this.arbeidsgiverutbetalingsperioder.map { it.tilDto() },
             personutbetalingsperioder = this.personutbetalingsperioder.map { it.tilDto() },
@@ -228,7 +229,7 @@ data class PersonData(
                 opptjening = this.opptjening!!.tilDto(),
                 medlemskapstatus = this.medlemskapstatus!!.tilDto(),
                 vurdertOk = this.vurdertOk!!,
-                meldingsreferanseId = this.meldingsreferanseId
+                meldingsreferanseId = this.meldingsreferanseId?.let { MeldingsreferanseDto(it) }
             )
         }
 
@@ -291,7 +292,7 @@ data class PersonData(
                 }
 
                 fun tilDto() = SkatteopplysningDto(
-                    hendelseId = this.hendelseId,
+                    hendelseId = MeldingsreferanseDto(this.hendelseId),
                     beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
                     måned = this.måned,
                     type = when (type) {
@@ -328,7 +329,7 @@ data class PersonData(
 
                 fun tilDto(): FaktaavklartInntektInnDto {
                     val inntektsdata = InntektsdataInnDto(
-                        hendelseId = this.hendelseId,
+                        hendelseId = MeldingsreferanseDto(this.hendelseId),
                         dato = this.dato,
                         beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
                         tidsstempel = this.tidsstempel
@@ -360,7 +361,7 @@ data class PersonData(
                 fun tilDto() = SaksbehandlerInnDto(
                     id = this.id,
                     inntektsdata = InntektsdataInnDto(
-                        hendelseId = this.hendelseId,
+                        hendelseId = MeldingsreferanseDto(this.hendelseId),
                         dato = this.dato,
                         beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
                         tidsstempel = this.tidsstempel
@@ -377,7 +378,7 @@ data class PersonData(
                 fun tilDto() = SkjønnsmessigFastsattInnDto(
                     id = this.id,
                     inntektsdata = InntektsdataInnDto(
-                        hendelseId = this.hendelseId,
+                        hendelseId = MeldingsreferanseDto(this.hendelseId),
                         dato = this.dato,
                         beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
                         tidsstempel = this.tidsstempel
@@ -459,7 +460,7 @@ data class PersonData(
             fun tilDto() = InntektsmeldingInnDto(
                 id = this.id,
                 inntektsdata = InntektsdataInnDto(
-                    hendelseId = this.hendelseId,
+                    hendelseId = MeldingsreferanseDto(this.hendelseId),
                     dato = this.dato,
                     beløp = InntektbeløpDto.MånedligDouble(beløp),
                     tidsstempel = this.tidsstempel
@@ -568,7 +569,7 @@ data class PersonData(
             ) {
                 fun tilDto() = HendelseskildeDto(
                     type = this.type,
-                    meldingsreferanseId = this.id,
+                    meldingsreferanseId = MeldingsreferanseDto(this.id),
                     tidsstempel = this.tidsstempel
                 )
             }
@@ -752,7 +753,7 @@ data class PersonData(
                 val dokumenttype: DokumentTypeData
             ) {
                 fun tilDto() = DokumentsporingDto(
-                    id = this.dokumentId,
+                    id = MeldingsreferanseDto(this.dokumentId),
                     type = when (dokumenttype) {
                         DokumentTypeData.Sykmelding -> DokumenttypeDto.Sykmelding
                         DokumentTypeData.Søknad -> DokumenttypeDto.Søknad
@@ -842,7 +843,7 @@ data class PersonData(
                     val avsender: AvsenderData
                 ) {
                     fun tilDto() = BehandlingkildeDto(
-                        meldingsreferanseId = this.meldingsreferanseId,
+                        meldingsreferanseId = MeldingsreferanseDto(this.meldingsreferanseId),
                         innsendt = this.innsendt,
                         registert = this.registrert,
                         avsender = this.avsender.tilDto()
@@ -997,7 +998,7 @@ data class PersonData(
     ) {
         fun tilDto() = SykdomshistorikkElementDto(
             id = this.id,
-            hendelseId = this.hendelseId,
+            hendelseId = this.hendelseId?.let { MeldingsreferanseDto(it) },
             tidsstempel = this.tidsstempel,
             hendelseSykdomstidslinje = hendelseSykdomstidslinje.tilDto(),
             beregnetSykdomstidslinje = beregnetSykdomstidslinje.tilDto()
@@ -1299,7 +1300,7 @@ data class PersonData(
                 tom = it.tom,
                 dagligBeløp = it.dagligBeløp,
                 kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(
-                    meldingsreferanseId = it.meldingsreferanseId,
+                    meldingsreferanseId = MeldingsreferanseDto(it.meldingsreferanseId),
                     avsender = it.avsender.tilDto(),
                     tidsstempel = it.tidsstempel
                 )

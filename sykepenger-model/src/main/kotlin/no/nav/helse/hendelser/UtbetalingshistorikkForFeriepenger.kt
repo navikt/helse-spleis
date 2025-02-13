@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
-import java.util.UUID
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode.Companion.kodeForDato
@@ -13,7 +12,7 @@ import no.nav.helse.utbetalingslinjer.Arbeidsgiverferiepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Feriepengegrunnlag
 
 class UtbetalingshistorikkForFeriepenger(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     private val utbetalinger: List<Utbetalingsperiode>,
     private val feriepengehistorikk: List<Feriepenger>,
     private val arbeidskategorikoder: Arbeidskategorikoder,

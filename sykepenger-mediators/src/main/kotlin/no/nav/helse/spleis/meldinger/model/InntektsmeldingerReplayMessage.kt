@@ -11,6 +11,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -33,7 +34,7 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
         packet["inntektsmeldinger"].forEach { inntektsmelding ->
             inntektsmeldinger.add(
                 inntektsmeldingReplay(
-                    inntektsmelding.path("internDokumentId").asText().toUUID(),
+                    MeldingsreferanseId(inntektsmelding.path("internDokumentId").asText().toUUID()),
                     inntektsmelding.path("inntektsmelding")
                 )
             )
@@ -44,7 +45,7 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
         mediator.behandle(this, inntektsmeldingerReplay, context)
     }
 
-    private fun inntektsmeldingReplay(internDokumentId: UUID, packet: JsonNode): Inntektsmelding {
+    private fun inntektsmeldingReplay(internDokumentId: MeldingsreferanseId, packet: JsonNode): Inntektsmelding {
         val refusjon = Inntektsmelding.Refusjon(
             beløp = packet.path("refusjon").path("beloepPrMnd").takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
             opphørsdato = packet.path("refusjon").path("opphoersdato").asOptionalLocalDate(),

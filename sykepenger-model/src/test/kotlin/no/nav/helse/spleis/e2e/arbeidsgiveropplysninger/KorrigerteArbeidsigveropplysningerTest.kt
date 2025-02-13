@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OpphørAvNaturalytelser
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.Dokumentsporing
@@ -117,7 +118,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
             val korrigeringId = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(2.januar til 17.januar)))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsler(1.vedtaksperiode, RV_IM_24)
-            assertDokumentsporingPåSisteEndring(1.vedtaksperiode, Dokumentsporing.inntektsmeldingDager(korrigeringId))
+            assertDokumentsporingPåSisteEndring(1.vedtaksperiode, Dokumentsporing.inntektsmeldingDager(MeldingsreferanseId(korrigeringId)))
             assertTrue(observatør.inntektsmeldingHåndtert.contains(korrigeringId to 1.vedtaksperiode))
         }
     }
@@ -140,7 +141,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
             val korrigeringId = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 10.januar)), UtbetaltDelerAvArbeidsgiverperioden(ManglerOpptjening, 10.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsler(1.vedtaksperiode, RV_IM_8)
-            assertDokumentsporingPåSisteEndring(1.vedtaksperiode, Dokumentsporing.inntektsmeldingDager(korrigeringId))
+            assertDokumentsporingPåSisteEndring(1.vedtaksperiode, Dokumentsporing.inntektsmeldingDager(MeldingsreferanseId(korrigeringId)))
             assertTrue(observatør.inntektsmeldingHåndtert.contains(korrigeringId to 1.vedtaksperiode))
         }
     }
@@ -152,7 +153,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
             val korrigeringId = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(2.januar til 17.januar)), RedusertUtbetaltBeløpIArbeidsgiverperioden(StreikEllerLockout))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsler(1.vedtaksperiode, RV_IM_24, RV_IM_8)
-            assertDokumentsporingPåSisteEndring(1.vedtaksperiode, Dokumentsporing.inntektsmeldingDager(korrigeringId))
+            assertDokumentsporingPåSisteEndring(1.vedtaksperiode, Dokumentsporing.inntektsmeldingDager(MeldingsreferanseId(korrigeringId)))
             assertTrue(observatør.inntektsmeldingHåndtert.contains(korrigeringId to 1.vedtaksperiode))
         }
     }
@@ -164,7 +165,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
             val korrigeringId = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OpphørAvNaturalytelser)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsler(1.vedtaksperiode, RV_IM_7)
-            assertDokumentsporingPåSisteEndring(1.vedtaksperiode, Dokumentsporing.inntektsmeldingDager(korrigeringId))
+            assertDokumentsporingPåSisteEndring(1.vedtaksperiode, Dokumentsporing.inntektsmeldingDager(MeldingsreferanseId(korrigeringId)))
             assertTrue(observatør.inntektsmeldingHåndtert.contains(korrigeringId to 1.vedtaksperiode))
         }
     }

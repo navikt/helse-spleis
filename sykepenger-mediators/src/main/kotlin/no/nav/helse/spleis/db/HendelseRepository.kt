@@ -1,11 +1,12 @@
 package no.nav.helse.spleis.db
 
 import java.time.ZoneId
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.serde.migration.Hendelse
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.ANMODNING_OM_FORKASTING
@@ -56,10 +57,10 @@ import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
-import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
 import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NavNoSelvbestemtInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
@@ -92,14 +93,14 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         melding.lagreMelding(this)
     }
 
-    internal fun lagreMelding(melding: HendelseMessage, personidentifikator: Personidentifikator, meldingId: UUID, json: String) {
+    internal fun lagreMelding(melding: HendelseMessage, personidentifikator: Personidentifikator, meldingId: MeldingsreferanseId, json: String) {
         val meldingtype = meldingstype(melding) ?: return
         sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json))) ON CONFLICT(melding_id) DO NOTHING",
                     personidentifikator.toLong(),
-                    meldingId.toString(),
+                    meldingId.id.toString(),
                     meldingtype.name,
                     json
                 ).asExecute
@@ -109,17 +110,17 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         }
     }
 
-    fun markerSomBehandlet(meldingId: UUID) = sessionOf(dataSource).use { session ->
+    fun markerSomBehandlet(meldingId: MeldingsreferanseId) = sessionOf(dataSource).use { session ->
         session.run(
             queryOf(
                 "UPDATE melding SET behandlet_tidspunkt=now() WHERE melding_id = ? AND behandlet_tidspunkt IS NULL",
-                meldingId.toString()
+                meldingId.id.toString()
             ).asUpdate
         )
     }
 
-    fun erBehandlet(meldingId: UUID) = sessionOf(dataSource).use { session ->
-        true == session.run(queryOf("SELECT exists(select 1 FROM melding WHERE melding_id = ? and behandlet_tidspunkt is not null)", meldingId.toString()).map { it.boolean(1) }.asSingle)
+    fun erBehandlet(meldingId: MeldingsreferanseId) = sessionOf(dataSource).use { session ->
+        true == session.run(queryOf("SELECT exists(select 1 FROM melding WHERE melding_id = ? and behandlet_tidspunkt is not null)", meldingId.id.toString()).map { it.boolean(1) }.asSingle)
     }
 
     private fun meldingstype(melding: HendelseMessage) = when (melding) {

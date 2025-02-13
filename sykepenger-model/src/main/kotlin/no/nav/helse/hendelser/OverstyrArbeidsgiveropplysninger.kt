@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav b`
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav c`
@@ -13,7 +12,7 @@ import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.økonomi.Inntekt
 
 class OverstyrArbeidsgiveropplysninger(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     internal val skjæringstidspunkt: LocalDate,
     val arbeidsgiveropplysninger: List<KorrigertArbeidsgiverInntektsopplysning>,
     opprettet: LocalDateTime,

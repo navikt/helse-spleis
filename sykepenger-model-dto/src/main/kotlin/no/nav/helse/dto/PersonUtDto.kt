@@ -4,7 +4,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
+
+data class MeldingsreferanseDto(val id: UUID)
 
 data class AlderDto(val fødselsdato: LocalDate, val dødsdato: LocalDate?)
 
@@ -13,7 +15,7 @@ data class SykmeldingsperioderDto(val perioder: List<PeriodeDto>)
 data class SykdomshistorikkDto(val elementer: List<SykdomshistorikkElementDto>)
 data class SykdomshistorikkElementDto(
     val id: UUID,
-    val hendelseId: UUID?,
+    val hendelseId: MeldingsreferanseDto?,
     val tidsstempel: LocalDateTime,
     val hendelseSykdomstidslinje: SykdomstidslinjeDto,
     val beregnetSykdomstidslinje: SykdomstidslinjeDto,
@@ -56,7 +58,7 @@ sealed class SykdomstidslinjeDagDto {
 
 data class HendelseskildeDto(
     val type: String,
-    val meldingsreferanseId: UUID,
+    val meldingsreferanseId: MeldingsreferanseDto,
     val tidsstempel: LocalDateTime
 )
 
@@ -97,7 +99,7 @@ sealed class BehandlingtilstandDto {
 }
 
 data class DokumentsporingDto(
-    val id: UUID,
+    val id: MeldingsreferanseDto,
     val type: DokumenttypeDto
 )
 
@@ -119,7 +121,7 @@ sealed class DokumenttypeDto {
 }
 
 data class BehandlingkildeDto(
-    val meldingsreferanseId: UUID,
+    val meldingsreferanseId: MeldingsreferanseDto,
     val innsendt: LocalDateTime,
     val registert: LocalDateTime,
     val avsender: AvsenderDto
@@ -133,7 +135,7 @@ sealed class MedlemskapsvurderingDto {
 }
 
 data class SkatteopplysningDto(
-    val hendelseId: UUID,
+    val hendelseId: MeldingsreferanseDto,
     val beløp: InntektbeløpDto.MånedligDouble,
     val måned: YearMonth,
     val type: InntekttypeDto,

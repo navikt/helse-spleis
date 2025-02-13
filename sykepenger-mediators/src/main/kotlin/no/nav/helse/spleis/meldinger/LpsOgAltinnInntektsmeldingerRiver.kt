@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -35,7 +34,7 @@ internal class LpsOgAltinnInntektsmeldingerRiver(
 
     override fun createMessage(packet: JsonMessage): InntektsmeldingMessage {
         val meldingsporing = Meldingsporing(
-            id = packet["@id"].asText().toUUID(),
+            id = packet.meldingsreferanseId(),
             fødselsnummer = packet["arbeidstakerFnr"].asText()
         )
         return InntektsmeldingMessage(

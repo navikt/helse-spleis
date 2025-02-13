@@ -87,7 +87,7 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
                     )
                 )
 
-            ), meldingsreferanseId.toString()
+            ), meldingsreferanseId
         )
         assertEquals(forventet, event)
     }

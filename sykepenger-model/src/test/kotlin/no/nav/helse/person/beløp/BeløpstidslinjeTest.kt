@@ -20,6 +20,7 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Avsender.SYSTEM
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
@@ -177,8 +178,8 @@ internal class BeløpstidslinjeTest {
 
     @Test
     fun `Slår sammen to beløptidslinjer med ulike beløp og tidsstempler`() {
-        val kilde1 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, LocalDateTime.now().minusDays(1))
-        val kilde2 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, LocalDateTime.now())
+        val kilde1 = Kilde(MeldingsreferanseId(UUID.randomUUID()), ARBEIDSGIVER, LocalDateTime.now().minusDays(1))
+        val kilde2 = Kilde(MeldingsreferanseId(UUID.randomUUID()), ARBEIDSGIVER, LocalDateTime.now())
 
         val gammelTidslinje = Beløpstidslinje.fra(januar, 500.daglig, kilde1)
         val nyTidslinje = Beløpstidslinje.fra(januar, 1000.daglig, kilde2)
@@ -189,8 +190,8 @@ internal class BeløpstidslinjeTest {
 
     @Test
     fun `Slår sammen to beløptidslinjer med like beløp og ulike tidsstempler`() {
-        val kilde1 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, LocalDateTime.now().minusDays(1))
-        val kilde2 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, LocalDateTime.now())
+        val kilde1 = Kilde(MeldingsreferanseId(UUID.randomUUID()), ARBEIDSGIVER, LocalDateTime.now().minusDays(1))
+        val kilde2 = Kilde(MeldingsreferanseId(UUID.randomUUID()), ARBEIDSGIVER, LocalDateTime.now())
 
         val beløp = 1000.daglig
         val gammelTidslinje = Beløpstidslinje.fra(januar, beløp, kilde1)
@@ -203,8 +204,8 @@ internal class BeløpstidslinjeTest {
     @Test
     fun `Slår sammen to beløptidslinjer med like beløp og like tidsstempler`() {
         val tidsstempel = LocalDateTime.now()
-        val kilde1 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, tidsstempel)
-        val kilde2 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, tidsstempel)
+        val kilde1 = Kilde(MeldingsreferanseId(UUID.randomUUID()), ARBEIDSGIVER, tidsstempel)
+        val kilde2 = Kilde(MeldingsreferanseId(UUID.randomUUID()), ARBEIDSGIVER, tidsstempel)
 
         val beløp = 1000.daglig
         val gammelTidslinje = Beløpstidslinje.fra(januar, beløp, kilde1)
@@ -280,7 +281,7 @@ internal class BeløpstidslinjeTest {
             (Arbeidsgiver oppgir 250.daglig fra 2.februar til 10.februar) og
             (Arbeidsgiver oppgir 500.daglig fra 11.februar til 12.februar)
 
-        val kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(Arbeidsgiver.meldingsreferanseId, Arbeidsgiver.avsender.dto(), Arbeidsgiver.tidsstempel)
+        val kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(Arbeidsgiver.meldingsreferanseId.dto(), Arbeidsgiver.avsender.dto(), Arbeidsgiver.tidsstempel)
         assertEquals(
             BeløpstidslinjeDto(
                 perioder = listOf(
@@ -309,13 +310,13 @@ internal class BeløpstidslinjeTest {
 
     internal companion object {
         internal val Beløpstidslinje.perioderMedBeløp get() = filterIsInstance<Beløpsdag>().map { it.dato }.grupperSammenhengendePerioder()
-        internal val UUID.arbeidsgiver get() = Kilde(this, ARBEIDSGIVER, LocalDateTime.now())
-        internal val UUID.saksbehandler get() = Kilde(this, SAKSBEHANDLER, LocalDateTime.now())
-        internal fun Avsender.beløpstidslinje(periode: Periode, beløp: Inntekt) = Beløpstidslinje.fra(periode, beløp, Kilde(UUID.randomUUID(), this, LocalDateTime.now()))
+        internal val UUID.arbeidsgiver get() = Kilde(MeldingsreferanseId(this), ARBEIDSGIVER, LocalDateTime.now())
+        internal val UUID.saksbehandler get() = Kilde(MeldingsreferanseId(this), SAKSBEHANDLER, LocalDateTime.now())
+        internal fun Avsender.beløpstidslinje(periode: Periode, beløp: Inntekt) = Beløpstidslinje.fra(periode, beløp, Kilde(MeldingsreferanseId(UUID.randomUUID()), this, LocalDateTime.now()))
 
         internal fun assertBeløpstidslinje(actual: Beløpstidslinje, periode: Periode, beløp: Inntekt, meldingsreferanseId: UUID? = null) {
             val ignoreMeldingsreferanseId = meldingsreferanseId == null
-            val kilde = Kilde(meldingsreferanseId ?: UUID.randomUUID(), SYSTEM, LocalDate.EPOCH.atStartOfDay())
+            val kilde = Kilde(MeldingsreferanseId(meldingsreferanseId ?: UUID.randomUUID()), SYSTEM, LocalDate.EPOCH.atStartOfDay())
             val expected = Beløpstidslinje.fra(periode, beløp, kilde)
             assertBeløpstidslinje(expected, actual, ignoreMeldingsreferanseId = ignoreMeldingsreferanseId, ignoreAvsender = true)
         }
@@ -336,7 +337,7 @@ internal class BeløpstidslinjeTest {
                     kilde = it.kilde.copy(
                         avsender = avsender(it.kilde.avsender),
                         tidsstempel = LocalDate.EPOCH.atStartOfDay(),
-                        meldingsreferanseId = meldingsreferanseId(it.kilde.meldingsreferanseId)
+                        meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId(it.kilde.meldingsreferanseId.id))
                     )
                 )
             }

@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektFor
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektI
@@ -20,7 +20,7 @@ import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag.Ansatt
 import no.nav.helse.yearMonth
 
 class Vilkårsgrunnlag(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     private val vedtaksperiodeId: String,
     private val skjæringstidspunkt: LocalDate,
     orgnummer: String,

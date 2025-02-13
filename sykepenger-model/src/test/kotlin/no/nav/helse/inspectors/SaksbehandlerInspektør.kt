@@ -10,6 +10,6 @@ internal val Saksbehandler.inspektør get() = SaksbehandlerInspektør(this)
 internal class SaksbehandlerInspektør(inntektsopplysning: Saksbehandler) {
 
     val beløp: Inntekt = inntektsopplysning.inntektsdata.beløp
-    val hendelseId: UUID = inntektsopplysning.inntektsdata.hendelseId
+    val hendelseId: UUID = inntektsopplysning.inntektsdata.hendelseId.id
     val tidsstempel: LocalDateTime = inntektsopplysning.inntektsdata.tidsstempel
 }

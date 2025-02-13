@@ -2,8 +2,8 @@ package no.nav.helse.person.refusjon
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -24,8 +24,8 @@ internal class RefusjonsservitørTest {
         val tidspunkt1 = LocalDateTime.now()
         val ubrukteRefusjonsopplysninger = Refusjonsservitør()
 
-        val im1 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, tidspunkt1)
-        val im2 = Kilde(UUID.randomUUID(), ARBEIDSGIVER, tidspunkt1.plusSeconds(1))
+        val im1 = Kilde(MeldingsreferanseId(UUID.randomUUID()), ARBEIDSGIVER, tidspunkt1)
+        val im2 = Kilde(MeldingsreferanseId(UUID.randomUUID()), ARBEIDSGIVER, tidspunkt1.plusSeconds(1))
 
         val beløpstidslinje1 = Beløpstidslinje.fra(5.januar.somPeriode(), 1000.daglig, im1)
         val beløpstidslinje2 = Beløpstidslinje.fra(1.januar.somPeriode(), 2000.daglig, im2)
@@ -69,6 +69,6 @@ internal class RefusjonsservitørTest {
     }
 
     private companion object {
-        private val kilde = Kilde(UUID.randomUUID(), ARBEIDSGIVER, LocalDateTime.now())
+        private val kilde = Kilde(MeldingsreferanseId(UUID.randomUUID()), ARBEIDSGIVER, LocalDateTime.now())
     }
 }

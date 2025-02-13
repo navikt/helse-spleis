@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.properties.Delegates
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.PersonObserver
@@ -148,7 +149,7 @@ internal class UtkastTilVedtakBuilder(
     private val build by lazy { Build() }
     internal fun buildGodkjenningsbehov() = build.godkjenningsbehov
     internal fun buildUtkastTilVedtak() = build.utkastTilVedtak
-    internal fun buildAvsluttedMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<UUID>) = build.avsluttetMedVedtak(vedtakFattet, historiskeHendelseIder)
+    internal fun buildAvsluttedMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<MeldingsreferanseId>) = build.avsluttetMedVedtak(vedtakFattet, historiskeHendelseIder)
     private inner class Build {
         private val skjønnsfastsatt = arbeidsgiverinntekter.any { it.skjønnsfastsatt != null }.also {
             if (it) check(arbeidsgiverinntekter.all { arbeidsgiver -> arbeidsgiver.skjønnsfastsatt != null }) { "Enten må ingen eller alle arbeidsgivere i sykepengegrunnlaget være skjønnsmessig fastsatt." }
@@ -288,13 +289,13 @@ internal class UtkastTilVedtakBuilder(
             }
         )
 
-        fun avsluttetMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<UUID>) = PersonObserver.AvsluttetMedVedtakEvent(
+        fun avsluttetMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<MeldingsreferanseId>) = PersonObserver.AvsluttetMedVedtakEvent(
             organisasjonsnummer = arbeidsgiver,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             periode = periode,
             // Til ettertanke: AvsluttetMedVedtak har alle hendelseId'er ever på vedtaksperioden, mens godkjenningsbehov/utkast_til_vedtak har kun behandlingens
-            hendelseIder = hendelseIder + historiskeHendelseIder, // TODO: 10.12.24: Enten klaske på historiske på godkjenningsbehovet (eget felt) eller fjerne "dokumenter" i vedtak_fattet
+            hendelseIder = hendelseIder + historiskeHendelseIder.map { it.id }, // TODO: 10.12.24: Enten klaske på historiske på godkjenningsbehovet (eget felt) eller fjerne "dokumenter" i vedtak_fattet
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = sykepengegrunnlag, // TODO: 10.12.24: Legge til for skjønnsmessig og infotrygd i tillegg til hovedregel
             // Til ettertanke: Denne mappes ut i JSON som "grunnlagForSykepengegrunnlag"

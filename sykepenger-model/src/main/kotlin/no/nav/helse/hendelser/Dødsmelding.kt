@@ -2,12 +2,11 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.hendelser.Avsender.SYSTEM
 
 class Dødsmelding(
-    meldingsreferanseId: UUID,
+    meldingsreferanseId: MeldingsreferanseId,
     private val dødsdato: LocalDate
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver

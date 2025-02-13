@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.dto.VedtaksperiodeVenterDto
 import no.nav.helse.dto.VenterPåDto
 import no.nav.helse.dto.VenteårsakDto
+import no.nav.helse.hendelser.MeldingsreferanseId
 
 internal class VedtaksperiodeVenter private constructor(
     private val vedtaksperiodeId: UUID,
@@ -58,8 +59,8 @@ internal class VedtaksperiodeVenter private constructor(
             this.behandlingId = behandlingId
         }
 
-        internal fun hendelseIder(hendelseIder: Set<UUID>) {
-            this.hendelseIder.addAll(hendelseIder)
+        internal fun hendelseIder(hendelseIder: Set<MeldingsreferanseId>) {
+            this.hendelseIder.addAll(hendelseIder.map { it.id })
         }
 
         internal fun venterPå(vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, orgnummer: String, venteÅrsak: Venteårsak) {

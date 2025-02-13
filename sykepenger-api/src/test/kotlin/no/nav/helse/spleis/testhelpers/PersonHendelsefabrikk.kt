@@ -6,6 +6,7 @@ import java.time.Year
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Dødsmelding
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -27,18 +28,18 @@ internal class PersonHendelsefabrikk {
         MinimumSykdomsgradsvurderingMelding(
             perioderMedMinimumSykdomsgradVurdertOK = perioderMedMinimumSykdomsgradVurdertOK,
             perioderMedMinimumSykdomsgradVurdertIkkeOK = perioderMedMinimumSykdomsgradVurdertIkkeOK,
-            meldingsreferanseId = UUID.randomUUID()
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())
         )
 
     internal fun lagDødsmelding(dødsdato: LocalDate) =
         Dødsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             dødsdato = dødsdato
         )
 
     internal fun lagOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) =
         OverstyrArbeidsforhold(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             skjæringstidspunkt = skjæringstidspunkt,
             overstyrteArbeidsforhold = overstyrteArbeidsforhold.toList(),
             opprettet = LocalDateTime.now()
@@ -46,12 +47,12 @@ internal class PersonHendelsefabrikk {
 
     internal fun lagPåminnelse() =
         PersonPåminnelse(
-            meldingsreferanseId = UUID.randomUUID()
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())
         )
 
     internal fun lagSkjønnsmessigFastsettelse(skjæringstidspunkt: LocalDate, arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>, meldingsreferanseId: UUID) =
         SkjønnsmessigFastsettelse(
-            meldingsreferanseId = meldingsreferanseId,
+            meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSkjønnsmessigFastsattInntekt(meldingsreferanseId, skjæringstidspunkt),
             opprettet = LocalDateTime.now()
@@ -60,7 +61,7 @@ internal class PersonHendelsefabrikk {
     internal fun lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt: LocalDate, arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>, meldingsreferanseId: UUID): OverstyrArbeidsgiveropplysninger {
         val opprettet = LocalDateTime.now()
         return OverstyrArbeidsgiveropplysninger(
-            meldingsreferanseId = meldingsreferanseId,
+            meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSaksbehandlerinntekt(meldingsreferanseId, skjæringstidspunkt),
             refusjonstidslinjer = arbeidsgiveropplysninger.refusjonstidslinjer(skjæringstidspunkt, meldingsreferanseId, opprettet),
@@ -70,7 +71,7 @@ internal class PersonHendelsefabrikk {
 
     internal fun lagUtbetalingshistorikkForFeriepenger(opptjeningsår: Year) =
         UtbetalingshistorikkForFeriepenger(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             utbetalinger = emptyList(),
             feriepengehistorikk = emptyList(),
             arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(emptyList()),
@@ -94,7 +95,7 @@ internal class OverstyrtArbeidsgiveropplysning(
                     organisasjonsnummer = it.orgnummer,
                     gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX),
                     inntektsdata = Inntektsdata(
-                        hendelseId = meldingsreferanseId,
+                        hendelseId = MeldingsreferanseId(meldingsreferanseId),
                         dato = skjæringstidspunkt,
                         beløp = it.inntekt,
                         tidsstempel = LocalDateTime.now()
@@ -113,7 +114,7 @@ internal class OverstyrtArbeidsgiveropplysning(
                 SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt(
                     orgnummer = it.orgnummer,
                     inntektsdata = Inntektsdata(
-                        hendelseId = meldingsreferanseId,
+                        hendelseId = MeldingsreferanseId(meldingsreferanseId),
                         dato = skjæringstidspunkt,
                         beløp = it.inntekt,
                         tidsstempel = LocalDateTime.now()
@@ -126,7 +127,7 @@ internal class OverstyrtArbeidsgiveropplysning(
             val defaultRefusjonFom = opplysning.gjelder?.start ?: skjæringstidspunkt
             val strekkbar = opplysning.refusjonsopplysninger(defaultRefusjonFom).any { (_, tom) -> tom == null }
             opplysning.refusjonsopplysninger(defaultRefusjonFom).fold(Beløpstidslinje()) { acc, (fom, tom, beløp) ->
-                acc + Beløpstidslinje.fra(fom til (tom ?: fom), beløp, Kilde(meldingsreferanseId, SAKSBEHANDLER, opprettet))
+                acc + Beløpstidslinje.fra(fom til (tom ?: fom), beløp, Kilde(MeldingsreferanseId(meldingsreferanseId), SAKSBEHANDLER, opprettet))
             } to strekkbar
         }
     }

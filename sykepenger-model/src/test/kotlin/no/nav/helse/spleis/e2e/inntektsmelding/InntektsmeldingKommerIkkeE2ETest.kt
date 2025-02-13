@@ -9,6 +9,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -181,7 +182,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             )
             )
             val hendelser = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.hendelser
-            assertTrue(hendelser.contains(Dokumentsporing.inntektFraAOrdingen(meldingsreferanseId)))
+            assertTrue(hendelser.contains(Dokumentsporing.inntektFraAOrdingen(MeldingsreferanseId(meldingsreferanseId))))
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)

@@ -10,6 +10,7 @@ import io.mockk.mockk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
@@ -39,7 +40,7 @@ class BehovMediatorTest {
 
         private val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
             it.requireKey("@event_name")
-        }, Meldingsporing(UUID.randomUUID(), fødselsnummer))
+        }, Meldingsporing(MeldingsreferanseId(UUID.randomUUID()), fødselsnummer))
     }
 
     private val messages = mutableListOf<Pair<String?, String>>()

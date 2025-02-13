@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.MinimumSykdomsgradsvurdering
 
@@ -12,7 +11,7 @@ import no.nav.helse.person.MinimumSykdomsgradsvurdering
 class MinimumSykdomsgradsvurderingMelding(
     private val perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
     private val perioderMedMinimumSykdomsgradVurdertIkkeOK: Set<Periode>,
-    meldingsreferanseId: UUID
+    meldingsreferanseId: MeldingsreferanseId
 ) : Hendelse {
 
     init {

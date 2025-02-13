@@ -3,6 +3,7 @@ package no.nav.helse.spleis.mediator
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -27,7 +28,7 @@ internal class DatadelingMediatorTest {
 
     private val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
         it.requireKey("@event_name")
-    }, Meldingsporing(UUID.randomUUID(), fødselsnummer))
+    }, Meldingsporing(MeldingsreferanseId(UUID.randomUUID()), fødselsnummer))
 
     @BeforeEach
     fun beforeEach() {

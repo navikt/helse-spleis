@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
@@ -67,7 +68,7 @@ internal abstract class AbstractObservableTest {
         sykeperioder: List<Sykmeldingsperiode> = listOf(Sykmeldingsperiode(FOM, TOM)),
         orgnummer: String = ORGNUMMER
     ): Sykmelding = Sykmelding(
-        meldingsreferanseId = id,
+        meldingsreferanseId = MeldingsreferanseId(id),
         orgnummer = orgnummer,
         sykeperioder = sykeperioder
     )
@@ -81,7 +82,7 @@ internal abstract class AbstractObservableTest {
         sykmeldingSkrevet: LocalDateTime = FOM.atStartOfDay(),
         egenmeldinger: List<Periode> = emptyList()
     ): Søknad = Søknad(
-        meldingsreferanseId = id,
+        meldingsreferanseId = MeldingsreferanseId(id),
         orgnummer = orgnummer,
         perioder = listOf(*perioder),
         andreInntektskilder = andreInntektskilder,
@@ -102,10 +103,10 @@ internal abstract class AbstractObservableTest {
     )
 
     protected fun utbetalinghistorikk() = UtbetalingshistorikkEtterInfotrygdendring(
-        UUID.randomUUID(),
-        InfotrygdhistorikkElement.opprett(
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+        element = InfotrygdhistorikkElement.opprett(
             oppdatert = LocalDateTime.now(),
-            hendelseId = UUID.randomUUID(),
+            hendelseId = MeldingsreferanseId(UUID.randomUUID()),
             perioder = emptyList(),
             inntekter = emptyList(),
             arbeidskategorikoder = emptyMap()
@@ -123,7 +124,7 @@ internal abstract class AbstractObservableTest {
         opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
         harFlereInntektsmeldinger: Boolean = false,
     ): Inntektsmelding = Inntektsmelding(
-        meldingsreferanseId = id,
+        meldingsreferanseId = MeldingsreferanseId(id),
         refusjon = refusjon,
         orgnummer = orgnummer,
         beregnetInntekt = beregnetInntekt,
@@ -159,7 +160,7 @@ internal abstract class AbstractObservableTest {
             )
         )
     ): Vilkårsgrunnlag = Vilkårsgrunnlag(
-        meldingsreferanseId = UUID.randomUUID(),
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         skjæringstidspunkt = FOM,
         orgnummer = orgnummer,
@@ -183,7 +184,7 @@ internal abstract class AbstractObservableTest {
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
-            meldingsreferanseId = meldingsreferanseId,
+            meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
             foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepenger),
@@ -216,7 +217,7 @@ internal abstract class AbstractObservableTest {
         utbetalingId: UUID
     ) =
         Simulering(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
             orgnummer = orgnummer,
             fagsystemId = fagsystemId,
@@ -273,7 +274,7 @@ internal abstract class AbstractObservableTest {
         automatiskBehandling: Boolean = false,
         utbetalingId: UUID
     ) = Utbetalingsgodkjenning(
-        meldingsreferanseId = UUID.randomUUID(),
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         organisasjonsnummer = orgnummer,
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
@@ -292,7 +293,7 @@ internal abstract class AbstractObservableTest {
         utbetalingId: UUID
     ) =
         UtbetalingHendelse(
-            meldingsreferanseId = meldingsreferanseId,
+            meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
             orgnummer = orgnummer,
             fagsystemId = fagsystemId,
             utbetalingId = utbetalingId,

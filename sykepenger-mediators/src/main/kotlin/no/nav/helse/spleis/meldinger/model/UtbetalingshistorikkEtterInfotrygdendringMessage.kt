@@ -4,7 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDate
-import java.util.UUID
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.spleis.IHendelseMediator
@@ -24,7 +24,7 @@ internal class UtbetalingshistorikkEtterInfotrygdendringMessage(packet: JsonMess
 
     private val inntektshistorikk = packet.inntektshistorikk()
 
-    private fun infotrygdhistorikk(meldingsreferanseId: UUID) =
+    private fun infotrygdhistorikk(meldingsreferanseId: MeldingsreferanseId) =
         InfotrygdhistorikkElement.opprett(
             oppdatert = besvart,
             hendelseId = meldingsreferanseId,

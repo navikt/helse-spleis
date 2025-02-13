@@ -9,11 +9,11 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse
@@ -23,6 +23,7 @@ import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
+import no.nav.helse.spleis.meldinger.meldingsreferanseId
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
@@ -44,7 +45,7 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
 
         private fun JsonMessage.arbeidsgiveropplysninger(skjæringstidspunkt: LocalDate): List<OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning> {
             val arbeidsgivere = get("arbeidsgivere").takeUnless { it.isMissingOrNull() } ?: return emptyList()
-            val id = UUID.fromString(get("@id").asText())
+            val id = meldingsreferanseId()
             val opprettet = get("@opprettet").asLocalDateTime()
             return arbeidsgivere.map { arbeidsgiveropplysning ->
                 val orgnummer = arbeidsgiveropplysning["organisasjonsnummer"].asText()
@@ -85,14 +86,14 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
         }
 
         private fun JsonMessage.refusjonstidslinjer(): Map<String, Pair<Beløpstidslinje, Boolean>> {
-            val id = UUID.fromString(get("@id").asText())
+            val id = meldingsreferanseId()
             val opprettet = get("@opprettet").asLocalDateTime()
             return get("arbeidsgivere").associateBy { it.path("organisasjonsnummer").asText() }.mapValues { (_, arbeidsgiver) ->
                 arbeidsgiver.path("refusjonsopplysninger").refusjonstidslinje(id, opprettet)
             }
         }
 
-        private fun JsonNode.refusjonstidslinje(meldingsreferanseId: UUID, opprettet: LocalDateTime): Pair<Beløpstidslinje, Boolean> {
+        private fun JsonNode.refusjonstidslinje(meldingsreferanseId: MeldingsreferanseId, opprettet: LocalDateTime): Pair<Beløpstidslinje, Boolean> {
             var strekkbar = false
             val refusjonstidslinje = this.fold(Beløpstidslinje()) { acc, node ->
                 val fom = node.path("fom").asLocalDate()

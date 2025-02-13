@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
-import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForOpptjeningsvurdering
@@ -57,7 +56,7 @@ internal class VilkårsgrunnlagRiver(
 
     override fun createMessage(packet: JsonMessage) = VilkårsgrunnlagMessage(
         packet, Meldingsporing(
-        id = packet["@id"].asText().toUUID(),
+        id = packet.meldingsreferanseId(),
         fødselsnummer = packet["fødselsnummer"].asText()
     )
     )
