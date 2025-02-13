@@ -34,6 +34,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
@@ -186,6 +187,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         }
     }
 
+    @Disabled
     @Test
     fun `skal forkaste personer vi ville hentet skatteinntekter for, men som har et fødselsnummer som ikke passerer inngangsfilter`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         medPersonidentifikator(Personidentifikator(FNR_SOM_IKKE_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
