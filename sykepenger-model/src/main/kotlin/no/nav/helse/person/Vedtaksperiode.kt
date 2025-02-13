@@ -987,10 +987,13 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(
         sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
         aktivitetslogg: IAktivitetslogg
-    ) {
-        if (!sykepengegrunnlagForArbeidsgiver.erRelevant(aktivitetslogg, id, skjæringstidspunkt)) return
+    ): Boolean {
+        if (tilstand != AvventerInntektsmelding) return false
+        if (!sykepengegrunnlagForArbeidsgiver.erRelevant(aktivitetslogg, skjæringstidspunkt)) return false
+
         registrerKontekst(aktivitetslogg)
         tilstand.håndter(this, sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
+        return true
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, aktivitetslogg: IAktivitetslogg) {
@@ -2635,7 +2638,7 @@ internal class Vedtaksperiode private constructor(
             val påTideMedSkatt = ventetMinst3Måneder && ikkeForGammel && (Toggle.InntektsmeldingSomIkkeKommer.enabled || påminnelse.når(Flagg("ønskerInntektFraAOrdningen")))
 
             if (påTideMedSkatt) {
-                val inngangsfilter = false // (30..31).contains(vedtaksperiode.person.personidentifikator.toString().take(2).toInt())
+                val inngangsfilter = (30..31).contains(vedtaksperiode.person.personidentifikator.toString().take(2).toInt())
                 if (!inngangsfilter) {
                     aktivitetslogg.info("Behandler ikke vedtaksperiode uten inntektsmelding fordi personen ikke slipper gjennom inngangsfilteret")
                     return vedtaksperiode.forkast(påminnelse, aktivitetslogg)

@@ -64,7 +64,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
@@ -99,7 +98,6 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEtterspurt(1.vedtaksperiode.id(a2), PersonObserver.Refusjon::class, PersonObserver.Arbeidsgiverperiode::class)
     }
 
-    @Disabled
     @Test
     fun `Skal sende med et flagg for å innhente inntekter fra a-ordningen etter å ha ventet på inntektsmelding lengre enn 3 måneder`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         person = createTestPerson(IDENTIFIKATOR_SOM_KAN_BEHANDLES_UTEN_IM, FØDSELSDATO_SOM_KAN_BEHANDLES_UTEN_IM)

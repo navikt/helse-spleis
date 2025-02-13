@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
@@ -667,7 +667,7 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg: IAktivitetslogg
     ) {
         aktivitetslogg.kontekst(this)
-        håndter(sykepengegrunnlagForArbeidsgiver) {
+        énHarHåndtert(sykepengegrunnlagForArbeidsgiver) {
             håndter(sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
         }
     }

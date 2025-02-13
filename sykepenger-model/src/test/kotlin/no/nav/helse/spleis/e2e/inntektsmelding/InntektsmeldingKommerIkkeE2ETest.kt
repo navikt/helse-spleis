@@ -34,7 +34,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
@@ -42,7 +41,68 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     private val FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER = "30019412345"
     private val FNR_SOM_IKKE_SKAL_SLIPPE_GJENNOM_INNGANGFILTER = "12019412345"
 
-    @Disabled
+    @Test
+    fun `legger varsel på riktig periode når det er en senere periode som blir påminnet -- helgegap og out of order`() {
+        medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
+        val inntektFraSkatt = 10000.månedlig
+        a1 {
+            håndterSøknad(29.januar til 10.februar)
+            håndterSøknad(1.januar til 26.januar)
+            assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
+                nåtidspunkt = 10.februar(2025).atStartOfDay()
+            )
+            håndterSykepengegrunnlagForArbeidsgiver(
+                1.vedtaksperiode,
+                1.januar,
+                listOf(
+                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
+                )
+            )
+            assertTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertVarsel(Varselkode.RV_IV_10, 2.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `legger varsel på riktig periode når det er en senere periode som blir påminnet -- helgegap`() {
+        medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
+        val inntektFraSkatt = 10000.månedlig
+        a1 {
+            håndterSøknad(1.januar til 26.januar)
+            håndterSøknad(29.januar til 10.februar)
+            assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
+            håndterPåminnelse(
+                2.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
+                nåtidspunkt = 10.februar(2025).atStartOfDay()
+            )
+            håndterSykepengegrunnlagForArbeidsgiver(
+                2.vedtaksperiode,
+                1.januar,
+                listOf(
+                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
+                )
+            )
+            assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
+        }
+    }
+
     @Test
     fun `event om at vi bruker skatteopplysninger`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
@@ -51,7 +111,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterPåminnelse(
                 1.vedtaksperiode,
-                TilstandType.AVVENTER_INNTEKTSMELDING,
+                AVVENTER_INNTEKTSMELDING,
                 tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
                 nåtidspunkt = 10.februar(2025).atStartOfDay()
             )
@@ -84,7 +144,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         }
     }
 
-    @Disabled
     @Test
     fun `event om at vi bruker skatteopplysninger med sprø minus`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
@@ -94,7 +153,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterPåminnelse(
                 1.vedtaksperiode,
-                TilstandType.AVVENTER_INNTEKTSMELDING,
+                AVVENTER_INNTEKTSMELDING,
                 tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
                 nåtidspunkt = 10.februar(2025).atStartOfDay()
             )
@@ -127,7 +186,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         }
     }
 
-    @Disabled
     @Test
     fun `skal forkaste personer vi ville hentet skatteinntekter for, men som har et fødselsnummer som ikke passerer inngangsfilter`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         medPersonidentifikator(Personidentifikator(FNR_SOM_IKKE_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
@@ -135,7 +193,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterPåminnelse(
                 1.vedtaksperiode,
-                TilstandType.AVVENTER_INNTEKTSMELDING,
+                AVVENTER_INNTEKTSMELDING,
                 tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
                 nåtidspunkt = 10.februar(2025).atStartOfDay()
             )
@@ -155,7 +213,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         }
     }
 
-    @Disabled
     @Test
     fun `lager påminnelse om vedtaksperioden har ventet mer enn tre måneder`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))

@@ -29,10 +29,8 @@ class SykepengegrunnlagForArbeidsgiver(
 
     internal fun erRelevant(
         aktivitetslogg: IAktivitetslogg,
-        other: UUID,
         skjæringstidspunktVedtaksperiode: LocalDate
     ): Boolean {
-        if (other != vedtaksperiodeId) return false
         if (skjæringstidspunktVedtaksperiode == skjæringstidspunkt) return true
         aktivitetslogg.info("Vilkårsgrunnlag var relevant for Vedtaksperiode, men skjæringstidspunktene var ulikte: [$skjæringstidspunkt, $skjæringstidspunktVedtaksperiode]")
         return false
