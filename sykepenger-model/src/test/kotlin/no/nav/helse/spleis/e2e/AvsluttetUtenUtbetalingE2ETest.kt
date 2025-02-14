@@ -1,13 +1,19 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.den
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.lørdag
 import no.nav.helse.mars
+import no.nav.helse.onsdag
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -19,10 +25,32 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.søndag
+import no.nav.helse.til
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
+    @Test
+    fun `korrigert søknad med arbeid gjenopptatt som dekker deler av vedtaksperioden`() {
+        a1 {
+            håndterSøknad(søndag den 7.januar til fredag den 12.januar)
+            håndterSøknad(Sykdom(lørdag den 13.januar, fredag den 2.februar, 100.prosent), Arbeid(23.januar, 2.februar))
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertEquals("H SSSSSHH SSSSSHH SAAAARR AAAAA", inspektør.sykdomstidslinje.toShortString())
+            håndterSøknad(Sykdom(lørdag den 13.januar, fredag den 2.februar, 100.prosent))
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertEquals("H SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomstidslinje.toShortString())
+            assertThrows<IllegalStateException> {
+                håndterSøknad(Sykdom(lørdag den 13.januar, onsdag den 31.januar, 100.prosent), Arbeid(16.januar, 31.januar))
+            }
+        }
+    }
     /*
         Hvis vi har en kort periode som har endt opp i AVSLUTTET_UTEN_UTBETALING vil alle etterkommende perioder
         bli stuck med å vente på den korte perioden. Da vil de aldri komme seg videre og til slutt time ut
