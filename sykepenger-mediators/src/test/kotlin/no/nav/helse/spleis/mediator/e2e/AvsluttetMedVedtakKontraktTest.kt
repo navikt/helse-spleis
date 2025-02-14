@@ -58,7 +58,8 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
               "arbeidsgivere": [
                 {
                   "arbeidsgiver": "987654321",
-                  "omregnetÅrsinntekt": 372000.0
+                  "omregnetÅrsinntekt": 372000.0,
+                  "inntektskilde": "Arbeidsgiver"
                 }
               ]
             }
@@ -201,7 +202,8 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
               "arbeidsgivere": [
                 {
                   "arbeidsgiver": "987654321",
-                  "omregnetÅrsinntekt": 372000.0
+                  "omregnetÅrsinntekt": 372000.0,
+                  "inntektskilde": "Arbeidsgiver"
                 }
               ]
             }

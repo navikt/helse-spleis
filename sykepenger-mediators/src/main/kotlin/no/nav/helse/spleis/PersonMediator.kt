@@ -461,7 +461,8 @@ internal class PersonMediator(
                     "arbeidsgivere" to fakta.arbeidsgivere.map { arbeidsgiver ->
                         mapOf(
                             "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
-                            "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt
+                            "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
+                            "inntektskilde" to arbeidsgiver.inntektskilde
                         )
                     }
                 )
