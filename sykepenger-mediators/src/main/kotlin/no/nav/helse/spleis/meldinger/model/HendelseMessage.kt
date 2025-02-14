@@ -22,11 +22,9 @@ internal sealed class HendelseMessage(private val packet: JsonMessage) : Aktivit
     internal abstract fun behandle(mediator: IHendelseMediator, context: MessageContext)
 
     final override fun toSpesifikkKontekst() =
-        SpesifikkKontekst(
-            kontekstnavn, mapOf(
-            "meldingsreferanseId" to meldingsporing.id.toString()
-        )
-        )
+        SpesifikkKontekst(kontekstnavn, mapOf(
+            "meldingsreferanseId" to meldingsporing.id.id.toString()
+        ))
 
     internal fun lagreMelding(repository: HendelseRepository) {
         repository.lagreMelding(this, Personidentifikator(meldingsporing.fødselsnummer), meldingsporing.id, toJson())
