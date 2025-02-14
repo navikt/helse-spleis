@@ -95,7 +95,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         spleisApiTestApplication(spekematClient = spekematClient, testdata = opprettTestdata(person)) {
             every { spekematClient.hentSpekemat(UNG_PERSON_FNR, any()) } returns spekemat.resultat()
             val query =
-                URI("https://raw.githubusercontent.com/navikt/helse-spesialist/main/spesialist-selve/src/main/resources/graphql/hentSnapshot.graphql").toURL()
+                URI("https://raw.githubusercontent.com/navikt/helse-spesialist/main/spesialist-client-spleis/src/main/resources/graphql/hentSnapshot.graphql").toURL()
                     .readText()
 
             @Language("JSON")
