@@ -14,7 +14,7 @@ import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør
 import no.nav.helse.dsl.Varslersamler
-import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.gjenopprettFraJSONtekst
@@ -43,7 +43,7 @@ internal abstract class AbstractPersonTest {
             organisasjonsnummer = a1
         )
 
-        private fun overgangFraInfotrygdPerson(jurist: Subsumsjonslogg) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", jurist).also { person ->
+        private fun overgangFraInfotrygdPerson(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", regelverkslogg).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
                     meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -62,7 +62,7 @@ internal abstract class AbstractPersonTest {
             )
         }
 
-        private fun pingPongPerson(jurist: Subsumsjonslogg) = gjenopprettFraJSON("/personer/pingpong.json", jurist).also { person ->
+        private fun pingPongPerson(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/pingpong.json", regelverkslogg).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
                     meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -85,7 +85,7 @@ internal abstract class AbstractPersonTest {
     internal val assertetVarsler = Varslersamler.AssertetVarsler()
     lateinit var person: Person
     lateinit var observatør: TestObservatør
-    lateinit var jurist: SubsumsjonsListLog
+    lateinit var regelverkslogg: SubsumsjonsListLog
     val inspektør get() = inspektør(a1)
 
     val Int.vedtaksperiode: IdInnhenter get() = IdInnhenter { orgnummer -> this@vedtaksperiode.vedtaksperiodeId(orgnummer) }
@@ -112,20 +112,20 @@ internal abstract class AbstractPersonTest {
         override fun maksSykepengedagerOver67() = maksSykedager
     }
 
-    protected fun createKorttidsPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate, maksSykedager: Int) = createTestPerson { jurist ->
-        Person(personidentifikator, fødseldato.alder, jurist, regler(maksSykedager))
+    protected fun createKorttidsPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate, maksSykedager: Int) = createTestPerson { regelverkslogg ->
+        Person(personidentifikator, fødseldato.alder, regelverkslogg, regler(maksSykedager))
     }
 
-    protected fun createTestPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate, dødsdato: LocalDate? = null) = createTestPerson { jurist ->
-        Person(personidentifikator, Alder(fødseldato, dødsdato), jurist)
+    protected fun createTestPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate, dødsdato: LocalDate? = null) = createTestPerson { regelverkslogg ->
+        Person(personidentifikator, Alder(fødseldato, dødsdato), regelverkslogg)
     }
 
-    protected fun createPingPongPerson() = createTestPerson { jurist -> pingPongPerson(jurist) }
-    protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist -> overgangFraInfotrygdPerson(jurist) }
+    protected fun createPingPongPerson() = createTestPerson { regelverkslogg -> pingPongPerson(regelverkslogg) }
+    protected fun createOvergangFraInfotrygdPerson() = createTestPerson { regelverkslogg -> overgangFraInfotrygdPerson(regelverkslogg) }
 
-    protected fun createTestPerson(block: (jurist: Subsumsjonslogg) -> Person): Person {
-        jurist = SubsumsjonsListLog()
-        person = block(jurist)
+    protected fun createTestPerson(block: (regelverkslogg: Regelverkslogg) -> Person): Person {
+        regelverkslogg = SubsumsjonsListLog()
+        person = block(regelverkslogg)
         observatør = TestObservatør(person)
         UgyldigeSituasjonerObservatør(person)
         return person

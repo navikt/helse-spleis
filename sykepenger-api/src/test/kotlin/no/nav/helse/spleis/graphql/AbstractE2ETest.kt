@@ -4,12 +4,12 @@ import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentLinkedDeque
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
-import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
+import no.nav.helse.etterlevelse.Regelverkslogg
+import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -70,7 +70,7 @@ internal abstract class AbstractE2ETest {
     private lateinit var hendelselogg: Aktivitetslogg
     private val ubesvarteBehov = ConcurrentLinkedDeque<Aktivitet.Behov>()
 
-    private fun createTestPerson(creator: (Subsumsjonslogg) -> Person) {
+    private fun createTestPerson(creator: (Regelverkslogg) -> Person) {
         observatør = TestObservatør()
         spekemat = Spekemat()
         person = creator(EmptyLog)

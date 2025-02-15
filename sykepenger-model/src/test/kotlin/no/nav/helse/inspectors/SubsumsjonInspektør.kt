@@ -1,14 +1,14 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
-import java.util.UUID
-import no.nav.helse.dsl.a1
+import java.util.*
 import no.nav.helse.dsl.SubsumsjonsListLog
+import no.nav.helse.dsl.a1
 import no.nav.helse.etterlevelse.Bokstav
-import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Punktum
+import no.nav.helse.etterlevelse.Regelverksporing
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
@@ -17,9 +17,10 @@ import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.person.IdInnhenter
 import org.junit.jupiter.api.Assertions.assertEquals
 
-internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
+internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
 
     private val subsumsjoner = mutableListOf<Subsumsjon>()
+    private val subsumsjonerForVedtaksperiode = mutableMapOf<UUID, MutableList<Subsumsjon>>()
 
     private data class Subsumsjon(
         val lovverk: String,
@@ -32,26 +33,27 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
         val utfall: Utfall,
         val input: Map<String, Any>,
         val output: Map<String, Any>
-    ) {
-        fun vedtaksperiodeIdFraSporing(): UUID = UUID.fromString(sporing.first { it.type == KontekstType.Vedtaksperiode }.verdi)
-    }
+    )
 
     init {
-        jurist.subsumsjoner.forEach { subsumsjon ->
-            subsumsjoner.add(
-                Subsumsjon(
-                    lovverk = subsumsjon.lovverk,
-                    paragraf = subsumsjon.paragraf,
-                    ledd = subsumsjon.ledd,
-                    punktum = subsumsjon.punktum,
-                    bokstav = subsumsjon.bokstav,
-                    versjon = subsumsjon.versjon,
-                    sporing = subsumsjon.kontekster,
-                    utfall = subsumsjon.utfall,
-                    input = subsumsjon.input,
-                    output = subsumsjon.output
-                )
+        regelverkslogg.regelverksporinger.forEach { sporing ->
+            val subsumsjon = Subsumsjon(
+                lovverk = sporing.subsumsjon.lovverk,
+                paragraf = sporing.subsumsjon.paragraf,
+                ledd = sporing.subsumsjon.ledd,
+                punktum = sporing.subsumsjon.punktum,
+                bokstav = sporing.subsumsjon.bokstav,
+                versjon = sporing.subsumsjon.versjon,
+                sporing = sporing.subsumsjon.kontekster,
+                utfall = sporing.subsumsjon.utfall,
+                input = sporing.subsumsjon.input,
+                output = sporing.subsumsjon.output
             )
+            subsumsjoner.add(subsumsjon)
+            when (sporing) {
+                is Regelverksporing.Arbeidsgiversporing -> {}
+                is Regelverksporing.Behandlingsporing -> subsumsjonerForVedtaksperiode.getOrPut(sporing.vedtaksperiodeId) { mutableListOf() }.add(subsumsjon)
+            }
         }
     }
 
@@ -64,17 +66,18 @@ internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
         bokstav: Bokstav?,
         utfall: Utfall? = null,
         vedtaksperiodeId: UUID? = null
-    ) =
-        subsumsjoner.filter {
+    ): List<Subsumsjon> {
+        val utvalg = if (vedtaksperiodeId == null) subsumsjoner else subsumsjonerForVedtaksperiode.getValue(vedtaksperiodeId)
+        return utvalg.filter {
             lovverk == it.lovverk
                 && it.paragraf == paragraf
-                && versjon?.equals(it.versjon) ?: true
-                && utfall?.equals(it.utfall) ?: true
-                && ledd?.equals(it.ledd) ?: true
-                && punktum?.equals(it.punktum) ?: true
-                && bokstav?.equals(it.bokstav) ?: true
-                && vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraSporing()) ?: true
+                && ((versjon != null && versjon == it.versjon) || versjon == null)
+                && ((utfall != null && utfall == it.utfall) || utfall == null)
+                && ((ledd != null && ledd == it.ledd) || ledd == null)
+                && ((punktum != null && punktum == it.punktum) || punktum == null)
+                && ((bokstav != null && bokstav == it.bokstav) || bokstav == null)
         }
+    }
 
     internal fun antallSubsumsjoner(
         lovverk: String = "folketrygdloven",

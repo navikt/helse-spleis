@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -20,8 +19,6 @@ internal sealed interface Yrkesaktivitet {
     }
 
     fun identifikator(): String
-    fun jurist(other: BehandlingSubsumsjonslogg): BehandlingSubsumsjonslogg =
-        other.medOrganisasjonsnummer(this.toString())
 
     fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean
     fun håndter(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg, sykmeldingsperioder: Sykmeldingsperioder) {

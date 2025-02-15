@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import no.nav.helse.Alder
 import no.nav.helse.Toggle
 import no.nav.helse.erHelg
+import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 22-13 ledd 3`
 import no.nav.helse.etterlevelse.`§ 8-9 ledd 1`
@@ -191,7 +192,7 @@ class Søknad(
     private fun avskjæringsdato(): LocalDate =
         (opprinneligSendt ?: metadata.innsendt).toLocalDate().minusMonths(3).withDayOfMonth(1)
 
-    internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, arbeidsgiver: Arbeidsgiver, subsumsjonslogg: Subsumsjonslogg): Vedtaksperiode {
+    internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, arbeidsgiver: Arbeidsgiver, regelverkslogg: Regelverkslogg): Vedtaksperiode {
         requireNotNull(sykdomstidslinje.periode()) { "ugyldig søknad: tidslinjen er tom" }
         return Vedtaksperiode(
             egenmeldingsperioder = egenmeldingsperioder(),
@@ -202,7 +203,7 @@ class Søknad(
             sykdomstidslinje = sykdomstidslinje,
             dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
             sykmeldingsperiode = sykdomsperiode,
-            subsumsjonslogg = subsumsjonslogg
+            regelverkslogg = regelverkslogg
         )
     }
 
@@ -243,7 +244,7 @@ class Søknad(
         internal val behandlingsporing = Behandlingsporing.Arbeidsgiver(orgnummer)
         internal val dokumentsporing = Dokumentsporing.tilkommenInntektFraSøknad(metadata.meldingsreferanseId)
 
-        internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, arbeidsgiver: Arbeidsgiver, subsumsjonslogg: Subsumsjonslogg, eksisterendeVedtaksperioder: List<Periode>): Vedtaksperiode? {
+        internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, arbeidsgiver: Arbeidsgiver, regelverkslogg: Regelverkslogg, eksisterendeVedtaksperioder: List<Periode>): Vedtaksperiode? {
             val overlapp = eksisterendeVedtaksperioder.mapNotNull { it.overlappendePeriode(periode) }
             if (overlapp.isNotEmpty()) {
                 aktivitetslogg.varsel(`Tilkommen inntekt som ikke støttes`)
@@ -260,7 +261,7 @@ class Søknad(
                 inntektsendringer = inntektstidslinje,
                 dokumentsporing = dokumentsporing,
                 sykmeldingsperiode = periode,
-                subsumsjonslogg = subsumsjonslogg
+                regelverkslogg = regelverkslogg
             )
         }
     }

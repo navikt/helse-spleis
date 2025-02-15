@@ -1,16 +1,16 @@
 package no.nav.helse.spleis
 
 import com.github.navikt.tbd_libs.test_support.TestDataSource
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
+import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.MeldingsreferanseId

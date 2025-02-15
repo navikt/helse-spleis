@@ -1,10 +1,8 @@
 package no.nav.helse.etterlevelse
 
 enum class KontekstType {
-    Fødselsnummer,
     Organisasjonsnummer,
-    Vedtaksperiode,
-    Behandling
+    Vedtaksperiode
 }
 
 data class Subsumsjonskontekst(

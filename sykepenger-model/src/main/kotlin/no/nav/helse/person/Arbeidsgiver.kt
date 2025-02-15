@@ -2,16 +2,15 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.UbrukteRefusjonsopplysningerUtDto
-import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
-import no.nav.helse.etterlevelse.KontekstType
-import no.nav.helse.etterlevelse.Subsumsjonskontekst
+import no.nav.helse.etterlevelse.ArbeidsgiverSubsumsjonslogg
+import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
@@ -113,9 +112,9 @@ internal class Arbeidsgiver private constructor(
     private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
     private val ubrukteRefusjonsopplysninger: Refusjonsservitør,
     private val yrkesaktivitet: Yrkesaktivitet,
-    private val subsumsjonslogg: Subsumsjonslogg
+    private val regelverkslogg: Regelverkslogg
 ) : Aktivitetskontekst, UtbetalingObserver {
-    internal constructor(person: Person, yrkesaktivitet: Yrkesaktivitet, subsumsjonslogg: Subsumsjonslogg) : this(
+    internal constructor(person: Person, yrkesaktivitet: Yrkesaktivitet, regelverkslogg: Regelverkslogg) : this(
         person = person,
         organisasjonsnummer = yrkesaktivitet.identifikator(),
         id = UUID.randomUUID(),
@@ -128,7 +127,7 @@ internal class Arbeidsgiver private constructor(
         feriepengeutbetalinger = mutableListOf(),
         ubrukteRefusjonsopplysninger = Refusjonsservitør(),
         yrkesaktivitet = yrkesaktivitet,
-        subsumsjonslogg = subsumsjonslogg
+        regelverkslogg = regelverkslogg
     )
 
     init {
@@ -295,7 +294,7 @@ internal class Arbeidsgiver private constructor(
             person: Person,
             alder: Alder,
             dto: ArbeidsgiverInnDto,
-            subsumsjonslogg: Subsumsjonslogg,
+            regelverkslogg: Regelverkslogg,
             grunnlagsdata: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>
         ): Arbeidsgiver {
             val vedtaksperioder = mutableListOf<Vedtaksperiode>()
@@ -317,7 +316,7 @@ internal class Arbeidsgiver private constructor(
                     .toMutableList(),
                 ubrukteRefusjonsopplysninger = Refusjonsservitør.gjenopprett(dto.ubrukteRefusjonsopplysninger),
                 yrkesaktivitet = dto.organisasjonsnummer.tilYrkesaktivitet(),
-                subsumsjonslogg = subsumsjonslogg
+                regelverkslogg = regelverkslogg
             )
             val utbetalingerMap = utbetalinger.associateBy(Utbetaling::id)
             vedtaksperioder.addAll(dto.vedtaksperioder.map {
@@ -325,7 +324,7 @@ internal class Arbeidsgiver private constructor(
                     person,
                     arbeidsgiver,
                     it,
-                    subsumsjonslogg,
+                    regelverkslogg,
                     grunnlagsdata,
                     utbetalingerMap
                 )
@@ -335,7 +334,7 @@ internal class Arbeidsgiver private constructor(
                     person,
                     arbeidsgiver,
                     it,
-                    subsumsjonslogg,
+                    regelverkslogg,
                     grunnlagsdata,
                     utbetalingerMap
                 )
@@ -537,7 +536,7 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg: IAktivitetslogg
     ) {
         aktivitetslogg.kontekst(this)
-        val vedtaksperiode = tilkommenInntekt.lagVedtaksperiode(aktivitetslogg, person, this, subsumsjonslogg, vedtaksperioder.map { it.periode }) ?: return
+        val vedtaksperiode = tilkommenInntekt.lagVedtaksperiode(aktivitetslogg, person, this, regelverkslogg, vedtaksperioder.map { it.periode }) ?: return
         registrerNyVedtaksperiode(vedtaksperiode)
         vedtaksperiode.håndterTilkommenInntekt(tilkommenInntekt, aktivitetslogg)
     }
@@ -550,7 +549,7 @@ internal class Arbeidsgiver private constructor(
     ) {
         val noenHarHåndtert = énHarHåndtert(søknad) { håndterKorrigertSøknad(søknad, aktivitetslogg) }
         if (noenHarHåndtert && !søknad.delvisOverlappende) return
-        val vedtaksperiode = søknad.lagVedtaksperiode(aktivitetslogg, person, this, subsumsjonslogg)
+        val vedtaksperiode = søknad.lagVedtaksperiode(aktivitetslogg, person, this, regelverkslogg)
         if (søknad.delvisOverlappende || aktivitetslogg.harFunksjonelleFeilEllerVerre()) {
             registrerForkastetVedtaksperiode(vedtaksperiode, søknad, aktivitetslogg)
             return
@@ -1043,7 +1042,7 @@ internal class Arbeidsgiver private constructor(
         skjæringstidspunkt: LocalDate?,
         inntekt: FaktaavklartInntekt,
         aktivitetslogg: IAktivitetslogg,
-        subsumsjonsloggMedInntektsmeldingkontekst: BehandlingSubsumsjonslogg,
+        subsumsjonslogg: Subsumsjonslogg,
         overstyring: Revurderingseventyr?
     ) {
         val inntektoverstyring = skjæringstidspunkt?.let {
@@ -1053,7 +1052,7 @@ internal class Arbeidsgiver private constructor(
                 this.organisasjonsnummer,
                 inntekt,
                 aktivitetslogg,
-                subsumsjonsloggMedInntektsmeldingkontekst
+                subsumsjonslogg
             )
         }
         val overstyringFraInntektsmelding = tidligsteEventyr(inntektoverstyring, overstyring) ?: return
@@ -1061,12 +1060,10 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun subsumsjonslogg() =
-        BehandlingSubsumsjonslogg(
-            parent = subsumsjonslogg,
-            kontekster = listOf(
-                Subsumsjonskontekst(KontekstType.Fødselsnummer, person.personidentifikator.toString()),
-                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer)
-            )
+        ArbeidsgiverSubsumsjonslogg(
+            regelverkslogg = regelverkslogg,
+            fødselsnummer = person.fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer
         )
 
     internal fun lagreTidsnærInntektsmelding(

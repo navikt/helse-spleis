@@ -9,6 +9,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.serialisering.PersonUtDto
+import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
@@ -95,14 +96,14 @@ class Person private constructor(
     private val opprettet: LocalDateTime,
     internal val infotrygdhistorikk: Infotrygdhistorikk,
     internal val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
-    private val jurist: Subsumsjonslogg,
+    private val regelverkslogg: Regelverkslogg,
     private val tidligereBehandlinger: List<Person> = emptyList(),
     internal val regler: ArbeidsgiverRegler = NormalArbeidstaker,
     internal val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering = MinimumSykdomsgradsvurdering()
 ) : Aktivitetskontekst {
     companion object {
         fun gjenopprett(
-            subsumsjonslogg: Subsumsjonslogg,
+            regelverkslogg: Regelverkslogg,
             dto: PersonInnDto,
             tidligereBehandlinger: List<Person> = emptyList()
         ): Person {
@@ -122,11 +123,11 @@ class Person private constructor(
                     grunnlagsdataMap
                 ),
                 minimumSykdomsgradsvurdering = MinimumSykdomsgradsvurdering.gjenopprett(dto.minimumSykdomsgradVurdering),
-                jurist = subsumsjonslogg,
+                regelverkslogg = regelverkslogg,
                 tidligereBehandlinger = tidligereBehandlinger
             )
             arbeidsgivere.addAll(dto.arbeidsgivere.map {
-                Arbeidsgiver.gjenopprett(person, alder, it, subsumsjonslogg, grunnlagsdataMap)
+                Arbeidsgiver.gjenopprett(person, alder, it, regelverkslogg, grunnlagsdataMap)
             })
             return person
         }
@@ -135,7 +136,7 @@ class Person private constructor(
     internal constructor(
         personidentifikator: Personidentifikator,
         alder: Alder,
-        subsumsjonslogg: Subsumsjonslogg,
+        regelverkslogg: Regelverkslogg,
         regler: ArbeidsgiverRegler
     ) : this(
         personidentifikator,
@@ -145,7 +146,7 @@ class Person private constructor(
         LocalDateTime.now(),
         Infotrygdhistorikk(),
         VilkårsgrunnlagHistorikk(),
-        subsumsjonslogg,
+        regelverkslogg,
         emptyList<Person>(),
         regler = regler
     )
@@ -153,8 +154,8 @@ class Person private constructor(
     constructor(
         personidentifikator: Personidentifikator,
         alder: Alder,
-        jurist: Subsumsjonslogg
-    ) : this(personidentifikator, alder, jurist, NormalArbeidstaker)
+        regelverkslogg: Regelverkslogg
+    ) : this(personidentifikator, alder, regelverkslogg, NormalArbeidstaker)
 
     internal val arbeidsgivere: List<Arbeidsgiver> get() = _arbeidsgivere.toList()
 
@@ -609,7 +610,7 @@ class Person private constructor(
         }
 
     private fun MutableList<Arbeidsgiver>.finnEllerOpprett(yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
-        finn(yrkesaktivitet) ?: Arbeidsgiver(this@Person, yrkesaktivitet, jurist).also { arbeidsgiver ->
+        finn(yrkesaktivitet) ?: Arbeidsgiver(this@Person, yrkesaktivitet, regelverkslogg).also { arbeidsgiver ->
             aktivitetslogg.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", yrkesaktivitet)
             add(arbeidsgiver)
         }

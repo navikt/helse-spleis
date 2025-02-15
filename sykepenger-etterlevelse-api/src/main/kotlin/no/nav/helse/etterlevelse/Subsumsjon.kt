@@ -1,6 +1,25 @@
 package no.nav.helse.etterlevelse
 
 import java.time.LocalDate
+import java.util.UUID
+
+sealed interface Regelverksporing {
+    val subsumsjon: Subsumsjon
+
+    data class Behandlingsporing(
+        val fødselsnummer: String,
+        val organisasjonsnummer: String,
+        val vedtaksperiodeId: UUID,
+        val behandlingId: UUID,
+        override val subsumsjon: Subsumsjon
+    ) : Regelverksporing
+
+    data class Arbeidsgiversporing(
+        val fødselsnummer: String,
+        val organisasjonsnummer: String,
+        override val subsumsjon: Subsumsjon
+    ) : Regelverksporing
+}
 
 data class Subsumsjon(
     val type: Subsumsjonstype,
@@ -101,6 +120,13 @@ data class Subsumsjon(
     override fun toString(): String {
         return "$lovreferanse [$utfall]"
     }
+}
+
+fun Subsumsjon.erTomPeriode(): Boolean {
+    if (type != Subsumsjon.Subsumsjonstype.PERIODISERT) return false
+    if ("perioder" !in output) return true
+    val perioder = output["perioder"] as List<*>
+    return perioder.isEmpty()
 }
 
 data class Lovreferanse(val lovverk: String, val paragraf: Paragraf?, val ledd: Ledd?, val punktum: Punktum?, val bokstav: Bokstav?) {

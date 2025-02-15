@@ -3,8 +3,7 @@ package no.nav.helse.spleis
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.Personidentifikator
-import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
+import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
@@ -359,7 +358,7 @@ internal class HendelseMediator(
     }
 
     override fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, context: MessageContext) {
-        person(personidentifikator, message, emptySet(), EmptyLog, null) { person ->
+        person(personidentifikator, message, emptySet(), Regelverkslogg.EmptyLog, null) { person ->
             val dto = person.dto()
             val avstemmer = Avstemmer(dto)
             context.publish(avstemmer.tilJsonMessage().toJson().also {
@@ -545,14 +544,14 @@ internal class HendelseMediator(
         ferdigstill(context, personMediator, subsumsjonMediator, datadelingMediator, message, aktivitetslogg)
     }
 
-    private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, historiskeFolkeregisteridenter: Set<Personidentifikator>, subsumsjonslogg: Subsumsjonslogg, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
+    private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, historiskeFolkeregisteridenter: Set<Personidentifikator>, regelverkslogg: Regelverkslogg, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
         personDao.hentEllerOpprettPerson(
-            subsumsjonslogg = subsumsjonslogg,
+            regelverkslogg = regelverkslogg,
             personidentifikator = personidentifikator,
             historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
             message = message,
             hendelseRepository = hendelseRepository,
-            lagNyPerson = { personopplysninger?.person(subsumsjonslogg) },
+            lagNyPerson = { personopplysninger?.person(regelverkslogg) },
             håndterPerson = { person -> person.also(block) }
         )
     }

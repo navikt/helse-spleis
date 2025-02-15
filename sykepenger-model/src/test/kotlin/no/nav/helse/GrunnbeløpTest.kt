@@ -1,13 +1,11 @@
 package no.nav.helse
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
-import no.nav.helse.etterlevelse.KontekstType
-import no.nav.helse.etterlevelse.Subsumsjonskontekst
+import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-51 ledd 2`
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -21,13 +19,7 @@ import org.junit.jupiter.api.assertThrows
 
 internal class GrunnbeløpTest {
 
-    private val jurist = BehandlingSubsumsjonslogg(
-        EmptyLog, listOf(
-        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    )
-    )
+    private val subsumsjonslogg = BehandlingSubsumsjonslogg(EmptyLog, "fnr", "orgnr", UUID.randomUUID(), UUID.randomUUID())
 
     @Test
     fun dagsats() {
@@ -166,7 +158,7 @@ internal class GrunnbeløpTest {
             skjæringstidspunkt = skjæringstidspunkt,
             inntekt = inntekt,
             alder = alder,
-            subsumsjonslogg = jurist
+            subsumsjonslogg = subsumsjonslogg
         )
     )
 
@@ -180,7 +172,7 @@ internal class GrunnbeløpTest {
             skjæringstidspunkt = skjæringstidspunkt,
             inntekt = inntekt,
             alder = alder,
-            subsumsjonslogg = jurist
+            subsumsjonslogg = subsumsjonslogg
         )
     )
 
@@ -193,7 +185,7 @@ internal class GrunnbeløpTest {
         skjæringstidspunkt = skjæringstidspunkt,
         inntekt = inntekt,
         alder = alder,
-        subsumsjonslogg = jurist
+        subsumsjonslogg = subsumsjonslogg
     )
     )
 

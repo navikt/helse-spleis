@@ -6,8 +6,8 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.etterlevelse.KontekstType
-import no.nav.helse.etterlevelse.Subsumsjon
-import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.Regelverkslogg
+import no.nav.helse.etterlevelse.Regelverksporing
 import no.nav.helse.spleis.SubsumsjonMediator.SubsumsjonEvent.Companion.paragrafVersjonFormaterer
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -27,7 +27,7 @@ interface Subsumsjonproducer {
 internal class SubsumsjonMediator(
     private val message: HendelseMessage,
     private val versjonAvKode: String
-) : Subsumsjonslogg {
+) : Regelverkslogg {
 
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -36,37 +36,30 @@ internal class SubsumsjonMediator(
 
     private val subsumsjoner = mutableListOf<SubsumsjonEvent>()
 
-    override fun logg(subsumsjon: Subsumsjon) {
-        bekreftAtSubsumsjonerHarKnytningTilBehandling(subsumsjon)
+    override fun logg(sporing: Regelverksporing) {
+        // bakoverkompatibilitet
+        val kontekster = when (sporing) {
+            is Regelverksporing.Arbeidsgiversporing -> mapOf(
+                KontekstType.Organisasjonsnummer to listOf(sporing.organisasjonsnummer)
+            )
+            is Regelverksporing.Behandlingsporing -> mapOf(
+                KontekstType.Organisasjonsnummer to listOf(sporing.organisasjonsnummer),
+                KontekstType.Vedtaksperiode to listOf(sporing.vedtaksperiodeId.toString())
+            )
+        }
         subsumsjoner.add(SubsumsjonEvent(
-            sporing = subsumsjon.kontekster
-                .filterNot { it.type == KontekstType.Fødselsnummer }
-                .groupBy({ it.type }) { it.verdi },
-            lovverk = subsumsjon.lovverk,
-            ikrafttredelse = paragrafVersjonFormaterer.format(subsumsjon.versjon),
-            paragraf = subsumsjon.paragraf.ref,
-            ledd = subsumsjon.ledd?.nummer,
-            punktum = subsumsjon.punktum?.nummer,
-            bokstav = subsumsjon.bokstav?.ref,
-            input = subsumsjon.input,
-            output = subsumsjon.output,
-            utfall = subsumsjon.utfall.name
+            sporing = kontekster,
+            lovverk = sporing.subsumsjon.lovverk,
+            ikrafttredelse = paragrafVersjonFormaterer.format(sporing.subsumsjon.versjon),
+            paragraf = sporing.subsumsjon.paragraf.ref,
+            ledd = sporing.subsumsjon.ledd?.nummer,
+            punktum = sporing.subsumsjon.punktum?.nummer,
+            bokstav = sporing.subsumsjon.bokstav?.ref,
+            input = sporing.subsumsjon.input,
+            output = sporing.subsumsjon.output,
+            utfall = sporing.subsumsjon.utfall.name
         )
         )
-    }
-
-    private fun bekreftAtSubsumsjonerHarKnytningTilBehandling(subsumsjon: Subsumsjon) {
-        val kritiskeTyper = setOf(KontekstType.Fødselsnummer, KontekstType.Organisasjonsnummer)
-        check(kritiskeTyper.all { kritiskType ->
-            subsumsjon.kontekster.count { it.type == kritiskType } == 1
-        }) {
-            "en av $kritiskeTyper mangler, eller forekommer mer enn én gang. Følgende kontekster er registert:\n${subsumsjon.kontekster.joinToString(separator = "\n")}\nSubsumsjonen: $subsumsjon"
-        }
-        // todo: sjekker for mindre enn 1 også ettersom noen subsumsjoner skjer på arbeidsgivernivå. det burde vi forsøke å flytte/fikse slik at
-        // alt kan subsummeres i kontekst av en behandling.
-        check(subsumsjon.kontekster.count { it.type == KontekstType.Vedtaksperiode } <= 1) {
-            "det er flere kontekster av ${KontekstType.Vedtaksperiode}:\n${subsumsjon.kontekster.joinToString(separator = "\n")}"
-        }
     }
 
     fun ferdigstill(producer: Subsumsjonproducer) {
@@ -117,10 +110,8 @@ internal class SubsumsjonMediator(
     }
 
     private fun KontekstType.tilEkstern() = when (this) {
-        KontekstType.Fødselsnummer -> "fodselsnummer"
         KontekstType.Organisasjonsnummer -> "organisasjonsnummer"
         KontekstType.Vedtaksperiode -> "vedtaksperiode"
-        KontekstType.Behandling -> "behandling"
     }
 
     data class SubsumsjonEvent(

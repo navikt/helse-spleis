@@ -5,9 +5,7 @@ import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
-import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Paragraf
-import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -32,14 +30,8 @@ import org.junit.jupiter.api.assertThrows
 
 internal class ArbeidsgiverInntektsopplysningTest {
 
-    private val subsumsjonslogg = SubsumsjonsListLog()
-    private val jurist = BehandlingSubsumsjonslogg(
-        subsumsjonslogg, listOf(
-        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    )
-    )
+    private val regelverkslogg = SubsumsjonsListLog()
+    private val subsumsjonslogg = BehandlingSubsumsjonslogg(regelverkslogg, "fnr", "orgnr", UUID.randomUUID(), UUID.randomUUID())
 
     @Test
     fun `overstyr inntekter`() {
@@ -152,10 +144,10 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, skattSykepengegrunnlag(UUID.randomUUID(), skjæringstidspunkt, emptyList()), null, null)
 
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
-        val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", jurist)
+        val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", subsumsjonslogg)
         assertEquals(a1Opplysning, aktive.single())
         assertEquals(a2Opplysning, deaktiverte.single())
-        SubsumsjonInspektør(subsumsjonslogg).assertOppfylt(
+        SubsumsjonInspektør(regelverkslogg).assertOppfylt(
             paragraf = Paragraf.PARAGRAF_8_15,
             versjon = LocalDate.of(1998, 12, 18),
             ledd = null,
@@ -180,10 +172,10 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val opprinneligAktive = listOf(a1Opplysning)
         val opprinneligDeaktiverte = listOf(a2Opplysning)
 
-        val (deaktiverte, aktive) = opprinneligDeaktiverte.aktiver(opprinneligAktive, "a2", "Denne må tilbake", jurist)
+        val (deaktiverte, aktive) = opprinneligDeaktiverte.aktiver(opprinneligAktive, "a2", "Denne må tilbake", subsumsjonslogg)
         assertTrue(listOf(a1Opplysning, a2Opplysning).funksjoneltLik(aktive))
         assertEquals(0, deaktiverte.size)
-        SubsumsjonInspektør(subsumsjonslogg).assertIkkeOppfylt(
+        SubsumsjonInspektør(regelverkslogg).assertIkkeOppfylt(
             paragraf = Paragraf.PARAGRAF_8_15,
             versjon = LocalDate.of(1998, 12, 18),
             ledd = null,

@@ -8,14 +8,14 @@ import java.sql.Connection
 import java.sql.ResultSet
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.system.measureTimeMillis
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
+import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.serde.tilPersonData
@@ -89,7 +89,7 @@ private fun migrateV2Task(arbeidId: String, size: Int) {
                 val time = measureTimeMillis {
                     val dto = SerialisertPerson(data).tilPersonDto()
                     check(dto.fødselsnummer.toLong() == fnr) { "fnr samsvarer ikke" }
-                    val gjenopprettetPerson = Person.gjenopprett(EmptyLog, dto)
+                    val gjenopprettetPerson = Person.gjenopprett(Regelverkslogg.EmptyLog, dto)
                     val resultat = gjenopprettetPerson.dto().tilPersonData().tilSerialisertPerson()
                     check(
                         1 == prepareStatement("UPDATE person SET skjema_versjon=?, data=? WHERE fnr=?;").use { stmt ->

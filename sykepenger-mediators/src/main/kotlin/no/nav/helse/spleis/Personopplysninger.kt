@@ -3,7 +3,7 @@ package no.nav.helse.spleis
 import java.time.LocalDate
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
-import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.person.Person
 
 internal class Personopplysninger internal constructor(
@@ -16,5 +16,5 @@ internal class Personopplysninger internal constructor(
         dødsdato: LocalDate?
     ) : this(personidentifikator, Alder(fødselsdato, dødsdato))
 
-    fun person(subsumsjonslogg: Subsumsjonslogg) = Person(personidentifikator, alder, subsumsjonslogg)
+    fun person(regelverkslogg: Regelverkslogg) = Person(personidentifikator, alder, regelverkslogg)
 }

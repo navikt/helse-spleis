@@ -1,10 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.util.UUID
+import java.util.*
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
-import no.nav.helse.etterlevelse.KontekstType
-import no.nav.helse.etterlevelse.Subsumsjonskontekst
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
+import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
@@ -29,13 +27,7 @@ internal class SykdomsgradfilterTest {
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
     private lateinit var aktivitetslogg: Aktivitetslogg
 
-    private val jurist = BehandlingSubsumsjonslogg(
-        EmptyLog, listOf(
-        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    )
-    )
+    private val subsumsjonslogg = BehandlingSubsumsjonslogg(EmptyLog, "fnr", "orgnr", UUID.randomUUID(), UUID.randomUUID())
 
     @Test
     fun `sykdomsgrad over 20 prosent`() {
@@ -144,7 +136,7 @@ internal class SykdomsgradfilterTest {
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode): List<Utbetalingstidslinje> {
         aktivitetslogg = Aktivitetslogg()
-        val resultat = Sykdomsgradfilter(MinimumSykdomsgradsvurdering()).filter(tidslinjer, periode, aktivitetslogg, jurist)
+        val resultat = Sykdomsgradfilter(MinimumSykdomsgradsvurdering()).filter(tidslinjer, periode, aktivitetslogg, subsumsjonslogg)
         inspektør = resultat.inspektør(0)
         return resultat
     }

@@ -35,6 +35,16 @@ import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.etterlevelse.Tidslinjedag.Companion.dager
 
+interface Regelverkslogg {
+    fun logg(sporing: Regelverksporing)
+
+    companion object {
+        val EmptyLog = object : Regelverkslogg {
+            override fun logg(sporing: Regelverksporing) {}
+        }
+    }
+}
+
 interface Subsumsjonslogg {
 
     fun logg(subsumsjon: Subsumsjon)

@@ -1,13 +1,13 @@
 package no.nav.helse.dsl
 
-import no.nav.helse.etterlevelse.Subsumsjon
-import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.Regelverkslogg
+import no.nav.helse.etterlevelse.Regelverksporing
 
-class SubsumsjonsListLog : Subsumsjonslogg {
-    private val oppsamlet = mutableListOf<Subsumsjon>()
-    val subsumsjoner get() = oppsamlet.toList()
+class SubsumsjonsListLog : Regelverkslogg {
+    private val oppsamlet = mutableListOf<Regelverksporing>()
+    val regelverksporinger get() = oppsamlet.toList()
 
-    override fun logg(subsumsjon: Subsumsjon) {
-        oppsamlet.add(subsumsjon)
+    override fun logg(sporing: Regelverksporing) {
+        oppsamlet.add(sporing)
     }
 }

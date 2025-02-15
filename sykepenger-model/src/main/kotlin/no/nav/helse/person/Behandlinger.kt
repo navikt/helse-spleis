@@ -12,9 +12,7 @@ import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.BehandlingendringUtDto
 import no.nav.helse.dto.serialisering.BehandlingerUtDto
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
-import no.nav.helse.etterlevelse.KontekstType
-import no.nav.helse.etterlevelse.Subsumsjonskontekst
-import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -232,15 +230,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
     }
 
-    internal fun subsumsjonslogg(subsumsjonslogg: Subsumsjonslogg, vedtaksperiodeId: UUID, fødselsnummer: String, organisasjonsnummer: String) =
+    internal fun subsumsjonslogg(regelverkslogg: Regelverkslogg, vedtaksperiodeId: UUID, fødselsnummer: String, organisasjonsnummer: String) =
         BehandlingSubsumsjonslogg(
-            parent = subsumsjonslogg,
-            kontekster = listOf(
-                Subsumsjonskontekst(KontekstType.Fødselsnummer, fødselsnummer),
-                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer),
-                Subsumsjonskontekst(KontekstType.Vedtaksperiode, vedtaksperiodeId.toString()),
-                Subsumsjonskontekst(KontekstType.Behandling, behandlinger.last().id.toString())
-            )
+            regelverkslogg = regelverkslogg,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlinger.last().id
         )
 
     internal fun hendelseIder() = behandlinger.dokumentsporing

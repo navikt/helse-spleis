@@ -12,11 +12,10 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
-import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Paragraf
+import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
-import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.etterlevelse.annetLedd
@@ -60,13 +59,7 @@ internal class InntektsgrunnlagTest {
         private val fødseldato67år = 1.februar(1954)
     }
 
-    private val jurist = BehandlingSubsumsjonslogg(
-        EmptyLog, listOf(
-        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-    )
-    )
+    private val subsumsjonslogg = BehandlingSubsumsjonslogg(Regelverkslogg.EmptyLog, "fnr", "orgnr", UUID.randomUUID(), UUID.randomUUID())
 
     @Test
     fun `minimum inntekt tom 67 år - må være 0,5 G`() {
@@ -130,7 +123,7 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = (forLitenInntekt).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, EmptyLog)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAV, startDato = 1.januar)
-        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist)
+        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, subsumsjonslogg)
         assertEquals(0, resultat.single().inspektør.avvistDagTeller)
     }
 
@@ -143,7 +136,7 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = (forLitenInntekt).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, EmptyLog)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
-        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
+        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, subsumsjonslogg).single()
         assertEquals(41, resultat.inspektør.avvistDagTeller)
         assertTrue(
             (1.januar(2021) til 1.februar(2021))
@@ -170,7 +163,7 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = (`1G`).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, EmptyLog)
 
         val tidslinje = tidslinjeOf(20.NAVDAGER, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
-        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
+        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, subsumsjonslogg).single()
         assertEquals(20, resultat.inspektør.avvistDagTeller)
         assertTrue(resultat.inspektør.avvistedatoer.all { dato ->
             resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
@@ -186,7 +179,7 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = (`1G`).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, EmptyLog)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAVDAGER, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
-        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
+        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, subsumsjonslogg).single()
         assertEquals(27, resultat.inspektør.avvistDagTeller)
         assertTrue(resultat.inspektør.avvistedatoer.all { dato ->
             resultat.inspektør.begrunnelse(dato).single() == Begrunnelse.MinimumInntektOver67
@@ -202,7 +195,7 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = (`1G`).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, EmptyLog)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAVDAGER, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
-        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til 31.januar(2021), skjæringstidspunkt til skjæringstidspunkt, jurist).single()
+        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til 31.januar(2021), skjæringstidspunkt til skjæringstidspunkt, subsumsjonslogg).single()
         assertEquals(0, resultat.inspektør.avvistDagTeller)
     }
 
@@ -265,7 +258,7 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = (inntekt).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
-        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
+        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, subsumsjonslogg).single()
         assertEquals(0, resultat.inspektør.avvistDagTeller)
     }
 
@@ -278,7 +271,7 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = (halvG - 1.daglig).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt)
 
         val tidslinje = tidslinjeOf(28.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
-        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
+        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, subsumsjonslogg).single()
         assertEquals(20, resultat.inspektør.avvistDagTeller)
         assertTrue(
             (1.februar(2021) til 1.februar(2021))
@@ -305,7 +298,7 @@ internal class InntektsgrunnlagTest {
         val sykepengegrunnlag = (`2G` - 1.daglig).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt)
 
         val tidslinje = tidslinjeOf(27.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
-        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
+        val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, subsumsjonslogg).single()
         assertEquals(19, resultat.inspektør.avvistDagTeller)
         assertTrue(
             (2.februar(2021) til 28.februar(2021))

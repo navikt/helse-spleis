@@ -10,8 +10,7 @@ import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
 import java.net.URI
 import java.util.UUID
-import no.nav.helse.etterlevelse.KontekstType
-import no.nav.helse.etterlevelse.Subsumsjonskontekst
+import no.nav.helse.etterlevelse.Regelverksporing
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 2`
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -48,14 +47,8 @@ internal class SubsumsjonsmeldingTest {
         val subsumsjonen = `§ 8-17 ledd 2`(
             listOf(1.januar(2018).somPeriode()),
             MutableList(31) { Tidslinjedag((it + 1).januar, "NAVDAG", 100) }
-        ).copy(
-            kontekster = listOf(
-                Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-                Subsumsjonskontekst(KontekstType.Vedtaksperiode, "vedtaksperiodeid"),
-            )
         )
-        subsumsjonMediator.logg(subsumsjonen)
+        subsumsjonMediator.logg(Regelverksporing.Behandlingsporing("fnr", "orgnr", UUID.randomUUID(), UUID.randomUUID(), subsumsjonen))
         val subsumsjoner = buildList<JsonNode> {
             subsumsjonMediator.ferdigstill(object : Subsumsjonproducer {
                 override fun send(fnr: String, melding: String) {

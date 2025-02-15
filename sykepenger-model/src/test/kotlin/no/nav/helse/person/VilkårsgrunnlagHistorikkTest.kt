@@ -1,17 +1,15 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.desember
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
-import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
-import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -47,15 +45,8 @@ import org.junit.jupiter.api.Test
 internal class VilkårsgrunnlagHistorikkTest {
     private lateinit var historikk: VilkårsgrunnlagHistorikk
     private val inspektør get() = Vilkårgrunnlagsinspektør(historikk.view())
-    private val subsumsjonslogg = SubsumsjonsListLog()
-    private val jurist = BehandlingSubsumsjonslogg(
-        subsumsjonslogg,
-        listOf(
-            Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
-            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-            Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
-        )
-    )
+    private val regelverkslogg = SubsumsjonsListLog()
+    private val subsumsjonslogg = BehandlingSubsumsjonslogg(regelverkslogg, "fnr", "orgnr", UUID.randomUUID(), UUID.randomUUID())
 
     companion object {
         private const val ORGNR = "123456789"
@@ -139,7 +130,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
-            jurist
+            subsumsjonslogg
         )
         historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
@@ -161,8 +152,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
 
-        vilkårsgrunnlag.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, jurist)
-        SubsumsjonInspektør(subsumsjonslogg).assertVurdert(paragraf = PARAGRAF_8_2, ledd = 1.ledd, versjon = 12.juni(2020))
+        vilkårsgrunnlag.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, subsumsjonslogg)
+        SubsumsjonInspektør(regelverkslogg).assertVurdert(paragraf = PARAGRAF_8_2, ledd = 1.ledd, versjon = 12.juni(2020))
     }
 
     @Test
@@ -191,12 +182,12 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag1.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
-            jurist
+            subsumsjonslogg
         )
         vilkårsgrunnlag2.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
-            jurist
+            subsumsjonslogg
         )
 
         historikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
@@ -236,8 +227,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
 
-        vilkårsgrunnlag1.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, jurist)
-        vilkårsgrunnlag2.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, jurist)
+        vilkårsgrunnlag1.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, subsumsjonslogg)
+        vilkårsgrunnlag2.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, subsumsjonslogg)
         historikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
         historikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
@@ -260,7 +251,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
-            jurist
+            subsumsjonslogg
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
@@ -284,7 +275,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
-            jurist
+            subsumsjonslogg
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
@@ -308,7 +299,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag1.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
-            jurist
+            subsumsjonslogg
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -323,12 +314,12 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag2.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
-            jurist
+            subsumsjonslogg
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, jurist).single()
+        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, subsumsjonslogg).single()
         assertEquals(8, resultat.filterIsInstance<Utbetalingsdag.NavDag>().size)
     }
 
@@ -348,14 +339,14 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
             10.månedlig.sykepengegrunnlag,
-            jurist
+            subsumsjonslogg
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertFalse(grunnlagsdataInspektør.vurdertOk)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, jurist).single()
+        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, subsumsjonslogg).single()
         resultat.filterIsInstance<Utbetalingsdag.AvvistDag>().let { avvisteDager ->
             assertEquals(8, avvisteDager.size)
             avvisteDager.forEach {
@@ -382,14 +373,14 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
             10.månedlig.inntektsgrunnlag(fødselsdato.alder),
-            jurist
+            subsumsjonslogg
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertFalse(grunnlagsdataInspektør.vurdertOk)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, jurist).single()
+        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, subsumsjonslogg).single()
 
         resultat.filterIsInstance<Utbetalingsdag.AvvistDag>().let { avvisteDager ->
             assertEquals(8, avvisteDager.size)

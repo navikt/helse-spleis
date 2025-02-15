@@ -1,24 +1,17 @@
 package no.nav.helse.etterlevelse
 
-import java.util.*
-
-class BehandlingSubsumsjonslogg(
+class ArbeidsgiverSubsumsjonslogg(
     private val regelverkslogg: Regelverkslogg,
     private val fødselsnummer: String,
-    private val organisasjonsnummer: String,
-    private val vedtaksperiodeId: UUID,
-    private val behandlingId: UUID
+    private val organisasjonsnummer: String
 ) : Subsumsjonslogg {
 
     override fun logg(subsumsjon: Subsumsjon) {
         if (subsumsjon.erTomPeriode()) return
-        regelverkslogg.logg(Regelverksporing.Behandlingsporing(
+        regelverkslogg.logg(Regelverksporing.Arbeidsgiversporing(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
             subsumsjon = subsumsjon
         ))
     }
 }
-
