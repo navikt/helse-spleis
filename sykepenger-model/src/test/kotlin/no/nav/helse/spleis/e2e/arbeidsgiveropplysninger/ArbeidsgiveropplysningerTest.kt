@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -72,8 +71,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
 
@@ -100,32 +97,18 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             // arbeidsgiver har sendt en ny portal-inntektsmelding (les: IKKE en "korrigert arbeidsgiveropplysning") på auu-perioden
-            fun inntektsmeldingForAuu() {
-                håndterArbeidsgiveropplysninger(
-                    vedtaksperiodeId = 4.vedtaksperiode,
-                    arbeidsgiverperioder = listOf(
-                        10.september til 13.september,
-                        23.september til 30.september,
-                        10.oktober til 13.oktober
-                    ),
-                    begrunnelseForReduksjonEllerIkkeUtbetalt = "BeskjedGittForSent"
-                )
-            }
-            assertForventetFeil(
-                forklaring = "kaster exception: Behandling ...... burde vært ferdig behandlet, men står i tilstand UberegnetOmgjøring",
-                nå = {
-                    assertThrows<IllegalStateException> {
-                        inntektsmeldingForAuu()
-                    }
-                },
-                ønsket = {
-                    assertDoesNotThrow {
-                        inntektsmeldingForAuu()
-                    }
-                    assertSisteTilstand(4.vedtaksperiode, AVVENTER_HISTORIKK)
-                    assertSisteTilstand(5.vedtaksperiode, AVVENTER_REVURDERING)
-                }
+            håndterArbeidsgiveropplysninger(
+                vedtaksperiodeId = 4.vedtaksperiode,
+                arbeidsgiverperioder = listOf(
+                    10.september til 13.september,
+                    23.september til 30.september,
+                    10.oktober til 13.oktober
+                ),
+                // det er begrunnelsen for reduksjon som skapte problem, ettersom det ble en error på aktivitetsloggen
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "BeskjedGittForSent"
             )
+            assertSisteTilstand(4.vedtaksperiode, AVVENTER_HISTORIKK)
+            assertSisteTilstand(5.vedtaksperiode, AVVENTER_REVURDERING)
         }
     }
 

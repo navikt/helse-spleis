@@ -481,7 +481,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndterArbeidsgiveropplysninger(eventyr: List<List<Revurderingseventyr>>, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Boolean {
         person.emitInntektsmeldingHåndtert(hendelse.metadata.meldingsreferanseId.id, id, arbeidsgiver.organisasjonsnummer)
         val tidligsteEventyr = eventyr.flatten().tidligsteEventyr()
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return true.also { forkast(hendelse, aktivitetslogg) }
+        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) forkast(hendelse, aktivitetslogg)
         if (tidligsteEventyr != null) person.igangsettOverstyring(tidligsteEventyr, aktivitetslogg)
         return true
     }
