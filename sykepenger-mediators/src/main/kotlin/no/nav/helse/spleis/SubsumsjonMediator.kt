@@ -85,10 +85,12 @@ internal class SubsumsjonMediator(
                 this["id"] = event.id
                 this["eventName"] = "subsumsjon"
                 this["tidsstempel"] = ZonedDateTime.now()
-                this["versjon"] = "1.0.0"
+                this["versjon"] = "1.1.0"
                 this["kilde"] = "spleis"
                 this["versjonAvKode"] = versjonAvKode
                 this["fodselsnummer"] = event.fødselsnummer
+                this["vedtaksperiodeId"] = event.vedtaksperiodeId
+                this["behandlingId"] = event.behandlingId
                 this["sporing"] = buildMap {
                     this["organisasjonsnummer"] = listOf(event.organisasjonsnummer)
                     if (event.vedtaksperiodeId != null) this["vedtaksperiode"] = listOf(event.vedtaksperiodeId.toString())

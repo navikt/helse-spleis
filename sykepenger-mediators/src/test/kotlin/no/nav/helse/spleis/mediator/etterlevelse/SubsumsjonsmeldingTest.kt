@@ -62,7 +62,7 @@ internal class SubsumsjonsmeldingTest {
     private val schema by lazy {
         JsonSchemaFactory
             .getInstance(SpecVersion.VersionFlag.V7)
-            .getSchema(URI("https://raw.githubusercontent.com/navikt/helse/c53bc453251b7878135f31d5d1070e5406ae4af1/subsumsjon/json-schema-1.0.0.json"))
+            .getSchema(URI("https://raw.githubusercontent.com/navikt/helse/6e2cd88991d8be659a179039b978aa91a0ff2092/subsumsjon/json-schema-1.0.0.json"))
     }
 
     private fun assertSubsumsjonsmelding(melding: JsonNode) {
