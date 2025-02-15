@@ -3,8 +3,6 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.etterlevelse.`§ 8-10 ledd 3`
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -94,8 +92,7 @@ class Inntektsmelding(
         aktivitetslogg.info("Lagrer inntekt på alternativ inntektsdato $inntektsdato")
     }
 
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonslogg: Subsumsjonslogg): LocalDate {
-        subsumsjonslogg.logg(`§ 8-10 ledd 3`(beregnetInntekt.årlig, beregnetInntekt.daglig))
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk): LocalDate {
         inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), inntektsdata.copy(dato = inntektsdato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
         return inntektsdato
     }

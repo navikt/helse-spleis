@@ -615,26 +615,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `§ 8-10 ledd 3 - årlig inntekt omregnet til daglig`() {
-        val inntekt = 260000.årlig
-        håndterSykmelding(januar)
-        håndterSøknad(januar)
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = inntekt,
-            førsteFraværsdag = 1.januar
-        )
-
-        SubsumsjonInspektør(regelverkslogg).assertBeregnet(
-            paragraf = PARAGRAF_8_10,
-            ledd = LEDD_3,
-            versjon = 1.januar(2020),
-            input = mapOf("årligInntekt" to 260000.0),
-            output = mapOf("dagligInntekt" to 1000.0)
-        )
-    }
-
-    @Test
     fun `§ 8-11 ledd 1 - yter ikke sykepenger i helgedager`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)

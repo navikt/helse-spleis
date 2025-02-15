@@ -1001,7 +1001,7 @@ internal class Arbeidsgiver private constructor(
         overstyring: Revurderingseventyr?
     ) {
         val subsumsjonsloggMedInntektsmeldingkontekst = subsumsjonslogg()
-        val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk, subsumsjonsloggMedInntektsmeldingkontekst)
+        val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk)
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
 
         val skjæringstidspunkt = inntektsmelding.inntektsdato.let { dato ->
