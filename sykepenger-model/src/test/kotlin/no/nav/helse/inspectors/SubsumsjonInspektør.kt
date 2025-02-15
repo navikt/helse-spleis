@@ -13,7 +13,6 @@ import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
-import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.person.IdInnhenter
 import org.junit.jupiter.api.Assertions.assertEquals
 
@@ -29,7 +28,6 @@ internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
         val punktum: Punktum?,
         val bokstav: Bokstav?,
         val versjon: LocalDate,
-        val sporing: List<Subsumsjonskontekst>,
         val utfall: Utfall,
         val input: Map<String, Any>,
         val output: Map<String, Any>
@@ -44,7 +42,6 @@ internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
                 punktum = sporing.subsumsjon.punktum,
                 bokstav = sporing.subsumsjon.bokstav,
                 versjon = sporing.subsumsjon.versjon,
-                sporing = sporing.subsumsjon.kontekster,
                 utfall = sporing.subsumsjon.utfall,
                 input = sporing.subsumsjon.input,
                 output = sporing.subsumsjon.output
@@ -98,11 +95,10 @@ internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
         bokstav: Bokstav? = null,
         input: Map<String, Any>,
         output: Map<String, Any>,
-        sporing: List<Subsumsjonskontekst>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = a1
     ) {
-        assertBeregnet(0, 1, paragraf, versjon, ledd, punktum, bokstav, input, output, sporing, vedtaksperiodeId, organisasjonsnummer)
+        assertBeregnet(0, 1, paragraf, versjon, ledd, punktum, bokstav, input, output, vedtaksperiodeId, organisasjonsnummer)
     }
 
     internal fun assertBeregnet(
@@ -115,7 +111,6 @@ internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
         bokstav: Bokstav? = null,
         input: Map<String, Any>,
         output: Map<String, Any>,
-        sporing: List<Subsumsjonskontekst>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = a1,
         lovverk: String = "folketrygdloven"
@@ -124,15 +119,6 @@ internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
         assertEquals(forventetAntall, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
         val subsumsjon = resultat[index]
 
-        sporing?.also { forventet ->
-            assertEquals(forventet, subsumsjon.sporing) {
-                "Fant ikke forventet sporing. Har dette:\n${
-                    subsumsjon.sporing.joinToString(separator = "\n") { (key, value) ->
-                        "$key: $value"
-                    }
-                }\n"
-            }
-        }
         assertEquals(VILKAR_BEREGNET, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
         assertResultat(input, output, subsumsjon)
     }

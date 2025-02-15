@@ -328,8 +328,7 @@ internal class OpptjeningTest {
                         )
                     )
                 ),
-                output = mapOf("antallOpptjeningsdager" to 28),
-                kontekster = emptyList()
+                output = mapOf("antallOpptjeningsdager" to 28)
             ), subsumsjon
         )
     }
@@ -361,8 +360,7 @@ internal class OpptjeningTest {
                         )
                     )
                 ),
-                output = mapOf("antallOpptjeningsdager" to 27),
-                kontekster = emptyList()
+                output = mapOf("antallOpptjeningsdager" to 27)
             ), subsumsjon
         )
     }

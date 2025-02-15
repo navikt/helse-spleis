@@ -629,7 +629,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             paragraf = PARAGRAF_8_10,
             ledd = LEDD_3,
             versjon = 1.januar(2020),
-            sporing = null,
             input = mapOf("årligInntekt" to 260000.0),
             output = mapOf("dagligInntekt" to 1000.0)
         )

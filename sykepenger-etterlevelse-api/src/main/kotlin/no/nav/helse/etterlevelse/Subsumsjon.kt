@@ -31,8 +31,7 @@ data class Subsumsjon(
     val punktum: Punktum? = null,
     val bokstav: Bokstav? = null,
     val input: Map<String, Any>,
-    val output: Map<String, Any>,
-    val kontekster: List<Subsumsjonskontekst>
+    val output: Map<String, Any>
 ) {
     val lovreferanse = Lovreferanse(
         lovverk = lovverk,
@@ -52,8 +51,7 @@ data class Subsumsjon(
             punktum: Punktum? = null,
             bokstav: Bokstav? = null,
             input: Map<String, Any>,
-            output: Map<String, Any>,
-            kontekster: List<Subsumsjonskontekst>
+            output: Map<String, Any>
         ): Subsumsjon {
             return Subsumsjon(
                 type = Subsumsjonstype.ENKEL,
@@ -65,8 +63,7 @@ data class Subsumsjon(
                 punktum = punktum,
                 bokstav = bokstav,
                 input = input,
-                output = output,
-                kontekster = kontekster
+                output = output
             )
         }
 
@@ -80,8 +77,7 @@ data class Subsumsjon(
             punktum: Punktum? = null,
             bokstav: Bokstav? = null,
             output: Map<String, Any> = emptyMap(),
-            input: Map<String, Any>,
-            kontekster: List<Subsumsjonskontekst>
+            input: Map<String, Any>
         ): Subsumsjon {
             val outputMedPerioder = output + mapOf(
                 "perioder" to perioder.map {
@@ -101,8 +97,7 @@ data class Subsumsjon(
                 punktum = punktum,
                 bokstav = bokstav,
                 input = input,
-                output = outputMedPerioder,
-                kontekster = kontekster
+                output = outputMedPerioder
             )
         }
     }

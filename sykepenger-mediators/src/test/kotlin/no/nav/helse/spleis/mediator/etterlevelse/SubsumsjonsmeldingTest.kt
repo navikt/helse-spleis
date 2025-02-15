@@ -48,7 +48,7 @@ internal class SubsumsjonsmeldingTest {
             listOf(1.januar(2018).somPeriode()),
             MutableList(31) { Tidslinjedag((it + 1).januar, "NAVDAG", 100) }
         )
-        subsumsjonMediator.logg(Regelverksporing.Behandlingsporing("fnr", "orgnr", UUID.randomUUID(), UUID.randomUUID(), subsumsjonen))
+        subsumsjonMediator.logg(Regelverksporing.Behandlingsporing("12345678911", "orgnr", UUID.randomUUID(), UUID.randomUUID(), subsumsjonen))
         val subsumsjoner = buildList<JsonNode> {
             subsumsjonMediator.ferdigstill(object : Subsumsjonproducer {
                 override fun send(fnr: String, melding: String) {

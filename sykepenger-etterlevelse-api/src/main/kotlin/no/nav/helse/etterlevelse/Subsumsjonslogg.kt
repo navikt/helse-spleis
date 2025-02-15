@@ -84,8 +84,7 @@ fun `§ 8-2 ledd 1`(
         "tilstrekkeligAntallOpptjeningsdager" to tilstrekkeligAntallOpptjeningsdager,
         "arbeidsforhold" to arbeidsforhold
     ),
-    output = mapOf("antallOpptjeningsdager" to antallOpptjeningsdager),
-    kontekster = emptyList()
+    output = mapOf("antallOpptjeningsdager" to antallOpptjeningsdager)
 )
 
 /**
@@ -123,8 +122,7 @@ fun `§ 8-3 ledd 1 punktum 2`(
         "tidslinjeFom" to tidslinjeFom,
         "tidslinjeTom" to tidslinjeTom
     ),
-    output = mapOf("avvisteDager" to avvistePerioder),
-    kontekster = emptyList()
+    output = mapOf("avvisteDager" to avvistePerioder)
 )
 
 /**
@@ -150,8 +148,7 @@ fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, 
             "grunnlagForSykepengegrunnlag" to beregningsgrunnlagÅrlig,
             "minimumInntekt" to minimumInntektÅrlig
         ),
-        output = emptyMap(),
-        kontekster = emptyList()
+        output = emptyMap()
     )
 
 /**
@@ -171,8 +168,7 @@ fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperioder: Collection<ClosedRange<Lo
         versjon = LocalDate.of(2021, 6, 1),
         paragraf = PARAGRAF_8_9,
         ledd = LEDD_1,
-        input = mapOf("soknadsPerioder" to søknadsperioder),
-        kontekster = emptyList()
+        input = mapOf("soknadsPerioder" to søknadsperioder)
     )
 
 /**
@@ -205,8 +201,7 @@ fun `§ 8-10 ledd 2 punktum 1`(
         ),
         output = mapOf(
             "erBegrenset" to erBegrenset
-        ),
-        kontekster = emptyList()
+        )
     )
 
 /**
@@ -225,8 +220,7 @@ fun `§ 8-10 ledd 3`(årsinntekt: Double, inntektOmregnetTilDaglig: Double) =
         paragraf = PARAGRAF_8_10,
         ledd = 3.ledd,
         input = mapOf("årligInntekt" to årsinntekt),
-        output = mapOf("dagligInntekt" to inntektOmregnetTilDaglig),
-        kontekster = emptyList()
+        output = mapOf("dagligInntekt" to inntektOmregnetTilDaglig)
     )
 
 /**
@@ -244,8 +238,7 @@ fun `§ 8-11 ledd 1`(vedtaksperiode: ClosedRange<LocalDate>, dato: Collection<Cl
         ledd = 1.ledd,
         utfall = VILKAR_IKKE_OPPFYLT,
         versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-        input = mapOf("periode" to mapOf("fom" to vedtaksperiode.start, "tom" to vedtaksperiode.endInclusive)),
-        kontekster = emptyList()
+        input = mapOf("periode" to mapOf("fom" to vedtaksperiode.start, "tom" to vedtaksperiode.endInclusive))
     )
 
 
@@ -296,8 +289,7 @@ fun `§ 8-12 ledd 1 punktum 1`(
                 "gjenståendeSykedager" to gjenståendeSykedager,
                 "forbrukteSykedager" to forbrukteSykedager,
                 "maksdato" to maksdato,
-            ),
-            kontekster = emptyList()
+            )
         )
 
     val subsumsjoner = mutableListOf<Subsumsjon>()
@@ -340,8 +332,7 @@ fun `§ 8-12 ledd 2`(
             "tidslinjegrunnlag" to tidslinjegrunnlag.map { it.dager() },
             "beregnetTidslinje" to beregnetTidslinje.dager()
         ),
-        output = emptyMap(),
-        kontekster = emptyList()
+        output = emptyMap()
     )
 
 /**
@@ -364,8 +355,7 @@ fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: Collection<C
             versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
             input = mapOf(
                 "tidslinjegrunnlag" to tidslinjer.map { it.dager(periode) }
-            ),
-            kontekster = emptyList()
+            )
         )
 
     val subsumsjoner = mutableListOf<Subsumsjon>()
@@ -406,8 +396,7 @@ fun `§ 8-13 ledd 2`(periode: ClosedRange<LocalDate>, tidslinjer: List<List<Tids
         ),
         output = mapOf(
             "dagerUnderGrensen" to dagerUnderGrensenMap
-        ),
-        kontekster = emptyList()
+        )
     )
 }
 
@@ -442,7 +431,6 @@ fun `§ 8-15`(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, innte
         } else {
             mapOf("aktivtArbeidsforhold" to organisasjonsnummer)
         },
-        kontekster = emptyList(),
     )
 
 /**
@@ -464,8 +452,7 @@ fun `§ 8-16 ledd 1`(dato: Collection<ClosedRange<LocalDate>>, dekningsgrad: Dou
         utfall = VILKAR_BEREGNET,
         paragraf = PARAGRAF_8_16,
         ledd = 1.ledd,
-        versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-        kontekster = emptyList()
+        versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO
     )
 
 /**
@@ -485,8 +472,7 @@ fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: Collection<ClosedRange<L
         paragraf = PARAGRAF_8_17,
         ledd = 1.ledd,
         bokstav = BOKSTAV_A,
-        input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager()),
-        kontekster = emptyList()
+        input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager())
     )
 
 /**
@@ -517,8 +503,7 @@ fun `§ 8-17 ledd 1`(
     utfall = VILKAR_OPPFYLT,
     paragraf = PARAGRAF_8_17,
     ledd = LEDD_1,
-    input = emptyMap(),
-    kontekster = emptyList()
+    input = emptyMap()
 )
 
 /**
@@ -538,8 +523,7 @@ fun `§ 8-17 ledd 2`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje:
         ledd = LEDD_2,
         input = mapOf(
             "beregnetTidslinje" to sykdomstidslinje.dager()
-        ),
-        kontekster = emptyList()
+        )
     )
 
 /**
@@ -562,8 +546,7 @@ fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag
         ),
         output = mapOf(
             "sisteDagIArbeidsgiverperioden" to dato
-        ),
-        kontekster = emptyList()
+        )
     )
 
 /**
@@ -584,8 +567,7 @@ fun `§ 8-19 andre ledd`(dato: Collection<ClosedRange<LocalDate>>, beregnetTidsl
         ledd = 2.ledd,
         input = mapOf(
             "beregnetTidslinje" to beregnetTidslinje.dager()
-        ),
-        kontekster = emptyList()
+        )
     )
 
 /**
@@ -607,8 +589,7 @@ fun `§ 8-19 tredje ledd`(dato: Collection<LocalDate>, beregnetTidslinje: List<T
         ledd = 3.ledd,
         input = mapOf(
             "beregnetTidslinje" to beregnetTidslinje.dager()
-        ),
-        kontekster = emptyList()
+        )
     )
 
 /**
@@ -631,8 +612,7 @@ fun `§ 8-19 fjerde ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>
         ledd = 4.ledd,
         input = mapOf(
             "beregnetTidslinje" to beregnetTidslinje.dager()
-        ),
-        kontekster = emptyList()
+        )
     )
 
 /**
@@ -669,8 +649,7 @@ fun `§ 8-28 ledd 3 bokstav a`(
         output = mapOf(
             "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
             "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
-        ),
-        kontekster = emptyList()
+        )
     )
 
 /**
@@ -713,8 +692,7 @@ fun `§ 8-28 ledd 3 bokstav b`(
         output = mapOf(
             "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
             "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
-        ),
-        kontekster = emptyList()
+        )
     )
 
 /**
@@ -754,8 +732,7 @@ fun `§ 8-28 ledd 3 bokstav c`(
         output = mapOf(
             "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
             "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
-        ),
-        kontekster = emptyList()
+        )
     )
 
 /**
@@ -794,8 +771,7 @@ fun `§ 8-28 ledd 5`(
         output = mapOf(
             "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
             "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
-        ),
-        kontekster = emptyList()
+        )
     )
 
 /**
@@ -826,8 +802,7 @@ fun `§ 8-29`(
     ),
     output = mapOf(
         "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlagÅrlig
-    ),
-    kontekster = emptyList()
+    )
 )
 
 fun `§ 8-33 ledd 1`() {}
@@ -863,8 +838,7 @@ fun `§ 8-51 ledd 2`(
         "grunnlagForSykepengegrunnlag" to beregningsgrunnlagÅrlig,
         "minimumInntekt" to minimumInntektÅrlig
     ),
-    output = emptyMap(),
-    kontekster = emptyList()
+    output = emptyMap()
 )
 
 /**
@@ -905,8 +879,7 @@ fun `§ 8-51 ledd 2`(
         "grunnlagForSykepengegrunnlag" to beregningsgrunnlagÅrlig,
         "minimumInntekt" to minimumInntektÅrlig
     ),
-    output = emptyMap(),
-    kontekster = emptyList()
+    output = emptyMap()
 )
 
 /**
@@ -953,8 +926,7 @@ fun `§ 8-51 ledd 3`(
                 "gjenståendeSykedager" to gjenståendeSykedager,
                 "forbrukteSykedager" to forbrukteSykedager,
                 "maksdato" to maksdato,
-            ),
-            kontekster = emptyList()
+            )
         )
 
     val subsumsjoner = mutableListOf<Subsumsjon>()
@@ -978,8 +950,7 @@ fun `§ 22-13 ledd 3`(avskjæringsdato: LocalDate, perioder: Collection<ClosedRa
         ledd = LEDD_3,
         input = mapOf(
             "avskjæringsdato" to avskjæringsdato
-        ),
-        kontekster = emptyList()
+        )
     )
 
 /**
@@ -997,8 +968,7 @@ fun `fvl § 35 ledd 1`() =
         input = mapOf(
             "stadfesting" to true
         ),
-        output = emptyMap(),
-        kontekster = emptyList()
+        output = emptyMap()
     )
 
 /**
@@ -1015,8 +985,7 @@ fun `§ 8-48 ledd 2 punktum 2`(dato: Collection<ClosedRange<LocalDate>>, sykdoms
         paragraf = PARAGRAF_8_48,
         ledd = LEDD_2,
         punktum = Punktum.PUNKTUM_2,
-        input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager()),
-        kontekster = emptyList()
+        input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager())
     )
 
 /**
@@ -1032,8 +1001,7 @@ fun `Trygderettens kjennelse 2006-4023`(dato: Collection<ClosedRange<LocalDate>>
         versjon = LocalDate.parse("2007-03-02"),
         paragraf = KJENNELSE_2006_4023,
         ledd = null,
-        input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager()),
-        kontekster = emptyList()
+        input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager())
     )
 
 internal class RangeIterator(start: LocalDate, private val end: LocalDate) : Iterator<LocalDate> {

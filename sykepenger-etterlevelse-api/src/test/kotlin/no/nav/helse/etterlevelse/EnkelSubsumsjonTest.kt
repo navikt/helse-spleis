@@ -41,13 +41,9 @@ internal class EnkelSubsumsjonTest {
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         input: Map<String, Any> = emptyMap(),
-        output: Map<String, Any> = emptyMap(),
-        kontekster: List<Subsumsjonskontekst> = listOf(
-            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
-            Subsumsjonskontekst(KontekstType.Vedtaksperiode, "vedtaksperiodeId")
-        )
+        output: Map<String, Any> = emptyMap()
     ) {
-        Subsumsjon.enkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).also {
+        Subsumsjon.enkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output).also {
             vurderinger.add(it)
         }
     }

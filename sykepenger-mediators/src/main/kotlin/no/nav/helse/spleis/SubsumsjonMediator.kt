@@ -4,8 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.UUID
-import no.nav.helse.etterlevelse.KontekstType
+import java.util.*
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Regelverksporing
 import no.nav.helse.spleis.SubsumsjonMediator.SubsumsjonEvent.Companion.paragrafVersjonFormaterer
@@ -37,18 +36,19 @@ internal class SubsumsjonMediator(
     private val subsumsjoner = mutableListOf<SubsumsjonEvent>()
 
     override fun logg(sporing: Regelverksporing) {
-        // bakoverkompatibilitet
-        val kontekster = when (sporing) {
-            is Regelverksporing.Arbeidsgiversporing -> mapOf(
-                KontekstType.Organisasjonsnummer to listOf(sporing.organisasjonsnummer)
-            )
-            is Regelverksporing.Behandlingsporing -> mapOf(
-                KontekstType.Organisasjonsnummer to listOf(sporing.organisasjonsnummer),
-                KontekstType.Vedtaksperiode to listOf(sporing.vedtaksperiodeId.toString())
-            )
+        val fnr = when (sporing) {
+            is Regelverksporing.Arbeidsgiversporing -> sporing.fødselsnummer
+            is Regelverksporing.Behandlingsporing -> sporing.fødselsnummer
+        }
+        val orgnr = when (sporing) {
+            is Regelverksporing.Arbeidsgiversporing -> sporing.organisasjonsnummer
+            is Regelverksporing.Behandlingsporing -> sporing.organisasjonsnummer
         }
         subsumsjoner.add(SubsumsjonEvent(
-            sporing = kontekster,
+            fødselsnummer = fnr,
+            organisasjonsnummer = orgnr,
+            vedtaksperiodeId = (sporing as? Regelverksporing.Behandlingsporing)?.vedtaksperiodeId,
+            behandlingId = (sporing as? Regelverksporing.Behandlingsporing)?.behandlingId,
             lovverk = sporing.subsumsjon.lovverk,
             ikrafttredelse = paragrafVersjonFormaterer.format(sporing.subsumsjon.versjon),
             paragraf = sporing.subsumsjon.paragraf.ref,
@@ -88,8 +88,11 @@ internal class SubsumsjonMediator(
                 this["versjon"] = "1.0.0"
                 this["kilde"] = "spleis"
                 this["versjonAvKode"] = versjonAvKode
-                this["fodselsnummer"] = message.meldingsporing.fødselsnummer
-                this["sporing"] = event.sporing.map { it.key.tilEkstern() to it.value }.toMap()
+                this["fodselsnummer"] = event.fødselsnummer
+                this["sporing"] = buildMap {
+                    this["organisasjonsnummer"] = listOf(event.organisasjonsnummer)
+                    if (event.vedtaksperiodeId != null) this["vedtaksperiode"] = listOf(event.vedtaksperiodeId.toString())
+                }
                 this["lovverk"] = event.lovverk
                 this["lovverksversjon"] = event.ikrafttredelse
                 this["paragraf"] = event.paragraf
@@ -109,14 +112,12 @@ internal class SubsumsjonMediator(
         ))
     }
 
-    private fun KontekstType.tilEkstern() = when (this) {
-        KontekstType.Organisasjonsnummer -> "organisasjonsnummer"
-        KontekstType.Vedtaksperiode -> "vedtaksperiode"
-    }
-
     data class SubsumsjonEvent(
         val id: UUID = UUID.randomUUID(),
-        val sporing: Map<KontekstType, List<String>>,
+        val fødselsnummer: String,
+        val organisasjonsnummer: String,
+        val vedtaksperiodeId: UUID?,
+        val behandlingId: UUID?,
         val lovverk: String,
         val ikrafttredelse: String,
         val paragraf: String,
