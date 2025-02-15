@@ -8,7 +8,6 @@ import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Punktum
-import no.nav.helse.etterlevelse.Regelverksporing
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
@@ -47,10 +46,7 @@ internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
                 output = sporing.subsumsjon.output
             )
             subsumsjoner.add(subsumsjon)
-            when (sporing) {
-                is Regelverksporing.Arbeidsgiversporing -> {}
-                is Regelverksporing.Behandlingsporing -> subsumsjonerForVedtaksperiode.getOrPut(sporing.vedtaksperiodeId) { mutableListOf() }.add(subsumsjon)
-            }
+            subsumsjonerForVedtaksperiode.getOrPut(sporing.vedtaksperiodeId) { mutableListOf() }.add(subsumsjon)
         }
     }
 

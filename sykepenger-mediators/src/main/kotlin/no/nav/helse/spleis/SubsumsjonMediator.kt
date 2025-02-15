@@ -36,19 +36,11 @@ internal class SubsumsjonMediator(
     private val subsumsjoner = mutableListOf<SubsumsjonEvent>()
 
     override fun logg(sporing: Regelverksporing) {
-        val fnr = when (sporing) {
-            is Regelverksporing.Arbeidsgiversporing -> sporing.fødselsnummer
-            is Regelverksporing.Behandlingsporing -> sporing.fødselsnummer
-        }
-        val orgnr = when (sporing) {
-            is Regelverksporing.Arbeidsgiversporing -> sporing.organisasjonsnummer
-            is Regelverksporing.Behandlingsporing -> sporing.organisasjonsnummer
-        }
         subsumsjoner.add(SubsumsjonEvent(
-            fødselsnummer = fnr,
-            organisasjonsnummer = orgnr,
-            vedtaksperiodeId = (sporing as? Regelverksporing.Behandlingsporing)?.vedtaksperiodeId,
-            behandlingId = (sporing as? Regelverksporing.Behandlingsporing)?.behandlingId,
+            fødselsnummer = sporing.fødselsnummer,
+            organisasjonsnummer = sporing.organisasjonsnummer,
+            vedtaksperiodeId = sporing.vedtaksperiodeId,
+            behandlingId = sporing.behandlingId,
             lovverk = sporing.subsumsjon.lovverk,
             ikrafttredelse = paragrafVersjonFormaterer.format(sporing.subsumsjon.versjon),
             paragraf = sporing.subsumsjon.paragraf.ref,

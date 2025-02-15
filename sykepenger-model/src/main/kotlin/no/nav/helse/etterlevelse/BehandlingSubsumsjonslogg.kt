@@ -12,7 +12,7 @@ class BehandlingSubsumsjonslogg(
 
     override fun logg(subsumsjon: Subsumsjon) {
         if (subsumsjon.erTomPeriode()) return
-        regelverkslogg.logg(Regelverksporing.Behandlingsporing(
+        regelverkslogg.logg(Regelverksporing(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,

@@ -232,7 +232,7 @@ internal class Vedtaksperiode private constructor(
     private val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()
     internal val periode get() = behandlinger.periode()
     internal val sykdomstidslinje get() = behandlinger.sykdomstidslinje()
-    private val jurist get() = behandlinger.subsumsjonslogg(regelverkslogg, id, person.fødselsnummer, arbeidsgiver.organisasjonsnummer)
+    internal val subsumsjonslogg get() = behandlinger.subsumsjonslogg(regelverkslogg, id, person.fødselsnummer, arbeidsgiver.organisasjonsnummer)
     internal val skjæringstidspunkt get() = behandlinger.skjæringstidspunkt()
     internal val førsteFraværsdag get() = arbeidsgiver.finnFørsteFraværsdag(this.periode)
 
@@ -651,7 +651,7 @@ internal class Vedtaksperiode private constructor(
                 inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.Arbeidsgiver)
             ),
             aktivitetslogg = aktivitetslogg,
-            subsumsjonslogg = this.jurist
+            subsumsjonslogg = this.subsumsjonslogg
         ) != null
 
         // Skjæringstidspunktet er allerede vilkårsprøvd, men inntekten for arbeidsgiveren er byttet ut med denne oppgitte inntekten
@@ -1066,7 +1066,7 @@ internal class Vedtaksperiode private constructor(
             overstyrArbeidsgiveropplysninger,
             aktivitetslogg,
             skjæringstidspunkt,
-            jurist
+            subsumsjonslogg
         )
     }
 
@@ -1081,14 +1081,14 @@ internal class Vedtaksperiode private constructor(
                 overstyrInntektsgrunnlag,
                 aktivitetslogg,
                 skjæringstidspunkt,
-                jurist
+                subsumsjonslogg
             )
 
             is OverstyrArbeidsforhold -> person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
                 overstyrInntektsgrunnlag,
                 aktivitetslogg,
                 skjæringstidspunkt,
-                jurist
+                subsumsjonslogg
             )
 
             is OverstyrArbeidsgiveropplysninger -> error("Error. Det finnes en konkret dispatcher-konfigurasjon for dette tilfellet")
@@ -1097,7 +1097,7 @@ internal class Vedtaksperiode private constructor(
                 overstyrInntektsgrunnlag,
                 aktivitetslogg,
                 skjæringstidspunkt,
-                jurist
+                subsumsjonslogg
             )
         }
         return true
@@ -1268,7 +1268,7 @@ internal class Vedtaksperiode private constructor(
     ) {
         videreførEksisterendeRefusjonsopplysninger(søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), aktivitetslogg)
         oppdaterHistorikk(søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
-            søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, jurist)
+            søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, subsumsjonslogg)
         }
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
         nesteTilstand()?.also { tilstand(aktivitetslogg, it) }
@@ -1288,7 +1288,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg.info("Søknad har trigget en revurdering")
         oppdaterHistorikk(søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
             if (søknad.delvisOverlappende) aktivitetslogg.varsel(`Mottatt søknad som delvis overlapper`)
-            søknad.valider(FunksjonelleFeilTilVarsler(aktivitetslogg), vilkårsgrunnlag, refusjonstidslinje, jurist)
+            søknad.valider(FunksjonelleFeilTilVarsler(aktivitetslogg), vilkårsgrunnlag, refusjonstidslinje, subsumsjonslogg)
         }
     }
 
@@ -1381,7 +1381,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun subsummerBrukAvSkatteopplysninger(orgnummer: String, inntektsdata: Inntektsdata, skatteopplysninger: List<Skatteopplysning>) {
         val inntekter = skatteopplysninger.subsumsjonsformat()
-        jurist.logg(
+        subsumsjonslogg.logg(
             `§ 8-28 ledd 3 bokstav a`(
                 organisasjonsnummer = orgnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -1390,7 +1390,7 @@ internal class Vedtaksperiode private constructor(
                 grunnlagForSykepengegrunnlagMånedlig = inntektsdata.beløp.månedlig
             )
         )
-        jurist.logg(
+        subsumsjonslogg.logg(
             `§ 8-29`(
                 skjæringstidspunkt = skjæringstidspunkt,
                 grunnlagForSykepengegrunnlagÅrlig = inntektsdata.beløp.årlig,
@@ -1450,7 +1450,7 @@ internal class Vedtaksperiode private constructor(
         val ghosts = ghostArbeidsgivere(inntektsgrunnlagArbeidsgivere, skatteopplysninger)
         if (ghosts.isNotEmpty()) aktivitetslogg.varsel(Varselkode.RV_VV_2)
         val inntektene = inntektsgrunnlagArbeidsgivere + ghosts
-        return Inntektsgrunnlag.opprett(person.alder, inntektene, skjæringstidspunkt, jurist)
+        return Inntektsgrunnlag.opprett(person.alder, inntektene, skjæringstidspunkt, subsumsjonslogg)
     }
 
     private fun håndterVilkårsgrunnlag(
@@ -1465,7 +1465,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg = aktivitetslogg,
             skatteopplysninger = skatteopplysninger
         )
-        vilkårsgrunnlag.valider(aktivitetslogg, sykepengegrunnlag, jurist)
+        vilkårsgrunnlag.valider(aktivitetslogg, sykepengegrunnlag, subsumsjonslogg)
         val grunnlagsdata = vilkårsgrunnlag.grunnlagsdata()
         grunnlagsdata.validerFørstegangsvurdering(aktivitetslogg)
         person.lagreVilkårsgrunnlag(grunnlagsdata)
@@ -1641,7 +1641,7 @@ internal class Vedtaksperiode private constructor(
         dokumentsporing: Set<UUID>
     ) {
         if (finnArbeidsgiverperiode()?.dekkesAvArbeidsgiver(periode) != false) {
-            jurist.logg(`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(periode, sykdomstidslinje.subsumsjonsformat()))
+            subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(periode, sykdomstidslinje.subsumsjonsformat()))
         }
         person.avsluttetUtenVedtak(
             PersonObserver.AvsluttetUtenVedtakEvent(
@@ -1899,9 +1899,9 @@ internal class Vedtaksperiode private constructor(
             maksdatoresultat.resultat,
             utbetalingstidslinje
         )
-        val subsumsjonen = Utbetalingstidslinjesubsumsjon(this.jurist, this.sykdomstidslinje, utbetalingstidslinje)
+        val subsumsjonen = Utbetalingstidslinjesubsumsjon(this.subsumsjonslogg, this.sykdomstidslinje, utbetalingstidslinje)
         subsumsjonen.subsummer(periode, person.regler)
-        maksdatoresultat.subsummer(jurist, periode)
+        maksdatoresultat.subsummer(subsumsjonslogg, periode)
         loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(arbeidsgiverSomBeregner, aktivitetslogg)
     }
 
@@ -2058,7 +2058,7 @@ internal class Vedtaksperiode private constructor(
             filter: UtbetalingstidslinjerFilter
         ): Map<String, Utbetalingstidslinje> {
             val input = tidslinjer.entries.map { (key, value) -> key to value }
-            val result = filter.filter(input.map { (_, tidslinje) -> tidslinje }, periode, aktivitetslogg, jurist)
+            val result = filter.filter(input.map { (_, tidslinje) -> tidslinje }, periode, aktivitetslogg, subsumsjonslogg)
             return input.zip(result) { (arbeidsgiver, _), utbetalingstidslinje ->
                 arbeidsgiver to utbetalingstidslinje
             }.toMap()
@@ -3261,7 +3261,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.person.beregnSkjæringstidspunkt(),
                 vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
             )
-            vedtaksperiode.jurist.logg(`fvl § 35 ledd 1`())
+            vedtaksperiode.subsumsjonslogg.logg(`fvl § 35 ledd 1`())
             revurdering.inngåSomRevurdering(vedtaksperiode, aktivitetslogg, vedtaksperiode.periode)
             vedtaksperiode.tilstand(aktivitetslogg, AvventerRevurdering)
         }

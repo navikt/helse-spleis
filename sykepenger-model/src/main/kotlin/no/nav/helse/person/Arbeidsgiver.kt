@@ -9,9 +9,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.UbrukteRefusjonsopplysningerUtDto
-import no.nav.helse.etterlevelse.ArbeidsgiverSubsumsjonslogg
 import no.nav.helse.etterlevelse.Regelverkslogg
-import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
@@ -1000,71 +998,54 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg: IAktivitetslogg,
         overstyring: Revurderingseventyr?
     ) {
-        val subsumsjonsloggMedInntektsmeldingkontekst = subsumsjonslogg()
         val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk)
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
 
-        val skjæringstidspunkt = inntektsmelding.inntektsdato.let { dato ->
-            vedtaksperioder.firstOrNull {
-                dato in it.periode || dato == it.skjæringstidspunkt
-            }?.skjæringstidspunkt
+        val enVedtaksperiodePåSkjæringstidspunktet = inntektsmelding.inntektsdato.let { dato ->
+            vedtaksperioder.firstOrNull { dato in it.periode || dato == it.skjæringstidspunkt }
         }
 
-        if (!inntektsmelding.skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode)) {
+        if (enVedtaksperiodePåSkjæringstidspunktet == null || !inntektsmelding.skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode)) {
             aktivitetslogg.info("Inntektsmelding oppdaterer ikke vilkårsgrunnlag")
             if (overstyring == null) return
             return person.igangsettOverstyring(overstyring, aktivitetslogg)
         }
 
-        if (skjæringstidspunkt != null) {
-            finnAlternativInntektsdato(inntektsdato, skjæringstidspunkt)?.let {
-                inntektsmelding.addInntekt(inntektshistorikk, aktivitetslogg, it)
-            }
+        finnAlternativInntektsdato(inntektsdato, enVedtaksperiodePåSkjæringstidspunktet)?.let {
+            inntektsmelding.addInntekt(inntektshistorikk, aktivitetslogg, it)
         }
-
         korrigerVilkårsgrunnlagOgIgangsettOverstyring(
-            inntektsmelding,
-            skjæringstidspunkt,
-            inntektsmelding.korrigertInntekt(),
-            aktivitetslogg,
-            subsumsjonsloggMedInntektsmeldingkontekst,
-            overstyring
+            hendelse = inntektsmelding,
+            enVedtaksperiodePåSkjæringstidspunktet = enVedtaksperiodePåSkjæringstidspunktet,
+            inntekt = inntektsmelding.korrigertInntekt(),
+            aktivitetslogg = aktivitetslogg,
+            overstyring = overstyring
         )
 
-        if (skjæringstidspunkt == null) return
         håndter(inntektsmelding) {
-            håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding, aktivitetslogg)
+            håndtertInntektPåSkjæringstidspunktet(enVedtaksperiodePåSkjæringstidspunktet.skjæringstidspunkt, inntektsmelding, aktivitetslogg)
         }
     }
 
     private fun korrigerVilkårsgrunnlagOgIgangsettOverstyring(
         hendelse: Hendelse,
-        skjæringstidspunkt: LocalDate?,
+        enVedtaksperiodePåSkjæringstidspunktet: Vedtaksperiode,
         inntekt: FaktaavklartInntekt,
         aktivitetslogg: IAktivitetslogg,
-        subsumsjonslogg: Subsumsjonslogg,
         overstyring: Revurderingseventyr?
     ) {
-        val inntektoverstyring = skjæringstidspunkt?.let {
-            person.nyeArbeidsgiverInntektsopplysninger(
-                hendelse,
-                it,
-                this.organisasjonsnummer,
-                inntekt,
-                aktivitetslogg,
-                subsumsjonslogg
-            )
-        }
+        val inntektoverstyring = person.nyeArbeidsgiverInntektsopplysninger(
+            hendelse = hendelse,
+            skjæringstidspunkt = enVedtaksperiodePåSkjæringstidspunktet.skjæringstidspunkt,
+            organisasjonsnummer = this.organisasjonsnummer,
+            inntekt = inntekt,
+            aktivitetslogg = aktivitetslogg,
+            subsumsjonslogg = enVedtaksperiodePåSkjæringstidspunktet.subsumsjonslogg
+        )
+
         val overstyringFraInntektsmelding = tidligsteEventyr(inntektoverstyring, overstyring) ?: return
         person.igangsettOverstyring(overstyringFraInntektsmelding, aktivitetslogg)
     }
-
-    private fun subsumsjonslogg() =
-        ArbeidsgiverSubsumsjonslogg(
-            regelverkslogg = regelverkslogg,
-            fødselsnummer = person.fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer
-        )
 
     internal fun lagreTidsnærInntektsmelding(
         skjæringstidspunkt: LocalDate,
@@ -1159,9 +1140,9 @@ internal class Arbeidsgiver private constructor(
         return Skjæringstidspunkt(sykdomstidslinje()).sisteOrNull(vedtaksperiode)
     }
 
-    private fun finnAlternativInntektsdato(inntektsdato: LocalDate, skjæringstidspunkt: LocalDate): LocalDate? {
-        if (inntektsdato <= skjæringstidspunkt) return null
-        return vedtaksperioder.firstOrNull { inntektsdato in it.periode }?.førsteFraværsdag?.takeUnless { it == inntektsdato }
+    private fun finnAlternativInntektsdato(inntektsdato: LocalDate, enVedtaksperiodePåSkjæringstidspunktet: Vedtaksperiode): LocalDate? {
+        if (inntektsdato <= enVedtaksperiodePåSkjæringstidspunktet.skjæringstidspunkt) return null
+        return enVedtaksperiodePåSkjæringstidspunktet.førsteFraværsdag?.takeUnless { it == inntektsdato }
     }
 
     private fun <Hendelsetype : Hendelse> håndter(

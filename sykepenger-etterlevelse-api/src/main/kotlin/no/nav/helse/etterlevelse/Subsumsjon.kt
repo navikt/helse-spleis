@@ -3,23 +3,13 @@ package no.nav.helse.etterlevelse
 import java.time.LocalDate
 import java.util.UUID
 
-sealed interface Regelverksporing {
+data class Regelverksporing(
+    val fødselsnummer: String,
+    val organisasjonsnummer: String,
+    val vedtaksperiodeId: UUID,
+    val behandlingId: UUID,
     val subsumsjon: Subsumsjon
-
-    data class Behandlingsporing(
-        val fødselsnummer: String,
-        val organisasjonsnummer: String,
-        val vedtaksperiodeId: UUID,
-        val behandlingId: UUID,
-        override val subsumsjon: Subsumsjon
-    ) : Regelverksporing
-
-    data class Arbeidsgiversporing(
-        val fødselsnummer: String,
-        val organisasjonsnummer: String,
-        override val subsumsjon: Subsumsjon
-    ) : Regelverksporing
-}
+)
 
 data class Subsumsjon(
     val type: Subsumsjonstype,
