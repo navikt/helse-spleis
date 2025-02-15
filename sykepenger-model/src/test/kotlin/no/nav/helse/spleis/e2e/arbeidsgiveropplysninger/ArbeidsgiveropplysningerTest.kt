@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -32,6 +33,8 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mandag
+import no.nav.helse.november
+import no.nav.helse.oktober
 import no.nav.helse.person.DokumentType
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
@@ -58,6 +61,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
+import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -68,8 +72,62 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
+
+    @Test
+    fun `svar på førespørsel for auu lenge etterpå`() {
+        a1 {
+            håndterSøknad(10.september til 13.september)
+            // ├── 9 dager mellom disse to
+            håndterSøknad(23.september til 27.september)
+            håndterSøknad(28.september til 30.september)
+            // ├── 17 dager mellom disse to
+            håndterSøknad(
+                Sykdom(18.oktober, 28.oktober, 100.prosent),
+                // bruker oppgir egenmeldinger i et tidsrom det egentlig er ugyldig,
+                // siden 8. oktober er kun 7 dager fra forrige søknad
+                egenmeldinger = listOf(8.oktober til 17.oktober)
+            )
+            håndterSøknad(Sykdom(29.oktober, 10.november, 100.prosent))
+            håndterInntektsmelding(listOf(18.oktober til 2.november)) // arbeidsgiver sendte lps-inntektsmelding til tross for foresprøsel
+            håndterVilkårsgrunnlag(5.vedtaksperiode)
+            håndterYtelser(5.vedtaksperiode)
+            håndterSimulering(5.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(5.vedtaksperiode)
+            håndterUtbetalt()
+
+            // arbeidsgiver har sendt en ny portal-inntektsmelding (les: IKKE en "korrigert arbeidsgiveropplysning") på auu-perioden
+            fun inntektsmeldingForAuu() {
+                håndterArbeidsgiveropplysninger(
+                    vedtaksperiodeId = 4.vedtaksperiode,
+                    arbeidsgiverperioder = listOf(
+                        10.september til 13.september,
+                        23.september til 30.september,
+                        10.oktober til 13.oktober
+                    ),
+                    begrunnelseForReduksjonEllerIkkeUtbetalt = "BeskjedGittForSent"
+                )
+            }
+            assertForventetFeil(
+                forklaring = "kaster exception: Behandling ...... burde vært ferdig behandlet, men står i tilstand UberegnetOmgjøring",
+                nå = {
+                    assertThrows<IllegalStateException> {
+                        inntektsmeldingForAuu()
+                    }
+                },
+                ønsket = {
+                    assertDoesNotThrow {
+                        inntektsmeldingForAuu()
+                    }
+                    assertSisteTilstand(4.vedtaksperiode, AVVENTER_HISTORIKK)
+                    assertSisteTilstand(5.vedtaksperiode, AVVENTER_REVURDERING)
+                }
+            )
+        }
+    }
 
     @Test
     fun `Arbeidsgiver korrigerer ubrukte refusjonsopplysninger`() {
