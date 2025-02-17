@@ -1141,13 +1141,17 @@ internal class Vedtaksperiode private constructor(
         return vilkårsgrunnlag?.harNødvendigInntektForVilkårsprøving(arbeidsgiver.organisasjonsnummer) == false
     }
 
-    internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, aktivitetslogg: IAktivitetslogg): Boolean {
-        if (!behandlinger.kanForkastes(aktivitetslogg, arbeidsgiverUtbetalinger)) {
-            aktivitetslogg.info("Kan ikke forkastes fordi behandlinger nekter det")
-            return false
+    internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, aktivitetslogg: IAktivitetslogg, hendelse: Hendelse? = null): Boolean {
+        if (behandlinger.kanForkastes(aktivitetslogg, arbeidsgiverUtbetalinger)) {
+            aktivitetslogg.info("Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet")
+            return true
         }
-        aktivitetslogg.info("Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet")
-        return true
+        if (hendelse is AnmodningOmForkasting && hendelse.force) {
+            aktivitetslogg.info("Behandlingene sier at denne _ikke_ kan forkastes. Men ettersom 'force'-flagget i anmodningen er satt forkastes perioden læll. Ta en god titt på at det ikke blir hengende noen utbetalinger her!")
+            return true
+        }
+        aktivitetslogg.info("Kan ikke forkastes fordi behandlinger nekter det")
+        return false
     }
 
     internal fun forkast(
@@ -1156,7 +1160,7 @@ internal class Vedtaksperiode private constructor(
         utbetalinger: List<Utbetaling>
     ): VedtaksperiodeForkastetEventBuilder? {
         registrerKontekst(aktivitetslogg)
-        if (!kanForkastes(utbetalinger, aktivitetslogg)) return null
+        if (!kanForkastes(utbetalinger, aktivitetslogg, hendelse)) return null
         aktivitetslogg.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.behandlinger.forkast(arbeidsgiver, hendelse.metadata.behandlingkilde, hendelse.metadata.automatiskBehandling, aktivitetslogg)
         val arbeidsgiverperiodeHensyntarForkastede = finnArbeidsgiverperiodeHensyntarForkastede()
