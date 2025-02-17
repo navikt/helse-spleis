@@ -350,6 +350,7 @@ internal class InntektsgrunnlagTest {
         val inntektsgrunnlag = Inntektsgrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
             arbeidsgiverInntektsopplysninger = inntekter,
+            deaktiverteArbeidsforhold = emptyList(),
             skjæringstidspunkt = skjæringstidspunkt,
             subsumsjonslogg = EmptyLog
         )

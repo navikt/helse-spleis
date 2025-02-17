@@ -77,10 +77,11 @@ internal class Inntektsgrunnlag private constructor(
     internal constructor(
         alder: Alder,
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
+        deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
         skjæringstidspunkt: LocalDate,
         subsumsjonslogg: Subsumsjonslogg,
         vurdertInfotrygd: Boolean = false
-    ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, emptyList(), vurdertInfotrygd) {
+    ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd) {
         subsumsjonslogg.apply {
             logg(
                 `§ 8-10 ledd 2 punktum 1`(
@@ -129,17 +130,20 @@ internal class Inntektsgrunnlag private constructor(
         fun opprett(
             alder: Alder,
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
+            deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
             subsumsjonslogg: Subsumsjonslogg
         ): Inntektsgrunnlag {
-            check(arbeidsgiverInntektsopplysninger.distinctBy { it.orgnummer }.size == arbeidsgiverInntektsopplysninger.size) {
-                "det er oppgitt duplikat orgnumre i inntektsgrunnlaget: ${arbeidsgiverInntektsopplysninger.joinToString { it.orgnummer }}"
+            val alleInntekter = arbeidsgiverInntektsopplysninger + deaktiverteArbeidsforhold
+            check(alleInntekter.distinctBy { it.orgnummer }.size == alleInntekter.size) {
+                "det er oppgitt duplikat orgnumre i inntektsgrunnlaget: ${alleInntekter.joinToString { it.orgnummer }}"
             }
             return Inntektsgrunnlag(
-                alder,
-                arbeidsgiverInntektsopplysninger,
-                skjæringstidspunkt,
-                subsumsjonslogg
+                alder = alder,
+                arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
+                deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
+                skjæringstidspunkt = skjæringstidspunkt,
+                subsumsjonslogg = subsumsjonslogg
             )
         }
 

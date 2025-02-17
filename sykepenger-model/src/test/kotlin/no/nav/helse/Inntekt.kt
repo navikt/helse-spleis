@@ -30,6 +30,7 @@ internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstid
                 skjønnsmessigFastsatt = null
             )
         ),
+        deaktiverteArbeidsforhold = emptyList(),
         skjæringstidspunkt = skjæringstidspunkt,
         subsumsjonslogg = subsumsjonslogg
     )

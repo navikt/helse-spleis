@@ -1454,7 +1454,7 @@ internal class Vedtaksperiode private constructor(
         val ghosts = ghostArbeidsgivere(inntektsgrunnlagArbeidsgivere, skatteopplysninger)
         if (ghosts.isNotEmpty()) aktivitetslogg.varsel(Varselkode.RV_VV_2)
         val inntektene = inntektsgrunnlagArbeidsgivere + ghosts
-        return Inntektsgrunnlag.opprett(person.alder, inntektene, skjæringstidspunkt, subsumsjonslogg)
+        return Inntektsgrunnlag.opprett(person.alder, inntektene, emptyList(), skjæringstidspunkt, subsumsjonslogg)
     }
 
     private fun håndterVilkårsgrunnlag(

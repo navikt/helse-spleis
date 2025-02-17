@@ -109,8 +109,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                     korrigertInntekt = null,
                     skjønnsmessigFastsatt = null
                 )
-            ), skjæringstidspunkt, subsumsjonslogg
-            ),
+            ), emptyList(), skjæringstidspunkt, subsumsjonslogg),
             opptjening = Opptjening.nyOpptjening(opptjening, 1.januar),
             medlemskapstatus = when (erMedlem) {
                 true -> Medlemskapsvurdering.Medlemskapstatus.Ja
