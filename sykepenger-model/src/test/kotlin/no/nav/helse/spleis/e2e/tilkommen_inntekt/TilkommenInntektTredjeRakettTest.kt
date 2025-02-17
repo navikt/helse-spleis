@@ -10,7 +10,6 @@ import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.fredag
-import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Søknad.InntektFraNyttArbeidsforhold
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
@@ -22,8 +21,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som støttes`
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.torsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -49,7 +47,7 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
         }
         a1 {
             håndterYtelser(2.vedtaksperiode)
-            assertVarsler(2.vedtaksperiode, Varselkode.`Tilkommen inntekt som støttes`)
+            assertVarsler(2.vedtaksperiode, `Tilkommen inntekt som støttes`)
             assertUtbetalingsbeløp(2.vedtaksperiode, 1382, 1431)
         }
     }
@@ -70,7 +68,7 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
         }
         a1 {
             håndterYtelser(2.vedtaksperiode)
-            assertVarsler(2.vedtaksperiode, Varselkode.`Tilkommen inntekt som støttes`)
+            assertVarsler(2.vedtaksperiode, `Tilkommen inntekt som støttes`)
             assertUtbetalingsbeløp(2.vedtaksperiode, forventetArbeidsgiverbeløp = 2136, forventetArbeidsgiverRefusjonsbeløp = 4292)
         }
     }
@@ -84,26 +82,14 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
             håndterUtbetalingshistorikk(1.vedtaksperiode)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            /** TODO: RV_VV_1 skal jo ikke skje da, #noe må gjøres. Nå ligger a2 i inntektsgrunnlaget, og om den deaktiveres hensyntas den ikke ved beregning av utbetalingsitdslinjer, og det er vel egentlig rett, så må vel fikse at hen ikke legger seg i inntektsgrunnlaget
-            Men nå ligger hen der med 0,- så det blir jo beregningsmessig rett da (?) **/
-            assertVarsler(1.vedtaksperiode, RV_VV_1, Varselkode.`Tilkommen inntekt som støttes`)
+            assertVarsler(1.vedtaksperiode, `Tilkommen inntekt som støttes`)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar.somPeriode()) // Syk og ingen tilkommen her
             assertUtbetalingsbeløp(1.vedtaksperiode, 842, 1431, subset = 18.januar til 31.januar)
             assertInntektsgrunnlag(1.januar, 2) {
-                assertInntektsgrunnlag(a1, forventetkilde = Arbeidstakerkilde.Arbeidsgiver, forventetFaktaavklartInntekt = INNTEKT)
-                assertInntektsgrunnlag(a2, forventetkilde = Arbeidstakerkilde.AOrdningen, forventetFaktaavklartInntekt = INGEN)
-            }
-            håndterOverstyrArbeidsforhold(1.januar, OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "Tilkommen arbeidsgiver"))
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar.somPeriode()) // Syk og ingen tilkommen her
-            assertUtbetalingsbeløp(1.vedtaksperiode, 842, 1431, subset = 18.januar til 31.januar)
-            assertInntektsgrunnlag(1.januar, 2) {
-                assertInntektsgrunnlag(a1, forventetkilde = Arbeidstakerkilde.Arbeidsgiver, forventetFaktaavklartInntekt = INNTEKT)
+                assertInntektsgrunnlag(a1, forventetkilde = Arbeidstakerkilde.Arbeidsgiver, forventetFaktaavklartInntekt = INNTEKT, deaktivert = false)
                 assertInntektsgrunnlag(a2, forventetkilde = Arbeidstakerkilde.AOrdningen, forventetFaktaavklartInntekt = INGEN, deaktivert = true)
             }
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -130,9 +116,7 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
             håndterUtbetalingshistorikk(1.vedtaksperiode)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsler(1.vedtaksperiode, RV_VV_1, Varselkode.`Tilkommen inntekt som støttes`)
-            /** TODO: RV_VV_1 skal jo ikke skje da, #noe må gjøres. Nå ligger a2 i inntektsgrunnlaget, og om den deaktiveres hensyntas den ikke ved beregning av utbetalingsitdslinjer, og det er vel egentlig rett, så må vel fikse at hen ikke legger seg i inntektsgrunnlaget
-            Men nå ligger hen der med 0,- så det blir jo beregningsmessig rett da (?) **/
+            assertVarsler(1.vedtaksperiode, `Tilkommen inntekt som støttes`)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -142,7 +126,10 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
             assertUtbetalingsbeløp(1.vedtaksperiode, 661, 1431, subset = 20.januar til 24.januar) // Syk OG tilkommen
             assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 25.januar til 26.januar) // Permisjon 🕵
             assertUtbetalingsbeløp(1.vedtaksperiode, 661, 1431, subset = 27.januar til 31.januar) // Syk OG tilkommen igjen
-
+            assertInntektsgrunnlag(1.januar, 2) {
+                assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.Arbeidsgiver, deaktivert = false)
+                assertInntektsgrunnlag(a2, INGEN, forventetkilde = Arbeidstakerkilde.AOrdningen, deaktivert = true)
+            }
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
         }
@@ -186,7 +173,7 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertVarsler(1.vedtaksperiode, Varselkode.`Tilkommen inntekt som støttes`)
+            assertVarsler(1.vedtaksperiode, `Tilkommen inntekt som støttes`)
         }
     }
 }

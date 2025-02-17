@@ -1423,6 +1423,21 @@ internal class Vedtaksperiode private constructor(
             }
     }
 
+    private fun aktivertArbeidsgiver(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>): Boolean {
+        if (Toggle.TilkommenInntektV3.disabled) return true // Om dinna toggelen er av er vi alltid aktivert
+
+        val valgtSkatt = when (val inntektsopplysning = arbeidsgiverInntektsopplysning.faktaavklartInntekt.inntektsopplysning) {
+            is Inntektsopplysning.Arbeidstaker -> inntektsopplysning.kilde is Arbeidstakerinntektskilde.AOrdningen
+        }
+
+        if (!valgtSkatt) return true // Når vi ikke har valgt skatt er vi alltid aktivert
+
+        val skatteopplysning = skatteopplysninger.singleOrNull { it.arbeidsgiver == arbeidsgiverInntektsopplysning.orgnummer }
+            ?: return false // Når vi har valgt skatt, men ikke har skatteopplysning for arbeidsgiveren har vi defaultet til en tom liste. Da er vi deaktivert
+
+        return skatteopplysning.ansattVedSkjæringstidspunkt // Er aktivert om vi er ansatt ved skjæringstidspunktet
+    }
+
     private fun ghostArbeidsgivere(arbeidsgivere: List<ArbeidsgiverInntektsopplysning>, skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>): List<ArbeidsgiverInntektsopplysning> {
         return skatteopplysninger
             .filter { skatteopplysning -> arbeidsgivere.none { it.orgnummer == skatteopplysning.arbeidsgiver } }
@@ -1453,8 +1468,14 @@ internal class Vedtaksperiode private constructor(
         // ghosts er alle inntekter fra skatt, som vi ikke har søknad for og som skal vektlegges som ghost
         val ghosts = ghostArbeidsgivere(inntektsgrunnlagArbeidsgivere, skatteopplysninger)
         if (ghosts.isNotEmpty()) aktivitetslogg.varsel(Varselkode.RV_VV_2)
-        val inntektene = inntektsgrunnlagArbeidsgivere + ghosts
-        return Inntektsgrunnlag.opprett(person.alder, inntektene, emptyList(), skjæringstidspunkt, subsumsjonslogg)
+        val (aktiverte, deaktiverte) = inntektsgrunnlagArbeidsgivere.partition { aktivertArbeidsgiver(it, skatteopplysninger) }
+        return Inntektsgrunnlag.opprett(
+            alder = person.alder,
+            arbeidsgiverInntektsopplysninger = aktiverte + ghosts,
+            deaktiverteArbeidsforhold = deaktiverte,
+            skjæringstidspunkt = skjæringstidspunkt,
+            subsumsjonslogg = subsumsjonslogg
+        )
     }
 
     private fun håndterVilkårsgrunnlag(
