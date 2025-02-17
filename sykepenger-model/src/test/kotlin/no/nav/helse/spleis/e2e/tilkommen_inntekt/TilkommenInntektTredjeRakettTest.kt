@@ -77,9 +77,6 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
     fun `Tilkommen inntekt på førstegangsbehandling`() = Toggle.TilkommenInntektV3.enable {
         a1 {
             håndterSøknad(januar, inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(fom = 18.januar, tom = 31.januar, orgnummer = a2, 10_000)))
-            /** TODO:  Lolzi, den "fangSisteVedtaksperiode"-tingen om skal håndtere dette for oss i testene har jo nå plukket opp a2 sin vedtaksperiode
-            Det kan man sikkert fikse der, men det gadd jeg ikke nå */
-            håndterUtbetalingshistorikk(1.vedtaksperiode)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertVarsler(1.vedtaksperiode, `Tilkommen inntekt som støttes`)
@@ -111,9 +108,6 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
                 Permisjon(torsdag(25.januar), fredag(26.januar)),
                 inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(fom = 18.januar, tom = 31.januar, orgnummer = a2, 10_000))
             )
-            /** TODO:  Lolzi, den "fangSisteVedtaksperiode"-tingen om skal håndtere dette for oss i testene har jo nå plukket opp a2 sin vedtaksperiode
-            Det kan man sikkert fikse der, men det gadd jeg ikke nå */
-            håndterUtbetalingshistorikk(1.vedtaksperiode)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertVarsler(1.vedtaksperiode, `Tilkommen inntekt som støttes`)
@@ -143,9 +137,6 @@ internal class TilkommenInntektTredjeRakettTest : AbstractDslTest() {
     fun `Sykmeldte oppfatter a2 som tilkommen, men a1 mener (uten å vite det) at a2 er en ghost`() = Toggle.TilkommenInntektV3.enable {
         a1 {
             håndterSøknad(januar, inntekterFraNyeArbeidsforhold = listOf(InntektFraNyttArbeidsforhold(fom = 5.januar, tom = 31.januar, orgnummer = a2, 10_000)))
-            /** TODO:  Lolzi, den "fangSisteVedtaksperiode"-tingen om skal håndtere dette for oss i testene har jo nå plukket opp a2 sin vedtaksperiode
-            Det kan man sikkert fikse der, men det gadd jeg ikke nå */
-            håndterUtbetalingshistorikk(1.vedtaksperiode)
             assertEquals(1.januar, inspektør.vedtaksperioder(1.vedtaksperiode).skjæringstidspunkt)
             assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
 

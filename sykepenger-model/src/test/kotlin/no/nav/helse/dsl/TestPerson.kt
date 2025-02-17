@@ -203,7 +203,7 @@ internal class TestPerson(
             inntekterFraNyeArbeidsforhold: List<Søknad.InntektFraNyttArbeidsforhold> = emptyList()
         ) =
             behovsamler.fangInntektsmeldingReplay({
-                vedtaksperiodesamler.fangVedtaksperiode {
+                vedtaksperiodesamler.fangVedtaksperiode(this.orgnummer) {
                     arbeidsgiverHendelsefabrikk.lagSøknad(
                         *perioder,
                         egenmeldinger = egenmeldinger,
@@ -584,10 +584,6 @@ internal class TestPerson(
             personHendelsefabrikk.lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, overstyringer, hendelseId, tidsstempel)
                 .håndter(Person::håndter)
 
-
-        internal fun håndterUtbetalingshistorikk(vedtaksperiodeId: UUID) {
-            arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikk(vedtaksperiodeId).håndter(Person::håndter)
-        }
         internal fun håndterUtbetalingshistorikkEtterInfotrygdendring(
             utbetalinger: List<Infotrygdperiode> = listOf(),
             inntektshistorikk: List<Inntektsopplysning> = emptyList(),
