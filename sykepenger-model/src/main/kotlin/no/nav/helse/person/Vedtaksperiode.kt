@@ -1525,8 +1525,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerInntektFraSkatt(aktivitetslogg: IAktivitetslogg) {
-        // Sender ut forespørsel da HAG skal ta over inntektsinnhenting fra a-ordningen
-        sendTrengerArbeidsgiveropplysninger(skalInnhenteInntektFraAOrdningen = true)
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
         inntekterForSykepengegrunnlagForArbeidsgiver(
             aktivitetslogg,
@@ -1543,7 +1541,7 @@ internal class Vedtaksperiode private constructor(
         return arbeidsgiverperiode.forventerOpplysninger(periode)
     }
 
-    private fun sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode: Arbeidsgiverperiode? = finnArbeidsgiverperiode(), skalInnhenteInntektFraAOrdningen: Boolean = false) {
+    private fun sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode: Arbeidsgiverperiode? = finnArbeidsgiverperiode()) {
         checkNotNull(arbeidsgiverperiode) { "Må ha arbeidsgiverperiode før vi sier dette." }
 
         val forespurteOpplysninger = listOfNotNull(
@@ -1570,8 +1568,7 @@ internal class Vedtaksperiode private constructor(
                 sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
                 egenmeldingsperioder = egenmeldingsperioder(vedtaksperioder),
                 førsteFraværsdager = førsteFraværsdager,
-                forespurteOpplysninger = forespurteOpplysninger,
-                innhentInntektFraAOrdningen = skalInnhenteInntektFraAOrdningen
+                forespurteOpplysninger = forespurteOpplysninger
             )
         )
     }

@@ -63,8 +63,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 PersonObserver.Inntekt,
                 PersonObserver.Refusjon,
                 PersonObserver.Arbeidsgiverperiode
-            ),
-            innhentInntektFraAOrdningen = false
+            )
         )
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last {
             it.vedtaksperiodeId == 1.vedtaksperiode.id(a1)
@@ -119,8 +118,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 forespurteOpplysninger = listOf(
                     PersonObserver.Refusjon,
                     PersonObserver.Arbeidsgiverperiode
-                ),
-                innhentInntektFraAOrdningen = false
+                )
             )
             assertEquals(expectedForespørsel, trengerArbeidsgiveropplysningerEvent)
         }
@@ -157,8 +155,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt,
                 PersonObserver.Refusjon
-            ),
-            innhentInntektFraAOrdningen = false
+            )
         )
 
         assertEquals(expectedForespørsel, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last())

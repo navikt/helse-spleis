@@ -231,7 +231,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
-          "innhentInntektFraAOrdningen": false,
           "fødselsnummer": "12029240045"
         }"""
 
@@ -274,7 +273,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
-          "innhentInntektFraAOrdningen": false,
           "fødselsnummer": "12029240045"
         }"""
 
@@ -312,7 +310,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
-          "innhentInntektFraAOrdningen": false,
           "fødselsnummer": "12029240045"
         }"""
 
@@ -350,7 +347,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
-          "innhentInntektFraAOrdningen": false,
           "fødselsnummer": "12029240045"
         }"""
 
@@ -386,7 +382,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "forslag": []
             }
           ],
-          "innhentInntektFraAOrdningen": false,
           "fødselsnummer": "12029240045"
         }"""
 
