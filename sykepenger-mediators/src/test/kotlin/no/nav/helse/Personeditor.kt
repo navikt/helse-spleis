@@ -7,7 +7,7 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.serde.SerialisertPerson
@@ -112,11 +112,24 @@ internal object Personeditor {
     private fun ventPåJdbcUrl(): String {
         println("## Fyll inn databaseport. Defaulten er '5432'")
         val port = ventPåInput { it == DEFAULT || it.length == 4 && kotlin.runCatching { it.toInt() }.isSuccess }.let { if (it == DEFAULT) "5432" else it }
-        println("## Fyll inn brukernavnet ditt (epost)")
-        val epost = ventPåInput { it.isNotBlank() }.removeSuffix("@nav.no")
-        val jdbcUrl = "jdbc:postgresql://localhost:$port/spleis?user=${epost}@nav.no"
+        val epost = hentEpostFraCloud()
+        val jdbcUrl = "jdbc:postgresql://localhost:$port/spleis?user=${epost}"
         println(" - Bruker JdbcUrl '$jdbcUrl'")
         return jdbcUrl
+    }
+
+    private fun hentEpostFraCloud(): String {
+        val (_, payload, _) = hentIdentityTokenFraGcloud().split('.', limit = 3)
+        val json = objectMapper.readTree(Base64.getDecoder().decode(payload))
+        return json.path("email").asText()
+    }
+
+    private fun hentIdentityTokenFraGcloud() = Runtime.getRuntime().exec(arrayOf("gcloud", "auth", "print-identity-token")).let {
+        val token = it.inputReader().readText().trim()
+        val feil = it.errorReader().readText()
+        it.waitFor()
+        if (feil.isNotBlank()) error("Feiler med $feil")
+        token
     }
 
     private fun gåVidereVedJa(hva: String, default: Boolean) {
