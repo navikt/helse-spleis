@@ -112,25 +112,33 @@ internal object Personeditor {
     private fun ventPåJdbcUrl(): String {
         println("## Fyll inn databaseport. Defaulten er '5432'")
         val port = ventPåInput { it == DEFAULT || it.length == 4 && kotlin.runCatching { it.toInt() }.isSuccess }.let { if (it == DEFAULT) "5432" else it }
-        val epost = hentEpostFraCloud()
+        val defaultEpost = hentEpostFraGCloud()
+        when (defaultEpost) {
+            null -> println("## Fyll inn brukernavn (epost)")
+            else -> println("## Fyll inn brukernavn (epost). Defaulten er '$defaultEpost'")
+        }
+        val epost = ventPåInput(required = defaultEpost == null) { it.endsWith("@nav.no") }.let { if (it == DEFAULT) defaultEpost else it }
         val jdbcUrl = "jdbc:postgresql://localhost:$port/spleis?user=${epost}"
         println(" - Bruker JdbcUrl '$jdbcUrl'")
         return jdbcUrl
     }
 
-    private fun hentEpostFraCloud(): String {
-        val (_, payload, _) = hentIdentityTokenFraGcloud().split('.', limit = 3)
-        val json = objectMapper.readTree(Base64.getDecoder().decode(payload))
-        return json.path("email").asText()
+    private fun hentEpostFraGCloud(): String? {
+        val identityToken = hentIdentityTokenFraGCloud() ?: return null
+        return try {
+            val (_, payload, _) = identityToken.split('.', limit = 3)
+            val json = objectMapper.readTree(Base64.getDecoder().decode(payload))
+            return json.path("email").asText().takeIf { it.lowercase().endsWith("@nav.no") }
+        } catch (_: Exception) { null }
     }
 
-    private fun hentIdentityTokenFraGcloud() = Runtime.getRuntime().exec(arrayOf("gcloud", "auth", "print-identity-token")).let {
-        val token = it.inputReader().readText().trim()
-        val feil = it.errorReader().readText()
-        it.waitFor()
-        if (feil.isNotBlank()) error("Feiler med $feil")
-        token
-    }
+    private fun hentIdentityTokenFraGCloud() = try {
+        Runtime.getRuntime().exec(arrayOf("gcloud", "auth", "print-identity-token")).let {
+            val token = it.inputReader().readText().trim()
+            it.waitFor()
+            token.takeUnless { it.isBlank() }
+        }
+    } catch (_: Exception) { null }
 
     private fun gåVidereVedJa(hva: String, default: Boolean) {
         val (defualtSvar, valg) = when (default) {
@@ -144,7 +152,7 @@ internal object Personeditor {
 
     private fun åpneFil(fil: File) = try {
         Runtime.getRuntime().exec(arrayOf("idea", fil.absolutePath))
-    } catch (ignored: Exception) {}
+    } catch (_: Exception) {}
 
     private fun File.somJson(): String {
         val json = try { objectMapper.readTree(readText()).toString() } catch (feil: Exception) {
