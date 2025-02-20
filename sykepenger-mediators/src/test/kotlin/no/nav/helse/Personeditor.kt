@@ -145,6 +145,7 @@ internal object Personeditor {
 
     private fun dataSource(jdbcUrl: String) = try {
         HikariDataSource(HikariConfig().apply {
+            this.maximumPoolSize = 1
             this.jdbcUrl = jdbcUrl
         })
     } catch (feil: Exception) {
