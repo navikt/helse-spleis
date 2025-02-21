@@ -343,7 +343,7 @@ class Utbetaling private constructor(
             val vedtaksperiodekladd = UtbetalingkladdBuilder(utbetalingsperiode, utbetalingstidslinje.subset(periode), organisasjonsnummer, fødselsnummer).build()
 
             val forrigeUtbetalte = utbetalinger.aktive(utbetalingsaken.omsluttendePeriode)
-            val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull { it.harOppdragMedUtbetalinger() } ?: forrigeUtbetalte.firstOrNull()
+            val korrelerendeUtbetaling = forrigeUtbetalte.korrelerendeUtbetaling() ?: forrigeUtbetalte.firstOrNull()
             val annulleringer = forrigeUtbetalte
                 .filterNot { it === korrelerendeUtbetaling }
                 .mapNotNull { it.opphør(aktivitetslogg) }
@@ -387,9 +387,19 @@ class Utbetaling private constructor(
 
         fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
         private fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
-        fun List<Utbetaling>.aktive(periode: Periode) = this
+        private fun List<Utbetaling>.aktive(periode: Periode) = this
             .aktive()
             .filter { utbetaling -> utbetaling.periode.overlapperMed(periode) }
+
+        private fun List<Utbetaling>.korrelerendeUtbetaling() = this
+            .filterNot { it.type == ANNULLERING }
+            .filterNot { it.personOppdrag.linjer.isEmpty() && it.arbeidsgiverOppdrag.linjer.isEmpty() }
+            .minByOrNull {
+                listOfNotNull(
+                    it.personOppdrag.linjer.minOfOrNull { linje -> linje.fom },
+                    it.arbeidsgiverOppdrag.linjer.minOfOrNull { linje -> linje.fom },
+                ).min()
+            }
 
         private fun Collection<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
             this
