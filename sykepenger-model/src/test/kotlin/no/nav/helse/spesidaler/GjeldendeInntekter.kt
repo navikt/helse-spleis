@@ -23,8 +23,8 @@ internal class GjeldendeInntekter(
             registrerteInntekter.mapNotNull { registrertInntekt ->
                 val overlapp = Periode(
                     fom = registrertInntekt.fom,
-                    tom = registrertInntekt.tom ?: maxOf(registrertInntekt.fom, periode.endInclusive
-                )).overlappendePeriode(periode) ?: return@mapNotNull null
+                    tom = registrertInntekt.tom ?: maxOf(registrertInntekt.fom, periode.endInclusive)
+                ).overlappendePeriode(periode) ?: return@mapNotNull null
                 Beløpsperiode(overlapp, registrertInntekt.beløp)
             }
         }
