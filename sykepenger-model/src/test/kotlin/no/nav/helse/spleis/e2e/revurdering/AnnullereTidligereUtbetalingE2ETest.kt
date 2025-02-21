@@ -53,11 +53,11 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
             håndterUtbetalt()
 
             val korrelasjonsIdByggetViderePå = inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
-            assertVarsler(3.vedtaksperiode, RV_UT_21, RV_OS_2)
 
             assertForventetFeil(
                 forklaring = "Velger feil oppdrag å bygge videre på når to arbeidsgiverperioder blir til én og den første har hatt en revudering uten endring i utbetaling (REVUDERING GODKJENT_UTEN_UTBETALING)",
                 nå = {
+                    assertVarsler(3.vedtaksperiode, RV_UT_21, RV_OS_2)
                     assertEquals(korrelasjonsIdFomApril, korrelasjonsIdByggetViderePå)
                     val januarUtbetaling = inspektør.utbetalinger.last { it.korrelasjonsId == korrelasjonsIdFomJanuar }
                     assertEquals(Utbetalingtype.ANNULLERING, januarUtbetaling.type)
@@ -66,6 +66,7 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
                     assertEquals(1.april, aprilUtbetaling.arbeidsgiverOppdrag.linjer.minOf { it.fom })
                 },
                 ønsket = {
+                    assertVarsler(3.vedtaksperiode, RV_UT_21)
                     assertEquals(korrelasjonsIdFomJanuar, korrelasjonsIdByggetViderePå)
                     val aprilUtbetaling = inspektør.utbetalinger.last { it.korrelasjonsId == korrelasjonsIdFomApril }
                     assertEquals(Utbetalingtype.ANNULLERING, aprilUtbetaling.type)
