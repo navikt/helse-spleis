@@ -280,4 +280,7 @@ spec:
         - team: tbd
           application: speed-async
           access: readwrite
+        - team: tbd
+          application: spesidaler-async
+          access: readwrite
 
