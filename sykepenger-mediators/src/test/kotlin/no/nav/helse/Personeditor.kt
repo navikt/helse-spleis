@@ -96,17 +96,19 @@ internal object Personeditor {
     }
 
     private fun ventPåInput(default: String? = null, valider: (input: String) -> Boolean): String {
-        var input: String?
+        var svar: String?
         do {
-            input = readlnOrNull()?.lowercase()
-        } while (input?.let { faktiskInput ->
-            if (faktiskInput == "exit") error("💀 Avslutter prosessen")
-            else if (default != null && faktiskInput.isEmpty()) true
-            else if (valider(faktiskInput)) true
-            else false.also { println("🙅 '$faktiskInput' er ikke gyldig!") }
-        } == false)
-        if (input!!.isEmpty()) return default!!
-        return input
+            svar = readlnOrNull()?.lowercase()?.let { input ->
+                if (input == "exit") error("💀 Avslutter prosessen")
+                if (default != null && input.isEmpty()) return@let default
+                if (!valider(input)) {
+                    println("🙅 '$input' er ikke gyldig!")
+                    return@let null
+                }
+                input
+            }
+        } while (svar == null)
+        return svar
     }
 
     private fun ventPåJdbcUrl(): String {
