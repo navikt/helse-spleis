@@ -353,6 +353,18 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `ferie og permisjon med i arbeidsgiverperioden - nav overtar ansvar`() {
+        undersøkeLike({ 6.S + 6.F + 6.S }, { 6.S + 6.P + 6.S }, { 6.S + 6.AIG + 6.S }, { 6.S + 6.YF + 6.S }, dagerNavOvertarAnsvar = listOf(1.januar til 16.januar)) {
+            assertEquals(18, inspektør.size)
+            assertEquals(9, inspektør.arbeidsgiverperiodeDagTeller)
+            assertEquals(7, inspektør.arbeidsgiverperiodedagNavTeller)
+            assertEquals(2, inspektør.navDagTeller)
+            assertEquals(listOf(1.januar til 5.januar, 15.januar til 16.januar), inspektør.arbeidsgiverperiodedagerNavAnsvar.map { it.dato }.grupperSammenhengendePerioder())
+            assertEquals(1, perioder.size)
+        }
+    }
+
+    @Test
     fun `ferie og permisjon fullfører arbeidsgiverperioden`() {
         undersøkeLike({ 1.S + 15.F + 6.S }, { 1.S + 15.P + 6.S }, { 1.S + 15.AIG + 6.S }, { 1.S + 15.YF + 6.S }) {
             assertEquals(22, inspektør.size)
@@ -1046,9 +1058,9 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     // undersøker forskjellige tidslinjer som skal ha samme funksjonelle betydning
-    private fun undersøkeLike(vararg tidslinje: () -> Sykdomstidslinje, assertBlock: () -> Unit) {
+    private fun undersøkeLike(vararg tidslinje: () -> Sykdomstidslinje, dagerNavOvertarAnsvar: List<Periode> = emptyList(), assertBlock: () -> Unit) {
         tidslinje.forEach {
-            undersøke(resetSeed(tidslinjegenerator = it))
+            undersøke(resetSeed(tidslinjegenerator = it), dagerNavOvertarAnsvar = dagerNavOvertarAnsvar)
             assertBlock()
             reset()
         }

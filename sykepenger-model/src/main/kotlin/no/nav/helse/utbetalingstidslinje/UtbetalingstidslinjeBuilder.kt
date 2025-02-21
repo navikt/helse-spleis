@@ -144,12 +144,12 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
                 }
 
                 is Dag.Arbeidsgiverdag -> {
-                    if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.økonomi)
+                    if (erAGP(dag.dato)) arbeidsgiverperiodedagEllerNavAnsvar(builder, dag.dato, dag.økonomi)
                     else avvistDag(builder, dag.dato, dag.økonomi.ikkeBetalt(), Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode)
                 }
 
                 is Dag.Sykedag -> {
-                    if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.økonomi)
+                    if (erAGP(dag.dato)) arbeidsgiverperiodedagEllerNavAnsvar(builder, dag.dato, dag.økonomi)
                     else navDag(builder, dag.dato, dag.økonomi)
                 }
 
@@ -219,9 +219,14 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
 
     private fun erAGP(dato: LocalDate) = arbeidsgiverperiode.any { dato in it }
     private fun erAGPNavAnsvar(dato: LocalDate) = dagerNavOvertarAnsvar.any { dato in it }
-    private fun arbeidsgiverperiodedag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi) {
+
+    private fun arbeidsgiverperiodedagEllerNavAnsvar(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi) {
         if (erAGPNavAnsvar(dato) && !dato.erHelg())
             return builder.addArbeidsgiverperiodedagNav(dato, medInntektOrThrow(dato, økonomi))
+        builder.addArbeidsgiverperiodedag(dato, medInntektHvisFinnes(dato, økonomi.ikkeBetalt()))
+    }
+
+    private fun arbeidsgiverperiodedag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, økonomi: Økonomi) {
         builder.addArbeidsgiverperiodedag(dato, medInntektHvisFinnes(dato, økonomi.ikkeBetalt()))
     }
 
