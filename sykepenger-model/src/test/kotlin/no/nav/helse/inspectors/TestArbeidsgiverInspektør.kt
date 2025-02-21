@@ -42,7 +42,7 @@ internal class TestArbeidsgiverInspektør(
     internal val inntektInspektør get() = InntektshistorikkInspektør(view.inntektshistorikk)
     val sykdomshistorikk = view.sykdomshistorikk.inspektør
     internal val sykdomstidslinje: Sykdomstidslinje get() = sykdomshistorikk.tidslinje(0)
-    private val utbetalinger = view.utbetalinger.map { it.inspektør }
+    internal val utbetalinger = view.utbetalinger.map { it.inspektør }
     internal val antallUtbetalinger get() = utbetalinger.size
 
     val ubrukteRefusjonsopplysninger = view.ubrukteRefusjonsopplysninger
