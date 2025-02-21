@@ -28,7 +28,7 @@ internal object Personeditor {
         val defaultPath = "${System.getenv("HOME")}/Desktop"
         println("## Fyll inn pathen")
         println(" - Pathen for hvor jeg skal legg filer. Default er '$defaultPath'")
-        val path = ventPåInput { it == DEFAULT || kotlin.runCatching { Path.of(it) }.isSuccess }.let { if (it == DEFAULT) defaultPath else it }.removeSuffix("/")
+        val path = ventPåInput(defaultPath) { kotlin.runCatching { Path.of(it) }.isSuccess }.removeSuffix("/")
 
         val workingDirectory = Path.of("$path/Personeditor")
         val backupDirectory = Path.of("$path/Personeditor/Backups").apply {
@@ -41,7 +41,7 @@ internal object Personeditor {
         val jdbcUrl = ventPåJdbcUrl()
 
         println("## Fyll inn fødselsnummer på personen det skal endres på")
-        val fødselsnummer = ventPåInput(true) { it.length == 11 && kotlin.runCatching { it.toLong() }.isSuccess }
+        val fødselsnummer = ventPåInput { it.length == 11 && kotlin.runCatching { it.toLong() }.isSuccess }
 
         gåVidereVedJa("Ønsker du å gå videre å gå videre med å endre på '$fødselsnummer'? ⚠️", false)
 
@@ -95,29 +95,30 @@ internal object Personeditor {
         }
     }
 
-    private fun ventPåInput(required: Boolean = false, valider: (input: String) -> Boolean): String {
+    private fun ventPåInput(default: String? = null, valider: (input: String) -> Boolean): String {
         var input: String?
         do {
             input = readlnOrNull()?.lowercase()
         } while (input?.let { faktiskInput ->
             if (faktiskInput == "exit") error("💀 Avslutter prosessen")
-            else if (!required && faktiskInput.isEmpty()) true
+            else if (default != null && faktiskInput.isEmpty()) true
             else if (valider(faktiskInput)) true
             else false.also { println("🙅 '$faktiskInput' er ikke gyldig!") }
         } == false)
-        if (input!!.isEmpty()) return DEFAULT
+        if (input!!.isEmpty()) return default!!
         return input
     }
 
     private fun ventPåJdbcUrl(): String {
         println("## Fyll inn databaseport. Defaulten er '5432'")
-        val port = ventPåInput { it == DEFAULT || it.length == 4 && kotlin.runCatching { it.toInt() }.isSuccess }.let { if (it == DEFAULT) "5432" else it }
+        val defaultPort = "5432"
+        val port = ventPåInput(defaultPort) { it.length == 4 && kotlin.runCatching { it.toInt() }.isSuccess }
         val defaultEpost = hentEpostFraGCloud()
         when (defaultEpost) {
             null -> println("## Fyll inn brukernavn (epost)")
             else -> println("## Fyll inn brukernavn (epost). Defaulten er '$defaultEpost'")
         }
-        val epost = ventPåInput(required = defaultEpost == null) { it.endsWith("@nav.no") }.let { if (it == DEFAULT) defaultEpost else it }
+        val epost = ventPåInput(defaultEpost) { it.endsWith("@nav.no") }
         val jdbcUrl = "jdbc:postgresql://localhost:$port/spleis?user=${epost}"
         println(" - Bruker JdbcUrl '$jdbcUrl'")
         return jdbcUrl
@@ -141,12 +142,12 @@ internal object Personeditor {
     } catch (_: Exception) { null }
 
     private fun gåVidereVedJa(hva: String, default: Boolean) {
-        val (defualtSvar, valg) = when (default) {
+        val (defaultSvar, valg) = when (default) {
             true -> "y" to "[Yn]"
             false -> "n" to "[yN]"
         }
         println("## $hva? $valg")
-        if (ventPåInput { it in setOf("y", "n", DEFAULT) }.let { if (it == DEFAULT) defualtSvar else it } == "y") return
+        if (ventPåInput(defaultSvar) { it in setOf("y", "n") } == "y") return
         error("❌ Avslutter prosessen siden du svarte nei")
     }
 
@@ -181,5 +182,4 @@ internal object Personeditor {
         .replace("but none found", "<slettet>")
 
     private val objectMapper = jacksonObjectMapper()
-    private const val DEFAULT = "DEFAULT"
 }
