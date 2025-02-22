@@ -1,6 +1,9 @@
 package no.nav.helse
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.sql_dsl.connection
+import com.github.navikt.tbd_libs.sql_dsl.firstOrNull
+import com.github.navikt.tbd_libs.sql_dsl.transaction
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.io.File
@@ -8,8 +11,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.time.LocalDateTime
 import java.util.*
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.serde.SerialisertPerson
 import org.skyscreamer.jsonassert.JSONCompare
 import org.skyscreamer.jsonassert.JSONCompareMode
@@ -58,9 +59,14 @@ internal object Personeditor {
         val backupfil = File("${backupsdirectory}/$id.json")
         val resultatfil = File("${workingdirectory}/$id.json")
 
-        sessionOf(dataSource(jdbcUrl)).use {
-            it.transaction { tx ->
-                val data = tx.run(queryOf("SELECT * FROM person where fnr=:fnr FOR UPDATE;", mapOf("fnr" to fødselsnummer.toLong())).map { row -> row.string("data") }.asSingle) ?: error("❌ Fant ikke person med fnr $fødselsnummer")
+        dataSource(jdbcUrl).connection {
+            transaction {
+                val data = prepareStatement("SELECT data FROM person where fnr=? FOR UPDATE;").use { stmt ->
+                    stmt.setLong(1, fødselsnummer.toLong())
+                    stmt.executeQuery().use { rs ->
+                        rs.firstOrNull { row -> row.getString("data") }
+                    }
+                } ?: error("❌ Fant ikke person med fnr $fødselsnummer")
                 with(backupfil) {
                     createNewFile()
                     writeText(data)
@@ -88,7 +94,11 @@ internal object Personeditor {
 
                 gåVidereVedJa("Ser endringene bra ut? Nå er det no way back om du sier ja ⚠️", default = false)
 
-                tx.run(queryOf("UPDATE person SET data=:data WHERE fnr=:fnr", mapOf("data" to resultat, "fnr" to fødselsnummer.toLong())).asUpdate)
+                check(1 == prepareStatement("UPDATE person SET data=? WHERE fnr=?").use { stmt ->
+                    stmt.setString(1, resultat)
+                    stmt.setLong(2, fødselsnummer.toLong())
+                    stmt.executeUpdate()
+                }) { "forventet å oppdatere nøyaktig én rad" }
 
                 println(" - Endringene dine er live ✅")
             }

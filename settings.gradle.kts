@@ -32,6 +32,7 @@ dependencyResolutionManagement {
             library("postgresql", "org.postgresql", "postgresql").versionRef("postgres")
             library("hikari", "com.zaxxer", "HikariCP").versionRef("hikari")
             library("kotliquery", "com.github.seratch", "kotliquery").versionRef("kotliquery")
+            library("tbd-sql", "com.github.navikt.tbd-libs", "sql-dsl").version("2025.02.14-08.59-4f6db7fb")
 
             library("cloudsql", "com.google.cloud.sql", "postgres-socket-factory").versionRef("cloudsql")
             library("flyway-postgres", "org.flywaydb", "flyway-database-postgresql").versionRef("flyway")
@@ -39,7 +40,7 @@ dependencyResolutionManagement {
             library("testcontainers", "org.testcontainers", "postgresql").versionRef("testcontainers")
 
             bundle("flyway", listOf("flyway-postgres"))
-            bundle("database", listOf("postgresql", "hikari", "kotliquery"))
+            bundle("database", listOf("postgresql", "hikari", "kotliquery", "tbd-sql"))
 
             bundle("jackson", listOf("jackson-kotlin", "jackson-datatype"))
             bundle("logging", listOf("logback", "logstash"))
