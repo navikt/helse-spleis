@@ -98,7 +98,7 @@ class Søknad(
     init {
         if (perioder.isEmpty()) error("Søknad må inneholde perioder")
         sykdomsperiode = Søknadsperiode.sykdomsperiode(perioder) ?: error("Søknad inneholder ikke sykdomsperioder")
-        if (perioder.inneholderDagerEtter(sykdomsperiode.endInclusive)) error("Søknad inneholder dager etter siste sykdomsdag")
+        if (perioder.inneholderDagerEtter(sykdomsperiode.endInclusive)) error("Søknad inneholder dager utenfor søknadsperioden")
 
         sykdomstidslinje = perioder
             .map { it.sykdomstidslinje(sykdomsperiode, avskjæringsdato(), kilde) }
