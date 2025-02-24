@@ -343,7 +343,7 @@ class Utbetaling private constructor(
             val vedtaksperiodekladd = UtbetalingkladdBuilder(utbetalingsperiode, utbetalingstidslinje.subset(periode), organisasjonsnummer, fødselsnummer).build()
 
             val forrigeUtbetalte = utbetalinger.aktive(utbetalingsaken.omsluttendePeriode)
-            val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull { it.harOppdragMedUtbetalinger() } ?: forrigeUtbetalte.firstOrNull()
+            val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull()
             val annulleringer = forrigeUtbetalte
                 .filterNot { it === korrelerendeUtbetaling }
                 .mapNotNull { it.opphør(aktivitetslogg) }
@@ -385,7 +385,7 @@ class Utbetaling private constructor(
                 )
             }
 
-        fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
+        fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv).filterNot { it.tilstand is Annullert  }
         private fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
         fun List<Utbetaling>.aktive(periode: Periode) = this
             .aktive()

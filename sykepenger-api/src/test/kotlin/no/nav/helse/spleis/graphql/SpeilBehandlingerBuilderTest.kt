@@ -2019,6 +2019,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelserTilUtbetalt()
+        håndterUtbetalt()
         håndterYtelserTilUtbetalt()
 
         generasjoner {

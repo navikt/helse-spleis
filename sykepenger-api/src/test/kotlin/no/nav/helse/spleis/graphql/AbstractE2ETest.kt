@@ -334,9 +334,11 @@ internal abstract class AbstractE2ETest {
     }
 
     protected fun håndterSimulering() {
-        val behov = hendelselogg.simuleringbehov() ?: error("Fant ikke simuleringsbehov")
-        behov.oppdrag.forEach {
-            håndterSimulering(behov.vedtaksperiodeId.vedtaksperiode, behov.utbetalingId, it.fagsystemId, it.fagområde, behov.orgnummer)
+        val simuleringer = hendelselogg.simuleringbehov() ?: error("Fant ikke simuleringsbehov")
+        simuleringer.forEach { behov ->
+            behov.oppdrag.forEach {
+                håndterSimulering(behov.vedtaksperiodeId.vedtaksperiode, behov.utbetalingId, it.fagsystemId, it.fagområde, behov.orgnummer)
+            }
         }
     }
 
@@ -547,20 +549,21 @@ internal abstract class AbstractE2ETest {
         ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Simulering))
             ?.let {
                 ubesvarteBehov.removeAll(it)
-                val (utbetalingId, oppdrag) = it.groupBy { UUID.fromString(it.kontekst().getValue("utbetalingId")) }.entries.single()
-                val vedtaksperiodeId = UUID.fromString(oppdrag.first().kontekst().getValue("vedtaksperiodeId"))
-                val orgnummer = oppdrag.first().kontekst().getValue("organisasjonsnummer")
-                Simuleringbehov(
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    orgnummer = orgnummer,
-                    utbetalingId = utbetalingId,
-                    oppdrag = oppdrag.map {
-                        Oppdragbehov(
-                            fagområde = it.detaljer().getValue("fagområde") as String,
-                            fagsystemId = it.kontekst().getValue("fagsystemId"),
-                        )
-                    }
-                )
+                it.groupBy { UUID.fromString(it.kontekst().getValue("utbetalingId")) }.map { (utbetalingId, oppdrag)  ->
+                    val vedtaksperiodeId = UUID.fromString(oppdrag.first().kontekst().getValue("vedtaksperiodeId"))
+                    val orgnummer = oppdrag.first().kontekst().getValue("organisasjonsnummer")
+                    Simuleringbehov(
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        orgnummer = orgnummer,
+                        utbetalingId = utbetalingId,
+                        oppdrag = oppdrag.map {
+                            Oppdragbehov(
+                                fagområde = it.detaljer().getValue("fagområde") as String,
+                                fagsystemId = it.kontekst().getValue("fagsystemId"),
+                            )
+                        }
+                    )
+                }
             }
 
     private fun IAktivitetslogg.godkjenningbehov() = ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Godkjenning))?.single()?.let {

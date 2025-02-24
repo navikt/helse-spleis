@@ -87,9 +87,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         håndterSøknad(februar)
         håndterYtelser(2.vedtaksperiode)
-        assertVarsler(listOf(Varselkode.RV_OS_2, Varselkode.RV_UT_21), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_UT_21), 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
         håndterUtbetalt()
 
         håndterYtelser(3.vedtaksperiode)
@@ -100,36 +101,31 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         assertEquals(5, inspektør.antallUtbetalinger)
         val januarutbetaling = inspektør.utbetaling(0)
         val marsutbetaling = inspektør.utbetaling(1)
-        val annulleringAvJanuar = inspektør.utbetaling(2)
+        val annulleringAvMars = inspektør.utbetaling(2)
         val februarutbetaling = inspektør.utbetaling(3)
         val revurderingAvMars = inspektør.utbetaling(4)
 
-        assertEquals(13, observatør.utbetaltEndretEventer.size)
+        assertEquals(15, observatør.utbetaltEndretEventer.size)
         assertUtbetalingtilstander(januarutbetaling.utbetalingId, NY, IKKE_UTBETALT, GODKJENT_UTEN_UTBETALING)
         assertUtbetalingtilstander(marsutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
-        assertUtbetalingtilstander(annulleringAvJanuar.utbetalingId, NY, IKKE_UTBETALT, ANNULLERT)
-        assertUtbetalingtilstander(februarutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
+        assertUtbetalingtilstander(annulleringAvMars.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, ANNULLERT)
+        assertUtbetalingtilstander(februarutbetaling.utbetalingId, NY, IKKE_UTBETALT, GODKJENT, OVERFØRT, UTBETALT)
         assertUtbetalingtilstander(revurderingAvMars.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
 
         assertNotEquals(januarutbetaling.korrelasjonsId, marsutbetaling.korrelasjonsId)
-        assertEquals(januarutbetaling.korrelasjonsId, annulleringAvJanuar.korrelasjonsId)
-        assertEquals(marsutbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
+        assertEquals(marsutbetaling.korrelasjonsId, annulleringAvMars.korrelasjonsId)
+        assertEquals(januarutbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
         assertEquals(revurderingAvMars.korrelasjonsId, februarutbetaling.korrelasjonsId)
 
-        assertEquals(0, annulleringAvJanuar.arbeidsgiverOppdrag.size)
-        assertEquals(0, annulleringAvJanuar.personOppdrag.size)
+        assertEquals(1, annulleringAvMars.arbeidsgiverOppdrag.size)
+        assertEquals(0, annulleringAvMars.personOppdrag.size)
 
-        assertEquals(2, februarutbetaling.arbeidsgiverOppdrag.size)
+        assertEquals(1, februarutbetaling.arbeidsgiverOppdrag.size)
         assertEquals(0, februarutbetaling.personOppdrag.size)
-        assertEquals(Endringskode.ENDR, februarutbetaling.arbeidsgiverOppdrag.inspektør.endringskode)
+        assertEquals(Endringskode.NY, februarutbetaling.arbeidsgiverOppdrag.inspektør.endringskode)
         februarutbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
             assertEquals(1.februar, linje.fom)
             assertEquals(28.februar, linje.tom)
-            assertEquals(Endringskode.NY, linje.endringskode)
-        }
-        februarutbetaling.arbeidsgiverOppdrag[1].inspektør.also { linje ->
-            assertEquals(17.mars, linje.fom)
-            assertEquals(30.mars, linje.tom)
             assertEquals(Endringskode.NY, linje.endringskode)
         }
 
@@ -139,7 +135,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         revurderingAvMars.arbeidsgiverOppdrag[0].inspektør.also { linje ->
             assertEquals(1.februar, linje.fom)
             assertEquals(30.mars, linje.tom)
-            assertEquals(Endringskode.NY, linje.endringskode)
+            assertEquals(Endringskode.ENDR, linje.endringskode)
         }
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -210,7 +206,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         håndterSøknad(februar)
         håndterYtelser(2.vedtaksperiode)
-        assertVarsler(listOf(Varselkode.RV_UT_21, Varselkode.RV_OS_2), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_UT_21), 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode("orgnr", 1.mai(2017), 5.mai(2017), 100.prosent, 1000.daglig)))
         håndterYtelser(2.vedtaksperiode)
