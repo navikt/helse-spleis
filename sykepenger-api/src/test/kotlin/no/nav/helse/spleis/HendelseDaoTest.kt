@@ -1,13 +1,14 @@
 package no.nav.helse.spleis
 
+import com.github.navikt.tbd_libs.sql_dsl.connection
+import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.test_support.TestDataSource
 import io.mockk.mockk
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.spleis.dao.HendelseDao
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -36,16 +37,15 @@ internal class HendelseDaoTest {
         fødselsnummer: String = UNG_PERSON_FNR,
         data: String = """{ "@opprettet": "${LocalDateTime.now()}" }"""
     ) {
-        sessionOf(this).use {
-            it.run(
-                queryOf(
-                    "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json)))",
-                    fødselsnummer.toLong(),
-                    meldingsReferanse.toString(),
-                    meldingstype.toString(),
-                    data
-                ).asExecute
-            )
+        @Language("PostgreSQL")
+        val sql = "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (:fnr, :meldingId, :meldingType, cast(:data as json))"
+        this.connection {
+            prepareStatementWithNamedParameters(sql) {
+                withParameter("fnr", fødselsnummer.toLong())
+                withParameter("meldingId", meldingsReferanse)
+                withParameter("meldingType", meldingstype.name)
+                withParameter("data", data)
+            }.use { it.execute() }
         }
     }
 

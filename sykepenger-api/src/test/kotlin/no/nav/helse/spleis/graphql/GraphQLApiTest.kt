@@ -5,6 +5,11 @@ import com.github.navikt.tbd_libs.naisful.test.naisfulTestApp
 import com.github.navikt.tbd_libs.result_object.ok
 import com.github.navikt.tbd_libs.speed.IdentResponse
 import com.github.navikt.tbd_libs.speed.SpeedClient
+import com.github.navikt.tbd_libs.sql_dsl.connection
+import com.github.navikt.tbd_libs.sql_dsl.long
+import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
+import com.github.navikt.tbd_libs.sql_dsl.single
+import com.github.navikt.tbd_libs.sql_dsl.transaction
 import com.github.navikt.tbd_libs.test_support.TestDataSource
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -20,8 +25,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
@@ -869,19 +872,29 @@ internal class GraphQLApiTest : AbstractObservableTest() {
 
     private fun lagrePerson(dataSource: DataSource, fødselsnummer: String, person: Person) {
         val serialisertPerson = person.dto().tilPersonData().tilSerialisertPerson()
-        sessionOf(dataSource, returnGeneratedKey = true).use {
-            val personId = it.run(
-                queryOf(
-                    "INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
-                    fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json
-                ).asUpdateAndReturnGeneratedKey
-            )
-            it.run(
-                queryOf(
-                    "INSERT INTO person_alias (fnr, person_id) VALUES (?, ?)",
-                    fødselsnummer.toLong(), personId!!
-                ).asExecute
-            )
+        dataSource.connection {
+            transaction {
+                @Language("PostgreSQL")
+                val opprettPerson = "INSERT INTO person(skjema_versjon, fnr, data) VALUES(:skjemaVersjon, :fnr, :data) RETURNING id"
+                val personId = prepareStatementWithNamedParameters(opprettPerson) {
+                    withParameter("fnr", fødselsnummer.toLong())
+                    withParameter("skjemaVersjon", serialisertPerson.skjemaVersjon)
+                    withParameter("data", serialisertPerson.json)
+                }.use {
+                    it.executeQuery().use { rs ->
+                        rs.single { it.long(1) }
+                    }
+                }
+
+                @Language("PostgreSQL")
+                val opprettPersonAlias = "INSERT INTO person_alias (fnr, person_id) VALUES (:fnr, :personId)"
+                prepareStatementWithNamedParameters(opprettPersonAlias) {
+                    withParameter("fnr", fødselsnummer.toLong())
+                    withParameter("personId", personId)
+                }.use {
+                    it.execute()
+                }
+            }
 
         }
     }
@@ -893,16 +906,15 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
         data: String = "{}"
     ) {
-        sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json)))",
-                    fødselsnummer.toLong(),
-                    meldingsReferanse.toString(),
-                    meldingstype.toString(),
-                    data
-                ).asExecute
-            )
+        dataSource.connection {
+            @Language("PostgreSQL")
+            val opprettMelding = "INSERT INTO melding(fnr, melding_id, melding_type, data, behandlet_tidspunkt) VALUES(:fnr, :meldingId, :meldingType, cast(:data as json), now())"
+            prepareStatementWithNamedParameters(opprettMelding) {
+                withParameter("fnr", fødselsnummer.toLong())
+                withParameter("meldingId", meldingsReferanse)
+                withParameter("meldingType", meldingstype.name)
+                withParameter("data", data)
+            }.use { it.execute() }
         }
     }
 

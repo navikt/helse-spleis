@@ -10,14 +10,18 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
+import com.github.navikt.tbd_libs.sql_dsl.connection
+import com.github.navikt.tbd_libs.sql_dsl.long
+import com.github.navikt.tbd_libs.sql_dsl.mapNotNull
+import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
+import com.github.navikt.tbd_libs.sql_dsl.single
+import com.github.navikt.tbd_libs.sql_dsl.string
 import com.github.navikt.tbd_libs.test_support.TestDataSource
 import com.zaxxer.hikari.HikariDataSource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
@@ -135,12 +139,20 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.reset()
     }
 
-    protected fun antallPersoner() = sessionOf(dataSource.ds).use {
-        it.run(queryOf("SELECT COUNT(1) FROM person").map { it.long(1) }.asSingle) ?: 0
+    protected fun antallPersoner() = dataSource.ds.connection {
+        prepareStatement("SELECT COUNT(1) FROM person").use {
+            it.executeQuery().use { rs ->
+                rs.single { it.long(1) }
+            }
+        }
     }
 
-    protected fun antallPersonalias(fnr: String? = null) = sessionOf(dataSource.ds).use {
-        it.run(queryOf("SELECT COUNT(1) FROM person_alias ${fnr?.let { "WHERE fnr=${fnr.toLong()}" } ?: ""}").map { it.long(1) }.asSingle) ?: 0
+    protected fun antallPersonalias(fnr: String? = null) = dataSource.ds.connection {
+        prepareStatement("SELECT COUNT(1) FROM person_alias ${fnr?.let { "WHERE fnr=${fnr.toLong()}" } ?: ""}").use {
+            it.executeQuery().use { rs ->
+                rs.single { it.long(1) }
+            }
+        }
     }
 
     protected fun sendNySøknad(
@@ -790,10 +802,14 @@ internal abstract class AbstractEndToEndMediatorTest {
         }
 
         private fun finnInntektsmeldinger(fnr: String): List<JsonNode> =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf("SELECT data FROM melding WHERE fnr = ? AND melding_type = 'INNTEKTSMELDING' ORDER BY lest_dato ASC", fnr.toLong()).map {
-                    objectMapper.readTree(it.string("data"))
-                }.asList)
+            dataSource.connection {
+                prepareStatementWithNamedParameters("SELECT data FROM melding WHERE fnr = :fnr AND melding_type = 'INNTEKTSMELDING' ORDER BY lest_dato ASC") {
+                    withParameter("fnr", fnr.toLong())
+                }.use {
+                    it.executeQuery().use { rs ->
+                        rs.mapNotNull { objectMapper.readTree(it.string("data")) }
+                    }
+                }
             }
 
         private fun lagInntektsmeldingerReplayMessage(forespørsel: Forespørsel): JsonMessage {

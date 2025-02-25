@@ -1,18 +1,16 @@
 package no.nav.helse.opprydding
 
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
-import java.time.LocalDateTime
-import java.util.UUID
-import javax.sql.DataSource
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import org.flywaydb.core.Flyway
+import com.github.navikt.tbd_libs.sql_dsl.connection
+import com.github.navikt.tbd_libs.sql_dsl.int
+import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
+import com.github.navikt.tbd_libs.sql_dsl.single
+import com.github.navikt.tbd_libs.sql_dsl.transaction
+import java.util.*
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class PersonRepositoryTest : DBTest() {
@@ -34,68 +32,50 @@ internal class PersonRepositoryTest : DBTest() {
         assertEquals(0, finnMelding("123"))
     }
 
-    private fun runMigration(psql: PostgreSQLContainer<Nothing>): DataSource {
-        val dataSource = HikariDataSource(createHikariConfig(psql))
-        Flyway.configure()
-            .dataSource(dataSource)
-            .cleanDisabled(false)
-            .locations("classpath:db/migration")
-            .load()
-            .also { it.clean() }
-            .migrate()
-        return dataSource
-    }
-
-    private fun createHikariConfig(psql: PostgreSQLContainer<Nothing>) =
-        HikariConfig().apply {
-            this.jdbcUrl = psql.jdbcUrl
-            this.username = psql.username
-            this.password = psql.password
-            maximumPoolSize = 3
-            minimumIdle = 1
-            idleTimeout = 10001
-            connectionTimeout = 1000
-            initializationFailTimeout = 5000
-            maxLifetime = 30001
-        }
-
     private fun finnPerson(fødselsnummer: String): Int {
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf("SELECT COUNT(1) FROM person WHERE fnr = ?", fødselsnummer.toLong()).map { it.int(1) }.asSingle)
-        } ?: 0
+        return dataSource.connection {
+            prepareStatementWithNamedParameters("SELECT COUNT(1) FROM person WHERE fnr = :fnr") {
+                withParameter("fnr", fødselsnummer.toLong())
+            }.use {
+                it.executeQuery().use { rs ->
+                    rs.single { it.int(1) }
+                }
+            }
+        }
     }
 
     private fun finnMelding(fødselsnummer: String): Int {
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf("SELECT COUNT(1) FROM melding WHERE fnr = ?", fødselsnummer.toLong()).map { it.int(1) }.asSingle)
-        } ?: 0
+        return dataSource.connection {
+            prepareStatementWithNamedParameters("SELECT COUNT(1) FROM melding WHERE fnr = :fnr") {
+                withParameter("fnr", fødselsnummer.toLong())
+            }.use {
+                it.executeQuery().use { rs ->
+                    rs.single { it.int(1) }
+                }
+            }
+        }
     }
 
     private fun opprettDummyPerson(fødselsnummer: String) {
-        sessionOf(dataSource).transaction {
-            val opprettMelding =
-                "INSERT INTO melding(fnr, melding_id, melding_type, data, behandlet_tidspunkt) VALUES(?, ?, ?, ?::json, ?)"
-            it.run(
-                queryOf(
-                    opprettMelding,
-                    fødselsnummer.toLong(),
-                    UUID.randomUUID(),
-                    "melding",
-                    "{}",
-                    LocalDateTime.now()
-                ).asExecute
-            )
+        dataSource.connection {
+            transaction {
+                @Language("PostgreSQL")
+                val opprettMelding = "INSERT INTO melding(fnr, melding_id, melding_type, data, behandlet_tidspunkt) VALUES(:fnr, :meldingId, :meldingType, cast(:data as json), now())"
+                prepareStatementWithNamedParameters(opprettMelding) {
+                    withParameter("fnr", fødselsnummer.toLong())
+                    withParameter("meldingId", UUID.randomUUID())
+                    withParameter("meldingType", "melding")
+                    withParameter("data", "{}")
+                }.use { it.execute() }
+                @Language("PostgreSQL")
+                val opprettPerson = "INSERT INTO person(skjema_versjon, fnr, data) VALUES(0, :fnr, '{}')"
+                prepareStatementWithNamedParameters(opprettPerson) {
+                    withParameter("fnr", fødselsnummer.toLong())
+                }.use {
+                    it.execute()
+                }
+            }
 
-            val opprettPerson =
-                "INSERT INTO person(skjema_versjon, fnr, data) VALUES(?, ?, ?::json)"
-            it.run(
-                queryOf(
-                    opprettPerson,
-                    0,
-                    fødselsnummer.toLong(),
-                    "{}"
-                ).asExecute
-            )
         }
     }
 }

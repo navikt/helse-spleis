@@ -1,12 +1,15 @@
 package no.nav.helse.spleis.dao
 
+import com.github.navikt.tbd_libs.sql_dsl.connection
+import com.github.navikt.tbd_libs.sql_dsl.firstOrNull
+import com.github.navikt.tbd_libs.sql_dsl.mapNotNull
+import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
+import com.github.navikt.tbd_libs.sql_dsl.string
 import io.micrometer.core.instrument.MeterRegistry
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.objectMapper
 import org.intellij.lang.annotations.Language
@@ -14,15 +17,14 @@ import org.intellij.lang.annotations.Language
 internal class HendelseDao(private val dataSource: () -> DataSource, private val meterRegistry: MeterRegistry) {
 
     fun hentHendelse(meldingsReferanse: UUID): String? {
-        return sessionOf(dataSource()).use { session ->
-            session.run(
-                queryOf(
-                    "SELECT data FROM melding WHERE melding_id = ?",
-                    meldingsReferanse.toString()
-                ).map {
-                    it.string("data")
-                }.asSingle
-            )
+        return dataSource().connection {
+            prepareStatementWithNamedParameters("SELECT data FROM melding WHERE melding_id = cast(:meldingId as text)") {
+                withParameter("meldingId", meldingsReferanse)
+            }.use {
+                it.executeQuery().use { rs ->
+                    rs.firstOrNull { it.string("data") }
+                }
+            }
         }.also {
             PostgresProbe.hendelseLestFraDb(meterRegistry)
         }
@@ -32,15 +34,19 @@ internal class HendelseDao(private val dataSource: () -> DataSource, private val
         @Language("PostgreSQL")
         val statement = """
             SELECT melding_type, data FROM melding 
-            WHERE fnr=? AND (melding_type = 'NY_SØKNAD' OR melding_type = 'SENDT_SØKNAD_NAV' OR melding_type = 'SENDT_SØKNAD_FRILANS'
+            WHERE fnr=:fnr AND (melding_type = 'NY_SØKNAD' OR melding_type = 'SENDT_SØKNAD_NAV' OR melding_type = 'SENDT_SØKNAD_FRILANS'
                 OR melding_type = 'SENDT_SØKNAD_SELVSTENDIG' OR melding_type = 'SENDT_SØKNAD_ARBEIDSGIVER' OR melding_type = 'SENDT_SØKNAD_ARBEIDSLEDIG' 
                 OR melding_type = 'INNTEKTSMELDING' OR melding_type = 'NAV_NO_SELVBESTEMT_INNTEKTSMELDING' OR melding_type = 'NAV_NO_KORRIGERT_INNTEKTSMELDING' OR melding_type = 'NAV_NO_INNTEKTSMELDING' 
                 OR melding_type = 'SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER')
         """
-        return sessionOf(dataSource()).use { session ->
-            session.run(queryOf(statement, fødselsnummer).map { row ->
-                Meldingstype.fra(row.string("melding_type")) to row.string("data")
-            }.asList)
+        return dataSource().connection {
+            prepareStatementWithNamedParameters(statement) {
+                withParameter("fnr", fødselsnummer)
+            }.use {
+                it.executeQuery().use { rs ->
+                    rs.mapNotNull { row -> Meldingstype.fra(row.string("melding_type")) to row.string("data") }
+                }
+            }
         }.mapNotNull { (type, data) ->
             objectMapper.readTree(data)?.let { node ->
                 when (type) {

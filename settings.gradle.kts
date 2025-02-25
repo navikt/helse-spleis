@@ -6,6 +6,7 @@ include(
 )
 
 val rapidsAndRiversVersion = "2025012712551737978926.de930d8e0feb"
+val tbdLibsVersion = "2025.02.25-12.50-0ab5a4f3"
 
 dependencyResolutionManagement {
     versionCatalogs {
@@ -14,7 +15,6 @@ dependencyResolutionManagement {
             version("rapids-and-rivers", rapidsAndRiversVersion)
             version("postgres", "42.7.4")
             version("hikari", "6.1.0")
-            version("kotliquery", "1.9.0")
             version("cloudsql", "1.20.0")
             version("flyway", "10.21.0")
             version("logback", "1.5.12")
@@ -31,8 +31,7 @@ dependencyResolutionManagement {
 
             library("postgresql", "org.postgresql", "postgresql").versionRef("postgres")
             library("hikari", "com.zaxxer", "HikariCP").versionRef("hikari")
-            library("kotliquery", "com.github.seratch", "kotliquery").versionRef("kotliquery")
-            library("tbd-sql", "com.github.navikt.tbd-libs", "sql-dsl").version("2025.02.14-08.59-4f6db7fb")
+            library("tbd-sql", "com.github.navikt.tbd-libs", "sql-dsl").version(tbdLibsVersion)
 
             library("cloudsql", "com.google.cloud.sql", "postgres-socket-factory").versionRef("cloudsql")
             library("flyway-postgres", "org.flywaydb", "flyway-database-postgresql").versionRef("flyway")
@@ -40,7 +39,7 @@ dependencyResolutionManagement {
             library("testcontainers", "org.testcontainers", "postgresql").versionRef("testcontainers")
 
             bundle("flyway", listOf("flyway-postgres"))
-            bundle("database", listOf("postgresql", "hikari", "kotliquery", "tbd-sql"))
+            bundle("database", listOf("postgresql", "hikari", "tbd-sql"))
 
             bundle("jackson", listOf("jackson-kotlin", "jackson-datatype"))
             bundle("logging", listOf("logback", "logstash"))

@@ -3,10 +3,12 @@ package no.nav.helse.spleis.mediator.e2e
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
+import com.github.navikt.tbd_libs.sql_dsl.connection
+import com.github.navikt.tbd_libs.sql_dsl.localDateTime
+import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
+import com.github.navikt.tbd_libs.sql_dsl.single
 import java.math.BigDecimal
 import java.time.LocalDate
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -320,15 +322,21 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     fun `Behandler ikke melding hvis den allerede er behandlet`() {
         val (meldingId, message) = meldingsfabrikk.lagNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 25.januar, sykmeldingsgrad = 100))
 
+        fun behandletTidspunkt(id: String) = dataSource.ds.connection {
+            prepareStatementWithNamedParameters("select behandlet_tidspunkt from melding WHERE melding_id = :id") {
+                withParameter("id", id)
+            }.use { stmt ->
+                stmt.executeQuery().use { rs ->
+                    rs.single { it.localDateTime(1) }
+                }
+            }
+        }
+
         testRapid.sendTestMessage(message)
         assertTrue(hendelseRepository.erBehandlet(MeldingsreferanseId(meldingId.toUUID())))
-        val behandletTidspunktFørDuplikat = sessionOf(dataSource.ds).use { session ->
-            session.run(queryOf("select behandlet_tidspunkt from melding WHERE melding_id = ?", meldingId).map { it.localDateTime(1) }.asSingle)
-        }!!
+        val behandletTidspunktFørDuplikat = behandletTidspunkt(meldingId)
         testRapid.sendTestMessage(message)
-        val behandletTidspunktEtterDuplikat = sessionOf(dataSource.ds).use { session ->
-            session.run(queryOf("select behandlet_tidspunkt from melding WHERE melding_id = ?", meldingId).map { it.localDateTime(1) }.asSingle)
-        }!!
+        val behandletTidspunktEtterDuplikat = behandletTidspunkt(meldingId)
         assertEquals(behandletTidspunktFørDuplikat, behandletTidspunktEtterDuplikat)
     }
 

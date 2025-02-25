@@ -1,10 +1,14 @@
 package no.nav.helse.spleis.db
 
-import java.time.ZoneId
+import com.github.navikt.tbd_libs.sql_dsl.boolean
+import com.github.navikt.tbd_libs.sql_dsl.connection
+import com.github.navikt.tbd_libs.sql_dsl.mapNotNull
+import com.github.navikt.tbd_libs.sql_dsl.offsetDateTime
+import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
+import com.github.navikt.tbd_libs.sql_dsl.single
+import com.github.navikt.tbd_libs.sql_dsl.string
 import java.util.*
 import javax.sql.DataSource
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.serde.migration.Hendelse
@@ -87,6 +91,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMes
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
+import org.intellij.lang.annotations.Language
 
 internal class HendelseRepository(private val dataSource: DataSource) {
     fun lagreMelding(melding: HendelseMessage) {
@@ -95,32 +100,44 @@ internal class HendelseRepository(private val dataSource: DataSource) {
 
     internal fun lagreMelding(melding: HendelseMessage, personidentifikator: Personidentifikator, meldingId: MeldingsreferanseId, json: String) {
         val meldingtype = meldingstype(melding) ?: return
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json))) ON CONFLICT(melding_id) DO NOTHING",
-                    personidentifikator.toLong(),
-                    meldingId.id.toString(),
-                    meldingtype.name,
-                    json
-                ).asExecute
-            )
+        @Language("PostgreSQL")
+        val sql = "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (:fnr, :meldingId, :meldingType, cast(:data as json)) ON CONFLICT(melding_id) DO NOTHING"
+        dataSource.connection {
+            prepareStatementWithNamedParameters(sql) {
+                withParameter("fnr", personidentifikator.toLong())
+                withParameter("meldingId", meldingId.id)
+                withParameter("meldingType", meldingtype.name)
+                withParameter("data", json)
+            }.use { stmt ->
+                stmt.execute()
+            }
         }.also {
             PostgresProbe.hendelseSkrevetTilDb()
         }
     }
 
-    fun markerSomBehandlet(meldingId: MeldingsreferanseId) = sessionOf(dataSource).use { session ->
-        session.run(
-            queryOf(
-                "UPDATE melding SET behandlet_tidspunkt=now() WHERE melding_id = ? AND behandlet_tidspunkt IS NULL",
-                meldingId.id.toString()
-            ).asUpdate
-        )
+    fun markerSomBehandlet(meldingId: MeldingsreferanseId) {
+        @Language("PostgreSQL")
+        val sql = "UPDATE melding SET behandlet_tidspunkt=now() WHERE melding_id = cast(:meldingId as text) AND behandlet_tidspunkt IS NULL"
+        dataSource.connection {
+            prepareStatementWithNamedParameters(sql) {
+                withParameter("meldingId", meldingId.id)
+            }.use { stmt ->
+                stmt.execute()
+            }
+        }
     }
 
-    fun erBehandlet(meldingId: MeldingsreferanseId) = sessionOf(dataSource).use { session ->
-        true == session.run(queryOf("SELECT exists(select 1 FROM melding WHERE melding_id = ? and behandlet_tidspunkt is not null)", meldingId.id.toString()).map { it.boolean(1) }.asSingle)
+    fun erBehandlet(meldingId: MeldingsreferanseId) = dataSource.connection {
+        @Language("PostgreSQL")
+        val sql = "SELECT exists(select 1 FROM melding WHERE melding_id = CAST(:meldingId as text) and behandlet_tidspunkt is not null)"
+        true == prepareStatementWithNamedParameters(sql) {
+            withParameter("meldingId", meldingId.id)
+        }.use { stmt ->
+            stmt.executeQuery().use { rs ->
+                rs.single { it.boolean(1) }
+            }
+        }
     }
 
     private fun meldingstype(melding: HendelseMessage) = when (melding) {
@@ -170,20 +187,23 @@ internal class HendelseRepository(private val dataSource: DataSource) {
     }
 
     internal fun hentAlleHendelser(personidentifikator: Personidentifikator): Map<UUID, Hendelse> {
-        return sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    "SELECT melding_id, melding_type, lest_dato FROM melding WHERE fnr = ?",
-                    personidentifikator.toLong()
-                ).map {
-                    Hendelse(
-                        meldingsreferanseId = UUID.fromString(it.string("melding_id")),
-                        meldingstype = it.string("melding_type"),
-                        lestDato = it.instant("lest_dato").atZone(ZoneId.systemDefault()).toLocalDateTime()
-                    )
-                }.asList
-            ).associateBy { it.meldingsreferanseId }
-        }
+        @Language("PostgreSQL")
+        val sql = "SELECT melding_id, melding_type, lest_dato FROM melding WHERE fnr = :fnr"
+        return dataSource.connection {
+            prepareStatementWithNamedParameters(sql) {
+                withParameter("fnr", personidentifikator.toLong())
+            }.use { stmt ->
+                stmt.executeQuery().use { rs ->
+                    rs.mapNotNull { row ->
+                        Hendelse(
+                            meldingsreferanseId = UUID.fromString(row.string("melding_id")),
+                            meldingstype = row.string("melding_type"),
+                            lestDato = row.offsetDateTime("lest_dato").toLocalDateTime()
+                        )
+                    }
+                }
+            }
+        }.associateBy { it.meldingsreferanseId }
     }
 
     private enum class Meldingstype {

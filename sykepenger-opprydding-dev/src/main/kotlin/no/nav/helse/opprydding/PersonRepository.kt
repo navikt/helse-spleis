@@ -1,33 +1,38 @@
 package no.nav.helse.opprydding
 
+import com.github.navikt.tbd_libs.sql_dsl.connection
+import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
+import com.github.navikt.tbd_libs.sql_dsl.transaction
+import java.sql.Connection
 import javax.sql.DataSource
-import kotliquery.TransactionalSession
-import kotliquery.queryOf
-import kotliquery.sessionOf
+import org.intellij.lang.annotations.Language
 
 internal class PersonRepository(private val dataSource: DataSource) {
     internal fun slett(fødselsnummer: String) {
-        sessionOf(dataSource).use { session ->
-            session.transaction {
-                it.slettPersonAlias(fødselsnummer)
-                it.slettPerson(fødselsnummer)
-                it.slettMeldinger(fødselsnummer)
+        dataSource.connection {
+            transaction {
+                slettPersonAlias(fødselsnummer)
+                slettPerson(fødselsnummer)
+                slettMeldinger(fødselsnummer)
             }
         }
     }
 
-    private fun TransactionalSession.slettPersonAlias(fødselsnummer: String) {
-        val query = "DELETE FROM person_alias WHERE fnr = ?"
-        run(queryOf(query, fødselsnummer.toLong()).asExecute)
+    private fun Connection.slettPersonAlias(fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query = "DELETE FROM person_alias WHERE fnr = :fnr"
+        prepareStatementWithNamedParameters(query) { withParameter("fnr", fødselsnummer.toLong()) }.use { it.execute() }
     }
 
-    private fun TransactionalSession.slettPerson(fødselsnummer: String) {
-        val query = "DELETE FROM person WHERE fnr = ?"
-        run(queryOf(query, fødselsnummer.toLong()).asExecute)
+    private fun Connection.slettPerson(fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query = "DELETE FROM person WHERE fnr = :fnr"
+        prepareStatementWithNamedParameters(query) { withParameter("fnr", fødselsnummer.toLong()) }.use { it.execute() }
     }
 
-    private fun TransactionalSession.slettMeldinger(fødselsnummer: String) {
-        val query = "DELETE FROM melding WHERE fnr = ?"
-        run(queryOf(query, fødselsnummer.toLong()).asExecute)
+    private fun Connection.slettMeldinger(fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query = "DELETE FROM melding WHERE fnr = :fnr"
+        prepareStatementWithNamedParameters(query) { withParameter("fnr", fødselsnummer.toLong()) }.use { it.execute() }
     }
 }

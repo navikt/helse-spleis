@@ -1,13 +1,17 @@
 package no.nav.helse.spleis
 
+import com.github.navikt.tbd_libs.sql_dsl.connection
+import com.github.navikt.tbd_libs.sql_dsl.long
+import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
+import com.github.navikt.tbd_libs.sql_dsl.single
+import com.github.navikt.tbd_libs.sql_dsl.transaction
 import com.github.navikt.tbd_libs.test_support.TestDataSource
 import io.ktor.http.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
-import kotliquery.queryOf
-import kotliquery.sessionOf
+import kotlin.use
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
@@ -23,6 +27,7 @@ import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 
@@ -117,19 +122,29 @@ internal class RestApiTest {
 
     private fun DataSource.lagrePerson(fødselsnummer: String, person: Person) {
         val serialisertPerson = person.dto().tilPersonData().tilSerialisertPerson()
-        sessionOf(this, returnGeneratedKey = true).use {
-            val personId = it.run(
-                queryOf(
-                    "INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
-                    fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json
-                ).asUpdateAndReturnGeneratedKey
-            )
-            it.run(
-                queryOf(
-                    "INSERT INTO person_alias (fnr, person_id) VALUES (?, ?);",
-                    fødselsnummer.toLong(), personId!!
-                ).asExecute
-            )
+        connection {
+            transaction {
+                @Language("PostgreSQL")
+                val opprettPerson = "INSERT INTO person(skjema_versjon, fnr, data) VALUES(:skjemaVersjon, :fnr, :data) RETURNING id"
+                val personId = prepareStatementWithNamedParameters(opprettPerson) {
+                    withParameter("fnr", fødselsnummer.toLong())
+                    withParameter("skjemaVersjon", serialisertPerson.skjemaVersjon)
+                    withParameter("data", serialisertPerson.json)
+                }.use {
+                    it.executeQuery().use { rs ->
+                        rs.single { it.long(1) }
+                    }
+                }
+
+                @Language("PostgreSQL")
+                val opprettPersonAlias = "INSERT INTO person_alias (fnr, person_id) VALUES (:fnr, :personId)"
+                prepareStatementWithNamedParameters(opprettPersonAlias) {
+                    withParameter("fnr", fødselsnummer.toLong())
+                    withParameter("personId", personId)
+                }.use {
+                    it.execute()
+                }
+            }
 
         }
     }
@@ -138,18 +153,17 @@ internal class RestApiTest {
         meldingsReferanse: UUID,
         meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
         fødselsnummer: String = UNG_PERSON_FNR,
-        data: String = "{}"
+        data: String = """{ "@opprettet": "${LocalDateTime.now()}" }"""
     ) {
-        sessionOf(this).use {
-            it.run(
-                queryOf(
-                    "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json)))",
-                    fødselsnummer.toLong(),
-                    meldingsReferanse.toString(),
-                    meldingstype.toString(),
-                    data
-                ).asExecute
-            )
+        @Language("PostgreSQL")
+        val sql = "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (:fnr, :meldingId, :meldingType, cast(:data as json))"
+        connection {
+            prepareStatementWithNamedParameters(sql) {
+                withParameter("fnr", fødselsnummer.toLong())
+                withParameter("meldingId", meldingsReferanse)
+                withParameter("meldingType", meldingstype.name)
+                withParameter("data", data)
+            }.use { it.execute() }
         }
     }
 }
