@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.postgresql)
     implementation(libs.hikari)
     implementation(libs.cloudsql)
+    implementation(libs.tbd.sql)
 }
 
 tasks {
