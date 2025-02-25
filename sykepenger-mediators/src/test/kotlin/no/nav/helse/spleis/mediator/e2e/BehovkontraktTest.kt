@@ -58,7 +58,8 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             Institusjonsopphold,
             Omsorgspenger,
             Opplæringspenger,
-            Pleiepenger
+            Pleiepenger,
+            InntekterForBeregning
         )
         assertArbeidsavklaringspengerdetaljer(behov)
         assertDagpengerdetaljer(behov)
@@ -67,6 +68,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertOmsorgspengerdetaljer(behov)
         assertOpplæringspengerdetaljer(behov)
         assertPleiepengerdetaljer(behov)
+        assertInntekterForBeregning(behov)
     }
 
     @Test
@@ -209,6 +211,11 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     private fun assertPleiepengerdetaljer(behov: JsonNode) {
         assertDato(behov.path(Pleiepenger.name).path("pleiepengerFom").asText())
         assertDato(behov.path(Pleiepenger.name).path("pleiepengerTom").asText())
+    }
+
+    private fun assertInntekterForBeregning(behov: JsonNode) {
+        assertDato(behov.path(InntekterForBeregning.name).path("fom").asText())
+        assertDato(behov.path(InntekterForBeregning.name).path("tom").asText())
     }
 
     private fun assertSykepengehistorikkdetaljer(behov: JsonNode) {

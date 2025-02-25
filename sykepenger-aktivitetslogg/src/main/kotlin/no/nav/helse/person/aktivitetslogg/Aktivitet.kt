@@ -187,6 +187,17 @@ sealed class Aktivitet(
                 )
             }
 
+            fun inntekterForBeregning(aktivitetslogg: IAktivitetslogg, periode: ClosedRange<LocalDate>) {
+                aktivitetslogg.behov(
+                    Behovtype.InntekterForBeregning,
+                    "Trenger informasjon om inntekter for beregning",
+                    mapOf(
+                        "fom" to periode.start.toString(),
+                        "tom" to periode.endInclusive.toString()
+                    )
+                )
+            }
+
             fun arbeidsforhold(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
                 aktivitetslogg.behov(
                     Behovtype.ArbeidsforholdV2, "Trenger informasjon om arbeidsforhold", mapOf(
@@ -245,6 +256,7 @@ sealed class Aktivitet(
             InntekterForSykepengegrunnlag,
             InntekterForSykepengegrunnlagForArbeidsgiver,
             InntekterForOpptjeningsvurdering,
+            InntekterForBeregning,
 
             Dagpenger,
             Arbeidsavklaringspenger,
