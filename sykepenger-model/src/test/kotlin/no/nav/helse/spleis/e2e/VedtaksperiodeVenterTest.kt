@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -240,7 +241,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
                 skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
                 hendelser = setOf(søknadId, inntektsmeldingId),
                 ventetSiden = inspektør(1.vedtaksperiode).oppdatert,
-                venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(90),
+                venterTil = LocalDateTime.MAX,
                 venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
                     skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,

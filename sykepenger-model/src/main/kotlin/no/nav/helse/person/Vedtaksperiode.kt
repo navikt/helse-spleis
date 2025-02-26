@@ -2734,12 +2734,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
 
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
-            when {
-                vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode) -> tilstandsendringstidspunkt.plusDays(90)
-                else -> LocalDateTime.MAX
-            }
-
         override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak? {
             return tilstand(vedtaksperiode).venteårsak()
         }

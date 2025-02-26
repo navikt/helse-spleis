@@ -40,7 +40,7 @@ internal class MakstidIAvventerBlokkerendePeriodeTest : AbstractDslTest() {
     }
 
     @Test
-    fun `periode i avventer blokkerende som venter på søknad fra annen arbeidsgiver venter i 3 måneder`() {
+    fun `periode i avventer blokkerende som venter på søknad fra annen arbeidsgiver venter for alltid`() {
         a1 {
             håndterSykmelding(januar)
         }
@@ -49,7 +49,7 @@ internal class MakstidIAvventerBlokkerendePeriodeTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            assertEquals(LocalDate.now().plusDays(90), venterTil(1.vedtaksperiode))
+            assertEquals(LocalDate.MAX, venterTil(1.vedtaksperiode))
         }
     }
 
