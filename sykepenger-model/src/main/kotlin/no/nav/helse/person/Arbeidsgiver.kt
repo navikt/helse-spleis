@@ -258,6 +258,9 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.avventerSøknad(periode: Periode) = this
             .any { it.sykmeldingsperioder.avventerSøknad(periode) }
 
+        internal fun Iterable<Arbeidsgiver>.fjernSykmeldingsperiode(periode: Periode) = this
+            .forEach { it.sykmeldingsperioder.fjern(periode) }
+
         private fun Iterable<Arbeidsgiver>.harPågåeneAnnullering() =
             any { it.utbetalinger.any { utbetaling -> utbetaling.erAnnulleringInFlight() } }
 

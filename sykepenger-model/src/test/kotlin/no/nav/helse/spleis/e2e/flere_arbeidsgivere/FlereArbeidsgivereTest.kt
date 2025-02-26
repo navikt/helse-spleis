@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
+import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.april
 import no.nav.helse.den
@@ -8,6 +9,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
@@ -47,6 +49,7 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SY_4
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
@@ -66,6 +69,43 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
+
+    @Test
+    fun `når vi har ventet 3 måneder på søknad på andre arbeisgivere går vi videre med varsel`() {
+        a1 { håndterSykmelding(januar) }
+        (a2 og a3) {
+            håndterSykmelding(januar)
+            håndterSykmelding(februar)
+        }
+        a1 {
+            håndterSøknad(januar)
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            assertVenterPåSøknad(1.vedtaksperiode)
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertVenterPåSøknad(1.vedtaksperiode)
+        }
+        (a2 og a3) {
+            assertEquals(listOf(januar, februar), inspektør.sykmeldingsperioder())
+        }
+        a1 {
+            val ikkeLengeNok = LocalDateTime.now().minusMonths(3).plusDays(1)
+            val lengeNok = LocalDateTime.now().minusMonths(3).minusDays(1)
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, tilstandsendringstidspunkt = ikkeLengeNok)
+            assertVenterPåSøknad(1.vedtaksperiode)
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, tilstandsendringstidspunkt = lengeNok)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertVarsler(1.vedtaksperiode, RV_SY_4)
+        }
+        (a2 og a3) {
+            assertEquals(listOf(februar), inspektør.sykmeldingsperioder())
+        }
+    }
+
+    private fun TestPerson.TestArbeidsgiver.assertVenterPåSøknad(vedtaksperiodeId: UUID) {
+        assertSisteTilstand(vedtaksperiodeId, AVVENTER_BLOKKERENDE_PERIODE)
+        val venterPå = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == vedtaksperiodeId }.venterPå.venteårsak.hva
+        assertEquals("SØKNAD", venterPå)
+    }
 
     @Test
     fun `en gjenskapning fra virkeligheten med foreldrepenger, ferie og en spenstig IM blant annet`() {

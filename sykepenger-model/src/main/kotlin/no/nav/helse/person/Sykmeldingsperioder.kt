@@ -21,8 +21,8 @@ internal class Sykmeldingsperioder(
         return perioder.any { other -> vedtaksperiode.overlapperMed(other) }
     }
 
-    internal fun fjern(søknad: Periode) {
-        perioder = perioder.flatMap { it.trim(søknad.oppdaterFom(LocalDate.MIN)) }
+    internal fun fjern(periode: Periode) {
+        perioder = perioder.flatMap { it.trim(periode.oppdaterFom(LocalDate.MIN)) }
     }
 
     internal fun overlappendePerioder(dager: DagerFraInntektsmelding) =

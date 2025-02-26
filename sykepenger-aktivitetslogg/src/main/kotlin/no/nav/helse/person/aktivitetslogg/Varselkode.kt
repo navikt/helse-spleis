@@ -10,9 +10,11 @@ enum class Varselkode(
     val avviklet: Boolean = false
 ) {
 
+    // SY: Sykmelding
     RV_SY_1("Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden", avviklet = true),
     RV_SY_2("Mottatt en sykmelding som er skrevet tidligere enn den som er lagt til grunn, vurder sykmeldingene og gjør eventuelle justeringer", avviklet = true),
     RV_SY_3("Mottatt flere sykmeldinger for perioden - den første sykmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt", avviklet = true),
+    RV_SY_4("Registrert overlappende sykmelding på annen arbeidsgiver"),
 
     // SØ: Søknad
     RV_SØ_1("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger"),

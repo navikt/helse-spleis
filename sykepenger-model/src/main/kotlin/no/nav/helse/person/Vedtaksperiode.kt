@@ -136,6 +136,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SY_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_31
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_32
@@ -2775,12 +2776,8 @@ internal class Vedtaksperiode private constructor(
             tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, hendelse, aktivitetslogg)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            if (påminnelse.skalReberegnes()) {
-                if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
-                    return vedtaksperiode.tilstand(aktivitetslogg, AvventerInntektsmelding)
-                }
-                return
-            }
+            if (påminnelse.skalReberegnes() && vedtaksperiode.måInnhenteInntektEllerRefusjon()) return vedtaksperiode.tilstand(aktivitetslogg, AvventerInntektsmelding)
+            tilstand(vedtaksperiode).håndter(vedtaksperiode, påminnelse, aktivitetslogg)
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
 
@@ -2819,16 +2816,20 @@ internal class Vedtaksperiode private constructor(
             fun venteårsak(): Venteårsak? = null
             fun venterPå(): Vedtaksperiode? = null
             fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg)
+            fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
         }
 
         private data object AvventerTidligereEllerOverlappendeSøknad : Tilstand {
             override fun venteårsak() = SØKNAD.utenBegrunnelse
-            override fun gjenopptaBehandling(
-                vedtaksperiode: Vedtaksperiode,
-                hendelse: Hendelse,
-                aktivitetslogg: IAktivitetslogg
-            ) {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
                 aktivitetslogg.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden")
+            }
+
+            override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+                if (påminnelse.når(VentetMinst(Period.ofMonths(3))) || påminnelse.når(Flagg("forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere"))) {
+                    aktivitetslogg.varsel(RV_SY_4)
+                    vedtaksperiode.person.fjernSykmeldingsperiode(vedtaksperiode.periode)
+                }
             }
         }
 

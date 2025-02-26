@@ -54,6 +54,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeid
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
+import no.nav.helse.person.Arbeidsgiver.Companion.fjernSykmeldingsperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterHistorikkFraInfotrygd
@@ -619,6 +620,7 @@ class Person private constructor(
         arbeidsgivere.nåværendeVedtaksperioder(filter)
 
     internal fun avventerSøknad(periode: Periode) = arbeidsgivere.avventerSøknad(periode)
+    internal fun fjernSykmeldingsperiode(periode: Periode) = arbeidsgivere.fjernSykmeldingsperiode(periode)
     internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter)
     internal fun mursteinsperioder(utgangspunkt: Vedtaksperiode) = arbeidsgivere.mursteinsperioder(utgangspunkt)
 
