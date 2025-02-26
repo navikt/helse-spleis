@@ -51,6 +51,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.arbeidsgiverperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
+import no.nav.helse.person.Vedtaksperiode.Companion.manglerRefusjonsopplysninger
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
@@ -586,7 +587,9 @@ internal class Arbeidsgiver private constructor(
         val dager = inntektsmelding.dager()
         håndter(inntektsmelding) { håndter(dager, aktivitetslogg) }
 
-        val refusjonsoverstyring = if (vedtaksperiodeIdForReplay == null) håndter(
+        val hånderRefusjon = vedtaksperiodeIdForReplay == null || vedtaksperioder.manglerRefusjonsopplysninger(vedtaksperiodeIdForReplay)
+
+        val refusjonsoverstyring = if (hånderRefusjon) håndter(
             inntektsmelding,
             inntektsmeldingRefusjon(inntektsmelding.metadata.meldingsreferanseId),
             aktivitetslogg,
