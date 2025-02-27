@@ -126,11 +126,21 @@ internal data class ArbeidsgiverInntektsopplysning(
                 )
             }
 
+        private fun ArbeidsgiverInntektsopplysning.kilde() = Kilde(
+            avsender = if (korrigertInntekt != null || skjønnsmessigFastsatt != null) Avsender.SAKSBEHANDLER else Avsender.ARBEIDSGIVER,
+            meldingsreferanseId = fastsattÅrsinntektInntektsdata.hendelseId,
+            tidsstempel = fastsattÅrsinntektInntektsdata.tidsstempel
+        )
+
         internal fun List<ArbeidsgiverInntektsopplysning>.beverte(builder: InntekterForBeregning.Builder) {
             forEach { arbeidsgiverInntektsopplysning ->
-                val avsender = if (arbeidsgiverInntektsopplysning.korrigertInntekt != null || arbeidsgiverInntektsopplysning.skjønnsmessigFastsatt != null) Avsender.SAKSBEHANDLER else Avsender.ARBEIDSGIVER
-                val kilde = Kilde(arbeidsgiverInntektsopplysning.fastsattÅrsinntektInntektsdata.hendelseId, avsender, arbeidsgiverInntektsopplysning.fastsattÅrsinntektInntektsdata.tidsstempel)
-                builder.fastsattÅrsinntekt(arbeidsgiverInntektsopplysning.orgnummer, arbeidsgiverInntektsopplysning.fastsattÅrsinntekt, kilde)
+                builder.fastsattÅrsinntekt(arbeidsgiverInntektsopplysning.orgnummer, arbeidsgiverInntektsopplysning.fastsattÅrsinntekt, arbeidsgiverInntektsopplysning.kilde())
+            }
+        }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.beverteDeaktiverte(builder: InntekterForBeregning.Builder) {
+            forEach { deaktivertArbeidsgiverInntektsopplysning ->
+                builder.fastsattÅrsinntekt(deaktivertArbeidsgiverInntektsopplysning.orgnummer, INGEN, deaktivertArbeidsgiverInntektsopplysning.kilde())
             }
         }
 

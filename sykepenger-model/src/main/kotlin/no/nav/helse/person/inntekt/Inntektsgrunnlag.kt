@@ -26,6 +26,7 @@ import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.berik
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.beverte
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.beverteDeaktiverte
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.faktaavklarteInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
@@ -125,6 +126,7 @@ internal class Inntektsgrunnlag private constructor(
     internal fun beverte(builder: InntekterForBeregning.Builder) {
         builder.medGjeldende6G(`6G`)
         arbeidsgiverInntektsopplysninger.beverte(builder)
+        deaktiverteArbeidsforhold.beverteDeaktiverte(builder)
     }
 
     internal companion object {

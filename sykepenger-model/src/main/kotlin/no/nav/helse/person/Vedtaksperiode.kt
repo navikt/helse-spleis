@@ -2017,7 +2017,8 @@ internal class Vedtaksperiode private constructor(
 
         val (maksdatofilter, beregnetTidslinjePerArbeidsgiver) = beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(
             aktivitetslogg,
-            grunnlagsdata
+            grunnlagsdata,
+            inntekterForBeregning
         )
         perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
             val utbetalingstidslinje = beregnetTidslinjePerArbeidsgiver.getValue(other.arbeidsgiver.organisasjonsnummer)
@@ -2035,19 +2036,21 @@ internal class Vedtaksperiode private constructor(
 
     private fun beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(
         aktivitetslogg: IAktivitetslogg,
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
+        inntekterForBeregning: InntekterForBeregning
     ): Pair<MaksimumSykepengedagerfilter, Map<String, Utbetalingstidslinje>> {
-        val uberegnetTidslinjePerArbeidsgiver = utbetalingstidslinjePerArbeidsgiver(grunnlagsdata)
+        val uberegnetTidslinjePerArbeidsgiver = utbetalingstidslinjePerArbeidsgiver(grunnlagsdata, inntekterForBeregning)
         return filtrerUtbetalingstidslinjer(aktivitetslogg, uberegnetTidslinjePerArbeidsgiver, grunnlagsdata)
     }
 
-    private fun utbetalingstidslinjePerArbeidsgiver(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Map<String, Utbetalingstidslinje> {
+    private fun utbetalingstidslinjePerArbeidsgiver(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, inntekterForBeregning: InntekterForBeregning): Map<String, Utbetalingstidslinje> {
         val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning()
             .groupBy { it.arbeidsgiver.organisasjonsnummer }
         val faktaavklarteInntekter = grunnlagsdata.faktaavklarteInntekter()
         val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning
             .mapValues { (arbeidsgiver, vedtaksperioder) ->
                 val fastsattÅrsinntekt = faktaavklarteInntekter.forArbeidsgiver(arbeidsgiver)
+                val inntektstidslinje = inntekterForBeregning.forArbeidsgiver(arbeidsgiver)
                 vedtaksperioder.map {
                     it.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, faktaavklarteInntekter.`6G`)
                 }
