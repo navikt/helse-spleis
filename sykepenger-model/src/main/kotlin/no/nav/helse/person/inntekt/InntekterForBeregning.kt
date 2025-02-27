@@ -5,7 +5,9 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.økonomi.Inntekt
 
-internal data class InntekterForBeregning(val inntekterPerInntektskilde: Map<String, Beløpstidslinje>) {
+internal data class InntekterForBeregning(val inntekterPerInntektskilde: Map<String, Beløpstidslinje>, val `6G`: Inntekt) {
+
+    internal fun forArbeidsgiver(organisasjonsnummer: String) = inntekterPerInntektskilde.getValue(organisasjonsnummer)
 
     internal class Builder(private val beregningsperiode: Periode) {
         private val inntekterPerInntektskilde = mutableMapOf<String, Beløpstidslinje>()
@@ -25,6 +27,12 @@ internal data class InntekterForBeregning(val inntekterPerInntektskilde: Map<Str
             }
         }
 
-        internal fun build() = InntekterForBeregning(inntekterPerInntektskilde.toMap())
+        private lateinit var `6G`: Inntekt
+
+        internal fun medGjeldende6G(gjeldende6G: Inntekt) {
+            this.`6G` = gjeldende6G
+        }
+
+        internal fun build() = InntekterForBeregning(inntekterPerInntektskilde.toMap(), `6G`)
     }
 }
