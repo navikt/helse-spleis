@@ -161,6 +161,7 @@ import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
+import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
@@ -2008,6 +2009,11 @@ internal class Vedtaksperiode private constructor(
         val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
         }
+
+        val inntektsbuilder = InntekterForBeregning.Builder(perioderSomMåHensyntasVedBeregning().map { it.periode }.periode()!!)
+        grunnlagsdata.inntektsgrunnlag.beverte(inntektsbuilder)
+        // inntektsbuilder.inntektsendringer()  --her fletter vi inn inntektsendringer som er registrert i spesidaler
+        val inntekterForBeregning = inntektsbuilder.build()
 
         val (maksdatofilter, beregnetTidslinjePerArbeidsgiver) = beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(
             aktivitetslogg,

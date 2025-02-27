@@ -25,6 +25,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.berik
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.beverte
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.faktaavklarteInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
@@ -119,6 +120,10 @@ internal class Inntektsgrunnlag private constructor(
                     minimumInntektÅrlig = minsteinntekt.årlig
                 )
             )
+    }
+
+    internal fun beverte(builder: InntekterForBeregning.Builder) {
+        arbeidsgiverInntektsopplysninger.beverte(builder)
     }
 
     internal companion object {

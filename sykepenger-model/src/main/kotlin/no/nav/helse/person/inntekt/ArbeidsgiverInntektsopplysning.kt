@@ -6,6 +6,7 @@ import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-15`
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
@@ -14,6 +15,7 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
@@ -29,7 +31,8 @@ internal data class ArbeidsgiverInntektsopplysning(
     val skjønnsmessigFastsatt: SkjønnsmessigFastsatt?
 ) {
     val omregnetÅrsinntekt = korrigertInntekt?.inntektsdata ?: faktaavklartInntekt.inntektsdata
-    val fastsattÅrsinntekt = skjønnsmessigFastsatt?.inntektsdata?.beløp ?: omregnetÅrsinntekt.beløp
+    private val fastsattÅrsinntektInntektsdata = skjønnsmessigFastsatt?.inntektsdata ?: omregnetÅrsinntekt
+    val fastsattÅrsinntekt = fastsattÅrsinntektInntektsdata.beløp
 
     private fun gjelderPåSkjæringstidspunktet(skjæringstidspunkt: LocalDate) =
         skjæringstidspunkt == gjelder.start
@@ -122,6 +125,14 @@ internal data class ArbeidsgiverInntektsopplysning(
                     fastsattÅrsinntekt = arbeidsgiverInntektsopplysning.fastsattÅrsinntekt
                 )
             }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.beverte(builder: InntekterForBeregning.Builder) {
+            forEach { arbeidsgiverInntektsopplysning ->
+                val avsender = if (arbeidsgiverInntektsopplysning.korrigertInntekt != null || arbeidsgiverInntektsopplysning.skjønnsmessigFastsatt != null) Avsender.SAKSBEHANDLER else Avsender.ARBEIDSGIVER
+                val kilde = Kilde(arbeidsgiverInntektsopplysning.fastsattÅrsinntektInntektsdata.hendelseId, avsender, arbeidsgiverInntektsopplysning.fastsattÅrsinntektInntektsdata.tidsstempel)
+                builder.fastsattÅrsinntekt(arbeidsgiverInntektsopplysning.orgnummer, arbeidsgiverInntektsopplysning.fastsattÅrsinntekt, kilde)
+            }
+        }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.validerSkjønnsmessigAltEllerIntet() {
             check(all { it.skjønnsmessigFastsatt == null } || all { it.skjønnsmessigFastsatt != null }) { "Enten så må alle inntektsopplysninger var skjønnsmessig fastsatt, eller så må ingen være det" }
