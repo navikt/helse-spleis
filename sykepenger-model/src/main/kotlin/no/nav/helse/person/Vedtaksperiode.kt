@@ -2050,7 +2050,7 @@ internal class Vedtaksperiode private constructor(
         val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning
             .mapValues { (arbeidsgiver, vedtaksperioder) ->
                 val fastsattÅrsinntekt = faktaavklarteInntekter.forArbeidsgiver(arbeidsgiver)
-                val inntektstidslinje = inntekterForBeregning.forArbeidsgiver(arbeidsgiver)
+                val (fastsattÅrsinntektV4, inntektstidslinje) = inntekterForBeregning.tilBeregning(arbeidsgiver)
                 vedtaksperioder.map {
                     it.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, faktaavklarteInntekter.`6G`)
                 }

@@ -6,29 +6,43 @@ import no.nav.helse.nesteDag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
-internal data class InntekterForBeregning(val inntekterPerInntektskilde: Map<String, Beløpstidslinje>, val `6G`: Inntekt) {
+internal data class InntekterForBeregning(
+    private val inntekterPerInntektskilde: Map<String, Inntekter>,
+    val `6G`: Inntekt
+) {
 
-    internal fun forArbeidsgiver(organisasjonsnummer: String) = inntekterPerInntektskilde.getValue(organisasjonsnummer)
+    internal fun tilBeregning(organisasjonsnummer: String) = inntekterPerInntektskilde.getValue(organisasjonsnummer).let { (it.fastsattÅrsinntekt ?: INGEN) to it.inntektstidslinje }
+
+    internal data class Inntekter(val fastsattÅrsinntekt: Inntekt?, val inntektstidslinje: Beløpstidslinje)
 
     internal class Builder(private val beregningsperiode: Periode, private val skjæringstidspunkt: LocalDate) {
-        private val inntekterPerInntektskilde = mutableMapOf<String, Beløpstidslinje>()
+        private val inntekterPerInntektskilde = mutableMapOf<String, Inntekter>()
         internal fun fastsattÅrsinntekt(organisasjonsnummer: String, fastsattÅrsinntekt: Inntekt, opplysningskilde: Kilde) {
-            inntekterPerInntektskilde[organisasjonsnummer] = Beløpstidslinje.fra(beregningsperiode, fastsattÅrsinntekt, opplysningskilde)
+            inntekterPerInntektskilde[organisasjonsnummer] = Inntekter(
+                fastsattÅrsinntekt = fastsattÅrsinntekt,
+                inntektstidslinje = Beløpstidslinje.fra(beregningsperiode, fastsattÅrsinntekt, opplysningskilde)
+            )
         }
 
-        internal fun inntektsendringer(inntektskilde: String, beløpstidslinje: Beløpstidslinje) {
+        internal fun inntektsendringer(inntektskilde: String, inntektstidslinje: Beløpstidslinje) {
             if (!inntekterPerInntektskilde.containsKey(inntektskilde)) {
                 // dette kan kanskje noen ganger være tilkommen inntekt
-                inntekterPerInntektskilde[inntektskilde] = beløpstidslinje.subset(beregningsperiode)
+                inntekterPerInntektskilde[inntektskilde] = Inntekter(
+                    fastsattÅrsinntekt = null,
+                    inntektstidslinje = inntektstidslinje.subset(beregningsperiode)
+                )
             } else {
                 // inntektsendring på en arbeidsgiver som finnes i inntektsgrunnlaget
                 //      - økt arbeidsinnsats hos biarbeidsgiver (ghosts)
                 //      - inntektsendring hos en arbeidsgiver du er syk hos (tror vi)
 
                 // for arbeidsgivere som finnes i inntektsgrunnlaget, kan ikke beløpet på skjæringstidspunktet (fastsatt årsinntekt) endres som en inntektsendring. Da må inntektsgrunnlaget overstyres
-                val inntektsendring = beløpstidslinje.subset(beregningsperiode).fraOgMed(skjæringstidspunkt.nesteDag)
-                inntekterPerInntektskilde.replace(inntektskilde, inntekterPerInntektskilde.getValue(inntektskilde) + inntektsendring)
+                val før = inntekterPerInntektskilde.getValue(inntektskilde)
+                val inntektsendring = inntektstidslinje.subset(beregningsperiode).fraOgMed(skjæringstidspunkt.nesteDag)
+                val etter = før.copy(inntektstidslinje = før.inntektstidslinje + inntektsendring)
+                inntekterPerInntektskilde.replace(inntektskilde, etter)
             }
         }
 

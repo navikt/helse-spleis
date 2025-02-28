@@ -12,6 +12,8 @@ import no.nav.helse.januar
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class InntekterForBeregningTest {
@@ -22,7 +24,7 @@ class InntekterForBeregningTest {
         builder.fastsattÅrsinntekt(a1, INNTEKT, UUID.randomUUID().arbeidsgiver)
         builder.inntektsendringer(a1, Avsender.SAKSBEHANDLER.beløpstidslinje(januar, INNTEKT * 2))
         builder.medGjeldende6G(Grunnbeløp.`6G`.beløp(1.januar))
-        val inntektstidslinje = builder.build().forArbeidsgiver(a1)
+        val (_, inntektstidslinje) = builder.build().tilBeregning(a1)
 
         val forventetTidslinje = Avsender.ARBEIDSGIVER.beløpstidslinje(1.januar.somPeriode(), INNTEKT) + Avsender.SAKSBEHANDLER.beløpstidslinje(2.januar til 31.januar, INNTEKT * 2)
         assertBeløpstidslinje(forventetTidslinje, inntektstidslinje, ignoreMeldingsreferanseId = true)
@@ -35,13 +37,15 @@ class InntekterForBeregningTest {
         builder.inntektsendringer(a2, Avsender.SAKSBEHANDLER.beløpstidslinje(januar, INNTEKT * 2))
         builder.medGjeldende6G(Grunnbeløp.`6G`.beløp(1.januar))
         val inntekterForBeregning = builder.build()
-        val inntektstidslinjeForA1 = inntekterForBeregning.forArbeidsgiver(a1)
-        val inntektstidslinjeForA2 = inntekterForBeregning.forArbeidsgiver(a2)
+        val (fastsattÅrsinntektA1, inntektstidslinjeForA1) = inntekterForBeregning.tilBeregning(a1)
+        val (fastsattÅrsinntektA2, inntektstidslinjeForA2) = inntekterForBeregning.tilBeregning(a2)
 
         val forventetTidslinjeA1 = Avsender.ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT)
         val forventetTidslinjeA2 = Avsender.SAKSBEHANDLER.beløpstidslinje(januar, INNTEKT * 2)
-        
+
         assertBeløpstidslinje(forventetTidslinjeA1, inntektstidslinjeForA1, ignoreMeldingsreferanseId = true)
         assertBeløpstidslinje(forventetTidslinjeA2, inntektstidslinjeForA2, ignoreMeldingsreferanseId = true)
+        assertEquals(INNTEKT, fastsattÅrsinntektA1)
+        assertEquals(INGEN, fastsattÅrsinntektA2)
     }
 }
