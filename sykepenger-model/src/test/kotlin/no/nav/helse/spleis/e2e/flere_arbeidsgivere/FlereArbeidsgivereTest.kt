@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.den
 import no.nav.helse.desember
@@ -88,7 +88,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertEquals(listOf(januar, februar), inspektør.sykmeldingsperioder())
         }
         a1 {
-            val ikkeLengeNok = LocalDateTime.now().minusMonths(3).plusDays(1)
+            val ikkeLengeNok = LocalDateTime.now().minusMonths(3).plusWeeks(1)
             val lengeNok = LocalDateTime.now().minusMonths(3).minusDays(1)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, tilstandsendringstidspunkt = ikkeLengeNok)
             assertVenterPåSøknad(1.vedtaksperiode)
