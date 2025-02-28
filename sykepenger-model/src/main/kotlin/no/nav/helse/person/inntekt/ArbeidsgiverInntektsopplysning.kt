@@ -134,13 +134,13 @@ internal data class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.beverte(builder: InntekterForBeregning.Builder) {
             forEach { arbeidsgiverInntektsopplysning ->
-                builder.fastsattÅrsinntekt(arbeidsgiverInntektsopplysning.orgnummer, arbeidsgiverInntektsopplysning.fastsattÅrsinntekt, arbeidsgiverInntektsopplysning.kilde())
+                builder.fraInntektsgrunnlag(arbeidsgiverInntektsopplysning.orgnummer, arbeidsgiverInntektsopplysning.fastsattÅrsinntekt, arbeidsgiverInntektsopplysning.kilde())
             }
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.beverteDeaktiverte(builder: InntekterForBeregning.Builder) {
             forEach { deaktivertArbeidsgiverInntektsopplysning ->
-                builder.fastsattÅrsinntekt(deaktivertArbeidsgiverInntektsopplysning.orgnummer, INGEN, deaktivertArbeidsgiverInntektsopplysning.kilde())
+                builder.deaktivertFraInntektsgrunnlag(deaktivertArbeidsgiverInntektsopplysning.orgnummer, deaktivertArbeidsgiverInntektsopplysning.kilde())
             }
         }
 

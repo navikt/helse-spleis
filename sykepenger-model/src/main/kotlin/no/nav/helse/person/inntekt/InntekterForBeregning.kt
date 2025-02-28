@@ -19,10 +19,17 @@ internal data class InntekterForBeregning(
 
     internal class Builder(private val beregningsperiode: Periode, private val skjæringstidspunkt: LocalDate) {
         private val inntekterPerInntektskilde = mutableMapOf<String, Inntekter>()
-        internal fun fastsattÅrsinntekt(organisasjonsnummer: String, fastsattÅrsinntekt: Inntekt, opplysningskilde: Kilde) {
+        internal fun fraInntektsgrunnlag(organisasjonsnummer: String, fastsattÅrsinntekt: Inntekt, opplysningskilde: Kilde) {
             inntekterPerInntektskilde[organisasjonsnummer] = Inntekter(
                 fastsattÅrsinntekt = fastsattÅrsinntekt,
                 inntektstidslinje = Beløpstidslinje.fra(beregningsperiode, fastsattÅrsinntekt, opplysningskilde)
+            )
+        }
+
+        internal fun deaktivertFraInntektsgrunnlag(organisasjonsnummer: String, opplysningskilde: Kilde) {
+            inntekterPerInntektskilde[organisasjonsnummer] = Inntekter(
+                fastsattÅrsinntekt = null,
+                inntektstidslinje = Beløpstidslinje.fra(beregningsperiode, INGEN, opplysningskilde)
             )
         }
 

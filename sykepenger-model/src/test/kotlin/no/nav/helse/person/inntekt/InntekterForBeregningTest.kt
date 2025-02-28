@@ -21,7 +21,7 @@ class InntekterForBeregningTest {
     @Test
     fun `kan ikke endre inntekt på skjæringstidspunktet for en arbeidsgiver som finnes i inntektsgrunnlaget ved hjelp av en inntektsendring`() {
         val builder = InntekterForBeregning.Builder(januar, 1.januar)
-        builder.fastsattÅrsinntekt(a1, INNTEKT, UUID.randomUUID().arbeidsgiver)
+        builder.fraInntektsgrunnlag(a1, INNTEKT, UUID.randomUUID().arbeidsgiver)
         builder.inntektsendringer(a1, Avsender.SAKSBEHANDLER.beløpstidslinje(januar, INNTEKT * 2))
         builder.medGjeldende6G(Grunnbeløp.`6G`.beløp(1.januar))
         val (_, inntektstidslinje) = builder.build().tilBeregning(a1)
@@ -33,7 +33,7 @@ class InntekterForBeregningTest {
     @Test
     fun `kan sette inntekt på skjæringstidspunktet for en arbeidsgiver som ikke finnes i inntektsgrunnlaget`() {
         val builder = InntekterForBeregning.Builder(januar, 1.januar)
-        builder.fastsattÅrsinntekt(a1, INNTEKT, UUID.randomUUID().arbeidsgiver)
+        builder.fraInntektsgrunnlag(a1, INNTEKT, UUID.randomUUID().arbeidsgiver)
         builder.inntektsendringer(a2, Avsender.SAKSBEHANDLER.beløpstidslinje(januar, INNTEKT * 2))
         builder.medGjeldende6G(Grunnbeløp.`6G`.beløp(1.januar))
         val inntekterForBeregning = builder.build()
