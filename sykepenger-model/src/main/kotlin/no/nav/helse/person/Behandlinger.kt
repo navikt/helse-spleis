@@ -417,7 +417,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 arbeidsgiverperiode = arbeidsgiverperiode,
                 dagerNavOvertarAnsvar = gjeldende.dagerNavOvertarAnsvar,
                 refusjonstidslinje = refusjonstidslinje,
-                inntektsendringer = inntektsendringer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 `6G` = `6G`
             )

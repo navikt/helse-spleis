@@ -4,10 +4,8 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
-import no.nav.helse.nesteDag
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.inntekt.Inntektstidslinje
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -86,13 +84,8 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
     private val regler: ArbeidsgiverRegler,
     private val arbeidsgiverperiode: List<Periode>,
     private val dagerNavOvertarAnsvar: List<Periode>,
-    private val refusjonstidslinje: Beløpstidslinje,
-    inntektsendringer: Beløpstidslinje
+    private val refusjonstidslinje: Beløpstidslinje
 ) {
-    private val inntektstidslinje = Inntektstidslinje(
-        inntektsendringer = inntektsendringer.fraOgMed(skjæringstidspunkt.nesteDag),
-        fastsattÅrsinntekt = fastsattÅrsinntekt
-    )
 
     private val lagDefaultRefusjonsbeløpHvisMangler = { _: LocalDate, aktuellDagsinntekt: Inntekt -> aktuellDagsinntekt }
     private val krevRefusjonsbeløpHvisMangler = { dato: LocalDate, _: Inntekt ->
@@ -123,7 +116,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
         økonomi: Økonomi,
         refusjonsopplysningFinnesIkkeStrategi: (LocalDate, Inntekt) -> Inntekt
     ): Økonomi {
-        val aktuellDagsinntekt = inntektstidslinje[dato]
+        val aktuellDagsinntekt = fastsattÅrsinntekt ?: INGEN
         return økonomi.inntekt(
             aktuellDagsinntekt = aktuellDagsinntekt,
             beregningsgrunnlag = fastsattÅrsinntekt ?: INGEN,

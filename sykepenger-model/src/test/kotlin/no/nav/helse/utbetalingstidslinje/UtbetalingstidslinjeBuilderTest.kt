@@ -1048,7 +1048,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje(),
-            inntektsendringer = Beløpstidslinje(),
             `6G` = Grunnbeløp.`6G`.beløp(1.januar),
             skjæringstidspunkt = 1.januar
         )
