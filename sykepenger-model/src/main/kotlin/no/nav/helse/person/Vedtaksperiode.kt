@@ -2010,7 +2010,7 @@ internal class Vedtaksperiode private constructor(
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
         }
 
-        val inntektsbuilder = InntekterForBeregning.Builder(perioderSomMåHensyntasVedBeregning().map { it.periode }.periode()!!)
+        val inntektsbuilder = InntekterForBeregning.Builder(perioderSomMåHensyntasVedBeregning().map { it.periode }.periode()!!, skjæringstidspunkt)
         grunnlagsdata.inntektsgrunnlag.beverte(inntektsbuilder)
         // inntektsbuilder.inntektsendringer()  --her fletter vi inn inntektsendringer som er registrert i spesidaler
         val inntekterForBeregning = inntektsbuilder.build()

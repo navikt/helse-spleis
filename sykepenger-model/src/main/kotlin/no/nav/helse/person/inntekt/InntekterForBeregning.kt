@@ -1,6 +1,8 @@
 package no.nav.helse.person.inntekt
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.nesteDag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.økonomi.Inntekt
@@ -9,7 +11,7 @@ internal data class InntekterForBeregning(val inntekterPerInntektskilde: Map<Str
 
     internal fun forArbeidsgiver(organisasjonsnummer: String) = inntekterPerInntektskilde.getValue(organisasjonsnummer)
 
-    internal class Builder(private val beregningsperiode: Periode) {
+    internal class Builder(private val beregningsperiode: Periode, private val skjæringstidspunkt: LocalDate) {
         private val inntekterPerInntektskilde = mutableMapOf<String, Beløpstidslinje>()
         internal fun fastsattÅrsinntekt(organisasjonsnummer: String, fastsattÅrsinntekt: Inntekt, opplysningskilde: Kilde) {
             inntekterPerInntektskilde[organisasjonsnummer] = Beløpstidslinje.fra(beregningsperiode, fastsattÅrsinntekt, opplysningskilde)
@@ -23,7 +25,10 @@ internal data class InntekterForBeregning(val inntekterPerInntektskilde: Map<Str
                 // inntektsendring på en arbeidsgiver som finnes i inntektsgrunnlaget
                 //      - økt arbeidsinnsats hos biarbeidsgiver (ghosts)
                 //      - inntektsendring hos en arbeidsgiver du er syk hos (tror vi)
-                inntekterPerInntektskilde.replace(inntektskilde, inntekterPerInntektskilde.getValue(inntektskilde) + beløpstidslinje.subset(beregningsperiode))
+
+                // for arbeidsgivere som finnes i inntektsgrunnlaget, kan ikke beløpet på skjæringstidspunktet (fastsatt årsinntekt) endres som en inntektsendring. Da må inntektsgrunnlaget overstyres
+                val inntektsendring = beløpstidslinje.subset(beregningsperiode).fraOgMed(skjæringstidspunkt.nesteDag)
+                inntekterPerInntektskilde.replace(inntektskilde, inntekterPerInntektskilde.getValue(inntektskilde) + inntektsendring)
             }
         }
 
