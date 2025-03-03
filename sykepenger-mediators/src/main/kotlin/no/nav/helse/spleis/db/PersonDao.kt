@@ -105,10 +105,8 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         val statement = "SELECT id, data FROM person WHERE fnr = ? FOR UPDATE"
         val (personId, person) = connection.prepareStatement(statement).use {
             it.setLong(1, personidentifikator.toLong())
-            it.executeQuery().use { rs ->
-                rs.mapNotNull { row ->
-                    row.long("id") to SerialisertPerson(row.string("data"))
-                }
+            it.mapNotNull { row ->
+                row.long("id") to SerialisertPerson(row.string("data"))
             }
         }.singleOrNullOrThrow() ?: return null
 
@@ -136,13 +134,10 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         // flere ulike person-rader til samme person, og personen må merges manuelt
         return connection.prepareStatementWithNamedParameters(statement) {
             withParameter("identer", identer.map { it.toLong() })
-        }.use { stmt ->
-            stmt.executeQuery().use { rs ->
-                rs.mapNotNull { row ->
-                    row.long("id") to SerialisertPerson(row.string("data"))
-                }
-            }
         }
+            .mapNotNull { row ->
+                row.long("id") to SerialisertPerson(row.string("data"))
+            }
             .distinctBy { (personId, _) -> personId }
     }
 
@@ -170,11 +165,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
             withParameter("fnr", personidentifikator.toLong())
             withParameter("skjemaversjon", skjemaVersjon)
             withParameter("data", personJson)
-        }.use { stmt ->
-            stmt.executeQuery().use { rs ->
-                rs.single { it.long("id") }
-            }
-        }
+        }.single { it.long("id") }
     }
 
     private fun oppdaterAvstemmingtidspunkt(connection: Connection, message: HendelseMessage, personidentifikator: Personidentifikator) {
@@ -193,9 +184,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         val statement = "SELECT count(1) FROM person WHERE sist_avstemt::date < now()::date - interval '31 DAYS'"
         return dataSource.connection {
             createStatement().use {
-                it.executeQuery(statement).use { rs ->
-                    rs.single { row -> row.int(1) }
-                }
+                it.executeQuery(statement).single { row -> row.int(1) }
             }
         }
     }

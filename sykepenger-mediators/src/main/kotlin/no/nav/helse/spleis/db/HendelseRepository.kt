@@ -133,11 +133,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         val sql = "SELECT exists(select 1 FROM melding WHERE melding_id = CAST(:meldingId as text) and behandlet_tidspunkt is not null)"
         true == prepareStatementWithNamedParameters(sql) {
             withParameter("meldingId", meldingId.id)
-        }.use { stmt ->
-            stmt.executeQuery().use { rs ->
-                rs.single { it.boolean(1) }
-            }
-        }
+        }.single { rs -> rs.boolean(1) }
     }
 
     private fun meldingstype(melding: HendelseMessage) = when (melding) {
@@ -192,16 +188,12 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         return dataSource.connection {
             prepareStatementWithNamedParameters(sql) {
                 withParameter("fnr", personidentifikator.toLong())
-            }.use { stmt ->
-                stmt.executeQuery().use { rs ->
-                    rs.mapNotNull { row ->
-                        Hendelse(
-                            meldingsreferanseId = UUID.fromString(row.string("melding_id")),
-                            meldingstype = row.string("melding_type"),
-                            lestDato = row.offsetDateTime("lest_dato").toLocalDateTime()
-                        )
-                    }
-                }
+            }.mapNotNull { row ->
+                Hendelse(
+                    meldingsreferanseId = UUID.fromString(row.string("melding_id")),
+                    meldingstype = row.string("melding_type"),
+                    lestDato = row.offsetDateTime("lest_dato").toLocalDateTime()
+                )
             }
         }.associateBy { it.meldingsreferanseId }
     }
