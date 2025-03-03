@@ -12,12 +12,16 @@ import no.nav.helse.november
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -32,7 +36,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
 
@@ -48,12 +51,11 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertEquals(2.januar(2025), inspektør.vedtaksperioder(2.vedtaksperiode).skjæringstidspunkt)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 20.november(2024), 30.november(2024), 100.prosent, INNTEKT))
 
-        val feilmelding = assertThrows<IllegalStateException> {
-            håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 20.november(2024), 30.november(2024), 100.prosent, INNTEKT))
-        }.message ?: "n/a"
-        assertTrue(feilmelding.endsWith("burde vært ferdig behandlet, men står i tilstand UberegnetOmgjøring"))
-        assertVarsel(Varselkode.RV_IT_37, 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IT_37, Varselkode.RV_IT_38), 1.vedtaksperiode.filter())
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
     }
 
     @Test

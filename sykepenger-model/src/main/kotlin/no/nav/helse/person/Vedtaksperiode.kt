@@ -906,11 +906,13 @@ internal class Vedtaksperiode private constructor(
 
         infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
 
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) {
+        val kanForkastes = arbeidsgiver.kanForkastes(this, aktivitetslogg)
+
+        if (aktivitetslogg.harFunksjonelleFeilEllerVerre() && kanForkastes) {
             aktivitetslogg.info("Forkaster perioden fordi Infotrygdhistorikken ikke validerer")
             return forkast(hendelse, aktivitetslogg)
         }
-        if (måInnhenteInntektEllerRefusjon()) {
+        if (måInnhenteInntektEllerRefusjon() && kanForkastes) {
             aktivitetslogg.info("Forkaster perioden fordi perioden har ikke tilstrekkelig informasjon til utbetaling")
             return forkast(hendelse, aktivitetslogg)
         }
