@@ -16,18 +16,22 @@ internal data class InntekterForBeregning(
 
     internal fun tilBeregning(organisasjonsnummer: String) = inntekterPerInntektskilde.getValue(organisasjonsnummer).let { it.fastsattÅrsinntekt to it.inntektstidslinje }
 
+    internal fun medVektlagteUtbetalingstidslinjer(beregnedeUtbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, List<Utbetalingstidslinje>> {
+        TODO("Her må vi vel loope inntekterPerInntekskilde og lage Utbetalingstidslinje som skal vektlegges selv om de ikke skal utbetales")
+    }
+
     internal sealed interface Inntekter {
         val fastsattÅrsinntekt: Inntekt
         val inntektstidslinje: Beløpstidslinje
         fun inntektsendring(skjæringstidspunkt: LocalDate, inntektsendringer: Beløpstidslinje): Inntekter
-        fun vektlagtUtbetalingstidslinje(beregnetUtbetalingstidslinje: Utbetalingstidslinje): Utbetalingstidslinje
+        fun vektlagtUtbetalingstidslinje(beregnedeUtbetalingstidslinjer: List<Utbetalingstidslinje>, `6G`: Inntekt): Utbetalingstidslinje
         data class FraInntektsgrunnlag(override val fastsattÅrsinntekt: Inntekt, override val inntektstidslinje: Beløpstidslinje): Inntekter {
             override fun inntektsendring(skjæringstidspunkt: LocalDate, inntektsendringer: Beløpstidslinje) = copy(
                 // For arbeidsgiver i inntektsgrunnlaget kan ikke inntekten på skjæringstidspunktet endres av en inntektsendring.
                 inntektstidslinje = this.inntektstidslinje + inntektsendringer.fraOgMed(skjæringstidspunkt.nesteDag)
             )
-            override fun vektlagtUtbetalingstidslinje(beregnetUtbetalingstidslinje: Utbetalingstidslinje): Utbetalingstidslinje {
-                TODO("Not yet implemented")
+            override fun vektlagtUtbetalingstidslinje(beregnedeUtbetalingstidslinjer: List<Utbetalingstidslinje>, `6G`: Inntekt): Utbetalingstidslinje {
+                TODO("Det er her vi må lage de beryktede 'ghosttidslinjene' da")
             }
         }
 
@@ -38,8 +42,8 @@ internal data class InntekterForBeregning(
                 inntektstidslinje = this.inntektstidslinje + inntektsendringer.fraOgMed(skjæringstidspunkt.nesteDag)
             )
 
-            override fun vektlagtUtbetalingstidslinje(beregnetUtbetalingstidslinje: Utbetalingstidslinje): Utbetalingstidslinje {
-                TODO("Not yet implemented")
+            override fun vektlagtUtbetalingstidslinje(beregnedeUtbetalingstidslinjer: List<Utbetalingstidslinje>, `6G`: Inntekt): Utbetalingstidslinje {
+                TODO("For deaktiverte kan vi vel bare returnere en tom Utbetalingstidslinje?")
             }
         }
 
@@ -48,8 +52,8 @@ internal data class InntekterForBeregning(
             override fun inntektsendring(skjæringstidspunkt: LocalDate, inntektsendringer: Beløpstidslinje) = copy(
                 inntektstidslinje = this.inntektstidslinje + inntektsendringer
             )
-            override fun vektlagtUtbetalingstidslinje(beregnetUtbetalingstidslinje: Utbetalingstidslinje): Utbetalingstidslinje {
-                TODO("Not yet implemented")
+            override fun vektlagtUtbetalingstidslinje(beregnedeUtbetalingstidslinjer: List<Utbetalingstidslinje>, `6G`: Inntekt): Utbetalingstidslinje {
+                TODO("Her må vi bare lage en utbetalingstidslinje for de delene inntektstidslinjen dekker. Ikke noe dekking av hull som kjent fra ghost")
             }
         }
     }
