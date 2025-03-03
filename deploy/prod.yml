@@ -21,7 +21,7 @@ spec:
       path: /stop
   observability:
     autoInstrumentation:
-      enabled: true
+      enabled: false
       runtime: java
   replicas:
     min: 2
