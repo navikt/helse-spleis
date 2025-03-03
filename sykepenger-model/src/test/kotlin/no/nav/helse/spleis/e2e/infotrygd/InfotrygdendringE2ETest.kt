@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
+import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.harBehov
@@ -7,6 +8,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
+import no.nav.helse.november
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -16,15 +18,43 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterInfotrygdendring
+import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
+import no.nav.helse.spleis.e2e.håndterUtbetalt
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
+import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `en auu vil omgjøres som følge av Infotrygdutbetaling, mangler inntektsmelding men kan ikke forkastes`() {
+        håndterSøknad(16.desember(2024) til 19.desember(2024))
+        håndterSøknad(2.januar(2025) til 15.januar(2025))
+        håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(16.desember(2024) til 19.desember(2024), 2.januar(2025) til 13.januar(2025)), beregnetInntekt = INNTEKT, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertEquals(2.januar(2025), inspektør.vedtaksperioder(2.vedtaksperiode).skjæringstidspunkt)
+
+        val feilmelding = assertThrows<IllegalStateException> {
+            håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 20.november(2024), 30.november(2024), 100.prosent, INNTEKT))
+        }.message ?: "n/a"
+        assertTrue(feilmelding.endsWith("burde vært ferdig behandlet, men står i tilstand UberegnetOmgjøring"))
+        assertVarsel(Varselkode.RV_IT_37, 1.vedtaksperiode.filter())
+    }
 
     @Test
     fun `infotrygdendring gjør vi at trenger oppdatert historikk`() {
