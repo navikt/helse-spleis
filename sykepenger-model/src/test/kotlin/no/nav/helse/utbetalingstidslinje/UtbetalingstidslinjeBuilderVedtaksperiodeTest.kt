@@ -46,15 +46,13 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiodeTest {
         skjæringstidspunkt: LocalDate = 1.januar,
         fastsattÅrsinntekt: Inntekt? = inntekt
     ) = UtbetalingstidslinjeBuilderVedtaksperiode(
-        fastsattÅrsinntekt = fastsattÅrsinntekt,
-        `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt),
         skjæringstidspunkt = skjæringstidspunkt,
         regler = NormalArbeidstaker,
         arbeidsgiverperiode = listOf(1.januar til 16.januar),
         dagerNavOvertarAnsvar = emptyList(),
         refusjonstidslinje = Beløpstidslinje(),
-        nyFastsattÅrsinntekt = fastsattÅrsinntekt ?: INGEN,
-        ny6G = Grunnbeløp.`6G`.beløp(1.januar),
+        fastsattÅrsinntekt = fastsattÅrsinntekt ?: INGEN,
+        `6G` = Grunnbeløp.`6G`.beløp(1.januar),
         inntektstidslinje = ARBEIDSGIVER.beløpstidslinje(1.januar.somPeriode(), fastsattÅrsinntekt ?: INGEN)
     )
 }

@@ -10,7 +10,6 @@ import no.nav.helse.nesteDag
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -152,34 +151,10 @@ internal data class InntekterForBeregning(
             return with(Builder(periode, skjæringstidspunkt)) {
                 inntektsgrunnlag.beverte(this)
                 build()
-            }.tilBeregning(organisasjonsnummer)
-        }
-
-        fun Map<String, Utbetalingstidslinje>.checkLik(andreBeregning: Map<String, Utbetalingstidslinje>) {
-            check(keys == andreBeregning.keys) { "Arbeidsgiverne er forskjellig. Var: $keys, nå: ${andreBeregning.keys}" }
-            forEach { (arbeidsgiver, denneUtbetalingstidslinjen) ->
-                val andreUtbetalingstidslinjen = andreBeregning.getValue(arbeidsgiver)
-                check(denneUtbetalingstidslinjen.size == andreUtbetalingstidslinjen.size) { "Antall dager i utbetalingstidslinjen er forskjellig. Var: ${denneUtbetalingstidslinjen.size}, nå: ${andreUtbetalingstidslinjen.size}" }
-                denneUtbetalingstidslinjen.forEach { denneUtbetalingsdagen ->
-                    val andreUtbetalingsdagen = andreUtbetalingstidslinjen[denneUtbetalingsdagen.dato].takeUnless { it is Utbetalingsdag.UkjentDag } ?: error("Fant ikke dagen ${denneUtbetalingsdagen.dato}")
-                    val denneØkonomi = denneUtbetalingsdagen.økonomi
-                    val andreØkonomi = andreUtbetalingsdagen.økonomi
-
-                    check(denneUtbetalingsdagen::class == andreUtbetalingsdagen::class) { "Utbetalingsdagtypen er forskjellig. Var: ${denneUtbetalingsdagen::class}, nå: ${andreUtbetalingsdagen::class}" }
-                    check(denneØkonomi.grad == andreØkonomi.grad) { "Grad er forskjellig. Var: ${denneØkonomi.grad}, nå: ${andreØkonomi.grad}" }
-                    check(denneØkonomi.totalGrad == andreØkonomi.totalGrad) { "Totalgrad er forskjellig. Var: ${denneØkonomi.totalGrad}, nå: ${andreØkonomi.totalGrad}" }
-                    check(denneØkonomi.arbeidsgiverRefusjonsbeløp == andreØkonomi.arbeidsgiverRefusjonsbeløp) { "Arbeidsgiver refusjonsbeløp er forskjellig. Var: ${denneØkonomi.arbeidsgiverRefusjonsbeløp}, nå: ${andreØkonomi.arbeidsgiverRefusjonsbeløp}" }
-                    check(denneØkonomi.aktuellDagsinntekt == andreØkonomi.aktuellDagsinntekt) { "Aktuell dagsinntekt er forskjellig. Var: ${denneØkonomi.aktuellDagsinntekt}, nå: ${andreØkonomi.aktuellDagsinntekt}" }
-                    check(denneØkonomi.beregningsgrunnlag == andreØkonomi.beregningsgrunnlag) { "Beregningsgrunnlag er forskjellig. Var: ${denneØkonomi.beregningsgrunnlag}, nå: ${andreØkonomi.beregningsgrunnlag}" }
-                    check(denneØkonomi.dekningsgrunnlag == andreØkonomi.dekningsgrunnlag) { "Dekningsgrunnlag er forskjellig. Var: ${denneØkonomi.dekningsgrunnlag}, nå: ${andreØkonomi.dekningsgrunnlag}" }
-                    check(denneØkonomi.grunnbeløpgrense == andreØkonomi.grunnbeløpgrense) { "Grunnbeløpgrense er forskjellig. Var: ${denneØkonomi.grunnbeløpgrense}, nå: ${andreØkonomi.grunnbeløpgrense}" }
-                    check(denneØkonomi.arbeidsgiverbeløp == andreØkonomi.arbeidsgiverbeløp) { "Arbeidsgiverbeløp er forskjellig. Var: ${denneØkonomi.arbeidsgiverbeløp}, nå: ${andreØkonomi.arbeidsgiverbeløp}" }
-                    check(denneØkonomi.personbeløp == andreØkonomi.personbeløp) { "Personbeløp er forskjellig. Var: ${denneØkonomi.personbeløp}, nå: ${andreØkonomi.personbeløp}" }
-                    check(denneØkonomi.er6GBegrenset == andreØkonomi.er6GBegrenset) { "Er6GBegrenset er forskjellig. Var: ${denneØkonomi.er6GBegrenset}, nå: ${andreØkonomi.er6GBegrenset}" }
-                    check(denneØkonomi.tilstand::class == andreØkonomi.tilstand::class) { "Tilstandstype er forskjellig. Var: ${denneØkonomi.tilstand::class}, nå: ${andreØkonomi.tilstand::class}" }
-
-                }
-            }
+            }.inntekterPerInntektskilde[organisasjonsnummer]?.let { it.fastsattÅrsinntekt to it.inntektstidslinje } ?: error(
+                "Det er en arbeidsgiver som ikke inngår i SP: $organisasjonsnummer som har søknader: $periode.\n" +
+                    "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
+            )
         }
     }
 }

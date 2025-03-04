@@ -1043,15 +1043,13 @@ internal class UtbetalingstidslinjeBuilderTest {
         perioder.addAll(arbeidsgiverperioder)
 
         val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
-            fastsattÅrsinntekt = 31000.månedlig,
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje(),
-            `6G` = Grunnbeløp.`6G`.beløp(1.januar),
             skjæringstidspunkt = 1.januar,
-            nyFastsattÅrsinntekt = 31000.månedlig,
-            ny6G = Grunnbeløp.`6G`.beløp(1.januar),
+            fastsattÅrsinntekt = 31000.månedlig,
+            `6G` = Grunnbeløp.`6G`.beløp(1.januar),
             inntektstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje()
         )
 

@@ -280,8 +280,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: InntektsgrunnlagUtDto
         ): VilkårsgrunnlagUtDto
-
-        fun faktaavklarteInntekter() = inntektsgrunnlag.faktaavklarteInntekter()
     }
 
     internal class Grunnlagsdata(

@@ -28,7 +28,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.beri
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.beverte
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.beverteDeaktiverte
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.faktaavklarteInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harGjenbrukbarInntekt
@@ -46,7 +45,6 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_IKKE_6G_BEGRE
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTRYGD
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.økonomi.Inntekt
 
 internal class Inntektsgrunnlag private constructor(
@@ -387,12 +385,6 @@ internal class Inntektsgrunnlag private constructor(
         forhøyetInntektskrav = this.forhøyetInntektskrav,
         minsteinntekt = this.minsteinntekt.dto(),
         oppfyllerMinsteinntektskrav = this.oppfyllerMinsteinntektskrav
-    )
-
-    internal fun faktaavklarteInntekter() = VilkårsprøvdSkjæringstidspunkt(
-        `6G` = `6G`,
-        inntekter = arbeidsgiverInntektsopplysninger.faktaavklarteInntekter(),
-        deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.orgnummer }
     )
 }
 

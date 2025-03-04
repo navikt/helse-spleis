@@ -162,7 +162,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.InntekterForBeregning
-import no.nav.helse.person.inntekt.InntekterForBeregning.Companion.checkLik
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
@@ -188,9 +187,7 @@ import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
-import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.yearMonth
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
@@ -2049,20 +2046,18 @@ internal class Vedtaksperiode private constructor(
     private fun utbetalingstidslinjePerArbeidsgiver(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, inntekterForBeregning: InntekterForBeregning): Map<String, Utbetalingstidslinje> {
         val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning()
             .groupBy { it.arbeidsgiver.organisasjonsnummer }
-        val faktaavklarteInntekter = grunnlagsdata.faktaavklarteInntekter()
         val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning
             .mapValues { (arbeidsgiver, vedtaksperioder) ->
-                val fastsattÅrsinntekt = faktaavklarteInntekter.forArbeidsgiver(arbeidsgiver)
-                val (fastsattÅrsinntektV4, inntektstidslinje) = inntekterForBeregning.tilBeregning(arbeidsgiver)
+                val (fastsattÅrsinntekt, inntektstidslinje) = inntekterForBeregning.tilBeregning(arbeidsgiver)
                 vedtaksperioder.map {
-                    it.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, faktaavklarteInntekter.`6G`, fastsattÅrsinntektV4, inntekterForBeregning.`6G`, inntektstidslinje)
+                    it.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, inntekterForBeregning.`6G`, inntektstidslinje)
                 }
             }
         // nå vi må lage en ghost-tidslinje per arbeidsgiver for de som eksisterer i sykepengegrunnlaget.
+        // i tillegg må vi lage én tidslinje per inntektskilde som ikke er en del av sykepengegrunnlaget
         // resultatet er én utbetalingstidslinje per arbeidsgiver som garantert dekker perioden ${vedtaksperiode.periode}, dog kan
         // andre arbeidsgivere dekke litt før/litt etter, avhengig av perioden til vedtaksperiodene som overlapper
-        val ny = inntekterForBeregning.hensyntattAlleInntektskilder(utbetalingstidslinjer)
-        return faktaavklarteInntekter.medGhostOgTilkommenInntekt(utbetalingstidslinjer).also { it.checkLik(ny) }
+        return inntekterForBeregning.hensyntattAlleInntektskilder(utbetalingstidslinjer)
     }
 
     private fun filtrerUtbetalingstidslinjer(
@@ -3171,21 +3166,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun lagUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode): Utbetalingstidslinje {
-            val inntekter = vedtaksperiode.vilkårsgrunnlag?.faktaavklarteInntekter()
             val (fastsattÅrsinntekt, inntektstidslinje) = InntekterForBeregning.forAuu(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.arbeidsgiver.organisasjonsnummer, vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag)
-            val inntektForArbeidsgiver = inntektForAUU(vedtaksperiode, inntekter)
             val `6G` = Grunnbeløp.`6G`.beløp(vedtaksperiode.skjæringstidspunkt)
-            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektForArbeidsgiver, `6G`, fastsattÅrsinntekt, `6G`, inntektstidslinje)
-        }
-
-        private fun inntektForAUU(vedtaksperiode: Vedtaksperiode, inntekter: VilkårsprøvdSkjæringstidspunkt?): Inntekt {
-            if (inntekter == null || vedtaksperiode.arbeidsgiver.organisasjonsnummer in inntekter.deaktiverteArbeidsforhold)
-                return INGEN
-            return inntekter.forArbeidsgiver(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
-                ?: error(
-                    "Det er en arbeidsgiver som ikke inngår i SP: ${vedtaksperiode.arbeidsgiver} som har søknader: ${vedtaksperiode.periode}.\n" +
-                        "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
-                )
+            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, `6G`, inntektstidslinje)
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {

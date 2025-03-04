@@ -12,11 +12,36 @@ import no.nav.helse.januar
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.UTELATE
+import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class InntekterForBeregningTest {
+
+    @Test
+    fun `lager ghosttidslinjer for dagene vi ikke har beregnet utbetalingstidslinje`() {
+        val builder = InntekterForBeregning.Builder(1.januar til 28.januar, 1.januar)
+        builder.fraInntektsgrunnlag(a1, 1000.daglig, UUID.randomUUID().arbeidsgiver)
+        builder.fraInntektsgrunnlag(a2, 1000.daglig, UUID.randomUUID().arbeidsgiver)
+        builder.medGjeldende6G(Grunnbeløp.`6G`.beløp(1.januar))
+
+        val inntekterForBeregning = builder.build()
+        inntekterForBeregning.hensyntattAlleInntektskilder(
+            mapOf(
+                "a1" to listOf(tidslinjeOf(16.AP, 8.NAV)),
+                "a2" to listOf(tidslinjeOf(20.UTELATE, 8.AP))
+            )
+        ).also { result ->
+            assertEquals(2, result.size)
+            assertEquals(28, result["a1"]?.size)
+            assertEquals(28, result["a2"]?.size)
+        }
+    }
 
     @Test
     fun `kan ikke endre inntekt på skjæringstidspunktet for en arbeidsgiver som finnes i inntektsgrunnlaget ved hjelp av en inntektsendring`() {

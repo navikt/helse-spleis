@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Dag
@@ -12,81 +11,19 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Økonomi
 
-internal class VilkårsprøvdSkjæringstidspunkt(
-    internal val `6G`: Inntekt,
-    inntekter: List<FaktaavklartInntekt>,
-    val deaktiverteArbeidsforhold: List<String>
-) {
-    private val inntekterFraInntektsgrunnlaget = inntekter.associate { inntekt -> inntekt.organisasjonsnummer to inntekt.fastsattÅrsinntekt }
-
-    internal fun forArbeidsgiver(organisasjonsnummer: String): Inntekt? = inntekterFraInntektsgrunnlaget[organisasjonsnummer]
-
-    internal fun medGhostOgTilkommenInntekt(utbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
-        val beregningsperiode = utbetalingstidslinjer.values.flatten().map { it.periode() }.periode()!!
-
-        // Lager Utbetalingstidslinje for alle arbeidsgivere fra inntektsgrunnlaget
-        val fraInntektsgrunnlag = inntekterFraInntektsgrunnlaget.mapValues { (orgnr, fastsattÅrsinntekt) ->
-            // De som ikke har noen beregnede utbetalingstidslinjer er ghost for hele beregningsperioden
-            val beregnedetidslinjer = utbetalingstidslinjer[orgnr] ?: emptyList()
-            val ghosttidslinje = ghosttidslinje(beregningsperiode, fastsattÅrsinntekt, `6G`, beregnedetidslinjer)
-            beregnedetidslinjer.fold(ghosttidslinje, Utbetalingstidslinje::plus)
-        }
-
-        // Lager Utbetalingstidslinje for arbeidsgiverne som ikke er i inntektsgrunnlaget (tilkommen)
-        // Her er ikke ghosttidslinjer aktuelt ettersom ghost må være i inntektsgrunnlaget (på skjæringstidspunktet)
-        val tilkomneInntekter = utbetalingstidslinjer
-            .filterKeys { orgnr -> orgnr !in inntekterFraInntektsgrunnlaget.keys }
-            .mapValues { (_, utbetalingstidslinjer) -> utbetalingstidslinjer.reduce(Utbetalingstidslinje::plus) }
-            .filterValues { it.isNotEmpty() }
-
-        return fraInntektsgrunnlag + tilkomneInntekter
-    }
-
-    private fun ghosttidslinje(beregningsperiode: Periode, fastsattÅrsinntekt: Inntekt, `6G`: Inntekt, arbeidsgiverlinjer: List<Utbetalingstidslinje>): Utbetalingstidslinje {
-        val beregnedePerioderForArbeidsgiver = arbeidsgiverlinjer.map { it.periode() }
-        val ghostdagerForArbeidsgiver = beregningsperiode
-            .filterNot { dato -> beregnedePerioderForArbeidsgiver.any { beregnetPeriode -> dato in beregnetPeriode } }
-
-        // Lager en ghosttidslinje for de dagene i beregningsperioden arbeidsgiveren ikke er beregnet
-        return with(Utbetalingstidslinje.Builder()) {
-            ghostdagerForArbeidsgiver.forEach { dato ->
-                if (dato.erHelg()) addFridag(dato, Økonomi.ikkeBetalt())
-                else addArbeidsdag(
-                    dato = dato,
-                    økonomi = Økonomi.ikkeBetalt().inntekt(
-                        aktuellDagsinntekt = fastsattÅrsinntekt,
-                        beregningsgrunnlag = fastsattÅrsinntekt,
-                        dekningsgrunnlag = INGEN,
-                        `6G` = `6G`,
-                        refusjonsbeløp = INGEN
-                    )
-                )
-            }
-            build()
-        }
-    }
-
-    data class FaktaavklartInntekt(
-        val organisasjonsnummer: String,
-        val fastsattÅrsinntekt: Inntekt
-    )
-}
-
 internal data class ArbeidsgiverperiodeForVedtaksperiode(
     val vedtaksperiode: Periode,
     val arbeidsgiverperioder: List<Periode>
 )
 
 internal class UtbetalingstidslinjeBuilderVedtaksperiode(
-    private val fastsattÅrsinntekt: Inntekt?,
     private val skjæringstidspunkt: LocalDate,
-    private val `6G`: Inntekt,
     private val regler: ArbeidsgiverRegler,
     private val arbeidsgiverperiode: List<Periode>,
     private val dagerNavOvertarAnsvar: List<Periode>,
     private val refusjonstidslinje: Beløpstidslinje,
-    private val nyFastsattÅrsinntekt: Inntekt,
-    private val ny6G: Inntekt,
+    private val fastsattÅrsinntekt: Inntekt,
+    private val `6G`: Inntekt,
     private val inntektstidslinje: Beløpstidslinje
 ) {
 
@@ -119,13 +56,10 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
         økonomi: Økonomi,
         refusjonsopplysningFinnesIkkeStrategi: (LocalDate, Inntekt) -> Inntekt
     ): Økonomi {
-        val aktuellDagsinntekt = fastsattÅrsinntekt ?: INGEN
-        check(aktuellDagsinntekt == inntektstidslinje[dato].beløp) { "Aktuell dagsinntekt er forskjellig. Gammel: $aktuellDagsinntekt, ny: ${inntektstidslinje[dato].beløp}" }
-        check(`6G` == ny6G) { "6G er forskjellig. Gammel: $`6G`, ny: $ny6G" }
-        check((fastsattÅrsinntekt ?: INGEN) == nyFastsattÅrsinntekt) { "Fastsatt årsinntekt er forskjellig. Gammel: ${fastsattÅrsinntekt ?: INGEN}, ny: $nyFastsattÅrsinntekt" }
+        val aktuellDagsinntekt = inntektstidslinje[dato].beløp
         return økonomi.inntekt(
             aktuellDagsinntekt = aktuellDagsinntekt,
-            beregningsgrunnlag = fastsattÅrsinntekt ?: INGEN,
+            beregningsgrunnlag = fastsattÅrsinntekt,
             dekningsgrunnlag = aktuellDagsinntekt * regler.dekningsgrad(),
             `6G` = if (dato < skjæringstidspunkt) INGEN else `6G`,
             refusjonsbeløp = refusjonsbeløp(dato, aktuellDagsinntekt, refusjonsopplysningFinnesIkkeStrategi)

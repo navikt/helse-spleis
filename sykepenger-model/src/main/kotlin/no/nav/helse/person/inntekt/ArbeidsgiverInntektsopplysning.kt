@@ -18,7 +18,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
-import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -117,14 +116,6 @@ internal data class ArbeidsgiverInntektsopplysning(
     internal companion object {
         private fun List<ArbeidsgiverInntektsopplysning>.rullTilbakeEventuellSkjønnsmessigFastsettelse() =
             map { it.copy(skjønnsmessigFastsatt = null) }
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.faktaavklarteInntekter() = this
-            .map { arbeidsgiverInntektsopplysning ->
-                VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt(
-                    organisasjonsnummer = arbeidsgiverInntektsopplysning.orgnummer,
-                    fastsattÅrsinntekt = arbeidsgiverInntektsopplysning.fastsattÅrsinntekt
-                )
-            }
 
         private fun ArbeidsgiverInntektsopplysning.kilde() = Kilde(
             avsender = if (korrigertInntekt != null || skjønnsmessigFastsatt != null) Avsender.SAKSBEHANDLER else Avsender.ARBEIDSGIVER,
