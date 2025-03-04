@@ -73,9 +73,10 @@ internal data class InntekterForBeregning(
             override val fastsattÅrsinntekt = INGEN
 
             override fun inntektsendring(skjæringstidspunkt: LocalDate, inntektsendringer: Beløpstidslinje) = copy(
-                // For arbeidsgiver i inntektsgrunnlaget kan ikke inntekten på skjæringstidspunktet endres av en inntektsendring.
                 // Inntektsendring for en deaktivert arbeidsgiver høres spennende ut. Men det kan vel sikkert skje? Hen var i sykepengegrunnlaget men var reelt tilkommen f.eks. ?
-                inntektstidslinje = this.inntektstidslinje + inntektsendringer.fraOgMed(skjæringstidspunkt.nesteDag)
+                // Her tillater vi å endre beløpet på skjæringstidspunktet ettersom arbeidsgiveren ikke er en del av sykepengegrunnlaget.
+                // Skulle den ble aktivert igjen så er det beløpet fra inntektsgrunnlaget som igjen vil bli brukt (Da er vi FraInntektsgrunnlag, ikke DeaktivertFraInntektsgrunnlag)
+                inntektstidslinje = this.inntektstidslinje + inntektsendringer
             )
 
             override fun uberegnetUtbetalingstidslinje(uberegnedeDager: List<LocalDate>, `6G`: Inntekt): Utbetalingstidslinje {
@@ -88,6 +89,7 @@ internal data class InntekterForBeregning(
 
         data class NyInntektskilde(override val inntektstidslinje: Beløpstidslinje = Beløpstidslinje()) : Inntekter {
             override val fastsattÅrsinntekt = INGEN
+
             override fun inntektsendring(skjæringstidspunkt: LocalDate, inntektsendringer: Beløpstidslinje) = copy(
                 inntektstidslinje = this.inntektstidslinje + inntektsendringer
             )
@@ -158,7 +160,7 @@ internal data class InntekterForBeregning(
                 build()
             }.inntekterPerInntektskilde[organisasjonsnummer]?.let { it.fastsattÅrsinntekt to it.inntektstidslinje } ?: error(
                 "Det er en arbeidsgiver som ikke inngår i SP: $organisasjonsnummer som har søknader: $periode.\n" +
-                    "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
+                "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
             )
         }
     }

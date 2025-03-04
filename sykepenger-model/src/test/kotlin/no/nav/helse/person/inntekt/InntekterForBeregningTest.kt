@@ -6,7 +6,8 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
-import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
@@ -15,6 +16,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.UTELATE
@@ -55,7 +57,7 @@ class InntekterForBeregningTest {
 
         val (_, inntektstidslinje) = inntekterForBeregning.tilBeregning(a1)
 
-        val forventetTidslinje = Avsender.ARBEIDSGIVER.beløpstidslinje(1.januar.somPeriode(), INNTEKT) + Avsender.SYSTEM.beløpstidslinje(2.januar til 31.januar, INNTEKT * 2)
+        val forventetTidslinje = ARBEIDSGIVER.beløpstidslinje(1.januar.somPeriode(), INNTEKT) + SYSTEM.beløpstidslinje(2.januar til 31.januar, INNTEKT * 2)
         assertBeløpstidslinje(forventetTidslinje, inntektstidslinje, ignoreMeldingsreferanseId = true)
     }
 
@@ -69,8 +71,28 @@ class InntekterForBeregningTest {
         val (fastsattÅrsinntektA1, inntektstidslinjeForA1) = inntekterForBeregning.tilBeregning(a1)
         val (fastsattÅrsinntektA2, inntektstidslinjeForA2) = inntekterForBeregning.tilBeregning(a2)
 
-        val forventetTidslinjeA1 = Avsender.ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT)
-        val forventetTidslinjeA2 = Avsender.SYSTEM.beløpstidslinje(januar, INNTEKT * 2)
+        val forventetTidslinjeA1 = ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT)
+        val forventetTidslinjeA2 = SYSTEM.beløpstidslinje(januar, INNTEKT * 2)
+
+        assertBeløpstidslinje(forventetTidslinjeA1, inntektstidslinjeForA1, ignoreMeldingsreferanseId = true)
+        assertBeløpstidslinje(forventetTidslinjeA2, inntektstidslinjeForA2, ignoreMeldingsreferanseId = true)
+        assertEquals(INNTEKT, fastsattÅrsinntektA1)
+        assertEquals(INGEN, fastsattÅrsinntektA2)
+    }
+
+    @Test
+    fun `kan endre inntekt på skjæringstidspunktet for en deaktivert arbeidsgiver i inntektsgrunnlaget ved hjelp av en inntektsendring`() {
+        val inntekterForBeregning = inntekterForBeregning(januar) {
+            fraInntektsgrunnlag(a1, INNTEKT)
+            deaktivertFraInntektsgrunnlag(a2)
+            inntektsendringer(a2, 1.januar, 31.januar, INNTEKT * 2)
+        }
+
+        val (fastsattÅrsinntektA1, inntektstidslinjeForA1) = inntekterForBeregning.tilBeregning(a1)
+        val (fastsattÅrsinntektA2, inntektstidslinjeForA2) = inntekterForBeregning.tilBeregning(a2)
+
+        val forventetTidslinjeA1 = ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT)
+        val forventetTidslinjeA2 = SYSTEM.beløpstidslinje(januar, INNTEKT * 2)
 
         assertBeløpstidslinje(forventetTidslinjeA1, inntektstidslinjeForA1, ignoreMeldingsreferanseId = true)
         assertBeløpstidslinje(forventetTidslinjeA2, inntektstidslinjeForA2, ignoreMeldingsreferanseId = true)
@@ -86,6 +108,9 @@ class InntekterForBeregningTest {
 
     private fun InntekterForBeregning.Builder.fraInntektsgrunnlag(organisasjonsnummer: String, fastsattÅrsinntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())) =
         fraInntektsgrunnlag(organisasjonsnummer, fastsattÅrsinntekt, meldingsreferanseId.id.arbeidsgiver)
+
+    private fun InntekterForBeregning.Builder.deaktivertFraInntektsgrunnlag(organisasjonsnummer: String,meldingsreferanseId: MeldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())) =
+        deaktivertFraInntektsgrunnlag(organisasjonsnummer, meldingsreferanseId.id.saksbehandler)
 
     private fun InntekterForBeregning.Builder.inntektsendringer(organisasjonsnummer: String, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())) =
         inntektsendringer(organisasjonsnummer, fom, tom, inntekt, meldingsreferanseId)
