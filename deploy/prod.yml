@@ -24,13 +24,13 @@ spec:
       enabled: false
       runtime: java
   replicas:
-    min: 2
-    max: 24
-    scalingStrategy:
-      kafka:
-        topic: tbd.rapid.v1
-        consumerGroup: tbd-spleis-v1
-        threshold: 200
+    min: 12
+    max: 12
+#    scalingStrategy:
+#      kafka:
+#        topic: tbd.rapid.v1
+#        consumerGroup: tbd-spleis-v1
+#        threshold: 200
   resources:
     limits:
       memory: 8Gi
