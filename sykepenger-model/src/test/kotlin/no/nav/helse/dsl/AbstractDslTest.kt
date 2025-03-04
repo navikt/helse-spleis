@@ -2,7 +2,7 @@ package no.nav.helse.dsl
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.Varslersamler.AssertetVarsler
 import no.nav.helse.dto.serialisering.PersonUtDto
@@ -406,9 +406,9 @@ internal abstract class AbstractDslTest {
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
         status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-        sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(this, beregnetInntekt, førsteFraværsdag)
+        ghosts: List<String>
     ) =
-        this { nyttVedtak(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt) }
+        this { nyttVedtak(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, ghosts) }
 
     protected fun String.tilGodkjenning(
         periode: Periode,
@@ -576,9 +576,9 @@ internal abstract class AbstractDslTest {
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
         status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-        sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, beregnetInntekt, førsteFraværsdag)
+        ghosts: List<String> = emptyList()
     ) =
-        bareÈnArbeidsgiver(a1).nyttVedtak(vedtaksperiode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt)
+        bareÈnArbeidsgiver(a1).nyttVedtak(vedtaksperiode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, ghosts)
 
     protected fun dto() = testperson.dto()
     protected fun medFødselsdato(fødselsdato: LocalDate) {

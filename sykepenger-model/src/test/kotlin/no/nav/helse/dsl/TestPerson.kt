@@ -720,9 +720,9 @@ internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode> = emptyList(),
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-    sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, beregnetInntekt, førsteFraværsdag)
+    ghosts: List<String> = emptyList()
 ) {
-    val vedtaksperiode = tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status)
+    val vedtaksperiode = tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, ghosts)
     håndterUtbetalingsgodkjenning(vedtaksperiode)
     håndterUtbetalt(status)
 }
