@@ -120,6 +120,9 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
         refusjonsopplysningFinnesIkkeStrategi: (LocalDate, Inntekt) -> Inntekt
     ): Økonomi {
         val aktuellDagsinntekt = fastsattÅrsinntekt ?: INGEN
+        check(aktuellDagsinntekt == inntektstidslinje[dato].beløp) { "Aktuell dagsinntekt er forskjellig. Gammel: $aktuellDagsinntekt, ny: ${inntektstidslinje[dato].beløp}" }
+        check(`6G` == ny6G) { "6G er forskjellig. Gammel: $`6G`, ny: $ny6G" }
+        check((fastsattÅrsinntekt ?: INGEN) == nyFastsattÅrsinntekt) { "Fastsatt årsinntekt er forskjellig. Gammel: ${fastsattÅrsinntekt ?: INGEN}, ny: $nyFastsattÅrsinntekt" }
         return økonomi.inntekt(
             aktuellDagsinntekt = aktuellDagsinntekt,
             beregningsgrunnlag = fastsattÅrsinntekt ?: INGEN,

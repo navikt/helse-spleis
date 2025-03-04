@@ -162,6 +162,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.InntekterForBeregning
+import no.nav.helse.person.inntekt.InntekterForBeregning.Companion.checkLik
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
@@ -2060,7 +2061,8 @@ internal class Vedtaksperiode private constructor(
         // nå vi må lage en ghost-tidslinje per arbeidsgiver for de som eksisterer i sykepengegrunnlaget.
         // resultatet er én utbetalingstidslinje per arbeidsgiver som garantert dekker perioden ${vedtaksperiode.periode}, dog kan
         // andre arbeidsgivere dekke litt før/litt etter, avhengig av perioden til vedtaksperiodene som overlapper
-        return faktaavklarteInntekter.medGhostOgTilkommenInntekt(utbetalingstidslinjer)
+        val ny = inntekterForBeregning.hensyntattAlleInntektskilder(utbetalingstidslinjer)
+        return faktaavklarteInntekter.medGhostOgTilkommenInntekt(utbetalingstidslinjer).also { it.checkLik(ny) }
     }
 
     private fun filtrerUtbetalingstidslinjer(
