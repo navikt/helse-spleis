@@ -18,7 +18,6 @@ data class Dokumentsporing(
         internal fun overstyrTidslinje(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.OverstyrTidslinje)
         internal fun overstyrArbeidsgiveropplysninger(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.OverstyrArbeidsgiveropplysninger)
         internal fun andreYtelser(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.AndreYtelser)
-        internal fun tilkommenInntektFraSøknad(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.TilkommenInntektFraSøknad)
 
         internal fun Iterable<Dokumentsporing>.eksterneIder() = filter { it.dokumentType.ekstern }.map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.ider() = eksterneIder().map { it.id }.toSet()
@@ -43,7 +42,7 @@ data class Dokumentsporing(
                     DokumenttypeDto.Sykmelding -> DokumentType.Sykmelding
                     DokumenttypeDto.Søknad -> DokumentType.Søknad
                     DokumenttypeDto.AndreYtelser -> DokumentType.AndreYtelser
-                    DokumenttypeDto.TilkommenInntektFraSøknad -> DokumentType.TilkommenInntektFraSøknad
+                    DokumenttypeDto.TilkommenInntektFraSøknad -> DokumentType.TilkommenInntektFraSøknad // TODO: TilkommenV4
                 }
             )
         }

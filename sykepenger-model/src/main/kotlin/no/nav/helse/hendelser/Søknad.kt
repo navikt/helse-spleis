@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.Alder
 import no.nav.helse.Toggle
-import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 22-13 ledd 3`
@@ -44,13 +43,11 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_YS_1
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel
 
 class Søknad(
@@ -116,28 +113,6 @@ class Søknad(
         return egenmeldinger
     }
 
-    internal fun tilkomneInntekter(): List<TilkommenInntekt> {
-        return inntekterFraNyeArbeidsforhold.mapNotNull {
-            val periode = it.fom til it.tom
-            val antallVirkedager = sykdomstidslinje.subset(periode)
-                .filterNot { dag -> dag is Dag.Feriedag || dag is Dag.Permisjonsdag }
-                .map(Dag::dato)
-                .filterNot(LocalDate::erHelg)
-                .count()
-            if (antallVirkedager == 0) return@mapNotNull null
-            val smurtBeløp = (it.råttBeløp / antallVirkedager).daglig
-            val tilkommenKilde = Kilde(metadata.meldingsreferanseId, SYKMELDT, metadata.innsendt)
-
-            TilkommenInntekt(
-                orgnummer = it.orgnummer,
-                periode = periode,
-                inntektstidslinje = Beløpstidslinje(periode.map { dato -> Beløpsdag(dato, smurtBeløp, tilkommenKilde) }),
-                metadata = metadata,
-                sykdomstidslinje = Sykdomstidslinje.arbeidsdager(periode, kilde)
-            )
-        }
-    }
-
     internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, refusjonstidslinje: Beløpstidslinje, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
         valider(aktivitetslogg, subsumsjonslogg)
         validerInntektskilder(aktivitetslogg, vilkårsgrunnlag)
@@ -169,7 +144,7 @@ class Søknad(
     private fun validerTilkomneInntekter(aktivitetslogg: IAktivitetslogg) {
         if (inntekterFraNyeArbeidsforhold.isEmpty()) return
         // Varselet må legges på her slik at det blir på perioden som er til behandling, for perioden med tilkommen er jo en AUU
-        if (Toggle.TilkommenInntektV3.enabled) return aktivitetslogg.varsel(`Tilkommen inntekt som støttes`)
+        if (Toggle.TilkommenInntektV4.enabled) return aktivitetslogg.varsel(`Tilkommen inntekt som støttes`)
         aktivitetslogg.funksjonellFeil(`Tilkommen inntekt som ikke støttes`)
     }
 
@@ -233,38 +208,6 @@ class Søknad(
         internal val orgnummer: String,
         internal val råttBeløp: Int
     )
-
-    class TilkommenInntekt(
-        private val orgnummer: String,
-        internal val periode: Periode,
-        private val inntektstidslinje: Beløpstidslinje,
-        internal val sykdomstidslinje: Sykdomstidslinje,
-        internal val metadata: HendelseMetadata
-    ) {
-        internal val behandlingsporing = Behandlingsporing.Arbeidsgiver(orgnummer)
-        internal val dokumentsporing = Dokumentsporing.tilkommenInntektFraSøknad(metadata.meldingsreferanseId)
-
-        internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, arbeidsgiver: Arbeidsgiver, regelverkslogg: Regelverkslogg, eksisterendeVedtaksperioder: List<Periode>): Vedtaksperiode? {
-            val overlapp = eksisterendeVedtaksperioder.mapNotNull { it.overlappendePeriode(periode) }
-            if (overlapp.isNotEmpty()) {
-                aktivitetslogg.varsel(`Tilkommen inntekt som ikke støttes`)
-                aktivitetslogg.info("Tilkommen inntekt som ikke støttes: Eksisterende vedtaksperiode(r) ${overlapp.joinToString()} på $orgnummer overlapper med den tilkomne inntekten i $periode")
-                return null
-            }
-            return Vedtaksperiode(
-                egenmeldingsperioder = emptyList(),
-                metadata = metadata,
-                aktivitetslogg = aktivitetslogg,
-                person = person,
-                arbeidsgiver = arbeidsgiver,
-                sykdomstidslinje = sykdomstidslinje,
-                inntektsendringer = inntektstidslinje,
-                dokumentsporing = dokumentsporing,
-                sykmeldingsperiode = periode,
-                regelverkslogg = regelverkslogg
-            )
-        }
-    }
 
     class Søknadstype(private val type: String) {
         internal fun valider(

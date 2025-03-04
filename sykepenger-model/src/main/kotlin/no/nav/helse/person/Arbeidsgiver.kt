@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
@@ -531,16 +531,6 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg.kontekst(this)
         søknad.slettSykmeldingsperioderSomDekkes(sykmeldingsperioder)
         opprettVedtaksperiodeOgHåndter(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
-    }
-
-    internal fun håndterTilkommenInntekt(
-        tilkommenInntekt: Søknad.TilkommenInntekt,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        aktivitetslogg.kontekst(this)
-        val vedtaksperiode = tilkommenInntekt.lagVedtaksperiode(aktivitetslogg, person, this, regelverkslogg, vedtaksperioder.map { it.periode }) ?: return
-        registrerNyVedtaksperiode(vedtaksperiode)
-        vedtaksperiode.håndterTilkommenInntekt(tilkommenInntekt, aktivitetslogg)
     }
 
     private fun opprettVedtaksperiodeOgHåndter(

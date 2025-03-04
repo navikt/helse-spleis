@@ -206,9 +206,6 @@ class Person private constructor(
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(søknad.behandlingsporing, aktivitetslogg)
         søknad.forUng(aktivitetslogg, alder)
         arbeidsgiver.håndter(søknad, aktivitetslogg, arbeidsgivere.toList(), infotrygdhistorikk)
-        if (Toggle.TilkommenInntektV3.enabled && !aktivitetslogg.harFunksjonelleFeilEllerVerre()) søknad.tilkomneInntekter().forEach {
-            finnEllerOpprettArbeidsgiver(it.behandlingsporing, aktivitetslogg).håndterTilkommenInntekt(it, aktivitetslogg)
-        }
         håndterGjenoppta(søknad, aktivitetslogg)
     }
 

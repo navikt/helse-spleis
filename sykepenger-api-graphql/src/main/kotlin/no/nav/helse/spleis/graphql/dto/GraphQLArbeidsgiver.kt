@@ -35,6 +35,6 @@ data class GraphQLArbeidsgiver(
     val generasjoner: List<GraphQLGenerasjon>,
     val ghostPerioder: List<GraphQLGhostPeriode>
 ) {
-    @Suppress("unused", "TODO: TilkommenV3: Denne må være her helt til Speilvendt er klar for å ikke bruke denne/om V3 må mappes inn som dette her")
+    @Suppress("unused", "TODO: TilkommenV4: Denne må være her helt til Speilvendt er klar for å ikke bruke denne/om V3 må mappes inn som dette her")
     val nyeInntektsforholdPerioder: List<GraphQLNyttInntektsforholdPeriode> = emptyList()
 }

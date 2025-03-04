@@ -345,7 +345,6 @@ internal class UtkastTilVedtakBuilder(
         Avslag,
         DelvisInnvilget,
         Innvilget,
-        TilkommenInntekt, // TODO: TilkommenV3 legge på denne etterhvert
         Ferie,
         InntektFraAOrdningenLagtTilGrunn,
     }
