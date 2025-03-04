@@ -27,7 +27,7 @@ internal data class InntekterForBeregning(
             val uberegnedeDagerForArbeidsgiver = beregningsperiode.filterNot { dato -> beregendePerioderForInntektskilde.any { beregnetPeriode -> dato in beregnetPeriode} }
             val uberegnetUtbetalingstidslinjeForArbeidsgiver = inntekter.uberegnetUtbetalingstidslinje(uberegnedeDagerForArbeidsgiver, `6G`)
             beregnedeUtbetalingstidslinjerForInntektskilde.fold(uberegnetUtbetalingstidslinjeForArbeidsgiver, Utbetalingstidslinje::plus)
-        }
+        }.filterValues { it.isNotEmpty() }
     }
 
     internal sealed interface Inntekter {
