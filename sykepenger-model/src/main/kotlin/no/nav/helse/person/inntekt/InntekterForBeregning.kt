@@ -1,11 +1,13 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -116,7 +118,10 @@ internal data class InntekterForBeregning(
             )
         }
 
-        internal fun inntektsendringer(inntektskilde: String, inntektsendring: Beløpstidslinje) {
+        internal fun inntektsendringer(inntektskilde: String, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId) {
+            val periode = fom til listOfNotNull(tom, beregningsperiode.endInclusive).min()
+            val kilde = Kilde(meldingsreferanseId, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
+            val inntektsendring = Beløpstidslinje.fra(periode, inntekt, kilde)
             // Om vi ikke kjenner til inntektskilden fra før kan vi være diverse snax. Derunder "tilkommen inntekt"
             if (inntektskilde !in inntekterPerInntektskilde) {
                 inntekterPerInntektskilde[inntektskilde] = Inntekter.NyInntektskilde()

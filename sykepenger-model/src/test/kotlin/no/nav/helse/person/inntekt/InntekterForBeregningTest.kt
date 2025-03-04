@@ -6,6 +6,7 @@ import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -47,11 +48,11 @@ class InntekterForBeregningTest {
     fun `kan ikke endre inntekt på skjæringstidspunktet for en arbeidsgiver som finnes i inntektsgrunnlaget ved hjelp av en inntektsendring`() {
         val builder = InntekterForBeregning.Builder(januar, 1.januar)
         builder.fraInntektsgrunnlag(a1, INNTEKT, UUID.randomUUID().arbeidsgiver)
-        builder.inntektsendringer(a1, Avsender.SAKSBEHANDLER.beløpstidslinje(januar, INNTEKT * 2))
+        builder.inntektsendringer(a1, 1.januar, 31.januar, INNTEKT * 2, MeldingsreferanseId(UUID.randomUUID()))
         builder.medGjeldende6G(Grunnbeløp.`6G`.beløp(1.januar))
         val (_, inntektstidslinje) = builder.build().tilBeregning(a1)
 
-        val forventetTidslinje = Avsender.ARBEIDSGIVER.beløpstidslinje(1.januar.somPeriode(), INNTEKT) + Avsender.SAKSBEHANDLER.beløpstidslinje(2.januar til 31.januar, INNTEKT * 2)
+        val forventetTidslinje = Avsender.ARBEIDSGIVER.beløpstidslinje(1.januar.somPeriode(), INNTEKT) + Avsender.SYSTEM.beløpstidslinje(2.januar til 31.januar, INNTEKT * 2)
         assertBeløpstidslinje(forventetTidslinje, inntektstidslinje, ignoreMeldingsreferanseId = true)
     }
 
@@ -59,14 +60,14 @@ class InntekterForBeregningTest {
     fun `kan sette inntekt på skjæringstidspunktet for en arbeidsgiver som ikke finnes i inntektsgrunnlaget`() {
         val builder = InntekterForBeregning.Builder(januar, 1.januar)
         builder.fraInntektsgrunnlag(a1, INNTEKT, UUID.randomUUID().arbeidsgiver)
-        builder.inntektsendringer(a2, Avsender.SAKSBEHANDLER.beløpstidslinje(januar, INNTEKT * 2))
+        builder.inntektsendringer(a2, 1.januar, 31.januar, INNTEKT * 2, MeldingsreferanseId(UUID.randomUUID()))
         builder.medGjeldende6G(Grunnbeløp.`6G`.beløp(1.januar))
         val inntekterForBeregning = builder.build()
         val (fastsattÅrsinntektA1, inntektstidslinjeForA1) = inntekterForBeregning.tilBeregning(a1)
         val (fastsattÅrsinntektA2, inntektstidslinjeForA2) = inntekterForBeregning.tilBeregning(a2)
 
         val forventetTidslinjeA1 = Avsender.ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT)
-        val forventetTidslinjeA2 = Avsender.SAKSBEHANDLER.beløpstidslinje(januar, INNTEKT * 2)
+        val forventetTidslinjeA2 = Avsender.SYSTEM.beløpstidslinje(januar, INNTEKT * 2)
 
         assertBeløpstidslinje(forventetTidslinjeA1, inntektstidslinjeForA1, ignoreMeldingsreferanseId = true)
         assertBeløpstidslinje(forventetTidslinjeA2, inntektstidslinjeForA2, ignoreMeldingsreferanseId = true)

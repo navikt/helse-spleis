@@ -933,7 +933,7 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        val maksdatoresultat = beregnUtbetalinger(aktivitetslogg)
+        val maksdatoresultat = beregnUtbetalinger(aktivitetslogg, ytelser)
 
         checkNotNull(vilkårsgrunnlag).valider(aktivitetslogg, arbeidsgiver.organisasjonsnummer)
         infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
@@ -1973,7 +1973,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun utbetalingstidslinje() = behandlinger.utbetalingstidslinje()
 
-    private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg): Maksdatoresultat {
+    private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg, ytelser: Ytelser): Maksdatoresultat {
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
 
         check(perioderDetSkalBeregnesUtbetalingFor.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
@@ -1984,8 +1984,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         val inntektsbuilder = InntekterForBeregning.Builder(perioderSomMåHensyntasVedBeregning().map { it.periode }.periode()!!, skjæringstidspunkt)
-        grunnlagsdata.inntektsgrunnlag.beverte(inntektsbuilder)
-        // inntektsbuilder.inntektsendringer()  --her fletter vi inn inntektsendringer som er registrert i spesidaler
+        grunnlagsdata.inntektsgrunnlag.beverte(inntektsbuilder) // TODO: litt teit at man må huske å sende inn i riktig rekkefølge
+        ytelser.inntekterForBeregning(inntektsbuilder)
         val inntekterForBeregning = inntektsbuilder.build()
 
         val (maksdatofilter, beregnetTidslinjePerArbeidsgiver) = beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(

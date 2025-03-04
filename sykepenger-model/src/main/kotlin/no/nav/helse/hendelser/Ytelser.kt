@@ -3,10 +3,11 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.inntekt.InntekterForBeregning.Builder
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 
@@ -21,7 +22,8 @@ class Ytelser(
     private val opplæringspenger: Opplæringspenger,
     private val institusjonsopphold: Institusjonsopphold,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
-    private val dagpenger: Dagpenger
+    private val dagpenger: Dagpenger,
+    private val inntekterForBeregning: InntekterForBeregning = InntekterForBeregning(emptyList())
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         organisasjonsnummer = organisasjonsnummer
@@ -80,6 +82,18 @@ class Ytelser(
             tidslinje.takeIf { ytelse.skalOppdatereHistorikk(aktivitetslogg, ytelse, periode, skjæringstidspunkt, periodeRettEtter) }
         }
         return if (result.isEmpty()) null else result.merge()
+    }
+
+    internal fun inntekterForBeregning(builder: Builder) {
+        inntekterForBeregning.inntektsperioder.forEach { inntektsperiode ->
+            builder.inntektsendringer(
+                inntektskilde = inntektsperiode.inntektskilde,
+                fom = inntektsperiode.fom,
+                tom = inntektsperiode.tom,
+                inntekt = inntektsperiode.inntekt,
+                meldingsreferanseId = metadata.meldingsreferanseId
+            )
+        }
     }
 }
 
