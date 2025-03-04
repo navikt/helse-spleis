@@ -2054,7 +2054,7 @@ internal class Vedtaksperiode private constructor(
                 val fastsattÅrsinntekt = faktaavklarteInntekter.forArbeidsgiver(arbeidsgiver)
                 val (fastsattÅrsinntektV4, inntektstidslinje) = inntekterForBeregning.tilBeregning(arbeidsgiver)
                 vedtaksperioder.map {
-                    it.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, faktaavklarteInntekter.`6G`)
+                    it.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, faktaavklarteInntekter.`6G`, fastsattÅrsinntektV4, inntekterForBeregning.`6G`, inntektstidslinje)
                 }
             }
         // nå vi må lage en ghost-tidslinje per arbeidsgiver for de som eksisterer i sykepengegrunnlaget.
@@ -3170,8 +3170,10 @@ internal class Vedtaksperiode private constructor(
 
         private fun lagUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode): Utbetalingstidslinje {
             val inntekter = vedtaksperiode.vilkårsgrunnlag?.faktaavklarteInntekter()
+            val (fastsattÅrsinntekt, inntektstidslinje) = InntekterForBeregning.forAuu(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.arbeidsgiver.organisasjonsnummer, vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag)
             val inntektForArbeidsgiver = inntektForAUU(vedtaksperiode, inntekter)
-            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektForArbeidsgiver, Grunnbeløp.`6G`.beløp(vedtaksperiode.skjæringstidspunkt))
+            val `6G` = Grunnbeløp.`6G`.beløp(vedtaksperiode.skjæringstidspunkt)
+            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektForArbeidsgiver, `6G`, fastsattÅrsinntekt, `6G`, inntektstidslinje)
         }
 
         private fun inntektForAUU(vedtaksperiode: Vedtaksperiode, inntekter: VilkårsprøvdSkjæringstidspunkt?): Inntekt {

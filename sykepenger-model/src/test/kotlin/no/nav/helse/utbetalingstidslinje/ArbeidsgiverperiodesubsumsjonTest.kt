@@ -207,7 +207,10 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
             dagerNavOvertarAnsvar = emptyList(),
             refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje(),
             `6G` = Grunnbeløp.`6G`.beløp(1.januar),
-            skjæringstidspunkt = 1.januar
+            skjæringstidspunkt = 1.januar,
+            nyFastsattÅrsinntekt = 31000.månedlig,
+            ny6G = Grunnbeløp.`6G`.beløp(1.januar),
+            inntektstidslinje = ARBEIDSGIVER.beløpstidslinje(tidslinje.periode()!!, 31000.månedlig)
         )
 
         val utbetalingstidslinje = builder.result(tidslinje)

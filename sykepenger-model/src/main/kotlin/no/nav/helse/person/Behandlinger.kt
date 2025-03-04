@@ -93,7 +93,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     )
 
     internal fun arbeidsgiverperiode() = ArbeidsgiverperiodeForVedtaksperiode(periode(), behandlinger.last().arbeidsgiverperiode)
-    internal fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt?, `6G`: Inntekt) = behandlinger.last().lagUtbetalingstidslinje(fastsattÅrsinntekt, `6G`)
+    internal fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt?, `6G`: Inntekt, nyFastsattÅrsinntekt: Inntekt, ny6G: Inntekt, inntektstidslinje: Beløpstidslinje) =
+        behandlinger.last().lagUtbetalingstidslinje(fastsattÅrsinntekt, `6G`, nyFastsattÅrsinntekt, ny6G, inntektstidslinje)
 
     internal val maksdato get() = behandlinger.last().maksdato
     internal val dagerNavOvertarAnsvar get() = behandlinger.last().dagerNavOvertarAnsvar
@@ -410,7 +411,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         fun utbetalingstidslinje() = gjeldende.utbetalingstidslinje
-        fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt?, `6G`: Inntekt): Utbetalingstidslinje {
+        fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt?, `6G`: Inntekt, nyFastsattÅrsinntekt: Inntekt, ny6G: Inntekt, inntektstidslinje: Beløpstidslinje): Utbetalingstidslinje {
             val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
                 fastsattÅrsinntekt = fastsattÅrsinntekt,
                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
@@ -418,7 +419,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dagerNavOvertarAnsvar = gjeldende.dagerNavOvertarAnsvar,
                 refusjonstidslinje = refusjonstidslinje,
                 skjæringstidspunkt = skjæringstidspunkt,
-                `6G` = `6G`
+                `6G` = `6G`,
+                nyFastsattÅrsinntekt = nyFastsattÅrsinntekt,
+                ny6G = ny6G,
+                inntektstidslinje = inntektstidslinje
             )
             return builder.result(sykdomstidslinje)
         }

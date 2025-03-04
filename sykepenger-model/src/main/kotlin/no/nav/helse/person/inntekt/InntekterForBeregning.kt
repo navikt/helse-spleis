@@ -1,7 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -139,45 +139,45 @@ internal data class InntekterForBeregning(
             beregningsperiode = beregningsperiode,
             `6G` = `6G`
         )
+    }
 
-        internal companion object {
-            private val TøyseteMeldingsreferanseId = MeldingsreferanseId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
-            private val TøyseteTidsstempel = LocalDate.EPOCH.atStartOfDay()
-            private val TøyseteOpplysningskilde = Kilde(TøyseteMeldingsreferanseId, SYSTEM, TøyseteTidsstempel)
-            private fun tøyseteAuu(periode: Periode) = INGEN to Beløpstidslinje.fra(periode, INGEN, TøyseteOpplysningskilde)
+    internal companion object {
+        private val TøyseteMeldingsreferanseId = MeldingsreferanseId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+        private val TøyseteTidsstempel = LocalDate.EPOCH.atStartOfDay()
+        private val TøyseteOpplysningskilde = Kilde(TøyseteMeldingsreferanseId, SYSTEM, TøyseteTidsstempel)
+        private fun tøyseteAuu(periode: Periode) = INGEN to Beløpstidslinje.fra(periode, INGEN, TøyseteOpplysningskilde)
 
-            fun forAuu(periode: Periode, skjæringstidspunkt: LocalDate, organisasjonsnummer: String, inntektsgrunnlag: Inntektsgrunnlag?): Pair<Inntekt, Beløpstidslinje> {
-                if (inntektsgrunnlag == null) return tøyseteAuu(periode)
-                return with(Builder(periode, skjæringstidspunkt)) {
-                    inntektsgrunnlag.beverte(this)
-                    build()
-                }.tilBeregning(organisasjonsnummer)
-            }
+        fun forAuu(periode: Periode, skjæringstidspunkt: LocalDate, organisasjonsnummer: String, inntektsgrunnlag: Inntektsgrunnlag?): Pair<Inntekt, Beløpstidslinje> {
+            if (inntektsgrunnlag == null) return tøyseteAuu(periode)
+            return with(Builder(periode, skjæringstidspunkt)) {
+                inntektsgrunnlag.beverte(this)
+                build()
+            }.tilBeregning(organisasjonsnummer)
+        }
 
-            fun Map<String, Utbetalingstidslinje>.checkLik(andreBeregning: Map<String, Utbetalingstidslinje>) {
-                check(keys == andreBeregning.keys)
-                forEach { (arbeidsgiver, denneUtbetalingstidslinjen) ->
-                    val andreUtbetalingstidslinjen = andreBeregning.getValue(arbeidsgiver)
-                    check(denneUtbetalingstidslinjen.size == andreUtbetalingstidslinjen.size)
-                    denneUtbetalingstidslinjen.forEach { denneUtbetalingsdagen ->
-                        val andreUtbetalingsdagen = andreUtbetalingstidslinjen[denneUtbetalingsdagen.dato].takeUnless { it is Utbetalingsdag.UkjentDag } ?: error("Fant ikke dagen ${denneUtbetalingsdagen.dato}")
-                        val denneØkonomi = denneUtbetalingsdagen.økonomi
-                        val andreØkonomi = andreUtbetalingsdagen.økonomi
+        fun Map<String, Utbetalingstidslinje>.checkLik(andreBeregning: Map<String, Utbetalingstidslinje>) {
+            check(keys == andreBeregning.keys)
+            forEach { (arbeidsgiver, denneUtbetalingstidslinjen) ->
+                val andreUtbetalingstidslinjen = andreBeregning.getValue(arbeidsgiver)
+                check(denneUtbetalingstidslinjen.size == andreUtbetalingstidslinjen.size)
+                denneUtbetalingstidslinjen.forEach { denneUtbetalingsdagen ->
+                    val andreUtbetalingsdagen = andreUtbetalingstidslinjen[denneUtbetalingsdagen.dato].takeUnless { it is Utbetalingsdag.UkjentDag } ?: error("Fant ikke dagen ${denneUtbetalingsdagen.dato}")
+                    val denneØkonomi = denneUtbetalingsdagen.økonomi
+                    val andreØkonomi = andreUtbetalingsdagen.økonomi
 
-                        check(denneUtbetalingsdagen::class == andreUtbetalingsdagen::class)
-                        check(denneØkonomi.grad == andreØkonomi.grad)
-                        check(denneØkonomi.totalGrad == andreØkonomi.totalGrad)
-                        check(denneØkonomi.arbeidsgiverRefusjonsbeløp == andreØkonomi.arbeidsgiverRefusjonsbeløp)
-                        check(denneØkonomi.aktuellDagsinntekt == andreØkonomi.aktuellDagsinntekt)
-                        check(denneØkonomi.beregningsgrunnlag == andreØkonomi.beregningsgrunnlag)
-                        check(denneØkonomi.dekningsgrunnlag == andreØkonomi.dekningsgrunnlag)
-                        check(denneØkonomi.grunnbeløpgrense == andreØkonomi.grunnbeløpgrense)
-                        check(denneØkonomi.arbeidsgiverbeløp == andreØkonomi.arbeidsgiverbeløp)
-                        check(denneØkonomi.personbeløp == andreØkonomi.personbeløp)
-                        check(denneØkonomi.er6GBegrenset == andreØkonomi.er6GBegrenset)
-                        check(denneØkonomi.tilstand::class == andreØkonomi.tilstand::class)
+                    check(denneUtbetalingsdagen::class == andreUtbetalingsdagen::class)
+                    check(denneØkonomi.grad == andreØkonomi.grad)
+                    check(denneØkonomi.totalGrad == andreØkonomi.totalGrad)
+                    check(denneØkonomi.arbeidsgiverRefusjonsbeløp == andreØkonomi.arbeidsgiverRefusjonsbeløp)
+                    check(denneØkonomi.aktuellDagsinntekt == andreØkonomi.aktuellDagsinntekt)
+                    check(denneØkonomi.beregningsgrunnlag == andreØkonomi.beregningsgrunnlag)
+                    check(denneØkonomi.dekningsgrunnlag == andreØkonomi.dekningsgrunnlag)
+                    check(denneØkonomi.grunnbeløpgrense == andreØkonomi.grunnbeløpgrense)
+                    check(denneØkonomi.arbeidsgiverbeløp == andreØkonomi.arbeidsgiverbeløp)
+                    check(denneØkonomi.personbeløp == andreØkonomi.personbeløp)
+                    check(denneØkonomi.er6GBegrenset == andreØkonomi.er6GBegrenset)
+                    check(denneØkonomi.tilstand::class == andreØkonomi.tilstand::class)
 
-                    }
                 }
             }
         }

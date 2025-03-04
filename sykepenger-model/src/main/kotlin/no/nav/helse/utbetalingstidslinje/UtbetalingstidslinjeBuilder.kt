@@ -84,7 +84,10 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
     private val regler: ArbeidsgiverRegler,
     private val arbeidsgiverperiode: List<Periode>,
     private val dagerNavOvertarAnsvar: List<Periode>,
-    private val refusjonstidslinje: Beløpstidslinje
+    private val refusjonstidslinje: Beløpstidslinje,
+    private val nyFastsattÅrsinntekt: Inntekt,
+    private val ny6G: Inntekt,
+    private val inntektstidslinje: Beløpstidslinje
 ) {
 
     private val lagDefaultRefusjonsbeløpHvisMangler = { _: LocalDate, aktuellDagsinntekt: Inntekt -> aktuellDagsinntekt }
