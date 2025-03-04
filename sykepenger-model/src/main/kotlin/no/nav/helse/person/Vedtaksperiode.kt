@@ -2645,18 +2645,11 @@ internal class Vedtaksperiode private constructor(
 
             if (påTideMedSkatt) {
                 val inngangsfilter = (29..31).contains(vedtaksperiode.person.personidentifikator.toString().take(2).toInt())
-                if (!inngangsfilter) {
-                    aktivitetslogg.info("Behandler ikke vedtaksperiode uten inntektsmelding fordi personen ikke slipper gjennom inngangsfilteret")
-                    return vedtaksperiode.forkast(påminnelse, aktivitetslogg)
+                if (inngangsfilter) {
+                    aktivitetslogg.info("Nå henter vi inntekt fra skatt!")
+                    return vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
                 }
-                aktivitetslogg.info("Nå henter vi inntekt fra skatt!")
-                return vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
             }
-
-            if (ventetMinst3Måneder) {
-                aktivitetslogg.info("Her ønsker vi å hente inntekt fra skatt")
-            }
-
             if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger()) {
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
             }

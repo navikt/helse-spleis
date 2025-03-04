@@ -18,7 +18,6 @@ import no.nav.helse.oktober
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -187,7 +186,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `skal forkaste personer vi ville hentet skatteinntekter for, men som har et fødselsnummer som ikke passerer inngangsfilter`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+    fun `lar vedtaksperiode time ut på vanlig måte dersom fødselsnummer som ikke passerer inngangsfilter`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         medPersonidentifikator(Personidentifikator(FNR_SOM_IKKE_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
         a1 {
             håndterSøknad(januar)
@@ -198,7 +197,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
                 nåtidspunkt = 10.februar(2025).atStartOfDay()
             )
             assertIngenBehov(1.vedtaksperiode, Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlagForArbeidsgiver)
-            assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
+            assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
     }
 
