@@ -100,6 +100,18 @@ class InntekterForBeregningTest {
         assertEquals(INGEN, fastsattÅrsinntektA2)
     }
 
+    @Test
+    fun `kan sende inn inntektsendringer før inntekter fra inntektsgrunnlaget`() {
+        val inntekterForBeregning = inntekterForBeregning(januar) {
+            inntektsendringer(a1, 1.januar, 31.januar, INNTEKT * 2)
+            fraInntektsgrunnlag(a1, INNTEKT)
+        }
+        val (fastsattÅrsinntekt, inntektstidslinje) = inntekterForBeregning.tilBeregning(a1)
+        val forventetTidslinje = ARBEIDSGIVER.beløpstidslinje(1.januar.somPeriode(), INNTEKT) + SYSTEM.beløpstidslinje(2.januar til 31.januar, INNTEKT * 2)
+        assertBeløpstidslinje(forventetTidslinje, inntektstidslinje, ignoreMeldingsreferanseId = true)
+        assertEquals(INNTEKT, fastsattÅrsinntekt)
+    }
+
     private fun inntekterForBeregning(periode: Periode, skjæringstidspunkt: LocalDate = periode.start, block: InntekterForBeregning.Builder.() -> Unit) = with(InntekterForBeregning.Builder(periode, skjæringstidspunkt)) {
         medGjeldende6G(Grunnbeløp.`6G`.beløp(skjæringstidspunkt))
         block()

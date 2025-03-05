@@ -84,7 +84,7 @@ class Ytelser(
         return if (result.isEmpty()) null else result.merge()
     }
 
-    internal fun inntekterForBeregning(builder: Builder) {
+    internal fun inntektsendringer(builder: Builder) {
         inntekterForBeregning.inntektsperioder.forEach { inntektsperiode ->
             builder.inntektsendringer(
                 inntektskilde = inntektsperiode.inntektskilde,

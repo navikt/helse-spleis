@@ -103,19 +103,20 @@ internal data class InntekterForBeregning(
     }
 
     internal class Builder(private val beregningsperiode: Periode, private val skjæringstidspunkt: LocalDate) {
-        private val inntekterPerInntektskilde = mutableMapOf<String, Inntekter>()
+        private val inntekterFraInntektsgrunnlaget = mutableMapOf<String, Inntekter>()
+        private val inntektsendringer = mutableMapOf<String, Beløpstidslinje>()
 
         internal fun fraInntektsgrunnlag(organisasjonsnummer: String, fastsattÅrsinntekt: Inntekt, opplysningskilde: Kilde) {
-            check(organisasjonsnummer !in inntekterPerInntektskilde) { "Organisasjonsnummer er allerede lagt til som ${inntekterPerInntektskilde.getValue(organisasjonsnummer)::class.simpleName}" }
-            inntekterPerInntektskilde[organisasjonsnummer] = Inntekter.FraInntektsgrunnlag(
+            check(organisasjonsnummer !in inntekterFraInntektsgrunnlaget) { "Organisasjonsnummer er allerede lagt til som ${inntekterFraInntektsgrunnlaget.getValue(organisasjonsnummer)::class.simpleName}" }
+            inntekterFraInntektsgrunnlaget[organisasjonsnummer] = Inntekter.FraInntektsgrunnlag(
                 fastsattÅrsinntekt = fastsattÅrsinntekt,
                 inntektstidslinje = Beløpstidslinje.fra(beregningsperiode, fastsattÅrsinntekt, opplysningskilde)
             )
         }
 
         internal fun deaktivertFraInntektsgrunnlag(organisasjonsnummer: String, opplysningskilde: Kilde) {
-            check(organisasjonsnummer !in inntekterPerInntektskilde) { "Organisasjonsnummer er allerede lagt til som ${inntekterPerInntektskilde.getValue(organisasjonsnummer)::class.simpleName}" }
-            inntekterPerInntektskilde[organisasjonsnummer] = Inntekter.DeaktivertFraInntektsgrunnlag(
+            check(organisasjonsnummer !in inntekterFraInntektsgrunnlaget) { "Organisasjonsnummer er allerede lagt til som ${inntekterFraInntektsgrunnlaget.getValue(organisasjonsnummer)::class.simpleName}" }
+            inntekterFraInntektsgrunnlaget[organisasjonsnummer] = Inntekter.DeaktivertFraInntektsgrunnlag(
                 inntektstidslinje = Beløpstidslinje.fra(beregningsperiode, INGEN, opplysningskilde)
             )
         }
@@ -124,14 +125,9 @@ internal data class InntekterForBeregning(
             val periode = fom til listOfNotNull(tom, beregningsperiode.endInclusive).min()
             val kilde = Kilde(meldingsreferanseId, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
             val inntektsendring = Beløpstidslinje.fra(periode, inntekt, kilde)
-            // Om vi ikke kjenner til inntektskilden fra før kan vi være diverse snax. Derunder "tilkommen inntekt"
-            if (inntektskilde !in inntekterPerInntektskilde) {
-                inntekterPerInntektskilde[inntektskilde] = Inntekter.NyInntektskilde()
+            inntektsendringer.compute(inntektskilde) { _, eksisterende ->
+                ((eksisterende ?: Beløpstidslinje()).erstatt(inntektsendring)).subset(beregningsperiode)
             }
-            // Litt avhengig av inntekten som er lagt til grunn håndterer vi innteksendringer litt forskjellig
-            inntekterPerInntektskilde[inntektskilde] = inntekterPerInntektskilde
-                .getValue(inntektskilde)
-                .inntektsendring(skjæringstidspunkt, inntektsendring.subset(beregningsperiode))
         }
 
         private lateinit var `6G`: Inntekt
@@ -140,11 +136,27 @@ internal data class InntekterForBeregning(
             this.`6G` = gjeldende6G
         }
 
-        internal fun build() = InntekterForBeregning(
-            inntekterPerInntektskilde = inntekterPerInntektskilde.toMap(),
-            beregningsperiode = beregningsperiode,
-            `6G` = `6G`
-        )
+        internal fun build(): InntekterForBeregning {
+            // Tar utgangspunkt i inntektene fra inntektsgrunnlaget
+            val inntekterPerInntektskilde = inntekterFraInntektsgrunnlaget.toMutableMap()
+
+            // Og fletter inn inntektsendringene
+            inntektsendringer.forEach { (inntektskilde, inntektsendring) ->
+                // Om vi ikke kjenner til inntektskilden fra før kan vi være diverse snax. Derunder "tilkommen inntekt"
+                if (inntektskilde !in inntekterPerInntektskilde) {
+                    inntekterPerInntektskilde[inntektskilde] = Inntekter.NyInntektskilde()
+                }
+                // Litt avhengig av inntekten som er lagt til grunn håndterer vi innteksendringer litt forskjellig
+                inntekterPerInntektskilde[inntektskilde] = inntekterPerInntektskilde
+                    .getValue(inntektskilde)
+                    .inntektsendring(skjæringstidspunkt, inntektsendring)
+            }
+            return InntekterForBeregning(
+                inntekterPerInntektskilde = inntekterPerInntektskilde.toMap(),
+                beregningsperiode = beregningsperiode,
+                `6G` = `6G`
+            )
+        }
     }
 
     internal companion object {

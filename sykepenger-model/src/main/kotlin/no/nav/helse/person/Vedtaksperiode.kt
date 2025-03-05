@@ -933,7 +933,11 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        val maksdatoresultat = beregnUtbetalinger(aktivitetslogg, ytelser)
+        val inntekterForBeregningBuilder = InntekterForBeregning.Builder(beregningsperiode, skjæringstidspunkt).apply {
+            ytelser.inntektsendringer(this)
+        }
+
+        val maksdatoresultat = beregnUtbetalinger(aktivitetslogg, inntekterForBeregningBuilder)
 
         checkNotNull(vilkårsgrunnlag).valider(aktivitetslogg, arbeidsgiver.organisasjonsnummer)
         infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
@@ -1490,7 +1494,7 @@ internal class Vedtaksperiode private constructor(
         institusjonsopphold(aktivitetslogg, periode)
         arbeidsavklaringspenger(aktivitetslogg, periode.start.minusMonths(6), periode.endInclusive)
         dagpenger(aktivitetslogg, periode.start.minusMonths(2), periode.endInclusive)
-        inntekterForBeregning(aktivitetslogg, periode)
+        inntekterForBeregning(aktivitetslogg, beregningsperiode)
     }
 
     private fun trengerVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg) {
@@ -1973,7 +1977,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun utbetalingstidslinje() = behandlinger.utbetalingstidslinje()
 
-    private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg, ytelser: Ytelser): Maksdatoresultat {
+    private val beregningsperiode get() = checkNotNull(perioderSomMåHensyntasVedBeregning().map { it.periode }.periode()) { "Hvordan kan det ha seg at vi ikke har noen beregningsperiode?" }
+    private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg, inntekterForBeregningBuilder: InntekterForBeregning.Builder): Maksdatoresultat {
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
 
         check(perioderDetSkalBeregnesUtbetalingFor.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
@@ -1983,10 +1988,9 @@ internal class Vedtaksperiode private constructor(
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
         }
 
-        val inntektsbuilder = InntekterForBeregning.Builder(perioderSomMåHensyntasVedBeregning().map { it.periode }.periode()!!, skjæringstidspunkt)
-        grunnlagsdata.inntektsgrunnlag.beverte(inntektsbuilder) // TODO: litt teit at man må huske å sende inn i riktig rekkefølge
-        ytelser.inntekterForBeregning(inntektsbuilder)
-        val inntekterForBeregning = inntektsbuilder.build()
+        val inntekterForBeregning = inntekterForBeregningBuilder.apply {
+            grunnlagsdata.inntektsgrunnlag.beverte(this)
+        }.build()
 
         val (maksdatofilter, beregnetTidslinjePerArbeidsgiver) = beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(
             aktivitetslogg,
@@ -2012,11 +2016,11 @@ internal class Vedtaksperiode private constructor(
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         inntekterForBeregning: InntekterForBeregning
     ): Pair<MaksimumSykepengedagerfilter, Map<String, Utbetalingstidslinje>> {
-        val uberegnetTidslinjePerArbeidsgiver = utbetalingstidslinjePerArbeidsgiver(grunnlagsdata, inntekterForBeregning)
+        val uberegnetTidslinjePerArbeidsgiver = utbetalingstidslinjePerArbeidsgiver(inntekterForBeregning)
         return filtrerUtbetalingstidslinjer(aktivitetslogg, uberegnetTidslinjePerArbeidsgiver, grunnlagsdata)
     }
 
-    private fun utbetalingstidslinjePerArbeidsgiver(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, inntekterForBeregning: InntekterForBeregning): Map<String, Utbetalingstidslinje> {
+    private fun utbetalingstidslinjePerArbeidsgiver(inntekterForBeregning: InntekterForBeregning): Map<String, Utbetalingstidslinje> {
         val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning()
             .groupBy { it.arbeidsgiver.organisasjonsnummer }
         val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning
