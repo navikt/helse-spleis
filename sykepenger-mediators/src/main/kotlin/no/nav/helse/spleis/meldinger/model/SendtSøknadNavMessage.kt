@@ -44,15 +44,11 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, override val meldings
             val inntektskilder = andreInntektskilder(packet["andreInntektskilder"], ikkeJobbetIDetSisteFraAnnetArbeidsforhold)
             builder.inntektskilde(inntektskilder.isNotEmpty())
 
-            packet["inntektFraNyttArbeidsforhold"].takeIf(JsonNode::isArray)?.filter { it.path("harJobbet").asBoolean() }?.forEach {
-                val beløp =  it.path("belop").takeUnless { belop -> belop.isMissingOrNull() }?.asInt() ?: error("Det skal angivelig aldri skje at harJobbet = true & belop er null, men her er vi!")
-                builder.inntektFraNyttArbeidsforhold(
-                    fom = it.path("fom").asLocalDate(),
-                    tom = it.path("tom").asLocalDate(),
-                    orgnummer = it.path("arbeidsstedOrgnummer").asText(),
-                    beløp = beløp
-                )
+            val inntekterFraNyttArbeidsforhold = when (val inntektFraNyttArbeidsforhold = packet["inntektFraNyttArbeidsforhold"].takeIf(JsonNode::isArray)) {
+                null -> false
+                else -> inntektFraNyttArbeidsforhold.any { it.path("harJobbet").asBoolean() }
             }
+            builder.inntekterFraNyeArbeidsforhold(inntekterFraNyttArbeidsforhold)
 
             packet["fravar"].forEach { fravær ->
                 val fraværstype = fravær["type"].asText()

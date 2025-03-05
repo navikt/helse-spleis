@@ -282,9 +282,7 @@ internal class SøknadTest {
         merknaderFraSykmelding: List<Merknad> = emptyList(),
         hendelsefabrikk: ArbeidsgiverHendelsefabrikk = ungPersonFnr2018Hendelsefabrikk,
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
-        egenmeldinger: List<Periode> = emptyList(),
-        ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false,
-        inntekterFraNyeArbeidsforhold: List<Søknad.InntektFraNyttArbeidsforhold> = emptyList()
+        ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false
     ) {
         aktivitetslogg = Aktivitetslogg()
         søknad = hendelsefabrikk.lagSøknad(
@@ -294,9 +292,7 @@ internal class SøknadTest {
             sykmeldingSkrevet = LocalDateTime.now(),
             ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
             merknaderFraSykmelding = merknaderFraSykmelding,
-            permittert = permittert,
-            egenmeldinger = egenmeldinger,
-            inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold
+            permittert = permittert
         )
     }
 }

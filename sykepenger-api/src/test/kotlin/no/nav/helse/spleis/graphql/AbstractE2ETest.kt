@@ -119,7 +119,7 @@ internal abstract class AbstractE2ETest {
         sykmeldingSkrevet: LocalDateTime = 1.januar.atStartOfDay(),
         sendtTilNAV: LocalDateTime = 1.januar.atStartOfDay(),
         orgnummer: String = a1,
-        inntekterFraNyeArbeidsforhold: List<Søknad.InntektFraNyttArbeidsforhold> = emptyList()
+        inntekterFraNyeArbeidsforhold: Boolean = false
     ): UUID {
         val søknadId = UUID.randomUUID()
         val søknad = fabrikker.getValue(orgnummer).lagSøknad(

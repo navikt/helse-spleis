@@ -27,7 +27,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
     @Test
     fun `tilkommen inntekt på førstegangsbehandling`() = Toggle.TilkommenInntektV4.enable {
         a1 {
-            håndterSøknad(januar, inntekterFraNyeArbeidsforhold = listOf(Søknad.InntektFraNyttArbeidsforhold(1.januar, 31.januar, a2, 23000))) // TODO: TilkommenV4 nå trenger vi ikke få inn beløp, eller annet. Kan bare være flagg for å legge på varsel
+            håndterSøknad(januar, inntekterFraNyeArbeidsforhold = true)
             håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag()
             håndterYtelser(1.vedtaksperiode)

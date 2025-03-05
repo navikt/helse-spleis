@@ -3,7 +3,6 @@ package no.nav.helse.spleis.meldinger.model
 import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Søknad.InntektFraNyttArbeidsforhold
 import no.nav.helse.hendelser.Søknad.Merknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -18,7 +17,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 internal class SendtSøknadBuilder : SøknadBuilder() {
     private val perioder = mutableListOf<Søknadsperiode>()
     private val merkander = mutableListOf<Merknad>()
-    private val inntekterFraNyeArbeidsforhold = mutableListOf<InntektFraNyttArbeidsforhold>()
+    private var inntekterFraNyeArbeidsforhold: Boolean = false
     private var opprinneligSendt: LocalDateTime? = null
     private var harAndreInntektskilder: Boolean = false
     private var ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false
@@ -106,14 +105,8 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         this.opprinneligSendt = opprinneligSendt
     }
 
-    fun inntektFraNyttArbeidsforhold(fom: LocalDate, tom: LocalDate, orgnummer: String, beløp: Int) {
-        inntekterFraNyeArbeidsforhold.add(
-            InntektFraNyttArbeidsforhold(
-                fom = fom,
-                tom = tom,
-                orgnummer = orgnummer,
-                råttBeløp = beløp,
-            )
-        )
+
+    fun inntekterFraNyeArbeidsforhold(inntekterFraNyeArbeidsforhold: Boolean) {
+        this.inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold
     }
 }

@@ -90,7 +90,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         egenmeldinger: List<Periode> = emptyList(),
         søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker,
         registrert: LocalDateTime = LocalDateTime.now(),
-        inntekterFraNyeArbeidsforhold: List<Søknad.InntektFraNyttArbeidsforhold> = emptyList(),
+        inntekterFraNyeArbeidsforhold: Boolean = false
     ): Søknad {
         return Søknad(
             meldingsreferanseId = MeldingsreferanseId(id),

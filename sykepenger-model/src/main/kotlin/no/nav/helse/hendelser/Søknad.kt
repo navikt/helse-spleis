@@ -52,7 +52,7 @@ import no.nav.helse.økonomi.Prosentdel
 
 class Søknad(
     meldingsreferanseId: MeldingsreferanseId,
-    private val orgnummer: String,
+    orgnummer: String,
     private val perioder: List<Søknadsperiode>,
     private val andreInntektskilder: Boolean,
     private val ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean,
@@ -68,7 +68,7 @@ class Søknad(
     private val egenmeldinger: List<Periode>,
     private val søknadstype: Søknadstype,
     registrert: LocalDateTime,
-    private val inntekterFraNyeArbeidsforhold: List<InntektFraNyttArbeidsforhold>
+    private val inntekterFraNyeArbeidsforhold: Boolean
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         organisasjonsnummer = orgnummer
@@ -125,7 +125,7 @@ class Søknad(
         subsumsjonslogg.logg(`§ 8-9 ledd 1`(false, utlandsopphold, this.perioder.subsumsjonsFormat()))
         perioder.forEach { it.valider(this, aktivitetslogg) }
         if (permittert) aktivitetslogg.varsel(RV_SØ_1)
-        validerTilkomneInntekter(aktivitetslogg)
+        validerInntekterFraNyeArbeidsforhold(aktivitetslogg)
         merknaderFraSykmelding.forEach { it.valider(aktivitetslogg) }
         val foreldedeDager = ForeldetSubsumsjonsgrunnlag(sykdomstidslinje).build()
         if (foreldedeDager.isNotEmpty()) {
@@ -141,9 +141,8 @@ class Søknad(
         return aktivitetslogg
     }
 
-    private fun validerTilkomneInntekter(aktivitetslogg: IAktivitetslogg) {
-        if (inntekterFraNyeArbeidsforhold.isEmpty()) return
-        // Varselet må legges på her slik at det blir på perioden som er til behandling, for perioden med tilkommen er jo en AUU
+    private fun validerInntekterFraNyeArbeidsforhold(aktivitetslogg: IAktivitetslogg) {
+        if (!inntekterFraNyeArbeidsforhold) return
         if (Toggle.TilkommenInntektV4.enabled) return aktivitetslogg.varsel(`Tilkommen inntekt som støttes`)
         aktivitetslogg.funksjonellFeil(`Tilkommen inntekt som ikke støttes`)
     }
@@ -201,13 +200,6 @@ class Søknad(
             aktivitetslogg.varsel(RV_SØ_3)
         }
     }
-
-    data class InntektFraNyttArbeidsforhold(
-        internal val fom: LocalDate,
-        internal val tom: LocalDate,
-        internal val orgnummer: String,
-        internal val råttBeløp: Int
-    )
 
     class Søknadstype(private val type: String) {
         internal fun valider(

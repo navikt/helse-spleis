@@ -283,7 +283,7 @@ internal abstract class AbstractDslTest {
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
         sykmeldingSkrevet: LocalDateTime? = null,
         sendTilGosys: Boolean = false,
-        inntekterFraNyeArbeidsforhold: List<Søknad.InntektFraNyttArbeidsforhold> = emptyList()
+        inntekterFraNyeArbeidsforhold: Boolean = false
     ) =
         this { håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, sendTilGosys = sendTilGosys, inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold) }
 
@@ -448,7 +448,7 @@ internal abstract class AbstractDslTest {
         sykmeldingSkrevet: LocalDateTime? = null,
         orgnummer: String = a1,
         sendTilGosys: Boolean = false,
-        inntekterFraNyeArbeidsforhold: List<Søknad.InntektFraNyttArbeidsforhold> = emptyList()
+        inntekterFraNyeArbeidsforhold: Boolean = false
     ) =
         bareÈnArbeidsgiver(orgnummer).håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, sendTilGosys = sendTilGosys, inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold)
 

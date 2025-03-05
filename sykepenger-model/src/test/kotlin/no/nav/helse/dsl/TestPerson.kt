@@ -168,7 +168,7 @@ internal class TestPerson(
 
         internal fun håndterSøknad(
             periode: Periode,
-            inntekterFraNyeArbeidsforhold: List<Søknad.InntektFraNyttArbeidsforhold> = emptyList()
+            inntekterFraNyeArbeidsforhold: Boolean = false
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, 100.prosent),
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold
@@ -202,7 +202,7 @@ internal class TestPerson(
             sendTilGosys: Boolean = false,
             registrert: LocalDateTime = LocalDateTime.now(),
             merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
-            inntekterFraNyeArbeidsforhold: List<Søknad.InntektFraNyttArbeidsforhold> = emptyList()
+            inntekterFraNyeArbeidsforhold: Boolean = false
         ) =
             behovsamler.fangInntektsmeldingReplay({
                 vedtaksperiodesamler.fangVedtaksperiode(this.orgnummer) {

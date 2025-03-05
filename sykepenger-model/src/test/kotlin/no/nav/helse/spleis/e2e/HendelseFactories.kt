@@ -124,7 +124,7 @@ internal fun AbstractEndToEndTest.søknad(
     merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
     permittert: Boolean = false,
     egenmeldinger: List<Periode> = emptyList(),
-    inntekterFraNyeArbeidsforhold: List<Søknad.InntektFraNyttArbeidsforhold> = emptyList()
+    inntekterFraNyeArbeidsforhold: Boolean = false
 ) = ArbeidsgiverHendelsefabrikk(orgnummer).lagSøknad(
     perioder = perioder,
     andreInntektskilder = andreInntektskilder,
