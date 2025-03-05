@@ -6,6 +6,8 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.*
 
+data class InntektskildeDto(val id: String)
+
 data class MeldingsreferanseDto(val id: UUID)
 
 data class AlderDto(val fødselsdato: LocalDate, val dødsdato: LocalDate?)

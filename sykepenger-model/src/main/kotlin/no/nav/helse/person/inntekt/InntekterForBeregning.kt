@@ -3,6 +3,8 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Grunnbeløp
+import no.nav.helse.dto.InntektskildeDto
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -18,7 +20,13 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Økonomi
 
 @JvmInline
-value class Inntektskilde(val id: String)
+value class Inntektskilde(val id: String) {
+    fun dto() = InntektskildeDto(id)
+
+    companion object {
+        fun gjenopprett(dto: InntektskildeDto) = Inntektskilde(dto.id)
+    }
+}
 
 internal data class InntekterForBeregning(
     private val inntekterPerInntektskilde: Map<Inntektskilde, Inntekter>,
@@ -27,6 +35,10 @@ internal data class InntekterForBeregning(
 ) {
 
     internal fun tilBeregning(organisasjonsnummer: String) = inntekterPerInntektskilde.getValue(Inntektskilde(organisasjonsnummer)).let { it.fastsattÅrsinntekt to it.inntektstidslinje }
+
+    internal fun forPeriode(periode: Periode) = inntekterPerInntektskilde
+        .mapValues { (_, inntekter) -> inntekter.inntektstidslinje.subset(periode) }
+        .filterValues { inntektstidslinje -> inntektstidslinje.isNotEmpty() }
 
     internal fun hensyntattAlleInntektskilder(beregnedeUtbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
         return inntekterPerInntektskilde.mapValues { (inntektskilde, inntekter) ->
@@ -168,17 +180,29 @@ internal data class InntekterForBeregning(
         private val TøyseteMeldingsreferanseId = MeldingsreferanseId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
         private val TøyseteTidsstempel = LocalDate.EPOCH.atStartOfDay()
         private val TøyseteOpplysningskilde = Kilde(TøyseteMeldingsreferanseId, SYSTEM, TøyseteTidsstempel)
-        private fun tøyseteAuu(periode: Periode) = INGEN to Beløpstidslinje.fra(periode, INGEN, TøyseteOpplysningskilde)
 
-        fun forAuu(periode: Periode, skjæringstidspunkt: LocalDate, organisasjonsnummer: String, inntektsgrunnlag: Inntektsgrunnlag?): Pair<Inntekt, Beløpstidslinje> {
-            if (inntektsgrunnlag == null) return tøyseteAuu(periode)
-            return with(Builder(periode, skjæringstidspunkt)) {
+        fun forAuu(periode: Periode, skjæringstidspunkt: LocalDate, organisasjonsnummer: String, inntektsgrunnlag: Inntektsgrunnlag?): Triple<Inntekt, Beløpstidslinje, InntekterForBeregning> {
+            if (inntektsgrunnlag == null) {
+                val inntekterForBeregning = with(Builder(periode, skjæringstidspunkt)) {
+                    medGjeldende6G(Grunnbeløp.`6G`.beløp(skjæringstidspunkt))
+                    build()
+                }
+                // Når vi skal lage en utbetalingstidslinje på en AUU hvor det ikke finnes noe inntektsgrunnlag vil vi ikke lagre de tøysete verdiene på behandlingen, bare bruke dem for å lage utbetalingstidslinje
+                return Triple(INGEN, Beløpstidslinje.fra(periode, INGEN, TøyseteOpplysningskilde), inntekterForBeregning)
+            }
+
+            val inntekterForBeregning = with(Builder(periode, skjæringstidspunkt)) {
                 inntektsgrunnlag.beverte(this)
                 build()
-            }.inntekterPerInntektskilde[Inntektskilde(organisasjonsnummer)]?.let { it.fastsattÅrsinntekt to it.inntektstidslinje } ?: error(
+            }
+
+            val (fastsattÅrsinntekt, inntektstidslinje) = inntekterForBeregning.inntekterPerInntektskilde[Inntektskilde(organisasjonsnummer)]?.let { it.fastsattÅrsinntekt to it.inntektstidslinje } ?: error(
                 "Det er en arbeidsgiver som ikke inngår i SP: $organisasjonsnummer som har søknader: $periode.\n" +
                 "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
             )
+
+            // Når vi skal lage en utbetalingstidslinje på en AUU hvor det finnes inntektsgrunnlag så lagrer vi ned de ekte inntektene
+            return Triple(fastsattÅrsinntekt, inntektstidslinje, inntekterForBeregning)
         }
     }
 }

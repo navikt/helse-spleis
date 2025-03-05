@@ -2003,7 +2003,8 @@ internal class Vedtaksperiode private constructor(
                 beregning = BeregnetPeriode(
                     maksdatovurdering = maksdatoresultat,
                     grunnlagsdata = grunnlagsdata,
-                    utbetalingstidslinje = utbetalingstidslinje
+                    utbetalingstidslinje = utbetalingstidslinje,
+                    inntekterForBeregning = inntekterForBeregning
                 )
             )
         }
@@ -3129,15 +3130,14 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg.info("Sender trenger arbeidsgiveropplysninger fra AvsluttetUtenUtbetaling på grunn av egenmeldingsdager")
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode)
             }
-            val utbetalingstidslinje = lagUtbetalingstidslinje(vedtaksperiode)
-            vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, aktivitetslogg, utbetalingstidslinje)
+            val (utbetalingstidslinje, inntekterForBeregning) = lagUtbetalingstidslinje(vedtaksperiode)
+            vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
 
-        private fun lagUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode): Utbetalingstidslinje {
-            val (fastsattÅrsinntekt, inntektstidslinje) = InntekterForBeregning.forAuu(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.arbeidsgiver.organisasjonsnummer, vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag)
-            val `6G` = Grunnbeløp.`6G`.beløp(vedtaksperiode.skjæringstidspunkt)
-            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, `6G`, inntektstidslinje)
+        private fun lagUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode): Pair<Utbetalingstidslinje, InntekterForBeregning> {
+            val (fastsattÅrsinntekt, inntektstidslinje, inntekterForBeregning) = InntekterForBeregning.forAuu(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.arbeidsgiver.organisasjonsnummer, vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag)
+            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, inntekterForBeregning.`6G`, inntektstidslinje) to inntekterForBeregning
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {

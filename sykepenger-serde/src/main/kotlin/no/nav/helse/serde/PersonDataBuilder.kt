@@ -396,7 +396,10 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     dokumentsporing = dokumentsporing.tilPersonData(),
     arbeidsgiverperioder = arbeidsgiverperioder.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
-    maksdatoresultat = maksdatoresultat.tilPersonData()
+    maksdatoresultat = maksdatoresultat.tilPersonData(),
+    inntekter = inntekter.map { (inntektskilde, beløpstidslinje) ->
+        inntektskilde.id to beløpstidslinje.tilPersonData()
+    }.toMap()
 )
 
 private fun MaksdatoresultatUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.MaksdatoresultatData(

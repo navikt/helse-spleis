@@ -23,6 +23,7 @@ import no.nav.helse.dto.FeriepengeberegnerDto
 import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.dto.InfotrygdFerieperiodeDto
 import no.nav.helse.dto.InntektbeløpDto
+import no.nav.helse.dto.InntektskildeDto
 import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.MaksdatobestemmelseDto
@@ -868,7 +869,8 @@ data class PersonData(
                     val dokumentsporing: DokumentsporingData,
                     val arbeidsgiverperioder: List<PeriodeData>,
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
-                    val maksdatoresultat: MaksdatoresultatData
+                    val maksdatoresultat: MaksdatoresultatData,
+                    val inntekter: Map<String, BeløpstidslinjeData>? // TODO: Fjerne optional når alle personer har fått seg det
                 ) {
                     fun tilDto() = BehandlingendringInnDto(
                         id = this.id,
@@ -886,7 +888,10 @@ data class PersonData(
                         skjæringstidspunkter = skjæringstidspunkter,
                         arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() },
                         dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map { it.tilDto() },
-                        maksdatoresultat = maksdatoresultat.tilDto()
+                        maksdatoresultat = maksdatoresultat.tilDto(),
+                        inntekter = inntekter?.map { (inntektskilde, beløpstidslinje) ->
+                            InntektskildeDto(inntektskilde) to beløpstidslinje.tilDto()
+                        }?.toMap() ?: emptyMap()
                     )
                 }
             }

@@ -71,6 +71,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             // Ettersom a2 nå ikke er en del av sykepengegrunnlaget blir utbetalingen annerledes selv om inntekten i a2 er helt lik som da den var ghost
             håndterNyeInntekter(fraOgMed = 1.januar)
             håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 1.januar, 31.januar, INNTEKT)))
+            håndterSimulering(1.vedtaksperiode)
             assertUtbetalingsbeløp(1.vedtaksperiode, 715, 1431, subset = 17.januar til 31.januar)
             assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23, Varselkode.RV_VV_2)
         }

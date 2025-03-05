@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.dto.DokumentsporingDto
+import no.nav.helse.dto.InntektskildeDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.SykdomstidslinjeDto
 import no.nav.helse.dto.UtbetalingTilstandDto
@@ -27,4 +28,5 @@ data class BehandlingendringUtDto(
     val arbeidsgiverperioder: List<PeriodeDto>,
     val dagerNavOvertarAnsvar: List<PeriodeDto>,
     val maksdatoresultat: MaksdatoresultatUtDto,
+    val inntekter: Map<InntektskildeDto, BeløpstidslinjeDto>
 )

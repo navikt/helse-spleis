@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
@@ -110,6 +111,15 @@ class InntekterForBeregningTest {
         val forventetTidslinje = ARBEIDSGIVER.beløpstidslinje(1.januar.somPeriode(), INNTEKT) + SYSTEM.beløpstidslinje(2.januar til 31.januar, INNTEKT * 2)
         assertBeløpstidslinje(forventetTidslinje, inntektstidslinje, ignoreMeldingsreferanseId = true)
         assertEquals(INNTEKT, fastsattÅrsinntekt)
+    }
+
+    @Test
+    fun `inntekter for beregning uten noen inntekter`() {
+        val inntekterForBeregning = InntekterForBeregning.Builder(1.januar til 16.januar, 1.januar).apply {
+            medGjeldende6G(Grunnbeløp.`6G`.beløp(1.januar))
+        }.build()
+        val inntekterForPeriode = inntekterForBeregning.forPeriode(1.januar til 16.januar)
+        assertEquals(emptyMap<Inntektskilde, Beløpstidslinje>(), inntekterForPeriode)
     }
 
     private fun inntekterForBeregning(periode: Periode, skjæringstidspunkt: LocalDate = periode.start, block: InntekterForBeregning.Builder.() -> Unit) = with(InntekterForBeregning.Builder(periode, skjæringstidspunkt)) {

@@ -44,6 +44,8 @@ import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.inntekt.InntekterForBeregning
+import no.nav.helse.person.inntekt.Inntektskilde
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
@@ -193,9 +195,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
     }
 
-    fun avsluttUtenVedtak(arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje) {
+    fun avsluttUtenVedtak(arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: InntekterForBeregning) {
         check(behandlinger.last().utbetaling() == null) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
-        this.behandlinger.last().avsluttUtenVedtak(arbeidsgiver, aktivitetslogg, utbetalingstidslinje)
+        this.behandlinger.last().avsluttUtenVedtak(arbeidsgiver, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
         bekreftAvsluttetBehandling(arbeidsgiver)
     }
 
@@ -453,7 +455,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val skjæringstidspunkter: List<LocalDate>,
             val arbeidsgiverperiode: List<Periode>,
             val dagerNavOvertarAnsvar: List<Periode>,
-            val maksdatoresultat: Maksdatoresultat
+            val maksdatoresultat: Maksdatoresultat,
+            val inntekter: Map<Inntektskilde, Beløpstidslinje>
         ) {
 
             fun view() = BehandlingendringView(
@@ -526,7 +529,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         skjæringstidspunkter = dto.skjæringstidspunkter,
                         arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) },
                         dagerNavOvertarAnsvar = dto.dagerNavOvertarAnsvar.map { Periode.gjenopprett(it) },
-                        maksdatoresultat = dto.maksdatoresultat.let { Maksdatoresultat.gjenopprett(it) }
+                        maksdatoresultat = dto.maksdatoresultat.let { Maksdatoresultat.gjenopprett(it) },
+                        inntekter = dto.inntekter.map { (inntektskildeDto, beløpstidslinjeDto) ->
+                            Inntektskilde.gjenopprett(inntektskildeDto) to Beløpstidslinje.gjenopprett(beløpstidslinjeDto)
+                        }.toMap()
                     )
                 }
             }
@@ -555,7 +561,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 skjæringstidspunkter: List<LocalDate> = this.skjæringstidspunkter,
                 arbeidsgiverperiode: List<Periode> = this.arbeidsgiverperiode,
                 dagerNavOvertarAnsvar: List<Periode> = this.dagerNavOvertarAnsvar,
-                maksdatoresultat: Maksdatoresultat = this.maksdatoresultat
+                maksdatoresultat: Maksdatoresultat = this.maksdatoresultat,
+                inntekter: Map<Inntektskilde, Beløpstidslinje> = this.inntekter
             ) = copy(
                 id = UUID.randomUUID(),
                 tidsstempel = LocalDateTime.now(),
@@ -573,6 +580,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 arbeidsgiverperiode = arbeidsgiverperiode,
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                 maksdatoresultat = maksdatoresultat,
+                inntekter = inntekter
             )
 
             internal fun kopierMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Endring? {
@@ -602,7 +610,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     skjæringstidspunkter = alleSkjæringstidspunkter,
                     arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode),
                     dagerNavOvertarAnsvar = dagerNavOvertarAnsvar ?: this.dagerNavOvertarAnsvar,
-                    maksdatoresultat = Maksdatoresultat.IkkeVurdert
+                    maksdatoresultat = Maksdatoresultat.IkkeVurdert,
+                    inntekter = emptyMap()
                 )
             }
 
@@ -627,7 +636,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     skjæringstidspunkter = alleSkjæringstidspunkter,
                     arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode),
                     dagerNavOvertarAnsvar = dagerNavOvertarAnsvar ?: this.dagerNavOvertarAnsvar,
-                    maksdatoresultat = Maksdatoresultat.IkkeVurdert
+                    maksdatoresultat = Maksdatoresultat.IkkeVurdert,
+                    inntekter = emptyMap()
                 )
             }
 
@@ -643,7 +653,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     maksdatoresultat = Maksdatoresultat.IkkeVurdert,
                     skjæringstidspunkt = beregnetSkjæringstidspunkt?.first ?: this.skjæringstidspunkt,
                     skjæringstidspunkter = beregnetSkjæringstidspunkt?.second ?: this.skjæringstidspunkter,
-                    arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode)
+                    arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode),
+                    inntekter = emptyMap()
                 )
             }
 
@@ -663,7 +674,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     refusjonstidslinje = refusjonstidslinje,
                     skjæringstidspunkt = beregnetSkjæringstidspunkt?.first ?: this.skjæringstidspunkt,
                     skjæringstidspunkter = beregnetSkjæringstidspunkt?.second ?: this.skjæringstidspunkter,
-                    arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode)
+                    arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode),
+                    inntekter = emptyMap()
                 )
             }
 
@@ -671,19 +683,22 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 grunnlagsdata = beregning.grunnlagsdata,
                 utbetaling = utbetaling,
                 utbetalingstidslinje = beregning.utbetalingstidslinje.subset(this.periode),
-                maksdatoresultat = beregning.maksdatovurdering.resultat
+                maksdatoresultat = beregning.maksdatovurdering.resultat,
+                inntekter = beregning.inntekterForBeregning.forPeriode(this.periode)
             )
 
             internal fun kopierMedAnnullering(grunnlagsdata: VilkårsgrunnlagElement, annullering: Utbetaling) = kopierMed(
                 grunnlagsdata = grunnlagsdata,
                 utbetaling = annullering,
                 utbetalingstidslinje = Utbetalingstidslinje(),
-                maksdatoresultat = Maksdatoresultat.IkkeVurdert
+                maksdatoresultat = Maksdatoresultat.IkkeVurdert,
+                inntekter = emptyMap()
             )
 
             internal fun kopierDokument(dokument: Dokumentsporing) = kopierMed(dokumentsporing = dokument)
-            internal fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) = kopierMed(
-                utbetalingstidslinje = utbetalingstidslinje.subset(this.periode)
+            internal fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: InntekterForBeregning) = kopierMed(
+                utbetalingstidslinje = utbetalingstidslinje.subset(this.periode),
+                inntekter = inntekterForBeregning.forPeriode(this.periode)
             )
 
             fun forkastUtbetaling(aktivitetslogg: IAktivitetslogg) {
@@ -731,7 +746,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     inntektsendringer = this.inntektsendringer.dto(),
                     arbeidsgiverperioder = this.arbeidsgiverperiode.map { it.dto() },
                     dagerNavOvertarAnsvar = this.dagerNavOvertarAnsvar.map { it.dto() },
-                    maksdatoresultat = this.maksdatoresultat.dto()
+                    maksdatoresultat = this.maksdatoresultat.dto(),
+                    inntekter = this.inntekter.map { (inntektskilde, beløpstidslinje) ->
+                        inntektskilde.dto() to beløpstidslinje.dto()
+                    }.toMap()
                 )
             }
         }
@@ -759,8 +777,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             tilstand.vedtakFattet(this, arbeidsgiver, utbetalingsavgjørelse, aktivitetslogg)
         }
 
-        internal fun avsluttUtenVedtak(arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje) {
-            tilstand.avsluttUtenVedtak(this, arbeidsgiver, aktivitetslogg, utbetalingstidslinje)
+        internal fun avsluttUtenVedtak(arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: InntekterForBeregning) {
+            tilstand.avsluttUtenVedtak(this, arbeidsgiver, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
         }
 
         internal fun forkastVedtaksperiode(arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
@@ -869,8 +887,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return true
         }
 
-        private fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje): Boolean {
-            nyEndring(gjeldende.kopierMedUtbetalingstidslinje(utbetalingstidslinje))
+        private fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: InntekterForBeregning): Boolean {
+            nyEndring(gjeldende.kopierMedUtbetalingstidslinje(utbetalingstidslinje, inntekterForBeregning))
             return true
         }
 
@@ -1193,7 +1211,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             skjæringstidspunkter = emptyList(),
                             arbeidsgiverperiode = emptyList(),
                             dagerNavOvertarAnsvar = emptyList(),
-                            maksdatoresultat = Maksdatoresultat.IkkeVurdert
+                            maksdatoresultat = Maksdatoresultat.IkkeVurdert,
+                            inntekter = emptyMap()
                         )
                     ),
                     avsluttet = null,
@@ -1333,7 +1352,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 error("Kan ikke fatte vedtak for behandling i $this")
             }
 
-            fun avsluttUtenVedtak(behandling: Behandling, arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje) {
+            fun avsluttUtenVedtak(behandling: Behandling, arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: InntekterForBeregning) {
                 error("Kan ikke avslutte uten vedtak for behandling i $this")
             }
 
@@ -1416,9 +1435,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     beregning: BeregnetPeriode
                 ) = behandling.lagUtbetaling(vedtaksperiodeSomLagerUtbetaling, arbeidsgiver, aktivitetslogg, beregning)
 
-                override fun avsluttUtenVedtak(behandling: Behandling, arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje) {
+                override fun avsluttUtenVedtak(behandling: Behandling, arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: InntekterForBeregning) {
                     behandling.behandlingLukket(arbeidsgiver)
-                    behandling.kopierMedUtbetalingstidslinje(utbetalingstidslinje)
+                    behandling.kopierMedUtbetalingstidslinje(utbetalingstidslinje, inntekterForBeregning)
                     behandling.tilstand(AvsluttetUtenVedtak, aktivitetslogg)
                 }
             }
