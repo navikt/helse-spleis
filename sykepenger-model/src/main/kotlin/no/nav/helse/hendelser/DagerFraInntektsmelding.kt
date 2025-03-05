@@ -106,7 +106,7 @@ internal class DagerFraInntektsmelding(
         if (arbeidsgiverperioder.isEmpty()) return
         if (opprinneligPeriode == null) return
         val oppdatertPeriode = opprinneligPeriode.oppdaterFom(dato)
-        val arbeidsdagerFør = oppdatertPeriode.trim(opprinneligPeriode).flatten()
+        val arbeidsdagerFør = oppdatertPeriode.uten(opprinneligPeriode).flatten()
         if (!arbeidsdager.addAll(arbeidsdagerFør)) return
         _gjenståendeDager.addAll(arbeidsdagerFør)
     }

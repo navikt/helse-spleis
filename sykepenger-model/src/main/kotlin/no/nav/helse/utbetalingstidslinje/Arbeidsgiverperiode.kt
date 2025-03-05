@@ -86,7 +86,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     private fun dagerSomarbeidsgiverUtbetaler(): Periode? {
         val heleInklHelg = arbeidsgiverperioden.justerForHelg()
         val utbetalingsperiode = utbetalingsdager.periode() ?: return heleInklHelg
-        return heleInklHelg.trimDagerFør(utbetalingsperiode)
+        return heleInklHelg.utenDagerFør(utbetalingsperiode)
     }
 
     internal fun hørerTil(periode: Periode, sisteKjente: LocalDate = this.sisteKjente) =

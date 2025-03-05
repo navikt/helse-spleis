@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
 import no.nav.helse.hendelser.Periode.Companion.slutterEtter
-import no.nav.helse.hendelser.Periode.Companion.trim
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
@@ -376,11 +375,12 @@ internal class PeriodeTest {
     @Test
     fun `liste av perioder trimmer annen`() {
         val periode = 5.januar til 31.januar
-        val result = listOf(
+        val result = periode.uten(listOf(
             1.januar til 5.januar,
             10.januar til 14.januar,
             28.januar til 29.januar
-        ).trim(periode)
+        ))
+
         assertEquals(
             listOf(6.januar til 9.januar, 15.januar til 27.januar, 30.januar til 31.januar),
             result
@@ -392,29 +392,29 @@ internal class PeriodeTest {
         val periode = 5.januar til 20.januar
 
         // trimmer ingenting
-        assertEquals(listOf(periode), periode.trim(1.januar til 4.januar))
-        assertEquals(listOf(periode), periode.trim(21.januar til 31.januar))
+        assertEquals(listOf(periode), periode.uten(1.januar til 4.januar))
+        assertEquals(listOf(periode), periode.uten(21.januar til 31.januar))
 
         // trimmer hele perioden
-        assertEquals(emptyList<Periode>(), periode.trim(4.januar til 20.januar))
-        assertEquals(emptyList<Periode>(), periode.trim(5.januar til 20.januar))
-        assertEquals(emptyList<Periode>(), periode.trim(5.januar til 21.januar))
-        assertEquals(emptyList<Periode>(), periode.trim(4.januar til 21.januar))
+        assertEquals(emptyList<Periode>(), periode.uten(4.januar til 20.januar))
+        assertEquals(emptyList<Periode>(), periode.uten(5.januar til 20.januar))
+        assertEquals(emptyList<Periode>(), periode.uten(5.januar til 21.januar))
+        assertEquals(emptyList<Periode>(), periode.uten(4.januar til 21.januar))
 
         // trimmer perioden i to deler
-        assertEquals(listOf(5.januar.somPeriode(), 20.januar.somPeriode()), periode.trim(6.januar til 19.januar))
-        assertEquals(listOf(5.januar til 9.januar, 16.januar til 20.januar), periode.trim(10.januar til 15.januar))
-        assertEquals(listOf(5.januar til 13.januar, 15.januar til 20.januar), periode.trim(14.januar.somPeriode()))
+        assertEquals(listOf(5.januar.somPeriode(), 20.januar.somPeriode()), periode.uten(6.januar til 19.januar))
+        assertEquals(listOf(5.januar til 9.januar, 16.januar til 20.januar), periode.uten(10.januar til 15.januar))
+        assertEquals(listOf(5.januar til 13.januar, 15.januar til 20.januar), periode.uten(14.januar.somPeriode()))
 
         // trimmer bort snute
-        assertEquals(listOf(20.januar.somPeriode()), periode.trim(4.januar til 19.januar))
-        assertEquals(listOf(20.januar.somPeriode()), periode.trim(5.januar til 19.januar))
-        assertEquals(listOf(15.januar til 20.januar), periode.trim(5.januar til 14.januar))
+        assertEquals(listOf(20.januar.somPeriode()), periode.uten(4.januar til 19.januar))
+        assertEquals(listOf(20.januar.somPeriode()), periode.uten(5.januar til 19.januar))
+        assertEquals(listOf(15.januar til 20.januar), periode.uten(5.januar til 14.januar))
 
         // trimmer bort hale
-        assertEquals(listOf(5.januar.somPeriode()), periode.trim(6.januar til 20.januar))
-        assertEquals(listOf(5.januar.somPeriode()), periode.trim(6.januar til 21.januar))
-        assertEquals(listOf(5.januar til 9.januar), periode.trim(10.januar til 21.januar))
+        assertEquals(listOf(5.januar.somPeriode()), periode.uten(6.januar til 20.januar))
+        assertEquals(listOf(5.januar.somPeriode()), periode.uten(6.januar til 21.januar))
+        assertEquals(listOf(5.januar til 9.januar), periode.uten(10.januar til 21.januar))
     }
 
     @Test

@@ -24,7 +24,7 @@ internal class MinimumSykdomsgradsvurdering(private val perioderMedMinimumSykdom
     private fun Collection<Periode>.fjernPerioder(nyePerioder: Set<Periode>) =
         this.flatMap { gammelPeriode ->
             nyePerioder.fold(listOf(gammelPeriode)) { result, nyPeriode ->
-                result.flatMap { it.trim(nyPeriode) }
+                result.flatMap { it.uten(nyPeriode) }
             }
         }
 

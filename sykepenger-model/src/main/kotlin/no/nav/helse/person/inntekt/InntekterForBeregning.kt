@@ -29,7 +29,7 @@ internal data class InntekterForBeregning(
         return inntekterPerInntektskilde.mapValues { (inntektskilde, inntekter) ->
             val beregnedeUtbetalingstidslinjerForInntektskilde = beregnedeUtbetalingstidslinjer[inntektskilde] ?: emptyList()
             val beregendePerioderForInntektskilde = beregnedeUtbetalingstidslinjerForInntektskilde.map(Utbetalingstidslinje::periode)
-            val uberegnedeDagerForArbeidsgiver = beregningsperiode.filterNot { dato -> beregendePerioderForInntektskilde.any { beregnetPeriode -> dato in beregnetPeriode} }
+            val uberegnedeDagerForArbeidsgiver = beregningsperiode.uten(beregendePerioderForInntektskilde).flatten()
             val uberegnetUtbetalingstidslinjeForArbeidsgiver = inntekter.uberegnetUtbetalingstidslinje(uberegnedeDagerForArbeidsgiver, `6G`)
             beregnedeUtbetalingstidslinjerForInntektskilde.fold(uberegnetUtbetalingstidslinjeForArbeidsgiver, Utbetalingstidslinje::plus)
         }.filterValues { it.isNotEmpty() }

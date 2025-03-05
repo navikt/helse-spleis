@@ -22,7 +22,7 @@ internal class Sykmeldingsperioder(
     }
 
     internal fun fjern(periode: Periode) {
-        perioder = perioder.flatMap { it.trim(periode.oppdaterFom(LocalDate.MIN)) }
+        perioder = perioder.flatMap { it.uten(periode.oppdaterFom(LocalDate.MIN)) }
     }
 
     internal fun overlappendePerioder(dager: DagerFraInntektsmelding) =

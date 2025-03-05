@@ -43,18 +43,9 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
         fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = merge(mergeOverHelg)
 
         fun Iterable<Periode>.merge(nyPeriode: Periode) = this
-            .flatMap { it.trim(nyPeriode) }
+            .flatMap { it.uten(nyPeriode) }
             .plusElement(nyPeriode)
             .sortedBy { it.start }
-
-        /*
-            bryter <other> opp i ulike biter som ikke dekkes av listen av perioder.
-            antar at listen av perioder er sortert
-         */
-        fun Iterable<Periode>.trim(other: Periode): List<Periode> =
-            fold(listOf(other)) { result, trimperiode ->
-                result.dropLast(1) + (result.lastOrNull()?.trim(trimperiode) ?: emptyList())
-            }
 
         val Iterable<LocalDate>.omsluttendePeriode get() = this.takeIf { it.iterator().hasNext() }?.let { min() til max() }
 
@@ -187,7 +178,7 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
         else -> cutoff.plusDays(1) til endInclusive
     }
 
-    fun trim(other: Periode): List<Periode> {
+    fun uten(other: Periode): List<Periode> {
         val felles = this.overlappendePeriode(other) ?: return listOf(this)
         return when {
             felles == this -> emptyList()
@@ -197,7 +188,7 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
         }
     }
 
-    fun trimDagerFør(other: Periode) = this.trim(other.oppdaterTom(LocalDate.MAX)).periode()
+    fun utenDagerFør(other: Periode) = this.uten(other.oppdaterTom(LocalDate.MAX)).periode()
 
     private fun beholdDagerFør(other: Periode) = this.start til other.start.forrigeDag
     private fun beholdDagerEtter(other: Periode) = other.endInclusive.nesteDag til this.endInclusive
@@ -220,6 +211,15 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     operator fun plus(annen: Periode?): Periode {
         if (annen == null) return this
         return Periode(minOf(this.start, annen.start), maxOf(this.endInclusive, annen.endInclusive))
+    }
+
+    fun uten(perioder: Iterable<Periode>): List<Periode> {
+        return perioder.sortedBy { it.start }.fold(listOf(this)) { resultat, periodeSomSkalFjernes ->
+            when (val siste = resultat.lastOrNull()) {
+                null -> resultat
+                else -> resultat.dropLast(1) + siste.uten(periodeSomSkalFjernes)
+            }
+        }
     }
 
     override operator fun iterator() = object : Iterator<LocalDate> {

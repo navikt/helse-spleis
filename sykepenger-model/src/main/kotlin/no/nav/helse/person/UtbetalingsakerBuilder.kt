@@ -4,7 +4,6 @@ import java.time.LocalDate
 import kotlin.collections.component1
 import kotlin.collections.component2
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.trim
 import no.nav.helse.utbetalingslinjer.Utbetalingsak
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
 
@@ -58,6 +57,6 @@ internal class UtbetalingsakerBuilder(
 
     private fun utbetalteInfotrygdperioderMellomVedtaksperioder(vedtaksperiodene: List<ArbeidsgiverperiodeForVedtaksperiode>) =
         infotrygdbetalinger.flatMap { periode ->
-            vedtaksperiodene.map { it.vedtaksperiode }.trim(periode)
+            periode.uten(vedtaksperiodene.map { it.vedtaksperiode })
         }
 }
