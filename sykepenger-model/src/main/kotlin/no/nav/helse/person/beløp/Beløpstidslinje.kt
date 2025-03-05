@@ -29,13 +29,18 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
             override fun next() = this@Beløpstidslinje[periodeIterator.next()]
         }
     }
+    operator fun plus(other: Beløpstidslinje) = merge(other) { champion, challenger ->
+        if (challenger.kilde.tidsstempel >= champion.kilde.tidsstempel) challenger
+        else champion
+    }
 
-    operator fun plus(other: Beløpstidslinje): Beløpstidslinje {
+    internal fun erstatt(other: Beløpstidslinje) = merge(other) { _, challenger -> challenger }
+
+    private fun merge(other: Beløpstidslinje, strategy: (champion: Beløpsdag, challenger: Beløpsdag) -> Beløpsdag): Beløpstidslinje {
         val results = this.dager.toMutableMap()
         other.dager.forEach { (key, dag) ->
             results.merge(key, dag) { champion, challenger ->
-                if (challenger.kilde.tidsstempel >= champion.kilde.tidsstempel) challenger
-                else champion
+                strategy(champion, challenger)
             }
         }
         return Beløpstidslinje(results)

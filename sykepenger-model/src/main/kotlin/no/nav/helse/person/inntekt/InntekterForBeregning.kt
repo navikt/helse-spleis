@@ -60,7 +60,7 @@ internal data class InntekterForBeregning(
         data class FraInntektsgrunnlag(override val fastsattÅrsinntekt: Inntekt, override val inntektstidslinje: Beløpstidslinje): Inntekter {
             override fun inntektsendring(skjæringstidspunkt: LocalDate, inntektsendringer: Beløpstidslinje) = copy(
                 // For arbeidsgiver i inntektsgrunnlaget kan ikke inntekten på skjæringstidspunktet endres av en inntektsendring.
-                inntektstidslinje = this.inntektstidslinje + inntektsendringer.fraOgMed(skjæringstidspunkt.nesteDag)
+                inntektstidslinje = this.inntektstidslinje.erstatt(inntektsendringer.fraOgMed(skjæringstidspunkt.nesteDag))
             )
             override fun uberegnetUtbetalingstidslinje(uberegnedeDager: List<LocalDate>, `6G`: Inntekt): Utbetalingstidslinje {
                 // Lager Utbetalingstidslinje for alle arbeidsgivere fra inntektsgrunnlaget
@@ -76,7 +76,7 @@ internal data class InntekterForBeregning(
                 // Inntektsendring for en deaktivert arbeidsgiver høres spennende ut. Men det kan vel sikkert skje? Hen var i sykepengegrunnlaget men var reelt tilkommen f.eks. ?
                 // Her tillater vi å endre beløpet på skjæringstidspunktet ettersom arbeidsgiveren ikke er en del av sykepengegrunnlaget.
                 // Skulle den ble aktivert igjen så er det beløpet fra inntektsgrunnlaget som igjen vil bli brukt (Da er vi FraInntektsgrunnlag, ikke DeaktivertFraInntektsgrunnlag)
-                inntektstidslinje = this.inntektstidslinje + inntektsendringer
+                inntektstidslinje = this.inntektstidslinje.erstatt(inntektsendringer)
             )
 
             override fun uberegnetUtbetalingstidslinje(uberegnedeDager: List<LocalDate>, `6G`: Inntekt): Utbetalingstidslinje {
@@ -91,7 +91,7 @@ internal data class InntekterForBeregning(
             override val fastsattÅrsinntekt = INGEN
 
             override fun inntektsendring(skjæringstidspunkt: LocalDate, inntektsendringer: Beløpstidslinje) = copy(
-                inntektstidslinje = this.inntektstidslinje + inntektsendringer
+                inntektstidslinje = this.inntektstidslinje.erstatt(inntektsendringer)
             )
 
             override fun uberegnetUtbetalingstidslinje(uberegnedeDager: List<LocalDate>, `6G`: Inntekt): Utbetalingstidslinje {
