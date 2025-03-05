@@ -52,7 +52,7 @@ class InntekterForBeregningTest {
     fun `kan ikke endre inntekt på skjæringstidspunktet for en arbeidsgiver som finnes i inntektsgrunnlaget ved hjelp av en inntektsendring`() {
         val inntekterForBeregning = inntekterForBeregning(januar) {
             fraInntektsgrunnlag(a1, INNTEKT)
-            inntektsendringer(a1, 1.januar, 31.januar, INNTEKT * 2)
+            inntektsendringer(Inntektskilde(a1), 1.januar, 31.januar, INNTEKT * 2)
         }
 
         val (_, inntektstidslinje) = inntekterForBeregning.tilBeregning(a1)
@@ -65,7 +65,7 @@ class InntekterForBeregningTest {
     fun `kan sette inntekt på skjæringstidspunktet for en arbeidsgiver som ikke finnes i inntektsgrunnlaget`() {
         val inntekterForBeregning = inntekterForBeregning(januar) {
             fraInntektsgrunnlag(a1, INNTEKT)
-            inntektsendringer(a2, 1.januar, 31.januar, INNTEKT * 2)
+            inntektsendringer(Inntektskilde(a2), 1.januar, 31.januar, INNTEKT * 2)
         }
 
         val (fastsattÅrsinntektA1, inntektstidslinjeForA1) = inntekterForBeregning.tilBeregning(a1)
@@ -85,7 +85,7 @@ class InntekterForBeregningTest {
         val inntekterForBeregning = inntekterForBeregning(januar) {
             fraInntektsgrunnlag(a1, INNTEKT)
             deaktivertFraInntektsgrunnlag(a2)
-            inntektsendringer(a2, 1.januar, 31.januar, INNTEKT * 2)
+            inntektsendringer(Inntektskilde(a2), 1.januar, 31.januar, INNTEKT * 2)
         }
 
         val (fastsattÅrsinntektA1, inntektstidslinjeForA1) = inntekterForBeregning.tilBeregning(a1)
@@ -103,7 +103,7 @@ class InntekterForBeregningTest {
     @Test
     fun `kan sende inn inntektsendringer før inntekter fra inntektsgrunnlaget`() {
         val inntekterForBeregning = inntekterForBeregning(januar) {
-            inntektsendringer(a1, 1.januar, 31.januar, INNTEKT * 2)
+            inntektsendringer(Inntektskilde(a1), 1.januar, 31.januar, INNTEKT * 2)
             fraInntektsgrunnlag(a1, INNTEKT)
         }
         val (fastsattÅrsinntekt, inntektstidslinje) = inntekterForBeregning.tilBeregning(a1)
@@ -124,6 +124,6 @@ class InntekterForBeregningTest {
     private fun InntekterForBeregning.Builder.deaktivertFraInntektsgrunnlag(organisasjonsnummer: String,meldingsreferanseId: MeldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())) =
         deaktivertFraInntektsgrunnlag(organisasjonsnummer, meldingsreferanseId.id.saksbehandler)
 
-    private fun InntekterForBeregning.Builder.inntektsendringer(organisasjonsnummer: String, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())) =
-        inntektsendringer(organisasjonsnummer, fom, tom, inntekt, meldingsreferanseId)
+    private fun InntekterForBeregning.Builder.inntektsendringer(inntektskilde: Inntektskilde, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())) =
+        inntektsendringer(inntektskilde, fom, tom, inntekt, meldingsreferanseId)
 }

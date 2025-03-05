@@ -17,22 +17,25 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Økonomi
 
+@JvmInline
+value class Inntektskilde(val id: String)
+
 internal data class InntekterForBeregning(
-    private val inntekterPerInntektskilde: Map<String, Inntekter>,
+    private val inntekterPerInntektskilde: Map<Inntektskilde, Inntekter>,
     private val beregningsperiode: Periode,
     val `6G`: Inntekt
 ) {
 
-    internal fun tilBeregning(organisasjonsnummer: String) = inntekterPerInntektskilde.getValue(organisasjonsnummer).let { it.fastsattÅrsinntekt to it.inntektstidslinje }
+    internal fun tilBeregning(organisasjonsnummer: String) = inntekterPerInntektskilde.getValue(Inntektskilde(organisasjonsnummer)).let { it.fastsattÅrsinntekt to it.inntektstidslinje }
 
     internal fun hensyntattAlleInntektskilder(beregnedeUtbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
         return inntekterPerInntektskilde.mapValues { (inntektskilde, inntekter) ->
-            val beregnedeUtbetalingstidslinjerForInntektskilde = beregnedeUtbetalingstidslinjer[inntektskilde] ?: emptyList()
+            val beregnedeUtbetalingstidslinjerForInntektskilde = beregnedeUtbetalingstidslinjer[inntektskilde.id] ?: emptyList()
             val beregendePerioderForInntektskilde = beregnedeUtbetalingstidslinjerForInntektskilde.map(Utbetalingstidslinje::periode)
             val uberegnedeDagerForArbeidsgiver = beregningsperiode.uten(beregendePerioderForInntektskilde).flatten()
             val uberegnetUtbetalingstidslinjeForArbeidsgiver = inntekter.uberegnetUtbetalingstidslinje(uberegnedeDagerForArbeidsgiver, `6G`)
             beregnedeUtbetalingstidslinjerForInntektskilde.fold(uberegnetUtbetalingstidslinjeForArbeidsgiver, Utbetalingstidslinje::plus)
-        }.filterValues { it.isNotEmpty() }
+        }.mapKeys { (inntktskilde, _) ->inntktskilde.id }.filterValues { it.isNotEmpty() }
     }
 
     internal sealed interface Inntekter {
@@ -103,25 +106,27 @@ internal data class InntekterForBeregning(
     }
 
     internal class Builder(private val beregningsperiode: Periode, private val skjæringstidspunkt: LocalDate) {
-        private val inntekterFraInntektsgrunnlaget = mutableMapOf<String, Inntekter>()
-        private val inntektsendringer = mutableMapOf<String, Beløpstidslinje>()
+        private val inntekterFraInntektsgrunnlaget = mutableMapOf<Inntektskilde, Inntekter>()
+        private val inntektsendringer = mutableMapOf<Inntektskilde, Beløpstidslinje>()
 
         internal fun fraInntektsgrunnlag(organisasjonsnummer: String, fastsattÅrsinntekt: Inntekt, opplysningskilde: Kilde) {
-            check(organisasjonsnummer !in inntekterFraInntektsgrunnlaget) { "Organisasjonsnummer er allerede lagt til som ${inntekterFraInntektsgrunnlaget.getValue(organisasjonsnummer)::class.simpleName}" }
-            inntekterFraInntektsgrunnlaget[organisasjonsnummer] = Inntekter.FraInntektsgrunnlag(
+            val inntektskilde = Inntektskilde(organisasjonsnummer)
+            check(inntektskilde !in inntekterFraInntektsgrunnlaget) { "Organisasjonsnummer er allerede lagt til som ${inntekterFraInntektsgrunnlaget.getValue(inntektskilde)::class.simpleName}" }
+            inntekterFraInntektsgrunnlaget[inntektskilde] = Inntekter.FraInntektsgrunnlag(
                 fastsattÅrsinntekt = fastsattÅrsinntekt,
                 inntektstidslinje = Beløpstidslinje.fra(beregningsperiode, fastsattÅrsinntekt, opplysningskilde)
             )
         }
 
         internal fun deaktivertFraInntektsgrunnlag(organisasjonsnummer: String, opplysningskilde: Kilde) {
-            check(organisasjonsnummer !in inntekterFraInntektsgrunnlaget) { "Organisasjonsnummer er allerede lagt til som ${inntekterFraInntektsgrunnlaget.getValue(organisasjonsnummer)::class.simpleName}" }
-            inntekterFraInntektsgrunnlaget[organisasjonsnummer] = Inntekter.DeaktivertFraInntektsgrunnlag(
+            val inntektskilde = Inntektskilde(organisasjonsnummer)
+            check(inntektskilde !in inntekterFraInntektsgrunnlaget) { "Organisasjonsnummer er allerede lagt til som ${inntekterFraInntektsgrunnlaget.getValue(inntektskilde)::class.simpleName}" }
+            inntekterFraInntektsgrunnlaget[inntektskilde] = Inntekter.DeaktivertFraInntektsgrunnlag(
                 inntektstidslinje = Beløpstidslinje.fra(beregningsperiode, INGEN, opplysningskilde)
             )
         }
 
-        internal fun inntektsendringer(inntektskilde: String, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId) {
+        internal fun inntektsendringer(inntektskilde: Inntektskilde, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId) {
             val periode = fom til listOfNotNull(tom, beregningsperiode.endInclusive).min()
             val kilde = Kilde(meldingsreferanseId, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
             val inntektsendring = Beløpstidslinje.fra(periode, inntekt, kilde)
@@ -170,7 +175,7 @@ internal data class InntekterForBeregning(
             return with(Builder(periode, skjæringstidspunkt)) {
                 inntektsgrunnlag.beverte(this)
                 build()
-            }.inntekterPerInntektskilde[organisasjonsnummer]?.let { it.fastsattÅrsinntekt to it.inntektstidslinje } ?: error(
+            }.inntekterPerInntektskilde[Inntektskilde(organisasjonsnummer)]?.let { it.fastsattÅrsinntekt to it.inntektstidslinje } ?: error(
                 "Det er en arbeidsgiver som ikke inngår i SP: $organisasjonsnummer som har søknader: $periode.\n" +
                 "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
             )

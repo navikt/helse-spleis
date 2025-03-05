@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.InntekterForBeregning.Builder
+import no.nav.helse.person.inntekt.Inntektskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 
@@ -87,7 +88,7 @@ class Ytelser(
     internal fun inntektsendringer(builder: Builder) {
         inntekterForBeregning.inntektsperioder.forEach { inntektsperiode ->
             builder.inntektsendringer(
-                inntektskilde = inntektsperiode.inntektskilde,
+                inntektskilde = Inntektskilde(inntektsperiode.inntektskilde),
                 fom = inntektsperiode.fom,
                 tom = inntektsperiode.tom,
                 inntekt = inntektsperiode.inntekt,
