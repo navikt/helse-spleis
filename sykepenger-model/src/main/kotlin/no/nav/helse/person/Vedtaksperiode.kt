@@ -149,6 +149,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
+import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
@@ -1890,21 +1891,17 @@ internal class Vedtaksperiode private constructor(
     private fun lagNyUtbetaling(
         arbeidsgiverSomBeregner: Arbeidsgiver,
         aktivitetslogg: IAktivitetslogg,
-        maksdatoresultat: Maksdatovurdering,
-        utbetalingstidslinje: Utbetalingstidslinje,
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
+        beregning: BeregnetPeriode
     ) {
         behandlinger.nyUtbetaling(
-            this.id,
-            this.arbeidsgiver,
-            grunnlagsdata,
-            aktivitetslogg,
-            maksdatoresultat.resultat,
-            utbetalingstidslinje
+            vedtaksperiodeSomLagerUtbetaling = this.id,
+            arbeidsgiver = this.arbeidsgiver,
+            aktivitetslogg = aktivitetslogg,
+            beregning = beregning
         )
-        val subsumsjonen = Utbetalingstidslinjesubsumsjon(this.subsumsjonslogg, this.sykdomstidslinje, utbetalingstidslinje)
+        val subsumsjonen = Utbetalingstidslinjesubsumsjon(this.subsumsjonslogg, this.sykdomstidslinje, beregning.utbetalingstidslinje)
         subsumsjonen.subsummer(periode, person.regler)
-        maksdatoresultat.subsummer(subsumsjonslogg, periode)
+        beregning.maksdatovurdering.subsummer(subsumsjonslogg, periode)
         loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(arbeidsgiverSomBeregner, aktivitetslogg)
     }
 
@@ -2001,11 +1998,13 @@ internal class Vedtaksperiode private constructor(
             val utbetalingstidslinje = beregnetTidslinjePerArbeidsgiver.getValue(other.arbeidsgiver.organisasjonsnummer)
             val maksdatoresultat = maksdatofilter.maksdatoresultatForVedtaksperiode(other.periode)
             other.lagNyUtbetaling(
-                this.arbeidsgiver,
-                other.aktivitetsloggkopi(aktivitetslogg),
-                maksdatoresultat,
-                utbetalingstidslinje,
-                grunnlagsdata
+                arbeidsgiverSomBeregner = this.arbeidsgiver,
+                aktivitetslogg = other.aktivitetsloggkopi(aktivitetslogg),
+                beregning = BeregnetPeriode(
+                    maksdatovurdering = maksdatoresultat,
+                    grunnlagsdata = grunnlagsdata,
+                    utbetalingstidslinje = utbetalingstidslinje
+                )
             )
         }
         return behandlinger.maksdato
