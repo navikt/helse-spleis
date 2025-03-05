@@ -96,7 +96,7 @@ internal data class InntekterForBeregning(
 
             override fun uberegnetUtbetalingstidslinje(uberegnedeDager: List<LocalDate>, `6G`: Inntekt): Utbetalingstidslinje {
                 // For en ny inntektskilde må vi ta utgangspunkt i inntektstidslinjen
-                val dager = inntektstidslinje.filterIsInstance<Beløpsdag>().filter { it.dato in uberegnedeDager }.map(Beløpsdag::dato)
+                val dager = uberegnedeDager.filter { inntektstidslinje[it] is Beløpsdag }
                 return arbeidsdager(dager, `6G`)
             }
         }
