@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e.tilkommen_arbeidsgiver
 
-import java.util.UUID
+import java.time.LocalDate
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
@@ -15,7 +15,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -40,7 +39,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
 
             // Her legger saksbehandler til inntekter basert på informasjon i søknaden
 
-            nyeInntekter(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            håndterNyeInntekter(fraOgMed = 1.januar)
             håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 1.januar, 31.januar, 1000.daglig)))
             assertUtbetalingsbeløp(1.vedtaksperiode, 842, 1431, subset = 17.januar til 31.januar)
         }
@@ -70,16 +69,17 @@ internal class TilkommenInntektTest : AbstractDslTest() {
 
             // Her legger saksbehandler til inntekter basert på informasjon i søknaden
             // Ettersom a2 nå ikke er en del av sykepengegrunnlaget blir utbetalingen annerledes selv om inntekten i a2 er helt lik som da den var ghost
-            nyeInntekter(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            håndterNyeInntekter(fraOgMed = 1.januar)
             håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 1.januar, 31.januar, INNTEKT)))
             assertUtbetalingsbeløp(1.vedtaksperiode, 715, 1431, subset = 17.januar til 31.januar)
             assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23, Varselkode.RV_VV_2)
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.nyeInntekter(vedtaksperiode: UUID, tilstand: TilstandType) {
+    private fun TestPerson.TestArbeidsgiver.håndterNyeInntekter(fraOgMed: LocalDate) {
         // TODO: Spleis får et signal om at det er kommet nye inntekter på personen
         // frem til det finnes et sånt signal, trigger vi reberegning manuelt
-        håndterPåminnelse(vedtaksperiode, tilstand, reberegning = true)
+        val vedtaksperiode = inspektør.førsteVedtaksperiodeSomOverlapperEllerErEtter(fraOgMed)
+        håndterPåminnelse(vedtaksperiode.id, vedtaksperiode.tilstand, reberegning = true)
     }
 }
