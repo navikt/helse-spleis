@@ -42,7 +42,6 @@ data class Dokumentsporing(
                     DokumenttypeDto.Sykmelding -> DokumentType.Sykmelding
                     DokumenttypeDto.Søknad -> DokumentType.Søknad
                     DokumenttypeDto.AndreYtelser -> DokumentType.AndreYtelser
-                    DokumenttypeDto.TilkommenInntektFraSøknad -> DokumentType.TilkommenInntektFraSøknad // TODO: TilkommenV4
                 }
             )
         }
@@ -66,7 +65,6 @@ data class Dokumentsporing(
             DokumentType.OverstyrArbeidsforhold -> DokumenttypeDto.OverstyrArbeidsforhold
             DokumentType.SkjønnsmessigFastsettelse -> DokumenttypeDto.SkjønnsmessigFastsettelse
             DokumentType.AndreYtelser -> DokumenttypeDto.AndreYtelser
-            DokumentType.TilkommenInntektFraSøknad -> DokumenttypeDto.TilkommenInntektFraSøknad
         }
     )
 }

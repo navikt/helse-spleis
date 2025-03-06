@@ -18,7 +18,6 @@ enum class DokumentType(val ekstern: Boolean = false) {
     OverstyrArbeidsgiveropplysninger,
     OverstyrArbeidsforhold,
     SkjønnsmessigFastsettelse,
-    AndreYtelser,
-    TilkommenInntektFraSøknad
+    AndreYtelser
 }
 
