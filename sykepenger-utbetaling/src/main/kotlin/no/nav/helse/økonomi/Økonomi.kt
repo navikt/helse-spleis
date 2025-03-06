@@ -156,6 +156,7 @@ class Økonomi private constructor(
                 // dager som har inntekt, som var i tilstand IkkeBetalt, vil kunne ha en sykdomsgradprosent,
                 // men de er blitt utbetalt med 0 % utbetalingsgrad (hardkodet INGEN som beløp)
                 dto.grad.prosent > 0.0 && dto.arbeidsgiverbeløp != null && (dto.arbeidsgiverbeløp!!.beløp == 0.0 && dto.personbeløp!!.beløp == 0.0) -> 0.prosent
+                dto.grad.prosent > 0.0 && dto.arbeidsgiverbeløp == null -> 0.prosent
                 else -> Prosentdel.gjenopprett(dto.grad)
             }
             if (dto.arbeidsgiverbeløp != null && (dto.arbeidsgiverbeløp!!.beløp != 0.0 || dto.personbeløp!!.beløp != 0.0)) {

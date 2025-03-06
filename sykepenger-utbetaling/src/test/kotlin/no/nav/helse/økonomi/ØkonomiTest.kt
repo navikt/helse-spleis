@@ -154,7 +154,7 @@ internal class ØkonomiTest {
             assertNotSame(original, original.inntekt(1200.daglig, 1200.daglig))
         }
     }
-    
+
     @Test
     fun `toMap uten dekningsgrunnlag`() {
         val økonomi = 79.5.prosent.sykdomsgrad
