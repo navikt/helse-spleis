@@ -372,7 +372,8 @@ private fun mapBeregnetPeriode(periode: BeregnetPeriode, hendelser: List<Hendels
         hendelser = periode.hendelser.tilHendelseDTO(hendelser),
         periodevilkar = mapPeriodevilkår(periode.periodevilkår),
         periodetilstand = mapTilstand(periode.periodetilstand),
-        vilkarsgrunnlagId = periode.vilkårsgrunnlagId
+        vilkarsgrunnlagId = periode.vilkårsgrunnlagId,
+        inntekter = emptyList()
     )
 
 private fun mapAnnullertPeriode(periode: AnnullertPeriode, hendelser: List<HendelseDTO>) =
@@ -408,7 +409,8 @@ private fun mapAnnullertPeriode(periode: AnnullertPeriode, hendelser: List<Hende
             )
         ),
         periodetilstand = mapTilstand(periode.periodetilstand),
-        vilkarsgrunnlagId = null
+        vilkarsgrunnlagId = null,
+        inntekter = emptyList()
     )
 
 private fun Set<UUID>.tilHendelseDTO(hendelser: List<HendelseDTO>): List<GraphQLHendelse> {

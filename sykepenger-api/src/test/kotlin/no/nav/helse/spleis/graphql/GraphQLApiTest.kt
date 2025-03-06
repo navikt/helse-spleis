@@ -11,11 +11,12 @@ import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.sql_dsl.single
 import com.github.navikt.tbd_libs.sql_dsl.transaction
 import com.github.navikt.tbd_libs.test_support.TestDataSource
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.auth.authentication
+import io.ktor.server.auth.jwt.JWTPrincipal
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.every
@@ -23,7 +24,7 @@ import io.mockk.mockk
 import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
@@ -697,6 +698,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                     }
                   },
                   "vilkarsgrunnlagId": "00000000-0000-0000-0000-000000000000",
+                  "inntekter": [],
                   "kilde": "00000000-0000-0000-0000-000000000000"
                 }
               ]

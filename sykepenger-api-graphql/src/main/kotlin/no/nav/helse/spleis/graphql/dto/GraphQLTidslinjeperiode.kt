@@ -248,5 +248,17 @@ data class GraphQLBeregnetPeriode(
     val maksdato: LocalDate,
     val utbetaling: GraphQLUtbetaling,
     val periodevilkar: GraphQLPeriodevilkar,
-    val vilkarsgrunnlagId: UUID?
+    val vilkarsgrunnlagId: UUID?,
+    val inntekter: List<GraphQLInntekt>
 ) : GraphQLTidslinjeperiode
+
+data class GraphQLInntekt(
+    val inntektskilde: String,
+    val periodiserteInntekter: List<GraphQLPeriodisertInntekt>
+)
+
+data class GraphQLPeriodisertInntekt(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val dagligBelop: Double
+)
