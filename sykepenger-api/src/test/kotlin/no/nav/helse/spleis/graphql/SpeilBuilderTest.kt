@@ -44,6 +44,26 @@ import org.junit.jupiter.api.Test
 internal class SpeilBuilderTest : AbstractE2ETest() {
 
     @Test
+    fun `selv om vi har refusjonsopplysninger fra begge arbeidsgivere mappes det kun ut for den som har beregnet perioder`() {
+        håndterSøknad(1.januar til 10.januar, a1) // AUU
+
+        håndterSøknad(11.januar til 26.januar, a2) // AUU
+        håndterSøknad(11.januar til 26.januar, a1) // Skal utbetales
+
+        håndterSøknad(27.januar til 27.februar, a2) // Skal utbetales
+
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), orgnummer = a1, vedtaksperiode = 2)
+        håndterArbeidsgiveropplysninger(listOf(11.januar til 26.januar), orgnummer = a2)
+        håndterVilkårsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT))
+        håndterYtelser()
+        håndterSimulering()
+
+        val arbeidsgiverrefusjoner = speilApi().vilkårsgrunnlag.values.single().arbeidsgiverrefusjoner
+        assertEquals(1, arbeidsgiverrefusjoner.size)
+        assertEquals(a1, arbeidsgiverrefusjoner.single().arbeidsgiver)
+    }
+
+    @Test
     fun `totalgrad må jo være lik for avslag og utbetaling`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 19.prosent), orgnummer = a1)
         håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1, beregnetInntekt = 836352.årlig)
