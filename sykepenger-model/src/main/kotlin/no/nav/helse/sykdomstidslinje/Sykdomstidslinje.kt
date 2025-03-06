@@ -34,7 +34,6 @@ import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.økonomi.Prosentdel
-import no.nav.helse.økonomi.Økonomi
 
 class Sykdomstidslinje private constructor(
     private val dager: SortedMap<LocalDate, Dag>,
@@ -207,10 +206,7 @@ class Sykdomstidslinje private constructor(
                         toMap(
                             { it },
                             {
-                                Økonomi.sykdomsgrad(grad).let { økonomi ->
-                                    if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else Sykedag(it, økonomi, kilde)
-                                }
-
+                                if (it.erHelg()) SykHelgedag(it, grad, kilde) else Sykedag(it, grad, kilde)
                             }
                         )
                     ))
@@ -242,14 +238,12 @@ class Sykdomstidslinje private constructor(
                         toMap(
                             { it },
                             {
-                                Økonomi.sykdomsgrad(grad).let { økonomi ->
-                                    if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else sykedag(
-                                        it,
-                                        avskjæringsdato,
-                                        økonomi,
-                                        kilde
-                                    )
-                                }
+                                if (it.erHelg()) SykHelgedag(it, grad, kilde) else sykedag(
+                                    it,
+                                    avskjæringsdato,
+                                    grad,
+                                    kilde
+                                )
                             })
                     )
             )
@@ -257,9 +251,9 @@ class Sykdomstidslinje private constructor(
         private fun sykedag(
             dato: LocalDate,
             avskjæringsdato: LocalDate,
-            økonomi: Økonomi,
+            grad: Prosentdel,
             kilde: Hendelseskilde
-        ) = if (dato < avskjæringsdato) ForeldetSykedag(dato, økonomi, kilde) else Sykedag(dato, økonomi, kilde)
+        ) = if (dato < avskjæringsdato) ForeldetSykedag(dato, grad, kilde) else Sykedag(dato, grad, kilde)
 
         internal fun arbeidsgiverdager(
             førsteDato: LocalDate,
@@ -273,10 +267,8 @@ class Sykdomstidslinje private constructor(
                         toMap(
                             { it },
                             {
-                                Økonomi.sykdomsgrad(grad).let { økonomi ->
-                                    if (it.erHelg()) ArbeidsgiverHelgedag(it, økonomi, kilde)
-                                    else Arbeidsgiverdag(it, økonomi, kilde)
-                                }
+                                if (it.erHelg()) ArbeidsgiverHelgedag(it, grad, kilde)
+                                else Arbeidsgiverdag(it, grad, kilde)
                             })
                     )
             )

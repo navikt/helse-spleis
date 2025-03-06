@@ -3,7 +3,7 @@ package no.nav.helse.etterlevelse
 import java.time.LocalDate
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.økonomi.Økonomi
+import no.nav.helse.økonomi.Prosentdel
 
 internal class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) {
     private val navdager = sykdomstidslinje.mapNotNull { dag ->
@@ -22,8 +22,8 @@ internal class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) {
 
             is Dag.Feriedag -> visit(dag.dato, "FERIEDAG", null)
             is Dag.Permisjonsdag -> visit(dag.dato, "PERMISJONSDAG", null)
-            is Dag.SykHelgedag -> visit(dag.dato, "SYKEDAG", dag.økonomi)
-            is Dag.Sykedag -> visit(dag.dato, "SYKEDAG", dag.økonomi)
+            is Dag.SykHelgedag -> visit(dag.dato, "SYKEDAG", dag.grad)
+            is Dag.Sykedag -> visit(dag.dato, "SYKEDAG", dag.grad)
             is Dag.ArbeidIkkeGjenopptattDag,
             is Dag.Arbeidsdag,
             is Dag.ArbeidsgiverHelgedag,
@@ -37,8 +37,7 @@ internal class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) {
 
     fun dager() = navdager.toList()
 
-    private fun visit(dato: LocalDate, dagtype: String, økonomi: Økonomi?): Tidslinjedag {
-        val grad = økonomi?.brukAvrundetGrad { grad -> grad }
-        return Tidslinjedag(dato, dagtype, grad)
+    private fun visit(dato: LocalDate, dagtype: String, grad: Prosentdel?): Tidslinjedag {
+        return Tidslinjedag(dato, dagtype, grad?.toDouble()?.toInt())
     }
 }

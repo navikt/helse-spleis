@@ -58,11 +58,7 @@ internal data class InntekterForBeregning(
                 if (dato.erHelg()) addFridag(dato, Økonomi.ikkeBetalt())
                 else addArbeidsdag(
                     dato = dato,
-                    økonomi = Økonomi.ikkeBetalt().inntekt(
-                        aktuellDagsinntekt = inntektstidslinje[dato].beløp,
-                        dekningsgrunnlag = INGEN,
-                        refusjonsbeløp = INGEN
-                    )
+                    økonomi = Økonomi.ikkeBetalt(aktuellDagsinntekt = inntektstidslinje[dato].beløp)
                 )
             }
             build()

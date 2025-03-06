@@ -25,8 +25,7 @@ fun tidslinjeOf(
         var dato = startDato
         val antallDager = antallDagerFun(startDato)
         repeat(antallDager) {
-            val økonomi = Økonomi.sykdomsgrad(grad.prosent)
-                .inntekt(dekningsgrunnlag, refusjonsbeløp = arbeidsgiverbeløp)
+            val økonomi = Økonomi.inntekt(grad.prosent, dekningsgrunnlag, dekningsgrunnlag, refusjonsbeløp = arbeidsgiverbeløp)
             if (helgedag != null && dato.erHelg()) this.helgedag(dato, økonomi)
             else this.utbetalingsdag(dato, økonomi)
             dato = dato.plusDays(1)

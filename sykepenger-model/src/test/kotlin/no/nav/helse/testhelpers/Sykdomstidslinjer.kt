@@ -18,7 +18,6 @@ import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import no.nav.helse.økonomi.Økonomi
 
 private var threadLocalDagensDato = ThreadLocal.withInitial { 1.januar }
 private var dagensDato: LocalDate
@@ -161,7 +160,7 @@ internal val Int.YOL
 internal val Int.H
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { SykHelgedag(it, Økonomi.sykdomsgrad(100.prosent), INGEN) }))
+            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { SykHelgedag(it, 100.prosent, INGEN) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.P
@@ -191,7 +190,7 @@ internal fun Int.PROBLEM(melding: String, kilde: Hendelseskilde) = Sykdomstidsli
 internal val Int.FORELDET
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { Dag.ForeldetSykedag(it, Økonomi.sykdomsgrad(100.prosent), INGEN) }))
+            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { Dag.ForeldetSykedag(it, 100.prosent, INGEN) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 

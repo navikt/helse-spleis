@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 
@@ -37,9 +36,8 @@ sealed class Utbetalingsperiode(
         }.build()
 
     private fun nyDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
-        val økonomi = Økonomi.sykdomsgrad(grad)
-        if (dato.erHelg()) return builder.addHelg(dato, økonomi.inntekt(INGEN, refusjonsbeløp = INGEN))
-        builder.addNAVdag(dato, økonomi.inntekt(inntekt, refusjonsbeløp = INGEN))
+        if (dato.erHelg()) return builder.addHelg(dato, Økonomi.ikkeBetalt())
+        builder.addNAVdag(dato, Økonomi.ikkeBetalt())
     }
 
     override fun gjelder(orgnummer: String) = orgnummer == this.orgnr

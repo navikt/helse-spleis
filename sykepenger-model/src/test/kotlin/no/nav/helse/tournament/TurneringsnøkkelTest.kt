@@ -32,24 +32,22 @@ import no.nav.helse.tournament.Turneringsnøkkel.UbestemtDag
 import no.nav.helse.tournament.TurneringsnøkkelTest.TestHendelse.Companion.inntektsmelding
 import no.nav.helse.tournament.TurneringsnøkkelTest.TestHendelse.Companion.søknad
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class TurneringsnøkkelTest {
     private val enDag = LocalDate.now()
-    private val økonomi = Økonomi.sykdomsgrad(100.prosent)
 
     @Test
     fun turneringsnøkler() {
         assertEquals(Arbeidsdag_IM, fraDag(Arbeidsdag(enDag, inntektsmelding)))
         assertEquals(Arbeidsdag_SØ, fraDag(Arbeidsdag(enDag, søknad)))
-        assertEquals(Arbeidsgiverdag_IM, fraDag(Arbeidsgiverdag(enDag, økonomi, inntektsmelding)))
-        assertEquals(Arbeidsgiverdag_SØ, fraDag(Arbeidsgiverdag(enDag, økonomi, søknad)))
-        assertEquals(ArbeidsgiverHelgedag_IM, fraDag(ArbeidsgiverHelgedag(enDag, økonomi, inntektsmelding)))
-        assertEquals(ArbeidsgiverHelgedag_SØ, fraDag(ArbeidsgiverHelgedag(enDag, økonomi, søknad)))
-        assertEquals(Turneringsnøkkel.ForeldetSykedag, fraDag(Dag.ForeldetSykedag(enDag, økonomi, inntektsmelding)))
-        assertEquals(Turneringsnøkkel.ForeldetSykedag, fraDag(Dag.ForeldetSykedag(enDag, økonomi, søknad)))
+        assertEquals(Arbeidsgiverdag_IM, fraDag(Arbeidsgiverdag(enDag, 100.prosent, inntektsmelding)))
+        assertEquals(Arbeidsgiverdag_SØ, fraDag(Arbeidsgiverdag(enDag, 100.prosent, søknad)))
+        assertEquals(ArbeidsgiverHelgedag_IM, fraDag(ArbeidsgiverHelgedag(enDag, 100.prosent, inntektsmelding)))
+        assertEquals(ArbeidsgiverHelgedag_SØ, fraDag(ArbeidsgiverHelgedag(enDag, 100.prosent, søknad)))
+        assertEquals(Turneringsnøkkel.ForeldetSykedag, fraDag(Dag.ForeldetSykedag(enDag, 100.prosent, inntektsmelding)))
+        assertEquals(Turneringsnøkkel.ForeldetSykedag, fraDag(Dag.ForeldetSykedag(enDag, 100.prosent, søknad)))
         assertEquals(Feriedag_IM, fraDag(Feriedag(enDag, inntektsmelding)))
         assertEquals(Feriedag_SØ, fraDag(Feriedag(enDag, søknad)))
         assertEquals(Feriedag_IM, fraDag(FriskHelgedag(enDag, inntektsmelding)))
@@ -57,8 +55,8 @@ internal class TurneringsnøkkelTest {
         assertEquals(Turneringsnøkkel.UkjentDag, fraDag(Dag.UkjentDag(enDag, INGEN)))
         assertEquals(UbestemtDag, fraDag(ProblemDag(enDag, INGEN, "")))
         assertEquals(Permisjonsdag_SØ, fraDag(Permisjonsdag(enDag, søknad)))
-        assertEquals(Sykedag_SØ, fraDag(Sykedag(enDag, økonomi, søknad)))
-        assertEquals(SykHelgedag_SØ, fraDag(SykHelgedag(enDag, økonomi, søknad)))
+        assertEquals(Sykedag_SØ, fraDag(Sykedag(enDag, 100.prosent, søknad)))
+        assertEquals(SykHelgedag_SØ, fraDag(SykHelgedag(enDag, 100.prosent, søknad)))
     }
 
     private sealed class TestHendelse {

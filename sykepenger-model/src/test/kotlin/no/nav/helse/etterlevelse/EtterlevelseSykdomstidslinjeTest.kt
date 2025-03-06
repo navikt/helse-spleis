@@ -6,7 +6,7 @@ import no.nav.helse.januar
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Foreldrepenger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.økonomi.Økonomi
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -17,16 +17,16 @@ internal class EtterlevelseSykdomstidslinjeTest {
         val dager = listOf(
             1.januar.subsummérbar { Dag.AndreYtelser(it, INGEN, Foreldrepenger) },
             2.januar.ikkeSubsummérbar { Dag.Arbeidsdag(it, INGEN) },
-            3.januar.ikkeSubsummérbar { Dag.ArbeidsgiverHelgedag(it, Økonomi.ikkeBetalt(), INGEN) },
-            4.januar.ikkeSubsummérbar { Dag.Arbeidsgiverdag(it, Økonomi.ikkeBetalt(), INGEN) },
+            3.januar.ikkeSubsummérbar { Dag.ArbeidsgiverHelgedag(it, 100.prosent, INGEN) },
+            4.januar.ikkeSubsummérbar { Dag.Arbeidsgiverdag(it, 100.prosent, INGEN) },
             5.januar.ikkeSubsummérbar { Dag.ArbeidIkkeGjenopptattDag(it, INGEN) },
             6.januar.subsummérbar { Dag.Feriedag(it, INGEN) },
-            7.januar.ikkeSubsummérbar { Dag.ForeldetSykedag(it, Økonomi.ikkeBetalt(), INGEN) },
+            7.januar.ikkeSubsummérbar { Dag.ForeldetSykedag(it, 100.prosent, INGEN) },
             8.januar.ikkeSubsummérbar { Dag.FriskHelgedag(it, INGEN) },
             9.januar.subsummérbar { Dag.Permisjonsdag(it, INGEN) },
             10.januar.ikkeSubsummérbar { Dag.ProblemDag(it, INGEN, "Melding") },
-            11.januar.subsummérbar { Dag.SykHelgedag(it, Økonomi.ikkeBetalt(), INGEN) },
-            12.januar.subsummérbar { Dag.Sykedag(it, Økonomi.ikkeBetalt(), INGEN) },
+            11.januar.subsummérbar { Dag.SykHelgedag(it, 100.prosent, INGEN) },
+            12.januar.subsummérbar { Dag.Sykedag(it, 100.prosent, INGEN) },
             14.januar.ikkeSubsummérbar { Dag.UkjentDag(it, INGEN) }
         ).sortedBy { it.second::class.simpleName }
 

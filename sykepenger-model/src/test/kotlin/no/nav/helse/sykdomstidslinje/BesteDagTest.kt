@@ -5,7 +5,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -18,15 +17,15 @@ internal class BesteDagTest {
         private val ferieFraInntektsmelding = Dag.Feriedag(1.januar, TestEvent.inntektsmelding)
         private val friskHelgFraInntektsmelding = Dag.FriskHelgedag(1.januar, TestEvent.inntektsmelding)
         private val arbeidIkkeGjenopptattDag = Dag.ArbeidIkkeGjenopptattDag(1.januar, TestEvent.saksbehandler)
-        private val arbeidsgiverdagFraInntektsmelding = Dag.Arbeidsgiverdag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.inntektsmelding)
+        private val arbeidsgiverdagFraInntektsmelding = Dag.Arbeidsgiverdag(1.januar, 100.prosent, TestEvent.inntektsmelding)
         private val ferieFraSøknad = Dag.Feriedag(1.januar, TestEvent.søknad)
         private val ferieFraSaksbehandler = Dag.Feriedag(1.januar, TestEvent.saksbehandler)
         private val permisjonFraSøknad = Dag.Permisjonsdag(1.januar, TestEvent.søknad)
-        private val sykedagFraSøknad = Dag.Sykedag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.søknad)
-        private val sykHelgedagFraSøknad = Dag.SykHelgedag(6.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.søknad)
+        private val sykedagFraSøknad = Dag.Sykedag(1.januar, 100.prosent, TestEvent.søknad)
+        private val sykHelgedagFraSøknad = Dag.SykHelgedag(6.januar, 100.prosent, TestEvent.søknad)
         private val permisjonHelgedagFraSøknad = Dag.Permisjonsdag(6.januar, TestEvent.søknad)
-        private val sykedagFraSaksbehandler = Dag.Sykedag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
-        private val egenmeldingsdagFraSaksbehandler = Dag.Arbeidsgiverdag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
+        private val sykedagFraSaksbehandler = Dag.Sykedag(1.januar, 100.prosent, TestEvent.saksbehandler)
+        private val egenmeldingsdagFraSaksbehandler = Dag.Arbeidsgiverdag(1.januar, 100.prosent, TestEvent.saksbehandler)
         private val arbeidsdagFraSaksbehandler = Dag.Arbeidsdag(1.januar, TestEvent.saksbehandler)
         private val andreYtelser = Dag.AndreYtelser(1.januar, TestEvent.testkilde, Dag.AndreYtelser.AnnenYtelse.Foreldrepenger)
     }

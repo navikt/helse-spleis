@@ -16,7 +16,7 @@ import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.økonomi.Økonomi
+import no.nav.helse.økonomi.Prosentdel
 
 internal val Sykdomstidslinje.inspektør get() = SykdomstidslinjeInspektør(this)
 
@@ -33,11 +33,11 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) {
     init {
         tidslinje.forEach { dag ->
             when (dag) {
-                is ArbeidsgiverHelgedag -> set(dag, dag.dato, dag.økonomi, dag.kilde)
-                is Arbeidsgiverdag -> set(dag, dag.dato, dag.økonomi, dag.kilde)
-                is Sykedag -> set(dag, dag.dato, dag.økonomi, dag.kilde)
-                is SykHelgedag -> set(dag, dag.dato, dag.økonomi, dag.kilde)
-                is ForeldetSykedag -> set(dag, dag.dato, dag.økonomi, dag.kilde)
+                is ArbeidsgiverHelgedag -> set(dag, dag.dato, dag.grad, dag.kilde)
+                is Arbeidsgiverdag -> set(dag, dag.dato, dag.grad, dag.kilde)
+                is Sykedag -> set(dag, dag.dato, dag.grad, dag.kilde)
+                is SykHelgedag -> set(dag, dag.dato, dag.grad, dag.kilde)
+                is ForeldetSykedag -> set(dag, dag.dato, dag.grad, dag.kilde)
                 is ProblemDag -> set(dag, dag.dato, dag.kilde, dag.melding)
                 is Dag.AndreYtelser,
                 is Dag.ArbeidIkkeGjenopptattDag,
@@ -61,8 +61,8 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) {
         dagteller.compute(dag::class) { _, value -> 1 + (value ?: 0) }
     }
 
-    private fun set(dag: Dag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-        this.grader[dato] = økonomi.inspektør.gradProsent.toInt()
+    private fun set(dag: Dag, dato: LocalDate, grad: Prosentdel, kilde: Hendelseskilde) {
+        this.grader[dato] = grad.toDouble().toInt()
         set(dag, dato, kilde)
     }
 
