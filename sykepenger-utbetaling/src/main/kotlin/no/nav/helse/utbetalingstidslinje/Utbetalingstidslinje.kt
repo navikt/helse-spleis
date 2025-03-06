@@ -20,6 +20,8 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.betal
 import no.nav.helse.økonomi.Økonomi
 
 /**
@@ -58,8 +60,10 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
             begrunnelse: Begrunnelse
         ) = tidslinjer.flatMap { it.subset(periode) }.mapNotNull { it.erAvvistMed(begrunnelse) }
 
-        fun betale(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
-            return beregnDagForDag(tidslinjer, Økonomi::betal)
+        fun betale(sykepengegrunnlagBegrenset6G: Inntekt, tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
+            return beregnDagForDag(tidslinjer) {
+                it.betal(sykepengegrunnlagBegrenset6G)
+            }
         }
 
         fun totalSykdomsgrad(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
@@ -92,12 +96,6 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
             return Utbetalingstidslinje(
                 utbetalingsdager = dto.dager.map { Utbetalingsdag.gjenopprett(it) }.toMutableList()
             )
-        }
-    }
-
-    fun er6GBegrenset(): Boolean {
-        return utbetalingsdager.any { (_, it) ->
-            it.økonomi.er6GBegrenset()
         }
     }
 

@@ -13,7 +13,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -23,7 +22,7 @@ internal class CreateØkonomiTest {
     fun `kan ikke betale økonomi med kun grad`() {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
-            assertThrows<IllegalStateException> { listOf(økonomi).betal() }
+            assertThrows<IllegalStateException> { listOf(økonomi).betal(2161.daglig) }
         }
     }
 
@@ -73,7 +72,7 @@ internal class CreateØkonomiTest {
             assertNull(økonomi.inspektør.personbeløp)
             // Indirect test of Økonomi state is HarLønn
             assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig) }
-            assertDoesNotThrow { listOf(økonomi).betal() }
+            assertDoesNotThrow { listOf(økonomi).betal(`6G`.beløp(1.januar)) }
         }
     }
 
@@ -88,10 +87,9 @@ internal class CreateØkonomiTest {
             assertEquals(1199.6.daglig, økonomi.inspektør.dekningsgrunnlag)
             assertEquals(640.daglig, økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(320.daglig, økonomi.inspektør.personbeløp)
-            assertTrue(økonomi.er6GBegrenset())
             // Indirect test of Økonomi state
             assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig) }
-            assertThrows<IllegalStateException> { listOf(økonomi).betal() }
+            assertThrows<IllegalStateException> { listOf(økonomi).betal(`6G`.beløp(1.januar)) }
         }
     }
 

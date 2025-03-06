@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -181,7 +180,6 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
 import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
-import no.nav.helse.utbetalingstidslinje.Maksdatovurdering
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
@@ -2060,7 +2058,10 @@ internal class Vedtaksperiode private constructor(
             AvvisDagerEtterDødsdatofilter(person.alder),
             AvvisInngangsvilkårfilter(grunnlagsdata),
             maksdatofilter,
-            MaksimumUtbetalingFilter()
+            MaksimumUtbetalingFilter(
+                sykepengegrunnlagBegrenset6G = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag,
+                er6GBegrenset = grunnlagsdata.inntektsgrunnlag.er6GBegrenset()
+            )
         )
 
         val kjørFilter = fun(
