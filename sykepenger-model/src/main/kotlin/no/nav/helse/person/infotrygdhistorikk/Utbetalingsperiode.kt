@@ -38,8 +38,8 @@ sealed class Utbetalingsperiode(
 
     private fun nyDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
         val økonomi = Økonomi.sykdomsgrad(grad)
-        if (dato.erHelg()) return builder.addHelg(dato, økonomi.inntekt(INGEN, `6G` = INGEN, refusjonsbeløp = INGEN))
-        builder.addNAVdag(dato, økonomi.inntekt(inntekt, `6G` = INGEN, refusjonsbeløp = INGEN))
+        if (dato.erHelg()) return builder.addHelg(dato, økonomi.inntekt(INGEN, refusjonsbeløp = INGEN))
+        builder.addNAVdag(dato, økonomi.inntekt(inntekt, refusjonsbeløp = INGEN))
     }
 
     override fun gjelder(orgnummer: String) = orgnummer == this.orgnr

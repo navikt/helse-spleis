@@ -64,7 +64,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
 
     @Test
     fun `avviser på tvers av vilkårsgrunnlagelementer`() {
-        val tidslinjer = listOf(tidslinjeOf(2.NAV, skjæringstidspunkter = listOf(1.januar, 2.januar)))
+        val tidslinjer = listOf(tidslinjeOf(2.NAV))
         val innslag1 = VilkårsgrunnlagHistorikk.Innslag(null, grunnlagsdata(1.januar, harOpptjening = false))
         val innslag = VilkårsgrunnlagHistorikk.Innslag(innslag1, grunnlagsdata(2.januar, harMinimumInntekt = false))
         val resultat = innslag.avvis(tidslinjer, 2.januar til 2.januar, subsumsjonslogg)
@@ -76,7 +76,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
 
     @Test
     fun `oppfyller ingen inngangsvilkår deler av perioden`() {
-        val tidslinjer = listOf(tidslinjeOf(2.NAV, skjæringstidspunkter = listOf(1.januar, 2.januar)))
+        val tidslinjer = listOf(tidslinjeOf(2.NAV))
         val innslag1 = VilkårsgrunnlagHistorikk.Innslag(null, grunnlagsdata(1.januar))
         val innslag = VilkårsgrunnlagHistorikk.Innslag(innslag1, grunnlagsdata(2.januar, harOpptjening = false, harMinimumInntekt = false, erMedlem = false))
         val resultat = innslag.avvis(tidslinjer, 2.januar til 2.januar, subsumsjonslogg)

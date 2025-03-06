@@ -10,7 +10,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 
@@ -20,18 +19,14 @@ import no.nav.helse.økonomi.Økonomi
  * */
 fun tidslinjeOf(
     vararg utbetalingsdager: Utbetalingsdager,
-    startDato: LocalDate = LocalDate.of(2018, 1, 1),
-    skjæringstidspunkter: List<LocalDate> = listOf(startDato),
-    `6G`: Inntekt = 561804.årlig
+    startDato: LocalDate = LocalDate.of(2018, 1, 1)
 ) = Utbetalingstidslinje.Builder().apply {
-    val finnSkjæringstidspunktFor = { dato: LocalDate -> skjæringstidspunkter.filter { dato >= it }.maxOrNull() ?: dato }
     utbetalingsdager.fold(startDato) { startDato, (antallDagerFun, utbetalingsdag, helgedag, dekningsgrunnlag, grad, arbeidsgiverbeløp) ->
         var dato = startDato
         val antallDager = antallDagerFun(startDato)
         repeat(antallDager) {
-            val skjæringstidspunkt = finnSkjæringstidspunktFor(dato)
             val økonomi = Økonomi.sykdomsgrad(grad.prosent)
-                .inntekt(dekningsgrunnlag, `6G` = `6G`, refusjonsbeløp = arbeidsgiverbeløp)
+                .inntekt(dekningsgrunnlag, refusjonsbeløp = arbeidsgiverbeløp)
             if (helgedag != null && dato.erHelg()) this.helgedag(dato, økonomi)
             else this.utbetalingsdag(dato, økonomi)
             dato = dato.plusDays(1)

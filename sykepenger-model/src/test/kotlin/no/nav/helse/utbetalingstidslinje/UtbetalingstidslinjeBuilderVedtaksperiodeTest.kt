@@ -1,7 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.LocalDate
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -38,21 +36,17 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiodeTest {
     fun `feiler dersom orgnr ikke finnes i inntektsgrunnlaget eller det forekommer inntektsendringer`() {
         val utbetalingstidslinjeBuilderVedtaksperiode = utbetalingstidslinjeBuilderVedtaksperiode(fastsattÅrsinntekt = null)
 
-        assertEquals(Inntekt.INGEN, utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt()).inspektør.aktuellDagsinntekt)
+        assertEquals(INGEN, utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt()).inspektør.aktuellDagsinntekt)
     }
 
     private fun utbetalingstidslinjeBuilderVedtaksperiode(
         inntekt: Inntekt = 21000.månedlig,
-        skjæringstidspunkt: LocalDate = 1.januar,
         fastsattÅrsinntekt: Inntekt? = inntekt
     ) = UtbetalingstidslinjeBuilderVedtaksperiode(
-        skjæringstidspunkt = skjæringstidspunkt,
         regler = NormalArbeidstaker,
         arbeidsgiverperiode = listOf(1.januar til 16.januar),
         dagerNavOvertarAnsvar = emptyList(),
         refusjonstidslinje = Beløpstidslinje(),
-        fastsattÅrsinntekt = fastsattÅrsinntekt ?: INGEN,
-        `6G` = Grunnbeløp.`6G`.beløp(1.januar),
         inntektstidslinje = ARBEIDSGIVER.beløpstidslinje(1.januar.somPeriode(), fastsattÅrsinntekt ?: INGEN)
     )
 }

@@ -1249,16 +1249,13 @@ data class PersonData(
         data class UtbetalingsdagData(
             val type: TypeData,
             val aktuellDagsinntekt: Double,
-            val beregningsgrunnlag: Double,
             val dekningsgrunnlag: Double,
-            val grunnbeløpgrense: Double?,
             val begrunnelser: List<BegrunnelseData>?,
             val grad: Double,
             val totalGrad: Double,
             val arbeidsgiverRefusjonsbeløp: Double,
             val arbeidsgiverbeløp: Double?,
             val personbeløp: Double?,
-            val er6GBegrenset: Boolean?,
             val dato: LocalDate?,
             val fom: LocalDate?,
             val tom: LocalDate?
@@ -1270,12 +1267,9 @@ data class PersonData(
                     totalGrad = ProsentdelDto(totalGrad),
                     arbeidsgiverRefusjonsbeløp = InntektbeløpDto.DagligDouble(this.arbeidsgiverRefusjonsbeløp),
                     aktuellDagsinntekt = InntektbeløpDto.DagligDouble(this.aktuellDagsinntekt),
-                    beregningsgrunnlag = InntektbeløpDto.DagligDouble(this.beregningsgrunnlag),
                     dekningsgrunnlag = InntektbeløpDto.DagligDouble(this.dekningsgrunnlag),
-                    grunnbeløpgrense = this.grunnbeløpgrense?.let { InntektbeløpDto.Årlig(it) },
                     arbeidsgiverbeløp = this.arbeidsgiverbeløp?.let { InntektbeløpDto.DagligDouble(it) },
-                    personbeløp = this.personbeløp?.let { InntektbeløpDto.DagligDouble(it) },
-                    er6GBegrenset = this.er6GBegrenset
+                    personbeløp = this.personbeløp?.let { InntektbeløpDto.DagligDouble(it) }
                 )
             }
 

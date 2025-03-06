@@ -8,10 +8,7 @@ data class ØkonomiInnDto(
     val totalGrad: ProsentdelDto,
     val arbeidsgiverRefusjonsbeløp: InntektbeløpDto.DagligDouble,
     val aktuellDagsinntekt: InntektbeløpDto.DagligDouble,
-    val beregningsgrunnlag: InntektbeløpDto.DagligDouble,
     val dekningsgrunnlag: InntektbeløpDto.DagligDouble,
-    val grunnbeløpgrense: InntektbeløpDto.Årlig?,
     val arbeidsgiverbeløp: InntektbeløpDto.DagligDouble?,
-    val personbeløp: InntektbeløpDto.DagligDouble?,
-    val er6GBegrenset: Boolean?
+    val personbeløp: InntektbeløpDto.DagligDouble?
 )

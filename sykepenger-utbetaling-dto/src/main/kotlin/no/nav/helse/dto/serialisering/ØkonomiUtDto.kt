@@ -8,10 +8,7 @@ data class ØkonomiUtDto(
     val totalGrad: ProsentdelDto,
     val arbeidsgiverRefusjonsbeløp: InntektDto,
     val aktuellDagsinntekt: InntektDto,
-    val beregningsgrunnlag: InntektDto,
     val dekningsgrunnlag: InntektDto,
-    val grunnbeløpgrense: InntektDto?,
     val arbeidsgiverbeløp: InntektDto?,
-    val personbeløp: InntektDto?,
-    val er6GBegrenset: Boolean?
+    val personbeløp: InntektDto?
 )

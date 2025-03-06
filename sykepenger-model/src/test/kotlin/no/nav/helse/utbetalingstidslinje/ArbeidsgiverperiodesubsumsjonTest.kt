@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
@@ -205,9 +204,6 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
             dagerNavOvertarAnsvar = emptyList(),
             refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje(),
-            skjæringstidspunkt = 1.januar,
-            fastsattÅrsinntekt = 31000.månedlig,
-            `6G` = Grunnbeløp.`6G`.beløp(1.januar),
             inntektstidslinje = ARBEIDSGIVER.beløpstidslinje(tidslinje.periode()!!, 31000.månedlig)
         )
 

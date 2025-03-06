@@ -681,16 +681,13 @@ data class SpannerPersonDto(
         data class UtbetalingsdagData(
             val type: TypeData,
             val aktuellDagsinntekt: Double,
-            val beregningsgrunnlag: Double,
             val dekningsgrunnlag: Double,
-            val grunnbeløpgrense: Double?,
             val begrunnelser: List<BegrunnelseData>?,
             val grad: Double,
             val totalGrad: Double,
             val arbeidsgiverRefusjonsbeløp: Double,
             val arbeidsgiverbeløp: Double?,
             val personbeløp: Double?,
-            val er6GBegrenset: Boolean?,
             val dato: LocalDate?,
             val fom: LocalDate?,
             val tom: LocalDate?
@@ -1241,9 +1238,7 @@ private fun UtbetalingsdagUtDto.tilPersonData() =
             is UtbetalingsdagUtDto.UkjentDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.UkjentDag
         },
         aktuellDagsinntekt = this.økonomi.aktuellDagsinntekt.dagligDouble.beløp,
-        beregningsgrunnlag = this.økonomi.beregningsgrunnlag.dagligDouble.beløp,
         dekningsgrunnlag = this.økonomi.dekningsgrunnlag.dagligDouble.beløp,
-        grunnbeløpgrense = this.økonomi.grunnbeløpgrense?.dagligDouble?.beløp,
         begrunnelser = when (this) {
             is UtbetalingsdagUtDto.AvvistDagDto -> this.begrunnelser.map { it.tilPersonData() }
             else -> null
@@ -1253,7 +1248,6 @@ private fun UtbetalingsdagUtDto.tilPersonData() =
         arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.dagligDouble.beløp,
         arbeidsgiverbeløp = this.økonomi.arbeidsgiverbeløp?.dagligDouble?.beløp,
         personbeløp = this.økonomi.personbeløp?.dagligDouble?.beløp,
-        er6GBegrenset = this.økonomi.er6GBegrenset,
         dato = this.dato,
         fom = null,
         tom = null

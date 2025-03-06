@@ -71,12 +71,9 @@ internal class OppdragBuilderTest {
             totalGrad = ProsentdelDto(100.0),
             arbeidsgiverRefusjonsbeløp = InntektbeløpDto.DagligDouble(500.0),
             aktuellDagsinntekt = InntektbeløpDto.DagligDouble(500.0),
-            beregningsgrunnlag = InntektbeløpDto.DagligDouble(500.0),
             dekningsgrunnlag = InntektbeløpDto.DagligDouble(500.0),
-            grunnbeløpgrense = null,
             arbeidsgiverbeløp = InntektbeløpDto.DagligDouble(500.0),
             personbeløp = InntektbeløpDto.DagligDouble(0.0),
-            er6GBegrenset = false
         ), erAvvistDag = false
     )
 }

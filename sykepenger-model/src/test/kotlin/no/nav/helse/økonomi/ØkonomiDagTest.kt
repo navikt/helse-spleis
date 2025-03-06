@@ -18,7 +18,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -103,7 +102,7 @@ internal class ØkonomiDagTest {
 
     @Test
     fun `avvist dag endrer ikke på økonomi til navdag`() {
-        val økonomi = Økonomi.sykdomsgrad(100.prosent).inntekt(500.daglig, 500.daglig, `6G` = 600000.årlig, refusjonsbeløp = 500.daglig)
+        val økonomi = Økonomi.sykdomsgrad(100.prosent).inntekt(500.daglig, 500.daglig, refusjonsbeløp = 500.daglig)
         val builderFør = Økonomitester()
         økonomi.builder(builderFør)
 

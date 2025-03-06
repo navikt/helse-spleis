@@ -60,7 +60,6 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderVedtaksperiode
-import no.nav.helse.økonomi.Inntekt
 
 internal class Behandlinger private constructor(behandlinger: List<Behandling>) {
     internal constructor() : this(emptyList())
@@ -96,8 +95,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     )
 
     internal fun arbeidsgiverperiode() = ArbeidsgiverperiodeForVedtaksperiode(periode(), behandlinger.last().arbeidsgiverperiode)
-    internal fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt, `6G`: Inntekt, inntektstidslinje: Beløpstidslinje) =
-        behandlinger.last().lagUtbetalingstidslinje(fastsattÅrsinntekt, `6G`, inntektstidslinje)
+    internal fun lagUtbetalingstidslinje(inntektstidslinje: Beløpstidslinje) =
+        behandlinger.last().lagUtbetalingstidslinje(inntektstidslinje)
 
     internal val maksdato get() = behandlinger.last().maksdato
     internal val dagerNavOvertarAnsvar get() = behandlinger.last().dagerNavOvertarAnsvar
@@ -410,15 +409,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         fun utbetalingstidslinje() = gjeldende.utbetalingstidslinje
-        fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt, `6G`: Inntekt, inntektstidslinje: Beløpstidslinje): Utbetalingstidslinje {
+        fun lagUtbetalingstidslinje(inntektstidslinje: Beløpstidslinje): Utbetalingstidslinje {
             val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
                 arbeidsgiverperiode = arbeidsgiverperiode,
                 dagerNavOvertarAnsvar = gjeldende.dagerNavOvertarAnsvar,
                 refusjonstidslinje = refusjonstidslinje,
-                skjæringstidspunkt = skjæringstidspunkt,
-                fastsattÅrsinntekt = fastsattÅrsinntekt,
-                `6G` = `6G`,
                 inntektstidslinje = inntektstidslinje
             )
             return builder.result(sykdomstidslinje)

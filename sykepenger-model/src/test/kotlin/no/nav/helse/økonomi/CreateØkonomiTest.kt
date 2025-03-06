@@ -37,7 +37,7 @@ internal class CreateØkonomiTest {
             assertNull(økonomi.inspektør.arbeidsgiverbeløp)
             assertNull(økonomi.inspektør.personbeløp)
             økonomi
-                .inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = INGEN)
+                .inntekt(1200.daglig, refusjonsbeløp = INGEN)
                 .also { nyØkonomi ->
                     assertEquals(79.5, nyØkonomi.inspektør.grad.toDouble())
                     assertEquals(INGEN, nyØkonomi.inspektør.arbeidsgiverRefusjonsbeløp)
@@ -55,7 +55,7 @@ internal class CreateØkonomiTest {
         createØkonomi(data).also { økonomi ->
             assertDoesNotThrow {
                 økonomi
-                    .inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig)
+                    .inntekt(1200.daglig, refusjonsbeløp = 1200.daglig)
             }
         }
     }
@@ -71,14 +71,14 @@ internal class CreateØkonomiTest {
             assertNull(økonomi.inspektør.arbeidsgiverbeløp)
             assertNull(økonomi.inspektør.personbeløp)
             // Indirect test of Økonomi state is HarLønn
-            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig) }
+            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, refusjonsbeløp = 1200.daglig) }
             assertDoesNotThrow { listOf(økonomi).betal(`6G`.beløp(1.januar)) }
         }
     }
 
     @Test
     fun `har betalinger`() {
-        val data = utbetalingsdag(79.5, 420.0, 1500.0, 1199.6, 640.0, 320.0, 79.5, true)
+        val data = utbetalingsdag(79.5, 420.0, 1500.0, 1199.6, 640.0, 320.0, 79.5)
         createØkonomi(data).also { økonomi ->
             assertEquals(79.5, økonomi.inspektør.grad.toDouble())
             assertEquals(79, økonomi.brukTotalGrad { totalGrad -> totalGrad })
@@ -88,7 +88,7 @@ internal class CreateØkonomiTest {
             assertEquals(640.daglig, økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(320.daglig, økonomi.inspektør.personbeløp)
             // Indirect test of Økonomi state
-            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig) }
+            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, refusjonsbeløp = 1200.daglig) }
             assertThrows<IllegalStateException> { listOf(økonomi).betal(`6G`.beløp(1.januar)) }
         }
     }
@@ -100,35 +100,31 @@ internal class CreateØkonomiTest {
         dekningsgrunnlag: Double,
         arbeidsgiverbeløp: Double? = null,
         personbeløp: Double? = null,
-        totalGrad: Double = grad,
-        er6GBegrenset: Boolean = false
+        totalGrad: Double = grad
     ) = UtbetalingstidslinjeData.UtbetalingsdagData(
-        UtbetalingstidslinjeData.TypeData.NavDag,
-        aktuellDagsinntekt,
-        aktuellDagsinntekt,
-        dekningsgrunnlag,
-        `6G`.beløp(1.januar).årlig,
-        null,
-        grad,
-        totalGrad,
-        arbeidsgiverRefusjonsbeløp,
-        arbeidsgiverbeløp,
-        personbeløp,
-        er6GBegrenset,
+        type = UtbetalingstidslinjeData.TypeData.NavDag,
+        aktuellDagsinntekt = aktuellDagsinntekt,
+        dekningsgrunnlag = dekningsgrunnlag,
+        begrunnelser = null,
+        grad = grad,
+        totalGrad = totalGrad,
+        arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp,
+        arbeidsgiverbeløp = arbeidsgiverbeløp,
+        personbeløp = personbeløp,
         dato = 1.januar,
         fom = null,
         tom = null
     )
 
     private fun sykdomstidslinjedag(grad: Double) = PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
-        PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID(), 1.januar.atStartOfDay()),
-        grad,
-        null,
-        null,
-        null,
-        null,
-        1.januar
+        type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
+        kilde = PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID(), 1.januar.atStartOfDay()),
+        grad = grad,
+        other = null,
+        melding = null,
+        fom = null,
+        tom = null,
+        dato = 1.januar
     )
 
     private fun createØkonomi(dagData: UtbetalingstidslinjeData.UtbetalingsdagData): Økonomi {

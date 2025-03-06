@@ -8,7 +8,6 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Økonomi
 
 internal data class ArbeidsgiverperiodeForVedtaksperiode(
@@ -17,13 +16,10 @@ internal data class ArbeidsgiverperiodeForVedtaksperiode(
 )
 
 internal class UtbetalingstidslinjeBuilderVedtaksperiode(
-    private val skjæringstidspunkt: LocalDate,
     private val regler: ArbeidsgiverRegler,
     private val arbeidsgiverperiode: List<Periode>,
     private val dagerNavOvertarAnsvar: List<Periode>,
     private val refusjonstidslinje: Beløpstidslinje,
-    private val fastsattÅrsinntekt: Inntekt,
-    private val `6G`: Inntekt,
     private val inntektstidslinje: Beløpstidslinje
 ) {
 
@@ -59,9 +55,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
         val aktuellDagsinntekt = inntektstidslinje[dato].beløp
         return økonomi.inntekt(
             aktuellDagsinntekt = aktuellDagsinntekt,
-            beregningsgrunnlag = fastsattÅrsinntekt,
             dekningsgrunnlag = aktuellDagsinntekt * regler.dekningsgrad(),
-            `6G` = if (dato < skjæringstidspunkt) INGEN else `6G`,
             refusjonsbeløp = refusjonsbeløp(dato, aktuellDagsinntekt, refusjonsopplysningFinnesIkkeStrategi)
         )
     }

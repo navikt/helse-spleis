@@ -7,7 +7,6 @@ import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.slf4j.LoggerFactory
 
@@ -16,15 +15,9 @@ class Økonomi private constructor(
     val totalGrad: Prosentdel = grad,
     val arbeidsgiverRefusjonsbeløp: Inntekt = INGEN,
     val aktuellDagsinntekt: Inntekt = INGEN,
-    @Deprecated("denne sletter vi")
-    val beregningsgrunnlag: Inntekt = INGEN,
     val dekningsgrunnlag: Inntekt = INGEN,
-    @Deprecated("denne sletter vi")
-    val grunnbeløpgrense: Inntekt? = null,
     val arbeidsgiverbeløp: Inntekt? = null,
     val personbeløp: Inntekt? = null,
-    @Deprecated("denne sletter vi")
-    val er6GBegrenset: Boolean? = null,
     val tilstand: Tilstand = Tilstand.KunGrad,
 ) {
     companion object {
@@ -161,12 +154,9 @@ class Økonomi private constructor(
                 totalGrad = Prosentdel.gjenopprett(dto.totalGrad),
                 arbeidsgiverRefusjonsbeløp = Inntekt.gjenopprett(dto.arbeidsgiverRefusjonsbeløp),
                 aktuellDagsinntekt = Inntekt.gjenopprett(dto.aktuellDagsinntekt),
-                beregningsgrunnlag = Inntekt.gjenopprett(dto.beregningsgrunnlag),
                 dekningsgrunnlag = Inntekt.gjenopprett(dto.dekningsgrunnlag),
-                grunnbeløpgrense = dto.grunnbeløpgrense?.let { Inntekt.gjenopprett(it) },
                 arbeidsgiverbeløp = dto.arbeidsgiverbeløp?.let { Inntekt.gjenopprett(it) },
                 personbeløp = dto.personbeløp?.let { Inntekt.gjenopprett(it) },
-                er6GBegrenset = dto.er6GBegrenset,
                 tilstand = when {
                     dto.arbeidsgiverbeløp == null && erAvvistDag -> Tilstand.Låst
                     dto.arbeidsgiverbeløp == null -> Tilstand.HarInntekt
@@ -181,14 +171,12 @@ class Økonomi private constructor(
         require(dekningsgrunnlag >= INGEN) { "dekningsgrunnlag kan ikke være negativ." }
     }
 
-    fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, beregningsgrunnlag: Inntekt = aktuellDagsinntekt, `6G`: Inntekt, refusjonsbeløp: Inntekt): Økonomi =
+    fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, refusjonsbeløp: Inntekt): Økonomi =
         tilstand.inntekt(
             økonomi = this,
             aktuellDagsinntekt = aktuellDagsinntekt,
-            beregningsgrunnlag = beregningsgrunnlag,
             refusjonsbeløp = refusjonsbeløp,
-            dekningsgrunnlag = dekningsgrunnlag,
-            `6G` = `6G`
+            dekningsgrunnlag = dekningsgrunnlag
         )
 
     fun lås() = tilstand.lås(this)
@@ -208,11 +196,8 @@ class Økonomi private constructor(
             .dekningsgrunnlag(dekningsgrunnlag.daglig)
             .totalGrad(totalGrad.toDouble())
             .aktuellDagsinntekt(aktuellDagsinntekt.daglig)
-            .beregningsgrunnlag(beregningsgrunnlag.daglig)
             .arbeidsgiverbeløp(arbeidsgiverbeløp?.daglig)
             .personbeløp(personbeløp?.daglig)
-            .er6GBegrenset(er6GBegrenset)
-            .grunnbeløpsgrense(grunnbeløpgrense?.årlig)
             .tilstand(tilstand)
     }
 
@@ -250,24 +235,18 @@ class Økonomi private constructor(
         totalgrad: Prosentdel = this.totalGrad,
         arbeidsgiverRefusjonsbeløp: Inntekt = this.arbeidsgiverRefusjonsbeløp,
         aktuellDagsinntekt: Inntekt = this.aktuellDagsinntekt,
-        beregningsgrunnlag: Inntekt = this.beregningsgrunnlag,
         dekningsgrunnlag: Inntekt = this.dekningsgrunnlag,
-        grunnbeløpgrense: Inntekt? = this.grunnbeløpgrense,
         arbeidsgiverbeløp: Inntekt? = this.arbeidsgiverbeløp,
         personbeløp: Inntekt? = this.personbeløp,
-        er6GBegrenset: Boolean? = this.er6GBegrenset,
         tilstand: Tilstand = this.tilstand,
     ) = Økonomi(
         grad = grad,
         totalGrad = totalgrad,
         arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp,
         aktuellDagsinntekt = aktuellDagsinntekt,
-        beregningsgrunnlag = beregningsgrunnlag,
         dekningsgrunnlag = dekningsgrunnlag,
-        grunnbeløpgrense = grunnbeløpgrense,
         arbeidsgiverbeløp = arbeidsgiverbeløp,
         personbeløp = personbeløp,
-        er6GBegrenset = er6GBegrenset,
         tilstand = tilstand
     )
 
@@ -283,10 +262,8 @@ class Økonomi private constructor(
         internal open fun inntekt(
             økonomi: Økonomi,
             aktuellDagsinntekt: Inntekt,
-            beregningsgrunnlag: Inntekt,
             refusjonsbeløp: Inntekt,
-            dekningsgrunnlag: Inntekt,
-            `6G`: Inntekt
+            dekningsgrunnlag: Inntekt
         ): Økonomi {
             throw IllegalStateException("Kan ikke sette inntekt i tilstand ${this::class.simpleName}")
         }
@@ -310,18 +287,14 @@ class Økonomi private constructor(
             override fun inntekt(
                 økonomi: Økonomi,
                 aktuellDagsinntekt: Inntekt,
-                beregningsgrunnlag: Inntekt,
                 refusjonsbeløp: Inntekt,
-                dekningsgrunnlag: Inntekt,
-                `6G`: Inntekt
+                dekningsgrunnlag: Inntekt
             ) = økonomi.kopierMed(
                 grad = økonomi.grad,
                 totalgrad = økonomi.totalGrad,
                 arbeidsgiverRefusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
-                beregningsgrunnlag = beregningsgrunnlag,
                 dekningsgrunnlag = dekningsgrunnlag,
-                grunnbeløpgrense = `6G`,
                 tilstand = HarInntekt
             )
         }
@@ -335,18 +308,14 @@ class Økonomi private constructor(
             override fun inntekt(
                 økonomi: Økonomi,
                 aktuellDagsinntekt: Inntekt,
-                beregningsgrunnlag: Inntekt,
                 refusjonsbeløp: Inntekt,
-                dekningsgrunnlag: Inntekt,
-                `6G`: Inntekt
+                dekningsgrunnlag: Inntekt
             ) = økonomi.kopierMed(
                 grad = økonomi.grad,
                 totalgrad = økonomi.totalGrad,
                 arbeidsgiverRefusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
-                beregningsgrunnlag = beregningsgrunnlag,
                 dekningsgrunnlag = dekningsgrunnlag,
-                grunnbeløpgrense = `6G`,
                 tilstand = HarInntektIkkeBetalt
             )
 
@@ -394,12 +363,9 @@ class Økonomi private constructor(
                 totalGrad?.prosent!!,
                 arbeidsgiverRefusjonsbeløp?.daglig!!,
                 aktuellDagsinntekt?.daglig!!,
-                beregningsgrunnlag?.daglig!!,
                 dekningsgrunnlag?.daglig!!,
-                grunnbeløpgrense?.årlig,
                 arbeidsgiverbeløp?.daglig,
                 personbeløp?.daglig,
-                er6GBegrenset,
                 tilstand!!
             )
         }
@@ -415,12 +381,9 @@ class Økonomi private constructor(
         totalGrad = totalGrad.dto(),
         arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp.dto(),
         aktuellDagsinntekt = aktuellDagsinntekt.dto(),
-        beregningsgrunnlag = beregningsgrunnlag.dto(),
         dekningsgrunnlag = dekningsgrunnlag.dto(),
-        grunnbeløpgrense = grunnbeløpgrense?.dto(),
         arbeidsgiverbeløp = arbeidsgiverbeløp?.dto(),
-        personbeløp = personbeløp?.dto(),
-        er6GBegrenset = er6GBegrenset
+        personbeløp = personbeløp?.dto()
     )
 }
 
@@ -451,10 +414,6 @@ abstract class ØkonomiBuilder {
         this.tilstand = tilstand
     }
 
-    fun grunnbeløpsgrense(grunnbeløpgrense: Double?) = apply {
-        this.grunnbeløpgrense = grunnbeløpgrense
-    }
-
     fun arbeidsgiverRefusjonsbeløp(arbeidsgiverRefusjonsbeløp: Double?) = apply {
         this.arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp
     }
@@ -471,20 +430,12 @@ abstract class ØkonomiBuilder {
         this.aktuellDagsinntekt = aktuellDagsinntekt
     }
 
-    fun beregningsgrunnlag(beregningsgrunnlag: Double?) = apply {
-        this.beregningsgrunnlag = beregningsgrunnlag
-    }
-
     fun arbeidsgiverbeløp(arbeidsgiverbeløp: Double?) = apply {
         this.arbeidsgiverbeløp = arbeidsgiverbeløp
     }
 
     fun personbeløp(personbeløp: Double?) = apply {
         this.personbeløp = personbeløp
-    }
-
-    fun er6GBegrenset(er6GBegrenset: Boolean?) = apply {
-        this.er6GBegrenset = er6GBegrenset
     }
 }
 

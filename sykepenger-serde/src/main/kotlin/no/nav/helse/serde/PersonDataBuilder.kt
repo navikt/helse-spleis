@@ -516,9 +516,7 @@ private fun UtbetalingsdagUtDto.tilPersonData() = UtbetalingsdagData(
         is UtbetalingsdagUtDto.UkjentDagDto -> PersonData.UtbetalingstidslinjeData.TypeData.UkjentDag
     },
     aktuellDagsinntekt = this.økonomi.aktuellDagsinntekt.dagligDouble.beløp,
-    beregningsgrunnlag = this.økonomi.beregningsgrunnlag.dagligDouble.beløp,
     dekningsgrunnlag = this.økonomi.dekningsgrunnlag.dagligDouble.beløp,
-    grunnbeløpgrense = this.økonomi.grunnbeløpgrense?.årlig?.beløp,
     begrunnelser = when (this) {
         is UtbetalingsdagUtDto.AvvistDagDto -> this.begrunnelser.map { it.tilPersonData() }
         else -> null
@@ -528,7 +526,6 @@ private fun UtbetalingsdagUtDto.tilPersonData() = UtbetalingsdagData(
     arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.dagligDouble.beløp,
     arbeidsgiverbeløp = this.økonomi.arbeidsgiverbeløp?.dagligDouble?.beløp,
     personbeløp = this.økonomi.personbeløp?.dagligDouble?.beløp,
-    er6GBegrenset = this.økonomi.er6GBegrenset,
     dato = this.dato,
     fom = null,
     tom = null

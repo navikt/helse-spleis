@@ -2023,9 +2023,9 @@ internal class Vedtaksperiode private constructor(
             .groupBy { it.arbeidsgiver.organisasjonsnummer }
         val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning
             .mapValues { (arbeidsgiver, vedtaksperioder) ->
-                val (fastsattÅrsinntekt, inntektstidslinje) = inntekterForBeregning.tilBeregning(arbeidsgiver)
+                val inntektstidslinje = inntekterForBeregning.tilBeregning(arbeidsgiver)
                 vedtaksperioder.map {
-                    it.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, inntekterForBeregning.`6G`, inntektstidslinje)
+                    it.behandlinger.lagUtbetalingstidslinje(inntektstidslinje)
                 }
             }
         // nå vi må lage en ghost-tidslinje per arbeidsgiver for de som eksisterer i sykepengegrunnlaget.
@@ -3137,8 +3137,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun lagUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode): Pair<Utbetalingstidslinje, InntekterForBeregning> {
-            val (fastsattÅrsinntekt, inntektstidslinje, inntekterForBeregning) = InntekterForBeregning.forAuu(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.arbeidsgiver.organisasjonsnummer, vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag)
-            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, inntekterForBeregning.`6G`, inntektstidslinje) to inntekterForBeregning
+            val (inntektstidslinje, inntekterForBeregning) = InntekterForBeregning.forAuu(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.arbeidsgiver.organisasjonsnummer, vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag)
+            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektstidslinje) to inntekterForBeregning
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
