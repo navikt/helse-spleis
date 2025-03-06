@@ -8,6 +8,8 @@ on:
     - 'jobs/**'
     - 'sykepenger-model/**'
     - 'sykepenger-serde/**'
+    - 'sykepenger-primitiver/**'
+    - 'sykepenger-utbetaling/**'
     - 'build.gradle.kts'
     - '.github/workflows/**'
     - 'deploy/dev-avstemming-job.yml'
