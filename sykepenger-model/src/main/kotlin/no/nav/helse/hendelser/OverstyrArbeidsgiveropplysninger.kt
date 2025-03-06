@@ -55,7 +55,6 @@ class OverstyrArbeidsgiveropplysninger(
 
     data class KorrigertArbeidsgiverInntektsopplysning(
         val organisasjonsnummer: String,
-        val gjelder: Periode,
         val inntektsdata: Inntektsdata,
         val begrunnelse: Overstyringbegrunnelse
     ) {

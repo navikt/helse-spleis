@@ -314,8 +314,6 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
                         InntekterFraAOrdningen(YearMonth.of(2017, Month.DECEMBER), 1000.0)
                     )
                 ),
-                fom = 1.januar,
-                tom = null,
                 deaktivert = true
             ),
             vilkårsgrunnlag?.inntekter?.find { it.organisasjonsnummer == a2 }
@@ -368,8 +366,6 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
                     månedsbeløp = 48000.0,
                     inntekterFraAOrdningen = null
                 ),
-                fom = 1.januar,
-                tom = null,
                 deaktivert = false
             ),
             Arbeidsgiverinntekt(
@@ -380,8 +376,6 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
                     månedsbeløp = 0.0,
                     inntekterFraAOrdningen = emptyList()
                 ),
-                fom = 1.januar,
-                tom = null,
                 deaktivert = true
             )
         )

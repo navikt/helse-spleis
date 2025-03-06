@@ -426,7 +426,7 @@ class Person private constructor(
         try {
             registrer(aktivitetslogg, "Behandler påminnelse")
             if (finnArbeidsgiver(påminnelse.behandlingsporing, aktivitetslogg).håndter(påminnelse, aktivitetslogg)) return håndterGjenoppta(påminnelse, aktivitetslogg)
-        } catch (err: Aktivitetslogg.AktivitetException) {
+        } catch (_: Aktivitetslogg.AktivitetException) {
             aktivitetslogg.funksjonellFeil(RV_AG_1)
         }
         observers.forEach { påminnelse.vedtaksperiodeIkkeFunnet(it) }
@@ -714,7 +714,7 @@ class Person private constructor(
             }
         }
 
-        val eventyr = Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(hendelse, skjæringstidspunkt, endretInntektsgrunnlag.endringFom)
+        val eventyr = Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(hendelse, skjæringstidspunkt, skjæringstidspunkt)
         nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
         return eventyr
     }
@@ -750,7 +750,7 @@ class Person private constructor(
                 }
             }
 
-        val eventyr = Revurderingseventyr.arbeidsgiveropplysninger(hendelse, skjæringstidspunkt, endretInntektsgrunnlag.endringFom)
+        val eventyr = Revurderingseventyr.arbeidsgiveropplysninger(hendelse, skjæringstidspunkt, skjæringstidspunkt)
         return eventyr
     }
 
@@ -761,10 +761,10 @@ class Person private constructor(
         subsumsjonslogg: Subsumsjonslogg
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
-        val (nyttGrunnlag, endretInntektsgrunnlag) = grunnlag.skjønnsmessigFastsettelse(hendelse, aktivitetslogg, subsumsjonslogg) ?: return
+        val (nyttGrunnlag, _) = grunnlag.skjønnsmessigFastsettelse(hendelse, aktivitetslogg, subsumsjonslogg) ?: return
         nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
 
-        val eventyr = Revurderingseventyr.skjønnsmessigFastsettelse(hendelse, skjæringstidspunkt, endretInntektsgrunnlag.endringFom)
+        val eventyr = Revurderingseventyr.skjønnsmessigFastsettelse(hendelse, skjæringstidspunkt, skjæringstidspunkt)
         igangsettOverstyring(eventyr, aktivitetslogg)
     }
 

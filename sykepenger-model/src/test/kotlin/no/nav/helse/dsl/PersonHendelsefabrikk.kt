@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
@@ -78,18 +77,15 @@ internal class PersonHendelsefabrikk {
 internal class OverstyrtArbeidsgiveropplysning(
     private val orgnummer: String,
     private val inntekt: Inntekt,
-    private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>? = null,
-    private val gjelder: Periode? = null
+    private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>? = null
 ) {
     private fun refusjonsopplysninger(førsteDag: LocalDate) = refusjonsopplysninger ?: listOf(Triple(førsteDag, null, inntekt))
 
     internal companion object {
         private fun List<OverstyrtArbeidsgiveropplysning>.tilArbeidsgiverInntektsopplysning(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate, tidsstempel: LocalDateTime) =
             map {
-                val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
                 OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning(
                     organisasjonsnummer = it.orgnummer,
-                    gjelder = gjelder,
                     inntektsdata = Inntektsdata(
                         hendelseId = MeldingsreferanseId(meldingsreferanseId),
                         dato = skjæringstidspunkt,
@@ -124,7 +120,7 @@ internal class OverstyrtArbeidsgiveropplysning(
         }
 
         internal fun List<OverstyrtArbeidsgiveropplysning>.refusjonstidslinjer(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, opprettet: LocalDateTime) = this.associateBy { it.orgnummer }.mapValues { (_, opplysning) ->
-            val defaultRefusjonFom = opplysning.gjelder?.start ?: skjæringstidspunkt
+            val defaultRefusjonFom = skjæringstidspunkt
             val strekkbar = opplysning.refusjonsopplysninger(defaultRefusjonFom).any { (_, tom) -> tom == null }
             opplysning.refusjonsopplysninger(defaultRefusjonFom).fold(Beløpstidslinje()) { acc, (fom, tom, beløp) ->
                 acc + Beløpstidslinje.fra(fom til (tom ?: fom), beløp, Kilde(MeldingsreferanseId(meldingsreferanseId), SAKSBEHANDLER, opprettet))

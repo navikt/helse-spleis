@@ -1371,7 +1371,6 @@ internal class Vedtaksperiode private constructor(
 
         return ArbeidsgiverInntektsopplysning(
             orgnummer = arbeidsgiver.organisasjonsnummer,
-            gjelder = skjæringstidspunkt til LocalDate.MAX,
             faktaavklartInntekt = faktaavklartInntekt,
             korrigertInntekt = null,
             skjønnsmessigFastsatt = null
@@ -1427,7 +1426,6 @@ internal class Vedtaksperiode private constructor(
                 subsummerBrukAvSkatteopplysninger(skatteopplysning.arbeidsgiver, skatteopplysning.inntektsdata, skatteopplysning.treMånederFørSkjæringstidspunkt)
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = skatteopplysning.arbeidsgiver,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     faktaavklartInntekt = FaktaavklartInntekt(
                         id = UUID.randomUUID(),
                         inntektsdata = skatteopplysning.inntektsdata,

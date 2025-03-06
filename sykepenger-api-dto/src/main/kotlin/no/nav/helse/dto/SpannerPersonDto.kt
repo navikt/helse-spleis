@@ -131,8 +131,6 @@ data class SpannerPersonDto(
 
         data class ArbeidsgiverInntektsopplysningData(
             val orgnummer: String,
-            val fom: LocalDate,
-            val tom: LocalDate,
             val faktaavklartInntekt: InntektsopplysningData,
             val korrigertInntekt: KorrigertInntektsopplysningData?,
             val skjønnsmessigFastsatt: SkjønnsmessigFastsattData?
@@ -1010,7 +1008,7 @@ private fun VedtaksperiodeUtDto.tilPersonData(
 private fun utledVenteårsak(venteårsak: LazyVedtaksperiodeVenterDto): SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeVenterDto? {
     try {
         return venteårsak.value?.tilPersonData()
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         return SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeVenterDto(
             ventetSiden = LocalDateTime.now(),
             venterTil = LocalDateTime.MAX,
@@ -1534,8 +1532,6 @@ private fun InntektsgrunnlagUtDto.tilPersonData() =
 private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() =
     ArbeidsgiverInntektsopplysningData(
         orgnummer = this.orgnummer,
-        fom = this.gjelder.fom,
-        tom = this.gjelder.tom,
         faktaavklartInntekt = this.faktaavklartInntekt.tilPersonData(),
         korrigertInntekt = this.korrigertInntekt?.tilPersonData(),
         skjønnsmessigFastsatt = this.skjønnsmessigFastsatt?.tilPersonData()

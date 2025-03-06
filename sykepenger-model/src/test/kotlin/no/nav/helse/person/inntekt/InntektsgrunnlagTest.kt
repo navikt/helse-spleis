@@ -336,29 +336,6 @@ internal class InntektsgrunnlagTest {
     }
 
     @Test
-    fun `tilkommen inntekt`() {
-        val skjæringstidspunkt = 1.januar
-        val a1Fom = skjæringstidspunkt
-        val a2Fom = skjæringstidspunkt.plusDays(1)
-        val a1Inntekt = 25000.månedlig
-        val a2Inntekt = 5000.månedlig
-        val inntekter = listOf(
-            ArbeidsgiverInntektsopplysning("a1", a1Fom til LocalDate.MAX, arbeidsgiverinntekt(a1Fom, a1Inntekt), null, null),
-            ArbeidsgiverInntektsopplysning("a2", a2Fom til LocalDate.MAX, arbeidsgiverinntekt(a2Fom, a2Inntekt), null, null),
-        )
-
-        val inntektsgrunnlag = Inntektsgrunnlag(
-            alder = UNG_PERSON_FØDSELSDATO.alder,
-            arbeidsgiverInntektsopplysninger = inntekter,
-            deaktiverteArbeidsforhold = emptyList(),
-            skjæringstidspunkt = skjæringstidspunkt,
-            subsumsjonslogg = EmptyLog
-        )
-        assertEquals(a1Inntekt, inntektsgrunnlag.inspektør.sykepengegrunnlag)
-        assertEquals(a1Inntekt, inntektsgrunnlag.inspektør.beregningsgrunnlag)
-    }
-
-    @Test
     fun `lager varsel dersom arbeidsforhold har opphørt`() {
         val skjæringstidspunkt = 1.mars
         val sluttdatoA1 = skjæringstidspunkt.minusMonths(1).withDayOfMonth(1)
@@ -370,7 +347,6 @@ internal class InntektsgrunnlagTest {
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     faktaavklartInntekt = arbeidsgiverinntekt(
                         dato = skjæringstidspunkt,
                         beløp = 25000.månedlig
@@ -380,7 +356,6 @@ internal class InntektsgrunnlagTest {
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     faktaavklartInntekt = skattSykepengegrunnlag(
                         hendelseId = UUID.randomUUID(),
                         dato = skjæringstidspunkt,
@@ -447,7 +422,6 @@ internal class InntektsgrunnlagTest {
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     faktaavklartInntekt = arbeidsgiverinntekt(
                         dato = skjæringstidspunkt,
                         beløp = 25000.månedlig
@@ -457,7 +431,6 @@ internal class InntektsgrunnlagTest {
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     faktaavklartInntekt = arbeidsgiverinntekt(
                         dato = skjæringstidspunkt,
                         beløp = 25000.månedlig

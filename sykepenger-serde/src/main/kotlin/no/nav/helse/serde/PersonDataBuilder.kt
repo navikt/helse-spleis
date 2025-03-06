@@ -790,8 +790,6 @@ private fun InntektsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagE
 
 private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData(
     orgnummer = this.orgnummer,
-    fom = this.gjelder.fom,
-    tom = this.gjelder.tom,
     inntektsopplysning = this.faktaavklartInntekt.tilPersonData(),
     korrigertInntekt = this.korrigertInntekt?.tilPersonData(),
     skjønnsmessigFastsatt = this.skjønnsmessigFastsatt?.tilPersonData()

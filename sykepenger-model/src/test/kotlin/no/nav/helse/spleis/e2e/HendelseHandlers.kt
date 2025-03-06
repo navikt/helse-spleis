@@ -918,14 +918,13 @@ internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
     inntekt: Inntekt = 31000.månedlig,
     orgnummer: String = a1,
     skjæringstidspunkt: LocalDate,
-    gjelder: Periode = skjæringstidspunkt til LocalDate.MAX,
     meldingsreferanseId: UUID = UUID.randomUUID(),
     forklaring: String = "forklaring",
     begrunnelse: OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse? = null
 ) {
     håndterOverstyrArbeidsgiveropplysninger(
         skjæringstidspunkt,
-        listOf(OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, emptyList(), gjelder, OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(forklaring, begrunnelse))),
+        listOf(OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, emptyList(), OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(forklaring, begrunnelse))),
         listOf(OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(forklaring, begrunnelse)),
         meldingsreferanseId
     )
@@ -977,19 +976,15 @@ internal class OverstyrtArbeidsgiveropplysning(
     private val orgnummer: String,
     private val inntekt: Inntekt,
     private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>,
-    private val gjelder: Periode? = null,
     private val overstyringbegrunnelse: OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse? = null
 ) {
-    internal constructor(orgnummer: String, inntekt: Inntekt) : this(orgnummer, inntekt, emptyList(), null)
-    internal constructor(orgnummer: String, inntekt: Inntekt, gjelder: Periode) : this(orgnummer, inntekt, emptyList(), gjelder)
+    internal constructor(orgnummer: String, inntekt: Inntekt) : this(orgnummer, inntekt, emptyList())
 
     internal companion object {
         internal fun List<OverstyrtArbeidsgiveropplysning>.tilOverstyrt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =
             map {
-                val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
                 OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning(
                     organisasjonsnummer = it.orgnummer,
-                    gjelder = gjelder,
                     inntektsdata = Inntektsdata(
                         hendelseId = MeldingsreferanseId(meldingsreferanseId),
                         dato = skjæringstidspunkt,

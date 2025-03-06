@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.speil.builders
 
-import java.time.LocalDate
 import java.time.YearMonth
 import no.nav.helse.spleis.speil.dto.Arbeidsgiverinntekt
 import no.nav.helse.spleis.speil.dto.Arbeidsgiverrefusjon
@@ -12,8 +11,6 @@ import no.nav.helse.spleis.speil.dto.SkjønnsmessigFastsattDTO
 
 internal data class IArbeidsgiverinntekt(
     val arbeidsgiver: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
     val omregnetÅrsinntekt: IOmregnetÅrsinntekt,
     val skjønnsmessigFastsatt: SkjønnsmessigFastsattDTO?,
     val deaktivert: Boolean
@@ -23,8 +20,6 @@ internal data class IArbeidsgiverinntekt(
             organisasjonsnummer = arbeidsgiver,
             omregnetÅrsinntekt = omregnetÅrsinntekt.toDTO(),
             skjønnsmessigFastsatt = skjønnsmessigFastsatt,
-            fom = fom,
-            tom = tom.takeUnless { it == LocalDate.MAX },
             deaktivert = deaktivert
         )
     }

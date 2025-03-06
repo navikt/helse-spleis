@@ -53,12 +53,9 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
 
                 val forklaring = arbeidsgiveropplysning.path("forklaring").asText()
                 val begrunnelse = arbeidsgiveropplysning.path("subsumsjon").asBegrunnelse()
-                val fom = arbeidsgiveropplysning.path("fom").takeIf(JsonNode::isTextual)?.asLocalDate() ?: skjæringstidspunkt
-                val tom = arbeidsgiveropplysning.path("tom").takeIf(JsonNode::isTextual)?.asLocalDate() ?: LocalDate.MAX
 
                 OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning(
                     organisasjonsnummer = orgnummer,
-                    gjelder = fom til tom,
                     inntektsdata = Inntektsdata(
                         hendelseId = id,
                         dato = skjæringstidspunkt,

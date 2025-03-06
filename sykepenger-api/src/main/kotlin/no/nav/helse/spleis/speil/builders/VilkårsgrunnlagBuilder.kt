@@ -38,10 +38,10 @@ internal abstract class IVilkårsgrunnlag(
         if (inntekter.size < 2 || this.skjæringstidspunkt !in sykefraværstilfeller) return null
         val inntekten = inntekter.firstOrNull { it.arbeidsgiver == organisasjonsnummer }
         if (inntekten == null) return null
-        val sisteDag = minOf(inntekten.tom, sykefraværstilfeller.getValue(skjæringstidspunkt).maxOf { it.endInclusive })
+        val sisteDag = sykefraværstilfeller.getValue(skjæringstidspunkt).maxOf { it.endInclusive }
         return GhostPeriodeDTO(
             id = UUID.randomUUID(),
-            fom = inntekten.fom,
+            fom = skjæringstidspunkt,
             tom = sisteDag,
             skjæringstidspunkt = skjæringstidspunkt,
             vilkårsgrunnlagId = this.id,
@@ -219,17 +219,15 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
     }
 
     private fun mapInntekt(dto: ArbeidsgiverInntektsopplysningUtDto, deaktivert: Boolean = false): IArbeidsgiverinntekt {
-        return mapInntekt(dto.orgnummer, dto.gjelder.fom, dto.gjelder.tom, dto.faktaavklartInntekt, dto.korrigertInntekt, dto.skjønnsmessigFastsatt, deaktivert)
+        return mapInntekt(dto.orgnummer, dto.faktaavklartInntekt, dto.korrigertInntekt, dto.skjønnsmessigFastsatt, deaktivert)
     }
 
-    private fun mapInntekt(orgnummer: String, fom: LocalDate, tom: LocalDate, io: FaktaavklartInntektUtDto, korrigertInntekt: SaksbehandlerUtDto?, skjønnsmessigFastsattDto: SkjønnsmessigFastsattUtDto?, deaktivert: Boolean): IArbeidsgiverinntekt {
+    private fun mapInntekt(orgnummer: String, io: FaktaavklartInntektUtDto, korrigertInntekt: SaksbehandlerUtDto?, skjønnsmessigFastsattDto: SkjønnsmessigFastsattUtDto?, deaktivert: Boolean): IArbeidsgiverinntekt {
         val omregnetÅrsinntekt = omregnetÅrsinntekt(korrigertInntekt, io).also {
             inntekter[io.id] = it
         }
         return IArbeidsgiverinntekt(
             arbeidsgiver = orgnummer,
-            fom = fom,
-            tom = tom,
             omregnetÅrsinntekt = omregnetÅrsinntekt,
             skjønnsmessigFastsatt = skjønnsmessigFastsattDto?.let {
                 SkjønnsmessigFastsattDTO(

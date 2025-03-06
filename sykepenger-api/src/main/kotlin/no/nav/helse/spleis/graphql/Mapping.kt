@@ -448,7 +448,7 @@ private fun mapArbeidsgiverRefusjon(arbeidsgiverrefusjon: Arbeidsgiverrefusjon) 
     }
 )
 
-private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntekt(
+private fun mapInntekt(skjæringstidspunkt: LocalDate, inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntekt(
     arbeidsgiver = inntekt.organisasjonsnummer,
     omregnetArsinntekt = inntekt.omregnetÅrsinntekt.tilGraphQLOmregnetArsinntekt(),
     skjonnsmessigFastsatt = inntekt.skjønnsmessigFastsatt?.let {
@@ -458,8 +458,8 @@ private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntek
         )
     },
     skjonnsmessigFastsattAarlig = inntekt.skjønnsmessigFastsatt?.årlig,
-    fom = inntekt.fom,
-    tom = inntekt.tom,
+    fom = skjæringstidspunkt,
+    tom = null,
     deaktivert = inntekt.deaktivert
 )
 
@@ -488,7 +488,7 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
             skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
             omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt,
             sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag,
-            inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) },
+            inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(vilkårsgrunnlag.skjæringstidspunkt, inntekt) },
             grunnbelop = vilkårsgrunnlag.grunnbeløp,
             sykepengegrunnlagsgrense = mapSykepengergrunnlagsgrense(vilkårsgrunnlag.sykepengegrunnlagsgrense),
             antallOpptjeningsdagerErMinst = vilkårsgrunnlag.antallOpptjeningsdagerErMinst,
@@ -504,7 +504,7 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
             skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
             omregnetArsinntekt = vilkårsgrunnlag.beregningsgrunnlag, // For infotrygd har vi ikke noe konsept for hvorvidt en inntekt er skjønnsfastsatt
             sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag,
-            inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) },
+            inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(vilkårsgrunnlag.skjæringstidspunkt, inntekt) },
             arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map { refusjon -> mapArbeidsgiverRefusjon(refusjon) }
         )
 

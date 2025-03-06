@@ -83,8 +83,7 @@ internal class PersonHendelsefabrikk {
 internal class OverstyrtArbeidsgiveropplysning(
     private val orgnummer: String,
     private val inntekt: Inntekt,
-    private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>? = null,
-    private val gjelder: Periode? = null
+    private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>? = null
 ) {
     private fun refusjonsopplysninger(skjæringstidspunkt: LocalDate) = refusjonsopplysninger ?: listOf(Triple(skjæringstidspunkt, null, inntekt))
 
@@ -93,7 +92,6 @@ internal class OverstyrtArbeidsgiveropplysning(
             map {
                 OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning(
                     organisasjonsnummer = it.orgnummer,
-                    gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX),
                     inntektsdata = Inntektsdata(
                         hendelseId = MeldingsreferanseId(meldingsreferanseId),
                         dato = skjæringstidspunkt,
@@ -124,7 +122,7 @@ internal class OverstyrtArbeidsgiveropplysning(
         }
 
         internal fun List<OverstyrtArbeidsgiveropplysning>.refusjonstidslinjer(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, opprettet: LocalDateTime) = this.associateBy { it.orgnummer }.mapValues { (_, opplysning) ->
-            val defaultRefusjonFom = opplysning.gjelder?.start ?: skjæringstidspunkt
+            val defaultRefusjonFom = skjæringstidspunkt
             val strekkbar = opplysning.refusjonsopplysninger(defaultRefusjonFom).any { (_, tom) -> tom == null }
             opplysning.refusjonsopplysninger(defaultRefusjonFom).fold(Beløpstidslinje()) { acc, (fom, tom, beløp) ->
                 acc + Beløpstidslinje.fra(fom til (tom ?: fom), beløp, Kilde(MeldingsreferanseId(meldingsreferanseId), SAKSBEHANDLER, opprettet))

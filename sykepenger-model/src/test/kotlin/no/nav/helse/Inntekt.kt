@@ -5,7 +5,6 @@ import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.dsl.a1
 import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.arbeidsgiverinntekt
@@ -24,7 +23,6 @@ internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstid
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
                 orgnummer = orgnr,
-                gjelder = skjæringstidspunkt til LocalDate.MAX,
                 faktaavklartInntekt = arbeidsgiverinntekt(skjæringstidspunkt, this),
                 korrigertInntekt = null,
                 skjønnsmessigFastsatt = null
@@ -42,7 +40,6 @@ internal fun Inntekt.inntektsgrunnlag(orgnr: String, skjæringstidspunkt: LocalD
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
                 orgnummer = orgnr,
-                gjelder = skjæringstidspunkt til LocalDate.MAX,
                 faktaavklartInntekt = arbeidsgiverinntekt(skjæringstidspunkt, this),
                 korrigertInntekt = null,
                 skjønnsmessigFastsatt = null

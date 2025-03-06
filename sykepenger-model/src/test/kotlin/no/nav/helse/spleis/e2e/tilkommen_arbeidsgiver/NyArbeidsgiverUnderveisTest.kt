@@ -11,7 +11,9 @@ import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -117,7 +119,6 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
     }
 
     @Test
-    @Disabled("TODO: Dette er en tøysete test, men kan kanskje gi mening i fremtiden?")
     fun `saksbehandler flytter arbeidsgiver på skjæringstidspunktet som tilkommen`() {
         a1 {
             håndterSøknad(januar)
@@ -139,15 +140,17 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             assertVarsler(listOf(Varselkode.RV_VV_1), 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, 5000.månedlig, gjelder = 10.januar til LocalDate.MAX)))
-            håndterYtelser(1.vedtaksperiode)
+            håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, deaktivert = true, forklaring = "skal ikke inngå i sykepengegrunnlaget"))
+            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(
+                InntekterForBeregning.Inntektsperiode(a2, 10.januar, tom = null, inntekt = 5000.månedlig)
+            ))
             håndterSimulering(1.vedtaksperiode)
 
             inspektør.utbetalingstidslinjer(1.vedtaksperiode)[1.januar].also { dag ->
                 assertEquals(100, dag.økonomi.inspektør.totalGrad)
             }
             inspektør.utbetalingstidslinjer(1.vedtaksperiode)[10.januar].also { dag ->
-                assertEquals(83, dag.økonomi.inspektør.totalGrad)
+                assertEquals(93, dag.økonomi.inspektør.totalGrad)
             }
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.also { vilkårsgrunnlagInspektør ->
                 assertEquals(INNTEKT, vilkårsgrunnlagInspektør.inntektsgrunnlag.inspektør.sykepengegrunnlag)

@@ -104,7 +104,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 ALDER, listOf(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = "orgnr",
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     faktaavklartInntekt = arbeidsgiverinntekt(skjæringstidspunkt, inntekt),
                     korrigertInntekt = null,
                     skjønnsmessigFastsatt = null

@@ -29,7 +29,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.beve
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.beverteDeaktiverte
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harFunksjonellEndring
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harGjenbrukbarInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
@@ -63,10 +63,10 @@ internal class Inntektsgrunnlag private constructor(
     private val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())
 
     // sum av alle inntekter foruten skjønnsmessig fastsatt beløp; da brukes inntekten den fastsatte
-    private val omregnetÅrsinntekt = arbeidsgiverInntektsopplysninger.totalOmregnetÅrsinntekt(skjæringstidspunkt)
+    private val omregnetÅrsinntekt = arbeidsgiverInntektsopplysninger.totalOmregnetÅrsinntekt()
 
     // summen av alle inntekter
-    private val beregningsgrunnlag = arbeidsgiverInntektsopplysninger.fastsattÅrsinntekt(skjæringstidspunkt)
+    private val beregningsgrunnlag = arbeidsgiverInntektsopplysninger.fastsattÅrsinntekt()
     val sykepengegrunnlag = beregningsgrunnlag.coerceAtMost(this.`6G`)
     private val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (beregningsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
@@ -288,8 +288,7 @@ internal class Inntektsgrunnlag private constructor(
     }
 
     private fun lagEndring(nyeInntekter: List<ArbeidsgiverInntektsopplysning>, subsumsjonslogg: Subsumsjonslogg): EndretInntektsgrunnlag? {
-        val nyttInntektsgrunnlag = kopierSykepengegrunnlagOgValiderMinsteinntekt(nyeInntekter, deaktiverteArbeidsforhold, subsumsjonslogg)
-        val endringFom = nyttInntektsgrunnlag.finnEndringsdato(this) ?: return null
+        val nyttInntektsgrunnlag = kopierSykepengegrunnlagOgValiderMinsteinntekt(nyeInntekter, deaktiverteArbeidsforhold, subsumsjonslogg) ?: return null
         return EndretInntektsgrunnlag(
             inntekter = nyeInntekter.mapNotNull { potensiellEndret ->
                 val eksisterende = arbeidsgiverInntektsopplysninger.single { eksisterende -> potensiellEndret.orgnummer == eksisterende.orgnummer }
@@ -300,7 +299,6 @@ internal class Inntektsgrunnlag private constructor(
                     inntektEtter = potensiellEndret
                 )
             },
-            endringFom = endringFom,
             inntektsgrunnlagFør = this,
             inntektsgrunnlagEtter = nyttInntektsgrunnlag
         )
@@ -310,7 +308,8 @@ internal class Inntektsgrunnlag private constructor(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
         subsumsjonslogg: Subsumsjonslogg
-    ): Inntektsgrunnlag {
+    ): Inntektsgrunnlag? {
+        if (!arbeidsgiverInntektsopplysninger.harFunksjonellEndring(this.arbeidsgiverInntektsopplysninger)) return null
         return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold).apply {
             subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, subsumsjonslogg)
         }
@@ -355,12 +354,6 @@ internal class Inntektsgrunnlag private constructor(
 
     override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
     internal fun er6GBegrenset() = begrensning == ER_6G_BEGRENSET
-    private fun finnEndringsdato(other: Inntektsgrunnlag): LocalDate? {
-        check(this.skjæringstidspunkt == other.skjæringstidspunkt) {
-            "Skal bare sammenlikne med samme skjæringstidspunkt"
-        }
-        return arbeidsgiverInntektsopplysninger.finnEndringsdato(other.arbeidsgiverInntektsopplysninger)
-    }
 
     fun harGjenbrukbarInntekt(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.harGjenbrukbarInntekt(organisasjonsnummer)
@@ -390,7 +383,6 @@ internal class Inntektsgrunnlag private constructor(
 
 internal data class EndretInntektsgrunnlag(
     val inntekter: List<EndretInntekt>,
-    val endringFom: LocalDate,
     val inntektsgrunnlagFør: Inntektsgrunnlag,
     val inntektsgrunnlagEtter: Inntektsgrunnlag
 ) {

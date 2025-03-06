@@ -262,15 +262,12 @@ data class PersonData(
 
         data class ArbeidsgiverInntektsopplysningData(
             val orgnummer: String,
-            val fom: LocalDate,
-            val tom: LocalDate,
             val inntektsopplysning: InntektsopplysningData,
             val korrigertInntekt: KorrigertInntektsopplysningData?,
             val skjønnsmessigFastsatt: SkjønnsmessigFastsattData?
         ) {
             fun tilDto() = ArbeidsgiverInntektsopplysningInnDto(
                 orgnummer = this.orgnummer,
-                gjelder = PeriodeDto(fom = this.fom, tom = this.tom),
                 faktaavklartInntekt = inntektsopplysning.tilDto(),
                 korrigertInntekt = korrigertInntekt?.tilDto(),
                 skjønnsmessigFastsatt = skjønnsmessigFastsatt?.tilDto()

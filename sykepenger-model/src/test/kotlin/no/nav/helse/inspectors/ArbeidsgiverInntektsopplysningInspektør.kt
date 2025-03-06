@@ -13,5 +13,4 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
     val fastsattÅrsinntekt = arbeidsgiverInntektsopplysning.fastsattÅrsinntekt
 
     val skjønnsmessigFastsatt = arbeidsgiverInntektsopplysning.skjønnsmessigFastsatt
-    val gjelder = arbeidsgiverInntektsopplysning.gjelder
 }
