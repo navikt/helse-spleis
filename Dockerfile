@@ -12,7 +12,7 @@ COPY --from=builder /opt/cprof/profiler_java_agent.so /opt/cprof/
 COPY build/libs/*.jar /app/
 
 ENV TZ="Europe/Oslo"
-ENV JDK_JAVA_OPTIONS='-XX:MaxRAMPercentage=90 -XX:+UseParallelGC -XX:ActiveProcessorCount=4'
+ENV JDK_JAVA_OPTIONS='-XX:MaxRAMPercentage=90'
 
 WORKDIR /app
 
