@@ -23,7 +23,6 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -56,7 +55,7 @@ class InntekterForBeregningTest {
             inntektsendringer(Inntektskilde(a1), 1.januar, 31.januar, INNTEKT * 2)
         }
 
-        val (_, inntektstidslinje) = inntekterForBeregning.tilBeregning(a1)
+        val inntektstidslinje = inntekterForBeregning.tilBeregning(a1)
 
         val forventetTidslinje = ARBEIDSGIVER.beløpstidslinje(1.januar.somPeriode(), INNTEKT) + SYSTEM.beløpstidslinje(2.januar til 31.januar, INNTEKT * 2)
         assertBeløpstidslinje(forventetTidslinje, inntektstidslinje, ignoreMeldingsreferanseId = true)
@@ -69,16 +68,14 @@ class InntekterForBeregningTest {
             inntektsendringer(Inntektskilde(a2), 1.januar, 31.januar, INNTEKT * 2)
         }
 
-        val (fastsattÅrsinntektA1, inntektstidslinjeForA1) = inntekterForBeregning.tilBeregning(a1)
-        val (fastsattÅrsinntektA2, inntektstidslinjeForA2) = inntekterForBeregning.tilBeregning(a2)
+        val inntektstidslinjeForA1 = inntekterForBeregning.tilBeregning(a1)
+        val inntektstidslinjeForA2 = inntekterForBeregning.tilBeregning(a2)
 
         val forventetTidslinjeA1 = ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT)
         val forventetTidslinjeA2 = SYSTEM.beløpstidslinje(januar, INNTEKT * 2)
 
         assertBeløpstidslinje(forventetTidslinjeA1, inntektstidslinjeForA1, ignoreMeldingsreferanseId = true)
         assertBeløpstidslinje(forventetTidslinjeA2, inntektstidslinjeForA2, ignoreMeldingsreferanseId = true)
-        assertEquals(INNTEKT, fastsattÅrsinntektA1)
-        assertEquals(INGEN, fastsattÅrsinntektA2)
     }
 
     @Test
@@ -89,16 +86,14 @@ class InntekterForBeregningTest {
             inntektsendringer(Inntektskilde(a2), 1.januar, 31.januar, INNTEKT * 2)
         }
 
-        val (fastsattÅrsinntektA1, inntektstidslinjeForA1) = inntekterForBeregning.tilBeregning(a1)
-        val (fastsattÅrsinntektA2, inntektstidslinjeForA2) = inntekterForBeregning.tilBeregning(a2)
+        val inntektstidslinjeForA1 = inntekterForBeregning.tilBeregning(a1)
+        val inntektstidslinjeForA2 = inntekterForBeregning.tilBeregning(a2)
 
         val forventetTidslinjeA1 = ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT)
         val forventetTidslinjeA2 = SYSTEM.beløpstidslinje(januar, INNTEKT * 2)
 
         assertBeløpstidslinje(forventetTidslinjeA1, inntektstidslinjeForA1, ignoreMeldingsreferanseId = true)
         assertBeløpstidslinje(forventetTidslinjeA2, inntektstidslinjeForA2, ignoreMeldingsreferanseId = true)
-        assertEquals(INNTEKT, fastsattÅrsinntektA1)
-        assertEquals(INGEN, fastsattÅrsinntektA2)
     }
 
     @Test
@@ -107,10 +102,9 @@ class InntekterForBeregningTest {
             inntektsendringer(Inntektskilde(a1), 1.januar, 31.januar, INNTEKT * 2)
             fraInntektsgrunnlag(a1, INNTEKT)
         }
-        val (fastsattÅrsinntekt, inntektstidslinje) = inntekterForBeregning.tilBeregning(a1)
+        val inntektstidslinje = inntekterForBeregning.tilBeregning(a1)
         val forventetTidslinje = ARBEIDSGIVER.beløpstidslinje(1.januar.somPeriode(), INNTEKT) + SYSTEM.beløpstidslinje(2.januar til 31.januar, INNTEKT * 2)
         assertBeløpstidslinje(forventetTidslinje, inntektstidslinje, ignoreMeldingsreferanseId = true)
-        assertEquals(INNTEKT, fastsattÅrsinntekt)
     }
 
     @Test

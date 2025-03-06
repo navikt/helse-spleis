@@ -16,6 +16,7 @@ import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -55,8 +56,9 @@ internal class UtbetalingstidslinjeTest {
 
     @Test
     fun betale() {
+        val `6G`= 2161.daglig
         val input = listOf(tidslinjeOf(1.NAV(1000)), tidslinjeOf(1.NAV(1000)))
-        val result = Utbetalingstidslinje.betale(input)
+        val result = Utbetalingstidslinje.betale(`6G`, input)
 
         input.forEachIndexed { index, input ->
             assertNull(input[1.januar].økonomi.inspektør.arbeidsgiverbeløp) { "den uberegnede listen skal ikke modifiseres" }
@@ -148,7 +150,6 @@ internal class UtbetalingstidslinjeTest {
             ),
             tidslinjedager
         )
-        println(tidslinjeOf(16.AP, 15.NAV, 2.FRI))
     }
 
     @Test

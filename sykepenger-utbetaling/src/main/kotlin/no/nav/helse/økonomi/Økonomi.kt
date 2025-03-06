@@ -16,11 +16,14 @@ class Økonomi private constructor(
     val totalGrad: Prosentdel = grad,
     val arbeidsgiverRefusjonsbeløp: Inntekt = INGEN,
     val aktuellDagsinntekt: Inntekt = INGEN,
+    @Deprecated("denne sletter vi")
     val beregningsgrunnlag: Inntekt = INGEN,
     val dekningsgrunnlag: Inntekt = INGEN,
+    @Deprecated("denne sletter vi")
     val grunnbeløpgrense: Inntekt? = null,
     val arbeidsgiverbeløp: Inntekt? = null,
     val personbeløp: Inntekt? = null,
+    @Deprecated("denne sletter vi")
     val er6GBegrenset: Boolean? = null,
     val tilstand: Tilstand = Tilstand.KunGrad,
 ) {
@@ -43,7 +46,6 @@ class Økonomi private constructor(
         }
 
         private fun List<Økonomi>.aktuellDagsinntekt() = map { it.aktuellDagsinntekt }.summer()
-        private fun List<Økonomi>.beregningsgrunnlag() = map { it.beregningsgrunnlag }.summer()
 
         private fun totalSykdomsgrad(økonomiList: List<Økonomi>, gradStrategi: (Økonomi) -> Prosentdel): Prosentdel {
             val aktuellDagsinntekt = økonomiList.aktuellDagsinntekt()
@@ -65,25 +67,19 @@ class Økonomi private constructor(
 
         private fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) = totalSykdomsgrad(økonomiList, Økonomi::utbetalingsgrad)
 
-        fun betal(økonomiList: List<Økonomi>): List<Økonomi> {
+        fun betal(sykepengegrunnlagBegrenset6G: Inntekt, økonomiList: List<Økonomi>): List<Økonomi> {
             val utbetalingsgrad = totalUtbetalingsgrad(økonomiList)
             val foreløpig = delteUtbetalinger(økonomiList)
-            return fordelBeløp(foreløpig, utbetalingsgrad)
+            return fordelBeløp(foreløpig, sykepengegrunnlagBegrenset6G, utbetalingsgrad)
         }
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.map { it.betal() }
 
-        private fun fordelBeløp(økonomiList: List<Økonomi>, utbetalingsgrad: Prosentdel): List<Økonomi> {
+        private fun fordelBeløp(økonomiList: List<Økonomi>, sykepengegrunnlagBegrenset6G: Inntekt, utbetalingsgrad: Prosentdel): List<Økonomi> {
             val totalArbeidsgiver = totalArbeidsgiver(økonomiList)
             val totalPerson = totalPerson(økonomiList)
             val total = totalArbeidsgiver + totalPerson
-            if (total == INGEN) return økonomiList.map { økonomi -> økonomi.kopierMed(er6GBegrenset = false) }
-
-            // todo: trenger ikke vite 6G hvis inntektene er redusert ihht. 6G når de settes på Økonomi
-            val grunnbeløp = økonomiList.firstNotNullOf { it.grunnbeløpgrense }
-            val beregningsgrunnlag = økonomiList.beregningsgrunnlag()
-            val sykepengegrunnlagBegrenset6G = minOf(beregningsgrunnlag, grunnbeløp)
-            val er6GBegrenset = beregningsgrunnlag > grunnbeløp
+            if (total == INGEN) return økonomiList.map { økonomi -> økonomi.kopierMed() }
 
             val inntektstapSomSkalDekkesAvNAV = maxOf(INGEN, (sykepengegrunnlagBegrenset6G * utbetalingsgrad).rundTilDaglig())
             val fordelingRefusjon = fordel(økonomiList, totalArbeidsgiver, inntektstapSomSkalDekkesAvNAV, { økonomi, inntekt -> økonomi.kopierMed(arbeidsgiverbeløp = inntekt) }, arbeidsgiverBeløp)
@@ -92,7 +88,7 @@ class Økonomi private constructor(
             val totalPersonbeløp = totalPerson(fordelingPerson)
             val restbeløp = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon - totalPersonbeløp
             val restfordeling = restfordeling(fordelingPerson, restbeløp)
-            return restfordeling.map { økonomi -> økonomi.kopierMed(er6GBegrenset = er6GBegrenset) }
+            return restfordeling.map { økonomi -> økonomi.kopierMed() }
         }
 
         private fun restfordeling(økonomiList: List<Økonomi>, grense: Inntekt): List<Økonomi> {
@@ -159,9 +155,6 @@ class Økonomi private constructor(
 
         private fun totalPerson(økonomiList: List<Økonomi>) = total(økonomiList, personBeløp)
 
-        internal fun er6GBegrenset(økonomiList: List<Økonomi>) =
-            økonomiList.any { it.er6GBegrenset() }
-
         fun gjenopprett(dto: ØkonomiInnDto, erAvvistDag: Boolean): Økonomi {
             return Økonomi(
                 grad = Prosentdel.gjenopprett(dto.grad),
@@ -188,14 +181,12 @@ class Økonomi private constructor(
         require(dekningsgrunnlag >= INGEN) { "dekningsgrunnlag kan ikke være negativ." }
     }
 
-    fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, beregningsgrunnlag: Inntekt = aktuellDagsinntekt, `6G`: Inntekt, refusjonsbeløp: Inntekt): Økonomi =
+    fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, refusjonsbeløp: Inntekt): Økonomi =
         tilstand.inntekt(
             økonomi = this,
             aktuellDagsinntekt = aktuellDagsinntekt,
-            beregningsgrunnlag = beregningsgrunnlag,
             refusjonsbeløp = refusjonsbeløp,
-            dekningsgrunnlag = dekningsgrunnlag,
-            `6G` = `6G`
+            dekningsgrunnlag = dekningsgrunnlag
         )
 
     fun lås() = tilstand.lås(this)
@@ -234,8 +225,6 @@ class Økonomi private constructor(
 
     private fun betal() = tilstand.betal(this)
 
-    fun er6GBegrenset() = tilstand.er6GBegrenset(this)
-
     private fun _betal(): Økonomi {
         val total = (dekningsgrunnlag * utbetalingsgrad()).rundTilDaglig()
         val gradertArbeidsgiverRefusjonsbeløp = (arbeidsgiverRefusjonsbeløp * utbetalingsgrad()).rundTilDaglig()
@@ -259,24 +248,21 @@ class Økonomi private constructor(
         totalgrad: Prosentdel = this.totalGrad,
         arbeidsgiverRefusjonsbeløp: Inntekt = this.arbeidsgiverRefusjonsbeløp,
         aktuellDagsinntekt: Inntekt = this.aktuellDagsinntekt,
-        beregningsgrunnlag: Inntekt = this.beregningsgrunnlag,
         dekningsgrunnlag: Inntekt = this.dekningsgrunnlag,
-        grunnbeløpgrense: Inntekt? = this.grunnbeløpgrense,
         arbeidsgiverbeløp: Inntekt? = this.arbeidsgiverbeløp,
         personbeløp: Inntekt? = this.personbeløp,
-        er6GBegrenset: Boolean? = this.er6GBegrenset,
         tilstand: Tilstand = this.tilstand,
     ) = Økonomi(
         grad = grad,
         totalGrad = totalgrad,
         arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp,
         aktuellDagsinntekt = aktuellDagsinntekt,
-        beregningsgrunnlag = beregningsgrunnlag,
+        beregningsgrunnlag = INGEN,
         dekningsgrunnlag = dekningsgrunnlag,
-        grunnbeløpgrense = grunnbeløpgrense,
+        grunnbeløpgrense = INGEN,
         arbeidsgiverbeløp = arbeidsgiverbeløp,
         personbeløp = personbeløp,
-        er6GBegrenset = er6GBegrenset,
+        er6GBegrenset = false,
         tilstand = tilstand
     )
 
@@ -292,20 +278,14 @@ class Økonomi private constructor(
         internal open fun inntekt(
             økonomi: Økonomi,
             aktuellDagsinntekt: Inntekt,
-            beregningsgrunnlag: Inntekt,
             refusjonsbeløp: Inntekt,
-            dekningsgrunnlag: Inntekt,
-            `6G`: Inntekt
+            dekningsgrunnlag: Inntekt
         ): Økonomi {
             throw IllegalStateException("Kan ikke sette inntekt i tilstand ${this::class.simpleName}")
         }
 
         internal open fun betal(økonomi: Økonomi): Økonomi {
             throw IllegalStateException("Kan ikke beregne utbetaling i tilstand ${this::class.simpleName}")
-        }
-
-        internal open fun er6GBegrenset(økonomi: Økonomi): Boolean {
-            throw IllegalStateException("Beløp er ikke beregnet ennå")
         }
 
         internal open fun lås(økonomi: Økonomi): Økonomi {
@@ -323,18 +303,14 @@ class Økonomi private constructor(
             override fun inntekt(
                 økonomi: Økonomi,
                 aktuellDagsinntekt: Inntekt,
-                beregningsgrunnlag: Inntekt,
                 refusjonsbeløp: Inntekt,
-                dekningsgrunnlag: Inntekt,
-                `6G`: Inntekt
+                dekningsgrunnlag: Inntekt
             ) = økonomi.kopierMed(
                 grad = økonomi.grad,
                 totalgrad = økonomi.totalGrad,
                 arbeidsgiverRefusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
-                beregningsgrunnlag = beregningsgrunnlag,
                 dekningsgrunnlag = dekningsgrunnlag,
-                grunnbeløpgrense = `6G`,
                 tilstand = HarInntekt
             )
         }
@@ -348,18 +324,14 @@ class Økonomi private constructor(
             override fun inntekt(
                 økonomi: Økonomi,
                 aktuellDagsinntekt: Inntekt,
-                beregningsgrunnlag: Inntekt,
                 refusjonsbeløp: Inntekt,
-                dekningsgrunnlag: Inntekt,
-                `6G`: Inntekt
+                dekningsgrunnlag: Inntekt
             ) = økonomi.kopierMed(
                 grad = økonomi.grad,
                 totalgrad = økonomi.totalGrad,
                 arbeidsgiverRefusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
-                beregningsgrunnlag = beregningsgrunnlag,
                 dekningsgrunnlag = dekningsgrunnlag,
-                grunnbeløpgrense = `6G`,
                 tilstand = HarInntektIkkeBetalt
             )
 
@@ -381,10 +353,7 @@ class Økonomi private constructor(
             override fun betal(økonomi: Økonomi) = økonomi._betal()
         }
 
-        object HarBeløp : Tilstand() {
-            override fun er6GBegrenset(økonomi: Økonomi) = økonomi.er6GBegrenset!!
-
-        }
+        object HarBeløp : Tilstand()
 
         object Låst : Tilstand() {
             override fun utbetalingsgrad(økonomi: Økonomi) = 0.prosent
@@ -399,7 +368,6 @@ class Økonomi private constructor(
         object LåstMedBeløp : Tilstand() {
             override fun utbetalingsgrad(økonomi: Økonomi) = 0.prosent
             override fun lås(økonomi: Økonomi) = økonomi
-            override fun er6GBegrenset(økonomi: Økonomi) = false
         }
     }
 
@@ -505,6 +473,4 @@ abstract class ØkonomiBuilder {
     }
 }
 
-fun List<Økonomi>.betal() = Økonomi.betal(this)
-
-fun List<Økonomi>.er6GBegrenset() = Økonomi.er6GBegrenset(this)
+fun List<Økonomi>.betal(sykepengegrunnlagBegrenset6G: Inntekt) = Økonomi.betal(sykepengegrunnlagBegrenset6G, this)

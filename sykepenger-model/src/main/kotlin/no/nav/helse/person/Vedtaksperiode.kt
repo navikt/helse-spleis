@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -181,7 +180,6 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
 import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
-import no.nav.helse.utbetalingstidslinje.Maksdatovurdering
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
@@ -2025,9 +2023,9 @@ internal class Vedtaksperiode private constructor(
             .groupBy { it.arbeidsgiver.organisasjonsnummer }
         val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning
             .mapValues { (arbeidsgiver, vedtaksperioder) ->
-                val (fastsattÅrsinntekt, inntektstidslinje) = inntekterForBeregning.tilBeregning(arbeidsgiver)
+                val inntektstidslinje = inntekterForBeregning.tilBeregning(arbeidsgiver)
                 vedtaksperioder.map {
-                    it.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, inntekterForBeregning.`6G`, inntektstidslinje)
+                    it.behandlinger.lagUtbetalingstidslinje(inntektstidslinje)
                 }
             }
         // nå vi må lage en ghost-tidslinje per arbeidsgiver for de som eksisterer i sykepengegrunnlaget.
@@ -2060,7 +2058,10 @@ internal class Vedtaksperiode private constructor(
             AvvisDagerEtterDødsdatofilter(person.alder),
             AvvisInngangsvilkårfilter(grunnlagsdata),
             maksdatofilter,
-            MaksimumUtbetalingFilter()
+            MaksimumUtbetalingFilter(
+                sykepengegrunnlagBegrenset6G = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag,
+                er6GBegrenset = grunnlagsdata.inntektsgrunnlag.er6GBegrenset()
+            )
         )
 
         val kjørFilter = fun(
@@ -3136,8 +3137,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun lagUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode): Pair<Utbetalingstidslinje, InntekterForBeregning> {
-            val (fastsattÅrsinntekt, inntektstidslinje, inntekterForBeregning) = InntekterForBeregning.forAuu(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.arbeidsgiver.organisasjonsnummer, vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag)
-            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, inntekterForBeregning.`6G`, inntektstidslinje) to inntekterForBeregning
+            val (inntektstidslinje, inntekterForBeregning) = InntekterForBeregning.forAuu(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.arbeidsgiver.organisasjonsnummer, vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag)
+            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektstidslinje) to inntekterForBeregning
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {

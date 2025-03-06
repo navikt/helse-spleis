@@ -23,7 +23,7 @@ internal class CreateØkonomiTest {
     fun `kan ikke betale økonomi med kun grad`() {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
-            assertThrows<IllegalStateException> { listOf(økonomi).betal() }
+            assertThrows<IllegalStateException> { listOf(økonomi).betal(2161.daglig) }
         }
     }
 
@@ -38,7 +38,7 @@ internal class CreateØkonomiTest {
             assertNull(økonomi.inspektør.arbeidsgiverbeløp)
             assertNull(økonomi.inspektør.personbeløp)
             økonomi
-                .inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = INGEN)
+                .inntekt(1200.daglig, refusjonsbeløp = INGEN)
                 .also { nyØkonomi ->
                     assertEquals(79.5, nyØkonomi.inspektør.grad.toDouble())
                     assertEquals(INGEN, nyØkonomi.inspektør.arbeidsgiverRefusjonsbeløp)
@@ -56,7 +56,7 @@ internal class CreateØkonomiTest {
         createØkonomi(data).also { økonomi ->
             assertDoesNotThrow {
                 økonomi
-                    .inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig)
+                    .inntekt(1200.daglig, refusjonsbeløp = 1200.daglig)
             }
         }
     }
@@ -72,8 +72,8 @@ internal class CreateØkonomiTest {
             assertNull(økonomi.inspektør.arbeidsgiverbeløp)
             assertNull(økonomi.inspektør.personbeløp)
             // Indirect test of Økonomi state is HarLønn
-            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig) }
-            assertDoesNotThrow { listOf(økonomi).betal() }
+            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, refusjonsbeløp = 1200.daglig) }
+            assertDoesNotThrow { listOf(økonomi).betal(`6G`.beløp(1.januar)) }
         }
     }
 
@@ -88,10 +88,9 @@ internal class CreateØkonomiTest {
             assertEquals(1199.6.daglig, økonomi.inspektør.dekningsgrunnlag)
             assertEquals(640.daglig, økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(320.daglig, økonomi.inspektør.personbeløp)
-            assertTrue(økonomi.er6GBegrenset())
             // Indirect test of Økonomi state
-            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig) }
-            assertThrows<IllegalStateException> { listOf(økonomi).betal() }
+            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, refusjonsbeløp = 1200.daglig) }
+            assertThrows<IllegalStateException> { listOf(økonomi).betal(`6G`.beløp(1.januar)) }
         }
     }
 

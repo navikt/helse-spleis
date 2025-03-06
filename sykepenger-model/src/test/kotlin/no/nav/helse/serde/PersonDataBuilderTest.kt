@@ -169,13 +169,20 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
 
     @Test
     fun `dto av utbetalingstidslinje`() {
+        val sykepengegrunnlag = 1200.daglig
         val input = tidslinjeOf(
-            1.AP, 1.NAP, 1.NAV(dekningsgrunnlag = 1200, refusjonsbeløp = 600.0), 1.HELG, 1.ARB, 1.FRI, 1.FOR,
+            1.AP,
+            1.NAP,
+            1.NAV(dekningsgrunnlag = 1200, refusjonsbeløp = 600.0),
+            1.HELG,
+            1.ARB,
+            1.FRI,
+            1.FOR,
             1.AVV(dekningsgrunnlag = 1000, begrunnelse = Begrunnelse.SykepengedagerOppbrukt),
             1.AVV(dekningsgrunnlag = 500, begrunnelse = Begrunnelse.MinimumInntekt),
             1.UKJ
         )
-        val tidslinje = MaksimumUtbetalingFilter().filter(listOf(input), input.periode(), Aktivitetslogg(), EmptyLog).single()
+        val tidslinje = MaksimumUtbetalingFilter(sykepengegrunnlag, false).filter(listOf(input), input.periode(), Aktivitetslogg(), EmptyLog).single()
         val dto = tidslinje.dto()
         assertEquals(10, dto.dager.size)
         dto.dager[0].also { dag ->
