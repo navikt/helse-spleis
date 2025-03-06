@@ -1250,6 +1250,7 @@ data class PersonData(
             val begrunnelser: List<BegrunnelseData>?,
             val grad: Double,
             val totalGrad: Double,
+            val utbetalingsgrad: Double?, // todo: trenger ikke være null når alle personer er på skjemaversjon >= 319
             val arbeidsgiverRefusjonsbeløp: Double,
             val arbeidsgiverbeløp: Double?,
             val personbeløp: Double?,
@@ -1262,6 +1263,7 @@ data class PersonData(
                 ØkonomiInnDto(
                     grad = ProsentdelDto(grad),
                     totalGrad = ProsentdelDto(totalGrad),
+                    utbetalingsgrad = utbetalingsgrad?.let { ProsentdelDto(utbetalingsgrad) },
                     arbeidsgiverRefusjonsbeløp = InntektbeløpDto.DagligDouble(this.arbeidsgiverRefusjonsbeløp),
                     aktuellDagsinntekt = InntektbeløpDto.DagligDouble(this.aktuellDagsinntekt),
                     dekningsgrunnlag = InntektbeløpDto.DagligDouble(this.dekningsgrunnlag),

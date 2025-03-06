@@ -1,6 +1,6 @@
 package no.nav.helse.økonomi
 
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -17,14 +17,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class CreateØkonomiTest {
-
-    @Test
-    fun `kan ikke betale økonomi med kun grad`() {
-        val data = sykdomstidslinjedag(79.5)
-        createØkonomi(data).also { økonomi ->
-            assertThrows<IllegalStateException> { listOf(økonomi).betal(2161.daglig) }
-        }
-    }
 
     @Test
     fun `opprette bare prosenter`() {
@@ -108,6 +100,7 @@ internal class CreateØkonomiTest {
         begrunnelser = null,
         grad = grad,
         totalGrad = totalGrad,
+        utbetalingsgrad = 100.0,
         arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp,
         arbeidsgiverbeløp = arbeidsgiverbeløp,
         personbeløp = personbeløp,

@@ -126,7 +126,7 @@ internal class ØkonomiTest {
             listOf(
                 50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig),
                 20.prosent.sykdomsgrad.inntekt(800.daglig, 800.daglig),
-                60.prosent.sykdomsgrad.inntekt(2000.daglig, 2000.daglig).lås()
+                60.prosent.sykdomsgrad.inntekt(2000.daglig, 2000.daglig).ikkeBetalt()
             ).totalSykdomsgrad().also {
                 assertFalse(it.erUnderGrensen())
             }
@@ -136,16 +136,7 @@ internal class ØkonomiTest {
     @Test
     fun `kan låse igjen hvis allerede låst`() {
         assertDoesNotThrow {
-            50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig).lås().lås()
-        }
-    }
-
-    @Test
-    fun `kan ikke låses etter betaling`() {
-        50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, refusjonsbeløp = 1200.daglig).also { økonomi ->
-            val betalte = listOf(økonomi).betal(1200.daglig)
-            assertUtbetaling(betalte.single(), 600.0, 0.0)
-            assertThrows<IllegalStateException> { betalte.single().lås() }
+            50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig).ikkeBetalt().ikkeBetalt()
         }
     }
 
@@ -163,15 +154,7 @@ internal class ØkonomiTest {
             assertNotSame(original, original.inntekt(1200.daglig, 1200.daglig))
         }
     }
-
-    @Test
-    fun `kan ikke låses etter utbetaling`() {
-        50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig).also { økonomi ->
-            val betalte = listOf(økonomi).betal(1200.daglig)
-            assertThrows<IllegalStateException> { betalte.single().lås() }
-        }
-    }
-
+    
     @Test
     fun `toMap uten dekningsgrunnlag`() {
         val økonomi = 79.5.prosent.sykdomsgrad

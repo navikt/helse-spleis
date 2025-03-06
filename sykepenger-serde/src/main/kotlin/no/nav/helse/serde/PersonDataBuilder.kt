@@ -523,6 +523,7 @@ private fun UtbetalingsdagUtDto.tilPersonData() = UtbetalingsdagData(
     },
     grad = this.økonomi.grad.prosent,
     totalGrad = this.økonomi.totalGrad.prosent,
+    utbetalingsgrad = this.økonomi.utbetalingsgrad.prosent,
     arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.dagligDouble.beløp,
     arbeidsgiverbeløp = this.økonomi.arbeidsgiverbeløp?.dagligDouble?.beløp,
     personbeløp = this.økonomi.personbeløp?.dagligDouble?.beløp,

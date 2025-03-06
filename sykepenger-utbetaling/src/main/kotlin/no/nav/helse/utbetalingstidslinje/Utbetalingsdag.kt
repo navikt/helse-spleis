@@ -136,7 +136,7 @@ sealed class Utbetalingsdag(
         dato: LocalDate,
         økonomi: Økonomi,
         val begrunnelser: List<Begrunnelse>
-    ) : Utbetalingsdag(dato, økonomi.lås()) {
+    ) : Utbetalingsdag(dato, økonomi.ikkeBetalt()) {
         override val prioritet = 60
         override fun avvisDag(begrunnelser: List<Begrunnelse>) =
             AvvistDag(dato, økonomi, this.begrunnelser + begrunnelser)
