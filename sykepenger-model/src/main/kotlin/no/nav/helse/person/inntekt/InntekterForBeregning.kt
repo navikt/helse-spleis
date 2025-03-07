@@ -9,8 +9,10 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
+import no.nav.helse.person.beløp.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -29,12 +31,14 @@ internal data class InntekterForBeregning(
     private val inntekterPerInntektskilde: Map<Inntektskilde, Beløpstidslinje>,
     private val beregningsperiode: Periode
 ) {
-
     internal fun tilBeregning(organisasjonsnummer: String) = inntekterPerInntektskilde.getValue(Inntektskilde(organisasjonsnummer))
 
-    internal fun forPeriode(periode: Periode) = inntekterPerInntektskilde
-        .mapValues { (_, inntekter) -> inntekter.subset(periode) }
-        .filterValues { inntekter -> inntekter.isNotEmpty() }
+    internal fun forPeriode(periode: Periode): Map<Inntektskilde, Beløpstidslinje> {
+        check(periode in beregningsperiode) { "Perioden $periode er utenfor beregningsperioden $beregningsperiode" }
+        return inntekterPerInntektskilde
+            .mapValues { (_, inntekter) -> inntekter.subset(periode) }
+            .filterValues { inntekter -> inntekter.isNotEmpty() }
+    }
 
     internal fun hensyntattAlleInntektskilder(beregnedeUtbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
         return inntekterPerInntektskilde.mapValues { (inntektskilde, inntekter) ->
@@ -49,10 +53,16 @@ internal data class InntekterForBeregning(
     private fun arbeidsdager(inntekter: Beløpstidslinje, dager: List<LocalDate>) = with(Utbetalingstidslinje.Builder()) {
         dager.forEach { dato ->
             if (dato.erHelg()) addFridag(dato, Økonomi.ikkeBetalt())
-            else addArbeidsdag(
-                dato = dato,
-                økonomi = Økonomi.ikkeBetalt(aktuellDagsinntekt = inntekter[dato].beløp)
-            )
+            else {
+                val aktuellDagsinntekt = when (val dag = inntekter[dato]) {
+                    is Beløpsdag -> dag.beløp
+                    UkjentDag -> INGEN
+                }
+                addArbeidsdag(
+                    dato = dato,
+                    økonomi = Økonomi.ikkeBetalt(aktuellDagsinntekt = aktuellDagsinntekt)
+                )
+            }
         }
         build()
     }
@@ -72,11 +82,11 @@ internal data class InntekterForBeregning(
         }
 
         internal fun inntektsendringer(inntektskilde: Inntektskilde, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId) {
-            val periode = fom til listOfNotNull(tom, beregningsperiode.endInclusive).min()
+            val periode = (fom til listOfNotNull(tom, beregningsperiode.endInclusive).min()).subset(beregningsperiode)
             val kilde = Kilde(meldingsreferanseId, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
             val inntektsendring = Beløpstidslinje.fra(periode, inntekt, kilde)
             inntektsendringer.compute(inntektskilde) { _, inntekter ->
-                ((inntekter ?: Beløpstidslinje.fra(beregningsperiode, INGEN, kilde)).erstatt(inntektsendring)).subset(beregningsperiode)
+                ((inntekter ?: Beløpstidslinje()).erstatt(inntektsendring))
             }
         }
 
@@ -108,11 +118,8 @@ internal data class InntekterForBeregning(
 
         fun forAuu(periode: Periode, organisasjonsnummer: String, inntektsgrunnlag: Inntektsgrunnlag?): Pair<Beløpstidslinje, InntekterForBeregning> {
             if (inntektsgrunnlag == null) {
-                val inntekterForBeregning = with(Builder(periode)) {
-                    build()
-                }
                 // Når vi skal lage en utbetalingstidslinje på en AUU hvor det ikke finnes noe inntektsgrunnlag vil vi ikke lagre de tøysete verdiene på behandlingen, bare bruke dem for å lage utbetalingstidslinje
-                return Pair(Beløpstidslinje.fra(periode, INGEN, TøyseteOpplysningskilde), inntekterForBeregning)
+                return Beløpstidslinje.fra(periode, INGEN, TøyseteOpplysningskilde) to Builder(periode).build()
             }
 
             val inntekterForBeregning = with(Builder(periode)) {

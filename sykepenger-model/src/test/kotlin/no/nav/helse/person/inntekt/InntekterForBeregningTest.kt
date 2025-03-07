@@ -2,10 +2,12 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.util.*
+import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Avsender.SYSTEM
@@ -27,6 +29,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class InntekterForBeregningTest {
 
@@ -50,7 +53,7 @@ class InntekterForBeregningTest {
     }
 
     @Test
-    fun `strekker beløpstidslinene til å matche beregningsperioden`() {
+    fun `strekker beløpstidslinene fra inntektsgrunnlaget til beregningsperioden`() {
         val inntekterForBeregning = inntekterForBeregning(1.januar til 31.januar) {
             fraInntektsgrunnlag(a1, 500.daglig)
             deaktivertFraInntektsgrunnlag(a2)
@@ -68,9 +71,46 @@ class InntekterForBeregningTest {
         }
 
         inntekterForBeregning.tilBeregning(a3).also { actual ->
-            val forventetTidslinje = SYSTEM.beløpstidslinje(1.januar til 9.januar, INGEN) + SYSTEM.beløpstidslinje(10.januar til 15.januar, 250.daglig) + SYSTEM.beløpstidslinje(16.januar til 31.januar, INGEN)
+            val forventetTidslinje = SYSTEM.beløpstidslinje(10.januar til 15.januar, 250.daglig)
             assertBeløpstidslinje(forventetTidslinje, actual, ignoreMeldingsreferanseId = true)
         }
+    }
+
+    @Test
+    fun `begrenser inntektene til en periode`() {
+        val inntekterForBeregning = inntekterForBeregning(1.januar til 31.januar) {
+            fraInntektsgrunnlag(a1, 500.daglig)
+            deaktivertFraInntektsgrunnlag(a2)
+            inntektsendringer(Inntektskilde(a3), 10.januar, 15.januar, 250.daglig)
+        }
+
+        // Hele perioden
+        with(inntekterForBeregning.forPeriode(1.januar til 31.januar)) {
+            assertEquals(setOf(Inntektskilde(a1), Inntektskilde(a2), Inntektskilde(a3)), keys)
+            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(1.januar til 31.januar, 500.daglig), getValue(Inntektskilde(a1)), ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(SAKSBEHANDLER.beløpstidslinje(1.januar til 31.januar, INGEN), getValue(Inntektskilde(a2)), ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(SYSTEM.beløpstidslinje(10.januar til 15.januar, 250.daglig), getValue(Inntektskilde(a3)), ignoreMeldingsreferanseId = true)
+        }
+
+        // Uten snute & hale
+        with(inntekterForBeregning.forPeriode(2.januar til 30.januar)) {
+            assertEquals(setOf(Inntektskilde(a1), Inntektskilde(a2), Inntektskilde(a3)), keys)
+            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(2.januar til 30.januar, 500.daglig), getValue(Inntektskilde(a1)), ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(SAKSBEHANDLER.beløpstidslinje(2.januar til 30.januar, INGEN), getValue(Inntektskilde(a2)), ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(SYSTEM.beløpstidslinje(10.januar til 15.januar, 250.daglig), getValue(Inntektskilde(a3)), ignoreMeldingsreferanseId = true)
+        }
+
+
+        // Etter inntektsendringen
+        with(inntekterForBeregning.forPeriode(16.januar til 31.januar)) {
+            assertEquals(setOf(Inntektskilde(a1), Inntektskilde(a2)), keys)
+            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(16.januar til 31.januar, 500.daglig), getValue(Inntektskilde(a1)), ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(SAKSBEHANDLER.beløpstidslinje(16.januar til 31.januar, INGEN), getValue(Inntektskilde(a2)), ignoreMeldingsreferanseId = true)
+        }
+
+        // Utenfor beregningsperioden
+        assertThrows<IllegalStateException> { inntekterForBeregning.forPeriode(31.desember(2017) til 31.januar) }
+        assertThrows<IllegalStateException> { inntekterForBeregning.forPeriode(1.januar til 1.februar) }
     }
 
     @Test
