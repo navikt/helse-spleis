@@ -165,8 +165,9 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             )
             assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_SV_1, Varselkode.RV_IV_10), 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
+            assertVarsler(listOf(Varselkode.RV_SV_1, Varselkode.RV_IV_10, Varselkode.RV_VV_4), 1.vedtaksperiode.filter())
 
             val event = observatør.skatteinntekterLagtTilGrunnEventer.single()
             val forventet = PersonObserver.SkatteinntekterLagtTilGrunnEvent(
@@ -272,7 +273,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_SV_1, Varselkode.RV_IV_10, Varselkode.RV_VV_4), 1.vedtaksperiode.filter())
             assertUtbetalingsbeløp(
                 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 0,
@@ -315,7 +316,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_SV_1, Varselkode.RV_IV_10, Varselkode.RV_VV_4), 1.vedtaksperiode.filter())
             assertUtbetalingsbeløp(
                 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 0,

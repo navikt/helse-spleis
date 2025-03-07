@@ -67,6 +67,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             OverstyrtArbeidsgiveropplysning(a1, INNTEKT)
         ))
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
             assertInntektsgrunnlag(a1, INGEN, INNTEKT, forventetKorrigertInntekt = INNTEKT)

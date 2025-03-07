@@ -44,9 +44,7 @@ data class Økonomi(
 
         private fun totalSykdomsgrad(økonomiList: List<Økonomi>, gradStrategi: (Økonomi) -> Prosentdel): Prosentdel {
             val aktuellDagsinntekt = økonomiList.aktuellDagsinntekt()
-            if (aktuellDagsinntekt == INGEN) {
-                return (økonomiList.sumOf { gradStrategi(it).times(100.0) } / økonomiList.size).prosent
-            }
+            if (aktuellDagsinntekt == INGEN) return 0.prosent
             val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { gradStrategi(it) to it.aktuellDagsinntekt }, aktuellDagsinntekt)
             return totalgrad
         }
