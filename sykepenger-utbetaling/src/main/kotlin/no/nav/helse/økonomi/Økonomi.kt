@@ -149,25 +149,11 @@ class Økonomi private constructor(
 
         private fun totalPerson(økonomiList: List<Økonomi>) = total(økonomiList, personBeløp)
 
-        fun gjenopprett(dto: ØkonomiInnDto, erAvvistDag: Boolean): Økonomi {
-            val utbetalingsgrad = dto.utbetalingsgrad?.let { Prosentdel.gjenopprett(it) } ?: when {
-                // alle avviste dager har 0 % utbetalingsgrad
-                erAvvistDag -> 0.prosent
-                // dager som har inntekt, som var i tilstand IkkeBetalt, vil kunne ha en sykdomsgradprosent,
-                // men de er blitt utbetalt med 0 % utbetalingsgrad (hardkodet INGEN som beløp)
-                dto.grad.prosent > 0.0 && dto.arbeidsgiverbeløp != null && (dto.arbeidsgiverbeløp!!.beløp == 0.0 && dto.personbeløp!!.beløp == 0.0) -> 0.prosent
-                dto.grad.prosent > 0.0 && dto.arbeidsgiverbeløp == null -> 0.prosent
-                else -> Prosentdel.gjenopprett(dto.grad)
-            }
-            if (dto.arbeidsgiverbeløp != null && (dto.arbeidsgiverbeløp!!.beløp != 0.0 || dto.personbeløp!!.beløp != 0.0)) {
-                check(utbetalingsgrad > 0.prosent) {
-                    "utbetalingsprosenten er 0, men det er beregnet utbetalingsbeløp"
-                }
-            }
+        fun gjenopprett(dto: ØkonomiInnDto): Økonomi {
             return Økonomi(
                 grad = Prosentdel.gjenopprett(dto.grad),
                 totalGrad = Prosentdel.gjenopprett(dto.totalGrad),
-                utbetalingsgrad = utbetalingsgrad,
+                utbetalingsgrad = Prosentdel.gjenopprett(dto.utbetalingsgrad),
                 arbeidsgiverRefusjonsbeløp = Inntekt.gjenopprett(dto.arbeidsgiverRefusjonsbeløp),
                 aktuellDagsinntekt = Inntekt.gjenopprett(dto.aktuellDagsinntekt),
                 dekningsgrunnlag = Inntekt.gjenopprett(dto.dekningsgrunnlag),

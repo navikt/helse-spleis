@@ -42,7 +42,7 @@ sealed class Utbetalingsdag(
             fun gjenopprett(dto: UtbetalingsdagInnDto.ArbeidsgiverperiodeDagDto): ArbeidsgiverperiodeDag {
                 return ArbeidsgiverperiodeDag(
                     dato = dto.dato,
-                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                    økonomi = Økonomi.gjenopprett(dto.økonomi)
                 )
             }
         }
@@ -58,7 +58,7 @@ sealed class Utbetalingsdag(
             fun gjenopprett(dto: UtbetalingsdagInnDto.ArbeidsgiverperiodeDagNavDto): ArbeidsgiverperiodedagNav {
                 return ArbeidsgiverperiodedagNav(
                     dato = dto.dato,
-                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                    økonomi = Økonomi.gjenopprett(dto.økonomi)
                 )
             }
         }
@@ -77,7 +77,7 @@ sealed class Utbetalingsdag(
             fun gjenopprett(dto: UtbetalingsdagInnDto.NavDagDto): NavDag {
                 return NavDag(
                     dato = dto.dato,
-                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                    økonomi = Økonomi.gjenopprett(dto.økonomi)
                 )
             }
         }
@@ -94,7 +94,7 @@ sealed class Utbetalingsdag(
             fun gjenopprett(dto: UtbetalingsdagInnDto.NavHelgDagDto): NavHelgDag {
                 return NavHelgDag(
                     dato = dto.dato,
-                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                    økonomi = Økonomi.gjenopprett(dto.økonomi)
                 )
             }
         }
@@ -110,7 +110,7 @@ sealed class Utbetalingsdag(
             fun gjenopprett(dto: UtbetalingsdagInnDto.FridagDto): Fridag {
                 return Fridag(
                     dato = dto.dato,
-                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                    økonomi = Økonomi.gjenopprett(dto.økonomi)
                 )
             }
         }
@@ -126,7 +126,7 @@ sealed class Utbetalingsdag(
             fun gjenopprett(dto: UtbetalingsdagInnDto.ArbeidsdagDto): Arbeidsdag {
                 return Arbeidsdag(
                     dato = dto.dato,
-                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                    økonomi = Økonomi.gjenopprett(dto.økonomi)
                 )
             }
         }
@@ -151,7 +151,7 @@ sealed class Utbetalingsdag(
             fun gjenopprett(dto: UtbetalingsdagInnDto.AvvistDagDto): AvvistDag {
                 return AvvistDag(
                     dato = dto.dato,
-                    økonomi = Økonomi.gjenopprett(dto.økonomi, true),
+                    økonomi = Økonomi.gjenopprett(dto.økonomi),
                     begrunnelser = dto.begrunnelser.map { Begrunnelse.gjenopprett(it) }
                 )
             }
@@ -169,7 +169,7 @@ sealed class Utbetalingsdag(
             fun gjenopprett(dto: UtbetalingsdagInnDto.ForeldetDagDto): ForeldetDag {
                 return ForeldetDag(
                     dato = dto.dato,
-                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                    økonomi = Økonomi.gjenopprett(dto.økonomi)
                 )
             }
         }
@@ -185,7 +185,7 @@ sealed class Utbetalingsdag(
             fun gjenopprett(dto: UtbetalingsdagInnDto.UkjentDagDto): UkjentDag {
                 return UkjentDag(
                     dato = dto.dato,
-                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                    økonomi = Økonomi.gjenopprett(dto.økonomi)
                 )
             }
         }

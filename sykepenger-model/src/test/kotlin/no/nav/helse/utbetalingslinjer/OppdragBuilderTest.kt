@@ -75,6 +75,6 @@ internal class OppdragBuilderTest {
             dekningsgrunnlag = InntektbeløpDto.DagligDouble(500.0),
             arbeidsgiverbeløp = InntektbeløpDto.DagligDouble(500.0),
             personbeløp = InntektbeløpDto.DagligDouble(0.0),
-        ), erAvvistDag = false
+        )
     )
 }
