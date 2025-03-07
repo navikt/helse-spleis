@@ -13,6 +13,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLDag
 import no.nav.helse.spleis.graphql.dto.GraphQLHendelse
 import no.nav.helse.spleis.graphql.dto.GraphQLInfotrygdVilkarsgrunnlag
+import no.nav.helse.spleis.graphql.dto.GraphQLInntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektFraAOrdningen
 import no.nav.helse.spleis.graphql.dto.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektskilde
@@ -23,6 +24,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLOppdrag
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetype
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodevilkar
+import no.nav.helse.spleis.graphql.dto.GraphQLPeriodisertInntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLRefusjonselement
 import no.nav.helse.spleis.graphql.dto.GraphQLSimulering
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsdetaljer
@@ -373,8 +375,21 @@ private fun mapBeregnetPeriode(periode: BeregnetPeriode, hendelser: List<Hendels
         periodevilkar = mapPeriodevilkår(periode.periodevilkår),
         periodetilstand = mapTilstand(periode.periodetilstand),
         vilkarsgrunnlagId = periode.vilkårsgrunnlagId,
-        inntekter = emptyList()
+        inntekter = mapInntekter(periode.inntekter)
     )
+
+private fun mapInntekter(inntekter: List<BeregnetPeriode.Inntekt>) = inntekter.map {
+    GraphQLInntekt(
+        inntektskilde = it.inntektskilde,
+        periodiserteInntekter = it.periodisertInntekter.map { periodisertInntekt ->
+            GraphQLPeriodisertInntekt(
+                fom = periodisertInntekt.fom,
+                tom = periodisertInntekt.tom,
+                dagligBelop = periodisertInntekt.dagligBeløp
+            )
+        }
+    )
+}
 
 private fun mapAnnullertPeriode(periode: AnnullertPeriode, hendelser: List<HendelseDTO>) =
     GraphQLBeregnetPeriode(
