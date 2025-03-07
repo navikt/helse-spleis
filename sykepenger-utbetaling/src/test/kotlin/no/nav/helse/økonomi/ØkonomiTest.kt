@@ -65,13 +65,8 @@ internal class ØkonomiTest {
     }
 
     @Test
-    fun singelsykegradUtenInntekt() {
-        assertEquals(
-            75.prosent,
-            listOf(
-                75.prosent.inntekt(0.daglig, 0.daglig)
-            ).totalSykdomsgrad()
-        )
+    fun `total sykdomsgrad med 0 kr inntekt`() {
+        assertEquals(0.prosent, listOf(75.prosent.inntekt(0.daglig, 0.daglig)).totalSykdomsgrad())
     }
 
     @Test
@@ -88,16 +83,14 @@ internal class ØkonomiTest {
     }
 
     @Test
-    fun `to arbeidsgivereUtenInntekt`() {
-        assertEquals(
-            35.prosent,
-            listOf(
-                50.prosent.inntekt(0.daglig, 0.daglig),
-                20.prosent.inntekt(0.daglig, 0.daglig)
-            ).totalSykdomsgrad().also {
-                assertFalse(it.erUnderGrensen())
-            }
-        )
+    fun `total sykdomsgrad med 0 kr inntekt - flere arbeidsgivere`() {
+        val totalSykdomsgrad = listOf(
+            50.prosent.inntekt(0.daglig, 0.daglig),
+            20.prosent.inntekt(0.daglig, 0.daglig)
+        ).totalSykdomsgrad()
+
+        assertEquals(0.prosent, totalSykdomsgrad)
+        assertTrue(totalSykdomsgrad.erUnderGrensen())
     }
 
     @Test
