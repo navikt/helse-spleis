@@ -3,15 +3,12 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.dto.InntektskildeDto
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.nesteDag
-import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -29,14 +26,14 @@ value class Inntektskilde(val id: String) {
 }
 
 internal data class InntekterForBeregning(
-    private val inntekterPerInntektskilde: Map<Inntektskilde, Inntekter>,
+    private val inntekterPerInntektskilde: Map<Inntektskilde, Beløpstidslinje>,
     private val beregningsperiode: Periode
 ) {
 
-    internal fun tilBeregning(organisasjonsnummer: String) = inntekterPerInntektskilde.getValue(Inntektskilde(organisasjonsnummer)).inntektstidslinje
+    internal fun tilBeregning(organisasjonsnummer: String) = inntekterPerInntektskilde.getValue(Inntektskilde(organisasjonsnummer))
 
     internal fun forPeriode(periode: Periode) = inntekterPerInntektskilde
-        .mapValues { (_, inntekter) -> inntekter.inntektstidslinje.subset(periode) }
+        .mapValues { (_, inntekter) -> inntekter.subset(periode) }
         .filterValues { inntektstidslinje -> inntektstidslinje.isNotEmpty() }
 
     internal fun hensyntattAlleInntektskilder(beregnedeUtbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
@@ -44,87 +41,36 @@ internal data class InntekterForBeregning(
             val beregnedeUtbetalingstidslinjerForInntektskilde = beregnedeUtbetalingstidslinjer[inntektskilde.id] ?: emptyList()
             val beregendePerioderForInntektskilde = beregnedeUtbetalingstidslinjerForInntektskilde.map(Utbetalingstidslinje::periode)
             val uberegnedeDagerForArbeidsgiver = beregningsperiode.uten(beregendePerioderForInntektskilde).flatten()
-            val uberegnetUtbetalingstidslinjeForArbeidsgiver = inntekter.uberegnetUtbetalingstidslinje(uberegnedeDagerForArbeidsgiver)
+            val uberegnetUtbetalingstidslinjeForArbeidsgiver = arbeidsdager(inntekter, uberegnedeDagerForArbeidsgiver)
             beregnedeUtbetalingstidslinjerForInntektskilde.fold(uberegnetUtbetalingstidslinjeForArbeidsgiver, Utbetalingstidslinje::plus)
         }.mapKeys { (inntktskilde, _) ->inntktskilde.id }.filterValues { it.isNotEmpty() }
     }
 
-    internal sealed interface Inntekter {
-        val inntektstidslinje: Beløpstidslinje
-        fun inntektsendring(skjæringstidspunkt: LocalDate, inntektsendringer: Beløpstidslinje): Inntekter
-        fun uberegnetUtbetalingstidslinje(uberegnedeDager: List<LocalDate>): Utbetalingstidslinje
-        fun arbeidsdager(dager: List<LocalDate>) = with(Utbetalingstidslinje.Builder()) {
-            dager.forEach { dato ->
-                if (dato.erHelg()) addFridag(dato, Økonomi.ikkeBetalt())
-                else addArbeidsdag(
-                    dato = dato,
-                    økonomi = Økonomi.ikkeBetalt(aktuellDagsinntekt = inntektstidslinje[dato].beløp)
-                )
-            }
-            build()
-        }
-
-        data class FraInntektsgrunnlag(override val inntektstidslinje: Beløpstidslinje): Inntekter {
-            override fun inntektsendring(skjæringstidspunkt: LocalDate, inntektsendringer: Beløpstidslinje) = copy(
-                // For arbeidsgiver i inntektsgrunnlaget kan ikke inntekten på skjæringstidspunktet endres av en inntektsendring.
-                inntektstidslinje = this.inntektstidslinje.erstatt(inntektsendringer.fraOgMed(skjæringstidspunkt.nesteDag))
+    private fun arbeidsdager(inntektstidslinje: Beløpstidslinje, dager: List<LocalDate>) = with(Utbetalingstidslinje.Builder()) {
+        dager.forEach { dato ->
+            if (dato.erHelg()) addFridag(dato, Økonomi.ikkeBetalt())
+            else addArbeidsdag(
+                dato = dato,
+                økonomi = Økonomi.ikkeBetalt(aktuellDagsinntekt = inntektstidslinje[dato].beløp)
             )
-            override fun uberegnetUtbetalingstidslinje(uberegnedeDager: List<LocalDate>): Utbetalingstidslinje {
-                // Lager Utbetalingstidslinje for alle arbeidsgivere fra inntektsgrunnlaget
-                // De som ikke har noen beregnede utbetalingstidslinjer er ghost for hele beregningsperioden
-                return arbeidsdager(uberegnedeDager)
-            }
         }
-
-        data class DeaktivertFraInntektsgrunnlag(override val inntektstidslinje: Beløpstidslinje): Inntekter {
-
-            override fun inntektsendring(skjæringstidspunkt: LocalDate, inntektsendringer: Beløpstidslinje) = copy(
-                // Inntektsendring for en deaktivert arbeidsgiver høres spennende ut. Men det kan vel sikkert skje? Hen var i sykepengegrunnlaget men var reelt tilkommen f.eks. ?
-                // Her tillater vi å endre beløpet på skjæringstidspunktet ettersom arbeidsgiveren ikke er en del av sykepengegrunnlaget.
-                // Skulle den ble aktivert igjen så er det beløpet fra inntektsgrunnlaget som igjen vil bli brukt (Da er vi FraInntektsgrunnlag, ikke DeaktivertFraInntektsgrunnlag)
-                inntektstidslinje = this.inntektstidslinje.erstatt(inntektsendringer)
-            )
-
-            override fun uberegnetUtbetalingstidslinje(uberegnedeDager: List<LocalDate>): Utbetalingstidslinje {
-                // En deaktivert arbeidsgiver kan være brukt til beregning (der hvor saksbehandler i dag overstyrer/skjønnsmessig fastsetter til 0,- med burde deaktivert hen)
-                // Legger kun til grunn uberegnede dager med inntektsendring
-                val uberegnedeDagerMedInntektsendring = uberegnedeDager.filter { inntektstidslinje[it].beløp != INGEN }
-                return arbeidsdager(uberegnedeDagerMedInntektsendring)
-            }
-        }
-
-        data class NyInntektskilde(override val inntektstidslinje: Beløpstidslinje = Beløpstidslinje()) : Inntekter {
-
-            override fun inntektsendring(skjæringstidspunkt: LocalDate, inntektsendringer: Beløpstidslinje) = copy(
-                inntektstidslinje = this.inntektstidslinje.erstatt(inntektsendringer)
-            )
-
-            override fun uberegnetUtbetalingstidslinje(uberegnedeDager: List<LocalDate>): Utbetalingstidslinje {
-                // For en ny inntektskilde må vi ta utgangspunkt i inntektstidslinjen
-                val dager = uberegnedeDager.filter { inntektstidslinje[it] is Beløpsdag }
-                return arbeidsdager(dager)
-            }
-        }
+        build()
     }
 
-    internal class Builder(private val beregningsperiode: Periode, private val skjæringstidspunkt: LocalDate) {
-        private val inntekterFraInntektsgrunnlaget = mutableMapOf<Inntektskilde, Inntekter>()
+    internal class Builder(private val beregningsperiode: Periode) {
+        private val inntekterFraInntektsgrunnlaget = mutableMapOf<Inntektskilde, Beløpstidslinje>()
         private val inntektsendringer = mutableMapOf<Inntektskilde, Beløpstidslinje>()
 
         internal fun fraInntektsgrunnlag(organisasjonsnummer: String, fastsattÅrsinntekt: Inntekt, opplysningskilde: Kilde) {
             val inntektskilde = Inntektskilde(organisasjonsnummer)
             check(inntektskilde !in inntekterFraInntektsgrunnlaget) { "Organisasjonsnummer er allerede lagt til som ${inntekterFraInntektsgrunnlaget.getValue(inntektskilde)::class.simpleName}" }
-            inntekterFraInntektsgrunnlaget[inntektskilde] = Inntekter.FraInntektsgrunnlag(
-                inntektstidslinje = Beløpstidslinje.fra(beregningsperiode, fastsattÅrsinntekt, opplysningskilde)
-            )
+            inntekterFraInntektsgrunnlaget[inntektskilde] = Beløpstidslinje.fra(beregningsperiode, fastsattÅrsinntekt, opplysningskilde)
         }
 
         internal fun deaktivertFraInntektsgrunnlag(organisasjonsnummer: String, opplysningskilde: Kilde) {
             val inntektskilde = Inntektskilde(organisasjonsnummer)
             check(inntektskilde !in inntekterFraInntektsgrunnlaget) { "Organisasjonsnummer er allerede lagt til som ${inntekterFraInntektsgrunnlaget.getValue(inntektskilde)::class.simpleName}" }
-            inntekterFraInntektsgrunnlaget[inntektskilde] = Inntekter.DeaktivertFraInntektsgrunnlag(
-                inntektstidslinje = Beløpstidslinje.fra(beregningsperiode, INGEN, opplysningskilde)
-            )
+            inntekterFraInntektsgrunnlaget[inntektskilde] = Beløpstidslinje.fra(beregningsperiode, INGEN, opplysningskilde)
         }
 
         internal fun inntektsendringer(inntektskilde: Inntektskilde, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId) {
@@ -132,33 +78,26 @@ internal data class InntekterForBeregning(
             val kilde = Kilde(meldingsreferanseId, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
             val inntektsendring = Beløpstidslinje.fra(periode, inntekt, kilde)
             inntektsendringer.compute(inntektskilde) { _, eksisterende ->
-                ((eksisterende ?: Beløpstidslinje()).erstatt(inntektsendring)).subset(beregningsperiode)
+                ((eksisterende ?: Beløpstidslinje.fra(beregningsperiode, INGEN, kilde)).erstatt(inntektsendring)).subset(beregningsperiode)
             }
-        }
-
-        private lateinit var `6G`: Inntekt
-
-        internal fun medGjeldende6G(gjeldende6G: Inntekt) {
-            this.`6G` = gjeldende6G
         }
 
         internal fun build(): InntekterForBeregning {
-            // Tar utgangspunkt i inntektene fra inntektsgrunnlaget
-            val inntekterPerInntektskilde = inntekterFraInntektsgrunnlaget.toMutableMap()
-
-            // Og fletter inn inntektsendringene
-            inntektsendringer.forEach { (inntektskilde, inntektsendring) ->
-                // Om vi ikke kjenner til inntektskilden fra før kan vi være diverse snax. Derunder "tilkommen inntekt"
-                if (inntektskilde !in inntekterPerInntektskilde) {
-                    inntekterPerInntektskilde[inntektskilde] = Inntekter.NyInntektskilde()
+            val result = buildMap<Inntektskilde, Beløpstidslinje> {
+                // Tar utgangspunkt i inntektene fra inntektsgrunnlaget
+                inntekterFraInntektsgrunnlaget.forEach { (kilde, inntekter) ->
+                    put(kilde, inntekter)
                 }
-                // Litt avhengig av inntekten som er lagt til grunn håndterer vi innteksendringer litt forskjellig
-                inntekterPerInntektskilde[inntektskilde] = inntekterPerInntektskilde
-                    .getValue(inntektskilde)
-                    .inntektsendring(skjæringstidspunkt, inntektsendring)
+
+                // Og fletter inn inntektsendringene
+                inntektsendringer.forEach { (kilde, inntektsendring) ->
+                    compute(kilde) { _, beløpstidslinje ->
+                        beløpstidslinje?.erstatt(inntektsendring) ?: inntektsendring
+                    }
+                }
             }
             return InntekterForBeregning(
-                inntekterPerInntektskilde = inntekterPerInntektskilde.toMap(),
+                inntekterPerInntektskilde = result,
                 beregningsperiode = beregningsperiode
             )
         }
@@ -169,22 +108,21 @@ internal data class InntekterForBeregning(
         private val TøyseteTidsstempel = LocalDate.EPOCH.atStartOfDay()
         private val TøyseteOpplysningskilde = Kilde(TøyseteMeldingsreferanseId, SYSTEM, TøyseteTidsstempel)
 
-        fun forAuu(periode: Periode, skjæringstidspunkt: LocalDate, organisasjonsnummer: String, inntektsgrunnlag: Inntektsgrunnlag?): Pair<Beløpstidslinje, InntekterForBeregning> {
+        fun forAuu(periode: Periode, organisasjonsnummer: String, inntektsgrunnlag: Inntektsgrunnlag?): Pair<Beløpstidslinje, InntekterForBeregning> {
             if (inntektsgrunnlag == null) {
-                val inntekterForBeregning = with(Builder(periode, skjæringstidspunkt)) {
-                    medGjeldende6G(Grunnbeløp.`6G`.beløp(skjæringstidspunkt))
+                val inntekterForBeregning = with(Builder(periode)) {
                     build()
                 }
                 // Når vi skal lage en utbetalingstidslinje på en AUU hvor det ikke finnes noe inntektsgrunnlag vil vi ikke lagre de tøysete verdiene på behandlingen, bare bruke dem for å lage utbetalingstidslinje
                 return Pair(Beløpstidslinje.fra(periode, INGEN, TøyseteOpplysningskilde), inntekterForBeregning)
             }
 
-            val inntekterForBeregning = with(Builder(periode, skjæringstidspunkt)) {
+            val inntekterForBeregning = with(Builder(periode)) {
                 inntektsgrunnlag.beverte(this)
                 build()
             }
 
-            val inntektstidslinje = inntekterForBeregning.inntekterPerInntektskilde[Inntektskilde(organisasjonsnummer)]?.inntektstidslinje ?: error(
+            val inntektstidslinje = inntekterForBeregning.inntekterPerInntektskilde[Inntektskilde(organisasjonsnummer)] ?: error(
                 "Det er en arbeidsgiver som ikke inngår i SP: $organisasjonsnummer som har søknader: $periode.\n" +
                 "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
             )

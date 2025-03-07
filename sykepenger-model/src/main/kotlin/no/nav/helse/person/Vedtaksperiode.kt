@@ -932,7 +932,7 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        val inntekterForBeregningBuilder = InntekterForBeregning.Builder(beregningsperiode, skjæringstidspunkt).apply {
+        val inntekterForBeregningBuilder = InntekterForBeregning.Builder(beregningsperiode).apply {
             ytelser.inntektsendringer(this)
         }
 
@@ -3135,7 +3135,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun lagUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode): Pair<Utbetalingstidslinje, InntekterForBeregning> {
-            val (inntektstidslinje, inntekterForBeregning) = InntekterForBeregning.forAuu(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.arbeidsgiver.organisasjonsnummer, vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag)
+            val (inntektstidslinje, inntekterForBeregning) = InntekterForBeregning.forAuu(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver.organisasjonsnummer, vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag)
             return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektstidslinje) to inntekterForBeregning
         }
 

@@ -122,7 +122,6 @@ internal class Inntektsgrunnlag private constructor(
     }
 
     internal fun beverte(builder: InntekterForBeregning.Builder) {
-        builder.medGjeldende6G(`6G`)
         arbeidsgiverInntektsopplysninger.beverte(builder)
         deaktiverteArbeidsforhold.beverteDeaktiverte(builder)
     }

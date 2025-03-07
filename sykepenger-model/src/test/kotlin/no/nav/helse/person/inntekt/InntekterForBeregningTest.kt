@@ -1,16 +1,16 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import java.util.UUID
-import no.nav.helse.Grunnbeløp
+import java.util.*
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.a3
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
+import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -23,6 +23,7 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -49,7 +50,31 @@ class InntekterForBeregningTest {
     }
 
     @Test
-    fun `kan ikke endre inntekt på skjæringstidspunktet for en arbeidsgiver som finnes i inntektsgrunnlaget ved hjelp av en inntektsendring`() {
+    fun `strekker beløpstidslinene til å matche beregningsperioden`() {
+        val inntekterForBeregning = inntekterForBeregning(1.januar til 31.januar) {
+            fraInntektsgrunnlag(a1, 500.daglig)
+            deaktivertFraInntektsgrunnlag(a2)
+            inntektsendringer(Inntektskilde(a3), 10.januar, 15.januar, 250.daglig)
+        }
+
+        inntekterForBeregning.tilBeregning(a1).also { actual ->
+            val forventetTidslinje = ARBEIDSGIVER.beløpstidslinje(1.januar til 31.januar, 500.daglig)
+            assertBeløpstidslinje(forventetTidslinje, actual, ignoreMeldingsreferanseId = true)
+        }
+
+        inntekterForBeregning.tilBeregning(a2).also { actual ->
+            val forventetTidslinje = SAKSBEHANDLER.beløpstidslinje(1.januar til 31.januar, INGEN)
+            assertBeløpstidslinje(forventetTidslinje, actual, ignoreMeldingsreferanseId = true)
+        }
+
+        inntekterForBeregning.tilBeregning(a3).also { actual ->
+            val forventetTidslinje = SYSTEM.beløpstidslinje(1.januar til 9.januar, INGEN) + SYSTEM.beløpstidslinje(10.januar til 15.januar, 250.daglig) + SYSTEM.beløpstidslinje(16.januar til 31.januar, INGEN)
+            assertBeløpstidslinje(forventetTidslinje, actual, ignoreMeldingsreferanseId = true)
+        }
+    }
+
+    @Test
+    fun `kan endre inntekt på skjæringstidspunktet for en arbeidsgiver som finnes i inntektsgrunnlaget ved hjelp av en inntektsendring`() {
         val inntekterForBeregning = inntekterForBeregning(januar) {
             fraInntektsgrunnlag(a1, INNTEKT)
             inntektsendringer(Inntektskilde(a1), 1.januar, 31.januar, INNTEKT * 2)
@@ -57,7 +82,7 @@ class InntekterForBeregningTest {
 
         val inntektstidslinje = inntekterForBeregning.tilBeregning(a1)
 
-        val forventetTidslinje = ARBEIDSGIVER.beløpstidslinje(1.januar.somPeriode(), INNTEKT) + SYSTEM.beløpstidslinje(2.januar til 31.januar, INNTEKT * 2)
+        val forventetTidslinje = SYSTEM.beløpstidslinje(1.januar til 31.januar, INNTEKT * 2)
         assertBeløpstidslinje(forventetTidslinje, inntektstidslinje, ignoreMeldingsreferanseId = true)
     }
 
@@ -103,21 +128,18 @@ class InntekterForBeregningTest {
             fraInntektsgrunnlag(a1, INNTEKT)
         }
         val inntektstidslinje = inntekterForBeregning.tilBeregning(a1)
-        val forventetTidslinje = ARBEIDSGIVER.beløpstidslinje(1.januar.somPeriode(), INNTEKT) + SYSTEM.beløpstidslinje(2.januar til 31.januar, INNTEKT * 2)
+        val forventetTidslinje = SYSTEM.beløpstidslinje(1.januar til 31.januar, INNTEKT * 2)
         assertBeløpstidslinje(forventetTidslinje, inntektstidslinje, ignoreMeldingsreferanseId = true)
     }
 
     @Test
     fun `inntekter for beregning uten noen inntekter`() {
-        val inntekterForBeregning = InntekterForBeregning.Builder(1.januar til 16.januar, 1.januar).apply {
-            medGjeldende6G(Grunnbeløp.`6G`.beløp(1.januar))
-        }.build()
+        val inntekterForBeregning = InntekterForBeregning.Builder(1.januar til 16.januar).build()
         val inntekterForPeriode = inntekterForBeregning.forPeriode(1.januar til 16.januar)
         assertEquals(emptyMap<Inntektskilde, Beløpstidslinje>(), inntekterForPeriode)
     }
 
-    private fun inntekterForBeregning(periode: Periode, skjæringstidspunkt: LocalDate = periode.start, block: InntekterForBeregning.Builder.() -> Unit) = with(InntekterForBeregning.Builder(periode, skjæringstidspunkt)) {
-        medGjeldende6G(Grunnbeløp.`6G`.beløp(skjæringstidspunkt))
+    private fun inntekterForBeregning(periode: Periode, block: InntekterForBeregning.Builder.() -> Unit) = with(InntekterForBeregning.Builder(periode)) {
         block()
         build()
     }
