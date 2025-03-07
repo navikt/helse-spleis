@@ -189,11 +189,6 @@ data class Økonomi(
         Fagområde.Sykepenger -> personbeløp?.daglig?.toInt()
     }
 
-    fun subsumsjonsdata() = Dekningsgrunnlagsubsumsjon(
-        årligInntekt = aktuellDagsinntekt.årlig,
-        årligDekningsgrunnlag = dekningsgrunnlag.årlig
-    )
-
     fun dto() = ØkonomiUtDto(
         grad = sykdomsgrad.dto(),
         totalGrad = totalSykdomsgrad.dto(),
@@ -205,10 +200,5 @@ data class Økonomi(
         personbeløp = personbeløp?.dto()
     )
 }
-
-data class Dekningsgrunnlagsubsumsjon(
-    val årligInntekt: Double,
-    val årligDekningsgrunnlag: Double
-)
 
 fun List<Økonomi>.betal(sykepengegrunnlagBegrenset6G: Inntekt) = Økonomi.betal(sykepengegrunnlagBegrenset6G, this)

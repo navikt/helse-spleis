@@ -22,7 +22,6 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserOmsorgspenger
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserOpplaringspenger
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserPleiepenger
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserSvangerskapspenger
-import no.nav.helse.økonomi.Dekningsgrunnlagsubsumsjon
 import no.nav.helse.økonomi.Økonomi
 
 internal class Utbetalingstidslinjesubsumsjon(
@@ -117,6 +116,11 @@ internal class Utbetalingstidslinjesubsumsjon(
         val inntekt: Dekningsgrunnlagsubsumsjon
     )
 
+    private data class Dekningsgrunnlagsubsumsjon(
+        val årligInntekt: Double,
+        val årligDekningsgrunnlag: Double
+    )
+
     private companion object {
         // utvider liste av perioder med ny dato. antar at listen er sortert i stigende rekkefølge,
         // og at <dato> må være nyere enn forrige periode. strekker altså -ikke- periodene eventuelt tilbake i tid, kun frem
@@ -134,7 +138,15 @@ internal class Utbetalingstidslinjesubsumsjon(
                 dato = dato,
                 finnPeriode = { it.periode },
                 oppdaterElement = { periodeFraFør -> periodeFraFør.copy(periode = periodeFraFør.periode.oppdaterTom(dato)) },
-                nyttElement = { Dekningsgrunnlag(periode = dato.somPeriode(), inntekt = økonomi.subsumsjonsdata()) }
+                nyttElement = {
+                    Dekningsgrunnlag(
+                        periode = dato.somPeriode(),
+                        inntekt = Dekningsgrunnlagsubsumsjon(
+                            årligInntekt = økonomi.aktuellDagsinntekt.årlig,
+                            årligDekningsgrunnlag = økonomi.dekningsgrunnlag.årlig
+                        )
+                    )
+                }
             )
         }
 
