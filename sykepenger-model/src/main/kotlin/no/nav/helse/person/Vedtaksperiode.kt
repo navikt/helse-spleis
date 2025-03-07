@@ -2021,9 +2021,10 @@ internal class Vedtaksperiode private constructor(
             .groupBy { it.arbeidsgiver.organisasjonsnummer }
         val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning
             .mapValues { (arbeidsgiver, vedtaksperioder) ->
-                val inntektstidslinje = inntekterForBeregning.tilBeregning(arbeidsgiver)
                 vedtaksperioder.map {
-                    it.behandlinger.lagUtbetalingstidslinje(inntektstidslinje)
+                    it.behandlinger.lagUtbetalingstidslinje(
+                        inntektstidslinje = inntekterForBeregning.tilBeregning(arbeidsgiver)
+                    )
                 }
             }
         // nå vi må lage en ghost-tidslinje per arbeidsgiver for de som eksisterer i sykepengegrunnlaget.
@@ -3129,14 +3130,14 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg.info("Sender trenger arbeidsgiveropplysninger fra AvsluttetUtenUtbetaling på grunn av egenmeldingsdager")
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode)
             }
-            val (utbetalingstidslinje, inntekterForBeregning) = lagUtbetalingstidslinje(vedtaksperiode)
-            vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
+            avsluttUtenVedtak(vedtaksperiode, aktivitetslogg)
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
 
-        private fun lagUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode): Pair<Utbetalingstidslinje, InntekterForBeregning> {
+        private fun avsluttUtenVedtak(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             val (inntektstidslinje, inntekterForBeregning) = InntekterForBeregning.forAuu(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver.organisasjonsnummer, vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag)
-            return vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektstidslinje) to inntekterForBeregning
+            val utbetalingstidslinje = vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektstidslinje)
+            vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {

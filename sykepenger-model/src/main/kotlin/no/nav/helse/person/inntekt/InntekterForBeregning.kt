@@ -34,7 +34,7 @@ internal data class InntekterForBeregning(
 
     internal fun forPeriode(periode: Periode) = inntekterPerInntektskilde
         .mapValues { (_, inntekter) -> inntekter.subset(periode) }
-        .filterValues { inntektstidslinje -> inntektstidslinje.isNotEmpty() }
+        .filterValues { inntekter -> inntekter.isNotEmpty() }
 
     internal fun hensyntattAlleInntektskilder(beregnedeUtbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
         return inntekterPerInntektskilde.mapValues { (inntektskilde, inntekter) ->
@@ -43,56 +43,54 @@ internal data class InntekterForBeregning(
             val uberegnedeDagerForArbeidsgiver = beregningsperiode.uten(beregendePerioderForInntektskilde).flatten()
             val uberegnetUtbetalingstidslinjeForArbeidsgiver = arbeidsdager(inntekter, uberegnedeDagerForArbeidsgiver)
             beregnedeUtbetalingstidslinjerForInntektskilde.fold(uberegnetUtbetalingstidslinjeForArbeidsgiver, Utbetalingstidslinje::plus)
-        }.mapKeys { (inntktskilde, _) ->inntktskilde.id }.filterValues { it.isNotEmpty() }
+        }.mapKeys { (inntektskilde, _) -> inntektskilde.id }.filterValues { it.isNotEmpty() }
     }
 
-    private fun arbeidsdager(inntektstidslinje: Beløpstidslinje, dager: List<LocalDate>) = with(Utbetalingstidslinje.Builder()) {
+    private fun arbeidsdager(inntekter: Beløpstidslinje, dager: List<LocalDate>) = with(Utbetalingstidslinje.Builder()) {
         dager.forEach { dato ->
             if (dato.erHelg()) addFridag(dato, Økonomi.ikkeBetalt())
             else addArbeidsdag(
                 dato = dato,
-                økonomi = Økonomi.ikkeBetalt(aktuellDagsinntekt = inntektstidslinje[dato].beløp)
+                økonomi = Økonomi.ikkeBetalt(aktuellDagsinntekt = inntekter[dato].beløp)
             )
         }
         build()
     }
 
     internal class Builder(private val beregningsperiode: Periode) {
-        private val inntekterFraInntektsgrunnlaget = mutableMapOf<Inntektskilde, Beløpstidslinje>()
+        private val inntekterFraInntektsgrunnlaget = mutableMapOf<String, Beløpstidslinje>()
         private val inntektsendringer = mutableMapOf<Inntektskilde, Beløpstidslinje>()
 
         internal fun fraInntektsgrunnlag(organisasjonsnummer: String, fastsattÅrsinntekt: Inntekt, opplysningskilde: Kilde) {
-            val inntektskilde = Inntektskilde(organisasjonsnummer)
-            check(inntektskilde !in inntekterFraInntektsgrunnlaget) { "Organisasjonsnummer er allerede lagt til som ${inntekterFraInntektsgrunnlaget.getValue(inntektskilde)::class.simpleName}" }
-            inntekterFraInntektsgrunnlaget[inntektskilde] = Beløpstidslinje.fra(beregningsperiode, fastsattÅrsinntekt, opplysningskilde)
+            check(organisasjonsnummer !in inntekterFraInntektsgrunnlaget) { "Organisasjonsnummer $organisasjonsnummer er allerede lagt til" }
+            inntekterFraInntektsgrunnlaget[organisasjonsnummer] = Beløpstidslinje.fra(beregningsperiode, fastsattÅrsinntekt, opplysningskilde)
         }
 
         internal fun deaktivertFraInntektsgrunnlag(organisasjonsnummer: String, opplysningskilde: Kilde) {
-            val inntektskilde = Inntektskilde(organisasjonsnummer)
-            check(inntektskilde !in inntekterFraInntektsgrunnlaget) { "Organisasjonsnummer er allerede lagt til som ${inntekterFraInntektsgrunnlaget.getValue(inntektskilde)::class.simpleName}" }
-            inntekterFraInntektsgrunnlaget[inntektskilde] = Beløpstidslinje.fra(beregningsperiode, INGEN, opplysningskilde)
+            check(organisasjonsnummer !in inntekterFraInntektsgrunnlaget) { "Organisasjonsnummer $organisasjonsnummer er allerede lagt til" }
+            inntekterFraInntektsgrunnlaget[organisasjonsnummer] = Beløpstidslinje.fra(beregningsperiode, INGEN, opplysningskilde)
         }
 
         internal fun inntektsendringer(inntektskilde: Inntektskilde, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId) {
             val periode = fom til listOfNotNull(tom, beregningsperiode.endInclusive).min()
             val kilde = Kilde(meldingsreferanseId, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
             val inntektsendring = Beløpstidslinje.fra(periode, inntekt, kilde)
-            inntektsendringer.compute(inntektskilde) { _, eksisterende ->
-                ((eksisterende ?: Beløpstidslinje.fra(beregningsperiode, INGEN, kilde)).erstatt(inntektsendring)).subset(beregningsperiode)
+            inntektsendringer.compute(inntektskilde) { _, inntekter ->
+                ((inntekter ?: Beløpstidslinje.fra(beregningsperiode, INGEN, kilde)).erstatt(inntektsendring)).subset(beregningsperiode)
             }
         }
 
         internal fun build(): InntekterForBeregning {
             val result = buildMap<Inntektskilde, Beløpstidslinje> {
                 // Tar utgangspunkt i inntektene fra inntektsgrunnlaget
-                inntekterFraInntektsgrunnlaget.forEach { (kilde, inntekter) ->
-                    put(kilde, inntekter)
+                inntekterFraInntektsgrunnlaget.forEach { (organisasjonsnummer, inntekter) ->
+                    put(Inntektskilde(organisasjonsnummer), inntekter)
                 }
 
                 // Og fletter inn inntektsendringene
                 inntektsendringer.forEach { (kilde, inntektsendring) ->
-                    compute(kilde) { _, beløpstidslinje ->
-                        beløpstidslinje?.erstatt(inntektsendring) ?: inntektsendring
+                    compute(kilde) { _, inntekter ->
+                        inntekter?.erstatt(inntektsendring) ?: inntektsendring
                     }
                 }
             }
@@ -128,7 +126,7 @@ internal data class InntekterForBeregning(
             )
 
             // Når vi skal lage en utbetalingstidslinje på en AUU hvor det finnes inntektsgrunnlag så lagrer vi ned de ekte inntektene
-            return Pair(inntektstidslinje, inntekterForBeregning)
+            return inntektstidslinje to inntekterForBeregning
         }
     }
 }
