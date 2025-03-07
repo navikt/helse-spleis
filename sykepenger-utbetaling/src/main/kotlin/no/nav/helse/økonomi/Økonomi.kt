@@ -9,7 +9,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.slf4j.LoggerFactory
 
-class Økonomi private constructor(
+data class Økonomi(
     val grad: Prosentdel,
     val totalGrad: Prosentdel = grad,
     val utbetalingsgrad: Prosentdel = grad,
@@ -59,7 +59,7 @@ class Økonomi private constructor(
         fun totalSykdomsgrad(økonomiList: List<Økonomi>): List<Økonomi> {
             val totalgrad = totalSykdomsgrad(økonomiList, Økonomi::grad)
             return økonomiList.map { økonomi: Økonomi ->
-                økonomi.kopierMed(totalgrad = totalgrad)
+                økonomi.copy(totalGrad = totalgrad)
             }
         }
 
@@ -79,16 +79,16 @@ class Økonomi private constructor(
             val totalArbeidsgiver = totalArbeidsgiver(økonomiList)
             val totalPerson = totalPerson(økonomiList)
             val total = totalArbeidsgiver + totalPerson
-            if (total == INGEN) return økonomiList.map { økonomi -> økonomi.kopierMed() }
+            if (total == INGEN) return økonomiList
 
             val inntektstapSomSkalDekkesAvNAV = maxOf(INGEN, (sykepengegrunnlagBegrenset6G * utbetalingsgrad).rundTilDaglig())
-            val fordelingRefusjon = fordel(økonomiList, totalArbeidsgiver, inntektstapSomSkalDekkesAvNAV, { økonomi, inntekt -> økonomi.kopierMed(arbeidsgiverbeløp = inntekt) }, arbeidsgiverBeløp)
+            val fordelingRefusjon = fordel(økonomiList, totalArbeidsgiver, inntektstapSomSkalDekkesAvNAV, { økonomi, inntekt -> økonomi.copy(arbeidsgiverbeløp = inntekt) }, arbeidsgiverBeløp)
             val totalArbeidsgiverrefusjon = totalArbeidsgiver(fordelingRefusjon)
-            val fordelingPerson = fordel(fordelingRefusjon, total - totalArbeidsgiverrefusjon, inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon, { økonomi, inntekt -> økonomi.kopierMed(personbeløp = inntekt) }, personBeløp)
+            val fordelingPerson = fordel(fordelingRefusjon, total - totalArbeidsgiverrefusjon, inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon, { økonomi, inntekt -> økonomi.copy(personbeløp = inntekt) }, personBeløp)
             val totalPersonbeløp = totalPerson(fordelingPerson)
             val restbeløp = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon - totalPersonbeløp
             val restfordeling = restfordeling(fordelingPerson, restbeløp)
-            return restfordeling.map { økonomi -> økonomi.kopierMed() }
+            return restfordeling
         }
 
         private fun restfordeling(økonomiList: List<Økonomi>, grense: Inntekt): List<Økonomi> {
@@ -106,7 +106,7 @@ class Økonomi private constructor(
                     val personbeløp = personBeløp(it)
                     if (budsjett > INGEN && (arbeidsgiverBeløp(it) > INGEN || personbeløp > INGEN)) {
                         budsjett -= 1.daglig
-                        it.kopierMed(personbeløp = personbeløp + 1.daglig)
+                        it.copy(personbeløp = personbeløp + 1.daglig)
                     } else {
                         it
                     }
@@ -183,38 +183,18 @@ class Økonomi private constructor(
         val total = (dekningsgrunnlag * utbetalingsgrad).rundTilDaglig()
         val gradertArbeidsgiverRefusjonsbeløp = (arbeidsgiverRefusjonsbeløp * utbetalingsgrad).rundTilDaglig()
         val arbeidsgiverbeløp = gradertArbeidsgiverRefusjonsbeløp.coerceAtMost(total)
-        return kopierMed(
+        return copy(
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = (total - arbeidsgiverbeløp).coerceAtLeast(INGEN)
         )
     }
 
-    fun ikkeBetalt() = kopierMed(utbetalingsgrad = 0.prosent)
+    fun ikkeBetalt() = copy(utbetalingsgrad = 0.prosent)
 
     internal fun dagligBeløpForFagområde(område: Fagområde): Int? = when (område) {
         Fagområde.SykepengerRefusjon -> arbeidsgiverbeløp?.daglig?.toInt()
         Fagområde.Sykepenger -> personbeløp?.daglig?.toInt()
     }
-
-    private fun kopierMed(
-        grad: Prosentdel = this.grad,
-        totalgrad: Prosentdel = this.totalGrad,
-        utbetalingsgrad: Prosentdel = this.utbetalingsgrad,
-        arbeidsgiverRefusjonsbeløp: Inntekt = this.arbeidsgiverRefusjonsbeløp,
-        aktuellDagsinntekt: Inntekt = this.aktuellDagsinntekt,
-        dekningsgrunnlag: Inntekt = this.dekningsgrunnlag,
-        arbeidsgiverbeløp: Inntekt? = this.arbeidsgiverbeløp,
-        personbeløp: Inntekt? = this.personbeløp
-    ) = Økonomi(
-        grad = grad,
-        totalGrad = totalgrad,
-        utbetalingsgrad = utbetalingsgrad,
-        arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp,
-        aktuellDagsinntekt = aktuellDagsinntekt,
-        dekningsgrunnlag = dekningsgrunnlag,
-        arbeidsgiverbeløp = arbeidsgiverbeløp,
-        personbeløp = personbeløp
-    )
 
     fun subsumsjonsdata() = Dekningsgrunnlagsubsumsjon(
         årligInntekt = aktuellDagsinntekt.årlig,
