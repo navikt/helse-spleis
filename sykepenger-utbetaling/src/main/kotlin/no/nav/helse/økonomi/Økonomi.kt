@@ -11,11 +11,11 @@ import org.slf4j.LoggerFactory
 
 data class Økonomi(
     val sykdomsgrad: Prosentdel,
+    val utbetalingsgrad: Prosentdel,
+    val refusjonsbeløp: Inntekt,
+    val aktuellDagsinntekt: Inntekt,
+    val dekningsgrunnlag: Inntekt,
     val totalSykdomsgrad: Prosentdel = sykdomsgrad,
-    val utbetalingsgrad: Prosentdel = sykdomsgrad,
-    val refusjonsbeløp: Inntekt = INGEN,
-    val aktuellDagsinntekt: Inntekt = INGEN,
-    val dekningsgrunnlag: Inntekt = INGEN,
     val arbeidsgiverbeløp: Inntekt? = null,
     val personbeløp: Inntekt? = null
 ) {
@@ -24,21 +24,21 @@ data class Økonomi(
         private val personBeløp = { økonomi: Økonomi -> økonomi.personbeløp!! }
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-        fun inntekt(grad: Prosentdel, aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt, refusjonsbeløp: Inntekt) =
+        fun inntekt(sykdomsgrad: Prosentdel, aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt, refusjonsbeløp: Inntekt) =
             Økonomi(
-                sykdomsgrad = grad,
+                sykdomsgrad = sykdomsgrad,
+                utbetalingsgrad = sykdomsgrad,
                 refusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
                 dekningsgrunnlag = dekningsgrunnlag
             )
 
-        fun ikkeBetalt(aktuellDagsinntekt: Inntekt = INGEN) = Økonomi(
+        fun ikkeBetalt(aktuellDagsinntekt: Inntekt = INGEN) = inntekt(
             sykdomsgrad = 0.prosent,
-            utbetalingsgrad = 0.prosent,
-            refusjonsbeløp = INGEN,
             aktuellDagsinntekt = aktuellDagsinntekt,
-            dekningsgrunnlag = INGEN
-        )
+            dekningsgrunnlag = INGEN,
+            refusjonsbeløp = INGEN
+        ).ikkeBetalt()
 
         private fun List<Økonomi>.aktuellDagsinntekt() = map { it.aktuellDagsinntekt }.summer()
 

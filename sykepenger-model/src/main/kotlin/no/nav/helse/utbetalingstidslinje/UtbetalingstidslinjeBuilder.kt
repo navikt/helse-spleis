@@ -56,7 +56,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
     ): Økonomi {
         val aktuellDagsinntekt = inntektstidslinje[dato].beløp
         return Økonomi.inntekt(
-            grad = grad,
+            sykdomsgrad = grad,
             aktuellDagsinntekt = aktuellDagsinntekt,
             dekningsgrunnlag = aktuellDagsinntekt * regler.dekningsgrad(),
             refusjonsbeløp = refusjonsbeløp(dato, aktuellDagsinntekt, refusjonsopplysningFinnesIkkeStrategi)
