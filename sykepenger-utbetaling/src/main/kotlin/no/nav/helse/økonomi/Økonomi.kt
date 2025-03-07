@@ -10,10 +10,10 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.slf4j.LoggerFactory
 
 data class Økonomi(
-    val grad: Prosentdel,
-    val totalGrad: Prosentdel = grad,
-    val utbetalingsgrad: Prosentdel = grad,
-    val arbeidsgiverRefusjonsbeløp: Inntekt = INGEN,
+    val sykdomsgrad: Prosentdel,
+    val totalSykdomsgrad: Prosentdel = sykdomsgrad,
+    val utbetalingsgrad: Prosentdel = sykdomsgrad,
+    val refusjonsbeløp: Inntekt = INGEN,
     val aktuellDagsinntekt: Inntekt = INGEN,
     val dekningsgrunnlag: Inntekt = INGEN,
     val arbeidsgiverbeløp: Inntekt? = null,
@@ -26,24 +26,19 @@ data class Økonomi(
 
         fun inntekt(grad: Prosentdel, aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt, refusjonsbeløp: Inntekt) =
             Økonomi(
-                grad = grad,
-                arbeidsgiverRefusjonsbeløp = refusjonsbeløp,
+                sykdomsgrad = grad,
+                refusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
                 dekningsgrunnlag = dekningsgrunnlag
             )
 
         fun ikkeBetalt(aktuellDagsinntekt: Inntekt = INGEN) = Økonomi(
-            grad = 0.prosent,
+            sykdomsgrad = 0.prosent,
             utbetalingsgrad = 0.prosent,
-            arbeidsgiverRefusjonsbeløp = INGEN,
+            refusjonsbeløp = INGEN,
             aktuellDagsinntekt = aktuellDagsinntekt,
             dekningsgrunnlag = INGEN
         )
-
-        fun List<Økonomi>.totalSykdomsgrad(): Prosentdel {
-            val økonomiList = totalSykdomsgrad(this)
-            return økonomiList.first().totalGrad
-        }
 
         private fun List<Økonomi>.aktuellDagsinntekt() = map { it.aktuellDagsinntekt }.summer()
 
@@ -57,13 +52,13 @@ data class Økonomi(
         }
 
         fun totalSykdomsgrad(økonomiList: List<Økonomi>): List<Økonomi> {
-            val totalgrad = totalSykdomsgrad(økonomiList, Økonomi::grad)
+            val totalgrad = totalSykdomsgrad(økonomiList, Økonomi::sykdomsgrad)
             return økonomiList.map { økonomi: Økonomi ->
-                økonomi.copy(totalGrad = totalgrad)
+                økonomi.copy(totalSykdomsgrad = totalgrad)
             }
         }
 
-        fun List<Økonomi>.erUnderGrensen() = none { !it.totalGrad.erUnderGrensen() }
+        fun List<Økonomi>.erUnderGrensen() = none { !it.totalSykdomsgrad.erUnderGrensen() }
 
         private fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) = totalSykdomsgrad(økonomiList, Økonomi::utbetalingsgrad)
 
@@ -157,10 +152,10 @@ data class Økonomi(
 
         fun gjenopprett(dto: ØkonomiInnDto): Økonomi {
             return Økonomi(
-                grad = Prosentdel.gjenopprett(dto.grad),
-                totalGrad = Prosentdel.gjenopprett(dto.totalGrad),
+                sykdomsgrad = Prosentdel.gjenopprett(dto.grad),
+                totalSykdomsgrad = Prosentdel.gjenopprett(dto.totalGrad),
                 utbetalingsgrad = Prosentdel.gjenopprett(dto.utbetalingsgrad),
-                arbeidsgiverRefusjonsbeløp = Inntekt.gjenopprett(dto.arbeidsgiverRefusjonsbeløp),
+                refusjonsbeløp = Inntekt.gjenopprett(dto.arbeidsgiverRefusjonsbeløp),
                 aktuellDagsinntekt = Inntekt.gjenopprett(dto.aktuellDagsinntekt),
                 dekningsgrunnlag = Inntekt.gjenopprett(dto.dekningsgrunnlag),
                 arbeidsgiverbeløp = dto.arbeidsgiverbeløp?.let { Inntekt.gjenopprett(it) },
@@ -174,14 +169,14 @@ data class Økonomi(
     }
 
     // sykdomsgrader opprettes som int, og det gir ikke mening å runde opp og på den måten "gjøre personen mer syk"
-    fun <R> brukAvrundetGrad(block: (grad: Int) -> R) = block(grad.toDouble().toInt())
+    fun <R> brukAvrundetGrad(block: (grad: Int) -> R) = block(sykdomsgrad.toDouble().toInt())
 
     // speil viser grad som nedrundet int (det rundes -ikke- oppover siden det ville gjort 19.5 % (for liten sykdomsgrad) til 20 % (ok sykdomsgrad)
-    fun <R> brukTotalGrad(block: (totalGrad: Int) -> R) = block(totalGrad.toDouble().toInt())
+    fun <R> brukTotalGrad(block: (totalGrad: Int) -> R) = block(totalSykdomsgrad.toDouble().toInt())
 
     private fun betal(): Økonomi {
         val total = (dekningsgrunnlag * utbetalingsgrad).rundTilDaglig()
-        val gradertArbeidsgiverRefusjonsbeløp = (arbeidsgiverRefusjonsbeløp * utbetalingsgrad).rundTilDaglig()
+        val gradertArbeidsgiverRefusjonsbeløp = (refusjonsbeløp * utbetalingsgrad).rundTilDaglig()
         val arbeidsgiverbeløp = gradertArbeidsgiverRefusjonsbeløp.coerceAtMost(total)
         return copy(
             arbeidsgiverbeløp = arbeidsgiverbeløp,
@@ -202,10 +197,10 @@ data class Økonomi(
     )
 
     fun dto() = ØkonomiUtDto(
-        grad = grad.dto(),
-        totalGrad = totalGrad.dto(),
+        grad = sykdomsgrad.dto(),
+        totalGrad = totalSykdomsgrad.dto(),
         utbetalingsgrad = utbetalingsgrad.dto(),
-        arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp.dto(),
+        arbeidsgiverRefusjonsbeløp = refusjonsbeløp.dto(),
         aktuellDagsinntekt = aktuellDagsinntekt.dto(),
         dekningsgrunnlag = dekningsgrunnlag.dto(),
         arbeidsgiverbeløp = arbeidsgiverbeløp?.dto(),

@@ -428,6 +428,10 @@ internal class ØkonomiTest {
         )
     }
 
+    private fun List<Økonomi>.totalSykdomsgrad(): Prosentdel {
+        return totalSykdomsgrad(this).first().totalSykdomsgrad
+    }
+
     private fun assertUtbetaling(økonomi: Økonomi, expectedArbeidsgiver: Double, expectedPerson: Double) {
         assertEquals(expectedArbeidsgiver.daglig, økonomi.inspektør.arbeidsgiverbeløp, "arbeidsgiverbeløp problem")
         assertEquals(expectedPerson.daglig, økonomi.inspektør.personbeløp, "personbeløp problem")

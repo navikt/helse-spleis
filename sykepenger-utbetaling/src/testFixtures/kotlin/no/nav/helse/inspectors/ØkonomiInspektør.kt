@@ -8,10 +8,10 @@ val Økonomi.inspektør get() = ØkonomiInspektørBuilder(this).build()
 
 private class ØkonomiInspektørBuilder(økonomi: Økonomi) {
     private val inspektøren = ØkonomiInspektør(
-        økonomi.grad.toDouble(),
-        økonomi.arbeidsgiverRefusjonsbeløp,
+        økonomi.sykdomsgrad.toDouble(),
+        økonomi.refusjonsbeløp,
         økonomi.dekningsgrunnlag,
-        økonomi.totalGrad.toDouble().toInt(),
+        økonomi.totalSykdomsgrad.toDouble().toInt(),
         økonomi.aktuellDagsinntekt,
         økonomi.arbeidsgiverbeløp,
         økonomi.personbeløp
