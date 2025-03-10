@@ -9,10 +9,8 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.person.beløp.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -36,7 +34,7 @@ internal data class InntekterForBeregning(
     internal fun forPeriode(periode: Periode): Map<Inntektskilde, Beløpstidslinje> {
         check(periode in beregningsperiode) { "Perioden $periode er utenfor beregningsperioden $beregningsperiode" }
         return inntekterPerInntektskilde
-            .mapValues { (_, inntekter) -> inntekter.subset(periode) }
+            .mapValues { (_, inntekter) -> inntekter.subset(periode).medBeløp() }
             .filterValues { inntekter -> inntekter.isNotEmpty() }
     }
 
@@ -53,16 +51,10 @@ internal data class InntekterForBeregning(
     private fun arbeidsdager(inntekter: Beløpstidslinje, dager: List<LocalDate>) = with(Utbetalingstidslinje.Builder()) {
         dager.forEach { dato ->
             if (dato.erHelg()) addFridag(dato, Økonomi.ikkeBetalt())
-            else {
-                val aktuellDagsinntekt = when (val dag = inntekter[dato]) {
-                    is Beløpsdag -> dag.beløp
-                    UkjentDag -> INGEN
-                }
-                addArbeidsdag(
-                    dato = dato,
-                    økonomi = Økonomi.ikkeBetalt(aktuellDagsinntekt = aktuellDagsinntekt)
-                )
-            }
+            else addArbeidsdag(
+                dato = dato,
+                økonomi = Økonomi.ikkeBetalt(aktuellDagsinntekt = inntekter[dato].beløp)
+            )
         }
         build()
     }
@@ -98,9 +90,10 @@ internal data class InntekterForBeregning(
                 }
 
                 // Og fletter inn inntektsendringene
-                inntektsendringer.forEach { (kilde, inntektsendring) ->
-                    compute(kilde) { _, inntekter ->
-                        inntekter?.erstatt(inntektsendring) ?: inntektsendring
+                inntektsendringer.forEach { (inntektskilde, inntektsendring) ->
+                    compute(inntektskilde) { _, inntekter ->
+                        val opplysningeskilde = inntektsendring.firstOrNull()?.kilde ?: return@compute inntekter
+                        (inntekter ?: Beløpstidslinje.fra(beregningsperiode, INGEN, opplysningeskilde)).erstatt(inntektsendring)
                     }
                 }
             }
