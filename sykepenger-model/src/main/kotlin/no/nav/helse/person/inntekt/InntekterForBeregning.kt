@@ -25,7 +25,7 @@ value class Inntektskilde(val id: String) {
     }
 }
 
-internal data class InntekterForBeregning(
+internal class InntekterForBeregning private constructor(
     private val inntekterPerInntektskilde: Map<Inntektskilde, Beløpstidslinje>,
     private val beregningsperiode: Periode
 ) {
