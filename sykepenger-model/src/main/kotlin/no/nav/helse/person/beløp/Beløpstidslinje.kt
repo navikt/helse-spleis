@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 
 data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>) : Collection<Dag> by dager.values {
@@ -45,6 +46,8 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
         }
         return Beløpstidslinje(results)
     }
+
+    internal fun medBeløp() = Beløpstidslinje(dager.filterValues { it.beløp != INGEN })
 
     internal operator fun minus(datoer: Iterable<LocalDate>) = Beløpstidslinje(this.dager.filterKeys { it !in datoer })
     internal operator fun minus(dato: LocalDate) = Beløpstidslinje(this.dager.filterKeys { it != dato })

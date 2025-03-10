@@ -23,10 +23,12 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -276,6 +278,23 @@ internal class BeløpstidslinjeTest {
     }
 
     @Test
+    fun `beholder kun dager med beløp (annet enn 0 kroner)`() {
+        val beløpstidslinje = Beløpstidslinje((1.januar til 31.januar).map {
+            val beløp = if (it.dayOfMonth % 2 == 0) it.dayOfMonth.daglig else INGEN
+            Beløpsdag(it, beløp, UUID.randomUUID().arbeidsgiver)
+        })
+        assertEquals(31, beløpstidslinje.size)
+        assertEquals(listOf(1.januar til 31.januar), beløpstidslinje.perioderMedBeløp)
+
+        val medBeløp = beløpstidslinje.medBeløp()
+        assertEquals(15, medBeløp.size)
+        assertEquals(listOf(2,4,6,8,10,12,14,16,18,20,22,24,26,28,30).map { it.januar.somPeriode() }, medBeløp.perioderMedBeløp)
+
+        val gjenopprettet = Beløpstidslinje.gjenopprett(medBeløp.dto())
+        assertEquals(medBeløp, gjenopprettet)
+    }
+
+    @Test
     fun dto() {
         val tidslinje = (Arbeidsgiver oppgir 500.daglig kun 1.februar) og
             (Arbeidsgiver oppgir 250.daglig fra 2.februar til 10.februar) og
@@ -306,6 +325,8 @@ internal class BeløpstidslinjeTest {
                 )
             ), tidslinje.dto()
         )
+
+
     }
 
     internal companion object {
