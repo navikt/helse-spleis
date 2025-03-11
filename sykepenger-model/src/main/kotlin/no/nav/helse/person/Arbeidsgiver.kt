@@ -894,14 +894,9 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(hendelse: Hendelse, dokumentsporing: Dokumentsporing, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør): Revurderingseventyr? {
-        var revurderingseventyr: Revurderingseventyr? = null
-        håndter {
-            it.håndter(hendelse, dokumentsporing, aktivitetslogg, servitør).also { håndtert ->
-                if (revurderingseventyr == null && håndtert) {
-                    revurderingseventyr = Revurderingseventyr.refusjonsopplysninger(hendelse, it.skjæringstidspunkt, it.periode)
-                }
-            }
-        }
+        val revurderingseventyr = håndter {
+            it.håndterRefusjon(hendelse, dokumentsporing, aktivitetslogg, servitør)
+        }.tidligsteEventyr()
         servitør.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
         return revurderingseventyr
     }

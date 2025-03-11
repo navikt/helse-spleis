@@ -601,9 +601,7 @@ internal class Vedtaksperiode private constructor(
         val servitør = Refusjonsservitør.fra(refusjonstidslinje)
 
         val eventyr = vedtaksperioder.mapNotNull { vedtaksperiode ->
-            if (vedtaksperiode.håndter(hendelse, Dokumentsporing.inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId), aktivitetslogg, servitør))
-                Revurderingseventyr.refusjonsopplysninger(hendelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
-            else null
+            vedtaksperiode.håndterRefusjon(hendelse, Dokumentsporing.inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId), aktivitetslogg, servitør)
         }
         servitør.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
         return eventyr
@@ -1098,10 +1096,10 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
-    internal fun håndter(hendelse: Hendelse, dokumentsporing: Dokumentsporing, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør): Boolean {
+    internal fun håndterRefusjon(hendelse: Hendelse, dokumentsporing: Dokumentsporing, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør): Revurderingseventyr? {
         val refusjonstidslinje = servitør.servér(startdatoPåSammenhengendeVedtaksperioder, periode)
-        if (refusjonstidslinje.isEmpty()) return false
-        return behandlinger.håndterRefusjonstidslinje(
+        if (refusjonstidslinje.isEmpty()) return null
+        if (!behandlinger.håndterRefusjonstidslinje(
             arbeidsgiver,
             hendelse.metadata.behandlingkilde,
             dokumentsporing,
@@ -1109,7 +1107,8 @@ internal class Vedtaksperiode private constructor(
             person.beregnSkjæringstidspunkt(),
             arbeidsgiver.beregnArbeidsgiverperiode(),
             refusjonstidslinje
-        )
+        )) return null
+        return Revurderingseventyr.refusjonsopplysninger(hendelse, skjæringstidspunkt, periode)
     }
 
     private fun påvirkerArbeidsgiverperioden(ny: Vedtaksperiode): Boolean {
