@@ -17,6 +17,8 @@ import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.InntekterForBeregning
+import no.nav.helse.hendelser.InntekterForBeregning.Inntektsperiode
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
@@ -274,6 +276,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         opplæringspenger: List<GradertPeriode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
+        inntekterForBeregning: List<Inntektsperiode> = emptyList(),
         dagpenger: List<Periode> = emptyList()
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
@@ -300,6 +303,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
                 perioder = institusjonsoppholdsperioder
             ),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
+            inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
             dagpenger = Dagpenger(dagpenger)
         )
     }

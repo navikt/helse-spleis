@@ -18,6 +18,8 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.InntekterForBeregning
+import no.nav.helse.hendelser.InntekterForBeregning.Inntektsperiode
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
@@ -361,6 +363,7 @@ internal fun AbstractEndToEndTest.ytelser(
     institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
     orgnummer: String = a1,
     arbeidsavklaringspenger: List<Periode> = emptyList(),
+    inntekterForBeregning: List<Inntektsperiode> = emptyList(),
     dagpenger: List<Periode> = emptyList(),
 ): Ytelser {
     val meldingsreferanseId = UUID.randomUUID()
@@ -387,6 +390,7 @@ internal fun AbstractEndToEndTest.ytelser(
             perioder = institusjonsoppholdsperioder
         ),
         arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
+        inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
         dagpenger = Dagpenger(dagpenger)
     )
 }

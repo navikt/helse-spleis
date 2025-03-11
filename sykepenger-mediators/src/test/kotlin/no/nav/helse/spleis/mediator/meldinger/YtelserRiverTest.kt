@@ -63,14 +63,6 @@ private val json = """
   {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
-      "historikkFom": "2014-12-08",
-      "historikkTom": "2019-12-08",
-      "pleiepengerFom": "2014-12-08",
-      "pleiepengerTom": "2019-12-08",
-      "omsorgspengerFom": "2014-12-08",
-      "omsorgspengerTom": "2019-12-08",
-      "opplæringspengerFom": "2014-12-08",
-      "opplæringspengerTom": "2019-12-08",
       "@behov": [
         "Sykepengehistorikk",
         "Foreldrepenger",
@@ -79,6 +71,7 @@ private val json = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "InntekterForBeregning",
         "Dagpenger"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -169,6 +162,28 @@ private val json = """
             }
           ]
         },
+        "InntekterForBeregning": {
+          "inntekter": [
+            {
+              "fom": "2019-03-11",
+              "tom": "2019-04-12",
+              "inntektskilde": "Operahuset",
+              "daglig": 220.123
+            },
+            {
+              "fom": "2019-03-11",
+              "tom": "2019-04-12",
+              "inntektskilde": "Nationalteatret",
+              "måndelig": 6920.123
+            },
+            {
+              "fom": "2019-03-11",
+              "tom": "2019-04-12",
+              "inntektskilde": "Deichmanske",
+              "årlig": 220213.123
+            }
+          ]
+        },
         "Dagpenger": {
           "meldekortperioder": [
             {
@@ -188,14 +203,6 @@ private val ukjentPeriode = """
     {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
-      "historikkFom": "2015-12-08",
-      "historikkTom": "2019-12-08",
-      "pleiepengerFom": "2014-12-08",
-      "pleiepengerTom": "2019-12-08",
-      "omsorgspengerFom": "2014-12-08",
-      "omsorgspengerTom": "2019-12-08",
-      "opplæringspengerFom": "2014-12-08",
-      "opplæringspengerTom": "2019-12-08",
       "@behov": [
         "Sykepengehistorikk",
         "Foreldrepenger",
@@ -204,6 +211,7 @@ private val ukjentPeriode = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "InntekterForBeregning",
         "Dagpenger"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -265,6 +273,7 @@ private val ukjentPeriode = """
         "Arbeidsavklaringspenger": {
           "meldekortperioder": []
         },
+        "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
           "meldekortperioder": []
         }
@@ -295,6 +304,7 @@ private val ugyldigPeriode = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "InntekterForBeregning",
         "Dagpenger"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -356,6 +366,7 @@ private val ugyldigPeriode = """
         "Arbeidsavklaringspenger": {
           "meldekortperioder": []
         },
+        "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
           "meldekortperioder": []
         }
@@ -370,14 +381,6 @@ private val utenPleiepenger = """
   {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
-      "historikkFom": "2014-12-08",
-      "historikkTom": "2019-12-08",
-      "pleiepengerFom": "2014-12-08",
-      "pleiepengerTom": "2019-12-08",
-      "omsorgspengerFom": "2014-12-08",
-      "omsorgspengerTom": "2019-12-08",
-      "opplæringspengerFom": "2014-12-08",
-      "opplæringspengerTom": "2019-12-08",
       "@behov": [
         "Sykepengehistorikk",
         "Foreldrepenger",
@@ -386,6 +389,7 @@ private val utenPleiepenger = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "InntekterForBeregning",
         "Dagpenger"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -435,6 +439,7 @@ private val utenPleiepenger = """
         "Arbeidsavklaringspenger": {
           "meldekortperioder": []
         },
+        "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
           "meldekortperioder": []
         }
@@ -449,14 +454,6 @@ private val utenOmsorgspenger = """
   {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
-      "historikkFom": "2014-12-08",
-      "historikkTom": "2019-12-08",
-      "pleiepengerFom": "2014-12-08",
-      "pleiepengerTom": "2019-12-08",
-      "omsorgspengerFom": "2014-12-08",
-      "omsorgspengerTom": "2019-12-08",
-      "opplæringspengerFom": "2014-12-08",
-      "opplæringspengerTom": "2019-12-08",
       "@behov": [
         "Sykepengehistorikk",
         "Foreldrepenger",
@@ -465,6 +462,7 @@ private val utenOmsorgspenger = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "InntekterForBeregning",
         "Dagpenger"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -514,6 +512,7 @@ private val utenOmsorgspenger = """
         "Arbeidsavklaringspenger": {
           "meldekortperioder": []
         },
+        "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
           "meldekortperioder": []
         }
@@ -528,14 +527,6 @@ private val utenOpplæringspenger = """
   {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
-      "historikkFom": "2014-12-08",
-      "historikkTom": "2019-12-08",
-      "pleiepengerFom": "2014-12-08",
-      "pleiepengerTom": "2019-12-08",
-      "omsorgspengerFom": "2014-12-08",
-      "omsorgspengerTom": "2019-12-08",
-      "opplæringspengerFom": "2014-12-08",
-      "opplæringspengerTom": "2019-12-08",
       "@behov": [
         "Sykepengehistorikk",
         "Foreldrepenger",
@@ -544,6 +535,7 @@ private val utenOpplæringspenger = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "InntekterForBeregning",
         "Dagpenger"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -593,6 +585,7 @@ private val utenOpplæringspenger = """
         "Arbeidsavklaringspenger": {
           "meldekortperioder": []
         },
+        "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
           "meldekortperioder": []
         }
@@ -607,14 +600,6 @@ private val utenInstitusjonsopphold = """
   {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
-      "historikkFom": "2014-12-08",
-      "historikkTom": "2019-12-08",
-      "pleiepengerFom": "2014-12-08",
-      "pleiepengerTom": "2019-12-08",
-      "omsorgspengerFom": "2014-12-08",
-      "omsorgspengerTom": "2019-12-08",
-      "opplæringspengerFom": "2014-12-08",
-      "opplæringspengerTom": "2019-12-08",
       "@behov": [
         "Sykepengehistorikk",
         "Foreldrepenger",
@@ -623,6 +608,7 @@ private val utenInstitusjonsopphold = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "InntekterForBeregning"
         "Dagpenger"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -672,6 +658,7 @@ private val utenInstitusjonsopphold = """
         "Arbeidsavklaringspenger": {
           "meldekortperioder": []
         },
+        "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
           "meldekortperioder": []
         }
@@ -687,14 +674,6 @@ private val utenArbeidsavklaringspenger = """
   {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
-      "historikkFom": "2014-12-08",
-      "historikkTom": "2019-12-08",
-      "pleiepengerFom": "2014-12-08",
-      "pleiepengerTom": "2019-12-08",
-      "omsorgspengerFom": "2014-12-08",
-      "omsorgspengerTom": "2019-12-08",
-      "opplæringspengerFom": "2014-12-08",
-      "opplæringspengerTom": "2019-12-08",
       "@behov": [
         "Sykepengehistorikk",
         "Foreldrepenger",
@@ -703,6 +682,7 @@ private val utenArbeidsavklaringspenger = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "InntekterForBeregning",
         "Dagpenger"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -767,6 +747,7 @@ private val utenArbeidsavklaringspenger = """
             "grad": "100"
           }
         ],
+        "InntekterForBeregning": {"inntekter": []},
         "Institusjonsopphold": [
           {
             "startdato": "2019-03-11",
@@ -786,14 +767,6 @@ private val utenDagpenger = """
   {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
-      "historikkFom": "2014-12-08",
-      "historikkTom": "2019-12-08",
-      "pleiepengerFom": "2014-12-08",
-      "pleiepengerTom": "2019-12-08",
-      "omsorgspengerFom": "2014-12-08",
-      "omsorgspengerTom": "2019-12-08",
-      "opplæringspengerFom": "2014-12-08",
-      "opplæringspengerTom": "2019-12-08",
       "@behov": [
         "Sykepengehistorikk",
         "Foreldrepenger",
@@ -802,6 +775,7 @@ private val utenDagpenger = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "InntekterForBeregning",
         "Dagpenger"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -874,6 +848,7 @@ private val utenDagpenger = """
             "kategori": "S"
           }
         ],
+        "InntekterForBeregning": {"inntekter": []},
         "Arbeidsavklaringspenger": {
           "meldekortperioder": []
         }

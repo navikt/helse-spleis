@@ -37,6 +37,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsforho
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
@@ -60,7 +61,9 @@ import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold
 import no.nav.helse.spleis.mediator.TestMessageFactory.ArbeidsforholdOverstyrt
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsgiveropplysning
 import no.nav.helse.spleis.mediator.TestMessageFactory.DagpengerTestdata
+import no.nav.helse.spleis.mediator.TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning
 import no.nav.helse.spleis.mediator.TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning
+import no.nav.helse.spleis.mediator.TestMessageFactory.InntektsperiodeTestData
 import no.nav.helse.spleis.mediator.TestMessageFactory.InstitusjonsoppholdTestdata
 import no.nav.helse.spleis.mediator.TestMessageFactory.OmsorgspengerTestdata
 import no.nav.helse.spleis.mediator.TestMessageFactory.OpplæringspengerTestdata
@@ -451,6 +454,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
         arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList(),
         dagpenger: List<DagpengerTestdata> = emptyList(),
+        inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
         orgnummer: String = ORGNUMMER
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
@@ -460,6 +464,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Arbeidsavklaringspenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Dagpenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Institusjonsopphold))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForBeregning))
         val (_, message) = meldingsfabrikk.lagYtelser(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger),
@@ -469,6 +474,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             institusjonsoppholdsperioder = institusjonsoppholdsperioder,
             arbeidsavklaringspenger = arbeidsavklaringspenger,
             dagpenger = dagpenger,
+            inntekterForBeregning = inntekterForBeregning,
             orgnummer = orgnummer
         )
         testRapid.sendTestMessage(message)
@@ -543,10 +549,10 @@ internal abstract class AbstractEndToEndMediatorTest {
             tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag),
             inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
             inntekterForOpptjeningsvurdering = listOf(
-                TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
+                InntekterForOpptjeningsvurderingFraLøsning(
                     måned = YearMonth.from(skjæringstidspunktFraBehov.minusMonths(1)),
                     inntekter = listOf(
-                        TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(
+                        InntekterForOpptjeningsvurderingFraLøsning.Inntekt(
                             32000.0,
                             ORGNUMMER
                         )

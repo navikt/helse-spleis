@@ -24,7 +24,7 @@ class Ytelser(
     private val institusjonsopphold: Institusjonsopphold,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
     private val dagpenger: Dagpenger,
-    private val inntekterForBeregning: InntekterForBeregning = InntekterForBeregning(emptyList())
+    private val inntekterForBeregning: InntekterForBeregning
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
         organisasjonsnummer = organisasjonsnummer

@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.GradertPeriode
+import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
 import no.nav.helse.hendelser.Omsorgspenger
@@ -21,6 +22,9 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.slf4j.LoggerFactory
 
 // Understands a JSON message representing an Ytelserbehov
@@ -60,6 +64,23 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             it.path("startdato").asLocalDate(),
             it.path("faktiskSluttdato").asOptionalLocalDate()
         )
+
+    })
+    private val inntekterForBeregning = InntekterForBeregning(packet["@løsning.${Behovtype.InntekterForBeregning.name}.inntekter"].map {
+        InntekterForBeregning.Inntektsperiode(
+            inntektskilde = it.path("inntektskilde").asText(),
+            fom = it.path("fom").asLocalDate(),
+            tom = it.path("tom").asLocalDate(),
+            inntekt = when {
+                it.path("daglig").isNumber -> it.path("daglig").asDouble().daglig
+                it.path("måndelig").isNumber -> it.path("måndelig").asDouble().månedlig
+                it.path("årlig").isNumber -> it.path("årlig").asDouble().årlig
+
+                else -> {
+                    error("Fant ikke noe beløp")
+                }
+            }
+        )
     })
 
     init {
@@ -78,7 +99,6 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             }
     }
 
-
     private val ytelser
         get() = Ytelser(
             meldingsreferanseId = meldingsporing.id,
@@ -91,7 +111,8 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             opplæringspenger = opplæringspenger,
             institusjonsopphold = institusjonsopphold,
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger.map { Periode(it.first, it.second) }),
-            dagpenger = Dagpenger(dagpenger.map { Periode(it.first, it.second) })
+            dagpenger = Dagpenger(dagpenger.map { Periode(it.first, it.second) }),
+            inntekterForBeregning = inntekterForBeregning
         ).also {
             if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom for")
             if (ugyldigeDagpengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom for")

@@ -501,7 +501,8 @@ internal class TestMessageFactory(
         begrunnelseForReduksjonEllerIkkeUtbetalt,
         AvsenderSystem("LPS", "V1.0"),
         null
-    ).toMapMedFelterFraSpedisjon(fødselsdato))
+    ).toMapMedFelterFraSpedisjon(fødselsdato)
+    )
 
     fun lagNavNoInntektsmelding(
         arbeidsgiverperiode: List<Periode>,
@@ -523,7 +524,8 @@ internal class TestMessageFactory(
         AvsenderSystem("NAV_NO", "V1.0"),
         vedtaksperiodeId,
         "Ny"
-    ).toMapMedFelterFraSpedisjon(fødselsdato))
+    ).toMapMedFelterFraSpedisjon(fødselsdato)
+    )
 
     fun lagKorrigertNavNoInntektsmelding(
         arbeidsgiverperiode: List<Periode>,
@@ -545,7 +547,8 @@ internal class TestMessageFactory(
         AvsenderSystem("NAV_NO", "V1.0"),
         vedtaksperiodeId,
         "Endring"
-    ).toMapMedFelterFraSpedisjon(fødselsdato))
+    ).toMapMedFelterFraSpedisjon(fødselsdato)
+    )
 
     fun lagNavNoSelvbestemtInntektsmelding(
         arbeidsgiverperiode: List<Periode>,
@@ -777,6 +780,8 @@ internal class TestMessageFactory(
         val tom: LocalDate
     )
 
+    data class InntektsperiodeTestData(val inntektskilde: String, val fom: LocalDate, val tom: LocalDate, val daglig: Double?, val måndelig: Double?, val årlig: Double?) {}
+
     data class Arbeidsforhold(
         val orgnummer: String,
         val ansattSiden: LocalDate,
@@ -871,6 +876,7 @@ internal class TestMessageFactory(
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
         arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList(),
         dagpenger: List<DagpengerTestdata> = emptyList(),
+        inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
         orgnummer: String = organisasjonsnummer
     ): Pair<String, String> {
         val behovliste = mutableListOf(
@@ -880,6 +886,7 @@ internal class TestMessageFactory(
             "Opplæringspenger",
             "Institusjonsopphold",
             "Arbeidsavklaringspenger",
+            "InntekterForBeregning",
             "Dagpenger"
         )
         return lagBehovMedLøsning(
@@ -924,6 +931,19 @@ internal class TestMessageFactory(
                             "fom" to data.fom,
                             "tom" to data.tom
                         )
+                    }
+                ),
+                InntekterForBeregning.name to mapOf(
+                    "inntekter" to inntekterForBeregning.map { data ->
+                        mapOf(
+                            "fom" to data.fom,
+                            "tom" to data.tom,
+                            "inntektskilde" to data.inntektskilde,
+                            "daglig" to data.daglig,
+                            "måndelig" to data.måndelig,
+                            "årlig" to data.årlig
+                        )
+
                     }
                 ),
                 Dagpenger.name to mapOf(
@@ -1247,7 +1267,6 @@ internal class TestMessageFactory(
         )
     }
 
-
     fun lagDødsmelding(dødsdato: LocalDate): Pair<String, String> {
         return nyHendelse(
             "dødsmelding", mapOf(
@@ -1344,7 +1363,6 @@ internal class TestMessageFactory(
         ))
     }
 
-
     fun lagOverstyrArbeidsforhold(
         skjæringstidspunkt: LocalDate,
         overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
@@ -1431,7 +1449,6 @@ internal class TestMessageFactory(
         "endringsmeldingId" to endringsmeldingId
     )
     )
-
 
     private fun nyHendelse(navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(navn, hendelse).let { it.id to it.toJson() }

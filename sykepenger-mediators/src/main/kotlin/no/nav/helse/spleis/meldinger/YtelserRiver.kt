@@ -8,6 +8,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger
@@ -27,6 +28,7 @@ internal class YtelserRiver(
         Opplæringspenger,
         Institusjonsopphold,
         Arbeidsavklaringspenger,
+        InntekterForBeregning,
         Dagpenger
     )
     override val riverName = "Ytelser"
@@ -75,6 +77,16 @@ internal class YtelserRiver(
         message.requireArray("@løsning.${Dagpenger.name}.meldekortperioder") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
+        }
+        message.requireArray("@løsning.${InntekterForBeregning.name}.inntekter") {
+            require("fom", JsonNode::asLocalDate)
+            require("tom", JsonNode::asLocalDate)
+            require("inntektskilde", {
+                check(it.asText().isNotBlank())
+            })
+            interestedIn("daglig", JsonNode::asDouble)
+            interestedIn("måndelig", JsonNode::asDouble)
+            interestedIn("årlig", JsonNode::asDouble)
         }
     }
 
