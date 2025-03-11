@@ -6,7 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
-import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
+import no.nav.helse.spleis.meldinger.model.InntektsendringerMessage
 
 internal class InntektsendringerRiver(
     rapidsConnection: RapidsConnection,
@@ -24,7 +24,7 @@ internal class InntektsendringerRiver(
         packet.require("inntektsendringFom", JsonNode::asLocalDate)
     }
 
-    override fun createMessage(packet: JsonMessage) = InfotrygdendringMessage(
+    override fun createMessage(packet: JsonMessage) = InntektsendringerMessage(
         packet, Meldingsporing(
         id = packet.meldingsreferanseId(),
         fødselsnummer = packet["fødselsnummer"].asText()
