@@ -39,6 +39,7 @@ class Revurderingseventyr private constructor(
         fun skjønnsmessigFastsettelse(hendelse: Hendelse, skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(SkjønssmessigFastsettelse, skjæringstidspunkt, endringsdato.somPeriode(), hendelse)
         fun arbeidsgiverperiode(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Arbeidsgiverperiode, skjæringstidspunkt, periodeForEndring, hendelse)
         fun infotrygdendring(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(RevurderingÅrsak.Infotrygdendring, skjæringstidspunkt, periodeForEndring, hendelse)
+        fun inntektsendringer(hendelse: Hendelse, inntektsendringFom: LocalDate) = Revurderingseventyr(RevurderingÅrsak.Inntektsendringer, inntektsendringFom, inntektsendringFom.somPeriode(), hendelse)
         fun korrigertInntektsmeldingInntektsopplysninger(hendelse: Hendelse, skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(KorrigertInntektsmeldingInntektsopplysninger, skjæringstidspunkt, endringsdato.somPeriode(), hendelse)
         fun refusjonsopplysninger(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periode: Periode) = Revurderingseventyr(RevurderingÅrsak.Refusjonsopplysninger, skjæringstidspunkt, periode, hendelse)
         fun inntekt(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(RevurderingÅrsak.Inntekt, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
@@ -121,9 +122,11 @@ class Revurderingseventyr private constructor(
         }
 
         data object Infotrygdendring : RevurderingÅrsak {
-            override fun navn(): String {
-                return "INFOTRYGDENDRING"
-            }
+            override fun navn() = "INFOTRYGDENDRING"
+        }
+
+        data object Inntektsendringer : RevurderingÅrsak {
+            override fun navn() = "INNTEKTSENDRINGER"
         }
 
         data object Sykdomstidslinje : RevurderingÅrsak {

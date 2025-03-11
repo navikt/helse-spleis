@@ -471,6 +471,10 @@ internal class TestPerson(
                 .håndter(Person::håndter)
         }
 
+        internal fun håndterInntektsendringer(inntektsendringFom: LocalDate) {
+            arbeidsgiverHendelsefabrikk.lagInntektsendringer(inntektsendringFom).håndter(Person::håndter)
+        }
+
         internal fun håndterSimulering(
             vedtaksperiodeId: UUID,
             simuleringOK: Boolean = true,

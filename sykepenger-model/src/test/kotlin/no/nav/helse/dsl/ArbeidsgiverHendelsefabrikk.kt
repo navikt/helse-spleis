@@ -22,6 +22,7 @@ import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
+import no.nav.helse.hendelser.Inntektsendringer
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Institusjonsopphold
@@ -509,4 +510,6 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             meldingsreferanseId = hendelseId,
             tidsstempel = tidsstempel
         )
+
+    internal fun lagInntektsendringer(inntektsendringerFom: LocalDate) = Inntektsendringer(MeldingsreferanseId(UUID.randomUUID()), inntektsendringerFom)
 }

@@ -286,6 +286,7 @@ class Person private constructor(
 
     fun håndter(inntektsendringer: Inntektsendringer, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler inntektsendringer")
+        igangsettOverstyring(Revurderingseventyr.inntektsendringer(inntektsendringer, inntektsendringer.inntektsendringFom), aktivitetslogg)
         håndterGjenoppta(inntektsendringer, aktivitetslogg)
     }
 
