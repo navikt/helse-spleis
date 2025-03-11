@@ -22,6 +22,7 @@ import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
+import no.nav.helse.hendelser.Inntektsendringer
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
@@ -282,6 +283,12 @@ class Person private constructor(
         infotrygdhistorikk.oppfrisk(aktivitetslogg, tidligsteDato)
         håndterGjenoppta(infotrygdendring, aktivitetslogg)
     }
+
+    fun håndter(inntektsendringer: Inntektsendringer, aktivitetslogg: IAktivitetslogg) {
+        registrer(aktivitetslogg, "Behandler inntektsendringer")
+        håndterGjenoppta(inntektsendringer, aktivitetslogg)
+    }
+
 
     fun håndter(utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, aktivitetslogg: IAktivitetslogg) = håndterHistorikkFraInfotrygd(utbetalingshistorikkEtterInfotrygdendring, aktivitetslogg) {
         utbetalingshistorikkEtterInfotrygdendring.oppdaterHistorikk(aktivitetslogg, it)

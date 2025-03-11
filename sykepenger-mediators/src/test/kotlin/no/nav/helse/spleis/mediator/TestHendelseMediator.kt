@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
+import no.nav.helse.hendelser.Inntektsendringer
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
@@ -47,12 +48,13 @@ import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
+import no.nav.helse.spleis.meldinger.model.InntektsendringerMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
-import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
 import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NavNoSelvbestemtInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
@@ -117,6 +119,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     val lestReplayHendelser get() = lestReplayHendelserVerdi.get()
     val lestGrunnbeløpsregulering get() = lestGrunnbeløpsreguleringVerdi.get()
     val lestInfotrygdendring get() = lestInfotrygdendringVerdi.get()
+    val lestInntektsendringer get() = lestInntektsendringerVerdi.get()
     val utbetalingshistorikkEtterInfotrygdendringMessage get() = utbetalingshistorikkEtterInfotrygdendringMessageVerdi.get()
     val lestForkastSykmeldingsperioderMessage get() = lestForkastSykmeldingsperioderMessageVerdi.get()
 
@@ -157,6 +160,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     private val lestReplayHendelserVerdi = ThreadLocal.withInitial { false }
     private val lestGrunnbeløpsreguleringVerdi = ThreadLocal.withInitial { false }
     private val lestInfotrygdendringVerdi = ThreadLocal.withInitial { false }
+    private val lestInntektsendringerVerdi = ThreadLocal.withInitial { false }
     private val utbetalingshistorikkEtterInfotrygdendringMessageVerdi = ThreadLocal.withInitial { false }
     private val lestForkastSykmeldingsperioderMessageVerdi = ThreadLocal.withInitial { false }
 
@@ -411,6 +415,10 @@ internal class TestHendelseMediator : IHendelseMediator {
         context: MessageContext
     ) {
         lestInfotrygdendringVerdi.set(true)
+    }
+
+    override fun behandle(message: InntektsendringerMessage, inntektsendringer: Inntektsendringer, context: MessageContext) {
+        lestInntektsendringerVerdi.set(true)
     }
 
     override fun behandle(

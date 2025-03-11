@@ -90,6 +90,7 @@ private val HendelseMessage.kontekstnavn
         is GrunnbeløpsreguleringMessage -> "Grunnbeløpsregulering"
         is IdentOpphørtMessage -> "IdentOpphørt"
         is InfotrygdendringMessage -> "Infotrygdendring"
+        is InntektsendringerMessage -> "Inntektsendringer"
         is InntektsmeldingMessage -> "Inntektsmelding"
         is NavNoInntektsmeldingMessage -> "NavNoInntektsmelding"
         is NavNoKorrigertInntektsmeldingMessage -> "NavNoKorrigertInntektsmelding"

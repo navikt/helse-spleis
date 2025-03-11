@@ -7,7 +7,7 @@ import com.github.navikt.tbd_libs.sql_dsl.offsetDateTime
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.sql_dsl.single
 import com.github.navikt.tbd_libs.sql_dsl.string
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -59,6 +59,7 @@ import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
+import no.nav.helse.spleis.meldinger.model.InntektsendringerMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
@@ -100,6 +101,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
 
     internal fun lagreMelding(melding: HendelseMessage, personidentifikator: Personidentifikator, meldingId: MeldingsreferanseId, json: String) {
         val meldingtype = meldingstype(melding) ?: return
+
         @Language("PostgreSQL")
         val sql = "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (:fnr, :meldingId, :meldingType, cast(:data as json)) ON CONFLICT(melding_id) DO NOTHING"
         dataSource.connection {
@@ -178,6 +180,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is PåminnelseMessage,
         is UtbetalingshistorikkMessage,
         is InfotrygdendringMessage,
+        is InntektsendringerMessage,
         is AvbruttArbeidsledigSøknadMessage -> null // Disse trenger vi ikke å lagre
 
     }

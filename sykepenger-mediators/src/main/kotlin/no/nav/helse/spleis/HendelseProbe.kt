@@ -93,6 +93,10 @@ object HendelseProbe {
         tell("Infotrygdendring")
     }
 
+    fun onInntektsendringer() {
+        tell("Inntektsendringer")
+    }
+
     fun onUtbetalingshistorikkEtterInfotrygdendring() {
         tell("UtbetalingshistorikkEtterInfotrygdendring")
     }
