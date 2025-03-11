@@ -1809,7 +1809,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun igangsettOverstyring(revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
-        if (revurdering.ikkeRelevant(periode)) return sendNyttGodkjenningsbehov(aktivitetslogg)
+        if (revurdering.erIkkeRelevantFor(periode)) return sendNyttGodkjenningsbehov(aktivitetslogg)
         registrerKontekst(aktivitetslogg)
         tilstand.igangsettOverstyring(this, revurdering, aktivitetslogg)
         videreførEksisterendeOpplysninger(revurdering.hendelse.metadata.behandlingkilde, aktivitetslogg)

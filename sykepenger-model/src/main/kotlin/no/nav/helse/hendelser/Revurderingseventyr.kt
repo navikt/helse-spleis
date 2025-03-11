@@ -79,8 +79,8 @@ class Revurderingseventyr private constructor(
         vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder, typeEndring.name)
     }
 
-    internal fun ikkeRelevant(periode: Periode): Boolean {
-        return periodeForEndring.starterEtter(periode)
+    internal fun erIkkeRelevantFor(vedtaksperiode: Periode): Boolean {
+        return periodeForEndring.starterEtter(vedtaksperiode)
     }
 
     internal fun sendOverstyringIgangsattEvent(person: Person) {
