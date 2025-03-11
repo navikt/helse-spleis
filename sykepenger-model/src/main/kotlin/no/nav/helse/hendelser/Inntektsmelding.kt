@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.forrigeDag
+import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.mapWithNext
@@ -20,8 +21,6 @@ import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsdata
-import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.økonomi.Inntekt
@@ -70,10 +69,18 @@ class Inntektsmelding(
         }
     }
 
-    internal val inntektsdato: LocalDate by lazy {
+    internal val kompensertFørsteFraværsdag: LocalDate by lazy {
         if (førsteFraværsdag != null && (grupperteArbeidsgiverperioder.isEmpty() || førsteFraværsdag > grupperteArbeidsgiverperioder.last().endInclusive.nesteDag)) førsteFraværsdag
         else grupperteArbeidsgiverperioder.maxOf { it.start }
     }
+
+    // dagen inntekten gjelder for er "dag nr 17", slik at ikke en auu-periode håndterer inntekten
+    // fordi "dag nr 17" -kan- være en lørdag/søndag så hopper vi til mandagen etterpå
+    internal val datoForHåndteringAvInntekt = if (begrunnelseForReduksjonEllerIkkeUtbetalt == null) {
+        listOfNotNull(grupperteArbeidsgiverperioder.lastOrNull()?.endInclusive?.nesteDag, førsteFraværsdag).max()
+    } else {
+        kompensertFørsteFraværsdag
+    }.førsteArbeidsdag()
 
     private val refusjonsdato: LocalDate by lazy {
         if (førsteFraværsdag == null) grupperteArbeidsgiverperioder.maxOf { it.start }
@@ -85,24 +92,13 @@ class Inntektsmelding(
     private var håndtertInntekt = false
     val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
 
-    private val inntektsdata = Inntektsdata(metadata.meldingsreferanseId, inntektsdato, beregnetInntekt, metadata.registrert)
+    internal val inntektsdata = Inntektsdata(metadata.meldingsreferanseId, kompensertFørsteFraværsdag, beregnetInntekt, metadata.registrert)
 
     internal fun korrigertInntekt() = FaktaavklartInntekt(
         id = UUID.randomUUID(),
         inntektsdata = inntektsdata,
         inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.Arbeidsgiver)
     )
-
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg, alternativInntektsdato: LocalDate) {
-        val inntektsdato = alternativInntektsdato.takeUnless { it == inntektsdato } ?: return
-        if (!inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), inntektsdata.copy(dato = inntektsdato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))) return
-        aktivitetslogg.info("Lagrer inntekt på alternativ inntektsdato $inntektsdato")
-    }
-
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk): LocalDate {
-        inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), inntektsdata.copy(dato = inntektsdato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
-        return inntektsdato
-    }
 
     internal fun inntektHåndtert() {
         håndtertInntekt = true
@@ -172,8 +168,4 @@ class Inntektsmelding(
         person.emitInntektsmeldingIkkeHåndtert(this, behandlingsporing.organisasjonsnummer, harPeriodeInnenfor16Dager)
     }
 
-    internal fun skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode: Periode?): Boolean {
-        if (sykdomstidslinjeperiode == null) return false // har ikke noe sykdom for arbeidsgiveren
-        return inntektsdato in sykdomstidslinjeperiode
-    }
 }

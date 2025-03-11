@@ -117,6 +117,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
             håndterInntektsmelding(listOf(mandag(22.januar) til 6.februar))
             assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
             assertEquals("AAAAARR AAAAARR AAAAARR SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
         }
         a2 {

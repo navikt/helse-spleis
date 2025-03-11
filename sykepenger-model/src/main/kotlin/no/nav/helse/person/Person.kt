@@ -693,13 +693,13 @@ class Person private constructor(
         inntekt: FaktaavklartInntekt,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonslogg: Subsumsjonslogg
-    ): Revurderingseventyr? {
+    ): Boolean {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
         if (grunnlag == null) {
             aktivitetslogg.info("Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt")
-            return null
+            return false
         }
-        val (nyttGrunnlag, endretInntektsgrunnlag) = grunnlag.nyeArbeidsgiverInntektsopplysninger(organisasjonsnummer, inntekt, aktivitetslogg, subsumsjonslogg) ?: return null
+        val (nyttGrunnlag, endretInntektsgrunnlag) = grunnlag.nyeArbeidsgiverInntektsopplysninger(organisasjonsnummer, inntekt, aktivitetslogg, subsumsjonslogg) ?: return false
 
         val endretInntektForArbeidsgiver = endretInntektsgrunnlag.inntekter.first { før -> før.inntektFør.orgnummer == organisasjonsnummer }
 
@@ -722,9 +722,8 @@ class Person private constructor(
             }
         }
 
-        val eventyr = Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(hendelse, skjæringstidspunkt, skjæringstidspunkt)
         nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
-        return eventyr
+        return true
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
@@ -800,7 +799,7 @@ class Person private constructor(
         }
     }
 
-    private fun nyttVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement) {
+    internal fun nyttVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement) {
         aktivitetslogg.kontekst(vilkårsgrunnlag)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }

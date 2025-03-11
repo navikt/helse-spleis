@@ -40,7 +40,6 @@ import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
@@ -561,7 +560,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         assertVarsler(emptyList(), 2.vedtaksperiode.filter())
-        assertVarsler(listOf(RV_IM_4), 3.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 3.vedtaksperiode.filter())
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -981,8 +980,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             beregnetInntekt = riktigInntekt
         )
         assertTrue(im in observatør.inntektsmeldingHåndtert.map { it.first })
-        assertVarsler(listOf(RV_IM_4, RV_IM_24), 1.vedtaksperiode.filter())
-        assertVarsler(listOf(RV_IM_4), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_24), 1.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
         assertEquals(22.januar til 11.februar, inspektør.periode(1.vedtaksperiode))
         assertEquals("UUUUUGG UUUUUGG SSSSSHH SSSSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterVilkårsgrunnlag(1.vedtaksperiode)

@@ -161,10 +161,16 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
     @Test
     fun `kort periode så gap til neste - korrigert inntektsmelding opplyser om ikke-utbetalt AGP`() {
         nyPeriode(1.januar til 15.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        val im1 = håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         nyPeriode(20.januar til 30.januar)
+        assertEquals(0, observatør.inntektsmeldingHåndtert.size)
+        assertEquals(im1, observatør.inntektsmeldingIkkeHåndtert.single())
+        assertEquals(20.januar til 30.januar, inspektør.periode(2.vedtaksperiode))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = lørdag den 20.januar,
@@ -172,7 +178,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         )
         assertEquals(listOf(1.januar til 15.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
         assertEquals(listOf(20.januar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
         assertEquals("SSSSSHH SSSSSHH SU???HH SSSSSHH SS", inspektør.sykdomstidslinje.toShortString())
@@ -239,7 +245,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
         assertEquals(listOf(6.januar.somPeriode()), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
         assertEquals(UBEREGNET_OMGJØRING, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().tilstand)
     }
 

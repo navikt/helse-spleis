@@ -246,7 +246,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(4.vedtaksperiode)
         håndterUtbetalt()
 
-        assertVarsel(Varselkode.RV_IV_7, 3.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IM_3), 3.vedtaksperiode.filter())
     }
 
     @Test

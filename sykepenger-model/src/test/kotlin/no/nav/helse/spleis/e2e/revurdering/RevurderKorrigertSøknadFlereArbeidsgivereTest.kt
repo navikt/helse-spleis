@@ -191,7 +191,6 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsler(listOf(Varselkode.RV_IM_4), 1.vedtaksperiode.filter())
         }
 
         a2 {
@@ -486,7 +485,6 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsler(listOf(Varselkode.RV_IM_4), 1.vedtaksperiode.filter())
         }
 
         a2 {
@@ -609,7 +607,6 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsler(listOf(Varselkode.RV_IM_4), 1.vedtaksperiode.filter())
         }
 
         a2 {

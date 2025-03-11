@@ -154,7 +154,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
 
-        assertVarsler(listOf(RV_OS_2, RV_IM_8, RV_IM_4, RV_IM_24), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_OS_2, RV_IM_8, RV_IM_24), 1.vedtaksperiode.filter())
         assertVarsler(listOf(RV_IM_8), 2.vedtaksperiode.filter())
         assertVarsler(listOf(RV_IM_8), 3.vedtaksperiode.filter())
     }
@@ -178,7 +178,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 25_000.månedlig,
         )
         assertBeløpstidslinje(Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
-        assertVarsler(listOf(RV_IM_4), 1.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         assertForventetFeil(
             forklaring = "Dette fungerer jo ikke",
             ønsket = {
@@ -377,19 +377,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Manglende sporing av IM ved langt gap mellom AGP og FF når IM kommer før søknad`() {
-        val inntektsmeldingId = håndterInntektsmelding(
+    fun `langt gap mellom AGP og vedtaksperiode når IM kommer før søknad - inntektsmeldingen er ikke aktuell for replay`() {
+        håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.mars
         )
         håndterSøknad(1.mars til 31.mars)
-        håndterVilkårsgrunnlag()
-
-        assertForventetFeil(
-            forklaring = "Manglende sporing av IM ved langt gap mellom AGP og FF når IM kommer før søknad",
-            nå = { assertFalse(inspektør.hendelseIder(1.vedtaksperiode).contains(inntektsmeldingId)) },
-            ønsket = { assertTrue(inspektør.hendelseIder(1.vedtaksperiode).contains(inntektsmeldingId)) }
-        )
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
 
     @Test
@@ -488,15 +482,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(listOf(1.januar til 15.januar, 22.januar til 22.januar), inspektør.arbeidsgiverperioder(2.vedtaksperiode))
         assertEquals("PNNNNHH NNNNNHH N", inspektør.utbetalingstidslinjer(2.vedtaksperiode).toString())
 
-        assertForventetFeil(
-            forklaring = """
-                Vedtaksperiode hvor vi er uenig om arbeidsgiverperioden kan bli automatisert ettersom varsel legges på perioden etter.
-                Slår heller ikke til å på sjekken hvor det er minst én ukedag mellom beregnet agp og vedtaksperioden ettersom det 
-                den her inneholder en agp-dag. Samme ville skjedd om det var kant-i-kant.
-            """,
-            nå = { assertVarsler(emptyList(), 2.vedtaksperiode.filter()) },
-            ønsket = { assertVarsler(listOf(RV_IM_3), 2.vedtaksperiode.filter()) }
-        )
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -591,16 +577,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Kort og useriøs arbeidsgiverperiode`() {
-        nyPeriode(januar)
-        håndterInntektsmelding(listOf(1.januar til 5.januar))
-
-        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
-        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-    }
-
-    @Test
     fun `inntektsmelding i det blå`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
@@ -647,7 +623,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
         assertTilstander(
             2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK
@@ -1037,7 +1012,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
-        assertVarsel(RV_IM_4, AktivitetsloggFilter.person())
     }
 
     @Test
@@ -1690,10 +1664,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
         )
-        assertVarsel(
-            RV_IM_4,
-            AktivitetsloggFilter.person()
-        )
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         assertTrue(inspektør.utbetaling(1).personOppdrag.harUtbetalinger())
         assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).personOppdrag))
     }
@@ -1798,7 +1769,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue((17.januar til 31.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
         assertFalse((1.februar til 11.februar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
         assertTrue((12.februar til 28.februar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         assertVarsler(emptyList(), 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -1820,7 +1791,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertFalse((1.februar til 11.februar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
         assertTrue((12.februar til 28.februar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
         assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
+        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
         assertVarsler(emptyList(), 3.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -2344,7 +2315,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = 30000.månedlig
         )
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
 
@@ -2364,12 +2334,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
-        assertVarsler(2.vedtaksperiode.filter(), etter = listOf(RV_IM_4)) {
-            håndterInntektsmelding(
-                listOf(1.mars til 16.mars),
-                beregnetInntekt = 30000.månedlig
-            )
-        }
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            beregnetInntekt = 30000.månedlig
+        )
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 

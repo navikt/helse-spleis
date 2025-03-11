@@ -80,6 +80,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 beregnetInntekt = INNTEKT,
                 refusjon = Inntektsmelding.Refusjon(INGEN, null)
             )
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)

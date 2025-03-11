@@ -1,17 +1,15 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
-import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
@@ -24,7 +22,6 @@ import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -410,39 +407,6 @@ internal class InntektsmeldingTest {
         assertEquals(UkjentDag::class, nyTidslinje[21.januar]::class)
         assertEquals(UkjentDag::class, nyTidslinje[22.januar]::class)
         assertEquals(UkjentDag::class, nyTidslinje[23.januar]::class)
-    }
-
-    @Test
-    fun `førsteFraværsdag kan være null ved lagring av inntekt`() {
-        inntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = null)
-        assertDoesNotThrow { inntektsmelding.addInntekt(Inntektshistorikk()) }
-    }
-
-    @Test
-    fun `lagrer inntekt for periodens skjæringstidspunkt dersom det er annerledes enn inntektmeldingens skjæringstidspunkt`() {
-        inntektsmelding(
-            listOf(Periode(1.januar, 16.januar)),
-            refusjonBeløp = 2000.månedlig,
-            beregnetInntekt = 2000.månedlig,
-            førsteFraværsdag = 3.februar
-        )
-        val inntektshistorikk = Inntektshistorikk()
-        inntektsmelding.addInntekt(inntektshistorikk, Aktivitetslogg(), 1.februar)
-        assertEquals(2000.månedlig, inntektshistorikk.avklarInntektsgrunnlag(1.februar, 1.februar)?.inntektsdata?.beløp)
-        assertNull(inntektshistorikk.avklarInntektsgrunnlag(3.februar, 3.februar))
-    }
-
-    @Test
-    fun `lagrer inntekt på første dag i arbeidsgiverpeiroden`() {
-        inntektsmelding(
-            listOf(1.januar til 10.januar, 11.januar til 16.januar),
-            refusjonBeløp = 2000.månedlig,
-            beregnetInntekt = 2000.månedlig,
-            førsteFraværsdag = 1.januar
-        )
-        val inntektshistorikk = Inntektshistorikk()
-        inntektsmelding.addInntekt(inntektshistorikk)
-        assertEquals(2000.månedlig, inntektshistorikk.avklarInntektsgrunnlag(1.januar, 1.januar)?.inntektsdata?.beløp)
     }
 
     @Test

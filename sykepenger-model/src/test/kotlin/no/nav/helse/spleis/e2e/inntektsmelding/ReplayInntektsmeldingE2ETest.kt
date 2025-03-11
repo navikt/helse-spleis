@@ -48,7 +48,8 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 21.januar
         )
         håndterInntektsmelding(inntektsmelding)
-        assertEquals(listOf(21.januar), inspektør.inntektInspektør.inntektsdatoer) // Lagrer alltid på oppgitt inntektsdato
+        assertEquals(1, observatør.inntektsmeldingIkkeHåndtert.size)
+        assertEquals(emptyList<Any>(), inspektør.inntektInspektør.inntektsdatoer) // inntekten er ikke lagret fordi inntekten ikke blir håndtert
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
         assertEquals(listOf(1.januar, 21.januar), inspektør.inntektInspektør.inntektsdatoer) // Replayer IM. Nå som personen er syk 21.januar lagres den både på 21.januar og alternativ inntektsdato (1.januar)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -64,7 +65,8 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 25.januar
         )
         håndterInntektsmelding(inntektsmelding)
-        assertEquals(listOf(25.januar), inspektør.inntektInspektør.inntektsdatoer) // lagrer alltid på inntektsdato i IM
+        assertEquals(1, observatør.inntektsmeldingIkkeHåndtert.size)
+        assertEquals(emptyList<Any>(), inspektør.inntektInspektør.inntektsdatoer) // inntekten er ikke lagret fordi inntekten ikke blir håndtert
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
         assertEquals(listOf(25.januar), inspektør.inntektInspektør.inntektsdatoer)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -80,7 +82,8 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 13.februar
         )
         håndterInntektsmelding(inntektsmelding)
-        assertEquals(listOf(13.februar, 1.januar), inspektør.inntektInspektør.inntektsdatoer)
+        assertEquals(1, observatør.inntektsmeldingIkkeHåndtert.size)
+        assertEquals(listOf(1.januar), inspektør.inntektInspektør.inntektsdatoer)
         håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent))
 
         assertEquals(listOf(12.februar, 13.februar, 1.januar), inspektør.inntektInspektør.inntektsdatoer) // Lagrer nå på alternativ inntektsdato nå som vi har søknad

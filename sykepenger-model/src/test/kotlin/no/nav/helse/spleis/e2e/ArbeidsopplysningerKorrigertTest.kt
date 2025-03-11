@@ -268,13 +268,12 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        assertVarsler(1.vedtaksperiode.filter(), etter = listOf(RV_IM_4)) {
-            håndterInntektsmelding(
-                listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT,
-                refusjon = Inntektsmelding.Refusjon(INNTEKT, null)
-            )
-        }
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null)
+        )
+
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar,
             arbeidsgiveropplysninger = listOf(

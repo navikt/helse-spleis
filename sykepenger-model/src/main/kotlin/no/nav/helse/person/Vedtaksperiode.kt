@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -71,6 +71,7 @@ import no.nav.helse.person.Dokumentsporing.Companion.andreYtelser
 import no.nav.helse.person.Dokumentsporing.Companion.inntektFraAOrdingen
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingDager
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingInntekt
+import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrTidslinje
 import no.nav.helse.person.Dokumentsporing.Companion.søknad
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype
@@ -148,7 +149,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
-import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
@@ -160,6 +160,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
+import no.nav.helse.person.inntekt.EndretInntektsgrunnlag
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektsdata
@@ -179,6 +180,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
 import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
+import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
@@ -415,17 +417,6 @@ internal class Vedtaksperiode private constructor(
         return periode !in arbeidsgiverperiodeOther
     }
 
-    private fun inntektsmeldingHåndtert(inntektsmelding: Inntektsmelding): Boolean {
-        inntektsmelding.inntektHåndtert()
-        if (!behandlinger.oppdaterDokumentsporing(inntektsmelding.dokumentsporing)) return true
-        person.emitInntektsmeldingHåndtert(
-            inntektsmelding.metadata.meldingsreferanseId.id,
-            id,
-            arbeidsgiver.organisasjonsnummer
-        )
-        return false
-    }
-
     internal fun håndter(anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg) {
         if (!anmodningOmForkasting.erRelevant(id)) return
         registrerKontekst(aktivitetslogg)
@@ -452,6 +443,81 @@ internal class Vedtaksperiode private constructor(
             TilUtbetaling -> {
                 if (anmodningOmForkasting.force) return forkast(anmodningOmForkasting, aktivitetslogg)
                 aktivitetslogg.info("Avslår anmodning om forkasting i $tilstand")
+            }
+        }
+    }
+
+    internal fun håndterInntektFraInntektsmelding(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektshistorikk: Inntektshistorikk): Revurderingseventyr? {
+        // håndterer kun inntekt hvis inntektsdato treffer perioden
+        if (inntektsmelding.datoForHåndteringAvInntekt !in periode) return null
+
+        // 1. legger til inntekten sånn at den kanskje kan brukes i forbindelse med faktaavklaring av inntekt
+        // 1.1 lagrer på den datoen inntektsmeldingen mener
+        val inntektsmeldinginntekt = Inntektsmeldinginntekt(UUID.randomUUID(), inntektsmelding.inntektsdata, Inntektsmeldinginntekt.Kilde.Arbeidsgiver)
+        inntektshistorikk.leggTil(inntektsmeldinginntekt)
+        // 1.2 lagrer på vedtaksperioden også..
+        this.førsteFraværsdag?.takeUnless { it == inntektsmeldinginntekt.inntektsdata.dato }?.also { alternativDato ->
+            inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), inntektsmelding.inntektsdata.copy(dato = alternativDato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
+        }
+
+        inntektsmeldingHåndtert(inntektsmelding)
+
+        // 2. endrer vilkårsgrunnlaget hvis det finnes et
+        if (!oppdaterVilkårsgrunnlagMedInntekt(aktivitetslogg, inntektsmelding.korrigertInntekt())) return null
+
+        registrerKontekst(aktivitetslogg)
+        aktivitetslogg.varsel(RV_IM_4)
+        return Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(inntektsmelding, skjæringstidspunkt, skjæringstidspunkt)
+    }
+
+    private fun inntektsmeldingHåndtert(inntektsmelding: Inntektsmelding) {
+        inntektsmelding.inntektHåndtert()
+        if (!behandlinger.oppdaterDokumentsporing(inntektsmelding.dokumentsporing)) return
+        person.emitInntektsmeldingHåndtert(
+            meldingsreferanseId = inntektsmelding.metadata.meldingsreferanseId.id,
+            vedtaksperiodeId = id,
+            organisasjonsnummer = arbeidsgiver.organisasjonsnummer
+        )
+    }
+
+    private fun oppdaterVilkårsgrunnlagMedInntekt(aktivitetslogg: IAktivitetslogg, korrigertInntekt: FaktaavklartInntekt): Boolean {
+        val grunnlag = vilkårsgrunnlag ?: return false
+        /* fest setebeltet. nå skal vi prøve å endre vilkårsgrunnlaget */
+        val resultat = grunnlag.nyeArbeidsgiverInntektsopplysninger(
+            organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+            inntekt = korrigertInntekt,
+            aktivitetslogg = aktivitetslogg,
+            subsumsjonslogg = subsumsjonslogg
+        ) ?: return false
+
+        val (nyttGrunnlag, endretInntektsgrunnlag) = resultat
+        person.nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
+        sendMetrikkTilHag(endretInntektsgrunnlag)
+        return true
+    }
+
+    private fun sendMetrikkTilHag(endretInntektsgrunnlag: EndretInntektsgrunnlag) {
+        // sender ut et event som påvirker metrikker hos Hag (?)
+        val endretInntektForArbeidsgiver = endretInntektsgrunnlag.inntekter.first { før ->
+            før.inntektFør.orgnummer == arbeidsgiver.organisasjonsnummer
+        }
+        // sender ikke ut melding hvis inntekten allerede er korrigert av saksbehandler (?)
+        if (endretInntektForArbeidsgiver.inntektFør.korrigertInntekt != null) return
+        when (val io = endretInntektForArbeidsgiver.inntektFør.faktaavklartInntekt.inntektsopplysning) {
+            is Inntektsopplysning.Arbeidstaker -> when (io.kilde) {
+                Arbeidstakerinntektskilde.Arbeidsgiver -> {
+                    person.arbeidsgiveropplysningerKorrigert(
+                        PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
+                            korrigertInntektsmeldingId = endretInntektForArbeidsgiver.inntektFør.faktaavklartInntekt.inntektsdata.hendelseId.id,
+                            korrigerendeInntektektsopplysningstype = Inntektsopplysningstype.INNTEKTSMELDING,
+                            korrigerendeInntektsopplysningId = endretInntektForArbeidsgiver.inntektEtter.faktaavklartInntekt.inntektsdata.hendelseId.id
+                        )
+                    )
+                }
+
+                is Arbeidstakerinntektskilde.AOrdningen,
+                Arbeidstakerinntektskilde.Infotrygd -> { /* gjør ingenting */
+                }
             }
         }
     }
@@ -639,8 +705,9 @@ internal class Vedtaksperiode private constructor(
         val servitør = Refusjonsservitør.fra(refusjonstidslinje)
 
         val eventyr = vedtaksperioder.mapNotNull { vedtaksperiode ->
-            vedtaksperiode.håndterRefusjon(hendelse, Dokumentsporing.inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId), aktivitetslogg, servitør)
+            vedtaksperiode.håndterRefusjon(hendelse, inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId), aktivitetslogg, servitør)
         }
+        registrerKontekst(aktivitetslogg)
         servitør.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
         return eventyr
     }
@@ -654,11 +721,13 @@ internal class Vedtaksperiode private constructor(
             beløp = oppgittInntekt.inntekt,
             tidsstempel = LocalDateTime.now()
         )
-        inntektshistorikk.leggTil(Inntektsmeldinginntekt(
-            id = UUID.randomUUID(),
-            inntektsdata = inntektsdata,
-            kilde = Inntektsmeldinginntekt.Kilde.Arbeidsgiver
-        ))
+        inntektshistorikk.leggTil(
+            Inntektsmeldinginntekt(
+                id = UUID.randomUUID(),
+                inntektsdata = inntektsdata,
+                kilde = Inntektsmeldinginntekt.Kilde.Arbeidsgiver
+            )
+        )
 
         // Skjæringstidspunktet er _ikke_ vilkårsprøvd før (det mest normale - står typisk i AvventerInntektsmelding)
         if (person.vilkårsgrunnlagFor(skjæringstidspunkt) == null) {
@@ -677,7 +746,7 @@ internal class Vedtaksperiode private constructor(
             ),
             aktivitetslogg = aktivitetslogg,
             subsumsjonslogg = this.subsumsjonslogg
-        ) != null
+        )
 
         // Skjæringstidspunktet er allerede vilkårsprøvd, men inntekten for arbeidsgiveren er byttet ut med denne oppgitte inntekten
         if (harEndretInntektIVilkårsgrunnlag) {
@@ -1135,17 +1204,18 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndterRefusjon(hendelse: Hendelse, dokumentsporing: Dokumentsporing, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør): Revurderingseventyr? {
+        registrerKontekst(aktivitetslogg)
         val refusjonstidslinje = servitør.servér(startdatoPåSammenhengendeVedtaksperioder, periode)
         if (refusjonstidslinje.isEmpty()) return null
         if (!behandlinger.håndterRefusjonstidslinje(
-            arbeidsgiver,
-            hendelse.metadata.behandlingkilde,
-            dokumentsporing,
-            aktivitetslogg,
-            person.beregnSkjæringstidspunkt(),
-            arbeidsgiver.beregnArbeidsgiverperiode(),
-            refusjonstidslinje
-        )) return null
+                arbeidsgiver,
+                hendelse.metadata.behandlingkilde,
+                dokumentsporing,
+                aktivitetslogg,
+                person.beregnSkjæringstidspunkt(),
+                arbeidsgiver.beregnArbeidsgiverperiode(),
+                refusjonstidslinje
+            )) return null
         return Revurderingseventyr.refusjonsopplysninger(hendelse, skjæringstidspunkt, periode)
     }
 
@@ -1326,16 +1396,6 @@ internal class Vedtaksperiode private constructor(
             if (søknad.delvisOverlappende) aktivitetslogg.varsel(`Mottatt søknad som delvis overlapper`)
             søknad.valider(FunksjonelleFeilTilVarsler(aktivitetslogg), vilkårsgrunnlag, refusjonstidslinje, subsumsjonslogg)
         }
-    }
-
-    private fun håndtertInntektPåSkjæringstidspunktetOgVurderVarsel(
-        hendelse: Inntektsmelding,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        val harHåndtertInntektTidligere = behandlinger.harHåndtertInntektTidligere()
-        if (inntektsmeldingHåndtert(hendelse)) return
-        if (!harHåndtertInntektTidligere) return
-        aktivitetslogg.varsel(RV_IM_4)
     }
 
     private fun håndterKorrigerendeInntektsmelding(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
@@ -1875,17 +1935,6 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    internal fun håndtertInntektPåSkjæringstidspunktet(
-        skjæringstidspunkt: LocalDate,
-        inntektsmelding: Inntektsmelding,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        if (skjæringstidspunkt != this.skjæringstidspunkt) return
-        if (!skalBehandlesISpeil()) return
-        registrerKontekst(aktivitetslogg)
-        tilstand.håndtertInntektPåSkjæringstidspunktet(this, inntektsmelding, aktivitetslogg)
-    }
-
     private fun vedtaksperiodeVenter(venterPå: Vedtaksperiode): VedtaksperiodeVenter? {
         val venteårsak = venterPå.venteårsak() ?: return null
         val builder = VedtaksperiodeVenter.Builder()
@@ -2270,13 +2319,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterKorrigerendeInntektsmelding(dager, aktivitetslogg)
         }
 
-        fun håndtertInntektPåSkjæringstidspunktet(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Inntektsmelding,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-        }
-
         fun håndter(
             vedtaksperiode: Vedtaksperiode,
             sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
@@ -2418,14 +2460,6 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg: IAktivitetslogg
         ) =
             vedtaksperiode.skalHåndtereDagerRevurdering(dager, aktivitetslogg)
-
-        override fun håndtertInntektPåSkjæringstidspunktet(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Inntektsmelding,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            vedtaksperiode.inntektsmeldingHåndtert(hendelse)
-        }
 
         private fun tilstand(vedtaksperiode: Vedtaksperiode): Tilstand {
             if (vedtaksperiode.behandlinger.utbetales()) return HarPågåendeUtbetaling
@@ -2604,14 +2638,6 @@ internal class Vedtaksperiode private constructor(
             if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
         }
 
-        override fun håndtertInntektPåSkjæringstidspunktet(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Inntektsmelding,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            vedtaksperiode.inntektsmeldingHåndtert(hendelse)
-        }
-
         override fun igangsettOverstyring(
             vedtaksperiode: Vedtaksperiode,
             revurdering: Revurderingseventyr,
@@ -2775,14 +2801,6 @@ internal class Vedtaksperiode private constructor(
             )
         }
 
-        override fun håndtertInntektPåSkjæringstidspunktet(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Inntektsmelding,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            vedtaksperiode.håndtertInntektPåSkjæringstidspunktetOgVurderVarsel(hendelse, aktivitetslogg)
-        }
-
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
             hendelse: Hendelse,
@@ -2925,14 +2943,6 @@ internal class Vedtaksperiode private constructor(
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = null
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.trengerVilkårsgrunnlag(aktivitetslogg)
-        }
-
-        override fun håndtertInntektPåSkjæringstidspunktet(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Inntektsmelding,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            vedtaksperiode.håndtertInntektPåSkjæringstidspunktetOgVurderVarsel(hendelse, aktivitetslogg)
         }
 
         override fun igangsettOverstyring(
@@ -3339,6 +3349,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = HJELP.utenBegrunnelse
+
+        override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) = false
+        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {}
 
         override fun igangsettOverstyring(
             vedtaksperiode: Vedtaksperiode,

@@ -18,8 +18,6 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
 
 class Revurderingseventyr private constructor(
@@ -178,12 +176,6 @@ class Revurderingseventyr private constructor(
         }
 
         data object KorrigertInntektsmeldingInntektsopplysninger : RevurderingÅrsak {
-
-            override fun dersomInngått(aktivitetslogg: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {
-                if (ingenAndrePåmeldt) aktivitetslogg.varsel(RV_IM_4, "Inngår i revurdering på grunn av korrigert inntektsmelding")
-                aktivitetslogg.info("korrigert inntektsmelding trigget revurdering på grunn av inntektsopplysninger")
-            }
-
             override fun navn() = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER"
         }
 

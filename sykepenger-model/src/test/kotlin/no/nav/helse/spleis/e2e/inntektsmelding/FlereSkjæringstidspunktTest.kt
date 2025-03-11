@@ -111,7 +111,7 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
             nullstillTilstandsendringer()
 
             håndterInntektsmelding(listOf(27.august til 27.august, 4.september til 18.september))
-            assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_4, Varselkode.RV_IV_11), 2.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IV_11), 2.vedtaksperiode.filter())
             assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         }
     }

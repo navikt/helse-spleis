@@ -70,7 +70,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
         assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
-        assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_4, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
         assertEquals("ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
         assertEquals(listOf(31.juli til 15.august), inspektør.arbeidsgiverperioden(2.vedtaksperiode))
         assertEquals(31.juli, inspektør.skjæringstidspunkt(2.vedtaksperiode))
@@ -80,7 +80,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((9.juli til 13.juli).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
         val tidslinje = "ARG SSSSS?? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH"
         assertEquals(tidslinje, inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
-        assertVarsler(listOf(Varselkode.RV_IV_11, Varselkode.RV_IM_3, Varselkode.RV_IM_4, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IV_11, Varselkode.RV_IM_3, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
         assertDoesNotThrow { håndterYtelser(2.vedtaksperiode) }
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
 
@@ -124,6 +124,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(12.februar til 27.februar)
         )
+        assertVarsel(Varselkode.RV_IV_7, 3.vedtaksperiode.filter())
         assertVarsel(RV_IM_24, 3.vedtaksperiode.filter())
         assertEquals(12.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
 
@@ -413,7 +414,6 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(januar)
         håndterSøknad(januar)
-        assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 

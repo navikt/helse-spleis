@@ -200,14 +200,13 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     @Test
     fun `Inntektsmelding før forlengelse-søknad - auu er litt lang`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(17.januar, 31.januar))
+        val søknad = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(17.januar, 31.januar))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         val id = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
-        val inntektsmeldingFørSøknadEvent = observatør.inntektsmeldingFørSøknad.single()
-        inntektsmeldingFørSøknadEvent.let {
-            assertEquals(id, it.inntektsmeldingId)
-            assertEquals(listOf(februar), it.relevanteSykmeldingsperioder)
-        }
+
+        assertEquals(id to 1.vedtaksperiode.id(a1), observatør.inntektsmeldingHåndtert.single())
+        assertEquals(setOf(søknad, id), inspektør.hendelseIder(1.vedtaksperiode))
+        assertEquals(0, observatør.inntektsmeldingFørSøknad.size)
     }
 
     @Test
@@ -335,8 +334,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertEquals(
             setOf(
                 Dokumentsporing.søknad(søknad4),
-                Dokumentsporing.inntektsmeldingRefusjon(im),
-                Dokumentsporing.inntektsmeldingInntekt(im)
+                Dokumentsporing.inntektsmeldingRefusjon(im)
             ), inspektør.hendelser(4.vedtaksperiode)
         )
 
@@ -351,8 +349,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         )
         assertEquals(
             listOf(
-                im.id to 3.vedtaksperiode.id(a1), // inntekt
-                im.id to 4.vedtaksperiode.id(a1) // inntekt
+                im.id to 3.vedtaksperiode.id(a1) // inntekt
             ), observatør.inntektsmeldingHåndtert
         )
     }

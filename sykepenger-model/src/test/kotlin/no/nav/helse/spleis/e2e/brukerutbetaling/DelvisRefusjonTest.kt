@@ -24,7 +24,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
@@ -581,13 +580,11 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
-        val im2 = assertVarsler(1.vedtaksperiode.filter(), etter = listOf(RV_IM_4)) {
-            håndterInntektsmelding(
-                listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT + 100.månedlig,
-                refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
-            )
-        }
+        val im2 = håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT + 100.månedlig,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
@@ -694,9 +691,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
 
-        assertVarsler(1.vedtaksperiode.filter(), etter = listOf(RV_IM_4)) {
-            håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.januar)
-        }
+        håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.januar)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)

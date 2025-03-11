@@ -572,35 +572,40 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, skalBehandleRefusjonsopplysningene: Boolean = true) {
         aktivitetslogg.kontekst(this)
 
+        // 1. starter håndtering av inntektsmelding på vegne av alle mulige perioder
         val dagoverstyring = håndterDagerFraInntektsmelding(inntektsmelding.dager(), aktivitetslogg)
 
+        // 2. starter håndtering av refusjonsopplysninger på vegne av alle mulige perioder
         val refusjonsoverstyring = if (skalBehandleRefusjonsopplysningene)
-            håndterRefusjonsopplysninger(
-                inntektsmelding,
-                inntektsmeldingRefusjon(inntektsmelding.metadata.meldingsreferanseId),
-                aktivitetslogg,
-                inntektsmelding.refusjonsservitør
-            ) else null
+            håndterRefusjonsopplysninger(inntektsmelding, inntektsmeldingRefusjon(inntektsmelding.metadata.meldingsreferanseId), aktivitetslogg, inntektsmelding.refusjonsservitør)
+        else null
 
-        addInntektsmelding(
-            inntektsmelding,
-            aktivitetslogg,
-            tidligsteEventyr(dagoverstyring, refusjonsoverstyring)
-        )
+        // 3. håndterer inntekten fra inntektsmeldingen
+        val inntektoverstyring = vedtaksperioder.firstNotNullOfOrNull {
+            it.håndterInntektFraInntektsmelding(inntektsmelding, aktivitetslogg, inntektshistorikk)
+        }
 
+        // 4. ferdigstiller håndtering av inntektsmelding
         inntektsmelding.ferdigstill(aktivitetslogg, person, vedtaksperioder, forkastede, sykmeldingsperioder)
+
+        // 5. igangsetter
+        val tidligsteOverstyring = listOfNotNull(inntektoverstyring, dagoverstyring, refusjonsoverstyring).tidligsteEventyr()
+        if (tidligsteOverstyring != null) {
+            person.igangsettOverstyring(tidligsteOverstyring, aktivitetslogg)
+        } else {
+            // inntektsmelding ikke håndtert?
+        }
+    }
+
+    internal fun håndterReplayAvInntektsmelding(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, vedtaksperiodeIdForReplay: UUID) {
+        énHarHåndtert(inntektsmelding) {
+            this.håndterReplayAvInntektsmelding(inntektsmelding, aktivitetslogg, vedtaksperiodeIdForReplay)
+        }
     }
 
     private fun håndterDagerFraInntektsmelding(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         håndter { it.håndter(dager, aktivitetslogg) }
         return dager.revurderingseventyr()
-    }
-
-    internal fun håndterReplayAvInntektsmelding(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, vedtaksperiodeIdForReplay: UUID) {
-        aktivitetslogg.kontekst(this)
-        énHarHåndtert(inntektsmelding) {
-            this.håndterReplayAvInntektsmelding(inntektsmelding, aktivitetslogg, vedtaksperiodeIdForReplay)
-        }
     }
 
     internal fun refusjonstidslinje(vedtaksperiode: Vedtaksperiode): Beløpstidslinje {
@@ -989,60 +994,6 @@ internal class Arbeidsgiver private constructor(
     internal fun startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode) =
         finnSammenhengendeVedtaksperioder(vedtaksperiode).first().periode.start
 
-    private fun addInntektsmelding(
-        inntektsmelding: Inntektsmelding,
-        aktivitetslogg: IAktivitetslogg,
-        overstyring: Revurderingseventyr?
-    ) {
-        val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk)
-        val sykdomstidslinjeperiode = sykdomstidslinje().periode()
-
-        val enVedtaksperiodePåSkjæringstidspunktet = inntektsmelding.inntektsdato.let { dato ->
-            vedtaksperioder.firstOrNull { dato in it.periode || dato == it.skjæringstidspunkt }
-        }
-
-        if (enVedtaksperiodePåSkjæringstidspunktet == null || !inntektsmelding.skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode)) {
-            aktivitetslogg.info("Inntektsmelding oppdaterer ikke vilkårsgrunnlag")
-            if (overstyring == null) return
-            return person.igangsettOverstyring(overstyring, aktivitetslogg)
-        }
-
-        finnAlternativInntektsdato(inntektsdato, enVedtaksperiodePåSkjæringstidspunktet)?.let {
-            inntektsmelding.addInntekt(inntektshistorikk, aktivitetslogg, it)
-        }
-        korrigerVilkårsgrunnlagOgIgangsettOverstyring(
-            hendelse = inntektsmelding,
-            enVedtaksperiodePåSkjæringstidspunktet = enVedtaksperiodePåSkjæringstidspunktet,
-            inntekt = inntektsmelding.korrigertInntekt(),
-            aktivitetslogg = aktivitetslogg,
-            overstyring = overstyring
-        )
-
-        håndter {
-            it.håndtertInntektPåSkjæringstidspunktet(enVedtaksperiodePåSkjæringstidspunktet.skjæringstidspunkt, inntektsmelding, aktivitetslogg)
-        }
-    }
-
-    private fun korrigerVilkårsgrunnlagOgIgangsettOverstyring(
-        hendelse: Hendelse,
-        enVedtaksperiodePåSkjæringstidspunktet: Vedtaksperiode,
-        inntekt: FaktaavklartInntekt,
-        aktivitetslogg: IAktivitetslogg,
-        overstyring: Revurderingseventyr?
-    ) {
-        val inntektoverstyring = person.nyeArbeidsgiverInntektsopplysninger(
-            hendelse = hendelse,
-            skjæringstidspunkt = enVedtaksperiodePåSkjæringstidspunktet.skjæringstidspunkt,
-            organisasjonsnummer = this.organisasjonsnummer,
-            inntekt = inntekt,
-            aktivitetslogg = aktivitetslogg,
-            subsumsjonslogg = enVedtaksperiodePåSkjæringstidspunktet.subsumsjonslogg
-        )
-
-        val overstyringFraInntektsmelding = tidligsteEventyr(inntektoverstyring, overstyring) ?: return
-        person.igangsettOverstyring(overstyringFraInntektsmelding, aktivitetslogg)
-    }
-
     internal fun lagreTidsnærInntektsmelding(
         skjæringstidspunkt: LocalDate,
         orgnummer: String,
@@ -1134,11 +1085,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun finnFørsteFraværsdag(vedtaksperiode: Periode): LocalDate? {
         return Skjæringstidspunkt(sykdomstidslinje()).sisteOrNull(vedtaksperiode)
-    }
-
-    private fun finnAlternativInntektsdato(inntektsdato: LocalDate, enVedtaksperiodePåSkjæringstidspunktet: Vedtaksperiode): LocalDate? {
-        if (inntektsdato <= enVedtaksperiodePåSkjæringstidspunktet.skjæringstidspunkt) return null
-        return enVedtaksperiodePåSkjæringstidspunktet.førsteFraværsdag?.takeUnless { it == inntektsdato }
     }
 
     private fun <R> håndter(håndterer: (Vedtaksperiode) -> R?): List<R> {

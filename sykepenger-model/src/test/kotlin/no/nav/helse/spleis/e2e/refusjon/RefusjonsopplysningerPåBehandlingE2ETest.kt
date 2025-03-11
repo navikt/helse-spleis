@@ -538,7 +538,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
         val tidsstempelNy = LocalDateTime.now()
         val imNy = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy))
-        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         val kildeNy = Kilde(imNy, ARBEIDSGIVER, tidsstempelNy)
 
         val forventetTidslinje = Beløpstidslinje.fra(1.januar til 27.januar, 500.daglig, kildeNy) + Beløpstidslinje.fra(28.januar til 31.januar, INGEN, kildeNy)
@@ -556,7 +555,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
         val tidsstempelNy = LocalDateTime.now()
         val imNy = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy))
-        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         val kildeNy = Kilde(imNy, ARBEIDSGIVER, tidsstempelNy)
 
         val forventetTidslinje = Beløpstidslinje.fra(1.januar til 27.januar, 500.daglig, kildeNy) + Beløpstidslinje.fra(28.januar til 31.januar, INGEN, kildeNy)
@@ -575,7 +573,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
         val tidsstempelNy = LocalDateTime.now()
         val imNy = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy))
-        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         val kildeNy = Kilde(imNy, ARBEIDSGIVER, tidsstempelNy)
 
         val forventetTidslinje = Beløpstidslinje.fra(1.januar til 27.januar, 500.daglig, kildeNy) + Beløpstidslinje.fra(28.januar til 31.januar, INGEN, kildeNy)
@@ -593,7 +590,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
 
         val tidsstempelNy = LocalDateTime.now()
         val imNy = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, refusjon = Refusjon(500.daglig, 27.januar), mottatt = tidsstempelNy))
-        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         val kildeNy = Kilde(imNy, ARBEIDSGIVER, tidsstempelNy)
 
         val forventetTidslinje = Beløpstidslinje.fra(1.januar til 27.januar, 500.daglig, kildeNy) + Beløpstidslinje.fra(28.januar til 31.januar, INGEN, kildeNy)

@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
@@ -66,6 +67,11 @@ internal class InntektshistorikkTest {
             historikk
         )
         assertEquals(2, inspektør.size)
+    }
+
+    private fun Inntektsmelding.addInntekt(historikk: Inntektshistorikk) {
+        val inntektsmeldinginntekt = Inntektsmeldinginntekt(UUID.randomUUID(), inntektsdata, Inntektsmeldinginntekt.Kilde.Arbeidsgiver)
+        historikk.leggTil(inntektsmeldinginntekt)
     }
 
     private fun inntektsmelding(

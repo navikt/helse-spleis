@@ -79,10 +79,9 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         a2 {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
         a1 {
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
@@ -129,10 +128,9 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         a2 {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektVedNyIM)
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
         a1 {
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
@@ -308,7 +306,6 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             nullstillTilstandsendringer()
             val im = håndterInntektsmelding(listOf(1.januar til 16.januar), inntekt)
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)

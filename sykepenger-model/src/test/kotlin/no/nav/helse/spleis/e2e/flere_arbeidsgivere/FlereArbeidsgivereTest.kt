@@ -346,12 +346,18 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(7.januar til 22.januar), førsteFraværsdag = 1.februar)
             // denne inntektsmeldingen lagrer refusjonsopplysninger uten første fraværsdag. Uten denne IMen så er testen useless
             håndterInntektsmelding(listOf(7.januar til 22.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer")
-            assertVarsler(listOf(Varselkode.RV_IM_8, Varselkode.RV_IM_4), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_IM_8), 1.vedtaksperiode.filter())
         }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
+
+            assertInntektsgrunnlag(7.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+                assertInntektsgrunnlag(a2, INGEN, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            }
         }
 
         a1 {
@@ -368,7 +374,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
             håndterOverstyrTidslinje((7.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Arbeidsdag) })
         }
         a1 {
@@ -377,7 +382,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
         }
 
         a1 {
@@ -455,6 +459,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, beregnetInntekt = INNTEKT)
             nyPeriode(20.januar til 31.januar)
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
 
         a1 {
@@ -1488,10 +1493,9 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_SØ_10, 1.vedtaksperiode.filter())
             håndterInntektsmelding(listOf(15.januar til 30.januar))
             assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
         a1 {
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -1517,7 +1521,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
 
         a2 {
-            håndterInntektsmelding(listOf(3.januar til 18.januar), beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INNTEKT, null), førsteFraværsdag = 3.januar)
+            håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INNTEKT, null))
             nyPeriode(februar)
         }
 
@@ -1526,13 +1530,17 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
+            assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter())
         }
 
         a2 {
             håndterInntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 1.februar, beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INNTEKT, null), begrunnelseForReduksjonEllerIkkeUtbetalt = "TidligereVirksomhet")
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
+            assertEquals(3.januar til 28.februar, inspektør.periode(1.vedtaksperiode))
+            assertEquals(listOf(1.februar til 1.februar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
         }
 
         a1 { assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }

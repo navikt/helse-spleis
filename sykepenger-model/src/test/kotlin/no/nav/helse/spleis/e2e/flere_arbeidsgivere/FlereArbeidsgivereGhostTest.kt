@@ -150,17 +150,13 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        assertInfoSomFølgeAv("Inntektsmelding oppdaterer ikke vilkårsgrunnlag") {
             håndterInntektsmelding(
-                listOf(mandag den 29.januar til 13.februar),
-                orgnummer = a2
-            )
-        }
+            listOf(mandag den 29.januar til 13.februar),
+            orgnummer = a2
+        )
         // IM replayes, og ettersom 27. og 28 blir friskedager pga. IM beregnes skjæringstidspunktet til 29.januar. Når A1 sin søknad kommer dekker den "hullet" med sykdom slik at skjæringstidspunktet blir 1.januar
         observatør.vedtaksperiodeVenter.clear()
-        assertInfoSomFølgeAv("Fant ikke vilkårsgrunnlag på skjæringstidspunkt 2018-01-29") {
-            håndterSøknad(Sykdom(lørdag den 27.januar, 20.februar, 100.prosent), orgnummer = a2)
-        }
+        håndterSøknad(Sykdom(lørdag den 27.januar, 20.februar, 100.prosent), orgnummer = a2)
         observatør.assertVenter(2.vedtaksperiode.id(a2), venterPåHva = INNTEKTSMELDING)
 
         assertEquals(29.januar, inspektør(a2).vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
@@ -455,13 +451,11 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertBeløpstidslinje(Beløpstidslinje.fra(februar, INNTEKT, inntektsmelding.arbeidsgiver), inspektør(a2).refusjon(1.vedtaksperiode))
 
-        val korrigerendeInntektsmelding =  assertVarsler(1.vedtaksperiode.filter(a2), etter = listOf(RV_IM_4)) {
-            håndterInntektsmelding(
-                arbeidsgiverperioder = listOf(1.februar til 16.februar),
-                førsteFraværsdag = 20.februar,
-                orgnummer = a2
-            )
-        }
+        val korrigerendeInntektsmelding =  håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.februar til 16.februar),
+            førsteFraværsdag = 20.februar,
+            orgnummer = a2
+        )
 
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, INNTEKT)

@@ -89,7 +89,8 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
         assertIngenFunksjonelleFeil()
 
-        assertVarsler(listOf(RV_IM_4, Varselkode.RV_VV_2), 2.vedtaksperiode.filter(orgnummer = a2))
+        assertVarsler(listOf(RV_IM_4), 2.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(Varselkode.RV_VV_2), 2.vedtaksperiode.filter(orgnummer = a2))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)

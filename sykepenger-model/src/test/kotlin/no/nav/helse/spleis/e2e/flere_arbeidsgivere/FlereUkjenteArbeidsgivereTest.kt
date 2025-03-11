@@ -167,7 +167,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
 
-        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a1))
+        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a2))
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -215,7 +215,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         val søknadId = MeldingsreferanseId(håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2))
 
-        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a1))
+        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a2))
 
         assertBeløpstidslinje(inspektør(a2).vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT, imId.id)
 
@@ -276,7 +276,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2) // a2 sent til festen, men med ting liggende i vilkårsgrunnlaget
         val søknadId = MeldingsreferanseId(håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2))
 
-        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a1))
+        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a2))
 
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, INNTEKT)

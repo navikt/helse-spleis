@@ -488,8 +488,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     id: UUID = UUID.randomUUID(),
     opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-    harFlereInntektsmeldinger: Boolean = false,
-    førReplay: () -> Unit = {}
+    harFlereInntektsmeldinger: Boolean = false
 ): UUID {
     return håndterInntektsmelding(
         inntektsmelding(
@@ -502,7 +501,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger
-        ), førReplay
+        )
     )
 }
 
@@ -528,10 +527,9 @@ internal fun AbstractEndToEndTest.håndterArbeidsgiveropplysninger(arbeidsgivero
     return arbeidsgiveropplysninger.metadata.meldingsreferanseId.id
 }
 
-internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Inntektsmelding, førReplay: () -> Unit = {}): UUID {
+internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Inntektsmelding): UUID {
     håndterOgReplayInntektsmeldinger(inntektsmelding.behandlingsporing.organisasjonsnummer) {
         inntektsmelding.håndter(Person::håndter)
-        førReplay()
     }
     return inntektsmelding.metadata.meldingsreferanseId.id
 }

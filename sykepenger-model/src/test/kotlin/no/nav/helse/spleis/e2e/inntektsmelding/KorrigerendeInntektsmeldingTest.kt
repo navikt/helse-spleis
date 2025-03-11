@@ -377,7 +377,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         tilGodkjenning(januar, a1, beregnetInntekt = INNTEKT)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
-        assertVarsler(1.vedtaksperiode.filter(), etter = listOf(RV_IM_4, RV_IM_24)) {
+        assertVarsler(1.vedtaksperiode.filter(), etter = listOf(RV_IM_24)) {
             håndterInntektsmelding(listOf(5.januar til 20.januar))
         }
 

@@ -1,10 +1,12 @@
 package no.nav.helse.bugs_showstoppers
 
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mandag
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -68,11 +70,11 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(26.januar, 2.februar))
-        håndterSøknad(Sykdom(26.januar, 2.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(26.januar, fredag den 2.februar))
+        håndterSøknad(Sykdom(26.januar, fredag den 2.februar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(5.februar, 21.februar))
-        håndterSøknad(Sykdom(5.februar, 21.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(mandag den 5.februar, 21.februar))
+        håndterSøknad(Sykdom(mandag den 5.februar, 21.februar, 100.prosent))
 
         // inntektsmelding inneholder en ukjent dag — 8. januar — som vi ikke
         // har registrert før i forbindelse med verken søknad eller sykmelding
