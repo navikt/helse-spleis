@@ -629,7 +629,7 @@ class Person private constructor(
     internal fun blitt6GBegrensetSidenSist(skjæringstidspunkt: LocalDate) =
         vilkårsgrunnlagHistorikk.blitt6GBegrensetSidenSist(skjæringstidspunkt)
 
-    internal fun lagreVilkårsgrunnlag(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
+    internal fun lagreVilkårsgrunnlag(vilkårsgrunnlag: VilkårsgrunnlagElement) {
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
@@ -678,10 +678,6 @@ class Person private constructor(
         observers.forEach {
             it.søknadHåndtert(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
         }
-    }
-
-    internal fun nyttVilkårsgrunnlag(vilkårsgrunnlag: VilkårsgrunnlagElement) {
-        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
     private var gjenopptaBehandlingNy = false

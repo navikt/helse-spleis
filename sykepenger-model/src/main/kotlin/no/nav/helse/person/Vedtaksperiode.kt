@@ -492,7 +492,7 @@ internal class Vedtaksperiode private constructor(
         ) ?: return false
 
         val (nyttGrunnlag, endretInntektsgrunnlag) = resultat
-        person.nyttVilkårsgrunnlag(nyttGrunnlag)
+        person.lagreVilkårsgrunnlag(nyttGrunnlag)
         sendMetrikkTilHag(endretInntektsgrunnlag)
         return true
     }
@@ -760,7 +760,7 @@ internal class Vedtaksperiode private constructor(
             ?: return emptyList()
 
         val (nyttGrunnlag, endretInntektsgrunnlag) = result
-        person.nyttVilkårsgrunnlag(nyttGrunnlag)
+        person.lagreVilkårsgrunnlag(nyttGrunnlag)
         sendMetrikkTilHag(endretInntektsgrunnlag)
         // Skjæringstidspunktet er allerede vilkårsprøvd, men inntekten for arbeidsgiveren er byttet ut med denne oppgitte inntekten
         dokumentsporingFraArbeidsgiveropplysning(hendelse, ::inntektsmeldingInntekt)
@@ -1173,7 +1173,7 @@ internal class Vedtaksperiode private constructor(
 
         val grunnlag = vilkårsgrunnlag ?: return null
         val (nyttGrunnlag, endretInntektsgrunnlag) = grunnlag.overstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger, aktivitetslogg, subsumsjonslogg) ?: return null
-        person.nyttVilkårsgrunnlag(nyttGrunnlag)
+        person.lagreVilkårsgrunnlag(nyttGrunnlag)
 
         endretInntektsgrunnlag.inntekter
             .forEach {
@@ -1212,7 +1212,7 @@ internal class Vedtaksperiode private constructor(
             is OverstyrArbeidsgiveropplysninger -> error("Error. Det finnes en konkret dispatcher-konfigurasjon for dette tilfellet")
         }
         if (nyttGrunnlag == null) return null
-        person.nyttVilkårsgrunnlag(nyttGrunnlag)
+        person.lagreVilkårsgrunnlag(nyttGrunnlag)
         return revurderingseventyr
     }
 
