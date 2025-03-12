@@ -550,10 +550,12 @@ internal class Arbeidsgiver private constructor(
         vedtaksperiode.håndterSøknadFørsteGang(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
     }
 
-    internal fun håndter(replays: InntektsmeldingerReplay, aktivitetslogg: IAktivitetslogg) {
+    internal fun håndter(replays: InntektsmeldingerReplay, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         aktivitetslogg.kontekst(this)
-        replays.fortsettÅBehandle(this, aktivitetslogg)
+        aktivitetslogg.info("Replayer inntektsmeldinger for vedtaksperiode ${replays.vedtaksperiodeId} og påfølgende som overlapper")
+        val revurderingseventyr = håndterReplayAvInntektsmelding(replays.inntektsmeldinger, aktivitetslogg, replays.vedtaksperiodeId)
         håndter { it.håndter(replays, aktivitetslogg) }
+        return revurderingseventyr
     }
 
     internal fun håndter(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
@@ -569,7 +571,7 @@ internal class Arbeidsgiver private constructor(
         person.emitInntektsmeldingIkkeHåndtert(arbeidsgiveropplysninger, organisasjonsnummer, true)
     }
 
-    internal fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, skalBehandleRefusjonsopplysningene: Boolean = true) {
+    internal fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, skalBehandleRefusjonsopplysningene: Boolean = true): Revurderingseventyr? {
         aktivitetslogg.kontekst(this)
 
         // 1. starter håndtering av inntektsmelding på vegne av alle mulige perioder
@@ -590,17 +592,12 @@ internal class Arbeidsgiver private constructor(
 
         // 5. igangsetter
         val tidligsteOverstyring = listOfNotNull(inntektoverstyring, dagoverstyring, refusjonsoverstyring).tidligsteEventyr()
-        if (tidligsteOverstyring != null) {
-            person.igangsettOverstyring(tidligsteOverstyring, aktivitetslogg)
-        } else {
-            // inntektsmelding ikke håndtert?
-        }
+        // hvis tidligsteOverstyring er null så er verken dager, refusjon eller inntekt håndtert
+        return tidligsteOverstyring
     }
 
-    internal fun håndterReplayAvInntektsmelding(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, vedtaksperiodeIdForReplay: UUID) {
-        énHarHåndtert(inntektsmelding) {
-            this.håndterReplayAvInntektsmelding(inntektsmelding, aktivitetslogg, vedtaksperiodeIdForReplay)
-        }
+    internal fun håndterReplayAvInntektsmelding(inntektsmeldinger: List<Inntektsmelding>, aktivitetslogg: IAktivitetslogg, vedtaksperiodeIdForReplay: UUID): Revurderingseventyr? {
+        return vedtaksperioder.firstNotNullOfOrNull { it.håndterReplayAvInntektsmelding(vedtaksperiodeIdForReplay, inntektsmeldinger, aktivitetslogg) }
     }
 
     private fun håndterDagerFraInntektsmelding(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {

@@ -220,14 +220,16 @@ class Person private constructor(
     fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler inntektsmelding")
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(inntektsmelding.behandlingsporing, aktivitetslogg)
-        arbeidsgiver.håndter(inntektsmelding, aktivitetslogg)
+        val revurderingseventyr = arbeidsgiver.håndter(inntektsmelding, aktivitetslogg)
         arbeidsgiver.inntektsmeldingFerdigbehandlet(inntektsmelding, aktivitetslogg)
+        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
         håndterGjenoppta(inntektsmelding, aktivitetslogg)
     }
 
     fun håndter(replays: InntektsmeldingerReplay, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler replay av inntektsmeldinger")
-        finnArbeidsgiver(replays.behandlingsporing, aktivitetslogg).håndter(replays, aktivitetslogg)
+        val revurderingseventyr = finnArbeidsgiver(replays.behandlingsporing, aktivitetslogg).håndter(replays, aktivitetslogg)
+        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
         håndterGjenoppta(replays, aktivitetslogg)
     }
 

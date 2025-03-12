@@ -531,16 +531,22 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal fun håndterReplayAvInntektsmelding(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, vedtaksperiodeIdForReplay: UUID): Boolean {
-        if (vedtaksperiodeIdForReplay != this.id) return false
+    internal fun håndterReplayAvInntektsmelding(vedtaksperiodeIdForReplay: UUID, inntektsmeldinger: List<Inntektsmelding>, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        if (vedtaksperiodeIdForReplay != this.id) return null
+        if (inntektsmeldinger.isEmpty()) return null
         registrerKontekst(aktivitetslogg)
 
         when (tilstand) {
             AvventerInntektsmelding,
             AvsluttetUtenUtbetaling -> {
-                aktivitetslogg.info("Replayer inntektsmelding i $tilstand.")
+                val antallInntektsmeldinger = inntektsmeldinger.size
+                aktivitetslogg.info("Replayer inntektsmeldinger ($antallInntektsmeldinger stk) i $tilstand.")
                 val trengerRefusjonsopplysninger = refusjonstidslinje.isEmpty() == true
-                arbeidsgiver.håndter(inntektsmelding, aktivitetslogg, trengerRefusjonsopplysninger)
+
+                if (antallInntektsmeldinger > 1) aktivitetslogg.varsel(RV_IM_4)
+                return inntektsmeldinger
+                    .mapNotNull { arbeidsgiver.håndter(it, aktivitetslogg, trengerRefusjonsopplysninger) }
+                    .tidligsteEventyr()
             }
 
             AvventerBlokkerendePeriode,
@@ -566,7 +572,7 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg.info("Replayer ikke inntektsmelding fordi tilstanden er $tilstand.")
             }
         }
-        return true
+        return null
     }
 
     internal fun håndter(replays: InntektsmeldingerReplay, aktivitetslogg: IAktivitetslogg) {
