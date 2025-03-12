@@ -492,7 +492,7 @@ internal class Vedtaksperiode private constructor(
         ) ?: return false
 
         val (nyttGrunnlag, endretInntektsgrunnlag) = resultat
-        person.nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
+        person.nyttVilkårsgrunnlag(nyttGrunnlag)
         sendMetrikkTilHag(endretInntektsgrunnlag)
         return true
     }
@@ -760,7 +760,7 @@ internal class Vedtaksperiode private constructor(
             ?: return emptyList()
 
         val (nyttGrunnlag, endretInntektsgrunnlag) = result
-        person.nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
+        person.nyttVilkårsgrunnlag(nyttGrunnlag)
         sendMetrikkTilHag(endretInntektsgrunnlag)
         // Skjæringstidspunktet er allerede vilkårsprøvd, men inntekten for arbeidsgiveren er byttet ut med denne oppgitte inntekten
         dokumentsporingFraArbeidsgiveropplysning(hendelse, ::inntektsmeldingInntekt)
@@ -1173,7 +1173,7 @@ internal class Vedtaksperiode private constructor(
 
         val grunnlag = vilkårsgrunnlag ?: return null
         val (nyttGrunnlag, endretInntektsgrunnlag) = grunnlag.overstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger, aktivitetslogg, subsumsjonslogg) ?: return null
-        person.nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
+        person.nyttVilkårsgrunnlag(nyttGrunnlag)
 
         endretInntektsgrunnlag.inntekter
             .forEach {
@@ -1186,37 +1186,34 @@ internal class Vedtaksperiode private constructor(
         return eventyr
     }
 
-    internal fun håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag, aktivitetslogg: IAktivitetslogg): Boolean {
-        if (!overstyrInntektsgrunnlag.erRelevant(skjæringstidspunkt)) return false
-        if (vilkårsgrunnlag?.erArbeidsgiverRelevant(arbeidsgiver.organisasjonsnummer) != true) return false
+    internal fun håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        if (!overstyrInntektsgrunnlag.erRelevant(skjæringstidspunkt)) return null
+        val grunnlag = vilkårsgrunnlag ?: return null
+        if (grunnlag.erArbeidsgiverRelevant(arbeidsgiver.organisasjonsnummer) != true) return null
         registrerKontekst(aktivitetslogg)
 
         // i praksis double-dispatch, kotlin-style
-        when (overstyrInntektsgrunnlag) {
-            is Grunnbeløpsregulering -> person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-                overstyrInntektsgrunnlag,
-                aktivitetslogg,
-                skjæringstidspunkt,
-                subsumsjonslogg
-            )
+        val (nyttGrunnlag, revurderingseventyr) = when (overstyrInntektsgrunnlag) {
+            is Grunnbeløpsregulering -> {
+                val nyttGrunnlag = grunnlag.grunnbeløpsregulering(overstyrInntektsgrunnlag, aktivitetslogg, subsumsjonslogg)
+                nyttGrunnlag to Revurderingseventyr.grunnbeløpsregulering(overstyrInntektsgrunnlag, skjæringstidspunkt)
+            }
 
-            is OverstyrArbeidsforhold -> person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-                overstyrInntektsgrunnlag,
-                aktivitetslogg,
-                skjæringstidspunkt,
-                subsumsjonslogg
-            )
+            is OverstyrArbeidsforhold -> {
+                val nyttGrunnlag = grunnlag.overstyrArbeidsforhold(overstyrInntektsgrunnlag, aktivitetslogg, subsumsjonslogg)
+                nyttGrunnlag to Revurderingseventyr.arbeidsforhold(overstyrInntektsgrunnlag, skjæringstidspunkt)
+            }
+
+            is SkjønnsmessigFastsettelse -> {
+                val nyttGrunnlag = grunnlag.skjønnsmessigFastsettelse(overstyrInntektsgrunnlag, aktivitetslogg, subsumsjonslogg)
+                nyttGrunnlag to Revurderingseventyr.skjønnsmessigFastsettelse(overstyrInntektsgrunnlag, skjæringstidspunkt, skjæringstidspunkt)
+            }
 
             is OverstyrArbeidsgiveropplysninger -> error("Error. Det finnes en konkret dispatcher-konfigurasjon for dette tilfellet")
-
-            is SkjønnsmessigFastsettelse -> person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-                overstyrInntektsgrunnlag,
-                aktivitetslogg,
-                skjæringstidspunkt,
-                subsumsjonslogg
-            )
         }
-        return true
+        if (nyttGrunnlag == null) return null
+        person.nyttVilkårsgrunnlag(nyttGrunnlag)
+        return revurderingseventyr
     }
 
     internal fun håndterRefusjon(hendelse: Hendelse, dokumentsporing: Dokumentsporing, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør): Revurderingseventyr? {

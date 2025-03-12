@@ -199,7 +199,7 @@ internal class Arbeidsgiver private constructor(
             overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag,
             aktivitetslogg: IAktivitetslogg
         ) =
-            any { it.håndter(overstyrInntektsgrunnlag, aktivitetslogg) }
+            firstNotNullOfOrNull { it.håndter(overstyrInntektsgrunnlag, aktivitetslogg) }
 
         internal fun List<Arbeidsgiver>.håndterOverstyringAvInntekt(
             overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger,
@@ -885,11 +885,9 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    private fun håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag, aktivitetslogg: IAktivitetslogg): Boolean {
+    private fun håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         aktivitetslogg.kontekst(this)
-        return énHarHåndtert(overstyrInntektsgrunnlag) {
-            håndter(it, aktivitetslogg)
-        }
+        return vedtaksperioder.firstNotNullOfOrNull { it.håndter(overstyrInntektsgrunnlag, aktivitetslogg) }
     }
 
     private fun håndter(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {

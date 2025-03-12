@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.math.roundToInt
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
@@ -10,7 +10,6 @@ import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.Regelverkslogg
-import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
@@ -70,8 +69,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.validerTilstand
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.venter
 import no.nav.helse.person.PersonObserver.FørsteFraværsdag
-import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
-import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -80,11 +77,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
-import no.nav.helse.person.inntekt.FaktaavklartInntekt
-import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.view.PersonView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -459,17 +452,15 @@ class Person private constructor(
 
     fun håndter(hendelse: SkjønnsmessigFastsettelse, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler skjønnsmessig fastsettelse")
-        check(arbeidsgivere.håndter(hendelse, aktivitetslogg)) {
-            "Ingen vedtaksperioder håndterte skjønnsmessig fastsettelse"
-        }
+        val revurderingseventyr = arbeidsgivere.håndter(hendelse, aktivitetslogg) ?: error("Ingen vedtaksperioder håndterte skjønnsmessig fastsettelse")
+        igangsettOverstyring(revurderingseventyr, aktivitetslogg)
         håndterGjenoppta(hendelse, aktivitetslogg)
     }
 
     fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler overstyring av arbeidsforhold")
-        check(arbeidsgivere.håndter(overstyrArbeidsforhold, aktivitetslogg)) {
-            "Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen"
-        }
+        val revurderingseventyr = arbeidsgivere.håndter(overstyrArbeidsforhold, aktivitetslogg) ?: error("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen")
+        igangsettOverstyring(revurderingseventyr, aktivitetslogg)
         håndterGjenoppta(overstyrArbeidsforhold, aktivitetslogg)
     }
 
@@ -481,8 +472,11 @@ class Person private constructor(
 
     fun håndter(hendelse: Grunnbeløpsregulering, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler grunnbeløpsendring")
-        if (arbeidsgivere.håndter(hendelse, aktivitetslogg)) return håndterGjenoppta(hendelse, aktivitetslogg)
-        observers.forEach { hendelse.sykefraværstilfelleIkkeFunnet(it) }
+        if (vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(hendelse.skjæringstidspunkt) == null)
+            return observers.forEach { hendelse.sykefraværstilfelleIkkeFunnet(it) }
+        val revurderingseventyr = arbeidsgivere.håndter(hendelse, aktivitetslogg) ?: return
+        igangsettOverstyring(revurderingseventyr, aktivitetslogg)
+        håndterGjenoppta(hendelse, aktivitetslogg)
     }
 
     fun addObserver(observer: PersonObserver) {
@@ -686,46 +680,7 @@ class Person private constructor(
         }
     }
 
-    internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-        hendelse: SkjønnsmessigFastsettelse,
-        aktivitetslogg: IAktivitetslogg,
-        skjæringstidspunkt: LocalDate,
-        subsumsjonslogg: Subsumsjonslogg
-    ) {
-        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
-        val (nyttGrunnlag, _) = grunnlag.skjønnsmessigFastsettelse(hendelse, aktivitetslogg, subsumsjonslogg) ?: return
-        nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
-
-        val eventyr = Revurderingseventyr.skjønnsmessigFastsettelse(hendelse, skjæringstidspunkt, skjæringstidspunkt)
-        igangsettOverstyring(eventyr, aktivitetslogg)
-    }
-
-    internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-        hendelse: OverstyrArbeidsforhold,
-        aktivitetslogg: IAktivitetslogg,
-        skjæringstidspunkt: LocalDate,
-        subsumsjonslogg: Subsumsjonslogg
-    ) {
-        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
-        nyttVilkårsgrunnlag(aktivitetslogg, grunnlag.overstyrArbeidsforhold(hendelse, aktivitetslogg, subsumsjonslogg))
-        igangsettOverstyring(Revurderingseventyr.arbeidsforhold(hendelse, skjæringstidspunkt), aktivitetslogg)
-    }
-
-    internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-        hendelse: Grunnbeløpsregulering,
-        aktivitetslogg: IAktivitetslogg,
-        skjæringstidspunkt: LocalDate,
-        subsumsjonslogg: Subsumsjonslogg
-    ) {
-        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return aktivitetslogg.funksjonellFeil(RV_VV_10)
-        grunnlag.grunnbeløpsregulering(hendelse, aktivitetslogg, subsumsjonslogg)?.let { grunnbeløpsregulert ->
-            nyttVilkårsgrunnlag(aktivitetslogg, grunnbeløpsregulert)
-            igangsettOverstyring(Revurderingseventyr.grunnbeløpsregulering(hendelse, skjæringstidspunkt), aktivitetslogg)
-        }
-    }
-
-    internal fun nyttVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement) {
-        aktivitetslogg.kontekst(vilkårsgrunnlag)
+    internal fun nyttVilkårsgrunnlag(vilkårsgrunnlag: VilkårsgrunnlagElement) {
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
