@@ -63,6 +63,13 @@ class Inntektsmelding(
         )
     }
 
+    init {
+        val count = arbeidsgiverperioder.flatten().count()
+        check(count <= 16) {
+            "antall arbeidsgiverperiodedager kan ikke være mer enn 16 dager: var $count"
+        }
+    }
+
     internal val inntektsdato: LocalDate by lazy {
         if (førsteFraværsdag != null && (grupperteArbeidsgiverperioder.isEmpty() || førsteFraværsdag > grupperteArbeidsgiverperioder.last().endInclusive.nesteDag)) førsteFraværsdag
         else grupperteArbeidsgiverperioder.maxOf { it.start }

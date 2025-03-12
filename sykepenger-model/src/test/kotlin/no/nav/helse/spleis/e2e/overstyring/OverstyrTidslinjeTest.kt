@@ -456,11 +456,10 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     fun `kan ikke utbetale overstyrt utbetaling`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterInntektsmelding(
-            listOf(Periode(2.januar, 18.januar)),
+            listOf(Periode(2.januar, 17.januar)),
             førsteFraværsdag = 2.januar
         )
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

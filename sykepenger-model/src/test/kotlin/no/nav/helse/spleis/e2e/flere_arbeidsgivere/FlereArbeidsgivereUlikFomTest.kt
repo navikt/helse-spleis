@@ -37,7 +37,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -1429,7 +1428,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(
-            listOf(februar),
+            listOf(1.februar til 16.februar),
             orgnummer = a1
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
@@ -1440,7 +1439,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
 
-        assertVarsler(listOf(RV_VV_2, RV_IM_3), 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter(orgnummer = a1))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
     }
 

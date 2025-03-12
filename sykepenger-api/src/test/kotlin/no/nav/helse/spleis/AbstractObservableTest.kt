@@ -118,7 +118,7 @@ internal abstract class AbstractObservableTest {
 
     protected fun inntektsmelding(
         id: UUID = INNTEKTSMELDING_ID,
-        arbeidsgiverperioder: List<Periode> = listOf(Periode(FOM, TOM)),
+        arbeidsgiverperioder: List<Periode> = listOf(Periode(FOM, FOM.plusDays(15))),
         beregnetInntekt: Inntekt = INNTEKT,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: LocalDate.of(2018, 1, 1),
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),

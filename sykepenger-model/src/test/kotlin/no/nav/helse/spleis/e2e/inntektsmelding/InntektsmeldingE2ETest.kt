@@ -70,8 +70,6 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
-import no.nav.helse.spleis.e2e.assertHarHendelseIder
-import no.nav.helse.spleis.e2e.assertHarIkkeHendelseIder
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenInfo
@@ -544,49 +542,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `To inntektsmeldinger krangler om arbeidsgiverperioden`() {
-        val inntektsmelding1 = UUID.randomUUID()
-        val inntektsmelding2 = UUID.randomUUID()
-
-        nyPeriode(20.mars.somPeriode())
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-
-        nullstillTilstandsendringer()
-
-        // Inntektsmelding treffer ikke (litt kødden siden den bare er 12 dager..)
-        håndterInntektsmelding(
-            listOf(5.mars til 16.mars),
-            id = inntektsmelding1
-        )
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertHarIkkeHendelseIder(1.vedtaksperiode, inntektsmelding1)
-
-        // Arbeidsgiver bare kødda, dette er riktig inntektsmelding
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(1.mars til 6.mars, 10.mars til 20.mars),
-            førsteFraværsdag = 21.mars,
-            id = inntektsmelding2,
-            førReplay = {
-                // Før replay har vi nå gått til avventer inntektsmelding på bakgrunn av denne inntektsmeldingen
-                // MEN, ettersom første fraværsdag er satt til 21.mars "treffer" ikke inntekt & refusjon
-                // Så vi trenger en annen inntektsmelding som kan gi inntekt og refusjon for 20.mars som nå skal utbetales
-                assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-                assertHarHendelseIder(1.vedtaksperiode, inntektsmelding2)
-                assertHarIkkeHendelseIder(1.vedtaksperiode, inntektsmelding1)
-                assertEquals(1.mars til 20.mars, inspektør.periode(1.vedtaksperiode))
-                assertEquals(
-                    listOf(1.mars til 6.mars, 10.mars til 19.mars),
-                    inspektør.arbeidsgiverperioder(1.vedtaksperiode)
-                )
-            }
-        )
-
-        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
-        assertEquals(listOf(1.mars til 6.mars, 10.mars til 19.mars), inspektør.arbeidsgiverperioder(1.vedtaksperiode))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-    }
-
-    @Test
     fun `Inntektsmelding strekker AUU, men treffer ikke med inntekt - går til Avventer Inntektsmelding`() {
         nyPeriode(1.februar til 6.februar)
         nyPeriode(7.februar til 14.februar)
@@ -633,16 +588,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(4.vedtaksperiode)
         håndterUtbetalingsgodkjenning(4.vedtaksperiode)
         håndterUtbetalt()
-    }
-
-    @Test
-    fun `Lang og useriøs arbeidsgiverperiode`() {
-        nyPeriode(januar)
-        håndterInntektsmelding(listOf(januar))
-
-        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
-        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
@@ -817,7 +762,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(22.januar, 15.februar, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(
-            listOf(11.januar til 13.januar, 20.januar til 2.februar),
+            listOf(11.januar til 13.januar, 20.januar til 1.februar),
             orgnummer = a1
         )
         håndterInntektsmelding(
@@ -825,7 +770,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter(orgnummer = a1))
         assertEquals("UUGR AAAAAGG SSSSSHH SSSSSHH SSSSSHH SSSS", inspektør(a1).sykdomshistorikk.sykdomstidslinje().toShortString())
         assertEquals("AAAAARR AAAAARR AAAAARR AAAA", inspektør(a2).sykdomshistorikk.sykdomstidslinje().toShortString())
 
@@ -1920,14 +1864,11 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(mars)
-        håndterInntektsmelding(
-            listOf(Periode(20.februar, 8.mars))
-        )
+        håndterInntektsmelding(listOf(Periode(20.februar, 7.mars)))
 
         håndterSykmelding(Sykmeldingsperiode(20.november(2017), 13.desember(2017)))
         håndterSøknad(Sykdom(20.november(2017), 13.desember(2017), 100.prosent))
 
-        assertVarsel(RV_IM_3, 4.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)

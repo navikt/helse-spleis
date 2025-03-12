@@ -244,8 +244,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(3.januar, 5.januar, 100.prosent))
             håndterSøknad(Sykdom(6.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(listOf(3.januar til 19.januar))
-            assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+            håndterInntektsmelding(listOf(3.januar til 18.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -310,8 +309,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
     fun `endrer skjæringstidspunkt på en førstegangsbehandling ved å omgjøre en arbeidsdag til sykedag`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 9.januar, 100.prosent))
-            tilGodkjenning(10.januar til 31.januar, arbeidsgiverperiode = listOf(10.januar til 26.januar)) // 1. jan - 9. jan blir omgjort til arbeidsdager ved innsending av IM her
-            assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+            tilGodkjenning(10.januar til 31.januar, arbeidsgiverperiode = listOf(10.januar til 25.januar)) // 1. jan - 9. jan blir omgjort til arbeidsdager ved innsending av IM her
             val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
             nullstillTilstandsendringer()
             // Saksbehandler korrigerer; 9.januar var vedkommende syk likevel

@@ -583,7 +583,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSøknad(Sykdom(22.februar, 14.mars, 50.prosent), sendtTilNAVEllerArbeidsgiver = 8.august)
         assertVarsel(Varselkode.RV_SØ_2, 2.vedtaksperiode.filter())
 
-        håndterInntektsmelding(listOf(22.februar til 14.mars), INNTEKT)
+        håndterInntektsmelding(listOf(22.februar til 9.mars), INNTEKT)
         assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)

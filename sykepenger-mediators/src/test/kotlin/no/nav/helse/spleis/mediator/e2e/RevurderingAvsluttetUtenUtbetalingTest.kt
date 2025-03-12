@@ -54,7 +54,7 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         sendInntektsmelding(
             listOf(
                 Periode(fom = 1.januar, tom = 6.januar),
-                Periode(fom = 11.januar, tom = 21.januar),
+                Periode(fom = 11.januar, tom = 20.januar),
             ), førsteFraværsdag = 11.januar
         )
         sendVilkårsgrunnlag(1)

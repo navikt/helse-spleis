@@ -18,7 +18,6 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
@@ -38,13 +37,12 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
     fun `Periode med bare ferie, så kommer en tidligere periode med sykdom - ferie skal ikke revurderes`() {
         håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(5.februar, 28.februar))
-        håndterInntektsmelding(listOf(5.februar til 21.februar))
+        håndterInntektsmelding(listOf(5.februar til 20.februar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         nyttVedtak(1.januar til 17.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertVarsler(listOf(Varselkode.RV_IM_3), 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -52,9 +50,7 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
         nyttVedtak(5.februar til 28.februar)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), Søknad.Søknadsperiode.Ferie(1.mars, 31.mars))
-        håndterInntektsmelding(
-            listOf(5.mars til 21.mars)
-        )
+        håndterInntektsmelding(listOf(5.mars til 20.mars))
 
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
 

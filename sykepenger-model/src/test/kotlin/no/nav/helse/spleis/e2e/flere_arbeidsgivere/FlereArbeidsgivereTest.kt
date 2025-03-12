@@ -1486,8 +1486,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertIngenFunksjonelleFeil()
             assertVarsel(Varselkode.RV_SØ_10, 1.vedtaksperiode.filter())
-            håndterInntektsmelding(listOf(15.januar til 31.januar))
-            assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
+            håndterInntektsmelding(listOf(15.januar til 30.januar))
             assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
         a1 {

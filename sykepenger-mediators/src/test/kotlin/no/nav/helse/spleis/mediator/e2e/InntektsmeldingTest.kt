@@ -12,7 +12,7 @@ internal class InntektsmeldingTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(
-            arbeidsgiverperiode = listOf(Periode(1.januar, 31.januar)),
+            arbeidsgiverperiode = listOf(Periode(1.januar, 16.januar)),
             førsteFraværsdag = 1.januar
         )
         sendVilkårsgrunnlag(vedtaksperiodeIndeks = 0)

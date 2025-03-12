@@ -385,7 +385,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
         val søknad2 = håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
         val im = håndterInntektsmelding(
-            listOf(10.januar til 26.januar),
+            listOf(10.januar til 25.januar),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
         assertFunksjonellFeil(RV_IM_8)

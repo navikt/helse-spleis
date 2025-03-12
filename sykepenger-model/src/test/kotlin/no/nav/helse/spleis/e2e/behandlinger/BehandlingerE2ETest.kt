@@ -866,9 +866,9 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     fun `korrigert inntektsmelding med funksjonell feil`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
-            nyttVedtak(15.januar til 25.januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 21.januar), førsteFraværsdag = 15.januar)
+            nyttVedtak(15.januar til 25.januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 20.januar), førsteFraværsdag = 15.januar)
 
-            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 10.januar, 15.januar til 21.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn")
+            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 10.januar, 15.januar til 20.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn")
 
             assertVarsler(listOf(Varselkode.RV_IM_8, Varselkode.RV_IM_23), 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)

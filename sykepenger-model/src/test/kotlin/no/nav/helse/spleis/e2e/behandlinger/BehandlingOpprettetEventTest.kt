@@ -72,8 +72,7 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
     fun omgjøring() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-            håndterInntektsmelding(listOf(25.desember(2017) til 10.januar), beregnetInntekt = INNTEKT)
-            assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
+            håndterInntektsmelding(listOf(25.desember(2017) til 9.januar), beregnetInntekt = INNTEKT)
             val behandlingOpprettetEventer = observatør.behandlingOpprettetEventer
             assertEquals(2, behandlingOpprettetEventer.size)
             val førsteEvent = behandlingOpprettetEventer.first()

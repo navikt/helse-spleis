@@ -287,7 +287,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             )
         )
 
-        sendInntektsmelding(listOf(Periode(fom = 9.januar, tom = 25.januar)), førsteFraværsdag = 9.januar)
+        sendInntektsmelding(listOf(Periode(fom = 9.januar, tom = 24.januar)), førsteFraværsdag = 9.januar)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
 

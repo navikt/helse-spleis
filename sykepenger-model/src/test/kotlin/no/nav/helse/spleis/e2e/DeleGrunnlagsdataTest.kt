@@ -18,7 +18,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.nullstillTilstandsendringer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -137,10 +136,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         val søknadId = håndterSøknad(mars)
 
-        val inntektsmeldingId = håndterInntektsmelding(
-            listOf(Periode(20.februar, 8.mars))
-        )
-        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(20.februar, 7.mars)))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 

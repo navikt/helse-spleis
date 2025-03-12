@@ -17,7 +17,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndMediatorTest()
             perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         )
         val korrigertInntektsmelding = sendInntektsmelding(
-            listOf(Periode(fom = 1.januar, tom = 31.januar)),
+            listOf(Periode(fom = 1.januar, tom = 16.januar)),
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 30000.0
         )
@@ -27,7 +27,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndMediatorTest()
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
         val korrigerendeInntektsmelding = sendInntektsmelding(
-            listOf(Periode(fom = 1.januar, tom = 31.januar)),
+            listOf(Periode(fom = 1.januar, tom = 16.januar)),
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 30500.0
         )

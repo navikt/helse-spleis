@@ -106,7 +106,7 @@ internal class RestApiTest {
             ),
             orgnummer = ORGNUMMER,
             beregnetInntekt = 12000.månedlig,
-            arbeidsgiverperioder = listOf(Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 10).plusDays(16))),
+            arbeidsgiverperioder = listOf(Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 25))),
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             harFlereInntektsmeldinger = false,
             opphørAvNaturalytelser = emptyList(),
