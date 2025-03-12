@@ -276,6 +276,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+        check(tilstand != Start) { "en vedtaksperiode blir stående i Start-tilstanden" }
         if (!tilstand.erFerdigBehandlet) return
         behandlinger.validerFerdigBehandlet(hendelse.metadata.meldingsreferanseId, aktivitetslogg)
     }
@@ -285,7 +286,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg,
         arbeidsgivere: List<Arbeidsgiver>,
         infotrygdhistorikk: Infotrygdhistorikk
-    ) {
+    ): Revurderingseventyr {
         check(tilstand is Start)
         registrerKontekst(aktivitetslogg)
         person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId.id, id, arbeidsgiver.organisasjonsnummer)
@@ -295,15 +296,8 @@ internal class Vedtaksperiode private constructor(
         håndterSøknad(søknad, aktivitetslogg)
         aktivitetslogg.info("Fullført behandling av søknad")
 
-        person.igangsettOverstyring(Revurderingseventyr.nyPeriode(søknad, skjæringstidspunkt, periode), aktivitetslogg)
-
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(søknad, aktivitetslogg)
-        tilstand(
-            aktivitetslogg, when {
-            !infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
-            else -> AvventerInntektsmelding
-        }
-        )
+        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) forkast(søknad, aktivitetslogg)
+        return Revurderingseventyr.nyPeriode(søknad, skjæringstidspunkt, periode)
     }
 
     internal fun håndterKorrigertSøknad(søknad: Søknad, aktivitetslogg: IAktivitetslogg): Boolean {
@@ -2386,6 +2380,10 @@ internal class Vedtaksperiode private constructor(
             revurdering: Revurderingseventyr,
             aktivitetslogg: IAktivitetslogg
         ) {
+            vedtaksperiode.tilstand(aktivitetslogg, when {
+                !vedtaksperiode.person.infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
+                else -> AvventerInntektsmelding
+            })
         }
     }
 

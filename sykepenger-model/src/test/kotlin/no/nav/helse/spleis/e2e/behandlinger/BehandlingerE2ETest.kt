@@ -49,7 +49,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -746,8 +745,6 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
             håndterSøknad(februar)
 
-            assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
-
             assertTilstand(4.vedtaksperiode, TIL_INFOTRYGD)
 
             assertEquals(1.mars, inspektør.skjæringstidspunkt(2.vedtaksperiode))
@@ -761,7 +758,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 behandlinger[1].also { behandling ->
                     assertEquals(UBEREGNET_REVURDERING, behandling.tilstand)
                 }
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             }
             inspektør(3.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)

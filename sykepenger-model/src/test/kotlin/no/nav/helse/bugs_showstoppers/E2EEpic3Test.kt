@@ -139,6 +139,13 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
 
         håndterSøknad(Sykdom(8.januar, 9.januar, 100.prosent))
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVSLUTTET_UTEN_UTBETALING
+        )
 
         håndterSøknad(Sykdom(15.januar, 16.januar, 100.prosent))
 

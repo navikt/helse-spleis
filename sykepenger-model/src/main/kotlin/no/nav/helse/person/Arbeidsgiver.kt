@@ -527,10 +527,10 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg: IAktivitetslogg,
         arbeidsgivere: List<Arbeidsgiver>,
         infotrygdhistorikk: Infotrygdhistorikk
-    ) {
+    ): Revurderingseventyr? {
         aktivitetslogg.kontekst(this)
         søknad.slettSykmeldingsperioderSomDekkes(sykmeldingsperioder)
-        opprettVedtaksperiodeOgHåndter(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
+        return opprettVedtaksperiodeOgHåndter(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
     }
 
     private fun opprettVedtaksperiodeOgHåndter(
@@ -538,16 +538,16 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg: IAktivitetslogg,
         arbeidsgivere: List<Arbeidsgiver>,
         infotrygdhistorikk: Infotrygdhistorikk
-    ) {
+    ): Revurderingseventyr? {
         val noenHarHåndtert = énHarHåndtert(søknad) { håndterKorrigertSøknad(søknad, aktivitetslogg) }
-        if (noenHarHåndtert && !søknad.delvisOverlappende) return
+        if (noenHarHåndtert && !søknad.delvisOverlappende) return null
         val vedtaksperiode = søknad.lagVedtaksperiode(aktivitetslogg, person, this, regelverkslogg)
         if (søknad.delvisOverlappende || aktivitetslogg.harFunksjonelleFeilEllerVerre()) {
             registrerForkastetVedtaksperiode(vedtaksperiode, søknad, aktivitetslogg)
-            return
+            return null
         }
         registrerNyVedtaksperiode(vedtaksperiode)
-        vedtaksperiode.håndterSøknadFørsteGang(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
+        return vedtaksperiode.håndterSøknadFørsteGang(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
     }
 
     internal fun håndter(replays: InntektsmeldingerReplay, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {

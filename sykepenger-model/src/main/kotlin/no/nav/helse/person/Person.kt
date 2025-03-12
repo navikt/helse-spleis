@@ -199,7 +199,8 @@ class Person private constructor(
         tidligereBehandlinger(søknad.behandlingsporing, aktivitetslogg, søknad.sykdomstidslinje.periode()!!)
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(søknad.behandlingsporing, aktivitetslogg)
         søknad.forUng(aktivitetslogg, alder)
-        arbeidsgiver.håndter(søknad, aktivitetslogg, arbeidsgivere.toList(), infotrygdhistorikk)
+        val revurderingseventyr = arbeidsgiver.håndter(søknad, aktivitetslogg, arbeidsgivere.toList(), infotrygdhistorikk)
+        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
         håndterGjenoppta(søknad, aktivitetslogg)
     }
 
