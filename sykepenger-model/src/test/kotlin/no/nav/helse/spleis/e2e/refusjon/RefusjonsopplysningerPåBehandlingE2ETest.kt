@@ -444,7 +444,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT / 2)
 
             assertBeløpstidslinje(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje, mars, INNTEKT / 2)
-            assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-04-2018 til 01-05-2018", 1.vedtaksperiode.filter())
+            assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-04-2018 til 01-05-2018", AktivitetsloggFilter.arbeidsgiver(a1))
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -1099,7 +1099,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterSøknad(februar)
 
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-            assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-02-2018 til 01-02-2018", 1.vedtaksperiode.filter())
+            assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-02-2018 til 01-02-2018", AktivitetsloggFilter.arbeidsgiver(a1))
 
             assertEquals(
                 INNTEKT,

@@ -220,7 +220,7 @@ internal class Arbeidsgiver private constructor(
                 val eksisterendeRefusjonstidslinje = periodendesRefusjonstidslinje + ubruktRefusjonstidslinjeEtterPeriodene
 
                 val servitør = hendelse.refusjonsservitør(startdatoer, arbeidsgiver.organisasjonsnummer, eksisterendeRefusjonstidslinje) ?: return@mapNotNull null
-                arbeidsgiver.håndter(hendelse, overstyrArbeidsgiveropplysninger(hendelse.metadata.meldingsreferanseId), aktivitetslogg, servitør)
+                arbeidsgiver.håndterRefusjonsopplysninger(hendelse, overstyrArbeidsgiveropplysninger(hendelse.metadata.meldingsreferanseId), aktivitetslogg, servitør)
             }
             return revurderingseventyr.tidligsteEventyr()
         }
@@ -574,12 +574,13 @@ internal class Arbeidsgiver private constructor(
         val dager = inntektsmelding.dager()
         håndter { it.håndter(dager, aktivitetslogg) }
 
-        val refusjonsoverstyring = if (skalBehandleRefusjonsopplysningene) håndter(
-            inntektsmelding,
-            inntektsmeldingRefusjon(inntektsmelding.metadata.meldingsreferanseId),
-            aktivitetslogg,
-            inntektsmelding.refusjonsservitør
-        ) else null
+        val refusjonsoverstyring = if (skalBehandleRefusjonsopplysningene)
+            håndterRefusjonsopplysninger(
+                inntektsmelding,
+                inntektsmeldingRefusjon(inntektsmelding.metadata.meldingsreferanseId),
+                aktivitetslogg,
+                inntektsmelding.refusjonsservitør
+            ) else null
 
         val dagoverstyring = dager.revurderingseventyr()
         addInntektsmelding(
@@ -892,10 +893,11 @@ internal class Arbeidsgiver private constructor(
         return revurderingseventyr
     }
 
-    internal fun håndter(hendelse: Hendelse, dokumentsporing: Dokumentsporing, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør): Revurderingseventyr? {
+    internal fun håndterRefusjonsopplysninger(hendelse: Hendelse, dokumentsporing: Dokumentsporing, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør): Revurderingseventyr? {
         val revurderingseventyr = håndter {
             it.håndterRefusjon(hendelse, dokumentsporing, aktivitetslogg, servitør)
         }.tidligsteEventyr()
+        aktivitetslogg.kontekst(this)
         servitør.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
         return revurderingseventyr
     }
