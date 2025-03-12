@@ -161,6 +161,7 @@ import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.EndretInntektsgrunnlag
+import no.nav.helse.person.inntekt.EndretInntektsgrunnlag.EndretInntekt
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektsdata
@@ -503,21 +504,29 @@ internal class Vedtaksperiode private constructor(
         }
         // sender ikke ut melding hvis inntekten allerede er korrigert av saksbehandler (?)
         if (endretInntektForArbeidsgiver.inntektFør.korrigertInntekt != null) return
+        sendMetrikkTilHag(endretInntektForArbeidsgiver)
+    }
+
+    private fun sendMetrikkTilHag(endretInntektForArbeidsgiver: EndretInntekt) {
+        if (endretInntektForArbeidsgiver.inntektEtter == endretInntektForArbeidsgiver.inntektFør) return
         when (val io = endretInntektForArbeidsgiver.inntektFør.faktaavklartInntekt.inntektsopplysning) {
             is Inntektsopplysning.Arbeidstaker -> when (io.kilde) {
                 Arbeidstakerinntektskilde.Arbeidsgiver -> {
+                    val (inntektsdata, type) = when (val saksbehandler = endretInntektForArbeidsgiver.inntektEtter.korrigertInntekt) {
+                        null -> endretInntektForArbeidsgiver.inntektEtter.faktaavklartInntekt.inntektsdata to Inntektsopplysningstype.INNTEKTSMELDING
+                        else -> saksbehandler.inntektsdata to SAKSBEHANDLER
+                    }
                     person.arbeidsgiveropplysningerKorrigert(
                         PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
                             korrigertInntektsmeldingId = endretInntektForArbeidsgiver.inntektFør.faktaavklartInntekt.inntektsdata.hendelseId.id,
-                            korrigerendeInntektektsopplysningstype = Inntektsopplysningstype.INNTEKTSMELDING,
-                            korrigerendeInntektsopplysningId = endretInntektForArbeidsgiver.inntektEtter.faktaavklartInntekt.inntektsdata.hendelseId.id
+                            korrigerendeInntektektsopplysningstype = type,
+                            korrigerendeInntektsopplysningId = inntektsdata.hendelseId.id
                         )
                     )
                 }
 
                 is Arbeidstakerinntektskilde.AOrdningen,
-                Arbeidstakerinntektskilde.Infotrygd -> { /* gjør ingenting */
-                }
+                Arbeidstakerinntektskilde.Infotrygd -> { /* gjør ingenting */ }
             }
         }
     }
@@ -729,15 +738,15 @@ internal class Vedtaksperiode private constructor(
             )
         )
 
+        val grunnlag = vilkårsgrunnlag
+
         // Skjæringstidspunktet er _ikke_ vilkårsprøvd før (det mest normale - står typisk i AvventerInntektsmelding)
-        if (person.vilkårsgrunnlagFor(skjæringstidspunkt) == null) {
+        if (grunnlag == null) {
             dokumentsporingFraArbeidsgiveropplysning(hendelse, ::inntektsmeldingInntekt)
             return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
         }
 
-        val harEndretInntektIVilkårsgrunnlag = person.nyeArbeidsgiverInntektsopplysninger(
-            hendelse = hendelse,
-            skjæringstidspunkt = skjæringstidspunkt,
+        val result = grunnlag.nyeArbeidsgiverInntektsopplysninger(
             organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
             inntekt = FaktaavklartInntekt(
                 id = UUID.randomUUID(),
@@ -745,17 +754,17 @@ internal class Vedtaksperiode private constructor(
                 inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.Arbeidsgiver)
             ),
             aktivitetslogg = aktivitetslogg,
-            subsumsjonslogg = this.subsumsjonslogg
+            subsumsjonslogg = subsumsjonslogg
         )
+            // todo: per 10. januar 2025 så sender alltid Hag inntekt i portal-inntektsmeldinger selv om vi ikke har bedt om det, derfor må vi ta høyde for at det ikke nødvendigvis er endringer
+            ?: return emptyList()
 
+        val (nyttGrunnlag, endretInntektsgrunnlag) = result
+        person.nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
+        sendMetrikkTilHag(endretInntektsgrunnlag)
         // Skjæringstidspunktet er allerede vilkårsprøvd, men inntekten for arbeidsgiveren er byttet ut med denne oppgitte inntekten
-        if (harEndretInntektIVilkårsgrunnlag) {
-            dokumentsporingFraArbeidsgiveropplysning(hendelse, ::inntektsmeldingInntekt)
-            return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
-        }
-
-        // todo: per 10. januar 2025 så sender alltid Hag inntekt i portal-inntektsmeldinger selv om vi ikke har bedt om det, derfor må vi ta høyde for at det ikke nødvendigvis er endringer
-        return emptyList()
+        dokumentsporingFraArbeidsgiveropplysning(hendelse, ::inntektsmeldingInntekt)
+        return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
     }
 
     private fun håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
@@ -1162,12 +1171,19 @@ internal class Vedtaksperiode private constructor(
         if (vilkårsgrunnlag?.erArbeidsgiverRelevant(arbeidsgiver.organisasjonsnummer) != true) return null
         registrerKontekst(aktivitetslogg)
 
-        return person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-            overstyrArbeidsgiveropplysninger,
-            aktivitetslogg,
-            skjæringstidspunkt,
-            subsumsjonslogg
-        )
+        val grunnlag = vilkårsgrunnlag ?: return null
+        val (nyttGrunnlag, endretInntektsgrunnlag) = grunnlag.overstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger, aktivitetslogg, subsumsjonslogg) ?: return null
+        person.nyttVilkårsgrunnlag(aktivitetslogg, nyttGrunnlag)
+
+        endretInntektsgrunnlag.inntekter
+            .forEach {
+                val opptjeningFom = nyttGrunnlag.opptjening!!.startdatoFor(it.inntektEtter.orgnummer)
+                overstyrArbeidsgiveropplysninger.subsummer(subsumsjonslogg, opptjeningFom, it.inntektEtter.orgnummer)
+                sendMetrikkTilHag(it)
+            }
+
+        val eventyr = Revurderingseventyr.arbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger, skjæringstidspunkt, skjæringstidspunkt)
+        return eventyr
     }
 
     internal fun håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag, aktivitetslogg: IAktivitetslogg): Boolean {
