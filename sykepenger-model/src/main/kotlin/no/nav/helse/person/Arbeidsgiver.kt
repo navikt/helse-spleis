@@ -15,6 +15,7 @@ import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsavgjørelse
+import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Hendelseskilde
@@ -571,8 +572,7 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, skalBehandleRefusjonsopplysningene: Boolean = true) {
         aktivitetslogg.kontekst(this)
 
-        val dager = inntektsmelding.dager()
-        håndter { it.håndter(dager, aktivitetslogg) }
+        val dagoverstyring = håndterDagerFraInntektsmelding(inntektsmelding.dager(), aktivitetslogg)
 
         val refusjonsoverstyring = if (skalBehandleRefusjonsopplysningene)
             håndterRefusjonsopplysninger(
@@ -582,7 +582,6 @@ internal class Arbeidsgiver private constructor(
                 inntektsmelding.refusjonsservitør
             ) else null
 
-        val dagoverstyring = dager.revurderingseventyr()
         addInntektsmelding(
             inntektsmelding,
             aktivitetslogg,
@@ -590,6 +589,11 @@ internal class Arbeidsgiver private constructor(
         )
 
         inntektsmelding.ferdigstill(aktivitetslogg, person, vedtaksperioder, forkastede, sykmeldingsperioder)
+    }
+
+    private fun håndterDagerFraInntektsmelding(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        håndter { it.håndter(dager, aktivitetslogg) }
+        return dager.revurderingseventyr()
     }
 
     internal fun håndterReplayAvInntektsmelding(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, vedtaksperiodeIdForReplay: UUID) {
