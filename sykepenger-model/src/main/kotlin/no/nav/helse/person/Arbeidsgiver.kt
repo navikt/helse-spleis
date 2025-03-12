@@ -51,7 +51,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.arbeidsgiverperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
-import no.nav.helse.person.Vedtaksperiode.Companion.manglerRefusjonsopplysninger
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
@@ -569,20 +568,13 @@ internal class Arbeidsgiver private constructor(
         person.emitInntektsmeldingIkkeHåndtert(arbeidsgiveropplysninger, organisasjonsnummer, true)
     }
 
-    internal fun håndter(
-        inntektsmelding: Inntektsmelding,
-        aktivitetslogg: IAktivitetslogg,
-        vedtaksperiodeIdForReplay: UUID? = null
-    ) {
+    internal fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, skalBehandleRefusjonsopplysningene: Boolean = true) {
         aktivitetslogg.kontekst(this)
-        if (vedtaksperiodeIdForReplay != null) aktivitetslogg.info("Replayer inntektsmelding.")
 
         val dager = inntektsmelding.dager()
         håndter { it.håndter(dager, aktivitetslogg) }
 
-        val hånderRefusjon = vedtaksperiodeIdForReplay == null || vedtaksperioder.manglerRefusjonsopplysninger(vedtaksperiodeIdForReplay)
-
-        val refusjonsoverstyring = if (hånderRefusjon) håndter(
+        val refusjonsoverstyring = if (skalBehandleRefusjonsopplysningene) håndter(
             inntektsmelding,
             inntektsmeldingRefusjon(inntektsmelding.metadata.meldingsreferanseId),
             aktivitetslogg,
@@ -597,6 +589,13 @@ internal class Arbeidsgiver private constructor(
         )
 
         inntektsmelding.ferdigstill(aktivitetslogg, person, vedtaksperioder, forkastede, sykmeldingsperioder)
+    }
+
+    internal fun håndterReplayAvInntektsmelding(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, vedtaksperiodeIdForReplay: UUID) {
+        aktivitetslogg.kontekst(this)
+        énHarHåndtert(inntektsmelding) {
+            this.håndterReplayAvInntektsmelding(inntektsmelding, aktivitetslogg, vedtaksperiodeIdForReplay)
+        }
     }
 
     internal fun refusjonstidslinje(vedtaksperiode: Vedtaksperiode): Beløpstidslinje {

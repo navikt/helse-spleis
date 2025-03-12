@@ -413,6 +413,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(januar)
         håndterSøknad(januar)
+        assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 

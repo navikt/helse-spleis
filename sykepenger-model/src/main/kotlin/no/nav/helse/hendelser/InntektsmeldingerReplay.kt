@@ -30,7 +30,7 @@ class InntektsmeldingerReplay(
     internal fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Replayer inntektsmeldinger for vedtaksperiode $vedtaksperiodeId og påfølgende som overlapper")
         inntektsmeldinger.forEach {
-            arbeidsgiver.håndter(it, aktivitetslogg, vedtaksperiodeId)
+            arbeidsgiver.håndterReplayAvInntektsmelding(it, aktivitetslogg, vedtaksperiodeId)
         }
     }
 }

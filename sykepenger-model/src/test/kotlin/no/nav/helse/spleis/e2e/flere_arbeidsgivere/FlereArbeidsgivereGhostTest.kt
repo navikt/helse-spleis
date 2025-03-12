@@ -39,9 +39,7 @@ import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -221,16 +219,16 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         // Så kjem søknaden på ghosten læll
         val ghostSøknad = MeldingsreferanseId(håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ghost))
 
-        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = ghost))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = ghost)
 
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
-            assertBeregningsgrunnlag(INNTEKT + 33_000.månedlig)
+            assertBeregningsgrunnlag(INNTEKT + 31_000.månedlig)
             assertSykepengegrunnlag(561804.årlig)
             assertInntektsgrunnlag(a1, INNTEKT)
-            assertInntektsgrunnlag(a2, 33_000.månedlig)
+            assertInntektsgrunnlag(a2, 31_000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
 
         håndterYtelser(1.vedtaksperiode, orgnummer = ghost)
@@ -239,7 +237,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = ghost)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
@@ -248,10 +245,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, ghost)
 
-        assertVarsel(RV_IM_8, 1.vedtaksperiode.filter(ghost))
-
         assertBeløpstidslinje(inspektør(a2).vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, 33000.månedlig, ghostIM.id)
-        assertEquals(setOf(Dokumentsporing.søknad(ghostSøknad), Dokumentsporing.inntektsmeldingDager(ghostIM), Dokumentsporing.inntektsmeldingInntekt(ghostIM)), inspektør(ghost).hendelser(1.vedtaksperiode))
+        assertEquals(setOf(Dokumentsporing.søknad(ghostSøknad)), inspektør(ghost).hendelser(1.vedtaksperiode))
     }
 
     @Test

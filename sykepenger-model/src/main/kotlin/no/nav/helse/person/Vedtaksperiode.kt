@@ -456,6 +456,44 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    internal fun håndterReplayAvInntektsmelding(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, vedtaksperiodeIdForReplay: UUID): Boolean {
+        if (vedtaksperiodeIdForReplay != this.id) return false
+        registrerKontekst(aktivitetslogg)
+
+        when (tilstand) {
+            AvventerInntektsmelding,
+            AvsluttetUtenUtbetaling -> {
+                aktivitetslogg.info("Replayer inntektsmelding i $tilstand.")
+                val trengerRefusjonsopplysninger = refusjonstidslinje.isEmpty() == true
+                arbeidsgiver.håndter(inntektsmelding, aktivitetslogg, trengerRefusjonsopplysninger)
+            }
+
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering,
+            TilUtbetaling -> {
+                aktivitetslogg.info("Replayer ikke inntektsmelding fordi tilstanden er $tilstand.")
+                aktivitetslogg.varsel(RV_IM_4)
+            }
+
+            Avsluttet,
+            RevurderingFeilet,
+            Start,
+            TilInfotrygd -> {
+                aktivitetslogg.info("Replayer ikke inntektsmelding fordi tilstanden er $tilstand.")
+            }
+        }
+        return true
+    }
+
     internal fun håndter(replays: InntektsmeldingerReplay, aktivitetslogg: IAktivitetslogg) {
         if (!replays.erRelevant(this.id)) return
         registrerKontekst(aktivitetslogg)
@@ -3322,8 +3360,6 @@ internal class Vedtaksperiode private constructor(
             fold(Beløpstidslinje()) { beløpstidslinje, vedtaksperiode ->
                 beløpstidslinje + vedtaksperiode.refusjonstidslinje
             }
-
-        internal fun List<Vedtaksperiode>.manglerRefusjonsopplysninger(vedtaksperiodeId: UUID) = firstOrNull { it.id == vedtaksperiodeId }?.refusjonstidslinje?.isEmpty() == true
 
         internal fun List<Vedtaksperiode>.startdatoerPåSammenhengendeVedtaksperioder(): Set<LocalDate> {
             val startdatoer = mutableMapOf<UUID, LocalDate>()
