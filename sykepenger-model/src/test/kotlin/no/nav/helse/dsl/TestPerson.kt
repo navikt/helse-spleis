@@ -433,7 +433,7 @@ internal class TestPerson(
             )
         }
 
-        private fun håndterVilkårsgrunnlag(
+        internal fun håndterVilkårsgrunnlag(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,

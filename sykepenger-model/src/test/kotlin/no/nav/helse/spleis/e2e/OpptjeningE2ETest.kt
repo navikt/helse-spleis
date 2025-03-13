@@ -1,28 +1,47 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
+import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
+import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.februar
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.YTELSE_FRA_OFFENTLIGE
+import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_3
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.utbetalingstidslinje.Begrunnelse.ManglerOpptjening
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class OpptjeningE2ETest : AbstractDslTest() {
+
     @Test
     fun `lagrer arbeidsforhold brukt til opptjening`() {
         a1 {
@@ -154,6 +173,53 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
 
             assertEquals(0, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistDagTeller)
+        }
+    }
+
+    @Test
+    fun `opptjening fra offentlig ytelse - arbeidsforhold opphørt før opptjeningstiden`() {
+        setupOpptjeningFraOffentligYtelse(ansattTom = 31.januar)
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertVarsler(1.vedtaksperiode, RV_OV_1)
+            with(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[8.mai]) {
+                assertTrue(this is AvvistDag)
+                erAvvistMed(ManglerOpptjening)
+            }
+        }
+    }
+
+    @Test
+    fun `opptjening fra offentlig ytelse - arbeidsforhold aktivt under opptjeningstiden`() {
+        setupOpptjeningFraOffentligYtelse(ansattTom = 31.mars)
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
+            with(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[8.mai]) {
+                assertTrue(this is NavDag)
+            }
+        }
+    }
+
+    private fun setupOpptjeningFraOffentligYtelse(ansattTom: LocalDate) {
+        a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+            forlengVedtak(mars)
+        }
+        a2 {
+            håndterSøknad(22.april til 22.mai)
+            håndterArbeidsgiveropplysninger(listOf(22.april til 7.mai))
+            håndterVilkårsgrunnlag(
+                arbeidsforhold = listOf(
+                    Arbeidsforhold(orgnummer = a1, ansattFom = 1.januar, ansattTom = ansattTom, type = ORDINÆRT),
+                    Arbeidsforhold(orgnummer = a2, ansattFom = 1.april, ansattTom = null, type = ORDINÆRT),
+                ),
+                inntekterForOpptjeningsvurdering = InntekterForOpptjeningsvurdering(
+                    listOf(ArbeidsgiverInntekt(a1, inntekter = listOf(MånedligInntekt(mars(2018), INNTEKT, YTELSE_FRA_OFFENTLIGE, "ja", "beskrivelse"))))
+                ),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a2, INNTEKT, 22.april)
+            )
+            håndterYtelser(1.vedtaksperiode)
         }
     }
 }
