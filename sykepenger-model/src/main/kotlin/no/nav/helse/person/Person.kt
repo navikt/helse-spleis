@@ -472,7 +472,8 @@ class Person private constructor(
 
     fun håndter(hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler annulleringforespørsel")
-        finnArbeidsgiver(hendelse.behandlingsporing, aktivitetslogg).håndter(hendelse, aktivitetslogg)
+        val revurderingseventyr = finnArbeidsgiver(hendelse.behandlingsporing, aktivitetslogg).håndter(hendelse, aktivitetslogg)
+        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
         håndterGjenoppta(hendelse, aktivitetslogg)
     }
 

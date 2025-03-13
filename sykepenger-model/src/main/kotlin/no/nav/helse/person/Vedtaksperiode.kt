@@ -1161,17 +1161,17 @@ internal class Vedtaksperiode private constructor(
         hendelse: AnnullerUtbetaling,
         aktivitetslogg: IAktivitetslogg,
         vedtaksperioder: List<Vedtaksperiode>
-    ) {
+    ): Revurderingseventyr? {
         registrerKontekst(aktivitetslogg)
         val annullering = behandlinger.håndterAnnullering(
             arbeidsgiver,
             hendelse,
             hendelse.metadata.behandlingkilde,
             aktivitetslogg,
-            vedtaksperioder.map { it.behandlinger }) ?: return
+            vedtaksperioder.map { it.behandlinger }) ?: return null
         aktivitetslogg.info("Forkaster denne, og senere perioder, som følge av annullering.")
         forkast(hendelse, aktivitetslogg)
-        person.igangsettOverstyring(Revurderingseventyr.annullering(hendelse, annullering.periode()), aktivitetslogg)
+        return Revurderingseventyr.annullering(hendelse, annullering.periode())
     }
 
     internal fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Boolean {

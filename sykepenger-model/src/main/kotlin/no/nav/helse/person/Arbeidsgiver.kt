@@ -744,10 +744,10 @@ internal class Arbeidsgiver private constructor(
         return annullering
     }
 
-    internal fun håndter(hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg) {
+    internal fun håndter(hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         aktivitetslogg.kontekst(this)
         aktivitetslogg.info("Håndterer annullering")
-        håndter { it.håndter(hendelse, aktivitetslogg, vedtaksperioder.toList()) }
+        return håndter { it.håndter(hendelse, aktivitetslogg, vedtaksperioder.toList()) }.tidligsteEventyr()
     }
 
     internal fun håndter(påminnelse: Utbetalingpåminnelse, aktivitetslogg: IAktivitetslogg) {
