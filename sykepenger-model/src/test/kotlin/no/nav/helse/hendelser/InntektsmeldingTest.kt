@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.util.*
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
@@ -37,6 +38,18 @@ internal class InntektsmeldingTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var inntektsmelding: Inntektsmelding
     private lateinit var dager: DagerFraInntektsmelding
+
+    @Test
+    fun `datoForHåndteringAvInntekt ved begrunnelseForReduksjonEllerIkkeUtbetalt`() {
+        inntektsmelding(listOf(Periode(1.januar, 16.januar)), begrunnelseForReduksjonEllerIkkeUtbetalt = "")
+        assertForventetFeil(
+            forklaring = "'datoForHåndteringAvInntekt' tok ikke høyde for at blank == null",
+            nå = { assertEquals(1.januar, inntektsmelding.datoForHåndteringAvInntekt) },
+            ønsket = { assertEquals(17.januar, inntektsmelding.datoForHåndteringAvInntekt) },
+        )
+        inntektsmelding(listOf(Periode(1.januar, 16.januar)), begrunnelseForReduksjonEllerIkkeUtbetalt = null)
+        assertEquals(17.januar, inntektsmelding.datoForHåndteringAvInntekt)
+    }
 
     @Test
     fun `periode dersom første fraværsdag er kant i kant med arbeidsgiverperioden`() {
