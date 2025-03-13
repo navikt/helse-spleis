@@ -290,6 +290,7 @@ internal class Vedtaksperiode private constructor(
         check(tilstand is Start)
         registrerKontekst(aktivitetslogg)
         person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId.id, id, arbeidsgiver.organisasjonsnummer)
+        søknad.forUng(aktivitetslogg, person.alder)
         arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(aktivitetslogg, this, arbeidsgivere)
 
         infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
