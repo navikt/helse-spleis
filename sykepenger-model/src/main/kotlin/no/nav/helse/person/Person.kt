@@ -716,7 +716,7 @@ class Person private constructor(
         observers.forEach { it.behandlingUtført() }
     }
 
-    internal fun igangsettOverstyring(revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
+    private fun igangsettOverstyring(revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
         arbeidsgivere.igangsettOverstyring(revurdering, aktivitetslogg)
         revurdering.sendOverstyringIgangsattEvent(this)
         ryddOppVilkårsgrunnlag(aktivitetslogg)
