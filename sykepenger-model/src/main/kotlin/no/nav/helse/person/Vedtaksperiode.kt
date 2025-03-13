@@ -591,19 +591,21 @@ internal class Vedtaksperiode private constructor(
         tilstand.inntektsmeldingFerdigbehandlet(this, hendelse, aktivitetslogg)
     }
 
-    private fun håndterArbeidsgiveropplysninger(eventyr: List<List<Revurderingseventyr>>, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Boolean {
+    private fun håndterArbeidsgiveropplysninger(eventyr: List<List<Revurderingseventyr>>, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         person.emitInntektsmeldingHåndtert(hendelse.metadata.meldingsreferanseId.id, id, arbeidsgiver.organisasjonsnummer)
         val tidligsteEventyr = eventyr.flatten().tidligsteEventyr()
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) forkast(hendelse, aktivitetslogg)
-        if (tidligsteEventyr != null) person.igangsettOverstyring(tidligsteEventyr, aktivitetslogg)
-        return true
+        return tidligsteEventyr
     }
 
-    internal fun håndter(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, vedtaksperioder: List<Vedtaksperiode>, inntektshistorikk: Inntektshistorikk, ubrukteRefusjonsopplysninger: Refusjonsservitør): Boolean {
-        if (arbeidsgiveropplysninger.vedtaksperiodeId != id) return false
+    internal fun håndter(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, vedtaksperioder: List<Vedtaksperiode>, inntektshistorikk: Inntektshistorikk, ubrukteRefusjonsopplysninger: Refusjonsservitør): Revurderingseventyr? {
+        if (arbeidsgiveropplysninger.vedtaksperiodeId != id) return null
         registrerKontekst(aktivitetslogg)
         // Vi må støtte AUU & AVBL på grunn av at det sendes forespørsel på entering i AUU om det er oppgitt egenmeldingsdager som gjør at perioden skal utbetaltes
-        if (tilstand !in setOf(AvventerInntektsmelding, AvventerBlokkerendePeriode, AvsluttetUtenUtbetaling)) return false.also { aktivitetslogg.info("Mottok arbeidsgiveropplysninger i ${tilstand.type}") }
+        if (tilstand !in setOf(AvventerInntektsmelding, AvventerBlokkerendePeriode, AvsluttetUtenUtbetaling)) {
+            aktivitetslogg.info("Mottok arbeidsgiveropplysninger i ${tilstand.type}")
+            return null
+        }
 
         val eventyr = listOf(
             håndterOppgittArbeidsgiverperiode(arbeidsgiveropplysninger, vedtaksperioder, aktivitetslogg),
@@ -619,8 +621,8 @@ internal class Vedtaksperiode private constructor(
         return håndterArbeidsgiveropplysninger(eventyr, arbeidsgiveropplysninger, aktivitetslogg)
     }
 
-    internal fun håndter(korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, vedtaksperioder: List<Vedtaksperiode>, inntektshistorikk: Inntektshistorikk, ubrukteRefusjonsopplysninger: Refusjonsservitør): Boolean {
-        if (korrigerteArbeidsgiveropplysninger.vedtaksperiodeId != id) return false
+    internal fun håndter(korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, vedtaksperioder: List<Vedtaksperiode>, inntektshistorikk: Inntektshistorikk, ubrukteRefusjonsopplysninger: Refusjonsservitør): Revurderingseventyr? {
+        if (korrigerteArbeidsgiveropplysninger.vedtaksperiodeId != id) return null
         registrerKontekst(aktivitetslogg)
         check(tilstand !is AvventerInntektsmelding) { "Mottok Korrigerende arbeidsgiveropplysninger i AvventerInntektsmelding " }
 
