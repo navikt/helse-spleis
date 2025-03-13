@@ -1371,8 +1371,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing): Boolean {
-                return false
-                //error("Støtter ikke å oppdatere dokumentsporing med $dokument i $this")
+                error("Støtter ikke å oppdatere dokumentsporing med $dokument i $this")
             }
 
             fun kanForkastes(behandling: Behandling, aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean
