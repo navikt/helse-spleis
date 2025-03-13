@@ -2,9 +2,9 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.util.*
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
+import no.nav.helse.hendelser.Inntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.fraInnteksmelding
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -25,6 +25,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -40,13 +41,17 @@ internal class InntektsmeldingTest {
     private lateinit var dager: DagerFraInntektsmelding
 
     @Test
+    fun BegrunnelseForReduksjonEllerIkkeUtbetalt() {
+        assertNull(fraInnteksmelding(""))
+        assertNull(fraInnteksmelding(" "))
+        assertNull(fraInnteksmelding(null))
+        assertNotNull(fraInnteksmelding("test"))
+    }
+
+    @Test
     fun `datoForHåndteringAvInntekt ved begrunnelseForReduksjonEllerIkkeUtbetalt`() {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), begrunnelseForReduksjonEllerIkkeUtbetalt = "")
-        assertForventetFeil(
-            forklaring = "'datoForHåndteringAvInntekt' tok ikke høyde for at blank == null",
-            nå = { assertEquals(1.januar, inntektsmelding.datoForHåndteringAvInntekt) },
-            ønsket = { assertEquals(17.januar, inntektsmelding.datoForHåndteringAvInntekt) },
-        )
+        assertEquals(17.januar, inntektsmelding.datoForHåndteringAvInntekt)
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), begrunnelseForReduksjonEllerIkkeUtbetalt = null)
         assertEquals(17.januar, inntektsmelding.datoForHåndteringAvInntekt)
     }

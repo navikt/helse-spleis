@@ -8,6 +8,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.Inntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.periode
@@ -21,9 +22,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.påvirkerArbeidsgiverperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
@@ -35,7 +34,7 @@ internal class DagerFraInntektsmelding(
     private val arbeidsgiverperioder: List<Periode>,
     private val førsteFraværsdag: LocalDate?,
     mottatt: LocalDateTime,
-    begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
+    private val begrunnelseForReduksjonEllerIkkeUtbetalt: BegrunnelseForReduksjonEllerIkkeUtbetalt?,
     private val harFlereInntektsmeldinger: Boolean,
     private val opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse>,
     val hendelse: Hendelse
@@ -44,7 +43,6 @@ internal class DagerFraInntektsmelding(
     // krever nok at vi json-migrerer alle "Inntektsmelding" til "BitAvInntektsmelding" først
     internal val kilde = Hendelseskilde("Inntektsmelding", hendelse.metadata.meldingsreferanseId, mottatt)
     private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(hendelse.metadata.meldingsreferanseId)
-    private val begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt.takeUnless { it.isNullOrBlank() }
     private val arbeidsgiverperiode = arbeidsgiverperioder.periode()
     private val overlappsperiode = when {
         // første fraværsdag er oppgitt etter arbeidsgiverperioden
@@ -206,19 +204,8 @@ internal class DagerFraInntektsmelding(
             aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_7)
         }
         if (harFlereInntektsmeldinger) aktivitetslogg.varsel(Varselkode.RV_IM_22)
-        validerBegrunnelseForReduksjonEllerIkkeUtbetalt(aktivitetslogg)
+        begrunnelseForReduksjonEllerIkkeUtbetalt?.valider(aktivitetslogg, hulleteArbeidsgiverperiode())
         validerOverstigerMaksimaltTillatAvstandMellomTidligereAGP(aktivitetslogg, gammelAgp)
-    }
-
-    private fun validerBegrunnelseForReduksjonEllerIkkeUtbetalt(aktivitetslogg: IAktivitetslogg) {
-        if (begrunnelseForReduksjonEllerIkkeUtbetalt == null) return
-        aktivitetslogg.info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: $begrunnelseForReduksjonEllerIkkeUtbetalt")
-        if (hulleteArbeidsgiverperiode()) aktivitetslogg.funksjonellFeil(RV_IM_23)
-        when (begrunnelseForReduksjonEllerIkkeUtbetalt) {
-            in ikkeStøttedeBegrunnelserForReduksjon -> aktivitetslogg.funksjonellFeil(RV_IM_8)
-            "FerieEllerAvspasering" -> aktivitetslogg.varsel(Varselkode.RV_IM_25)
-            else -> aktivitetslogg.varsel(RV_IM_8)
-        }
     }
 
     private fun hulleteArbeidsgiverperiode(): Boolean {
@@ -304,13 +291,5 @@ internal class DagerFraInntektsmelding(
         private const val MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER = 10
         private const val MAKS_ANTALL_DAGER_MELLOM_FØRSTE_FRAVÆRSDAG_OG_AGP_FOR_HÅNDTERING_AV_DAGER = 20
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-        private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
-            "BetvilerArbeidsufoerhet",
-            "FiskerMedHyre",
-            "StreikEllerLockout",
-            "FravaerUtenGyldigGrunn",
-            "BeskjedGittForSent",
-            "IkkeLoenn"
-        )
     }
 }

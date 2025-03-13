@@ -16,6 +16,9 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
@@ -29,9 +32,9 @@ class Inntektsmelding(
     meldingsreferanseId: MeldingsreferanseId,
     private val refusjon: Refusjon,
     orgnummer: String,
-    private val beregnetInntekt: Inntekt,
+    beregnetInntekt: Inntekt,
     arbeidsgiverperioder: List<Periode>,
-    private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
+    private val begrunnelseForReduksjonEllerIkkeUtbetalt: BegrunnelseForReduksjonEllerIkkeUtbetalt?,
     private val opphørAvNaturalytelser: List<OpphørAvNaturalytelse>,
     private val harFlereInntektsmeldinger: Boolean,
     private val førsteFraværsdag: LocalDate?,
@@ -69,7 +72,7 @@ class Inntektsmelding(
         }
     }
 
-    internal val kompensertFørsteFraværsdag: LocalDate by lazy {
+    private val kompensertFørsteFraværsdag: LocalDate by lazy {
         if (førsteFraværsdag != null && (grupperteArbeidsgiverperioder.isEmpty() || førsteFraværsdag > grupperteArbeidsgiverperioder.last().endInclusive.nesteDag)) førsteFraværsdag
         else grupperteArbeidsgiverperioder.maxOf { it.start }
     }
@@ -102,6 +105,36 @@ class Inntektsmelding(
 
     internal fun inntektHåndtert() {
         håndtertInntekt = true
+    }
+
+    @JvmInline
+    value class BegrunnelseForReduksjonEllerIkkeUtbetalt private constructor(private val begrunnelse: String) {
+        init { check(begrunnelse.isNotBlank()) }
+        override fun toString() = begrunnelse
+        internal fun valider(aktivitetslogg: IAktivitetslogg, hulleteArbeidsgiverperiode: Boolean) {
+            aktivitetslogg.info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: $begrunnelse")
+            if (hulleteArbeidsgiverperiode) aktivitetslogg.funksjonellFeil(RV_IM_23)
+            when (begrunnelse) {
+                in ikkeStøttedeBegrunnelserForReduksjon -> aktivitetslogg.funksjonellFeil(RV_IM_8)
+                "FerieEllerAvspasering" -> aktivitetslogg.varsel(Varselkode.RV_IM_25)
+                else -> aktivitetslogg.varsel(RV_IM_8)
+            }
+        }
+        companion object {
+            private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
+                "BetvilerArbeidsufoerhet",
+                "FiskerMedHyre",
+                "StreikEllerLockout",
+                "FravaerUtenGyldigGrunn",
+                "BeskjedGittForSent",
+                "IkkeLoenn"
+            )
+            fun fraInnteksmelding(imBegrunnelse: String?) = when {
+                imBegrunnelse.isNullOrBlank() -> null
+                else -> BegrunnelseForReduksjonEllerIkkeUtbetalt(imBegrunnelse)
+            }
+
+        }
     }
 
     data class OpphørAvNaturalytelse(

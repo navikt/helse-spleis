@@ -8,6 +8,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.fraInnteksmelding
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -42,7 +43,7 @@ internal class InntektsmeldingMessage(
         orgnummer = orgnummer,
         beregnetInntekt = beregnetInntekt.månedlig,
         arbeidsgiverperioder = arbeidsgiverperioder,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = fraInnteksmelding(begrunnelseForReduksjonEllerIkkeUtbetalt),
         opphørAvNaturalytelser = opphørAvNaturalytelser,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
         førsteFraværsdag = førsteFraværsdag,

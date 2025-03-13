@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.InntekterForBeregning.Inntektsperiode
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.fraInnteksmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
@@ -136,7 +137,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
                 orgnummer = organisasjonsnummer,
                 beregnetInntekt = beregnetInntekt,
                 arbeidsgiverperioder = arbeidsgiverperioder,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = fraInnteksmelding(begrunnelseForReduksjonEllerIkkeUtbetalt),
                 opphørAvNaturalytelser = opphørAvNaturalytelser,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
                 førsteFraværsdag = førsteFraværsdag,

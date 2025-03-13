@@ -10,6 +10,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.fraInnteksmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.spleis.IHendelseMediator
@@ -71,7 +72,7 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
             orgnummer = orgnummer,
             beregnetInntekt = beregnetInntekt.månedlig,
             arbeidsgiverperioder = arbeidsgiverperioder,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = fraInnteksmelding(begrunnelseForReduksjonEllerIkkeUtbetalt),
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
             førsteFraværsdag = førsteFraværsdag,
