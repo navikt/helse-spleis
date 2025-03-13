@@ -344,12 +344,15 @@ internal class Vedtaksperiode private constructor(
         return Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode)
     }
 
-    internal fun håndter(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {
-        if (!hendelse.erRelevant(this.periode)) return hendelse.vurdertTilOgMed(periode.endInclusive)
+    internal fun håndter(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        if (!hendelse.erRelevant(this.periode)) {
+            hendelse.vurdertTilOgMed(periode.endInclusive)
+            return null
+        }
         registrerKontekst(aktivitetslogg)
         val arbeidsgiverperiodeFørOverstyring = arbeidsgiver.arbeidsgiverperiode(periode)
 
-        when (tilstand) {
+        val overstyring = when (tilstand) {
             Avsluttet,
             AvsluttetUtenUtbetaling,
             AvventerBlokkerendePeriode,
@@ -373,12 +376,11 @@ internal class Vedtaksperiode private constructor(
                 val vedtaksperiodeTilRevurdering = arbeidsgiver.finnVedtaksperiodeFør(this)?.takeIf {
                     nyArbeidsgiverperiodeEtterEndring(it)
                 } ?: this
-                person.igangsettOverstyring(
-                    Revurderingseventyr.sykdomstidslinje(
-                        hendelse = hendelse,
-                        skjæringstidspunkt = vedtaksperiodeTilRevurdering.skjæringstidspunkt,
-                        periodeForEndring = vedtaksperiodeTilRevurdering.periode
-                    ), aktivitetslogg
+
+                Revurderingseventyr.sykdomstidslinje(
+                    hendelse = hendelse,
+                    skjæringstidspunkt = vedtaksperiodeTilRevurdering.skjæringstidspunkt,
+                    periodeForEndring = vedtaksperiodeTilRevurdering.periode
                 )
             }
 
@@ -390,6 +392,7 @@ internal class Vedtaksperiode private constructor(
         val arbeidsgiverperiodeEtterOverstyring = arbeidsgiver.arbeidsgiverperiode(periode)
         sendMetrikkTilHag(arbeidsgiverperiodeFørOverstyring, arbeidsgiverperiodeEtterOverstyring, hendelse)
         hendelse.vurdertTilOgMed(periode.endInclusive)
+        return overstyring
     }
 
     private fun nyArbeidsgiverperiodeEtterEndring(other: Vedtaksperiode): Boolean {

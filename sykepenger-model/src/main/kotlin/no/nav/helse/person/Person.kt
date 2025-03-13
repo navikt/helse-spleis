@@ -438,7 +438,8 @@ class Person private constructor(
 
     fun håndter(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {
         registrer(aktivitetslogg, "Behandler Overstyr tidslinje")
-        finnArbeidsgiver(hendelse.behandlingsporing, aktivitetslogg).håndter(hendelse, aktivitetslogg)
+        val revurderingseventyr = finnArbeidsgiver(hendelse.behandlingsporing, aktivitetslogg).håndter(hendelse, aktivitetslogg)
+        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
         håndterGjenoppta(hendelse, aktivitetslogg)
     }
 

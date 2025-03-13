@@ -895,11 +895,11 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
-    internal fun håndter(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {
+    internal fun håndter(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         aktivitetslogg.kontekst(this)
-        håndter {
+        return håndter {
             it.håndter(hendelse, aktivitetslogg)
-        }
+        }.tidligsteEventyr()
     }
 
     private fun håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
