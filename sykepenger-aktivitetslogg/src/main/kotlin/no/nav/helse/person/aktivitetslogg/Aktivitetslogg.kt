@@ -5,12 +5,11 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.*
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
 // Implements Visitor pattern to traverse the messages
-class Aktivitetslogg(
-    private var forelder: Aktivitetslogg? = null
+data class Aktivitetslogg(
+    private val forelder: Aktivitetslogg? = null,
+    private val kontekster: List<Aktivitetskontekst> = emptyList(),
+    val aktiviteter: MutableList<Aktivitet> = mutableListOf()
 ) : IAktivitetslogg {
-    private val _aktiviteter = mutableListOf<Aktivitet>()
-    val aktiviteter: List<Aktivitet> get() = _aktiviteter.toList()
-    private val kontekster = mutableListOf<Aktivitetskontekst>()  // Doesn't need serialization
 
     val behov get() = aktiviteter.filterIsInstance<Behov>()
     val info get() = aktiviteter.filterIsInstance<Info>()
@@ -42,30 +41,23 @@ class Aktivitetslogg(
     }
 
     private fun add(aktivitet: Aktivitet) {
-        this._aktiviteter.add(aktivitet)
+        this.aktiviteter.add(aktivitet)
         forelder?.add(aktivitet)
     }
 
-    private fun MutableList<Aktivitetskontekst>.toSpesifikk() = this.map { it.toSpesifikkKontekst() }
+    private fun Collection<Aktivitetskontekst>.toSpesifikk() = this.map { it.toSpesifikkKontekst() }
 
     override fun harVarslerEllerVerre() = varsel.isNotEmpty() || harFunksjonelleFeilEllerVerre()
 
     override fun harFunksjonelleFeilEllerVerre() = funksjonellFeil.isNotEmpty() || logiskFeil.isNotEmpty()
 
-    override fun barn() = Aktivitetslogg(this).also { it.kontekster.addAll(this.kontekster) }
+    override fun toString() = this.aktiviteter.joinToString(separator = "\n") { "$it" }
 
-    override fun toString() = this._aktiviteter.joinToString(separator = "\n") { "$it" }
-
-    override fun kontekst(kontekst: Aktivitetskontekst) {
+    override fun kontekst(kontekst: Aktivitetskontekst): Aktivitetslogg {
         val spesifikkKontekst = kontekst.toSpesifikkKontekst()
         val index = kontekster.indexOfFirst { spesifikkKontekst.sammeType(it) }
-        if (index >= 0) fjernKonteksterFraOgMed(index)
-        kontekster.add(kontekst)
-    }
-
-    private fun fjernKonteksterFraOgMed(indeks: Int) {
-        val antall = kontekster.size - indeks
-        repeat(antall) { kontekster.removeLast() }
+        val nyeKontekster = (if (index >= 0) kontekster.take(index) else kontekster).plusElement(kontekst)
+        return copy(forelder = this, kontekster = nyeKontekster, aktiviteter = aktiviteter.toMutableList())
     }
 
     class AktivitetException internal constructor(private val aktivitetslogg: Aktivitetslogg) :

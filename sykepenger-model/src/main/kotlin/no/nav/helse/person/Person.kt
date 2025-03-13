@@ -161,80 +161,80 @@ class Person private constructor(
     )
 
     fun håndter(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler sykmelding")
-        tidligereBehandlinger(sykmelding.behandlingsporing, aktivitetslogg, sykmelding.periode())
-        val arbeidsgiver = finnEllerOpprettArbeidsgiver(sykmelding.behandlingsporing, aktivitetslogg)
-        arbeidsgiver.håndter(sykmelding, aktivitetslogg)
-        håndterGjenoppta(sykmelding, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler sykmelding")
+        tidligereBehandlinger(sykmelding.behandlingsporing, aktivitetsloggMedPersonkontekst, sykmelding.periode())
+        val arbeidsgiver = finnEllerOpprettArbeidsgiver(sykmelding.behandlingsporing, aktivitetsloggMedPersonkontekst)
+        arbeidsgiver.håndter(sykmelding, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(sykmelding, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(avbruttSøknad: AvbruttSøknad, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler avbrutt søknad")
-        val arbeidsgiver = finnArbeidsgiver(avbruttSøknad.behandlingsporing, aktivitetslogg)
-        arbeidsgiver.håndter(avbruttSøknad, aktivitetslogg)
-        gjenopptaBehandling(aktivitetslogg)
-        håndterGjenoppta(avbruttSøknad, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler avbrutt søknad")
+        val arbeidsgiver = finnArbeidsgiver(avbruttSøknad.behandlingsporing, aktivitetsloggMedPersonkontekst)
+        arbeidsgiver.håndter(avbruttSøknad, aktivitetsloggMedPersonkontekst)
+        gjenopptaBehandling(aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(avbruttSøknad, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(forkastSykmeldingsperioder: ForkastSykmeldingsperioder, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler forkasting av sykmeldingsperioder")
-        finnArbeidsgiver(forkastSykmeldingsperioder.behandlingsporing, aktivitetslogg).håndter(forkastSykmeldingsperioder, aktivitetslogg)
-        gjenopptaBehandling(aktivitetslogg)
-        håndterGjenoppta(forkastSykmeldingsperioder, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler forkasting av sykmeldingsperioder")
+        finnArbeidsgiver(forkastSykmeldingsperioder.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(forkastSykmeldingsperioder, aktivitetsloggMedPersonkontekst)
+        gjenopptaBehandling(aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(forkastSykmeldingsperioder, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler anmodning om forkasting")
-        finnArbeidsgiver(anmodningOmForkasting.behandlingsporing, aktivitetslogg).håndter(anmodningOmForkasting, aktivitetslogg)
-        håndterGjenoppta(anmodningOmForkasting, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler anmodning om forkasting")
+        finnArbeidsgiver(anmodningOmForkasting.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(anmodningOmForkasting, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(anmodningOmForkasting, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(søknad: Søknad, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler søknad")
-        tidligereBehandlinger(søknad.behandlingsporing, aktivitetslogg, søknad.sykdomstidslinje.periode()!!)
-        val arbeidsgiver = finnEllerOpprettArbeidsgiver(søknad.behandlingsporing, aktivitetslogg)
-        val revurderingseventyr = arbeidsgiver.håndter(søknad, aktivitetslogg, arbeidsgivere.toList(), infotrygdhistorikk)
-        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
-        håndterGjenoppta(søknad, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler søknad")
+        tidligereBehandlinger(søknad.behandlingsporing, aktivitetsloggMedPersonkontekst, søknad.sykdomstidslinje.periode()!!)
+        val arbeidsgiver = finnEllerOpprettArbeidsgiver(søknad.behandlingsporing, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr = arbeidsgiver.håndter(søknad, aktivitetsloggMedPersonkontekst, arbeidsgivere.toList(), infotrygdhistorikk)
+        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(søknad, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler arbeidsgiveropplysningene ${arbeidsgiveropplysninger.joinToString { "${it::class.simpleName}" }}")
-        val arbeidsgiver = finnEllerOpprettArbeidsgiver(arbeidsgiveropplysninger.behandlingsporing, aktivitetslogg)
-        val revurderingseventyr = arbeidsgiver.håndter(arbeidsgiveropplysninger, aktivitetslogg)
-        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
-        håndterGjenoppta(arbeidsgiveropplysninger, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler arbeidsgiveropplysningene ${arbeidsgiveropplysninger.joinToString { "${it::class.simpleName}" }}")
+        val arbeidsgiver = finnEllerOpprettArbeidsgiver(arbeidsgiveropplysninger.behandlingsporing, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr = arbeidsgiver.håndter(arbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
+        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(arbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler de korrigerte arbeidsgiveropplysningene ${korrigerteArbeidsgiveropplysninger.joinToString { "${it::class.simpleName}" }}")
-        val arbeidsgiver = finnEllerOpprettArbeidsgiver(korrigerteArbeidsgiveropplysninger.behandlingsporing, aktivitetslogg)
-        val revurderingseventyr = arbeidsgiver.håndter(korrigerteArbeidsgiveropplysninger, aktivitetslogg)
-        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
-        håndterGjenoppta(korrigerteArbeidsgiveropplysninger, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler de korrigerte arbeidsgiveropplysningene ${korrigerteArbeidsgiveropplysninger.joinToString { "${it::class.simpleName}" }}")
+        val arbeidsgiver = finnEllerOpprettArbeidsgiver(korrigerteArbeidsgiveropplysninger.behandlingsporing, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr = arbeidsgiver.håndter(korrigerteArbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
+        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(korrigerteArbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler inntektsmelding")
-        val arbeidsgiver = finnEllerOpprettArbeidsgiver(inntektsmelding.behandlingsporing, aktivitetslogg)
-        val revurderingseventyr = arbeidsgiver.håndter(inntektsmelding, aktivitetslogg)
-        arbeidsgiver.inntektsmeldingFerdigbehandlet(inntektsmelding, aktivitetslogg)
-        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
-        håndterGjenoppta(inntektsmelding, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler inntektsmelding")
+        val arbeidsgiver = finnEllerOpprettArbeidsgiver(inntektsmelding.behandlingsporing, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr = arbeidsgiver.håndter(inntektsmelding, aktivitetsloggMedPersonkontekst)
+        arbeidsgiver.inntektsmeldingFerdigbehandlet(inntektsmelding, aktivitetsloggMedPersonkontekst)
+        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(inntektsmelding, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(replays: InntektsmeldingerReplay, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler replay av inntektsmeldinger")
-        val revurderingseventyr = finnArbeidsgiver(replays.behandlingsporing, aktivitetslogg).håndter(replays, aktivitetslogg)
-        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
-        håndterGjenoppta(replays, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler replay av inntektsmeldinger")
+        val revurderingseventyr = finnArbeidsgiver(replays.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(replays, aktivitetsloggMedPersonkontekst)
+        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(replays, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(melding: MinimumSykdomsgradsvurderingMelding, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler minimum sykdomsgradvurdering")
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler minimum sykdomsgradvurdering")
         melding.oppdater(this.minimumSykdomsgradsvurdering)
-        this.igangsettOverstyring(Revurderingseventyr.minimumSykdomsgradVurdert(melding, melding.periodeForEndring()), aktivitetslogg)
-        håndterGjenoppta(melding, aktivitetslogg)
+        this.igangsettOverstyring(Revurderingseventyr.minimumSykdomsgradVurdert(melding, melding.periodeForEndring()), aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(melding, aktivitetsloggMedPersonkontekst)
     }
 
     private fun tidligereBehandlinger(behandlingsporing: Behandlingsporing.Arbeidsgiver, aktivitetslogg: IAktivitetslogg, periode: Periode) {
@@ -256,44 +256,48 @@ class Person private constructor(
 
     private fun vedtaksperioderEtter(dato: LocalDate) = arbeidsgivere.flatMap { it.vedtaksperioderEtter(dato) }
     fun håndter(dødsmelding: Dødsmelding, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler dødsmelding")
-        aktivitetslogg.info("Registrerer dødsdato")
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler dødsmelding")
+        aktivitetsloggMedPersonkontekst.info("Registrerer dødsdato")
         alder = dødsmelding.dødsdato(alder)
-        håndterGjenoppta(dødsmelding, aktivitetslogg)
+        håndterGjenoppta(dødsmelding, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(identOpphørt: IdentOpphørt, aktivitetslogg: IAktivitetslogg, nyPersonidentifikator: Personidentifikator) {
-        registrer(aktivitetslogg, "Behandler ident opphørt")
-        aktivitetslogg.info("Person har byttet ident til $nyPersonidentifikator")
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler ident opphørt")
+        aktivitetsloggMedPersonkontekst.info("Person har byttet ident til $nyPersonidentifikator")
         this.personidentifikator = nyPersonidentifikator
-        håndterGjenoppta(identOpphørt, aktivitetslogg)
+        håndterGjenoppta(identOpphørt, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(infotrygdendring: Infotrygdendring, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler infotrygdendring")
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler infotrygdendring")
         val tidligsteDato = arbeidsgivere.tidligsteDato()
-        infotrygdhistorikk.oppfrisk(aktivitetslogg, tidligsteDato)
-        håndterGjenoppta(infotrygdendring, aktivitetslogg)
+        infotrygdhistorikk.oppfrisk(aktivitetsloggMedPersonkontekst, tidligsteDato)
+        håndterGjenoppta(infotrygdendring, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(inntektsendringer: Inntektsendringer, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler inntektsendringer")
-        igangsettOverstyring(Revurderingseventyr.inntektsendringer(inntektsendringer, inntektsendringer.inntektsendringFom), aktivitetslogg)
-        håndterGjenoppta(inntektsendringer, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler inntektsendringer")
+        igangsettOverstyring(Revurderingseventyr.inntektsendringer(inntektsendringer, inntektsendringer.inntektsendringFom), aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(inntektsendringer, aktivitetsloggMedPersonkontekst)
     }
 
 
-    fun håndter(utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, aktivitetslogg: IAktivitetslogg) = håndterHistorikkFraInfotrygd(utbetalingshistorikkEtterInfotrygdendring, aktivitetslogg) {
-        utbetalingshistorikkEtterInfotrygdendring.oppdaterHistorikk(aktivitetslogg, it)
-    }
-
-    fun håndter(utbetalingshistorikk: Utbetalingshistorikk, aktivitetslogg: IAktivitetslogg) =
-        håndterHistorikkFraInfotrygd(utbetalingshistorikk, aktivitetslogg) {
-            utbetalingshistorikk.oppdaterHistorikk(aktivitetslogg, it)
+    fun håndter(utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler historikk fra infotrygd")
+        håndterHistorikkFraInfotrygd(utbetalingshistorikkEtterInfotrygdendring, aktivitetsloggMedPersonkontekst) {
+            utbetalingshistorikkEtterInfotrygdendring.oppdaterHistorikk(aktivitetsloggMedPersonkontekst, it)
         }
+    }
+
+    fun håndter(utbetalingshistorikk: Utbetalingshistorikk, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler historikk fra infotrygd")
+        håndterHistorikkFraInfotrygd(utbetalingshistorikk, aktivitetsloggMedPersonkontekst) {
+            utbetalingshistorikk.oppdaterHistorikk(aktivitetsloggMedPersonkontekst, it)
+        }
+    }
 
     private fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, oppdatertHistorikk: (infotrygdhistorikk: Infotrygdhistorikk) -> Boolean) {
-        registrer(aktivitetslogg, "Behandler historikk fra infotrygd")
         oppdatertHistorikk(infotrygdhistorikk)
         sykdomshistorikkEndret()
         val revurderingseventyr = arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, aktivitetslogg, infotrygdhistorikk)
@@ -314,14 +318,14 @@ class Person private constructor(
     }
 
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkForFeriepenger, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler utbetalingshistorikk for feriepenger")
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler utbetalingshistorikk for feriepenger")
 
         if (Toggle.SendFeriepengeOppdrag.enabled) {
-            aktivitetslogg.info("Starter beregning av feriepenger")
+            aktivitetsloggMedPersonkontekst.info("Starter beregning av feriepenger")
         }
 
         if (utbetalingshistorikk.skalBeregnesManuelt) {
-            aktivitetslogg.info("Person er markert for manuell beregning av feriepenger")
+            aktivitetsloggMedPersonkontekst.info("Person er markert for manuell beregning av feriepenger")
             return
         }
 
@@ -340,7 +344,7 @@ class Person private constructor(
             feriepengeberegner.beregnFeriepengerForInfotrygdPerson().roundToInt()
 
         if (beregnetFeriepengebeløpPersonInfotrygd != 0 && beregnetFeriepengebeløpPersonInfotrygd !in feriepengepengebeløpPersonUtbetaltAvInfotrygd) {
-            aktivitetslogg.info(
+            aktivitetsloggMedPersonkontekst.info(
                 """
                 Beregnet feriepengebeløp til person i IT samsvarer ikke med faktisk utbetalt beløp
                 Faktisk utbetalt beløp: $feriepengepengebeløpPersonUtbetaltAvInfotrygd
@@ -350,132 +354,132 @@ class Person private constructor(
         }
 
         utbetalingshistorikk.sikreAtArbeidsgivereEksisterer {
-            _arbeidsgivere.finnEllerOpprett(Yrkesaktivitet.Arbeidstaker(it), aktivitetslogg)
+            _arbeidsgivere.finnEllerOpprett(Yrkesaktivitet.Arbeidstaker(it), aktivitetsloggMedPersonkontekst)
         }
         arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(
             personidentifikator,
             feriepengeberegner,
             utbetalingshistorikk,
-            aktivitetslogg
+            aktivitetsloggMedPersonkontekst
         )
 
         if (Toggle.SendFeriepengeOppdrag.enabled) {
-            aktivitetslogg.info("Feriepenger er utbetalt")
+            aktivitetsloggMedPersonkontekst.info("Feriepenger er utbetalt")
         }
     }
 
     fun håndter(ytelser: Ytelser, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler historiske utbetalinger og inntekter")
-        finnArbeidsgiver(ytelser.behandlingsporing, aktivitetslogg).håndter(ytelser, aktivitetslogg, infotrygdhistorikk)
-        håndterGjenoppta(ytelser, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler historiske utbetalinger og inntekter")
+        finnArbeidsgiver(ytelser.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(ytelser, aktivitetsloggMedPersonkontekst, infotrygdhistorikk)
+        håndterGjenoppta(ytelser, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler utbetalingsgodkjenning")
-        finnArbeidsgiver(utbetalingsgodkjenning.behandlingsporing, aktivitetslogg).håndter(utbetalingsgodkjenning, aktivitetslogg)
-        håndterGjenoppta(utbetalingsgodkjenning, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler utbetalingsgodkjenning")
+        finnArbeidsgiver(utbetalingsgodkjenning.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(utbetalingsgodkjenning, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(utbetalingsgodkjenning, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(vedtakFattet: VedtakFattet, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler vedtak fattet")
-        finnArbeidsgiver(vedtakFattet.behandlingsporing, aktivitetslogg).håndter(vedtakFattet, aktivitetslogg)
-        håndterGjenoppta(vedtakFattet, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler vedtak fattet")
+        finnArbeidsgiver(vedtakFattet.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(vedtakFattet, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(vedtakFattet, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(kanIkkeBehandlesHer: KanIkkeBehandlesHer, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler kan ikke behandles her")
-        finnArbeidsgiver(kanIkkeBehandlesHer.behandlingsporing, aktivitetslogg).håndter(kanIkkeBehandlesHer, aktivitetslogg)
-        håndterGjenoppta(kanIkkeBehandlesHer, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler kan ikke behandles her")
+        finnArbeidsgiver(kanIkkeBehandlesHer.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(kanIkkeBehandlesHer, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(kanIkkeBehandlesHer, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler sykepengegrunnlag for arbeidsgiver")
-        finnArbeidsgiver(sykepengegrunnlagForArbeidsgiver.behandlingsporing, aktivitetslogg).håndter(sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
-        håndterGjenoppta(sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler sykepengegrunnlag for arbeidsgiver")
+        finnArbeidsgiver(sykepengegrunnlagForArbeidsgiver.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler vilkårsgrunnlag")
-        finnArbeidsgiver(vilkårsgrunnlag.behandlingsporing, aktivitetslogg).håndter(vilkårsgrunnlag, aktivitetslogg)
-        håndterGjenoppta(vilkårsgrunnlag, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler vilkårsgrunnlag")
+        finnArbeidsgiver(vilkårsgrunnlag.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(vilkårsgrunnlag, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(vilkårsgrunnlag, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(simulering: Simulering, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler simulering")
-        finnArbeidsgiver(simulering.behandlingsporing, aktivitetslogg).håndter(simulering, aktivitetslogg)
-        håndterGjenoppta(simulering, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler simulering")
+        finnArbeidsgiver(simulering.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(simulering, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(simulering, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(utbetaling: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler utbetaling")
-        finnArbeidsgiver(utbetaling.behandlingsporing, aktivitetslogg).håndter(utbetaling, aktivitetslogg)
-        håndterGjenoppta(utbetaling, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler utbetaling")
+        finnArbeidsgiver(utbetaling.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(utbetaling, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(utbetaling, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(påminnelse: Utbetalingpåminnelse, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler utbetalingpåminnelse")
-        finnArbeidsgiver(påminnelse.behandlingsporing, aktivitetslogg).håndter(påminnelse, aktivitetslogg)
-        håndterGjenoppta(påminnelse, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler utbetalingpåminnelse")
+        finnArbeidsgiver(påminnelse.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(påminnelse, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(påminnelse, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(påminnelse: PersonPåminnelse, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler personpåminnelse")
-        håndterGjenoppta(påminnelse, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler personpåminnelse")
+        håndterGjenoppta(påminnelse, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler påminnelse")
-        val revurderingseventyr = finnArbeidsgiver(påminnelse.behandlingsporing, aktivitetslogg).håndter(påminnelse, aktivitetslogg)
-        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
-        return håndterGjenoppta(påminnelse, aktivitetslogg)
-        håndterGjenoppta(påminnelse, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler påminnelse")
+        val revurderingseventyr = finnArbeidsgiver(påminnelse.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(påminnelse, aktivitetsloggMedPersonkontekst)
+        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        return håndterGjenoppta(påminnelse, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(påminnelse, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler Overstyr tidslinje")
-        val revurderingseventyr = finnArbeidsgiver(hendelse.behandlingsporing, aktivitetslogg).håndter(hendelse, aktivitetslogg)
-        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
-        håndterGjenoppta(hendelse, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler Overstyr tidslinje")
+        val revurderingseventyr = finnArbeidsgiver(hendelse.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(hendelse, aktivitetsloggMedPersonkontekst)
+        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(hendelse, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(hendelse: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler Overstyring av arbeidsgiveropplysninger")
-        val inntektseventyr = arbeidsgivere.håndterOverstyringAvInntekt(hendelse, aktivitetslogg)
-        val refusjonseventyr = arbeidsgivere.håndterOverstyringAvRefusjon(hendelse, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler Overstyring av arbeidsgiveropplysninger")
+        val inntektseventyr = arbeidsgivere.håndterOverstyringAvInntekt(hendelse, aktivitetsloggMedPersonkontekst)
+        val refusjonseventyr = arbeidsgivere.håndterOverstyringAvRefusjon(hendelse, aktivitetsloggMedPersonkontekst)
         val tidligsteEventyr = Revurderingseventyr.tidligsteEventyr(inntektseventyr, refusjonseventyr)
-        if (tidligsteEventyr == null) return aktivitetslogg.info("Ingen vedtaksperioder håndterte overstyringen av arbeidsgiveropplysninger fordi overstyringen ikke har endret noe.")
-        igangsettOverstyring(tidligsteEventyr, aktivitetslogg)
-        håndterGjenoppta(hendelse, aktivitetslogg)
+        if (tidligsteEventyr == null) return aktivitetsloggMedPersonkontekst.info("Ingen vedtaksperioder håndterte overstyringen av arbeidsgiveropplysninger fordi overstyringen ikke har endret noe.")
+        igangsettOverstyring(tidligsteEventyr, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(hendelse, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(hendelse: SkjønnsmessigFastsettelse, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler skjønnsmessig fastsettelse")
-        val revurderingseventyr = arbeidsgivere.håndter(hendelse, aktivitetslogg) ?: error("Ingen vedtaksperioder håndterte skjønnsmessig fastsettelse")
-        igangsettOverstyring(revurderingseventyr, aktivitetslogg)
-        håndterGjenoppta(hendelse, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler skjønnsmessig fastsettelse")
+        val revurderingseventyr = arbeidsgivere.håndter(hendelse, aktivitetsloggMedPersonkontekst) ?: error("Ingen vedtaksperioder håndterte skjønnsmessig fastsettelse")
+        igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(hendelse, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler overstyring av arbeidsforhold")
-        val revurderingseventyr = arbeidsgivere.håndter(overstyrArbeidsforhold, aktivitetslogg) ?: error("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen")
-        igangsettOverstyring(revurderingseventyr, aktivitetslogg)
-        håndterGjenoppta(overstyrArbeidsforhold, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler overstyring av arbeidsforhold")
+        val revurderingseventyr = arbeidsgivere.håndter(overstyrArbeidsforhold, aktivitetsloggMedPersonkontekst) ?: error("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen")
+        igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(overstyrArbeidsforhold, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler annulleringforespørsel")
-        val revurderingseventyr = finnArbeidsgiver(hendelse.behandlingsporing, aktivitetslogg).håndter(hendelse, aktivitetslogg)
-        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
-        håndterGjenoppta(hendelse, aktivitetslogg)
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler annulleringforespørsel")
+        val revurderingseventyr = finnArbeidsgiver(hendelse.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(hendelse, aktivitetsloggMedPersonkontekst)
+        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(hendelse, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(hendelse: Grunnbeløpsregulering, aktivitetslogg: IAktivitetslogg) {
-        registrer(aktivitetslogg, "Behandler grunnbeløpsendring")
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler grunnbeløpsendring")
         if (vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(hendelse.skjæringstidspunkt) == null)
             return observers.forEach { hendelse.sykefraværstilfelleIkkeFunnet(it) }
-        val revurderingseventyr = arbeidsgivere.håndter(hendelse, aktivitetslogg) ?: return
-        igangsettOverstyring(revurderingseventyr, aktivitetslogg)
-        håndterGjenoppta(hendelse, aktivitetslogg)
+        val revurderingseventyr = arbeidsgivere.håndter(hendelse, aktivitetsloggMedPersonkontekst) ?: return
+        igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(hendelse, aktivitetsloggMedPersonkontekst)
     }
 
     fun addObserver(observer: PersonObserver) {
@@ -592,9 +596,10 @@ class Person private constructor(
         return SpesifikkKontekst("Person", mapOf("fødselsnummer" to personidentifikator.toString()))
     }
 
-    private fun registrer(aktivitetslogg: IAktivitetslogg, melding: String) {
-        aktivitetslogg.kontekst(this)
-        aktivitetslogg.info(melding)
+    private fun registrer(aktivitetslogg: IAktivitetslogg, melding: String): IAktivitetslogg {
+        return aktivitetslogg.kontekst(this).also {
+            it.info(melding)
+        }
     }
 
     private fun finnEllerOpprettArbeidsgiver(behandlingsporing: Behandlingsporing.Arbeidsgiver, aktivitetslogg: IAktivitetslogg) =

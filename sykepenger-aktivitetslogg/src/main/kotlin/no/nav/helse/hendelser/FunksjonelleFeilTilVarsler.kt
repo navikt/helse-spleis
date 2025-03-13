@@ -8,6 +8,4 @@ class FunksjonelleFeilTilVarsler(private val other: IAktivitetslogg) : IAktivite
         varsel(kode)
         info("Deeskalerer $kode")
     }
-
-    override fun barn() = FunksjonelleFeilTilVarsler(other.barn())
 }

@@ -226,7 +226,7 @@ internal class Vedtaksperiode private constructor(
         opprettet = LocalDateTime.now(),
         regelverkslogg = regelverkslogg
     ) {
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         val periode = checkNotNull(sykdomstidslinje.periode()) { "sykdomstidslinjen er tom" }
         person.vedtaksperiodeOpprettet(id, arbeidsgiver.organisasjonsnummer, periode, periode.start, opprettet)
         behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, inntektsendringer, dokumentsporing, metadata.behandlingkilde)
@@ -288,22 +288,22 @@ internal class Vedtaksperiode private constructor(
         infotrygdhistorikk: Infotrygdhistorikk
     ): Revurderingseventyr {
         check(tilstand is Start)
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId.id, id, arbeidsgiver.organisasjonsnummer)
-        søknad.forUng(aktivitetslogg, person.alder)
-        arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(aktivitetslogg, this, arbeidsgivere)
+        søknad.forUng(aktivitetsloggMedVedtaksperiodekontekst, person.alder)
+        arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(aktivitetsloggMedVedtaksperiodekontekst, this, arbeidsgivere)
 
-        infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
-        håndterSøknad(søknad, aktivitetslogg)
-        aktivitetslogg.info("Fullført behandling av søknad")
+        infotrygdhistorikk.valider(aktivitetsloggMedVedtaksperiodekontekst, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
+        håndterSøknad(søknad, aktivitetsloggMedVedtaksperiodekontekst)
+        aktivitetsloggMedVedtaksperiodekontekst.info("Fullført behandling av søknad")
 
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) forkast(søknad, aktivitetslogg)
+        if (aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeilEllerVerre()) forkast(søknad, aktivitetslogg)
         return Revurderingseventyr.nyPeriode(søknad, skjæringstidspunkt, periode)
     }
 
     internal fun håndterKorrigertSøknad(søknad: Søknad, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         if (!søknad.erRelevant(this.periode)) return null
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId.id, id, arbeidsgiver.organisasjonsnummer)
 
@@ -322,7 +322,7 @@ internal class Vedtaksperiode private constructor(
 
                     else -> AvventerBlokkerendePeriode
                 }
-                håndterOverlappendeSøknad(søknad, aktivitetslogg, nesteTilstand)
+                håndterOverlappendeSøknad(søknad, aktivitetsloggMedVedtaksperiodekontekst, nesteTilstand)
             }
 
             AvsluttetUtenUtbetaling,
@@ -333,14 +333,14 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøvingRevurdering,
             TilUtbetaling -> {
-                håndterOverlappendeSøknadRevurdering(søknad, aktivitetslogg)
+                håndterOverlappendeSøknadRevurdering(søknad, aktivitetsloggMedVedtaksperiodekontekst)
             }
 
             Start,
             RevurderingFeilet,
             TilInfotrygd -> error("Kan ikke håndtere søknad mens perioden er i $tilstand")
         }
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) forkast(søknad, aktivitetslogg)
+        if (aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeilEllerVerre()) forkast(søknad, aktivitetsloggMedVedtaksperiodekontekst)
         return Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode)
     }
 
@@ -349,7 +349,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.vurdertTilOgMed(periode.endInclusive)
             return null
         }
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         val arbeidsgiverperiodeFørOverstyring = arbeidsgiver.arbeidsgiverperiode(periode)
 
         val overstyring = when (tilstand) {
@@ -369,10 +369,10 @@ internal class Vedtaksperiode private constructor(
             AvventerVilkårsprøvingRevurdering,
             TilUtbetaling -> {
                 val dagerNavOvertarAnsvar = behandlinger.dagerNavOvertarAnsvar
-                oppdaterHistorikk(hendelse.metadata.behandlingkilde, overstyrTidslinje(hendelse.metadata.meldingsreferanseId), hendelse.sykdomstidslinje, aktivitetslogg, hendelse.dagerNavOvertarAnsvar(dagerNavOvertarAnsvar)) {
+                oppdaterHistorikk(hendelse.metadata.behandlingkilde, overstyrTidslinje(hendelse.metadata.meldingsreferanseId), hendelse.sykdomstidslinje, aktivitetsloggMedVedtaksperiodekontekst, hendelse.dagerNavOvertarAnsvar(dagerNavOvertarAnsvar)) {
                     // ingen validering å gjøre :(
                 }
-                aktivitetslogg.info("Igangsetter overstyring av tidslinje")
+                aktivitetsloggMedVedtaksperiodekontekst.info("Igangsetter overstyring av tidslinje")
                 val vedtaksperiodeTilRevurdering = arbeidsgiver.finnVedtaksperiodeFør(this)?.takeIf {
                     nyArbeidsgiverperiodeEtterEndring(it)
                 } ?: this
@@ -407,12 +407,12 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg) {
         if (!anmodningOmForkasting.erRelevant(id)) return
-        registrerKontekst(aktivitetslogg)
-        aktivitetslogg.info("Behandler anmodning om forkasting")
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        aktivitetsloggMedVedtaksperiodekontekst.info("Behandler anmodning om forkasting")
         when (tilstand) {
             AvventerInntektsmelding,
             AvventerBlokkerendePeriode,
-            AvsluttetUtenUtbetaling -> forkast(anmodningOmForkasting, aktivitetslogg)
+            AvsluttetUtenUtbetaling -> forkast(anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst)
 
             Avsluttet,
             AvventerGodkjenning,
@@ -429,8 +429,8 @@ internal class Vedtaksperiode private constructor(
             Start,
             TilInfotrygd,
             TilUtbetaling -> {
-                if (anmodningOmForkasting.force) return forkast(anmodningOmForkasting, aktivitetslogg)
-                aktivitetslogg.info("Avslår anmodning om forkasting i $tilstand")
+                if (anmodningOmForkasting.force) return forkast(anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst)
+                aktivitetsloggMedVedtaksperiodekontekst.info("Avslår anmodning om forkasting i $tilstand")
             }
         }
     }
@@ -438,6 +438,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndterInntektFraInntektsmelding(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektshistorikk: Inntektshistorikk): Revurderingseventyr? {
         // håndterer kun inntekt hvis inntektsdato treffer perioden
         if (inntektsmelding.datoForHåndteringAvInntekt !in periode) return null
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         // 1. legger til inntekten sånn at den kanskje kan brukes i forbindelse med faktaavklaring av inntekt
         // 1.1 lagrer på den datoen inntektsmeldingen mener
@@ -453,8 +454,7 @@ internal class Vedtaksperiode private constructor(
         // 2. endrer vilkårsgrunnlaget hvis det finnes et
         if (!oppdaterVilkårsgrunnlagMedInntekt(inntektsmelding.korrigertInntekt())) return null
 
-        registrerKontekst(aktivitetslogg)
-        aktivitetslogg.varsel(RV_IM_4)
+        aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
         return Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(inntektsmelding, skjæringstidspunkt, skjæringstidspunkt)
     }
 
@@ -538,18 +538,18 @@ internal class Vedtaksperiode private constructor(
     internal fun håndterReplayAvInntektsmelding(vedtaksperiodeIdForReplay: UUID, inntektsmeldinger: List<Inntektsmelding>, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         if (vedtaksperiodeIdForReplay != this.id) return null
         if (inntektsmeldinger.isEmpty()) return null
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         when (tilstand) {
             AvventerInntektsmelding,
             AvsluttetUtenUtbetaling -> {
                 val antallInntektsmeldinger = inntektsmeldinger.size
-                aktivitetslogg.info("Replayer inntektsmeldinger ($antallInntektsmeldinger stk) i $tilstand.")
+                aktivitetsloggMedVedtaksperiodekontekst.info("Replayer inntektsmeldinger ($antallInntektsmeldinger stk) i $tilstand.")
                 val trengerRefusjonsopplysninger = refusjonstidslinje.isEmpty() == true
 
-                if (antallInntektsmeldinger > 1) aktivitetslogg.varsel(RV_IM_4)
+                if (antallInntektsmeldinger > 1) aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
                 return inntektsmeldinger
-                    .mapNotNull { arbeidsgiver.håndter(it, aktivitetslogg, trengerRefusjonsopplysninger) }
+                    .mapNotNull { arbeidsgiver.håndter(it, aktivitetsloggMedVedtaksperiodekontekst, trengerRefusjonsopplysninger) }
                     .tidligsteEventyr()
             }
 
@@ -565,15 +565,15 @@ internal class Vedtaksperiode private constructor(
             AvventerVilkårsprøving,
             AvventerVilkårsprøvingRevurdering,
             TilUtbetaling -> {
-                aktivitetslogg.info("Replayer ikke inntektsmelding fordi tilstanden er $tilstand.")
-                aktivitetslogg.varsel(RV_IM_4)
+                aktivitetsloggMedVedtaksperiodekontekst.info("Replayer ikke inntektsmelding fordi tilstanden er $tilstand.")
+                aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
             }
 
             Avsluttet,
             RevurderingFeilet,
             Start,
             TilInfotrygd -> {
-                aktivitetslogg.info("Replayer ikke inntektsmelding fordi tilstanden er $tilstand.")
+                aktivitetsloggMedVedtaksperiodekontekst.info("Replayer ikke inntektsmelding fordi tilstanden er $tilstand.")
             }
         }
         return null
@@ -581,13 +581,13 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(replays: InntektsmeldingerReplay, aktivitetslogg: IAktivitetslogg) {
         if (!replays.erRelevant(this.id)) return
-        registrerKontekst(aktivitetslogg)
-        tilstand.replayUtført(this, replays, aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        tilstand.replayUtført(this, replays, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
     internal fun inntektsmeldingFerdigbehandlet(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-        registrerKontekst(aktivitetslogg)
-        tilstand.inntektsmeldingFerdigbehandlet(this, hendelse, aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        tilstand.inntektsmeldingFerdigbehandlet(this, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
     private fun håndterArbeidsgiveropplysninger(eventyr: List<List<Revurderingseventyr>>, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
@@ -599,40 +599,40 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, vedtaksperioder: List<Vedtaksperiode>, inntektshistorikk: Inntektshistorikk, ubrukteRefusjonsopplysninger: Refusjonsservitør): Revurderingseventyr? {
         if (arbeidsgiveropplysninger.vedtaksperiodeId != id) return null
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         // Vi må støtte AUU & AVBL på grunn av at det sendes forespørsel på entering i AUU om det er oppgitt egenmeldingsdager som gjør at perioden skal utbetaltes
         if (tilstand !in setOf(AvventerInntektsmelding, AvventerBlokkerendePeriode, AvsluttetUtenUtbetaling)) {
-            aktivitetslogg.info("Mottok arbeidsgiveropplysninger i ${tilstand.type}")
+            aktivitetsloggMedVedtaksperiodekontekst.info("Mottok arbeidsgiveropplysninger i ${tilstand.type}")
             return null
         }
 
         val eventyr = listOf(
-            håndterOppgittArbeidsgiverperiode(arbeidsgiveropplysninger, vedtaksperioder, aktivitetslogg),
-            håndterOppgittRefusjon(arbeidsgiveropplysninger, vedtaksperioder, aktivitetslogg, ubrukteRefusjonsopplysninger),
+            håndterOppgittArbeidsgiverperiode(arbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst),
+            håndterOppgittRefusjon(arbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst, ubrukteRefusjonsopplysninger),
             håndterOppgittInntekt(arbeidsgiveropplysninger, inntektshistorikk),
-            håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg),
-            håndterIkkeUtbetaltArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg),
-            håndterRedusertUtbetaltBeløpIArbeidsgiverperioden(arbeidsgiveropplysninger, aktivitetslogg),
-            håndterUtbetaltDelerAvArbeidsgiverperioden(arbeidsgiveropplysninger, aktivitetslogg),
-            håndterOpphørAvNaturalytelser(arbeidsgiveropplysninger, aktivitetslogg)
+            håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
+            håndterIkkeUtbetaltArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
+            håndterRedusertUtbetaltBeløpIArbeidsgiverperioden(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
+            håndterUtbetaltDelerAvArbeidsgiverperioden(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
+            håndterOpphørAvNaturalytelser(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
         )
 
-        return håndterArbeidsgiveropplysninger(eventyr, arbeidsgiveropplysninger, aktivitetslogg)
+        return håndterArbeidsgiveropplysninger(eventyr, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
     internal fun håndter(korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, vedtaksperioder: List<Vedtaksperiode>, inntektshistorikk: Inntektshistorikk, ubrukteRefusjonsopplysninger: Refusjonsservitør): Revurderingseventyr? {
         if (korrigerteArbeidsgiveropplysninger.vedtaksperiodeId != id) return null
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         check(tilstand !is AvventerInntektsmelding) { "Mottok Korrigerende arbeidsgiveropplysninger i AvventerInntektsmelding " }
 
         val eventyr = listOf(
-            håndterOppgittRefusjon(korrigerteArbeidsgiveropplysninger, vedtaksperioder, aktivitetslogg, ubrukteRefusjonsopplysninger),
+            håndterOppgittRefusjon(korrigerteArbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst, ubrukteRefusjonsopplysninger),
             håndterOppgittInntekt(korrigerteArbeidsgiveropplysninger, inntektshistorikk),
-            håndterKorrigertArbeidsgiverperiode(korrigerteArbeidsgiveropplysninger, aktivitetslogg),
-            håndterKorrigertOpphørAvNaturalytelser(korrigerteArbeidsgiveropplysninger, aktivitetslogg)
+            håndterKorrigertArbeidsgiverperiode(korrigerteArbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
+            håndterKorrigertOpphørAvNaturalytelser(korrigerteArbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
         )
 
-        return håndterArbeidsgiveropplysninger(eventyr, korrigerteArbeidsgiveropplysninger, aktivitetslogg)
+        return håndterArbeidsgiveropplysninger(eventyr, korrigerteArbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
     private fun håndterOppgittArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
@@ -647,7 +647,6 @@ internal class Vedtaksperiode private constructor(
             }
             acc.håndter(vedtaksperiode.periode)
         }
-        this.registrerKontekst(aktivitetslogg)
 
         val antallDagerIgjen = rester.sykdomstidslinje.count()
         if (antallDagerIgjen > 0) {
@@ -658,20 +657,20 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterBitAvArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, arbeidsgiverperiodetidslinje: Sykdomstidslinje): Revurderingseventyr {
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         val bitAvArbeidsgiverperiode = BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, arbeidsgiverperiodetidslinje, emptyList())
         when (tilstand) {
             AvventerInntektsmelding,
             AvsluttetUtenUtbetaling,
             AvventerBlokkerendePeriode -> {
-                håndterDager(arbeidsgiveropplysninger, bitAvArbeidsgiverperiode, aktivitetslogg) {}
+                håndterDager(arbeidsgiveropplysninger, bitAvArbeidsgiverperiode, aktivitetsloggMedVedtaksperiodekontekst) {}
             }
 
             else -> {
                 // det er oppgitt arbeidsgiverperiode på uventede perioder; mest sannsynlig
                 // har da ikke vedtaksperioden bedt om Arbeidsgiverperiode som opplysning, men vi har fått det likevel
-                varselFraArbeidsgiveropplysning(arbeidsgiveropplysninger, aktivitetslogg, RV_IM_24)
-                aktivitetslogg.info("Håndterer ikke arbeidsgiverperiode i ${tilstand.type}")
+                varselFraArbeidsgiveropplysning(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst, RV_IM_24)
+                aktivitetsloggMedVedtaksperiodekontekst.info("Håndterer ikke arbeidsgiverperiode i ${tilstand.type}")
             }
         }
         return Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, skjæringstidspunkt, periode)
@@ -728,7 +727,6 @@ internal class Vedtaksperiode private constructor(
         val eventyr = vedtaksperioder.mapNotNull { vedtaksperiode ->
             vedtaksperiode.håndterRefusjon(hendelse, inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId), aktivitetslogg, servitør)
         }
-        registrerKontekst(aktivitetslogg)
         servitør.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
         return eventyr
     }
@@ -894,10 +892,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
-        if (!tilstand.skalHåndtereDager(this, dager, aktivitetslogg) || dager.alleredeHåndtert(behandlinger))
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        if (!tilstand.skalHåndtereDager(this, dager, aktivitetsloggMedVedtaksperiodekontekst) || dager.alleredeHåndtert(behandlinger))
             return dager.vurdertTilOgMed(periode.endInclusive)
-        registrerKontekst(aktivitetslogg)
-        tilstand.håndter(this, dager, aktivitetslogg)
+        tilstand.håndter(this, dager, aktivitetsloggMedVedtaksperiodekontekst)
         dager.vurdertTilOgMed(periode.endInclusive)
     }
 
@@ -965,29 +963,29 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg,
         infotrygdhistorikk: Infotrygdhistorikk
     ): Revurderingseventyr? {
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         when (tilstand) {
-            AvsluttetUtenUtbetaling -> return omgjøreEtterInfotrygdendring(hendelse, aktivitetslogg.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk)
+            AvsluttetUtenUtbetaling -> return omgjøreEtterInfotrygdendring(hendelse, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk)
 
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering -> {
                 if (!behandlinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) {
-                    aktivitetslogg.info("Infotrygdhistorikken er uendret, reberegner ikke periode")
+                    aktivitetsloggMedVedtaksperiodekontekst.info("Infotrygdhistorikken er uendret, reberegner ikke periode")
                     return null
                 }
-                aktivitetslogg.info("Infotrygdhistorikken har endret seg, reberegner periode")
+                aktivitetsloggMedVedtaksperiodekontekst.info("Infotrygdhistorikken har endret seg, reberegner periode")
                 return Revurderingseventyr.infotrygdendring(hendelse, skjæringstidspunkt, periode)
             }
 
             AvventerInfotrygdHistorikk,
             AvventerInntektsmelding,
             AvventerHistorikk -> {
-                validation(aktivitetslogg) {
-                    onValidationFailed { forkast(hendelse, aktivitetslogg) }
+                validation(aktivitetsloggMedVedtaksperiodekontekst) {
+                    onValidationFailed { forkast(hendelse, aktivitetsloggMedVedtaksperiodekontekst) }
                     valider { infotrygdhistorikk.valider(this, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer) }
                     if (tilstand == AvventerInfotrygdHistorikk) {
-                        onSuccess { tilstand(aktivitetslogg, AvventerInntektsmelding) }
+                        onSuccess { tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding) }
                     }
                 }
             }
@@ -1044,12 +1042,12 @@ internal class Vedtaksperiode private constructor(
         infotrygdhistorikk: Infotrygdhistorikk
     ) {
         if (!ytelser.erRelevant(id)) return
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         if (tilstand !in setOf(AvventerHistorikk, AvventerHistorikkRevurdering))
-            return aktivitetslogg.info("Forventet ikke ytelsehistorikk i %s".format(tilstand.type))
+            return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke ytelsehistorikk i %s".format(tilstand.type))
 
-        håndterYtelser(ytelser, aktivitetslogg.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk)
+        håndterYtelser(ytelser, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk)
     }
 
     private fun håndterYtelser(ytelser: Ytelser, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
@@ -1089,72 +1087,70 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (!utbetalingsavgjørelse.relevantVedtaksperiode(id)) return
-        if (behandlinger.gjelderIkkeFor(utbetalingsavgjørelse)) return aktivitetslogg.info("Ignorerer løsning på utbetalingsavgjørelse, utbetalingid på løsningen matcher ikke vedtaksperiodens nåværende utbetaling")
-        registrerKontekst(aktivitetslogg)
+        if (behandlinger.gjelderIkkeFor(utbetalingsavgjørelse)) return aktivitetsloggMedVedtaksperiodekontekst.info("Ignorerer løsning på utbetalingsavgjørelse, utbetalingid på løsningen matcher ikke vedtaksperiodens nåværende utbetaling")
 
-        if (tilstand !in setOf(AvventerGodkjenning, AvventerGodkjenningRevurdering)) return aktivitetslogg.info("Forventet ikke utbetalingsavgjørelse i %s".format(tilstand.type.name))
+        if (tilstand !in setOf(AvventerGodkjenning, AvventerGodkjenningRevurdering)) return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke utbetalingsavgjørelse i %s".format(tilstand.type.name))
 
         val erAvvist = behandlinger.erAvvist()
         if (erAvvist) {
-            if (arbeidsgiver.kanForkastes(this, aktivitetslogg)) return forkast(utbetalingsavgjørelse, aktivitetslogg)
-            if (utbetalingsavgjørelse.automatisert) aktivitetslogg.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
-            aktivitetslogg.varsel(RV_UT_24)
+            if (arbeidsgiver.kanForkastes(this, aktivitetsloggMedVedtaksperiodekontekst)) return forkast(utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst)
+            if (utbetalingsavgjørelse.automatisert) aktivitetsloggMedVedtaksperiodekontekst.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
+            aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_UT_24)
         }
 
-        behandlinger.vedtakFattet(arbeidsgiver, utbetalingsavgjørelse, aktivitetslogg)
+        behandlinger.vedtakFattet(arbeidsgiver, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst)
 
         if (erAvvist) return // er i limbo
-        tilstand(
-            aktivitetslogg, when {
+        tilstand(aktivitetsloggMedVedtaksperiodekontekst, when {
             behandlinger.harUtbetalinger() -> TilUtbetaling
             else -> Avsluttet
-        }
-        )
+        })
     }
 
     internal fun håndter(
         sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
         aktivitetslogg: IAktivitetslogg
     ): Boolean {
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (tilstand != AvventerInntektsmelding) return false
-        if (!sykepengegrunnlagForArbeidsgiver.erRelevant(aktivitetslogg, skjæringstidspunkt)) return false
+        if (!sykepengegrunnlagForArbeidsgiver.erRelevant(aktivitetsloggMedVedtaksperiodekontekst, skjæringstidspunkt)) return false
 
-        registrerKontekst(aktivitetslogg)
-        tilstand.håndter(this, sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
+        tilstand.håndter(this, sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedVedtaksperiodekontekst)
         return true
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, aktivitetslogg: IAktivitetslogg) {
         if (!vilkårsgrunnlag.erRelevant(aktivitetslogg, id, skjæringstidspunkt)) return
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         val nesteTilstand = when (tilstand) {
             AvventerVilkårsprøving -> AvventerHistorikk
             AvventerVilkårsprøvingRevurdering -> AvventerHistorikkRevurdering
-            else -> return aktivitetslogg.info("Forventet ikke vilkårsgrunnlag i %s".format(tilstand.type))
+            else -> return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke vilkårsgrunnlag i %s".format(tilstand.type))
         }
-        håndterVilkårsgrunnlag(vilkårsgrunnlag, aktivitetslogg.medFeilSomVarslerHvisNødvendig(), nesteTilstand)
+        håndterVilkårsgrunnlag(vilkårsgrunnlag, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), nesteTilstand)
     }
 
     internal fun håndter(simulering: Simulering, aktivitetslogg: IAktivitetslogg) {
         if (simulering.vedtaksperiodeId != this.id.toString()) return
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         val nesteTilstand = when (tilstand) {
             AvventerSimulering -> AvventerGodkjenning
             AvventerSimuleringRevurdering -> AvventerGodkjenningRevurdering
-            else -> return aktivitetslogg.info("Forventet ikke simulering i %s".format(tilstand.type.name))
+            else -> return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke simulering i %s".format(tilstand.type.name))
         }
 
-        val wrapper = aktivitetslogg.medFeilSomVarslerHvisNødvendig()
+        val wrapper = aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig()
         behandlinger.valider(simulering, wrapper)
         if (!behandlinger.erKlarForGodkjenning()) return wrapper.info("Kan ikke gå videre da begge oppdragene ikke er simulert.")
         tilstand(wrapper, nesteTilstand)
     }
 
     internal fun håndter(hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
-        if (!behandlinger.håndterUtbetalinghendelse(hendelse, aktivitetslogg)) return
-        registrerKontekst(aktivitetslogg)
-        tilstand.håndter(this, hendelse, aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        if (!behandlinger.håndterUtbetalinghendelse(hendelse, aktivitetsloggMedVedtaksperiodekontekst)) return
+        tilstand.håndter(this, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
     internal fun håndter(
@@ -1162,33 +1158,33 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg,
         vedtaksperioder: List<Vedtaksperiode>
     ): Revurderingseventyr? {
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         val annullering = behandlinger.håndterAnnullering(
             arbeidsgiver,
             hendelse,
             hendelse.metadata.behandlingkilde,
-            aktivitetslogg,
+            aktivitetsloggMedVedtaksperiodekontekst,
             vedtaksperioder.map { it.behandlinger }) ?: return null
-        aktivitetslogg.info("Forkaster denne, og senere perioder, som følge av annullering.")
-        forkast(hendelse, aktivitetslogg)
+        aktivitetsloggMedVedtaksperiodekontekst.info("Forkaster denne, og senere perioder, som følge av annullering.")
+        forkast(hendelse, aktivitetsloggMedVedtaksperiodekontekst)
         return Revurderingseventyr.annullering(hendelse, annullering.periode())
     }
 
     internal fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         if (!påminnelse.erRelevant(id)) return null
-        registrerKontekst(aktivitetslogg)
-        return tilstand.påminnelse(this, påminnelse, aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        return tilstand.påminnelse(this, påminnelse, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
     internal fun nyAnnullering(aktivitetslogg: IAktivitetslogg) {
-        registrerKontekst(aktivitetslogg)
-        tilstand.nyAnnullering(this, aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        tilstand.nyAnnullering(this, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
     internal fun håndter(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         if (!overstyrArbeidsgiveropplysninger.erRelevant(skjæringstidspunkt)) return null
         if (vilkårsgrunnlag?.erArbeidsgiverRelevant(arbeidsgiver.organisasjonsnummer) != true) return null
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         val grunnlag = vilkårsgrunnlag ?: return null
         val (nyttGrunnlag, endretInntektsgrunnlag) = grunnlag.overstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger, subsumsjonslogg) ?: return null
@@ -1209,16 +1205,16 @@ internal class Vedtaksperiode private constructor(
         if (!overstyrInntektsgrunnlag.erRelevant(skjæringstidspunkt)) return null
         val grunnlag = vilkårsgrunnlag ?: return null
         if (grunnlag.erArbeidsgiverRelevant(arbeidsgiver.organisasjonsnummer) != true) return null
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         // i praksis double-dispatch, kotlin-style
         val (nyttGrunnlag, revurderingseventyr) = when (overstyrInntektsgrunnlag) {
             is Grunnbeløpsregulering -> {
                 val nyttGrunnlag = grunnlag.grunnbeløpsregulering(overstyrInntektsgrunnlag, subsumsjonslogg)
                 if (nyttGrunnlag == null) {
-                    aktivitetslogg.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt er allerede korrekt.")
+                    aktivitetsloggMedVedtaksperiodekontekst.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt er allerede korrekt.")
                 } else {
-                    aktivitetslogg.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt korrigeres til rett beløp.")
+                    aktivitetsloggMedVedtaksperiodekontekst.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt korrigeres til rett beløp.")
                 }
                 nyttGrunnlag to Revurderingseventyr.grunnbeløpsregulering(overstyrInntektsgrunnlag, skjæringstidspunkt)
             }
@@ -1241,14 +1237,14 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndterRefusjon(hendelse: Hendelse, dokumentsporing: Dokumentsporing, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør): Revurderingseventyr? {
-        registrerKontekst(aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         val refusjonstidslinje = servitør.servér(startdatoPåSammenhengendeVedtaksperioder, periode)
         if (refusjonstidslinje.isEmpty()) return null
         if (!behandlinger.håndterRefusjonstidslinje(
                 arbeidsgiver,
                 hendelse.metadata.behandlingkilde,
                 dokumentsporing,
-                aktivitetslogg,
+                aktivitetsloggMedVedtaksperiodekontekst,
                 person.beregnSkjæringstidspunkt(),
                 arbeidsgiver.beregnArbeidsgiverperiode(),
                 refusjonstidslinje
@@ -1281,15 +1277,16 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, aktivitetslogg: IAktivitetslogg, hendelse: Hendelse? = null): Boolean {
-        if (behandlinger.kanForkastes(aktivitetslogg, arbeidsgiverUtbetalinger)) {
-            aktivitetslogg.info("Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet")
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        if (behandlinger.kanForkastes(aktivitetsloggMedVedtaksperiodekontekst, arbeidsgiverUtbetalinger)) {
+            aktivitetsloggMedVedtaksperiodekontekst.info("Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet")
             return true
         }
         if (hendelse is AnmodningOmForkasting && hendelse.force) {
-            aktivitetslogg.info("Behandlingene sier at denne _ikke_ kan forkastes. Men ettersom 'force'-flagget i anmodningen er satt forkastes perioden læll. Ta en god titt på at det ikke blir hengende noen utbetalinger her!")
+            aktivitetsloggMedVedtaksperiodekontekst.info("Behandlingene sier at denne _ikke_ kan forkastes. Men ettersom 'force'-flagget i anmodningen er satt forkastes perioden læll. Ta en god titt på at det ikke blir hengende noen utbetalinger her!")
             return true
         }
-        aktivitetslogg.info("Kan ikke forkastes fordi behandlinger nekter det")
+        aktivitetsloggMedVedtaksperiodekontekst.info("Kan ikke forkastes fordi behandlinger nekter det")
         return false
     }
 
@@ -1298,10 +1295,10 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg,
         utbetalinger: List<Utbetaling>
     ): VedtaksperiodeForkastetEventBuilder? {
-        registrerKontekst(aktivitetslogg)
-        if (!kanForkastes(utbetalinger, aktivitetslogg, hendelse)) return null
-        aktivitetslogg.info("Forkaster vedtaksperiode: %s", this.id.toString())
-        this.behandlinger.forkast(arbeidsgiver, hendelse.metadata.behandlingkilde, hendelse.metadata.automatiskBehandling, aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        if (!kanForkastes(utbetalinger, aktivitetsloggMedVedtaksperiodekontekst, hendelse)) return null
+        aktivitetsloggMedVedtaksperiodekontekst.info("Forkaster vedtaksperiode: %s", this.id.toString())
+        this.behandlinger.forkast(arbeidsgiver, hendelse.metadata.behandlingkilde, hendelse.metadata.automatiskBehandling, aktivitetsloggMedVedtaksperiodekontekst)
         val arbeidsgiverperiodeHensyntarForkastede = finnArbeidsgiverperiodeHensyntarForkastede()
         val trengerArbeidsgiveropplysninger =
             arbeidsgiverperiodeHensyntarForkastede?.forventerOpplysninger(periode) == true
@@ -1309,7 +1306,7 @@ internal class Vedtaksperiode private constructor(
             sykmeldingsperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiodeHensyntarForkastede)
         val vedtaksperiodeForkastetEventBuilder =
             VedtaksperiodeForkastetEventBuilder(tilstand.type, trengerArbeidsgiveropplysninger, sykmeldingsperioder)
-        tilstand(aktivitetslogg, TilInfotrygd)
+        tilstand(aktivitetsloggMedVedtaksperiodekontekst, TilInfotrygd)
         return vedtaksperiodeForkastetEventBuilder
     }
 
@@ -1353,10 +1350,8 @@ internal class Vedtaksperiode private constructor(
         person.søppelbøtte(hendelse, aktivitetslogg, TIDLIGERE_OG_ETTERGØLGENDE(this))
     }
 
-    private fun registrerKontekst(aktivitetslogg: IAktivitetslogg) {
-        aktivitetslogg.kontekst(arbeidsgiver)
-        aktivitetslogg.kontekst(this)
-        aktivitetslogg.kontekst(this.tilstand)
+    private fun registrerKontekst(aktivitetslogg: IAktivitetslogg): IAktivitetslogg {
+        return aktivitetslogg.kontekst(arbeidsgiver).kontekst(this).kontekst(this.tilstand)
     }
 
     private fun tilstand(
@@ -1364,7 +1359,7 @@ internal class Vedtaksperiode private constructor(
         nyTilstand: Vedtaksperiodetilstand,
         block: () -> Unit = {}
     ) {
-        if (tilstand == nyTilstand) return  // Already in this state => ignore
+        if (tilstand == nyTilstand) return // Already in this state => ignore
         tilstand.leaving(this, event)
 
         val previousState = tilstand
@@ -1373,7 +1368,6 @@ internal class Vedtaksperiode private constructor(
         oppdatert = LocalDateTime.now()
         block()
 
-        event.kontekst(tilstand)
         emitVedtaksperiodeEndret(previousState)
         tilstand.entering(this, event)
     }
@@ -1943,24 +1937,20 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun gjenopptaBehandling(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-        aktivitetslogg.kontekst(arbeidsgiver)
-        registrerKontekst(aktivitetslogg)
-        aktivitetslogg.info("Forsøker å gjenoppta $this")
-        tilstand.gjenopptaBehandling(this, hendelse, aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        aktivitetsloggMedVedtaksperiodekontekst.info("Forsøker å gjenoppta $this")
+        tilstand.gjenopptaBehandling(this, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
     internal fun igangsettOverstyring(revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
-        if (revurdering.erIkkeRelevantFor(periode)) return sendNyttGodkjenningsbehov(aktivitetslogg)
-        registrerKontekst(aktivitetslogg)
-        tilstand.igangsettOverstyring(this, revurdering, aktivitetslogg)
-        videreførEksisterendeOpplysninger(revurdering.hendelse.metadata.behandlingkilde, aktivitetslogg)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        if (revurdering.erIkkeRelevantFor(periode)) return sendNyttGodkjenningsbehov(aktivitetsloggMedVedtaksperiodekontekst)
+        tilstand.igangsettOverstyring(this, revurdering, aktivitetsloggMedVedtaksperiodekontekst)
+        videreførEksisterendeOpplysninger(revurdering.hendelse.metadata.behandlingkilde, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
     private fun sendNyttGodkjenningsbehov(aktivitetslogg: IAktivitetslogg) {
-        if (this.tilstand !in setOf(AvventerGodkjenningRevurdering, AvventerGodkjenning)) {
-            return
-        }
-        registrerKontekst(aktivitetslogg)
+        if (this.tilstand !in setOf(AvventerGodkjenningRevurdering, AvventerGodkjenning)) return
         this.trengerGodkjenning(aktivitetslogg)
     }
 
@@ -2009,10 +1999,6 @@ internal class Vedtaksperiode private constructor(
         tilstand.makstid(this, tilstandsendringstidspunkt)
 
     fun slutterEtter(dato: LocalDate) = periode.slutterEtter(dato)
-    private fun aktivitetsloggkopi(aktivitetslogg: IAktivitetslogg) =
-        aktivitetslogg.barn().also { kopi ->
-            this.registrerKontekst(kopi)
-        }
 
     private fun lagNyUtbetaling(
         arbeidsgiverSomBeregner: Arbeidsgiver,
@@ -2125,7 +2111,7 @@ internal class Vedtaksperiode private constructor(
             val maksdatoresultat = maksdatofilter.maksdatoresultatForVedtaksperiode(other.periode)
             other.lagNyUtbetaling(
                 arbeidsgiverSomBeregner = this.arbeidsgiver,
-                aktivitetslogg = other.aktivitetsloggkopi(aktivitetslogg),
+                aktivitetslogg = other.registrerKontekst(aktivitetslogg),
                 beregning = BeregnetPeriode(
                     maksdatovurdering = maksdatoresultat,
                     grunnlagsdata = grunnlagsdata,

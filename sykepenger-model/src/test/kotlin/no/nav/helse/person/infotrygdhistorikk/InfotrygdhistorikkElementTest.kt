@@ -173,9 +173,7 @@ internal class InfotrygdhistorikkElementTest {
 
         val element = nyttHistorikkelement(perioder = utbetalinger, inntekter = inntekter)
 
-        aktivitetslogg.barn().also {
-            assertTrue(element.valider(it, februar, "ag1"))
-        }
+        assertTrue(element.valider(aktivitetslogg, februar, "ag1"))
     }
 
     @Test
@@ -190,9 +188,7 @@ internal class InfotrygdhistorikkElementTest {
 
         val element = nyttHistorikkelement(perioder = utbetalinger, inntekter = inntekter)
 
-        aktivitetslogg.barn().also {
-            assertTrue(element.valider(it, februar, "ag1"))
-        }
+        assertTrue(element.valider(aktivitetslogg, februar, "ag1"))
     }
 
     @Test
@@ -205,9 +201,7 @@ internal class InfotrygdhistorikkElementTest {
 
         val element = nyttHistorikkelement(perioder = utbetalinger, inntekter = inntekter)
 
-        aktivitetslogg.barn().also {
-            assertTrue(element.valider(it, februar, "ag1"))
-        }
+        assertTrue(element.valider(aktivitetslogg, februar, "ag1"))
     }
 
     @Test

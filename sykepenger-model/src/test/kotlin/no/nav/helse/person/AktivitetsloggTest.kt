@@ -30,8 +30,7 @@ internal class AktivitetsloggTest {
     @Test
     fun `toString av aktivitet`() {
         val infomelding = "info message"
-        val hendelse1 = aktivitetslogg.barn()
-        hendelse1.kontekst(person)
+        val hendelse1 = aktivitetslogg.kontekst(person)
         hendelse1.info(infomelding)
         val expected = "$infomelding (Person Person: Person 1)"
         assertTrue(aktivitetslogg.toString().contains(expected)) { "Expected $aktivitetslogg to contain <$expected>" }
@@ -69,11 +68,11 @@ internal class AktivitetsloggTest {
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         val vedtaksperiode2 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 2")
 
-        val hendelse = aktivitetslogg.barn()
-        hendelse.kontekst(person)
-        hendelse.kontekst(arbeidsgiver1)
-        hendelse.kontekst(vedtaksperiode1)
-        hendelse.kontekst(vedtaksperiode2)
+        val hendelse = aktivitetslogg
+            .kontekst(person)
+            .kontekst(arbeidsgiver1)
+            .kontekst(vedtaksperiode1)
+            .kontekst(vedtaksperiode2)
         hendelse.info("Hei på deg")
         assertEquals(1, aktivitetslogg.aktiviteter.size)
         val aktivitet = aktivitetslogg.aktiviteter.first()
@@ -88,11 +87,11 @@ internal class AktivitetsloggTest {
         val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
 
-        val hendelse = aktivitetslogg.barn()
-        hendelse.kontekst(person)
-        hendelse.kontekst(arbeidsgiver1)
-        hendelse.kontekst(vedtaksperiode1)
-        hendelse.kontekst(arbeidsgiver2) // arbeidsgiver 2 overskriver arbeidsgiver 1 over. Vedtaksperiode-kontekst forsvinner, siden de er lagt på etter arbeidsgiver-typen
+        val hendelse = aktivitetslogg
+            .kontekst(person)
+            .kontekst(arbeidsgiver1)
+            .kontekst(vedtaksperiode1)
+            .kontekst(arbeidsgiver2) // arbeidsgiver 2 overskriver arbeidsgiver 1 over. Vedtaksperiode-kontekst forsvinner, siden de er lagt på etter arbeidsgiver-typen
         hendelse.info("Hei på deg")
         assertEquals(1, aktivitetslogg.aktiviteter.size)
         val aktivitet = aktivitetslogg.aktiviteter.first()
@@ -116,7 +115,7 @@ internal class AktivitetsloggTest {
 
     @Test
     fun `Melding sendt til forelder`() {
-        val hendelse = aktivitetslogg.barn()
+        val hendelse = Aktivitetslogg(aktivitetslogg)
         "info message".also {
             hendelse.info(it)
             assertInfo(it, aktivitetslogg = hendelse)
@@ -129,12 +128,12 @@ internal class AktivitetsloggTest {
 
     @Test
     fun `Melding sendt fra barnebarn til forelder`() {
-        val hendelse = aktivitetslogg.barn()
-        hendelse.kontekst(person)
         val arbeidsgiver = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
-        hendelse.kontekst(arbeidsgiver)
         val vedtaksperiode = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
-        hendelse.kontekst(vedtaksperiode)
+        val hendelse = Aktivitetslogg(aktivitetslogg)
+            .kontekst(person)
+            .kontekst(arbeidsgiver)
+            .kontekst(vedtaksperiode)
         "info message".also {
             hendelse.info(it)
             assertInfo(it, aktivitetslogg = hendelse)
@@ -149,36 +148,23 @@ internal class AktivitetsloggTest {
     }
 
     @Test
-    fun `bevarer kontekster for barn`() {
-        val hendelse = aktivitetslogg.barn()
-        hendelse.kontekst(person)
-
-        val barn = hendelse.barn()
-        barn.kontekst(TestKontekst("Arbeidsgiver", ""))
-        barn.info("Hei")
-
-        assertInfo("Hei", listOf("Person", "Arbeidsgiver"), aktivitetslogg)
-        assertInfo("Hei", listOf("Person", "Arbeidsgiver"), barn)
-    }
-
-    @Test
     fun `Vis bare arbeidsgiveraktivitet`() {
-        val hendelse1 = aktivitetslogg.barn()
-        hendelse1.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
-        hendelse1.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
-        hendelse1.kontekst(vedtaksperiode1)
+        val hendelse1 = aktivitetslogg
+            .kontekst(person)
+            .kontekst(arbeidsgiver1)
+            .kontekst(vedtaksperiode1)
         hendelse1.info("info message")
         hendelse1.varsel(RV_SØ_1)
         hendelse1.funksjonellFeil(RV_VT_1)
 
-        val hendelse2 = aktivitetslogg.barn()
-        hendelse2.kontekst(person)
         val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
-        hendelse2.kontekst(arbeidsgiver2)
         val vedtaksperiode2 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 2")
-        hendelse2.kontekst(vedtaksperiode2)
+        val hendelse2 = aktivitetslogg
+            .kontekst(person)
+            .kontekst(arbeidsgiver2)
+            .kontekst(vedtaksperiode2)
         hendelse2.info("info message")
         hendelse2.funksjonellFeil(RV_VT_1)
         assertEquals(5, aktivitetslogg.aktiviteter.size)
@@ -186,8 +172,8 @@ internal class AktivitetsloggTest {
 
     @Test
     fun `Behov kan ha detaljer`() {
-        val hendelse1 = aktivitetslogg.barn()
-        hendelse1.kontekst(person)
+        val hendelse1 = aktivitetslogg
+            .kontekst(person)
         val param1 = "value"
         val param2 = LocalDate.now()
         hendelse1.behov(
@@ -207,8 +193,8 @@ internal class AktivitetsloggTest {
 
     @Test
     fun `varselkode blir til varsel`() {
-        val hendelse = aktivitetslogg.barn()
-        hendelse.kontekst(person)
+        val hendelse = aktivitetslogg
+            .kontekst(person)
         hendelse.varsel(RV_SØ_1)
         assertEquals(1, aktivitetslogg.varsel.size)
         assertVarsel(RV_SØ_1)

@@ -301,10 +301,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun vilkårsgrunnlagtype() = "Spleis"
 
-        override fun overstyrArbeidsforhold(
-            hendelse: OverstyrArbeidsforhold,
-            subsumsjonslogg: Subsumsjonslogg
-        ) = kopierMed(
+        override fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonslogg: Subsumsjonslogg) = kopierMed(
             inntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonslogg),
             opptjening = opptjening!!.overstyrArbeidsforhold(hendelse).also {
                 subsumsjonslogg.logg(it.subsumsjon)
@@ -374,10 +371,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         vilkårsgrunnlagId: UUID = UUID.randomUUID()
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, null) {
 
-        override fun overstyrArbeidsforhold(
-            hendelse: OverstyrArbeidsforhold,
-            subsumsjonslogg: Subsumsjonslogg
-        ) = kopierMed(
+        override fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonslogg: Subsumsjonslogg) = kopierMed(
             inntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonslogg),
             opptjening = null,
             subsumsjonslogg = subsumsjonslogg

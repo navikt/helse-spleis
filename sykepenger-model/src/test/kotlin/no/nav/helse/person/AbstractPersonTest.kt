@@ -103,7 +103,7 @@ internal abstract class AbstractPersonTest {
         val varslersamler = Varslersamler()
         varslersamler.registrerVarsler(personlogg.varsel)
         varslersamler.bekreftVarslerAssertet(assertetVarsler)
-        ugyldigeSituasjoner.bekreftVarselHarKnytningTilVedtaksperiode(personlogg)
+        ugyldigeSituasjoner.bekreftVarselHarKnytningTilVedtaksperiode(personlogg.varsel)
     }
 
     private fun regler(maksSykedager: Int): ArbeidsgiverRegler = object : ArbeidsgiverRegler {

@@ -148,26 +148,28 @@ class Utbetaling private constructor(
     fun erKlarForGodkjenning() = personOppdrag.erKlarForGodkjenning() && arbeidsgiverOppdrag.erKlarForGodkjenning()
 
     fun opprett(aktivitetslogg: IAktivitetslogg) {
-        tilstand.opprett(this, aktivitetslogg)
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
+        tilstand.opprett(this, aktivitetsloggMedUtbetalingkontekst)
     }
 
     fun håndter(hendelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         if (hendelse.utbetalingId != this.id) return
-        hendelse.valider(aktivitetslogg)
-        godkjenn(aktivitetslogg, hendelse.vurdering)
+        hendelse.valider(aktivitetsloggMedUtbetalingkontekst)
+        godkjenn(aktivitetsloggMedUtbetalingkontekst, hendelse.vurdering)
     }
 
     fun håndter(utbetaling: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
-        if (!relevantFor(utbetaling)) return håndterKvitteringForAnnullering(utbetaling, aktivitetslogg)
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
+        if (!relevantFor(utbetaling)) return håndterKvitteringForAnnullering(utbetaling, aktivitetsloggMedUtbetalingkontekst)
         if (harHåndtert(utbetaling)) return
-        aktivitetslogg.kontekst(this)
-        tilstand.kvittér(this, utbetaling, aktivitetslogg)
+        tilstand.kvittér(this, utbetaling, aktivitetsloggMedUtbetalingkontekst)
     }
 
     private fun håndterKvitteringForAnnullering(hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         if (annulleringer.none { it.relevantFor(hendelse) }) return
-        aktivitetslogg.kontekst(this)
-        tilstand.kvittérAnnullering(this, hendelse, aktivitetslogg)
+        tilstand.kvittérAnnullering(this, hendelse, aktivitetsloggMedUtbetalingkontekst)
     }
 
     private fun relevantFor(utbetaling: UtbetalingmodulHendelse) =
@@ -180,15 +182,15 @@ class Utbetaling private constructor(
     }
 
     fun simuler(aktivitetslogg: IAktivitetslogg) {
-        aktivitetslogg.kontekst(this)
-        tilstand.simuler(this, aktivitetslogg)
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
+        tilstand.simuler(this, aktivitetsloggMedUtbetalingkontekst)
     }
 
     fun håndter(påminnelse: UtbetalingpåminnelseHendelse, aktivitetslogg: IAktivitetslogg) {
         if (påminnelse.utbetalingId != this.id) return
-        aktivitetslogg.kontekst(this)
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         if (påminnelse.status != this.tilstand.status) return
-        tilstand.håndterPåminnelse(this, aktivitetslogg)
+        tilstand.håndterPåminnelse(this, aktivitetsloggMedUtbetalingkontekst)
     }
 
     fun gjelderFor(hendelse: UtbetalingmodulHendelse) =
@@ -197,8 +199,9 @@ class Utbetaling private constructor(
     fun gjelderFor(hendelse: UtbetalingsavgjørelseHendelse) = hendelse.utbetalingId == this.id
 
     fun valider(simulering: SimuleringHendelse, aktivitetslogg: IAktivitetslogg) {
-        validerSimuleringsresultat(simulering, aktivitetslogg, arbeidsgiverOppdrag)
-        validerSimuleringsresultat(simulering, aktivitetslogg, personOppdrag)
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
+        validerSimuleringsresultat(simulering, aktivitetsloggMedUtbetalingkontekst, arbeidsgiverOppdrag)
+        validerSimuleringsresultat(simulering, aktivitetsloggMedUtbetalingkontekst, personOppdrag)
     }
 
     private fun validerSimuleringsresultat(simuleringHendelse: SimuleringHendelse, aktivitetslogg: IAktivitetslogg, oppdrag: Oppdrag) {
@@ -211,7 +214,8 @@ class Utbetaling private constructor(
     }
 
     fun håndter(hendelse: AnnullerUtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
-        godkjenn(aktivitetslogg, hendelse.vurdering)
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
+        godkjenn(aktivitetsloggMedUtbetalingkontekst, hendelse.vurdering)
     }
 
     fun annuller(hendelse: AnnullerUtbetalingHendelse, aktivitetslogg: IAktivitetslogg, alleUtbetalinger: List<Utbetaling>): Utbetaling? {
@@ -224,15 +228,16 @@ class Utbetaling private constructor(
             "Det er gjort forsøk på å annullere en utbetaling som ikke lenger er aktiv"
         }
 
-        return sisteUtbetalteForUtbetaling.opphør(aktivitetslogg)
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(sisteUtbetalteForUtbetaling)
+        return sisteUtbetalteForUtbetaling.opphør(aktivitetsloggMedUtbetalingkontekst)
     }
 
     private fun opphør(aktivitetslogg: IAktivitetslogg) =
         tilstand.annuller(this, aktivitetslogg)
 
     fun forkast(aktivitetslogg: IAktivitetslogg) {
-        aktivitetslogg.kontekst(this)
-        tilstand.forkast(this, aktivitetslogg)
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
+        tilstand.forkast(this, aktivitetsloggMedUtbetalingkontekst)
     }
 
     fun arbeidsgiverOppdrag() = arbeidsgiverOppdrag
@@ -243,8 +248,8 @@ class Utbetaling private constructor(
         SpesifikkKontekst("Utbetaling", mapOf("utbetalingId" to "$id"))
 
     private fun godkjenn(aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
-        aktivitetslogg.kontekst(this)
-        tilstand.godkjenn(this, aktivitetslogg, vurdering)
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
+        tilstand.godkjenn(this, aktivitetsloggMedUtbetalingkontekst, vurdering)
     }
 
     private fun tilstand(neste: Tilstand, aktivitetslogg: IAktivitetslogg) {
@@ -474,8 +479,7 @@ class Utbetaling private constructor(
     private fun håndterKvittering(hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
         when (hendelse.status) {
             Oppdragstatus.OVERFØRT,
-            Oppdragstatus.AKSEPTERT -> {
-            } // all is good
+            Oppdragstatus.AKSEPTERT -> {} // all is good
             Oppdragstatus.AKSEPTERT_MED_FEIL -> aktivitetslogg.info("Utbetalingen ble gjennomført, men med advarsel")
             Oppdragstatus.AVVIST,
             Oppdragstatus.FEIL -> aktivitetslogg.info("Utbetaling feilet med status ${hendelse.status}. Feilmelding fra Oppdragsystemet: ${hendelse.melding}")
@@ -573,7 +577,6 @@ class Utbetaling private constructor(
         override val status = Utbetalingstatus.IKKE_UTBETALT
         override fun forkast(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
             utbetaling.annulleringer.forEach { it.forkast(aktivitetslogg) }
-            aktivitetslogg.kontekst(utbetaling)
             aktivitetslogg.info("Forkaster utbetaling")
             utbetaling.tilstand(Forkastet, aktivitetslogg)
         }
@@ -581,14 +584,12 @@ class Utbetaling private constructor(
         override fun godkjenn(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
             utbetaling.vurdering = vurdering
             utbetaling.annulleringer.forEach { it.godkjenn(aktivitetslogg, vurdering) }
-            aktivitetslogg.kontekst(utbetaling)
             utbetaling.tilstand(vurdering.avgjør(utbetaling), aktivitetslogg)
         }
 
         override fun simuler(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
             utbetaling.annulleringer.forEach { it.simuler(aktivitetslogg) }
 
-            aktivitetslogg.kontekst(utbetaling)
             utbetaling.arbeidsgiverOppdrag.simuler(aktivitetslogg, utbetaling.maksdato, systemident)
             utbetaling.personOppdrag.simuler(aktivitetslogg, utbetaling.maksdato, systemident)
         }

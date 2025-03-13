@@ -15,7 +15,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.VedtaksperiodeView
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
@@ -177,30 +176,22 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
         IM.bekreftEntydighåndtering()
     }
 
-    internal fun bekreftVarselHarKnytningTilVedtaksperiode(aktivitetslogg: Aktivitetslogg) {
-        aktivitetslogg.aktiviteter.forEach { aktivitet ->
-            when (aktivitet) {
-                is Aktivitet.Behov -> {}
-                is Aktivitet.FunksjonellFeil -> {}
-                is Aktivitet.Info -> {}
-                is Aktivitet.LogiskFeil -> {}
-                is Aktivitet.Varsel -> {
-                    // disse opprettes utenfor en vedtaksperiode/eller på en lukket vedtaksperiode 💀
-                    if (aktivitet.kode in setOf(Varselkode.RV_RV_7)) return@forEach
+    internal fun bekreftVarselHarKnytningTilVedtaksperiode(varsler: List<Aktivitet.Varsel>) {
+        varsler.forEach { aktivitet ->
+            // disse opprettes utenfor en vedtaksperiode/eller på en lukket vedtaksperiode 💀
+            if (aktivitet.kode in setOf(Varselkode.RV_RV_7)) return@forEach
 
-                    val vedtaksperiodekontekst = checkNotNull(aktivitet.kontekster.firstOrNull { it.kontekstType == "Vedtaksperiode" }) {
-                        "Det er opprettet et varsel utenom Vedtaksperiode:\n${aktivitet}"
-                    }
-                    val vedtaksperiodeId = UUID.fromString(vedtaksperiodekontekst.kontekstMap.getValue("vedtaksperiodeId"))
-                    val behandlingstatusPåTidspunkt = gjeldendeBehandlingstatus
-                        .getValue(vedtaksperiodeId)
-                        .first { (tidspunkt, _) ->
-                            tidspunkt < aktivitet.tidsstempel
-                        }.second
-                    check(behandlingstatusPåTidspunkt == Behandlingstatus.ÅPEN) {
-                        "Det er opprettet et varsel (${aktivitet.melding}) utenom en åpen behandling (status = $behandlingstatusPåTidspunkt)"
-                    }
-                }
+            val vedtaksperiodekontekst = checkNotNull(aktivitet.kontekster.firstOrNull { it.kontekstType == "Vedtaksperiode" }) {
+                "Det er opprettet et varsel utenom Vedtaksperiode:\n${aktivitet}"
+            }
+            val vedtaksperiodeId = UUID.fromString(vedtaksperiodekontekst.kontekstMap.getValue("vedtaksperiodeId"))
+            val behandlingstatusPåTidspunkt = gjeldendeBehandlingstatus
+                .getValue(vedtaksperiodeId)
+                .first { (tidspunkt, _) ->
+                    tidspunkt < aktivitet.tidsstempel
+                }.second
+            check(behandlingstatusPåTidspunkt == Behandlingstatus.ÅPEN) {
+                "Det er opprettet et varsel (${aktivitet.melding}) utenom en åpen behandling (status = $behandlingstatusPåTidspunkt)"
             }
         }
     }

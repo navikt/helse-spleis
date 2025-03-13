@@ -10,6 +10,5 @@ interface IAktivitetslogg {
     fun harVarslerEllerVerre(): Boolean
     fun harFunksjonelleFeilEllerVerre(): Boolean
 
-    fun barn(): IAktivitetslogg
-    fun kontekst(kontekst: Aktivitetskontekst)
+    fun kontekst(kontekst: Aktivitetskontekst): IAktivitetslogg
 }

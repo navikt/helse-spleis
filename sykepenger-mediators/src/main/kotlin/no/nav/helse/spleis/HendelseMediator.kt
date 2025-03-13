@@ -544,8 +544,7 @@ internal class HendelseMediator(
         historiskeFolkeregisteridenter: Set<Personidentifikator> = emptySet(),
         handler: (Person, IAktivitetslogg) -> Unit
     ) {
-        val aktivitetslogg = Aktivitetslogg()
-        aktivitetslogg.kontekst(message)
+        val aktivitetslogg = Aktivitetslogg().kontekst(message)
 
         val subsumsjonMediator = SubsumsjonMediator(message, versjonAvKode)
         val personMediator = PersonMediator(message)

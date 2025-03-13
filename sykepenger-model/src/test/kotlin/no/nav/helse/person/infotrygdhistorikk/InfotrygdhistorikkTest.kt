@@ -56,12 +56,12 @@ internal class InfotrygdhistorikkTest {
 
     @Test
     fun `kan justere perioden for oppfrisk`() {
-        aktivitetslogg.barn().also {
+        Aktivitetslogg().also {
             historikk.oppfriskNødvendig(it, tidligsteDato)
             assertEquals("${tidligsteDato.minusYears(4)}", it.behov.first().detaljer()["historikkFom"])
             assertEquals("${LocalDate.now()}", it.behov.first().detaljer()["historikkTom"])
         }
-        aktivitetslogg.barn().also {
+        Aktivitetslogg().also {
             historikk.oppfriskNødvendig(it, 1.februar)
             assertEquals("${1.februar.minusYears(4)}", it.behov.first().detaljer()["historikkFom"])
             assertEquals("${LocalDate.now()}", it.behov.first().detaljer()["historikkTom"])
@@ -248,17 +248,17 @@ internal class InfotrygdhistorikkTest {
                 ), inntekter = listOf(Inntektsopplysning("ag1", 1.februar, 1000.daglig, true))
             )
         )
-        aktivitetslogg.barn().also {
+        Aktivitetslogg().also {
             assertTrue(historikk.valider(it, 1.januar til 31.januar, 1.januar, "ag1"))
             assertFalse(it.harFunksjonelleFeilEllerVerre())
             it.assertVarsel(Varselkode.RV_IT_1)
         }
-        aktivitetslogg.barn().also {
+        Aktivitetslogg().also {
             assertFalse(historikk.valider(it, 20.februar til 28.februar, 20.februar, "ag1"))
             assertTrue(it.harVarslerEllerVerre())
             it.assertFunksjonellFeil(Varselkode.RV_IT_37)
         }
-        aktivitetslogg.barn().also {
+        Aktivitetslogg().also {
             assertTrue(historikk.valider(it, 1.mai til 5.mai, 1.mai, "ag1"))
             assertFalse(it.harVarslerEllerVerre())
         }

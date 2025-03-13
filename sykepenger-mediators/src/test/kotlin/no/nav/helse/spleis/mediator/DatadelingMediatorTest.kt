@@ -46,8 +46,9 @@ internal class DatadelingMediatorTest {
 
     @Test
     fun innhold() {
-        aktivitetslogg.kontekst(TestKontekst("Person", "Person 1"))
-        aktivitetslogg.info("Dette er en infomelding")
+        aktivitetslogg
+            .kontekst(TestKontekst("Person", "Person 1"))
+            .info("Dette er en infomelding")
         datadelingMediator.ferdigstill(testRapid)
         assertEquals(1, testRapid.inspektør.antall())
 

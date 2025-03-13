@@ -705,11 +705,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             ) {
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved godkjenningsbehov" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjenningsbehov" }
-                aktivitetslogg.kontekst(utbetaling)
+                val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(utbetaling)
                 utkastTilVedtakBuilder.utbetalingstidslinje(utbetalingstidslinje).utbetaling(utbetaling).sykdomstidslinje(sykdomstidslinje)
                 grunnlagsdata.berik(utkastTilVedtakBuilder)
                 behandling.observatører.forEach { it.utkastTilVedtak(utkastTilVedtakBuilder.buildUtkastTilVedtak()) }
-                Aktivitet.Behov.godkjenning(aktivitetslogg, utkastTilVedtakBuilder.buildGodkjenningsbehov())
+                Aktivitet.Behov.godkjenning(aktivitetsloggMedUtbetalingkontekst, utkastTilVedtakBuilder.buildGodkjenningsbehov())
             }
 
             internal fun berik(builder: UtkastTilVedtakBuilder) {

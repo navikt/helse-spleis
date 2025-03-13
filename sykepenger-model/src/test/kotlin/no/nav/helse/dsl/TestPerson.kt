@@ -117,7 +117,7 @@ internal class TestPerson(
     internal fun bekreftBehovOppfylt(assertetVarsler: Varslersamler.AssertetVarsler) {
         behovsamler.bekreftBehovOppfylt()
         varslersamler.bekreftVarslerAssertet(assertetVarsler)
-        ugyldigeSituasjoner.bekreftVarselHarKnytningTilVedtaksperiode(personlogg)
+        ugyldigeSituasjoner.bekreftVarselHarKnytningTilVedtaksperiode(personlogg.varsel)
     }
 
     internal fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: ArbeidsforholdOverstyrt) {

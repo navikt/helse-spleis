@@ -21,20 +21,20 @@ internal class AktivitetsloggBehovTest {
 
     @Test
     fun `kan hente ut behov`() {
-        val hendelse1 = aktivitetslogg.barn()
-        hendelse1.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
-        hendelse1.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
-        hendelse1.kontekst(vedtaksperiode1)
+        val hendelse1 = aktivitetslogg
+            .kontekst(person)
+            .kontekst(arbeidsgiver1)
+            .kontekst(vedtaksperiode1)
         hendelse1.behov(Godkjenning, "Trenger godkjenning")
 
-        val hendelse2 = aktivitetslogg.barn()
-        hendelse2.kontekst(person)
         val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
-        hendelse2.kontekst(arbeidsgiver2)
         val tilstand = TestKontekst("Tilstand", "Tilstand 1")
-        hendelse2.kontekst(tilstand)
+        val hendelse2 = aktivitetslogg
+            .kontekst(person)
+            .kontekst(arbeidsgiver2)
+            .kontekst(tilstand)
         hendelse2.behov(Utbetaling, "Skal utbetale")
 
         assertEquals(2, aktivitetslogg.behov.size)
