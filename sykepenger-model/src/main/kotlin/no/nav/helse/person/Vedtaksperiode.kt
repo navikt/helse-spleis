@@ -970,7 +970,7 @@ internal class Vedtaksperiode private constructor(
         registrerKontekst(aktivitetslogg)
 
         when (tilstand) {
-            AvsluttetUtenUtbetaling -> omgjøreEtterInfotrygdendring(hendelse, aktivitetslogg.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk)
+            AvsluttetUtenUtbetaling -> return omgjøreEtterInfotrygdendring(hendelse, aktivitetslogg.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk)
 
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering -> {
@@ -1013,8 +1013,8 @@ internal class Vedtaksperiode private constructor(
         return null
     }
 
-    private fun omgjøreEtterInfotrygdendring(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
-        if (!skalOmgjøres()) return
+    private fun omgjøreEtterInfotrygdendring(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk): Revurderingseventyr? {
+        if (!skalOmgjøres()) return null
         behandlinger.sikreNyBehandling(
             arbeidsgiver,
             hendelse.metadata.behandlingkilde,
@@ -1028,14 +1028,16 @@ internal class Vedtaksperiode private constructor(
 
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre() && kanForkastes) {
             aktivitetslogg.info("Forkaster perioden fordi Infotrygdhistorikken ikke validerer")
-            return forkast(hendelse, aktivitetslogg)
+            forkast(hendelse, aktivitetslogg)
+            return null
         }
         if (måInnhenteInntektEllerRefusjon() && kanForkastes) {
             aktivitetslogg.info("Forkaster perioden fordi perioden har ikke tilstrekkelig informasjon til utbetaling")
-            return forkast(hendelse, aktivitetslogg)
+            forkast(hendelse, aktivitetslogg)
+            return null
         }
         aktivitetslogg.varsel(RV_IT_38)
-        person.igangsettOverstyring(Revurderingseventyr.infotrygdendring(hendelse, skjæringstidspunkt, periode), aktivitetslogg)
+        return Revurderingseventyr.infotrygdendring(hendelse, skjæringstidspunkt, periode)
     }
 
     internal fun håndter(
