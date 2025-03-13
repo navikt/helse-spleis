@@ -966,7 +966,7 @@ internal class Vedtaksperiode private constructor(
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg,
         infotrygdhistorikk: Infotrygdhistorikk
-    ) {
+    ): Revurderingseventyr? {
         registrerKontekst(aktivitetslogg)
 
         when (tilstand) {
@@ -974,9 +974,12 @@ internal class Vedtaksperiode private constructor(
 
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering -> {
-                if (!behandlinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) return aktivitetslogg.info("Infotrygdhistorikken er uendret, reberegner ikke periode")
+                if (!behandlinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) {
+                    aktivitetslogg.info("Infotrygdhistorikken er uendret, reberegner ikke periode")
+                    return null
+                }
                 aktivitetslogg.info("Infotrygdhistorikken har endret seg, reberegner periode")
-                person.igangsettOverstyring(Revurderingseventyr.infotrygdendring(hendelse, skjæringstidspunkt, periode), aktivitetslogg)
+                return Revurderingseventyr.infotrygdendring(hendelse, skjæringstidspunkt, periode)
             }
 
             AvventerInfotrygdHistorikk,
@@ -1006,6 +1009,8 @@ internal class Vedtaksperiode private constructor(
                 /* gjør ingenting */
             }
         }
+
+        return null
     }
 
     private fun omgjøreEtterInfotrygdendring(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {

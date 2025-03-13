@@ -189,10 +189,10 @@ internal class Arbeidsgiver private constructor(
             hendelse: Hendelse,
             aktivitetslogg: IAktivitetslogg,
             infotrygdhistorikk: Infotrygdhistorikk
-        ) {
-            forEach { arbeidsgiver ->
-                arbeidsgiver.håndterHistorikkFraInfotrygd(hendelse, aktivitetslogg, infotrygdhistorikk)
-            }
+        ): Revurderingseventyr? {
+            return this
+                .mapNotNull { arbeidsgiver -> arbeidsgiver.håndterHistorikkFraInfotrygd(hendelse, aktivitetslogg, infotrygdhistorikk) }
+                .tidligsteEventyr()
         }
 
         internal fun List<Arbeidsgiver>.håndter(
@@ -644,9 +644,9 @@ internal class Arbeidsgiver private constructor(
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg,
         infotrygdhistorikk: Infotrygdhistorikk
-    ) {
+    ): Revurderingseventyr? {
         aktivitetslogg.kontekst(this)
-        håndter { it.håndterHistorikkFraInfotrygd(hendelse, aktivitetslogg, infotrygdhistorikk) }
+        return håndter { it.håndterHistorikkFraInfotrygd(hendelse, aktivitetslogg, infotrygdhistorikk) }.tidligsteEventyr()
     }
 
     internal fun håndter(

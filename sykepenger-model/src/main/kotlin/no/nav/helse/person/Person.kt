@@ -301,9 +301,10 @@ class Person private constructor(
         registrer(aktivitetslogg, "Behandler historikk fra infotrygd")
         oppdatertHistorikk(infotrygdhistorikk)
         sykdomshistorikkEndret()
-        arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, aktivitetslogg, infotrygdhistorikk)
+        val revurderingseventyr = arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, aktivitetslogg, infotrygdhistorikk)
         val alleVedtaksperioder = arbeidsgivere.vedtaksperioder { true }
         emitOverlappendeInfotrygdperioder(alleVedtaksperioder)
+        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
         håndterGjenoppta(hendelse, aktivitetslogg)
     }
 
