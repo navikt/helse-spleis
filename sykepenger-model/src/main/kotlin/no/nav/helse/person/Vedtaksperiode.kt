@@ -2758,11 +2758,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun vurderOmInntektsmeldingAldriKommer(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse): Boolean {
+            if (påminnelse.når(Flagg("ønskerInntektFraAOrdningen"))) return true
+            if (Toggle.InntektsmeldingSomIkkeKommer.disabled) return false
+            if (vedtaksperiode.person.alder.fødselsdato.dayOfMonth !in 29 .. 31) return false
             val ventetMinst3Måneder = påminnelse.når(VentetMinst(Period.ofMonths(3)))
             val ikkeForGammel = !påminnelse.når(Påminnelse.Predikat.VentetFørCutoff)
-            val påTideMedSkatt = ventetMinst3Måneder && ikkeForGammel && (Toggle.InntektsmeldingSomIkkeKommer.enabled || påminnelse.når(Flagg("ønskerInntektFraAOrdningen")))
-            val inngangsfilter = (29..31).contains(vedtaksperiode.person.personidentifikator.toString().take(2).toInt())
-            return påTideMedSkatt && inngangsfilter
+            return ventetMinst3Måneder && ikkeForGammel
         }
 
         override fun gjenopptaBehandling(

@@ -37,12 +37,12 @@ import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
-    private val FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER = "30019412345"
-    private val FNR_SOM_IKKE_SKAL_SLIPPE_GJENNOM_INNGANGFILTER = "12019412345"
+    private val fødselsdatoSomSkalSlippeGjennom = 30.januar(1990)
+    private val fødselsdatoSomIkkeSkalSlippeGjennom = 12.januar(1990)
 
     @Test
     fun `legger varsel på riktig periode når det er en senere periode som blir påminnet -- helgegap og out of order`() {
-        medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
+        medFødselsdato(fødselsdatoSomSkalSlippeGjennom)
         val inntektFraSkatt = 10000.månedlig
         a1 {
             håndterSøknad(29.januar til 10.februar)
@@ -73,7 +73,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
     @Test
     fun `legger varsel på riktig periode når det er en senere periode som blir påminnet -- helgegap`() {
-        medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
+        medFødselsdato(fødselsdatoSomSkalSlippeGjennom)
         val inntektFraSkatt = 10000.månedlig
         a1 {
             håndterSøknad(1.januar til 26.januar)
@@ -104,7 +104,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
     @Test
     fun `event om at vi bruker skatteopplysninger`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
-        medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
+        medFødselsdato(fødselsdatoSomSkalSlippeGjennom)
         val inntektFraSkatt = 10000.månedlig
         a1 {
             håndterSøknad(januar)
@@ -145,7 +145,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
     @Test
     fun `event om at vi bruker skatteopplysninger med sprø minus`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
-        medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
+        medFødselsdato(fødselsdatoSomSkalSlippeGjennom)
         val inntektFraSkatt = 10000.månedlig
         val sprøInntektFraSkatt = 30000.månedlig * -1
         a1 {
@@ -188,7 +188,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
     @Test
     fun `lar vedtaksperiode time ut på vanlig måte dersom fødselsnummer som ikke passerer inngangsfilter`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
-        medPersonidentifikator(Personidentifikator(FNR_SOM_IKKE_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
+        medFødselsdato(fødselsdatoSomIkkeSkalSlippeGjennom)
         a1 {
             håndterSøknad(januar)
             håndterPåminnelse(
@@ -215,7 +215,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
     @Test
     fun `lager påminnelse om vedtaksperioden har ventet mer enn tre måneder`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
-        medPersonidentifikator(Personidentifikator(FNR_SOM_SKAL_SLIPPE_GJENNOM_INNGANGFILTER))
+        medFødselsdato(30.januar(1990))
 
         val nå = 10.februar(2025).atStartOfDay()
         val tilstandsendringstidspunkt = 10.november(2024).atStartOfDay()
