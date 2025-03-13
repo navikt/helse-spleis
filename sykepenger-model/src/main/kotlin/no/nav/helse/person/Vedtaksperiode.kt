@@ -388,17 +388,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         val arbeidsgiverperiodeEtterOverstyring = arbeidsgiver.arbeidsgiverperiode(periode)
-        if (arbeidsgiverperiodeFørOverstyring != arbeidsgiverperiodeEtterOverstyring) {
-            behandlinger.sisteInntektsmeldingDagerId()?.let {
-                person.arbeidsgiveropplysningerKorrigert(
-                    PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                        korrigerendeInntektsopplysningId = hendelse.metadata.meldingsreferanseId.id,
-                        korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
-                        korrigertInntektsmeldingId = it.id
-                    )
-                )
-            }
-        }
+        sendMetrikkTilHag(arbeidsgiverperiodeFørOverstyring, arbeidsgiverperiodeEtterOverstyring, hendelse)
         hendelse.vurdertTilOgMed(periode.endInclusive)
     }
 
@@ -521,6 +511,24 @@ internal class Vedtaksperiode private constructor(
 
                 is Arbeidstakerinntektskilde.AOrdningen,
                 Arbeidstakerinntektskilde.Infotrygd -> { /* gjør ingenting */ }
+            }
+        }
+    }
+
+    private fun sendMetrikkTilHag(
+        arbeidsgiverperiodeFørOverstyring: Arbeidsgiverperiode?,
+        arbeidsgiverperiodeEtterOverstyring: Arbeidsgiverperiode?,
+        hendelse: OverstyrTidslinje
+    ) {
+        if (arbeidsgiverperiodeFørOverstyring != arbeidsgiverperiodeEtterOverstyring) {
+            behandlinger.sisteInntektsmeldingDagerId()?.let {
+                person.arbeidsgiveropplysningerKorrigert(
+                    PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
+                        korrigerendeInntektsopplysningId = hendelse.metadata.meldingsreferanseId.id,
+                        korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
+                        korrigertInntektsmeldingId = it.id
+                    )
+                )
             }
         }
     }
