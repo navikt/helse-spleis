@@ -22,19 +22,6 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `påminnelse når vedtaksperiode ikke finnes`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        )
-        val id = sendNyPåminnelse()
-        val melding = testRapid.inspektør.meldinger("vedtaksperiode_ikke_funnet").single()
-        assertEquals("vedtaksperiode_ikke_funnet", melding.path("@event_name").asText())
-        assertEquals("$id", melding.path("vedtaksperiodeId").asText())
-        assertVedtaksperiodeIkkeFunnet(melding)
-    }
-
-    @Test
     fun `påminnelse for feil tilstand`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(

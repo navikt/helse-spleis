@@ -6,7 +6,6 @@ import java.time.Period
 import java.util.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.SYSTEM
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
@@ -56,15 +55,6 @@ class Påminnelse(
         if (!it) {
             aktivitetslogg.info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
         }
-    }
-
-    internal fun vedtaksperiodeIkkeFunnet(observer: PersonObserver) {
-        observer.vedtaksperiodeIkkeFunnet(
-            PersonObserver.VedtaksperiodeIkkeFunnetEvent(
-                organisasjonsnummer = behandlingsporing.organisasjonsnummer,
-                vedtaksperiodeId = UUID.fromString(vedtaksperiodeId)
-            )
-        )
     }
 
     fun toOutgoingMessage() = mapOf(

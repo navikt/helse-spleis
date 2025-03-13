@@ -755,9 +755,9 @@ internal class Arbeidsgiver private constructor(
         utbetalinger.forEach { it.håndter(påminnelse, aktivitetslogg) }
     }
 
-    internal fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Boolean {
+    internal fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         aktivitetslogg.kontekst(this)
-        return énHarHåndtert(påminnelse) { håndter(it, aktivitetslogg) }
+        return énHåndtert(påminnelse) { håndter(it, aktivitetslogg) }
     }
 
     override fun utbetalingUtbetalt(

@@ -76,7 +76,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.view.PersonView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -429,13 +428,10 @@ class Person private constructor(
     }
 
     fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-        try {
-            registrer(aktivitetslogg, "Behandler påminnelse")
-            if (finnArbeidsgiver(påminnelse.behandlingsporing, aktivitetslogg).håndter(påminnelse, aktivitetslogg)) return håndterGjenoppta(påminnelse, aktivitetslogg)
-        } catch (_: Aktivitetslogg.AktivitetException) {
-            aktivitetslogg.funksjonellFeil(RV_AG_1)
-        }
-        observers.forEach { påminnelse.vedtaksperiodeIkkeFunnet(it) }
+        registrer(aktivitetslogg, "Behandler påminnelse")
+        val revurderingseventyr = finnArbeidsgiver(påminnelse.behandlingsporing, aktivitetslogg).håndter(påminnelse, aktivitetslogg)
+        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
+        return håndterGjenoppta(påminnelse, aktivitetslogg)
         håndterGjenoppta(påminnelse, aktivitetslogg)
     }
 

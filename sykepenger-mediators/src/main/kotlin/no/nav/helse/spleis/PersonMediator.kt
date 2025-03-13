@@ -491,17 +491,6 @@ internal class PersonMediator(
         )
     }
 
-    override fun vedtaksperiodeIkkeFunnet(event: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "vedtaksperiode_ikke_funnet", mapOf(
-                "organisasjonsnummer" to event.organisasjonsnummer,
-                "vedtaksperiodeId" to event.vedtaksperiodeId
-            )
-            )
-        )
-    }
-
     override fun sykefraværstilfelleIkkeFunnet(event: PersonObserver.SykefraværstilfelleIkkeFunnet) {
         queueMessage(
             JsonMessage.newMessage(

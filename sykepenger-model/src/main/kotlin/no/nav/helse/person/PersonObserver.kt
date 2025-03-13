@@ -18,11 +18,6 @@ interface PersonObserver {
         val skjæringstidspunkt: LocalDate
     )
 
-    data class VedtaksperiodeIkkeFunnetEvent(
-        val organisasjonsnummer: String,
-        val vedtaksperiodeId: UUID
-    )
-
     data class VedtaksperiodeEndretEvent(
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
@@ -620,7 +615,6 @@ interface PersonObserver {
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {}
     fun vedtaksperioderVenter(eventer: List<VedtaksperiodeVenterEvent>) {}
     fun vedtaksperiodeForkastet(event: VedtaksperiodeForkastetEvent) {}
-    fun vedtaksperiodeIkkeFunnet(event: VedtaksperiodeIkkeFunnetEvent) {}
     fun sykefraværstilfelleIkkeFunnet(event: SykefraværstilfelleIkkeFunnet) {}
     fun trengerArbeidsgiveropplysninger(event: TrengerArbeidsgiveropplysningerEvent) {}
     fun trengerIkkeArbeidsgiveropplysninger(event: TrengerIkkeArbeidsgiveropplysningerEvent) {}

@@ -1174,11 +1174,10 @@ internal class Vedtaksperiode private constructor(
         return Revurderingseventyr.annullering(hendelse, annullering.periode())
     }
 
-    internal fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Boolean {
-        if (!påminnelse.erRelevant(id)) return false
+    internal fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        if (!påminnelse.erRelevant(id)) return null
         registrerKontekst(aktivitetslogg)
-        tilstand.påminnelse(this, påminnelse, aktivitetslogg)
-        return true
+        return tilstand.påminnelse(this, påminnelse, aktivitetslogg)
     }
 
     internal fun nyAnnullering(aktivitetslogg: IAktivitetslogg) {
@@ -1874,16 +1873,24 @@ internal class Vedtaksperiode private constructor(
         vedtaksperiode: Vedtaksperiode,
         påminnelse: Påminnelse,
         aktivitetslogg: IAktivitetslogg
-    ) {
-        if (!påminnelse.gjelderTilstand(aktivitetslogg, type)) return vedtaksperiode.person.vedtaksperiodeIkkePåminnet(
-            id,
-            arbeidsgiver.organisasjonsnummer,
-            type
-        )
+    ): Revurderingseventyr? {
+        if (!påminnelse.gjelderTilstand(aktivitetslogg, type)) {
+            vedtaksperiode.person.vedtaksperiodeIkkePåminnet(id, arbeidsgiver.organisasjonsnummer, type)
+            return null
+        }
         vedtaksperiode.person.vedtaksperiodePåminnet(id, arbeidsgiver.organisasjonsnummer, påminnelse)
         val beregnetMakstid = { tilstandsendringstidspunkt: LocalDateTime -> makstid(tilstandsendringstidspunkt) }
-        if (påminnelse.nåddMakstid(beregnetMakstid)) return håndterMakstid(vedtaksperiode, påminnelse, aktivitetslogg)
+        if (påminnelse.nåddMakstid(beregnetMakstid)) {
+            håndterMakstid(vedtaksperiode, påminnelse, aktivitetslogg)
+            return null
+        }
+        val overstyring = påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+        if (overstyring != null) {
+            aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
+            return overstyring
+        }
         håndter(vedtaksperiode, påminnelse, aktivitetslogg)
+        return null
     }
 
     override fun toString() =
@@ -2595,10 +2602,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
-                aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
-                vedtaksperiode.person.igangsettOverstyring(it, aktivitetslogg)
-            } ?: vedtaksperiode.trengerYtelser(aktivitetslogg)
+            vedtaksperiode.trengerYtelser(aktivitetslogg)
         }
 
         override fun skalHåndtereDager(
@@ -2739,24 +2743,26 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            if (vurderOmKanGåVidere(vedtaksperiode, påminnelse, aktivitetslogg)) return aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
+            if (vurderOmKanGåVidere(vedtaksperiode, påminnelse, aktivitetslogg)) {
+                aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
+            }
 
             if (påminnelse.når(Flagg("trengerReplay"))) return vedtaksperiode.trengerInntektsmeldingReplay()
-
-            val ventetMinst3Måneder = påminnelse.når(VentetMinst(Period.ofMonths(3)))
-            val ikkeForGammel = !påminnelse.når(Påminnelse.Predikat.VentetFørCutoff)
-            val påTideMedSkatt = ventetMinst3Måneder && ikkeForGammel && (Toggle.InntektsmeldingSomIkkeKommer.enabled || påminnelse.når(Flagg("ønskerInntektFraAOrdningen")))
-
-            if (påTideMedSkatt) {
-                val inngangsfilter = (29..31).contains(vedtaksperiode.person.personidentifikator.toString().take(2).toInt())
-                if (inngangsfilter) {
-                    aktivitetslogg.info("Nå henter vi inntekt fra skatt!")
-                    return vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
-                }
+            if (vurderOmInntektsmeldingAldriKommer(vedtaksperiode, påminnelse)) {
+                aktivitetslogg.info("Nå henter vi inntekt fra skatt!")
+                return vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
             }
             if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger()) {
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
             }
+        }
+
+        private fun vurderOmInntektsmeldingAldriKommer(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse): Boolean {
+            val ventetMinst3Måneder = påminnelse.når(VentetMinst(Period.ofMonths(3)))
+            val ikkeForGammel = !påminnelse.når(Påminnelse.Predikat.VentetFørCutoff)
+            val påTideMedSkatt = ventetMinst3Måneder && ikkeForGammel && (Toggle.InntektsmeldingSomIkkeKommer.enabled || påminnelse.når(Flagg("ønskerInntektFraAOrdningen")))
+            val inngangsfilter = (29..31).contains(vedtaksperiode.person.personidentifikator.toString().take(2).toInt())
+            return påTideMedSkatt && inngangsfilter
         }
 
         override fun gjenopptaBehandling(
@@ -2846,7 +2852,6 @@ internal class Vedtaksperiode private constructor(
             tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, hendelse, aktivitetslogg)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            if (påminnelse.skalReberegnes() && vedtaksperiode.måInnhenteInntektEllerRefusjon()) return vedtaksperiode.tilstand(aktivitetslogg, AvventerInntektsmelding)
             tilstand(vedtaksperiode).håndter(vedtaksperiode, påminnelse, aktivitetslogg)
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
@@ -3004,10 +3009,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
-                aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
-                vedtaksperiode.person.igangsettOverstyring(it, aktivitetslogg)
-            } ?: vedtaksperiode.trengerYtelser(aktivitetslogg)
+            vedtaksperiode.trengerYtelser(aktivitetslogg)
         }
 
         override fun igangsettOverstyring(
@@ -3038,10 +3040,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
-                aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
-                vedtaksperiode.person.igangsettOverstyring(it, aktivitetslogg)
-            } ?: trengerSimulering(vedtaksperiode, aktivitetslogg)
+            trengerSimulering(vedtaksperiode, aktivitetslogg)
         }
 
         private fun trengerSimulering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
@@ -3070,10 +3069,7 @@ internal class Vedtaksperiode private constructor(
         ) = vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
-                aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
-                vedtaksperiode.person.igangsettOverstyring(it, aktivitetslogg)
-            } ?: vedtaksperiode.behandlinger.simuler(aktivitetslogg)
+            vedtaksperiode.behandlinger.simuler(aktivitetslogg)
         }
 
         override fun skalHåndtereDager(
@@ -3103,10 +3099,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
-                aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
-                vedtaksperiode.person.igangsettOverstyring(it, aktivitetslogg)
-            } ?: vedtaksperiode.trengerGodkjenning(aktivitetslogg)
+            vedtaksperiode.trengerGodkjenning(aktivitetslogg)
         }
 
         override fun igangsettOverstyring(
@@ -3153,10 +3146,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.skalHåndtereDagerRevurdering(dager, aktivitetslogg)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
-                aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
-                vedtaksperiode.person.igangsettOverstyring(it, aktivitetslogg)
-            } ?: vedtaksperiode.trengerGodkjenning(aktivitetslogg)
+            vedtaksperiode.trengerGodkjenning(aktivitetslogg)
         }
     }
 
@@ -3193,11 +3183,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
             when {
-                vedtaksperiode.behandlinger.erUbetalt() -> vedtaksperiode.tilstand(
-                    aktivitetslogg,
-                    AvventerBlokkerendePeriode
-                )
-
+                vedtaksperiode.behandlinger.erUbetalt() -> vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
                 vedtaksperiode.behandlinger.erAvsluttet() -> vedtaksperiode.tilstand(aktivitetslogg, Avsluttet)
             }
         }
@@ -3282,10 +3268,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
             if (!vedtaksperiode.skalOmgjøres() && vedtaksperiode.behandlinger.erAvsluttet()) return aktivitetslogg.info("Forventer ikke inntekt. Vil forbli i AvsluttetUtenUtbetaling")
-            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
-                aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
-                vedtaksperiode.person.igangsettOverstyring(it, aktivitetslogg)
-            }
         }
     }
 
@@ -3334,13 +3316,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.subsumsjonslogg.logg(`fvl § 35 ledd 1`())
             revurdering.inngåSomRevurdering(vedtaksperiode, aktivitetslogg, vedtaksperiode.periode)
             vedtaksperiode.tilstand(aktivitetslogg, AvventerRevurdering)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
-                aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
-                vedtaksperiode.person.igangsettOverstyring(it, aktivitetslogg)
-            }
         }
     }
 
