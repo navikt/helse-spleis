@@ -301,8 +301,8 @@ internal class Vedtaksperiode private constructor(
         return Revurderingseventyr.nyPeriode(søknad, skjæringstidspunkt, periode)
     }
 
-    internal fun håndterKorrigertSøknad(søknad: Søknad, aktivitetslogg: IAktivitetslogg): Boolean {
-        if (!søknad.erRelevant(this.periode)) return false
+    internal fun håndterKorrigertSøknad(søknad: Søknad, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        if (!søknad.erRelevant(this.periode)) return null
         registrerKontekst(aktivitetslogg)
 
         person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId.id, id, arbeidsgiver.organisasjonsnummer)
@@ -341,8 +341,7 @@ internal class Vedtaksperiode private constructor(
             TilInfotrygd -> error("Kan ikke håndtere søknad mens perioden er i $tilstand")
         }
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) forkast(søknad, aktivitetslogg)
-        person.igangsettOverstyring(Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode), aktivitetslogg)
-        return true
+        return Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode)
     }
 
     internal fun håndter(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg) {

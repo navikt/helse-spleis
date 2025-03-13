@@ -530,22 +530,42 @@ internal class Arbeidsgiver private constructor(
     ): Revurderingseventyr? {
         aktivitetslogg.kontekst(this)
         søknad.slettSykmeldingsperioderSomDekkes(sykmeldingsperioder)
-        return opprettVedtaksperiodeOgHåndter(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
+        return behandleSøknad(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
     }
 
-    private fun opprettVedtaksperiodeOgHåndter(
+    private fun behandleSøknad(
         søknad: Søknad,
         aktivitetslogg: IAktivitetslogg,
         arbeidsgivere: List<Arbeidsgiver>,
         infotrygdhistorikk: Infotrygdhistorikk
     ): Revurderingseventyr? {
-        val noenHarHåndtert = énHarHåndtert(søknad) { håndterKorrigertSøknad(søknad, aktivitetslogg) }
-        if (noenHarHåndtert && !søknad.delvisOverlappende) return null
+        return behandleSøknadSomKorrigering(søknad, aktivitetslogg)
+            ?: behandleSøknadSomFørstegangs(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
+    }
+
+    private fun behandleSøknadSomKorrigering(
+        søknad: Søknad,
+        aktivitetslogg: IAktivitetslogg
+    ): Revurderingseventyr? {
+        val noenHarHåndtert = énHåndtert(søknad) { håndterKorrigertSøknad(søknad, aktivitetslogg) } ?: return null
+        if (!søknad.delvisOverlappende) return noenHarHåndtert
+        // oppretter en forkastet vedtaksperiode hvis det er delvis overlapp
+        opprettForkastetVedtaksperiode(søknad, aktivitetslogg)
+        return noenHarHåndtert
+    }
+
+    private fun opprettForkastetVedtaksperiode(søknad: Søknad, aktivitetslogg: IAktivitetslogg) {
         val vedtaksperiode = søknad.lagVedtaksperiode(aktivitetslogg, person, this, regelverkslogg)
-        if (søknad.delvisOverlappende || aktivitetslogg.harFunksjonelleFeilEllerVerre()) {
-            registrerForkastetVedtaksperiode(vedtaksperiode, søknad, aktivitetslogg)
-            return null
-        }
+        registrerForkastetVedtaksperiode(vedtaksperiode, søknad, aktivitetslogg)
+    }
+
+    private fun behandleSøknadSomFørstegangs(
+        søknad: Søknad,
+        aktivitetslogg: IAktivitetslogg,
+        arbeidsgivere: List<Arbeidsgiver>,
+        infotrygdhistorikk: Infotrygdhistorikk
+    ): Revurderingseventyr? {
+        val vedtaksperiode = søknad.lagVedtaksperiode(aktivitetslogg, person, this, regelverkslogg)
         registrerNyVedtaksperiode(vedtaksperiode)
         return vedtaksperiode.håndterSøknadFørsteGang(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
     }
@@ -1093,6 +1113,17 @@ internal class Arbeidsgiver private constructor(
         var håndtert = false
         looper { håndtert = håndtert || håndterer(it, hendelse) }
         return håndtert
+    }
+
+    private fun <R, Hendelsetype : Hendelse> énHåndtert(
+        hendelse: Hendelsetype,
+        håndterer: Vedtaksperiode.(Hendelsetype) -> R?
+    ): R? {
+        var result: R? = null
+        looper {
+            if (result == null) result = håndterer(it, hendelse)
+        }
+        return result
     }
 
     // støtter å loope over vedtaksperioder som modifiseres pga. forkasting.
