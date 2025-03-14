@@ -3,7 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
@@ -169,19 +169,6 @@ interface PersonObserver {
             )
     }
 
-    data class ArbeidsgiveropplysningerKorrigertEvent(
-        val korrigertInntektsmeldingId: UUID,
-        val korrigerendeInntektsopplysningId: UUID,
-        val korrigerendeInntektektsopplysningstype: Inntektsopplysningstype
-    ) {
-        fun toJsonMap(): Map<String, Any> =
-            mapOf(
-                "korrigertInntektsmeldingId" to korrigertInntektsmeldingId,
-                "korrigerendeInntektsopplysningId" to korrigerendeInntektsopplysningId,
-                "korrigerendeInntektektsopplysningstype" to korrigerendeInntektektsopplysningstype
-            )
-    }
-
     data class FørsteFraværsdag(
         val organisasjonsnummer: String,
         val førsteFraværsdag: LocalDate
@@ -210,11 +197,6 @@ interface PersonObserver {
                 }
             }
         }
-    }
-
-    enum class Inntektsopplysningstype {
-        INNTEKTSMELDING,
-        SAKSBEHANDLER
     }
 
     data object Inntekt : ForespurtOpplysning()
@@ -618,7 +600,6 @@ interface PersonObserver {
     fun sykefraværstilfelleIkkeFunnet(event: SykefraværstilfelleIkkeFunnet) {}
     fun trengerArbeidsgiveropplysninger(event: TrengerArbeidsgiveropplysningerEvent) {}
     fun trengerIkkeArbeidsgiveropplysninger(event: TrengerIkkeArbeidsgiveropplysningerEvent) {}
-    fun arbeidsgiveropplysningerKorrigert(event: ArbeidsgiveropplysningerKorrigertEvent) {}
     fun utbetalingEndret(event: UtbetalingEndretEvent) {}
     fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}
     fun utbetalingUtenUtbetaling(event: UtbetalingUtbetaltEvent) {}

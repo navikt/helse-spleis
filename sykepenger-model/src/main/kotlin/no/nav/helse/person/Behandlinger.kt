@@ -239,7 +239,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun hendelseIder() = behandlinger.dokumentsporing
     internal fun eksterneIder() = behandlinger.dokumentsporing.eksterneIder()
     internal fun søknadIder() = behandlinger.dokumentsporing.søknadIder()
-    internal fun sisteInntektsmeldingDagerId() = behandlinger.dokumentsporing.sisteInntektsmeldingDagerId()
     internal fun harHåndtertDagerTidligere() = behandlinger.dokumentsporing.sisteInntektsmeldingDagerId() != null
     internal fun oppdaterDokumentsporing(dokument: Dokumentsporing) {
         return behandlinger.last().oppdaterDokumentsporing(dokument)

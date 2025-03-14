@@ -27,7 +27,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val utbetalteVedtaksperioder = mutableListOf<UUID>()
     val trengerArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerArbeidsgiveropplysningerEvent>()
     val trengerIkkeArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent>()
-    val arbeidsgiveropplysningerKorrigert = mutableListOf<PersonObserver.ArbeidsgiveropplysningerKorrigertEvent>()
     val utbetalingUtenUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
     val utbetalingMedUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
     val feriepengerUtbetaltEventer = mutableListOf<PersonObserver.FeriepengerUtbetaltEvent>()
@@ -149,7 +148,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         if (oppgitt.isEmpty()) return
         val relevante = oppgitt.filter { it is Arbeidsgiveropplysning.OppgittInntekt || it is Arbeidsgiveropplysning.OppgittArbeidgiverperiode || it is Arbeidsgiveropplysning.OppgittRefusjon }
 
-        val forespurteOpplysninger = forespurt.mapNotNull { it.somArbeidsgiveropplysning }.toSet()
+        val forespurteOpplysninger = forespurt.map { it.somArbeidsgiveropplysning }.toSet()
         val oppgittOpplysninger = relevante.map { it::class }.toSet()
 
         val ikkeForespurt = (oppgittOpplysninger - forespurteOpplysninger).takeUnless { it.isEmpty() } ?: return
@@ -174,10 +173,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     override fun trengerIkkeArbeidsgiveropplysninger(event: PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent) {
         trengerIkkeArbeidsgiveropplysningerVedtaksperioder.add(event)
         trengerArbeidsgiveroppysninger.remove(event.vedtaksperiodeId)
-    }
-
-    override fun arbeidsgiveropplysningerKorrigert(event: PersonObserver.ArbeidsgiveropplysningerKorrigertEvent) {
-        arbeidsgiveropplysningerKorrigert.add(event)
     }
 
     override fun inntektsmeldingReplay(

@@ -513,10 +513,6 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("trenger_ikke_opplysninger_fra_arbeidsgiver", event.toJsonMap()))
     }
 
-    override fun arbeidsgiveropplysningerKorrigert(event: PersonObserver.ArbeidsgiveropplysningerKorrigertEvent) {
-        queueMessage(JsonMessage.newMessage("arbeidsgiveropplysninger_korrigert", event.toJsonMap()))
-    }
-
     override fun utkastTilVedtak(event: PersonObserver.UtkastTilVedtakEvent) {
         val utkastTilVedtak = mutableMapOf(
             "vedtaksperiodeId" to event.vedtaksperiodeId,

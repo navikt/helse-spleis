@@ -539,10 +539,6 @@ class Person private constructor(
         observers.forEach { it.trengerIkkeArbeidsgiveropplysninger(event) }
     }
 
-    internal fun arbeidsgiveropplysningerKorrigert(event: PersonObserver.ArbeidsgiveropplysningerKorrigertEvent) {
-        observers.forEach { it.arbeidsgiveropplysningerKorrigert(event) }
-    }
-
     internal fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {
         observers.forEach { it.utbetalingUtbetalt(event) }
     }
