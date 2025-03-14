@@ -619,7 +619,7 @@ internal class Arbeidsgiver private constructor(
         return tidligsteOverstyring
     }
 
-    internal fun håndterReplayAvInntektsmelding(inntektsmeldinger: List<Inntektsmelding>, aktivitetslogg: IAktivitetslogg, vedtaksperiodeIdForReplay: UUID): Revurderingseventyr? {
+    private fun håndterReplayAvInntektsmelding(inntektsmeldinger: List<Inntektsmelding>, aktivitetslogg: IAktivitetslogg, vedtaksperiodeIdForReplay: UUID): Revurderingseventyr? {
         return vedtaksperioder.firstNotNullOfOrNull { it.håndterReplayAvInntektsmelding(vedtaksperiodeIdForReplay, inntektsmeldinger, aktivitetslogg) }
     }
 
