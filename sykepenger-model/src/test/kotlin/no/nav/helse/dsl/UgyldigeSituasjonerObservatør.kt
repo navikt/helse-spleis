@@ -158,7 +158,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
     }
 
     override fun behandlingUtført() {
-        bekreftIngenUgyldigeSituasjoner(person.personlogg)
+        bekreftIngenUgyldigeSituasjoner()
         IM.behandlingUtført()
     }
 
@@ -171,9 +171,8 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
         }
     }
 
-    private fun bekreftIngenUgyldigeSituasjoner(aktivitetslogg: Aktivitetslogg) = sjekk {
+    private fun bekreftIngenUgyldigeSituasjoner() = sjekk {
         bekreftIngenOverlappende()
-        bekreftVarselHarKnytningTilVedtaksperiode(aktivitetslogg)
         validerSykdomshistorikk()
         validerSykdomstidslinjePåBehandlinger()
         validerTilstandPåSisteBehandlingForFerdigbehandledePerioder()
@@ -182,7 +181,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
         IM.bekreftEntydighåndtering()
     }
 
-    private fun bekreftVarselHarKnytningTilVedtaksperiode(aktivitetslogg: Aktivitetslogg) {
+    internal fun bekreftVarselHarKnytningTilVedtaksperiode(aktivitetslogg: Aktivitetslogg) {
         aktivitetslogg.aktiviteter.forEach { aktivitet ->
             when (aktivitet) {
                 is Aktivitet.Behov -> {}

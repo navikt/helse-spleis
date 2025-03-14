@@ -6,7 +6,6 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.harBehov
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.person.PersonObserver
@@ -62,7 +61,7 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
     fun `infotrygdendring gjør vi at trenger oppdatert historikk`() {
         nyPeriode(1.januar til 16.januar)
         håndterInfotrygdendring()
-        assertTrue(person.personLogg.harBehov(Sykepengehistorikk))
+        assertTrue(personlogg.harBehov(Sykepengehistorikk))
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2016), 31.januar(2016), 100.prosent, INNTEKT))
 
         val infotrygdHistorikk = person.inspektør.utbetaltIInfotrygd

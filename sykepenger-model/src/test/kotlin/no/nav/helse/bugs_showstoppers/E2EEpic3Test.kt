@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
@@ -150,7 +149,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(15.januar, 16.januar, 100.prosent))
 
         assertIngenFunksjonelleFeil()
-        assertActivities(person)
+        assertActivities()
         assertTilstander(
             2.vedtaksperiode,
             START,
@@ -546,7 +545,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertTrue(person.personLogg.harVarslerEllerVerre())
+        assertTrue(personlogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -586,7 +585,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertFalse(person.personLogg.harVarslerEllerVerre())
+        assertFalse(personlogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -618,7 +617,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertTrue(person.personLogg.harVarslerEllerVerre())
+        assertTrue(personlogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(2.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -662,7 +661,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertTrue(person.personLogg.harVarslerEllerVerre())
+        assertTrue(personlogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -694,7 +693,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertTrue(person.personLogg.harVarslerEllerVerre())
+        assertTrue(personlogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(2.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -737,7 +736,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertTrue(person.personLogg.harVarslerEllerVerre())
+        assertTrue(personlogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -772,7 +771,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertTrue(person.personLogg.harVarslerEllerVerre())
+        assertTrue(personlogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(2.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)

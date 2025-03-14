@@ -47,7 +47,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
@@ -76,7 +75,7 @@ internal fun AbstractEndToEndTest.utbetaling(
         meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
-        utbetalingId = utbetalingId ?: person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId").let { UUID.fromString(it) },
+        utbetalingId = utbetalingId ?: personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId").let { UUID.fromString(it) },
         status = status,
         melding = "hei",
         avstemmingsnøkkel = 123456L,
@@ -93,7 +92,7 @@ internal fun AbstractEndToEndTest.feriepengeutbetaling(
         meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
-        utbetalingId = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId").let { UUID.fromString(it) },
+        utbetalingId = personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId").let { UUID.fromString(it) },
         status = status,
         melding = "hey",
         avstemmingsnøkkel = 654321L,
@@ -406,7 +405,7 @@ internal fun AbstractEndToEndTest.simulering(
     simuleringOK: Boolean = true,
     orgnummer: String = a1,
     simuleringsresultat: SimuleringResultatDto? = standardSimuleringsresultat(orgnummer)
-) = person.personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter, orgnummer).filter { it.type == Aktivitet.Behov.Behovtype.Simulering }.map { simuleringsBehov ->
+) = personlogg.etterspurteBehov(vedtaksperiodeIdInnhenter, orgnummer).filter { it.type == Aktivitet.Behov.Behovtype.Simulering }.map { simuleringsBehov ->
     Simulering(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
@@ -467,10 +466,10 @@ internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     orgnummer: String,
     automatiskBehandling: Boolean,
     utbetalingId: UUID = UUID.fromString(
-        person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"]
+        personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"]
             ?: throw IllegalStateException(
                 "Finner ikke utbetalingId i: ${
-                    person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).kontekst()
+                    personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).kontekst()
                 }"
             )
     ),

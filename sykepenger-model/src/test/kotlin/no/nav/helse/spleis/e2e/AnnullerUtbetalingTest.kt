@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
@@ -43,7 +42,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     fun `avvis hvis arbeidsgiver er ukjent`() {
         nyttVedtak(3.januar til 26.januar, 100.prosent)
         assertThrows<Aktivitetslogg.AktivitetException> { håndterAnnullerUtbetaling(orgnummer = a2) }
-        assertTrue(person.personLogg.harFunksjonelleFeilEllerVerre(), person.personLogg.toString())
+        assertTrue(personlogg.harFunksjonelleFeilEllerVerre(), personlogg.toString())
     }
 
     @Test
@@ -82,24 +81,24 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `annuller siste utbetaling`() {
         nyttVedtak(3.januar til 26.januar, 100.prosent)
-        val behovTeller = person.personLogg.behov.size
+        val behovTeller = personlogg.behov.size
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
         assertIngenFunksjonelleFeil()
-        val behov = person.personLogg.sisteBehov(Behovtype.Utbetaling)
+        val behov = personlogg.sisteBehov(Behovtype.Utbetaling)
 
         @Suppress("UNCHECKED_CAST")
         val statusForUtbetaling = (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"]
         assertEquals("OPPH", statusForUtbetaling)
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
-        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
+        assertFalse(personlogg.harFunksjonelleFeilEllerVerre())
         assertEquals(2, inspektør.antallUtbetalinger)
-        assertEquals(1, person.personLogg.behov.size - behovTeller)
+        assertEquals(1, personlogg.behov.size - behovTeller)
         inspektør.utbetaling(1).arbeidsgiverOppdrag.inspektør.also {
             assertEquals(19.januar, it.fom(0))
             assertEquals(26.januar, it.tom(0))
             assertEquals(19.januar, it.datoStatusFom(0))
         }
-        person.personLogg.behov.last().also {
+        personlogg.behov.last().also {
             assertEquals(Behovtype.Utbetaling, it.type)
             assertNull(it.detaljer()["maksdato"])
             assertEquals("SPREF", it.detaljer()["fagområde"])
@@ -119,7 +118,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     private fun sisteBehovErAnnullering(vedtaksperiodeIdInnhenter: IdInnhenter) {
-        person.personLogg.behov.last().also {
+        personlogg.behov.last().also {
             assertEquals(Behovtype.Utbetaling, it.type)
             assertEquals(inspektør.sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeIdInnhenter), it.detaljer()["fagsystemId"])
             assertEquals("OPPH", it.hentLinjer()[0]["statuskode"])
@@ -128,7 +127,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     private fun assertIngenAnnulleringsbehov() {
         assertFalse(
-            person.personLogg.behov
+            personlogg.behov
                 .filter { it.type == Behovtype.Utbetaling }
                 .any {
                     it.hentLinjer().any { linje ->
@@ -188,7 +187,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
-        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
+        assertFalse(personlogg.harFunksjonelleFeilEllerVerre())
         assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetaling(1).tilstand)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, TIL_INFOTRYGD)
     }
@@ -200,7 +199,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
             assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
         }
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
-        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre(), person.personLogg.toString())
+        assertFalse(personlogg.harFunksjonelleFeilEllerVerre(), personlogg.toString())
         inspektør.also {
             assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
@@ -214,7 +213,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         forlengPeriode(1.februar til 20.februar, 100.prosent)
         nullstillTilstandsendringer()
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
-        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre(), person.personLogg.toString())
+        assertFalse(personlogg.harFunksjonelleFeilEllerVerre(), personlogg.toString())
         assertEquals(3, inspektør.antallUtbetalinger)
         assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetaling(2).tilstand)
         assertEquals(Utbetalingtype.ANNULLERING, inspektør.utbetaling(2).type)
@@ -231,7 +230,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterAnnullerUtbetaling()
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
-        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre(), person.personLogg.toString())
+        assertFalse(personlogg.harFunksjonelleFeilEllerVerre(), personlogg.toString())
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, TIL_INFOTRYGD)
     }
 
@@ -240,11 +239,11 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar til 26.januar, 100.prosent)
         forlengVedtak(27.januar til 30.januar, 100.prosent)
         nyttVedtak(1.mars til 20.mars, 100.prosent, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
-        val behovTeller = person.personLogg.behov.size
+        val behovTeller = personlogg.behov.size
         nullstillTilstandsendringer()
         håndterAnnullerUtbetaling()
-        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre(), person.personLogg.toString())
-        assertEquals(1, person.personLogg.behov.size - behovTeller, person.personLogg.toString())
+        assertFalse(personlogg.harFunksjonelleFeilEllerVerre(), personlogg.toString())
+        assertEquals(1, personlogg.behov.size - behovTeller, personlogg.toString())
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVSLUTTET)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET, TIL_INFOTRYGD)

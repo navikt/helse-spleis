@@ -298,7 +298,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
 
         assertVarsler(listOf(RV_AY_4), 1.vedtaksperiode.filter())
         assertIngenFunksjonelleFeil()
-        assertActivities(person)
+        assertActivities()
     }
 
     @Test
@@ -311,7 +311,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
 
         assertVarsler(listOf(Varselkode.RV_AY_3), 1.vedtaksperiode.filter())
         assertIngenFunksjonelleFeil()
-        assertActivities(person)
+        assertActivities()
     }
 
     @Test

@@ -13,10 +13,8 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -49,7 +47,7 @@ internal fun <T : PersonHendelse> AbstractEndToEndTest.assertEtterspurt(løsning
     assertTrue(ikkeBesvarteBehov.remove(etterspurtBehov)) {
         "Forventer at $type skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${
             observatør.tilstandsendringer[vedtaksperiodeIdInnhenter.id(orgnummer)]?.last()
-        }.\nAktivitetsloggen:\n${person.personLogg}"
+        }.\nAktivitetsloggen:\n${personlogg}"
     }
 }
 */
@@ -103,7 +101,7 @@ internal fun AbstractEndToEndTest.assertTilstand(
 ) {
     val sisteTilstand = inspektør(orgnummer).sisteTilstand(vedtaksperiodeIdInnhenter)
     assertEquals(tilstand, sisteTilstand) {
-        "Forventet at perioden skal stå i tilstand $tilstand, mens den står faktisk i $sisteTilstand\n${person.personLogg}"
+        "Forventet at perioden skal stå i tilstand $tilstand, mens den står faktisk i $sisteTilstand\n${personlogg}"
     }
 }
 
@@ -117,8 +115,8 @@ internal fun AbstractEndToEndTest.assertTilstander(indeks: Int, vararg tilstande
 
 internal fun AbstractEndToEndTest.assertTilstander(vedtaksperiodeIdInnhenter: IdInnhenter, vararg tilstander: TilstandType, orgnummer: String = a1, inspektør: TestArbeidsgiverInspektør = inspektør(orgnummer), message: String? = null) {
     val id = vedtaksperiodeIdInnhenter.id(orgnummer)
-    assertFalse(inspektør.periodeErForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}:\n${person.personLogg}" }
-    assertTrue(inspektør.periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}\n${person.personLogg}" }
+    assertFalse(inspektør.periodeErForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}:\n${personlogg}" }
+    assertTrue(inspektør.periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}\n${personlogg}" }
     assertEquals(tilstander.asList(), observatør.tilstandsendringer[id], message)
 }
 
@@ -145,15 +143,15 @@ internal fun AbstractEndToEndTest.assertSisteForkastetPeriodeTilstand(orgnummer:
     assertFalse(inspektør(orgnummer).periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
 }
 
-internal fun AbstractPersonTest.assertInfo(forventet: String, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertInfo(forventet, filter, assertetVarsler)
-internal fun AbstractPersonTest.assertIngenInfo(forventet: String, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenInfo(forventet, filter, assertetVarsler)
-internal fun AbstractPersonTest.assertVarsler(varsel: List<Varselkode>, filter: AktivitetsloggFilter) = person.personLogg.assertVarsler(varsel, filter, assertetVarsler)
-internal fun AbstractPersonTest.assertVarsel(varsel: Varselkode, filter: AktivitetsloggFilter) = person.personLogg.assertVarsel(varsel, filter, assertetVarsler)
-internal fun AbstractPersonTest.assertFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertFunksjonellFeil(varselkode, filter, assertetVarsler)
-internal fun AbstractPersonTest.assertFunksjonelleFeil(filter: AktivitetsloggFilter) = person.personLogg.assertFunksjonelleFeil(filter, assertetVarsler)
-internal fun AbstractPersonTest.assertIngenFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenFunksjonellFeil(varselkode, filter, assertetVarsler)
-internal fun AbstractPersonTest.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = person.personLogg.assertIngenFunksjonelleFeil(filter, assertetVarsler)
-internal fun AbstractPersonTest.assertLogiskFeil(severe: String, filter: AktivitetsloggFilter) = person.personLogg.assertLogiskFeil(severe, filter, assertetVarsler)
+internal fun AbstractPersonTest.assertInfo(forventet: String, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = personlogg.assertInfo(forventet, filter, assertetVarsler)
+internal fun AbstractPersonTest.assertIngenInfo(forventet: String, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = personlogg.assertIngenInfo(forventet, filter, assertetVarsler)
+internal fun AbstractPersonTest.assertVarsler(varsel: List<Varselkode>, filter: AktivitetsloggFilter) = personlogg.assertVarsler(varsel, filter, assertetVarsler)
+internal fun AbstractPersonTest.assertVarsel(varsel: Varselkode, filter: AktivitetsloggFilter) = personlogg.assertVarsel(varsel, filter, assertetVarsler)
+internal fun AbstractPersonTest.assertFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = personlogg.assertFunksjonellFeil(varselkode, filter, assertetVarsler)
+internal fun AbstractPersonTest.assertFunksjonelleFeil(filter: AktivitetsloggFilter) = personlogg.assertFunksjonelleFeil(filter, assertetVarsler)
+internal fun AbstractPersonTest.assertIngenFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = personlogg.assertIngenFunksjonellFeil(varselkode, filter, assertetVarsler)
+internal fun AbstractPersonTest.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = personlogg.assertIngenFunksjonelleFeil(filter, assertetVarsler)
+internal fun AbstractPersonTest.assertLogiskFeil(severe: String, filter: AktivitetsloggFilter) = personlogg.assertLogiskFeil(severe, filter, assertetVarsler)
 internal fun <T> AbstractPersonTest.assertVarsler(filter: AktivitetsloggFilter, før: List<Varselkode> = emptyList(), etter: List<Varselkode>, block: () -> T): T{
     assertVarsler(før, filter)
     val resultat = block()
@@ -216,6 +214,6 @@ internal fun interface AktivitetsloggFilter {
     fun filtrer(kontekst: SpesifikkKontekst): Boolean
 }
 
-internal fun assertActivities(person: Person) {
-    assertTrue(person.personLogg.aktiviteter.isNotEmpty(), person.personLogg.toString())
+internal fun AbstractEndToEndTest.assertActivities() {
+    assertTrue(personlogg.aktiviteter.isNotEmpty(), personlogg.toString())
 }

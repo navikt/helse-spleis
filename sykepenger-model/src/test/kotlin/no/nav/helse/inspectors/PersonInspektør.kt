@@ -4,14 +4,12 @@ import java.util.*
 import no.nav.helse.person.Person
 
 internal val Person.inspektør get() = PersonInspektør(this)
-internal val Person.personLogg get() = inspektør.aktivitetslogg
 
 internal class PersonInspektør(person: Person) {
     internal val arbeidsgiverteller get() = arbeidsgivere.size
     internal val vilkårsgrunnlagHistorikk = person.vilkårsgrunnlagHistorikk.inspektør
     private val infotrygdhistorikk = person.infotrygdhistorikk
 
-    internal val aktivitetslogg = person.personlogg
     internal val personidentifikator = person.personidentifikator
     internal val fødselsdato = person.alder.fødselsdato
     internal var dødsdato = person.alder.dødsdato

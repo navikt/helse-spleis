@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Utbetalingsperi
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør.Feriepengeoppdrag.Companion.utbetalingslinjer
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør.Feriepengeutbetalingslinje
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
@@ -53,7 +52,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
     private fun fangLoggmeldinger(vararg filter: String, block: () -> Any): List<String> {
         block()
-        val etter = person.personLogg.toString()
+        val etter = personlogg.toString()
 
         val bareMeldingerSomMatcher = { event: String ->
             filter.isEmpty() || filter.any { filtertekst -> event.contains(filtertekst) }
@@ -409,7 +408,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         )
 
         assertEquals(0, inspektør.feriepengeoppdrag.size)
-        assertTrue(person.personLogg.toString().contains("Person er markert for manuell beregning av feriepenger"))
+        assertTrue(personlogg.toString().contains("Person er markert for manuell beregning av feriepenger"))
     }
 
     @Test
@@ -649,11 +648,11 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             opptjeningsår = Year.of(2020)
         )
 
-        assertTrue(person.personLogg.toString().contains("Trenger å sende utbetaling til Oppdrag"))
-        assertEquals(person.personLogg.behov.last().detaljer()["saksbehandler"], "SPLEIS")
+        assertTrue(personlogg.toString().contains("Trenger å sende utbetaling til Oppdrag"))
+        assertEquals(personlogg.behov.last().detaljer()["saksbehandler"], "SPLEIS")
 
         @Suppress("unchecked_cast")
-        val linje = (person.personLogg.behov.last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
+        val linje = (personlogg.behov.last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
         assertEquals(linje["satstype"], "ENG")
         assertEquals(linje["klassekode"], "SPREFAGFER-IOP")
         assertEquals(linje["grad"], null)
@@ -677,11 +676,11 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             opptjeningsår = Year.of(2020)
         )
 
-        val fagsystemIdFeriepenger = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).detaljer()["fagsystemId"] as String
+        val fagsystemIdFeriepenger = personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).detaljer()["fagsystemId"] as String
         håndterFeriepengerUtbetalt(fagsystemId = fagsystemIdFeriepenger)
 
-        assertTrue(person.personLogg.toString().contains("Data for feriepenger fra Oppdrag/UR"))
-        assertTrue(person.personLogg.toString().contains("utbetalt ok: ja"))
+        assertTrue(personlogg.toString().contains("Data for feriepenger fra Oppdrag/UR"))
+        assertTrue(personlogg.toString().contains("utbetalt ok: ja"))
         observatør.feriepengerUtbetaltEventer.first().let { event ->
             assertEquals(fagsystemIdFeriepenger, event.arbeidsgiverOppdrag.fagsystemId)
             val linje = event.arbeidsgiverOppdrag.linjer.first()
@@ -709,7 +708,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             opptjeningsår = Year.of(2020)
         )
 
-        val fagsystemIdFeriepenger = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).detaljer()["fagsystemId"] as String
+        val fagsystemIdFeriepenger = personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).detaljer()["fagsystemId"] as String
         håndterFeriepengerUtbetalt(fagsystemId = fagsystemIdFeriepenger)
 
         håndterSykmelding(Sykmeldingsperiode(1.juli(2020), 10.juli(2020)))
@@ -725,8 +724,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
         håndterFeriepengerUtbetalt(fagsystemId = fagsystemIdFeriepenger)
 
-        assertTrue(person.personLogg.toString().contains("Data for feriepenger fra Oppdrag/UR"))
-        assertTrue(person.personLogg.toString().contains("utbetalt ok: ja"))
+        assertTrue(personlogg.toString().contains("Data for feriepenger fra Oppdrag/UR"))
+        assertTrue(personlogg.toString().contains("utbetalt ok: ja"))
 
         assertEquals(2, observatør.feriepengerUtbetaltEventer.size)
 
@@ -761,7 +760,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020)
             )
-            assertFalse(person.personLogg.toString().contains("Trenger å sende utbetaling til Oppdrag"))
+            assertFalse(personlogg.toString().contains("Trenger å sende utbetaling til Oppdrag"))
         }
     }
 
@@ -785,7 +784,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             )
 
             @Suppress("unchecked_cast")
-            val linje = (person.personLogg.behov.last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
+            val linje = (personlogg.behov.last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
 
             assertEquals("1460", "${linje["sats"]}")
             assertEquals("1460", "${linje["totalbeløp"]}")
@@ -1269,7 +1268,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertEquals("SPREF", ugyldigOppdrag.detaljer()["fagområde"])
     }
 
-    private fun engangsutbetalinger() = person.personLogg.behov
+    private fun engangsutbetalinger() = personlogg.behov
         .filter { it.type == Aktivitet.Behov.Behovtype.Utbetaling }
         .filter { utbetaling -> utbetaling.detaljer()["linjer"].castAsList<Map<String, Any>>().any { linje -> linje["satstype"] == "ENG" } }
 

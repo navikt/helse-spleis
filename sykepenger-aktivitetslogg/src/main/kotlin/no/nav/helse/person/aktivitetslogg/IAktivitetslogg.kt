@@ -12,5 +12,4 @@ interface IAktivitetslogg {
 
     fun barn(): IAktivitetslogg
     fun kontekst(kontekst: Aktivitetskontekst)
-    fun kontekst(parent: Aktivitetslogg, kontekst: Aktivitetskontekst)
 }

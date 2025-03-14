@@ -50,7 +50,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Arbeidsledig
@@ -341,7 +340,7 @@ internal fun AbstractEndToEndTest.forlengTilSimulering(
     nyPeriode(periode, orgnummer, grad = grad)
     val id: IdInnhenter = observatør.sisteVedtaksperiode()
     håndterYtelser(id, orgnummer = orgnummer)
-    assertTrue(person.personLogg.etterspurteBehov(id, Behovtype.Simulering, orgnummer)) { "Forventet at simulering er etterspurt" }
+    assertTrue(personlogg.etterspurteBehov(id, Behovtype.Simulering, orgnummer)) { "Forventet at simulering er etterspurt" }
 }
 
 internal fun AbstractEndToEndTest.forlengTilGodkjenning(
@@ -352,7 +351,7 @@ internal fun AbstractEndToEndTest.forlengTilGodkjenning(
     nyPeriode(periode, orgnummer, grad = grad)
     val id: IdInnhenter = observatør.sisteVedtaksperiode()
     håndterYtelser(id, orgnummer = orgnummer)
-    if (person.personLogg.etterspurteBehov(id, Behovtype.Simulering, orgnummer)) håndterSimulering(id, orgnummer = orgnummer)
+    if (personlogg.etterspurteBehov(id, Behovtype.Simulering, orgnummer)) håndterSimulering(id, orgnummer = orgnummer)
 }
 
 internal fun AbstractEndToEndTest.forlengVedtak(
@@ -690,7 +689,13 @@ internal fun AbstractEndToEndTest.håndterSimulering(
     simuleringsresultat: SimuleringResultatDto? = standardSimuleringsresultat(orgnummer)
 ) {
     assertEtterspurt(Simulering::class, Behovtype.Simulering, vedtaksperiodeIdInnhenter, orgnummer)
-    simulering(vedtaksperiodeIdInnhenter, simuleringOK, orgnummer, simuleringsresultat).forEach { simulering -> simulering.håndter(Person::håndter) }
+    simulering(vedtaksperiodeIdInnhenter, simuleringOK, orgnummer, simuleringsresultat)
+        .also {
+            check(it.isNotEmpty()) { "det er ingenting å simulere ??" }
+        }
+        .forEach { simulering ->
+            simulering.håndter(Person::håndter)
+        }
 }
 
 internal fun AbstractEndToEndTest.håndterSimulering(
@@ -728,7 +733,7 @@ private fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
     orgnummer: String = a1,
     besvart: LocalDateTime = LocalDateTime.now()
 ) {
-    val bedtOmSykepengehistorikk = person.personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter, Behovtype.Sykepengehistorikk, orgnummer)
+    val bedtOmSykepengehistorikk = personlogg.etterspurteBehov(vedtaksperiodeIdInnhenter, Behovtype.Sykepengehistorikk, orgnummer)
     if (bedtOmSykepengehistorikk) assertEtterspurt(Utbetalingshistorikk::class, Behovtype.Sykepengehistorikk, vedtaksperiodeIdInnhenter, orgnummer)
     utbetalingshistorikk(
         vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
@@ -841,8 +846,8 @@ internal fun AbstractEndToEndTest.håndterUtbetalingsgodkjenning(
     orgnummer: String = a1,
     automatiskBehandling: Boolean = false,
     utbetalingId: UUID = UUID.fromString(
-        person.personLogg.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"]
-            ?: throw IllegalStateException("Finner ikke utbetalingId i: ${person.personLogg.sisteBehov(Behovtype.Godkjenning).kontekst()}")
+        personlogg.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"]
+            ?: throw IllegalStateException("Finner ikke utbetalingId i: ${personlogg.sisteBehov(Behovtype.Godkjenning).kontekst()}")
     ),
 ) {
     assertEtterspurt(Utbetalingsgodkjenning::class, Behovtype.Godkjenning, vedtaksperiodeIdInnhenter, orgnummer)
@@ -856,7 +861,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
     utbetalingId: UUID? = null,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) {
-    val faktiskUtbetalingId = utbetalingId?.toString() ?: person.personLogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId")
+    val faktiskUtbetalingId = utbetalingId?.toString() ?: personlogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId")
     utbetaling(
         fagsystemId = fagsystemId,
         status = status,
@@ -869,7 +874,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
 private fun Oppdrag.fagsytemIdOrNull() = if (harUtbetalinger()) inspektør.fagsystemId() else null
 
 private fun AbstractEndToEndTest.førsteUhåndterteUtbetalingsbehov(orgnummer: String): Pair<UUID, List<String>>? {
-    val utbetalingsbehovUtbetalingIder = person.personLogg.behov
+    val utbetalingsbehovUtbetalingIder = personlogg.behov
         .filter { it.type == Behovtype.Utbetaling }
         .map { UUID.fromString(it.kontekst().getValue("utbetalingId")) }
 

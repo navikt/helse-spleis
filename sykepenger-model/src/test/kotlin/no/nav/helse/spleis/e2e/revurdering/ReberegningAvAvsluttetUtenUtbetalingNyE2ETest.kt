@@ -15,7 +15,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
@@ -766,7 +765,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        assertEquals("FLERE_ARBEIDSGIVERE", person.personLogg.sisteBehov(Godkjenning).detaljer()["inntektskilde"] as? String)
+        assertEquals("FLERE_ARBEIDSGIVERE", personlogg.sisteBehov(Godkjenning).detaljer()["inntektskilde"] as? String)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
 
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, orgnummer = a1)
@@ -816,7 +815,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
 
-        assertEquals("FLERE_ARBEIDSGIVERE", person.personLogg.sisteBehov(Godkjenning).detaljer()["inntektskilde"] as? String)
+        assertEquals("FLERE_ARBEIDSGIVERE", personlogg.sisteBehov(Godkjenning).detaljer()["inntektskilde"] as? String)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
 
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, orgnummer = a1)

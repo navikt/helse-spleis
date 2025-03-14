@@ -21,7 +21,6 @@ import no.nav.helse.gjenopprettFraJSONtekst
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -83,8 +82,10 @@ internal abstract class AbstractPersonTest {
     }
 
     internal val assertetVarsler = Varslersamler.AssertetVarsler()
+    lateinit var personlogg: Aktivitetslogg
     lateinit var person: Person
     lateinit var observatør: TestObservatør
+    lateinit var ugyldigeSituasjoner: UgyldigeSituasjonerObservatør
     lateinit var regelverkslogg: SubsumsjonsListLog
     val inspektør get() = inspektør(a1)
 
@@ -100,8 +101,9 @@ internal abstract class AbstractPersonTest {
     @AfterEach
     fun alleVarslerAssertet() {
         val varslersamler = Varslersamler()
-        varslersamler.registrerVarsler(person.personLogg.varsel)
+        varslersamler.registrerVarsler(personlogg.varsel)
         varslersamler.bekreftVarslerAssertet(assertetVarsler)
+        ugyldigeSituasjoner.bekreftVarselHarKnytningTilVedtaksperiode(personlogg)
     }
 
     private fun regler(maksSykedager: Int): ArbeidsgiverRegler = object : ArbeidsgiverRegler {
@@ -127,7 +129,8 @@ internal abstract class AbstractPersonTest {
         regelverkslogg = SubsumsjonsListLog()
         person = block(regelverkslogg)
         observatør = TestObservatør(person)
-        UgyldigeSituasjonerObservatør(person)
+        personlogg = Aktivitetslogg()
+        ugyldigeSituasjoner = UgyldigeSituasjonerObservatør(person)
         return person
     }
 

@@ -45,7 +45,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     internal fun <T : Hendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit): T {
-        hendelselogg = Aktivitetslogg()
+        hendelselogg = Aktivitetslogg(personlogg)
         forrigeHendelse = this
         person.håndter(this, hendelselogg)
         ikkeBesvarteBehov += EtterspurtBehov.finnEtterspurteBehov(hendelselogg.behov)

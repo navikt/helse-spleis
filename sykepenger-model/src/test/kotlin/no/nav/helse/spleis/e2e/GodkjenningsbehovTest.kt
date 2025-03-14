@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.hentFeltFraBehov
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
@@ -198,7 +197,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertFalse(kanAvvises(1.vedtaksperiode))
 
-        val utbetalingId = UUID.fromString(person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"])
+        val utbetalingId = UUID.fromString(personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"])
         val utbetaling = inspektør.utbetalinger(1.vedtaksperiode).last()
         assertEquals(utbetalingId, utbetaling.inspektør.utbetalingId)
 

@@ -10,13 +10,12 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.format.DateTimeFormatter
-import java.util.UUID
+import java.util.*
+import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dto.tilSpannerPersonDto
-import no.nav.helse.inspectors.personLogg
-import no.nav.helse.person.Person
+import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestWatcher
@@ -45,12 +44,16 @@ class SpannerEtterTestInterceptor : TestWatcher {
 
     internal fun openTheSpanner(context: ExtensionContext?, errorMsg: String? = null) {
         // fisk ut person på et vis og opprett SpannerDto
-        val person = context!!.testInstance.get().get("person") as Person
+        val (person, personlogg) = when (val testcontext = context!!.testInstance.get()) {
+            is AbstractDslTest -> testcontext.testperson.person to testcontext.testperson.personlogg
+            is AbstractPersonTest -> testcontext.person to testcontext.personlogg
+            else -> error("Kjenner ikke til testcontext-typen, og kan derfor ikke finne testperson!")
+        }
         val spannerPerson = person.dto().tilSpannerPersonDto()
         val personJson = objectMapper.writeValueAsString(spannerPerson)
 
         // aktivitetsloggen krever litt mer greier ettersom spanner henter den fra sparsom på ekte
-        val aktivtetsloggV2Json = SugUtAlleAktivitetene(person.personLogg)
+        val aktivtetsloggV2Json = SugUtAlleAktivitetene(personlogg)
 
         // trikser inn aktivitetsloggen. Dette burde sikkert gjøres på en bedre måte
         val json = "{" + aktivtetsloggV2Json.drop(1).dropLast(1) + "," + personJson.drop(1)

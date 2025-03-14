@@ -27,7 +27,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
@@ -1853,7 +1852,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(27.januar, 7.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
-        assertFalse(person.personLogg.harVarslerEllerVerre())
+        assertFalse(personlogg.harVarslerEllerVerre())
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1910,7 +1909,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
         assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
-        assertActivities(person)
+        assertActivities()
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1945,7 +1944,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
 
         assertIngenFunksjonelleFeil()
-        assertActivities(person)
+        assertActivities()
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1990,7 +1989,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertIngenFunksjonelleFeil()
-        assertActivities(person)
+        assertActivities()
         assertTilstander(
             1.vedtaksperiode,
             START,

@@ -22,7 +22,6 @@ import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
@@ -71,8 +70,7 @@ internal abstract class AbstractDslTest {
 
     protected lateinit var jurist: SubsumsjonsListLog
     protected lateinit var observatør: TestObservatør
-    private lateinit var testperson: TestPerson
-    @Suppress("unused") private val person get() = testperson.person // Hen brukes av @OpenInSpanner
+    internal lateinit var testperson: TestPerson
     private lateinit var deferredLog: DeferredLog
     protected fun Int.vedtaksperiode(orgnummer: String) = orgnummer { vedtaksperiode }
     protected val Int.vedtaksperiode get() = vedtaksperiode(bareÈnArbeidsgiver(a1))
@@ -85,7 +83,7 @@ internal abstract class AbstractDslTest {
             observatør = observatør,
             inspektør = inspektør,
             personInspektør = testperson.inspiser(personInspektør),
-            aktivitetsloggAsserts = AktivitetsloggAsserts(testperson.person.personLogg, assertetVarsler)
+            aktivitetsloggAsserts = AktivitetsloggAsserts(testperson.personlogg, assertetVarsler)
         )
     private val testPersonAsserter get() = TestPersonAssertions(testperson.inspiser(personInspektør), jurist)
     protected fun personView() = testperson.view()
@@ -546,8 +544,7 @@ internal abstract class AbstractDslTest {
         bareÈnArbeidsgiver(a1).assertFunksjonellFeil(kode, filter)
 
     protected fun assertActivities() {
-        val inspektør = inspiser(personInspektør)
-        assertTrue(inspektør.aktivitetslogg.aktiviteter.isNotEmpty()) { inspektør.aktivitetslogg.toString() }
+        assertTrue(testperson.personlogg.aktiviteter.isNotEmpty()) { testperson.personlogg.toString() }
     }
 
     protected fun assertGjenoppbygget(dto: PersonUtDto) {

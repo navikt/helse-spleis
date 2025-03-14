@@ -68,11 +68,6 @@ class Aktivitetslogg(
         repeat(antall) { kontekster.removeLast() }
     }
 
-    override fun kontekst(parent: Aktivitetslogg, kontekst: Aktivitetskontekst) {
-        forelder = parent
-        kontekst(kontekst)
-    }
-
     class AktivitetException internal constructor(private val aktivitetslogg: Aktivitetslogg) :
         RuntimeException(aktivitetslogg.toString()) {
 

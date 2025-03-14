@@ -72,7 +72,6 @@ import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -86,7 +85,6 @@ class Person private constructor(
     personidentifikator: Personidentifikator,
     internal var alder: Alder,
     private val _arbeidsgivere: MutableList<Arbeidsgiver>,
-    internal val personlogg: Aktivitetslogg,
     private val opprettet: LocalDateTime,
     internal val infotrygdhistorikk: Infotrygdhistorikk,
     internal val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
@@ -108,7 +106,6 @@ class Person private constructor(
                 personidentifikator = Personidentifikator(dto.fødselsnummer),
                 alder = alder,
                 _arbeidsgivere = arbeidsgivere,
-                personlogg = Aktivitetslogg(),
                 opprettet = dto.opprettet,
                 infotrygdhistorikk = Infotrygdhistorikk.gjenopprett(dto.infotrygdhistorikk),
                 vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk.gjenopprett(
@@ -136,7 +133,6 @@ class Person private constructor(
         personidentifikator,
         alder,
         mutableListOf(),
-        Aktivitetslogg(),
         LocalDateTime.now(),
         Infotrygdhistorikk(),
         VilkårsgrunnlagHistorikk(),
@@ -597,7 +593,7 @@ class Person private constructor(
     }
 
     private fun registrer(aktivitetslogg: IAktivitetslogg, melding: String) {
-        aktivitetslogg.kontekst(this.personlogg, this)
+        aktivitetslogg.kontekst(this)
         aktivitetslogg.info(melding)
     }
 

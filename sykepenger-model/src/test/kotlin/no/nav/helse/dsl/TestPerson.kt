@@ -77,7 +77,7 @@ internal class TestPerson(
     }
 
     private lateinit var forrigeAktivitetslogg: Aktivitetslogg
-
+    internal val personlogg = Aktivitetslogg()
     private val behovsamler = Behovsamler(deferredLog)
     private val varslersamler = Varslersamler()
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
@@ -87,10 +87,7 @@ internal class TestPerson(
         it.addObserver(behovsamler)
         it.addObserver(observatør)
     }
-
-    init {
-        UgyldigeSituasjonerObservatør(person)
-    }
+    private val ugyldigeSituasjoner = UgyldigeSituasjonerObservatør(person)
 
     private val arbeidsgivere = mutableMapOf<String, TestArbeidsgiver>()
 
@@ -107,7 +104,7 @@ internal class TestPerson(
         arbeidsgiver(this, testblokk)
 
     private fun <T : Hendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit): T {
-        forrigeAktivitetslogg = Aktivitetslogg()
+        forrigeAktivitetslogg = Aktivitetslogg(personlogg)
         try {
             person.håndter(this, forrigeAktivitetslogg)
         } finally {
@@ -120,6 +117,7 @@ internal class TestPerson(
     internal fun bekreftBehovOppfylt(assertetVarsler: Varslersamler.AssertetVarsler) {
         behovsamler.bekreftBehovOppfylt()
         varslersamler.bekreftVarslerAssertet(assertetVarsler)
+        ugyldigeSituasjoner.bekreftVarselHarKnytningTilVedtaksperiode(personlogg)
     }
 
     internal fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: ArbeidsforholdOverstyrt) {

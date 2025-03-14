@@ -5,7 +5,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -34,7 +33,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(17.april(2021), 30.april(2021)))
-        assertTrue(person.personLogg.varsel.none { w ->
+        assertTrue(personlogg.varsel.none { w ->
             w.toString().contains("Mottatt flere inntektsmeldinger")
         })
     }
