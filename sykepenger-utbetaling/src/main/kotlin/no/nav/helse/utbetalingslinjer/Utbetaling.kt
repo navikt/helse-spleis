@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.UtbetalingTilstandDto
@@ -26,7 +26,6 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_12
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_21
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
@@ -477,7 +476,7 @@ class Utbetaling private constructor(
             Oppdragstatus.OVERFØRT,
             Oppdragstatus.AKSEPTERT -> {
             } // all is good
-            Oppdragstatus.AKSEPTERT_MED_FEIL -> aktivitetslogg.varsel(RV_UT_2)
+            Oppdragstatus.AKSEPTERT_MED_FEIL -> aktivitetslogg.info("Utbetalingen ble gjennomført, men med advarsel")
             Oppdragstatus.AVVIST,
             Oppdragstatus.FEIL -> aktivitetslogg.info("Utbetaling feilet med status ${hendelse.status}. Feilmelding fra Oppdragsystemet: ${hendelse.melding}")
         }

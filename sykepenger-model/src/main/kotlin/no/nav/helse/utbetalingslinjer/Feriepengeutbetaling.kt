@@ -19,7 +19,6 @@ import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDeta
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_2
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 
 internal class Feriepengeutbetaling private constructor(
@@ -73,7 +72,7 @@ internal class Feriepengeutbetaling private constructor(
             Oppdragstatus.OVERFØRT,
             Oppdragstatus.AKSEPTERT -> {
             } // all is good
-            Oppdragstatus.AKSEPTERT_MED_FEIL -> aktivitetslogg.varsel(RV_UT_2)
+            Oppdragstatus.AKSEPTERT_MED_FEIL -> aktivitetslogg.info("Utbetalingen ble gjennomført, men med advarsel")
             Oppdragstatus.AVVIST,
             Oppdragstatus.FEIL -> aktivitetslogg.info("Utbetaling feilet med status ${utbetalingHendelse.status}. Feilmelding fra Oppdragsystemet: ${utbetalingHendelse.melding}")
         }

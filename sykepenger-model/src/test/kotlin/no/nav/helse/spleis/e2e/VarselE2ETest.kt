@@ -34,7 +34,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_5
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_2
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -114,7 +113,7 @@ internal class VarselE2ETest : AbstractDslTest() {
             tilGodkjenning(januar)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt(status = Oppdragstatus.AKSEPTERT_MED_FEIL)
-            assertVarsel(RV_UT_2, AktivitetsloggFilter.arbeidsgiver(a1))
+            assertInfo("Utbetalingen ble gjennomført, men med advarsel", AktivitetsloggFilter.arbeidsgiver(a1))
         }
     }
 

@@ -1,10 +1,7 @@
 package no.nav.helse.dsl
 
 import java.time.LocalDateTime
-import java.util.UUID
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.set
+import java.util.*
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.BehandlingView
@@ -189,7 +186,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
                 is Aktivitet.LogiskFeil -> {}
                 is Aktivitet.Varsel -> {
                     // disse opprettes utenfor en vedtaksperiode/eller på en lukket vedtaksperiode 💀
-                    if (aktivitet.kode in setOf(Varselkode.RV_RV_7, Varselkode.RV_UT_2)) return@forEach
+                    if (aktivitet.kode in setOf(Varselkode.RV_RV_7)) return@forEach
 
                     val vedtaksperiodekontekst = checkNotNull(aktivitet.kontekster.firstOrNull { it.kontekstType == "Vedtaksperiode" }) {
                         "Det er opprettet et varsel utenom Vedtaksperiode:\n${aktivitet}"
