@@ -118,8 +118,35 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `En AUU med arbeid blir valgt til å håndtere inntekt`() {
+        håndterSøknad(1.januar til 16.januar)
+        håndterSøknad(17.januar til 31.januar)
+        håndterSøknad(februar)
+
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertVarsler(listOf(RV_IM_3), 3.vedtaksperiode.filter())
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+
+        val feil = assertThrows<IllegalStateException> {
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+        }.message ?: "n/a"
+
+        assertTrue(feil.startsWith("Støtter ikke å oppdatere dokumentsporing med InntektsmeldingInntekt"))
+        assertTrue(feil.endsWith("i AvsluttetUtenVedtak"))
+    }
 
     @Test
     fun `En beregnet omgjøring som treffes av tom bit fra inntektsmeldingen må reberegnes`() {
