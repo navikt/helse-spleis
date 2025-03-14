@@ -460,7 +460,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun inntektsmeldingHåndtert(inntektsmelding: Inntektsmelding) {
         inntektsmelding.inntektHåndtert()
-        if (!behandlinger.oppdaterDokumentsporing(inntektsmelding.dokumentsporing)) return
+        behandlinger.oppdaterDokumentsporing(inntektsmelding.dokumentsporing)
         person.emitInntektsmeldingHåndtert(
             meldingsreferanseId = inntektsmelding.metadata.meldingsreferanseId.id,
             vedtaksperiodeId = id,

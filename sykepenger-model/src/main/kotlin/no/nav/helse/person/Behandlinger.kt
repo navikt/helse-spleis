@@ -241,7 +241,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun søknadIder() = behandlinger.dokumentsporing.søknadIder()
     internal fun sisteInntektsmeldingDagerId() = behandlinger.dokumentsporing.sisteInntektsmeldingDagerId()
     internal fun harHåndtertDagerTidligere() = behandlinger.dokumentsporing.sisteInntektsmeldingDagerId() != null
-    internal fun oppdaterDokumentsporing(dokument: Dokumentsporing): Boolean {
+    internal fun oppdaterDokumentsporing(dokument: Dokumentsporing) {
         return behandlinger.last().oppdaterDokumentsporing(dokument)
     }
 
@@ -870,14 +870,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
             dokumentsporing in this.dokumentsporing
 
-        internal fun oppdaterDokumentsporing(dokument: Dokumentsporing): Boolean {
+        internal fun oppdaterDokumentsporing(dokument: Dokumentsporing) {
             return tilstand.oppdaterDokumentsporing(this, dokument)
         }
 
-        private fun kopierMedDokument(dokument: Dokumentsporing): Boolean {
-            if (gjeldende.dokumentsporing == dokument) return false
+        private fun kopierMedDokument(dokument: Dokumentsporing) {
+            if (gjeldende.dokumentsporing == dokument) return
             nyEndring(gjeldende.kopierDokument(dokument))
-            return true
         }
 
         private fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: InntekterForBeregning): Boolean {
@@ -1367,9 +1366,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 error("Støtter ikke å opprette utbetaling i $this")
             }
 
-            fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing): Boolean {
-                error("Støtter ikke å oppdatere dokumentsporing med $dokument i $this")
-            }
+            fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing) {}
 
             fun kanForkastes(behandling: Behandling, aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean
             fun sikreNyBehandling(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Behandling? {
@@ -1707,11 +1704,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.vedtakFattet = null // det fattes ikke vedtak i AUU
                     behandling.avsluttet = LocalDateTime.now()
                     behandling.avsluttetUtenVedtak(aktivitetslogg)
-                }
-
-                override fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing): Boolean {
-                    if (dokument.dokumentType == DokumentType.InntektsmeldingInntekt) return true
-                    return super.oppdaterDokumentsporing(behandling, dokument)
                 }
 
                 override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling {
