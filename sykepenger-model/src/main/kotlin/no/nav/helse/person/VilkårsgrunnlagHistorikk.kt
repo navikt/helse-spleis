@@ -173,20 +173,19 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
         )
 
-        internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): Pair<VilkårsgrunnlagElement, EndretInntektsgrunnlag>? {
+        internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonslogg: Subsumsjonslogg): Pair<VilkårsgrunnlagElement, EndretInntektsgrunnlag>? {
             if (this is InfotrygdVilkårsgrunnlag) return null
             val endretInntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsgiveropplysninger(hendelse, subsumsjonslogg) ?: return null
-            return kopierMed(aktivitetslogg, endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, subsumsjonslogg) to endretInntektsgrunnlag
+            return kopierMed(endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, subsumsjonslogg) to endretInntektsgrunnlag
         }
 
-        internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): VilkårsgrunnlagElement? {
+        internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, subsumsjonslogg: Subsumsjonslogg): VilkårsgrunnlagElement? {
             if (this is InfotrygdVilkårsgrunnlag) return null
             val endretInntektsgrunnlag = inntektsgrunnlag.skjønnsmessigFastsettelse(hendelse, subsumsjonslogg) ?: return null
-            return kopierMed(aktivitetslogg, endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, subsumsjonslogg)
+            return kopierMed(endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, subsumsjonslogg)
         }
 
         protected abstract fun kopierMed(
-            aktivitetslogg: IAktivitetslogg,
             inntektsgrunnlag: Inntektsgrunnlag,
             opptjening: Opptjening?,
             subsumsjonslogg: Subsumsjonslogg,
@@ -195,32 +194,24 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         abstract fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
-            aktivitetslogg: IAktivitetslogg,
             subsumsjonslogg: Subsumsjonslogg
         ): VilkårsgrunnlagElement
 
         internal fun grunnbeløpsregulering(
             hendelse: Grunnbeløpsregulering,
-            aktivitetslogg: IAktivitetslogg,
             subsumsjonslogg: Subsumsjonslogg
         ): VilkårsgrunnlagElement? {
-            val nyttSykepengegrunnlag = inntektsgrunnlag.grunnbeløpsregulering()
-            if (nyttSykepengegrunnlag == null) {
-                aktivitetslogg.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt er allerede korrekt.")
-                return null
-            }
-            aktivitetslogg.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt korrigeres til rett beløp.")
-            return kopierMed(aktivitetslogg, nyttSykepengegrunnlag, opptjening, subsumsjonslogg)
+            val nyttSykepengegrunnlag = inntektsgrunnlag.grunnbeløpsregulering() ?: return null
+            return kopierMed(nyttSykepengegrunnlag, opptjening, subsumsjonslogg)
         }
 
         internal fun nyeArbeidsgiverInntektsopplysninger(
             organisasjonsnummer: String,
             inntekt: FaktaavklartInntekt,
-            aktivitetslogg: IAktivitetslogg,
             subsumsjonslogg: Subsumsjonslogg
         ): Pair<VilkårsgrunnlagElement, EndretInntektsgrunnlag>? {
             val endretInntektsgrunnlag = inntektsgrunnlag.nyeArbeidsgiverInntektsopplysninger(organisasjonsnummer, inntekt, subsumsjonslogg) ?: return null
-            val grunnlag = kopierMed(aktivitetslogg, endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, EmptyLog)
+            val grunnlag = kopierMed(endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, EmptyLog)
             return grunnlag to endretInntektsgrunnlag
         }
 
@@ -312,10 +303,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
-            aktivitetslogg: IAktivitetslogg,
             subsumsjonslogg: Subsumsjonslogg
         ) = kopierMed(
-            aktivitetslogg = aktivitetslogg,
             inntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonslogg),
             opptjening = opptjening!!.overstyrArbeidsforhold(hendelse).also {
                 subsumsjonslogg.logg(it.subsumsjon)
@@ -324,20 +313,17 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         )
 
         override fun kopierMed(
-            aktivitetslogg: IAktivitetslogg,
             inntektsgrunnlag: Inntektsgrunnlag,
             opptjening: Opptjening?,
             subsumsjonslogg: Subsumsjonslogg,
             nyttSkjæringstidspunkt: LocalDate?
         ): VilkårsgrunnlagElement {
-            val sykepengegrunnlagOk = inntektsgrunnlag.valider(aktivitetslogg)
-            val opptjeningOk = opptjening?.validerOpptjeningsdager(aktivitetslogg)
             return Grunnlagsdata(
                 skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
                 inntektsgrunnlag = inntektsgrunnlag,
                 opptjening = opptjening ?: this.opptjening!!,
                 medlemskapstatus = medlemskapstatus,
-                vurdertOk = vurdertOk && sykepengegrunnlagOk && (opptjeningOk ?: true),
+                vurdertOk = vurdertOk,
                 meldingsreferanseId = meldingsreferanseId,
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
@@ -390,17 +376,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
-            aktivitetslogg: IAktivitetslogg,
             subsumsjonslogg: Subsumsjonslogg
         ) = kopierMed(
-            aktivitetslogg = aktivitetslogg,
             inntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonslogg),
             opptjening = null,
             subsumsjonslogg = subsumsjonslogg
         )
 
         override fun kopierMed(
-            aktivitetslogg: IAktivitetslogg,
             inntektsgrunnlag: Inntektsgrunnlag,
             opptjening: Opptjening?,
             subsumsjonslogg: Subsumsjonslogg,

@@ -20,7 +20,6 @@ import no.nav.helse.person.VedtaksperiodeView
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
@@ -190,7 +189,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
                 is Aktivitet.LogiskFeil -> {}
                 is Aktivitet.Varsel -> {
                     // disse opprettes utenfor en vedtaksperiode/eller på en lukket vedtaksperiode 💀
-                    if (aktivitet.kode in setOf(RV_SV_1, Varselkode.RV_RV_7, Varselkode.RV_UT_2)) return@forEach
+                    if (aktivitet.kode in setOf(Varselkode.RV_RV_7, Varselkode.RV_UT_2)) return@forEach
 
                     val vedtaksperiodekontekst = checkNotNull(aktivitet.kontekster.firstOrNull { it.kontekstType == "Vedtaksperiode" }) {
                         "Det er opprettet et varsel utenom Vedtaksperiode:\n${aktivitet}"

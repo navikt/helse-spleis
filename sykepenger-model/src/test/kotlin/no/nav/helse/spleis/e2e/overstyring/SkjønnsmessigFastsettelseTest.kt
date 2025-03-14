@@ -48,8 +48,8 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         "a6" {
             tilGodkjenning(mars)
             håndterSkjønnsmessigFastsettelse(1.mars, listOf(OverstyrtArbeidsgiveropplysning("a6", INGEN)))
-            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
             assertEquals(0, inspektør(1.vedtaksperiode).utbetalingstidslinje[17.mars].økonomi.inspektør.totalGrad)
         }

@@ -451,7 +451,7 @@ internal class Vedtaksperiode private constructor(
         inntektsmeldingHåndtert(inntektsmelding)
 
         // 2. endrer vilkårsgrunnlaget hvis det finnes et
-        if (!oppdaterVilkårsgrunnlagMedInntekt(aktivitetslogg, inntektsmelding.korrigertInntekt())) return null
+        if (!oppdaterVilkårsgrunnlagMedInntekt(inntektsmelding.korrigertInntekt())) return null
 
         registrerKontekst(aktivitetslogg)
         aktivitetslogg.varsel(RV_IM_4)
@@ -468,13 +468,12 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun oppdaterVilkårsgrunnlagMedInntekt(aktivitetslogg: IAktivitetslogg, korrigertInntekt: FaktaavklartInntekt): Boolean {
+    private fun oppdaterVilkårsgrunnlagMedInntekt(korrigertInntekt: FaktaavklartInntekt): Boolean {
         val grunnlag = vilkårsgrunnlag ?: return false
         /* fest setebeltet. nå skal vi prøve å endre vilkårsgrunnlaget */
         val resultat = grunnlag.nyeArbeidsgiverInntektsopplysninger(
             organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
             inntekt = korrigertInntekt,
-            aktivitetslogg = aktivitetslogg,
             subsumsjonslogg = subsumsjonslogg
         ) ?: return false
 
@@ -610,7 +609,7 @@ internal class Vedtaksperiode private constructor(
         val eventyr = listOf(
             håndterOppgittArbeidsgiverperiode(arbeidsgiveropplysninger, vedtaksperioder, aktivitetslogg),
             håndterOppgittRefusjon(arbeidsgiveropplysninger, vedtaksperioder, aktivitetslogg, ubrukteRefusjonsopplysninger),
-            håndterOppgittInntekt(arbeidsgiveropplysninger, inntektshistorikk, aktivitetslogg),
+            håndterOppgittInntekt(arbeidsgiveropplysninger, inntektshistorikk),
             håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg),
             håndterIkkeUtbetaltArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetslogg),
             håndterRedusertUtbetaltBeløpIArbeidsgiverperioden(arbeidsgiveropplysninger, aktivitetslogg),
@@ -628,7 +627,7 @@ internal class Vedtaksperiode private constructor(
 
         val eventyr = listOf(
             håndterOppgittRefusjon(korrigerteArbeidsgiveropplysninger, vedtaksperioder, aktivitetslogg, ubrukteRefusjonsopplysninger),
-            håndterOppgittInntekt(korrigerteArbeidsgiveropplysninger, inntektshistorikk, aktivitetslogg),
+            håndterOppgittInntekt(korrigerteArbeidsgiveropplysninger, inntektshistorikk),
             håndterKorrigertArbeidsgiverperiode(korrigerteArbeidsgiveropplysninger, aktivitetslogg),
             håndterKorrigertOpphørAvNaturalytelser(korrigerteArbeidsgiveropplysninger, aktivitetslogg)
         )
@@ -734,7 +733,7 @@ internal class Vedtaksperiode private constructor(
         return eventyr
     }
 
-    private fun <T> håndterOppgittInntekt(hendelse: T, inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
+    private fun <T> håndterOppgittInntekt(hendelse: T, inntektshistorikk: Inntektshistorikk): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
         val oppgittInntekt = hendelse.filterIsInstance<OppgittInntekt>().singleOrNull() ?: return emptyList()
 
         val inntektsdata = Inntektsdata(
@@ -766,7 +765,6 @@ internal class Vedtaksperiode private constructor(
                 inntektsdata = inntektsdata,
                 inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.Arbeidsgiver)
             ),
-            aktivitetslogg = aktivitetslogg,
             subsumsjonslogg = subsumsjonslogg
         )
             // todo: per 10. januar 2025 så sender alltid Hag inntekt i portal-inntektsmeldinger selv om vi ikke har bedt om det, derfor må vi ta høyde for at det ikke nødvendigvis er endringer
@@ -1073,6 +1071,8 @@ internal class Vedtaksperiode private constructor(
         val maksdatoresultat = beregnUtbetalinger(aktivitetslogg, inntekterForBeregningBuilder)
 
         checkNotNull(vilkårsgrunnlag).valider(aktivitetslogg, arbeidsgiver.organisasjonsnummer)
+        checkNotNull(vilkårsgrunnlag).inntektsgrunnlag.valider(aktivitetslogg)
+        checkNotNull(vilkårsgrunnlag).opptjening?.validerOpptjeningsdager(aktivitetslogg)
         infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
         ytelser.valider(aktivitetslogg, periode, skjæringstidspunkt, maksdatoresultat.maksdato, erForlengelse())
 
@@ -1191,7 +1191,7 @@ internal class Vedtaksperiode private constructor(
         registrerKontekst(aktivitetslogg)
 
         val grunnlag = vilkårsgrunnlag ?: return null
-        val (nyttGrunnlag, endretInntektsgrunnlag) = grunnlag.overstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger, aktivitetslogg, subsumsjonslogg) ?: return null
+        val (nyttGrunnlag, endretInntektsgrunnlag) = grunnlag.overstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger, subsumsjonslogg) ?: return null
         person.lagreVilkårsgrunnlag(nyttGrunnlag)
 
         endretInntektsgrunnlag.inntekter
@@ -1214,17 +1214,22 @@ internal class Vedtaksperiode private constructor(
         // i praksis double-dispatch, kotlin-style
         val (nyttGrunnlag, revurderingseventyr) = when (overstyrInntektsgrunnlag) {
             is Grunnbeløpsregulering -> {
-                val nyttGrunnlag = grunnlag.grunnbeløpsregulering(overstyrInntektsgrunnlag, aktivitetslogg, subsumsjonslogg)
+                val nyttGrunnlag = grunnlag.grunnbeløpsregulering(overstyrInntektsgrunnlag, subsumsjonslogg)
+                if (nyttGrunnlag == null) {
+                    aktivitetslogg.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt er allerede korrekt.")
+                } else {
+                    aktivitetslogg.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt korrigeres til rett beløp.")
+                }
                 nyttGrunnlag to Revurderingseventyr.grunnbeløpsregulering(overstyrInntektsgrunnlag, skjæringstidspunkt)
             }
 
             is OverstyrArbeidsforhold -> {
-                val nyttGrunnlag = grunnlag.overstyrArbeidsforhold(overstyrInntektsgrunnlag, aktivitetslogg, subsumsjonslogg)
+                val nyttGrunnlag = grunnlag.overstyrArbeidsforhold(overstyrInntektsgrunnlag, subsumsjonslogg)
                 nyttGrunnlag to Revurderingseventyr.arbeidsforhold(overstyrInntektsgrunnlag, skjæringstidspunkt)
             }
 
             is SkjønnsmessigFastsettelse -> {
-                val nyttGrunnlag = grunnlag.skjønnsmessigFastsettelse(overstyrInntektsgrunnlag, aktivitetslogg, subsumsjonslogg)
+                val nyttGrunnlag = grunnlag.skjønnsmessigFastsettelse(overstyrInntektsgrunnlag, subsumsjonslogg)
                 nyttGrunnlag to Revurderingseventyr.skjønnsmessigFastsettelse(overstyrInntektsgrunnlag, skjæringstidspunkt, skjæringstidspunkt)
             }
 
