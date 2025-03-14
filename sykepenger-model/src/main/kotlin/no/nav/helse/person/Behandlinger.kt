@@ -34,7 +34,6 @@ import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentspo
 import no.nav.helse.person.Dokumentsporing.Companion.eksterneIder
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingDagerId
-import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingInntektId
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.harUlikeGrunnbeløp
@@ -105,7 +104,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun skjæringstidspunkter() = behandlinger.last().skjæringstidspunkter
     internal fun sykdomstidslinje() = behandlinger.last().sykdomstidslinje
     internal fun refusjonstidslinje() = behandlinger.last().refusjonstidslinje
-    internal fun harVærtBeregnet() = behandlinger.any { behandling -> behandling.harVærtBeregnet() }
     internal fun navOvertarAnsvar() = behandlinger.last().navOvertarAnsvar()
     internal fun trekkerTilbakePenger() = siste?.trekkerTilbakePenger() == true
     internal fun utbetales() = behandlinger.any { it.erInFlight() }
@@ -243,7 +241,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun søknadIder() = behandlinger.dokumentsporing.søknadIder()
     internal fun sisteInntektsmeldingDagerId() = behandlinger.dokumentsporing.sisteInntektsmeldingDagerId()
     internal fun harHåndtertDagerTidligere() = behandlinger.dokumentsporing.sisteInntektsmeldingDagerId() != null
-    internal fun harHåndtertInntektTidligere() = behandlinger.dokumentsporing.sisteInntektsmeldingInntektId() != null
     internal fun oppdaterDokumentsporing(dokument: Dokumentsporing): Boolean {
         return behandlinger.last().oppdaterDokumentsporing(dokument)
     }
@@ -1710,6 +1707,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.vedtakFattet = null // det fattes ikke vedtak i AUU
                     behandling.avsluttet = LocalDateTime.now()
                     behandling.avsluttetUtenVedtak(aktivitetslogg)
+                }
+
+                override fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing): Boolean {
+                    if (dokument.dokumentType == DokumentType.InntektsmeldingInntekt) return true
+                    return super.oppdaterDokumentsporing(behandling, dokument)
                 }
 
                 override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling {

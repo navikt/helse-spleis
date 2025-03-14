@@ -23,7 +23,6 @@ data class Dokumentsporing(
         internal fun Iterable<Dokumentsporing>.ider() = eksterneIder().map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.søknadIder() = filter { it.dokumentType == DokumentType.Søknad }.map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.sisteInntektsmeldingDagerId() = lastOrNull { it.dokumentType == DokumentType.InntektsmeldingDager }?.id
-        internal fun Iterable<Dokumentsporing>.sisteInntektsmeldingInntektId() = lastOrNull { it.dokumentType == DokumentType.InntektsmeldingInntekt }?.id
 
         internal fun gjenopprett(dto: DokumentsporingDto): Dokumentsporing {
             return Dokumentsporing(

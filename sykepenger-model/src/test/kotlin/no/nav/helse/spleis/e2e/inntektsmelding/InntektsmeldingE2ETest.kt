@@ -140,12 +140,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
-        val feil = assertThrows<IllegalStateException> {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-        }.message ?: "n/a"
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        // Håndtert og håndter fru-blom, men rar er den hvert fall
+        assertTrue(im to (2.vedtaksperiode.id(a1)) in observatør.inntektsmeldingHåndtert)
 
-        assertTrue(feil.startsWith("Støtter ikke å oppdatere dokumentsporing med InntektsmeldingInntekt"))
-        assertTrue(feil.endsWith("i AvsluttetUtenVedtak"))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test
