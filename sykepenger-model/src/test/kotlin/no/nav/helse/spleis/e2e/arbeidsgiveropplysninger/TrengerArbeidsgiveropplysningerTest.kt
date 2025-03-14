@@ -486,19 +486,6 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Skal ikke be om arbeidsgiverperiode når vi allerede har motatt inntektsmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
-        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 25.januar))
-        håndterSøknad(Sykdom(20.januar, 25.januar, 100.prosent))
-
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-
-        val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
-        assertFalse(trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger.contains(PersonObserver.Arbeidsgiverperiode))
-    }
-
-    @Test
     fun `blir syk fra ghost`()  {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterArbeidsgiveropplysninger(
@@ -945,32 +932,6 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Skal ikke be om arbeidsgiverperiode når det er kort gap pga av arbeid gjenopptatt i slutten av perioden før en forlengelse`() {
-        nyPeriode(januar, orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 20.januar), orgnummer = a2)
-        håndterSøknad(Sykdom(3.januar, 20.januar, 100.prosent), Søknad.Søknadsperiode.Arbeid(13.januar, 20.januar), orgnummer = a2)
-        håndterArbeidsgiveropplysninger(
-            listOf(1.januar til 16.januar),
-            orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
-        )
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            orgnummer = a2
-        )
-        håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
-        nyPeriode(21.januar til 31.januar, orgnummer = a2)
-
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Refusjon
-        )
-        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
-        assertEquals(expectedForespurteOpplysninger, actualForespørsel.forespurteOpplysninger)
-    }
-
-    @Test
     fun `dersom kort periode allerede har fått inntektsmelding trenger ikke neste periode å be om AGP`() {
         nyPeriode(1.januar til 16.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -978,7 +939,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.Inntekt,
-            PersonObserver.Refusjon
+            PersonObserver.Refusjon,
+            PersonObserver.Arbeidsgiverperiode
         )
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(expectedForespurteOpplysninger, actualForespørsel.forespurteOpplysninger)

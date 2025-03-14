@@ -166,7 +166,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
 
         nyPeriode(20.januar til 30.januar)
         assertEquals(0, observatør.inntektsmeldingHåndtert.size)
-        assertEquals(im1, observatør.inntektsmeldingIkkeHåndtert.single())
+        assertEquals(listOf(im1, im1), observatør.inntektsmeldingIkkeHåndtert)
         assertEquals(20.januar til 30.januar, inspektør.periode(2.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)

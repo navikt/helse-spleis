@@ -1585,9 +1585,7 @@ internal class Vedtaksperiode private constructor(
 
         val vedtaksperioder = when {
             // For å beregne riktig arbeidsgiverperiode/første fraværsdag
-            PersonObserver.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(
-                arbeidsgiverperiode
-            )
+            PersonObserver.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode)
             // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
             else -> listOf(this)
         }
@@ -1643,11 +1641,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) =
         arbeidsgiverperiode != null && arbeidsgiverperiode.forventerArbeidsgiverperiodeopplysning(periode)
-            && harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode)
-
-    private fun harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) =
-        arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
-            .none { it.behandlinger.harHåndtertDagerTidligere() }
 
     private fun trengerInntektsmeldingReplay() {
         val arbeidsgiverperiode = finnArbeidsgiverperiode()
