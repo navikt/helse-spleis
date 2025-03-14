@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
-import no.nav.helse.april
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -9,10 +8,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.juni
-import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.november
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -20,8 +16,8 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
@@ -161,41 +157,6 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(expectedForespørsel, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last())
     }
 
-    @Test
-    fun `sender oppdatert forespørsel om arbeidsgiveropplysninger når forrige periode som ikke er auu får et nytt vilkårsgrunnlag`() {
-        nyttVedtak(1.november(2017) til 30.november(2017))  // skal ikke oppdatere tidligere perioder
-        nyPeriode(januar)                                   // periode som får et vilkårsgrunnlag som skal være med i oppdatert forespørsel
-        nyPeriode(18.februar til 22.februar)                // en kort periode vi ikke skal bry oss om
-        nyPeriode(mars)                                     // perioden som skal sende ut oppdatert forespørsel
-        nyPeriode(1.april til 5.april)                      // forlengelse i AvventerInntektsmelding som ikke skal sende ny forespørsel
-        nyPeriode(mai)                                      // skal ikke sende oppdatert forespørsel for senere skjæringstidspunkt enn førstkommende
-        nyPeriode(1.juni til 5.juni)                        // skal ikke sende forespørsel for forlengelser
-
-        assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-
-        håndterArbeidsgiveropplysninger(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT,
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
-        )
-        assertEquals(6, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-
-        assertEquals(7, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        val oppdatertForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
-
-        assertEquals(4.vedtaksperiode.id(a1), oppdatertForespørsel.vedtaksperiodeId)
-        assertEquals(
-            PersonObserver.Inntekt,
-            oppdatertForespørsel.forespurteOpplysninger.first { it is PersonObserver.Inntekt }
-        )
-
-        assertEquals(
-            PersonObserver.Refusjon,
-            oppdatertForespørsel.forespurteOpplysninger.first { it is PersonObserver.Refusjon }
-        )
-    }
 
     @Test
     fun `Sender ikke med skjønnsmessig inntekt ved oppdatert forespørsel`() {
@@ -241,35 +202,6 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
-        assertEquals(
-            PersonObserver.Inntekt,
-            forespørsel.forespurteOpplysninger.first { it is PersonObserver.Inntekt }
-        )
-    }
-
-    @Test
-    fun `Sender oppdatert forespørsel ved nytt vilkårsgrunnlag pga korrigerende inntektsmelding  -- overstyring`() {
-        nyPeriode(januar)
-        nyPeriode(mars)
-
-        håndterArbeidsgiveropplysninger(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = 32000.månedlig,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = 33000.månedlig
-        )
-
-        assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-        assertEquals(5, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(
             PersonObserver.Inntekt,

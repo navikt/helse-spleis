@@ -1602,7 +1602,6 @@ internal class Vedtaksperiode private constructor(
         person.lagreVilkårsgrunnlag(grunnlagsdata)
         aktivitetslogg.info("Vilkårsgrunnlag vurdert")
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(vilkårsgrunnlag, aktivitetslogg)
-        arbeidsgiver.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(this)
         tilstand(aktivitetslogg, nesteTilstand)
     }
 
@@ -3475,15 +3474,6 @@ internal class Vedtaksperiode private constructor(
         internal fun Iterable<Vedtaksperiode>.nestePeriodeSomSkalGjenopptas() =
             firstOrNull(HAR_PÅGÅENDE_UTBETALING) ?: filter(IKKE_FERDIG_BEHANDLET).førstePeriode()
 
-        internal fun List<Vedtaksperiode>.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(vedtaksperiode: Vedtaksperiode) {
-            val nestePeriode = this
-                .firstOrNull { it.skjæringstidspunkt > vedtaksperiode.skjæringstidspunkt && it.skalBehandlesISpeil() }
-                ?.takeIf { it.tilstand == AvventerInntektsmelding }
-                ?: return
-            if (nestePeriode.sjekkTrengerArbeidsgiveropplysninger()) {
-                nestePeriode.sendTrengerArbeidsgiveropplysninger()
-            }
-        }
 
         internal fun Iterable<Vedtaksperiode>.checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas: Vedtaksperiode) {
             check(this.filterNot { it == periodeSomSkalGjenopptas }.none(HAR_AVVENTENDE_GODKJENNING)) {
