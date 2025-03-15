@@ -390,12 +390,10 @@ internal class Vedtaksperiode private constructor(
 
     private fun nyArbeidsgiverperiodeEtterEndring(other: Vedtaksperiode): Boolean {
         if (this.behandlinger.erUtbetaltPåForskjelligeUtbetalinger(other.behandlinger)) return false
-        val arbeidsgiverperiodeOther = other.finnArbeidsgiverperiode()
-        val arbeidsgiverperiodeThis = this.finnArbeidsgiverperiode()
-        if (arbeidsgiverperiodeOther == null || arbeidsgiverperiodeThis == null) return false
-        val periode = arbeidsgiverperiodeThis.periode(this.periode.endInclusive)
+        val arbeidsgiverperiodeOther = other.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode()
+        val arbeidsgiverperiodeThis = this.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode()
         // ingen overlapp i arbeidsgiverperiodene => ny arbeidsgiverperiode
-        return periode !in arbeidsgiverperiodeOther
+        return arbeidsgiverperiodeOther != null && arbeidsgiverperiodeThis != null && !arbeidsgiverperiodeOther.overlapperMed(arbeidsgiverperiodeThis)
     }
 
     internal fun håndter(anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg) {
