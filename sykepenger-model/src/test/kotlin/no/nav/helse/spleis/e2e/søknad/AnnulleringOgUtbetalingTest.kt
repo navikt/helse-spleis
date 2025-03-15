@@ -21,13 +21,13 @@ import no.nav.helse.juni
 import no.nav.helse.lørdag
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -39,7 +39,6 @@ import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_UTBETALT
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.NY
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.OVERFØRT
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.UTBETALT
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -208,7 +207,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         håndterYtelser(2.vedtaksperiode)
         assertVarsler(listOf(Varselkode.RV_UT_21), 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode("orgnr", 1.mai(2017), 5.mai(2017), 100.prosent, 1000.daglig)))
+        håndterPåminnelse(2.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING, reberegning = true)
         håndterYtelser(2.vedtaksperiode)
 
         assertEquals(6, inspektør.antallUtbetalinger)

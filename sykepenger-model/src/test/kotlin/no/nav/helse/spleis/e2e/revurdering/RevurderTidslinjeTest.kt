@@ -1190,6 +1190,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
 
+        nullstillTilstandsendringer()
+
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(a1, 1.november(2017), 30.november(2017), 100.prosent, 32000.månedlig),
             inntektshistorikk = listOf(
@@ -1198,22 +1200,17 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
                 )
             )
         )
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+
         håndterOverstyrTidslinje(overstyringsdager = listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode)
 
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
         assertTilstander(
             1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING

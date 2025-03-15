@@ -78,21 +78,30 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             arbeidsgiverperioder = emptyList(),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        assertVarsler(listOf(Varselkode.RV_VV_2, Varselkode.RV_OS_2, Varselkode.RV_IT_14), 1.vedtaksperiode.filter())
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
         håndterVilkårsgrunnlag(2.vedtaksperiode)
 
-        assertEquals(1.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(setOf(1.februar, 10.mars), person.inspektør.vilkårsgrunnlagHistorikk.aktiveSpleisSkjæringstidspunkt)
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(setOf(1.januar, 10.mars), person.inspektør.vilkårsgrunnlagHistorikk.aktiveSpleisSkjæringstidspunkt)
 
-        assertEquals(listOf(1.februar til 16.februar), inspektør.arbeidsgiverperioder(1.vedtaksperiode))
-        // infotrygdendringen påvirker beregning av agp for 2.vedtaksperiode siden den er åpnet opp.
-        // 1.vedtaksperiode forblir uendret siden den ikke har fått ny behandling
+        assertEquals(emptyList<Any>(), inspektør.arbeidsgiverperioder(1.vedtaksperiode))
         assertEquals(emptyList<Any>(), inspektør.arbeidsgiverperioder(2.vedtaksperiode))
 
         håndterYtelser(2.vedtaksperiode)
         // utbetalingen endres -ikke- fordi det fremdeles lages agp-dager for februar, siden 1.vedtaksperiode ikke åpnes opp
         inspektør.utbetaling(1).also { utbetalinginspektør ->
+            assertEquals(1, utbetalinginspektør.arbeidsgiverOppdrag.size)
+            assertEquals(1.februar til 28.februar, utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.periode)
+        }
+        inspektør.utbetaling(2).also { utbetalinginspektør ->
             assertEquals(2, utbetalinginspektør.arbeidsgiverOppdrag.size)
-            assertEquals(17.februar til 28.februar, utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.periode)
+            assertEquals(1.februar til 28.februar, utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.periode)
             assertEquals(10.mars til 30.mars, utbetalinginspektør.arbeidsgiverOppdrag[1].inspektør.periode)
         }
     }

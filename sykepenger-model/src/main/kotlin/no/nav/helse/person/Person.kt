@@ -34,6 +34,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
@@ -48,6 +49,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
@@ -297,13 +299,23 @@ class Person private constructor(
     private fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, element: InfotrygdhistorikkElement) {
         aktivitetslogg.info("Oppdaterer Infotrygdhistorikk")
         val tidligsteDatoForEndring = infotrygdhistorikk.oppdaterHistorikk(element)
-        if (tidligsteDatoForEndring == null) {
+        val defaultRevurderingseventyr = if (tidligsteDatoForEndring == null) {
             aktivitetslogg.info("Oppfrisket Infotrygdhistorikk medførte ingen endringer")
+            null
         } else {
             aktivitetslogg.info("Oppfrisket Infotrygdhistorikk ble lagret, tidligste endring $tidligsteDatoForEndring")
+
+            Revurderingseventyr.infotrygdendring(hendelse, tidligsteDatoForEndring, tidligsteDatoForEndring.somPeriode())
+                .takeIf { Toggle.RevurderingVedInfotrygdendring.enabled }
+                .also {
+                    if (it == null) {
+                        aktivitetslogg.info("Ville ha startet revurdering fra $tidligsteDatoForEndring som følge av infotrygdendring")
+                    }
+                }
         }
         sykdomshistorikkEndret()
-        val revurderingseventyr = arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, aktivitetslogg, infotrygdhistorikk)
+        val revurderingseventyrVedtaksperiode = arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, aktivitetslogg, infotrygdhistorikk)
+        val revurderingseventyr = listOfNotNull(defaultRevurderingseventyr, revurderingseventyrVedtaksperiode).tidligsteEventyr()
         val alleVedtaksperioder = arbeidsgivere.vedtaksperioder { true }
         emitOverlappendeInfotrygdperioder(alleVedtaksperioder)
         if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
@@ -449,7 +461,7 @@ class Person private constructor(
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler Overstyring av arbeidsgiveropplysninger")
         val inntektseventyr = arbeidsgivere.håndterOverstyringAvInntekt(hendelse, aktivitetsloggMedPersonkontekst)
         val refusjonseventyr = arbeidsgivere.håndterOverstyringAvRefusjon(hendelse, aktivitetsloggMedPersonkontekst)
-        val tidligsteEventyr = Revurderingseventyr.tidligsteEventyr(inntektseventyr, refusjonseventyr)
+        val tidligsteEventyr = tidligsteEventyr(inntektseventyr, refusjonseventyr)
         if (tidligsteEventyr == null) return aktivitetsloggMedPersonkontekst.info("Ingen vedtaksperioder håndterte overstyringen av arbeidsgiveropplysninger fordi overstyringen ikke har endret noe.")
         igangsettOverstyring(tidligsteEventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(hendelse, aktivitetsloggMedPersonkontekst)

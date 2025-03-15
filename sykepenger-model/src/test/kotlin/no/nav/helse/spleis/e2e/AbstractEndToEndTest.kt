@@ -28,6 +28,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -139,6 +140,10 @@ internal abstract class AbstractEndToEndTest {
             ),
             besvart = LocalDateTime.now()
         ).håndter(Person::håndter)
+
+        håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_IT_14, 1.vedtaksperiode.filter())
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
     }
 
     protected fun createTestPerson(block: (regelverkslogg: Regelverkslogg) -> Person): Person {

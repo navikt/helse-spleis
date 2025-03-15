@@ -124,8 +124,15 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 29.januar, 2.februar, 100.prosent, INNTEKT))
+        håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_IT_3, 2.vedtaksperiode.filter())
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+        håndterYtelser(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+
         forlengVedtak(april)
-        assertEquals(6, inspektør.antallUtbetalinger)
+        assertEquals(8, inspektør.antallUtbetalinger)
 
         inspektør.sisteUtbetaling().also { utbetalinginspektør ->
             assertEquals(utbetalinginspektør.korrelasjonsId, marsutbetaling.korrelasjonsId)

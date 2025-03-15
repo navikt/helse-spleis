@@ -187,9 +187,8 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
             val vedtaksperiodeId = UUID.fromString(vedtaksperiodekontekst.kontekstMap.getValue("vedtaksperiodeId"))
             val behandlingstatusPåTidspunkt = gjeldendeBehandlingstatus
                 .getValue(vedtaksperiodeId)
-                .first { (tidspunkt, _) ->
-                    tidspunkt < aktivitet.tidsstempel
-                }.second
+                .firstOrNull { (tidspunkt, _) -> tidspunkt < aktivitet.tidsstempel }?.second
+                ?: error("Finner ikke behandling forut før varselstidspunktet (vedtaksperiode $vedtaksperiodeId)")
             check(behandlingstatusPåTidspunkt == Behandlingstatus.ÅPEN) {
                 "Det er opprettet et varsel (${aktivitet.melding}) utenom en åpen behandling (status = $behandlingstatusPåTidspunkt)"
             }

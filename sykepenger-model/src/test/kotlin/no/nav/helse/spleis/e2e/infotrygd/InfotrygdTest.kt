@@ -16,6 +16,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
@@ -92,7 +93,9 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.februar, 9.februar))
-        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().first().vilkårsgrunnlag.size)
+        assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().first().vilkårsgrunnlag.size)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test

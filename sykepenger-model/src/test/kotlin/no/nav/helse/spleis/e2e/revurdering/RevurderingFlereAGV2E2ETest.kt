@@ -594,6 +594,6 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
             assertNull(linje.statuskode)
         }
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, orgnummer = a1)
     }
 }

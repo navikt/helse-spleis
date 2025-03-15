@@ -235,7 +235,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         )
         )
         håndterYtelser(1.vedtaksperiode)
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
     }
@@ -261,7 +261,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         )
         )
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
     }
@@ -293,7 +293,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter(orgnummer = a2))
 
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, orgnummer = a2)
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
