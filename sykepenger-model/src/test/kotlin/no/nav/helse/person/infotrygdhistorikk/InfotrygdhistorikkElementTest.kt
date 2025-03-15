@@ -29,6 +29,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -85,6 +86,98 @@ internal class InfotrygdhistorikkElementTest {
     private fun assertEquals(one: InfotrygdhistorikkElement, other: InfotrygdhistorikkElement) {
         assertTrue(one.funksjoneltLik(other))
         assertTrue(other.funksjoneltLik(one))
+    }
+
+    @Test
+    fun `tidligste endring mellom - forrige og nytt element er tomt`() {
+        val eksisterende = nyttHistorikkelement(perioder = emptyList())
+        val nyttElement = nyttHistorikkelement(perioder = emptyList())
+        assertNull(nyttElement.tidligsteEndringMellom(eksisterende))
+    }
+
+    @Test
+    fun `tidligste endring mellom - nytt element er likt`() {
+        var perioder = listOf(
+            PersonUtbetalingsperiode("orgnr", 10.januar, 20.januar, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 3.januar, 3.januar, 100.prosent, 1000.daglig)
+        )
+        val eksisterende = nyttHistorikkelement(perioder = perioder)
+        val nyttElement = nyttHistorikkelement(perioder = perioder)
+        assertNull(nyttElement.tidligsteEndringMellom(eksisterende))
+    }
+
+    @Test
+    fun `tidligste endring mellom - nytt element er tomt`() {
+        val eksisterende = nyttHistorikkelement(
+            perioder = listOf(
+                PersonUtbetalingsperiode("orgnr", 10.januar, 20.januar, 100.prosent, 1000.daglig),
+                ArbeidsgiverUtbetalingsperiode("orgnr", 3.januar, 3.januar, 100.prosent, 1000.daglig)
+            )
+        )
+        val nyttElement = nyttHistorikkelement(perioder = emptyList())
+        assertEquals(3.januar, nyttElement.tidligsteEndringMellom(eksisterende))
+    }
+
+    @Test
+    fun `tidligste endring mellom - eksisterende element er tomt`() {
+        val eksisterende = nyttHistorikkelement(perioder = emptyList())
+        val nyttElement = nyttHistorikkelement(perioder = listOf(
+            PersonUtbetalingsperiode("orgnr", 10.januar, 20.januar, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 3.januar, 3.januar, 100.prosent, 1000.daglig)
+        ))
+        assertEquals(3.januar, nyttElement.tidligsteEndringMellom(eksisterende))
+    }
+
+    @Test
+    fun `tidligste endring mellom - eksisterende element fjerner periode i starten`() {
+        val eksisterende = nyttHistorikkelement(perioder = listOf(
+            PersonUtbetalingsperiode("orgnr", 10.januar, 20.januar, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 3.januar, 3.januar, 100.prosent, 1000.daglig)
+        ))
+        val nyttElement = nyttHistorikkelement(perioder = listOf(
+            PersonUtbetalingsperiode("orgnr", 10.januar, 20.januar, 100.prosent, 1000.daglig)
+        ))
+        assertEquals(3.januar, nyttElement.tidligsteEndringMellom(eksisterende))
+    }
+
+    @Test
+    fun `tidligste endring mellom - eksisterende element legger til periode i starten`() {
+        val eksisterende = nyttHistorikkelement(perioder = listOf(
+            PersonUtbetalingsperiode("orgnr", 10.januar, 20.januar, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 3.januar, 3.januar, 100.prosent, 1000.daglig)
+        ))
+        val nyttElement = nyttHistorikkelement(perioder = listOf(
+            PersonUtbetalingsperiode("orgnr", 10.januar, 20.januar, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig)
+        ))
+        assertEquals(1.januar, nyttElement.tidligsteEndringMellom(eksisterende))
+    }
+
+    @Test
+    fun `tidligste endring mellom - eksisterende element legger til periode i slutten`() {
+        val eksisterende = nyttHistorikkelement(perioder = listOf(
+            PersonUtbetalingsperiode("orgnr", 10.januar, 20.januar, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 3.januar, 3.januar, 100.prosent, 1000.daglig)
+        ))
+        val nyttElement = nyttHistorikkelement(perioder = listOf(
+            PersonUtbetalingsperiode("orgnr", 10.januar, 20.januar, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 3.januar, 3.januar, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 3.februar, 3.februar, 100.prosent, 1000.daglig)
+        ))
+        assertEquals(3.februar, nyttElement.tidligsteEndringMellom(eksisterende))
+    }
+
+    @Test
+    fun `tidligste endring mellom - eksisterende element endrer personutbetaling til arbeidsgiverutbetaling`() {
+        val eksisterende = nyttHistorikkelement(perioder = listOf(
+            PersonUtbetalingsperiode("orgnr", 10.januar, 20.januar, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 3.januar, 3.januar, 100.prosent, 1000.daglig)
+        ))
+        val nyttElement = nyttHistorikkelement(perioder = listOf(
+            ArbeidsgiverUtbetalingsperiode("orgnr", 10.januar, 20.januar, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 3.januar, 3.januar, 100.prosent, 1000.daglig)
+        ))
+        assertEquals(10.januar, nyttElement.tidligsteEndringMellom(eksisterende))
     }
 
     @Test

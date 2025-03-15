@@ -132,6 +132,18 @@ class InfotrygdhistorikkElement private constructor(
         other.oppdatert = this.oppdatert
     }
 
+    internal fun tidligsteEndringMellom(other: InfotrygdhistorikkElement?): LocalDate? {
+        if (other == null || other.perioder.isEmpty()) return this.perioder.firstOrNull()?.periode?.start
+        if (this.perioder.isEmpty()) return other.perioder.first().periode.start
+        // tidligste dato som ikke er i begge lister
+        val førsteUlikePeriode = this.førsteUlikePeriode(other) ?: other.førsteUlikePeriode(this)
+        return førsteUlikePeriode?.periode?.start
+    }
+
+    private fun førsteUlikePeriode(other: InfotrygdhistorikkElement): Infotrygdperiode? {
+        return this.perioder.firstOrNull { other.perioder.none { otherIt -> it.funksjoneltLik(otherIt) } }
+    }
+
     internal fun erEldreEnn(utbetaling: Utbetaling): Boolean {
         return utbetaling.erNyereEnn(this.tidsstempel)
     }
