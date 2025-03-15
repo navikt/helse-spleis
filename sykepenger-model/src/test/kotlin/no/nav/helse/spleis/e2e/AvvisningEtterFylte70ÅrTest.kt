@@ -32,7 +32,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `Person over 70 får alle dager etter AGP avvist med Over70 som begrunnelse`() {
-        person = createTestPerson(FYLLER_70_FJORTENDE_JANUAR, FYLLER_70_FJORTENDE_JANUAR_FØDSELSDATO)
+        createTestPerson(FYLLER_70_FJORTENDE_JANUAR, FYLLER_70_FJORTENDE_JANUAR_FØDSELSDATO)
 
         håndterSykmelding(januar)
         håndterSøknad(januar)
@@ -65,7 +65,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `Får ikke plutselig penger igjen etter 26 uker hvis over 70 år`() {
-        person = createTestPerson(FYLLER_70_TIENDE_JANUAR, FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
+        createTestPerson(FYLLER_70_TIENDE_JANUAR, FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
 
         håndterSykmelding(Sykmeldingsperiode(20.desember(2017), 9.januar))
         håndterSøknad(20.desember(2017) til 9.januar)
@@ -100,7 +100,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `Maksdato settes til dagen før 70årsdagen uavhengig av opptjente sykedager dersom person fyller 70 i perioden`() {
-        person = createTestPerson(FYLLER_70_TIENDE_JANUAR, FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
+        createTestPerson(FYLLER_70_TIENDE_JANUAR, FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
 
         håndterSykmelding(januar)
         håndterSøknad(januar)
@@ -114,7 +114,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `Maksdato settes til dagen før 70årsdagen også for perioder etter fylte 70`() {
-        person = createTestPerson(FYLLER_70_TIENDE_JANUAR, FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
+        createTestPerson(FYLLER_70_TIENDE_JANUAR, FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(mars)
@@ -128,7 +128,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `Maksdato settes til virkedagen før 70årsdagen hvis bursdagen er på en søndag`() {
-        person = createTestPerson(FYLLER_70_FJORTENDE_JANUAR, FYLLER_70_FJORTENDE_JANUAR_FØDSELSDATO)
+        createTestPerson(FYLLER_70_FJORTENDE_JANUAR, FYLLER_70_FJORTENDE_JANUAR_FØDSELSDATO)
 
         håndterSykmelding(januar)
         håndterSøknad(januar)
@@ -141,7 +141,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `Maksdato settes til virkedagen før 70årsdagen hvis bursdagen er på en mandag`() {
-        person = createTestPerson(FYLLER_70_TOOGTYVENDE_JANUAR, FYLLER_70_TOOGTYVENDE_JANUAR_FØDSELSDATO)
+        createTestPerson(FYLLER_70_TOOGTYVENDE_JANUAR, FYLLER_70_TOOGTYVENDE_JANUAR_FØDSELSDATO)
 
         håndterSykmelding(januar)
         håndterSøknad(januar)

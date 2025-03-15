@@ -5,13 +5,13 @@ import java.util.*
 import no.nav.helse.inspectors.ArbeidsgiverInntektsopplysningInspektør
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.AOrdningen
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.Arbeidsgiver
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.Infotrygd
 import no.nav.helse.person.inntekt.InntektsgrunnlagView
 import no.nav.helse.person.inntekt.Inntektsopplysning
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt
@@ -37,7 +37,7 @@ internal fun TestPerson.TestArbeidsgiver.assertInntektsgrunnlag(
     assertInntektsgrunnlag(inspektør.vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør, forventetAntallArbeidsgivere, assertBlock)
 }
 
-internal fun AbstractPersonTest.assertInntektsgrunnlag(
+internal fun AbstractEndToEndTest.assertInntektsgrunnlag(
     skjæringstidspunkt: LocalDate,
     forventetAntallArbeidsgivere: Int,
     assertBlock: InntektsgrunnlagAssert.() -> Unit

@@ -1,8 +1,9 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
@@ -16,7 +17,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -34,7 +34,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
-import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_GODKJENT
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_UTBETALT
@@ -45,10 +44,12 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
+    private val IDENTIFIKATOR_SOM_KAN_BEHANDLES_UTEN_IM = Personidentifikator("30019212345")
+    private val FØDSELSDATO_SOM_KAN_BEHANDLES_UTEN_IM = 30.januar(1992)
 
     @Test
     fun `sender med inntektskilder i sykepengegrunnlaget i godkjenningsbehovet`() {
-        person = createTestPerson(IDENTIFIKATOR_SOM_KAN_BEHANDLES_UTEN_IM, FØDSELSDATO_SOM_KAN_BEHANDLES_UTEN_IM)
+        createTestPerson(IDENTIFIKATOR_SOM_KAN_BEHANDLES_UTEN_IM, FØDSELSDATO_SOM_KAN_BEHANDLES_UTEN_IM)
         nyPeriode(januar, orgnummer = a1)
         nyPeriode(januar, orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
@@ -65,7 +66,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `sender med inntektskilde saksbehandler i sykepengegrunnlaget i godkjenningsbehovet ved skjønnsmessig fastsettelse -- AOrdning på orginal inntekt`() {
-        person = createTestPerson(IDENTIFIKATOR_SOM_KAN_BEHANDLES_UTEN_IM, FØDSELSDATO_SOM_KAN_BEHANDLES_UTEN_IM)
+        createTestPerson(IDENTIFIKATOR_SOM_KAN_BEHANDLES_UTEN_IM, FØDSELSDATO_SOM_KAN_BEHANDLES_UTEN_IM)
         nyPeriode(januar, a1)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(), nå = 10.februar(2025).atStartOfDay(), orgnummer = a1)
         håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, orgnummer = a1)
@@ -346,7 +347,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     @Test
     fun `markerer godkjenningsbehov som har brukt skatteinntekter istedenfor inntektsmelding med riktig tag`() =
         Toggle.InntektsmeldingSomIkkeKommer.enable {
-            person = createTestPerson(IDENTIFIKATOR_SOM_KAN_BEHANDLES_UTEN_IM, FØDSELSDATO_SOM_KAN_BEHANDLES_UTEN_IM)
+            createTestPerson(IDENTIFIKATOR_SOM_KAN_BEHANDLES_UTEN_IM, FØDSELSDATO_SOM_KAN_BEHANDLES_UTEN_IM)
             nyPeriode(januar)
             håndterPåminnelse(
                 1.vedtaksperiode,

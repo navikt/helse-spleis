@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import java.util.UUID
-import no.nav.helse.person.IdInnhenter
+import java.util.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 

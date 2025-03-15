@@ -12,7 +12,7 @@ import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
-import no.nav.helse.person.IdInnhenter
+import no.nav.helse.spleis.e2e.IdInnhenter
 import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {

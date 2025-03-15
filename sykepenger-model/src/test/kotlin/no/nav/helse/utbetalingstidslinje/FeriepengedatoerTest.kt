@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import java.time.Year
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.april
 import no.nav.helse.august
@@ -23,8 +23,8 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.IdInnhenter
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.IdInnhenter
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering

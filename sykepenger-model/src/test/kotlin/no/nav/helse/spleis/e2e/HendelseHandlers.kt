@@ -51,9 +51,7 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Arbeidsledig
-import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -96,7 +94,6 @@ internal fun AbstractEndToEndTest.håndterSykmelding(
         mottatt = mottatt,
         orgnummer = orgnummer
     ).håndter(Person::håndter)
-    sykmeldinger[id] = sykeperioder
     return id
 }
 
@@ -417,7 +414,6 @@ internal fun AbstractEndToEndTest.håndterSøknad(
             permittert = permittert,
             egenmeldinger = egenmeldinger
         ).håndter(Person::håndter)
-        søknader[id] = Triple(sendtTilNAVEllerArbeidsgiver, andreInntektskilder, perioder)
         val vedtaksperiodeId: IdInnhenter = observatør.sisteVedtaksperiode()
         if (hendelselogg.etterspurteBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk, orgnummer = orgnummer)) {
             håndterUtbetalingshistorikk(vedtaksperiodeId, orgnummer = orgnummer)
@@ -761,7 +757,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkEtterInfotrygdendr
     return meldingsreferanseId
 }
 
-private fun AbstractPersonTest.finnArbeidsgivere() = person.inspektør.arbeidsgivere()
+private fun AbstractEndToEndTest.finnArbeidsgivere() = person.inspektør.arbeidsgivere()
 
 internal fun AbstractEndToEndTest.håndterYtelser(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,

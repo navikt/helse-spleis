@@ -1,10 +1,10 @@
 package no.nav.helse
 
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dsl.a1
-import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.spleis.e2e.IdInnhenter
 
 internal fun Aktivitetslogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, behovtype: Aktivitet.Behov.Behovtype, orgnummer: String = a1) =
     antallEtterspurteBehov(vedtaksperiodeIdInnhenter.id(orgnummer), behovtype)

@@ -4,7 +4,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
@@ -48,7 +48,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -194,7 +193,6 @@ internal fun AbstractEndToEndTest.inntektsmelding(
         innsenderFulltNavn = "SPLEIS Modell"
     )
     inntektsmeldinger[id] = AbstractEndToEndTest.InnsendtInntektsmelding(LocalDateTime.now(), inntektsmeldinggenerator, kontrakten)
-    inntekter[id] = beregnetInntekt
     EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
     return inntektsmeldinggenerator()
 }
