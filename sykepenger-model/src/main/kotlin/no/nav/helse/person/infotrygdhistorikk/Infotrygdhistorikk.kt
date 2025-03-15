@@ -33,12 +33,10 @@ internal class Infotrygdhistorikk private constructor(
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,
-        periode: Periode,
-        skjæringstidspunkt: LocalDate,
-        orgnummer: String
+        periode: Periode
     ): Boolean {
         if (!harHistorikk()) return true
-        return siste.valider(aktivitetslogg, periode, orgnummer)
+        return siste.valider(aktivitetslogg, periode)
     }
 
     internal fun oppfriskNødvendig(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {

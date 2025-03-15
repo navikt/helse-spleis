@@ -16,10 +16,10 @@ sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
     internal open fun sykdomstidslinje(kilde: Hendelseskilde): Sykdomstidslinje = Sykdomstidslinje()
     internal open fun utbetalingstidslinje(): Utbetalingstidslinje = Utbetalingstidslinje()
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode) {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode) {
         validerHarBetaltTidligere(periode, aktivitetslogg)
         validerOverlapp(aktivitetslogg, periode)
-        validerNyereOpplysninger(aktivitetslogg, organisasjonsnummer, periode)
+        validerNyereOpplysninger(aktivitetslogg, periode)
     }
 
 
@@ -39,9 +39,10 @@ sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
         aktivitetslogg.varsel(Varselkode.RV_IT_3)
     }
 
-    private fun validerNyereOpplysninger(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode) {
-        if (!gjelder(organisasjonsnummer)) return
+    private fun validerNyereOpplysninger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
         if (this.periode.start <= periode.endInclusive) return
+        val periodeMellom = periode.endInclusive.datesUntil(this.periode.start).count()
+        if (periodeMellom > MINIMALT_TILLAT_AVSTAND_NYERE_OPPLYSNINGER) return
         aktivitetslogg.varsel(Varselkode.RV_IT_1)
     }
 
@@ -55,6 +56,8 @@ sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
     }
 
     internal companion object {
+        private const val MINIMALT_TILLAT_AVSTAND_NYERE_OPPLYSNINGER = 182
+
         internal fun sorter(perioder: List<Infotrygdperiode>) =
             perioder.sortedWith(compareBy({ it.periode.start }, { it.periode.endInclusive }, { it::class.simpleName }))
 

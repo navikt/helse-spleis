@@ -90,10 +90,10 @@ class InfotrygdhistorikkElement private constructor(
     private fun erTom() =
         perioder.isEmpty() && inntekter.isEmpty() && arbeidskategorikoder.isEmpty()
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, organisasjonsnummer: String): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode): Boolean {
         validerBetaltRettFør(periode, aktivitetslogg)
         aktivitetslogg.info("Sjekker utbetalte perioder")
-        perioder.forEach { it.valider(aktivitetslogg, organisasjonsnummer, periode) }
+        perioder.forEach { it.valider(aktivitetslogg, periode) }
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 

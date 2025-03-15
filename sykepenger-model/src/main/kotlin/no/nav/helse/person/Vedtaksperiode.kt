@@ -289,7 +289,7 @@ internal class Vedtaksperiode private constructor(
         søknad.forUng(aktivitetsloggMedVedtaksperiodekontekst, person.alder)
         arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(aktivitetsloggMedVedtaksperiodekontekst, this, arbeidsgivere)
 
-        infotrygdhistorikk.valider(aktivitetsloggMedVedtaksperiodekontekst, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
+        infotrygdhistorikk.valider(aktivitetsloggMedVedtaksperiodekontekst, periode)
         håndterSøknad(søknad, aktivitetsloggMedVedtaksperiodekontekst)
         aktivitetsloggMedVedtaksperiodekontekst.info("Fullført behandling av søknad")
 
@@ -920,7 +920,7 @@ internal class Vedtaksperiode private constructor(
             AvventerHistorikk -> {
                 validation(aktivitetsloggMedVedtaksperiodekontekst) {
                     onValidationFailed { forkast(hendelse, aktivitetsloggMedVedtaksperiodekontekst) }
-                    valider { infotrygdhistorikk.valider(this, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer) }
+                    valider { infotrygdhistorikk.valider(this, periode) }
                     if (tilstand == AvventerInfotrygdHistorikk) {
                         onSuccess { tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding) }
                     }
@@ -955,7 +955,7 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver.beregnArbeidsgiverperiode()
         )
 
-        infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
+        infotrygdhistorikk.valider(aktivitetslogg, periode)
 
         val kanForkastes = arbeidsgiver.kanForkastes(this, aktivitetslogg)
 
@@ -1008,7 +1008,7 @@ internal class Vedtaksperiode private constructor(
         checkNotNull(vilkårsgrunnlag).valider(aktivitetslogg, arbeidsgiver.organisasjonsnummer)
         checkNotNull(vilkårsgrunnlag).inntektsgrunnlag.valider(aktivitetslogg)
         checkNotNull(vilkårsgrunnlag).opptjening?.validerOpptjeningsdager(aktivitetslogg)
-        infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
+        infotrygdhistorikk.valider(aktivitetslogg, periode)
         ytelser.valider(aktivitetslogg, periode, skjæringstidspunkt, maksdatoresultat.maksdato, erForlengelse())
 
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(ytelser, aktivitetslogg)
