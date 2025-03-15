@@ -18,20 +18,16 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_9
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_37
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
@@ -163,14 +159,19 @@ internal class VarselE2ETest : AbstractDslTest() {
             håndterSøknad(26.januar til 31.januar)
             håndterInntektsmelding(listOf(10.januar til 25.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
+            nullstillTilstandsendringer()
             håndterUtbetalingshistorikkEtterInfotrygdendring(
                 utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 9.januar, 100.prosent, INNTEKT)),
                 inntektshistorikk = listOf(
                     Inntektsopplysning(a1, 1.januar, INNTEKT, true)
                 )
             )
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, varselkode = RV_IT_14)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            assertVarsler(listOf(RV_IT_14, Varselkode.RV_IT_38, RV_IT_14), 1.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 2.vedtaksperiode.filter())
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }
 
@@ -190,9 +191,8 @@ internal class VarselE2ETest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(RV_OS_2, 1.vedtaksperiode.filter())
             assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
-            assertFunksjonellFeil(RV_IT_37, 2.vedtaksperiode.filter())
-            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_SIMULERING_REVURDERING)
-            assertSisteForkastetTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }
 }

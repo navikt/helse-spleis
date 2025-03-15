@@ -242,28 +242,20 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
     @Test
     fun `infotrygd har utbetalt perioden - vi har ingenting`() {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
         håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
-
-        nullstillTilstandsendringer()
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT
-        )
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            PersonUtbetalingsperiode(a1, 1.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 1.januar, INNTEKT, false)
+            PersonUtbetalingsperiode(a1, 1.januar, 27.januar, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, false))
         )
-        )
+        håndterYtelser(1.vedtaksperiode)
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test

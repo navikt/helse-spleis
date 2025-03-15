@@ -112,6 +112,14 @@
               {
                 "fom": "2018-01-01",
                 "tom": "2018-01-31"
+              },
+              {
+                "fom": "2018-03-01",
+                "tom": "2018-03-19"
+              },
+              {
+                "fom": "2018-05-01",
+                "tom": "2018-05-31"
               }
             ]
           }
@@ -849,7 +857,7 @@
         },
         {
           "id": "dedf39f0-8bbe-4dfb-974c-c47731e33240",
-          "tilstand": "AVVENTER_HISTORIKK",
+          "tilstand": "AVSLUTTET_UTEN_UTBETALING",
           "skjæringstidspunkt": "2018-03-01",
           "behandlinger": [
             {
@@ -1051,91 +1059,6 @@
                   }
                 }
               ]
-            },
-            {
-              "id": "d2d3eab1-5d7b-42e6-9092-0500a7fd2722",
-              "tilstand": "UBEREGNET_OMGJØRING",
-              "vedtakFattet": null,
-              "avsluttet": null,
-              "kilde": {
-                "meldingsreferanseId": "4f56dc9f-6598-4c3b-8222-04939f783b41",
-                "innsendt": "2024-03-15T08:38:51.55873",
-                "registrert": "2024-03-15T08:38:51.55873",
-                "avsender": "SYSTEM"
-              },
-              "endringer": [
-                {
-                  "id": "cc91ca17-5e2e-48e2-b45b-c1c13792c69d",
-                  "tidsstempel": "2024-03-15T08:38:51.591396",
-                  "sykmeldingsperiodeFom": "2018-03-01",
-                  "sykmeldingsperiodeTom": "2018-03-19",
-                  "fom": "2018-03-01",
-                  "tom": "2018-03-19",
-                  "skjæringstidspunkt": "2018-03-01",
-                  "utbetalingId": null,
-                  "vilkårsgrunnlagId": null,
-                  "sykdomstidslinje": {
-                    "dager": [
-                      {
-                        "type": "SYKEDAG",
-                        "kilde": {
-                          "type": "Søknad",
-                          "id": "fce94ecf-b986-4b69-b1e4-857992df780b",
-                          "tidsstempel": "2018-03-01T00:00:00"
-                        },
-                        "grad": 100.0,
-                        "other": null,
-                        "melding": null,
-                        "fom": "2018-03-01",
-                        "tom": "2018-03-16",
-                        "dato": null
-                      }
-                    ],
-                    "periode": {
-                      "fom": "2018-03-01",
-                      "tom": "2018-03-19"
-                    },
-                    "låstePerioder": []
-                  },
-                  "utbetalingstidslinje": {
-                    "dager": []
-                  },
-                  "refusjonstidslinje": {
-                    "perioder": [
-                      {
-                        "fom": "2018-03-01",
-                        "tom": "2018-03-19",
-                        "dagligBeløp": 1430.7692307692307,
-                        "meldingsreferanseId": "8879a3ca-dcbe-487c-9ca2-d8d040120358",
-                        "avsender": "ARBEIDSGIVER",
-                        "tidsstempel": "2022-10-14T14:21:51.672309"
-                      }
-                    ]
-                  },
-                  "inntektsendringer": {
-                    "perioder": []
-                  },
-                  "dokumentsporing": {
-                    "dokumentId": "fce94ecf-b986-4b69-b1e4-857992df780b",
-                    "dokumenttype": "Søknad"
-                  },
-                  "arbeidsgiverperioder": [],
-                  "maksdatoresultat": {
-                    "vurdertTilOgMed": "-999999999-01-01",
-                    "bestemmelse": "IKKE_VURDERT",
-                    "startdatoTreårsvindu": "-999999999-01-01",
-                    "startdatoSykepengerettighet": null,
-                    "forbrukteDager": [],
-                    "oppholdsdager": [],
-                    "avslåtteDager": [],
-                    "maksdato": "-999999999-01-01",
-                    "gjenståendeDager": 0,
-                    "grunnlag": {
-                      "dager": []
-                    }
-                  }
-                }
-              ]
             }
           ],
           "opprettet": "2022-10-14T14:21:51.793933",
@@ -1144,7 +1067,7 @@
         },
         {
           "id": "149406fb-134f-4185-99ec-9117d76d38f1",
-          "tilstand": "AVVENTER_REVURDERING",
+          "tilstand": "AVSLUTTET",
           "skjæringstidspunkt": "2018-05-01",
           "behandlinger": [
             {
@@ -1539,91 +1462,6 @@
                     "avslåtteDager": [],
                     "maksdato": "2019-04-12",
                     "gjenståendeDager": 226,
-                    "grunnlag": {
-                      "dager": []
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              "id": "7fa88e22-c1eb-4576-9ab2-d4979300a38d",
-              "tilstand": "UBEREGNET_REVURDERING",
-              "vedtakFattet": null,
-              "avsluttet": null,
-              "kilde": {
-                "meldingsreferanseId": "4f56dc9f-6598-4c3b-8222-04939f783b41",
-                "innsendt": "2024-03-15T08:38:51.55873",
-                "registrert": "2024-03-15T08:38:51.55873",
-                "avsender": "SYSTEM"
-              },
-              "endringer": [
-                {
-                  "id": "62f3523a-aec8-4bb1-ae53-2acfbd11af3a",
-                  "tidsstempel": "2024-03-15T08:38:51.603383",
-                  "sykmeldingsperiodeFom": "2018-05-01",
-                  "sykmeldingsperiodeTom": "2018-05-31",
-                  "fom": "2018-05-01",
-                  "tom": "2018-05-31",
-                  "skjæringstidspunkt": "2018-05-01",
-                  "utbetalingId": null,
-                  "vilkårsgrunnlagId": null,
-                  "sykdomstidslinje": {
-                    "dager": [
-                      {
-                        "type": "SYKEDAG",
-                        "kilde": {
-                          "type": "Søknad",
-                          "id": "16e0a9d0-f7e0-4a42-8200-8d0b19879ffd",
-                          "tidsstempel": "2018-05-01T00:00:00"
-                        },
-                        "grad": 100.0,
-                        "other": null,
-                        "melding": null,
-                        "fom": "2018-05-01",
-                        "tom": "2018-05-31",
-                        "dato": null
-                      }
-                    ],
-                    "periode": {
-                      "fom": "2018-05-01",
-                      "tom": "2018-05-31"
-                    },
-                    "låstePerioder": []
-                  },
-                  "utbetalingstidslinje": {
-                    "dager": []
-                  },
-                  "refusjonstidslinje": {
-                    "perioder": [
-                      {
-                        "fom": "2018-05-01",
-                        "tom": "2018-05-31",
-                        "dagligBeløp": 1430.7692307692307,
-                        "meldingsreferanseId": "8879a3ca-dcbe-487c-9ca2-d8d040120358",
-                        "avsender": "ARBEIDSGIVER",
-                        "tidsstempel": "2022-10-14T14:21:51.672309"
-                      }
-                    ]
-                  },
-                  "inntektsendringer": {
-                    "perioder": []
-                  },
-                  "dokumentsporing": {
-                    "dokumentId": "16e0a9d0-f7e0-4a42-8200-8d0b19879ffd",
-                    "dokumenttype": "Søknad"
-                  },
-                  "arbeidsgiverperioder": [],
-                  "maksdatoresultat": {
-                    "vurdertTilOgMed": "-999999999-01-01",
-                    "bestemmelse": "IKKE_VURDERT",
-                    "startdatoTreårsvindu": "-999999999-01-01",
-                    "startdatoSykepengerettighet": null,
-                    "forbrukteDager": [],
-                    "oppholdsdager": [],
-                    "avslåtteDager": [],
-                    "maksdato": "-999999999-01-01",
-                    "gjenståendeDager": 0,
                     "grunnlag": {
                       "dager": []
                     }

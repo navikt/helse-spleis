@@ -289,7 +289,7 @@ internal class Vedtaksperiode private constructor(
         søknad.forUng(aktivitetsloggMedVedtaksperiodekontekst, person.alder)
         arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(aktivitetsloggMedVedtaksperiodekontekst, this, arbeidsgivere)
 
-        infotrygdhistorikk.valider(aktivitetsloggMedVedtaksperiodekontekst, periode)
+        infotrygdhistorikk.validerMedFunksjonellFeil(aktivitetsloggMedVedtaksperiodekontekst, periode)
         håndterSøknad(søknad, aktivitetsloggMedVedtaksperiodekontekst)
         aktivitetsloggMedVedtaksperiodekontekst.info("Fullført behandling av søknad")
 
@@ -903,7 +903,7 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         when (tilstand) {
-            AvsluttetUtenUtbetaling -> return omgjøreEtterInfotrygdendring(hendelse, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk)
+            AvsluttetUtenUtbetaling -> return omgjøreEtterInfotrygdendring(hendelse, aktivitetsloggMedVedtaksperiodekontekst, infotrygdhistorikk)
 
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering -> {
@@ -916,11 +916,10 @@ internal class Vedtaksperiode private constructor(
             }
 
             AvventerInfotrygdHistorikk,
-            AvventerInntektsmelding,
-            AvventerHistorikk -> {
+            AvventerInntektsmelding -> {
                 validation(aktivitetsloggMedVedtaksperiodekontekst) {
                     onValidationFailed { forkast(hendelse, aktivitetsloggMedVedtaksperiodekontekst) }
-                    valider { infotrygdhistorikk.valider(this, periode) }
+                    valider { infotrygdhistorikk.validerMedFunksjonellFeil(this, periode) }
                     if (tilstand == AvventerInfotrygdHistorikk) {
                         onSuccess { tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding) }
                     }
@@ -930,6 +929,7 @@ internal class Vedtaksperiode private constructor(
             Avsluttet,
             AvventerBlokkerendePeriode,
             AvventerHistorikkRevurdering,
+            AvventerHistorikk,
             AvventerRevurdering,
             AvventerSimulering,
             AvventerSimuleringRevurdering,
@@ -955,20 +955,17 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver.beregnArbeidsgiverperiode()
         )
 
-        infotrygdhistorikk.valider(aktivitetslogg, periode)
-
         val kanForkastes = arbeidsgiver.kanForkastes(this, aktivitetslogg)
+        val måInnhenteInntektEllerRefusjon = måInnhenteInntektEllerRefusjon()
 
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre() && kanForkastes) {
-            aktivitetslogg.info("Forkaster perioden fordi Infotrygdhistorikken ikke validerer")
-            forkast(hendelse, aktivitetslogg)
-            return null
-        }
-        if (måInnhenteInntektEllerRefusjon() && kanForkastes) {
+        if (kanForkastes && måInnhenteInntektEllerRefusjon) {
+            infotrygdhistorikk.validerMedFunksjonellFeil(aktivitetslogg, periode)
             aktivitetslogg.info("Forkaster perioden fordi perioden har ikke tilstrekkelig informasjon til utbetaling")
             forkast(hendelse, aktivitetslogg)
             return null
         }
+
+        infotrygdhistorikk.validerMedVarsel(aktivitetslogg, periode)
         aktivitetslogg.varsel(RV_IT_38)
         return Revurderingseventyr.infotrygdendring(hendelse, skjæringstidspunkt, periode)
     }
@@ -1008,7 +1005,8 @@ internal class Vedtaksperiode private constructor(
         checkNotNull(vilkårsgrunnlag).valider(aktivitetslogg, arbeidsgiver.organisasjonsnummer)
         checkNotNull(vilkårsgrunnlag).inntektsgrunnlag.valider(aktivitetslogg)
         checkNotNull(vilkårsgrunnlag).opptjening?.validerOpptjeningsdager(aktivitetslogg)
-        infotrygdhistorikk.valider(aktivitetslogg, periode)
+        infotrygdhistorikk.validerMedVarsel(aktivitetslogg, periode)
+        infotrygdhistorikk.validerNyereOpplysninger(aktivitetslogg, periode)
         ytelser.valider(aktivitetslogg, periode, skjæringstidspunkt, maksdatoresultat.maksdato, erForlengelse())
 
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(ytelser, aktivitetslogg)

@@ -16,16 +16,10 @@ sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
     internal open fun sykdomstidslinje(kilde: Hendelseskilde): Sykdomstidslinje = Sykdomstidslinje()
     internal open fun utbetalingstidslinje(): Utbetalingstidslinje = Utbetalingstidslinje()
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode) {
-        validerHarBetaltTidligere(periode, aktivitetslogg)
-        validerOverlapp(aktivitetslogg, periode)
-        validerNyereOpplysninger(aktivitetslogg, periode)
-    }
-
-
-    private fun validerHarBetaltTidligere(periode: Periode, aktivitetslogg: IAktivitetslogg) {
-        if (!harBetaltTidligere(periode)) return
-        aktivitetslogg.funksjonellFeil(Varselkode.RV_IT_37)
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, strategi: IAktivitetslogg.(Varselkode) -> Unit) {
+        if (harBetaltTidligere(periode)) aktivitetslogg.strategi(Varselkode.RV_IT_37)
+        if (harBetaltRettFør(periode)) aktivitetslogg.strategi(Varselkode.RV_IT_14)
+        if (harOverlapp(aktivitetslogg, periode)) aktivitetslogg.varsel(Varselkode.RV_IT_3)
     }
 
     private fun harBetaltTidligere(other: Periode): Boolean {
@@ -33,13 +27,17 @@ sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
         return periodeMellom.count() < Vedtaksperiode.MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
     }
 
-    private fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
-        if (!this.periode.overlapperMed(periode)) return
-        aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", this.periode.start, this.periode.endInclusive)
-        aktivitetslogg.varsel(Varselkode.RV_IT_3)
+    private fun harBetaltRettFør(other: Periode): Boolean {
+        return this.periode.erRettFør(other)
     }
 
-    private fun validerNyereOpplysninger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+    private fun harOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode): Boolean {
+        if (!this.periode.overlapperMed(periode)) return false
+        aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", this.periode.start, this.periode.endInclusive)
+        return true
+    }
+
+    internal fun validerNyereOpplysninger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
         if (this.periode.start <= periode.endInclusive) return
         val periodeMellom = periode.endInclusive.datesUntil(this.periode.start).count()
         if (periodeMellom > MINIMALT_TILLAT_AVSTAND_NYERE_OPPLYSNINGER) return
@@ -65,10 +63,5 @@ sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
             .filterIsInstance<Utbetalingsperiode>()
             .filter { organisasjonsnummer == null || it.gjelder(organisasjonsnummer) }
             .map { it.periode }
-
-        internal fun List<Infotrygdperiode>.harBetaltRettFør(other: Periode) = this
-            .any {
-                it.periode.erRettFør(other)
-            }
     }
 }

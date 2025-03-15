@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
+import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -23,9 +24,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
@@ -34,6 +35,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
@@ -73,9 +75,10 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 2.januar, 2.januar, 100.prosent, INNTEKT))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_IT_14, 2.vedtaksperiode.filter())
 
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
     @Test
@@ -117,7 +120,8 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+
         håndterYtelser(3.vedtaksperiode)
 
         assertEquals(4, inspektør.antallUtbetalinger)
@@ -133,8 +137,8 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
             assertEquals(31.januar, it.arbeidsgiverOppdrag[1].inspektør.tom)
         }
         inspektør.utbetaling(3).also {
-            assertEquals(it.korrelasjonsId, inspektør.utbetaling(1).korrelasjonsId)
-            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId)
+            assertEquals(it.korrelasjonsId, inspektør.utbetaling(3).korrelasjonsId)
+            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(3).arbeidsgiverOppdrag.fagsystemId)
             assertEquals(1, it.arbeidsgiverOppdrag.size)
             assertEquals(Endringskode.UEND, it.arbeidsgiverOppdrag[0].inspektør.endringskode)
             assertEquals(17.mai, it.arbeidsgiverOppdrag[0].inspektør.fom)
@@ -149,23 +153,20 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
     private fun createAuuBlirMedIRevureringPerson() = createTestPerson { jurist ->
         gjenopprettFraJSON("/personer/auu-blir-med-i-revurdering.json", jurist)
     }.also {
-        person.håndter(
-            Utbetalingshistorikk(
-                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = UUID.randomUUID().toString(),
-                element = InfotrygdhistorikkElement.opprett(
-                    oppdatert = LocalDateTime.now(),
-                    hendelseId = MeldingsreferanseId(UUID.randomUUID()),
-                    perioder = listOf(
-                        Friperiode(fom = 1.februar, tom = 28.februar)
-                    ),
-                    inntekter = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true)),
-                    arbeidskategorikoder = emptyMap()
+        Utbetalingshistorikk(
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+            organisasjonsnummer = a1,
+            vedtaksperiodeId = UUID.randomUUID().toString(),
+            element = InfotrygdhistorikkElement.opprett(
+                oppdatert = LocalDateTime.now(),
+                hendelseId = MeldingsreferanseId(UUID.randomUUID()),
+                perioder = listOf(
+                    Friperiode(fom = 1.februar, tom = 28.februar)
                 ),
-                besvart = LocalDateTime.now()
+                inntekter = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true)),
+                arbeidskategorikoder = emptyMap()
             ),
-            Aktivitetslogg()
-        )
+            besvart = LocalDateTime.now()
+        ).håndter(Person::håndter)
     }
 }
