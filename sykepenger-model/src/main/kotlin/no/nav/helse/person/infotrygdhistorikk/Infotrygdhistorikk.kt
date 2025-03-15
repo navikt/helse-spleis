@@ -31,12 +31,28 @@ internal class Infotrygdhistorikk private constructor(
         }
     }
 
-    internal fun valider(
+    internal fun validerMedFunksjonellFeil(
         aktivitetslogg: IAktivitetslogg,
         periode: Periode
     ): Boolean {
         if (!harHistorikk()) return true
-        return siste.valider(aktivitetslogg, periode)
+        return siste.validerMedFunksjonellFeil(aktivitetslogg, periode)
+    }
+
+    internal fun validerMedVarsel(
+        aktivitetslogg: IAktivitetslogg,
+        periode: Periode
+    ) {
+        if (!harHistorikk()) return
+        siste.validerMedVarsel(aktivitetslogg, periode)
+    }
+
+    internal fun validerNyereOpplysninger(
+        aktivitetslogg: IAktivitetslogg,
+        periode: Periode
+    ) {
+        if (!harHistorikk()) return
+        siste.validerNyereOpplysninger(aktivitetslogg, periode)
     }
 
     internal fun oppfriskNødvendig(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {

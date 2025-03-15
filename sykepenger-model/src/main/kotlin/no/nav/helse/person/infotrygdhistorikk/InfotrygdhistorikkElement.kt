@@ -2,15 +2,13 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBetaltRettFør
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.utbetalingsperioder
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -90,24 +88,27 @@ class InfotrygdhistorikkElement private constructor(
     private fun erTom() =
         perioder.isEmpty() && inntekter.isEmpty() && arbeidskategorikoder.isEmpty()
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode): Boolean {
-        validerBetaltRettFør(periode, aktivitetslogg)
+    internal fun validerMedFunksjonellFeil(aktivitetslogg: IAktivitetslogg, periode: Periode): Boolean {
         aktivitetslogg.info("Sjekker utbetalte perioder")
-        perioder.forEach { it.valider(aktivitetslogg, periode) }
+        perioder.forEach { it.valider(aktivitetslogg, periode, IAktivitetslogg::funksjonellFeil) }
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
-    private fun validerBetaltRettFør(periode: Periode, aktivitetslogg: IAktivitetslogg) {
-        if (!harBetaltRettFør(periode)) return
-        aktivitetslogg.funksjonellFeil(RV_IT_14)
+    internal fun validerMedVarsel(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+        aktivitetslogg.info("Sjekker utbetalte perioder")
+        perioder.forEach { it.valider(aktivitetslogg, periode, IAktivitetslogg::varsel) }
+    }
+
+    internal fun validerNyereOpplysninger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+        perioder.forEach {
+            it.validerNyereOpplysninger(aktivitetslogg, periode)
+        }
     }
 
     internal fun utbetalingstidslinje() =
         perioder
             .map { it.utbetalingstidslinje() }
             .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
-
-    private fun harBetaltRettFør(periode: Periode) = perioder.harBetaltRettFør(periode)
 
     internal fun funksjoneltLik(other: InfotrygdhistorikkElement): Boolean {
         if (!harLikePerioder(other)) return false

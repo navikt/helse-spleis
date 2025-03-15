@@ -174,7 +174,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         )
 
         assertVarsler(listOf(RV_IT_3), 2.vedtaksperiode.filter(orgnummer = a1))
-        assertVarsler(listOf(RV_IT_3, Varselkode.RV_IT_1), 1.vedtaksperiode.filter(orgnummer = a2))
+        assertVarsler(listOf(RV_IT_3), 1.vedtaksperiode.filter(orgnummer = a2))
 
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a1)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a2)

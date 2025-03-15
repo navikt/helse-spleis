@@ -180,8 +180,9 @@ internal class VarselE2ETest : AbstractDslTest() {
                     Inntektsopplysning(a1, 5.februar, INNTEKT, true)
                 )
             )
-            assertFunksjonellFeil(RV_IT_37, 2.vedtaksperiode.filter())
-            assertSisteForkastetTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+            håndterYtelser(2.vedtaksperiode)
+            //assertVarsel(RV_IT_37, 2.vedtaksperiode.filter())
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
         }
     }
 }

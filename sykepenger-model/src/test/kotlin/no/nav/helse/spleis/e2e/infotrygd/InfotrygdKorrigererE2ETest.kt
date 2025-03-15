@@ -16,6 +16,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
+import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -23,6 +25,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -35,6 +38,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
@@ -73,9 +77,10 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 2.januar, 2.januar, 100.prosent, INNTEKT))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_IT_14, 2.vedtaksperiode.filter())
 
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
     @Test
@@ -117,10 +122,16 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+        assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+        håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_IT_14, 2.vedtaksperiode.filter())
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
         håndterYtelser(3.vedtaksperiode)
 
-        assertEquals(4, inspektør.antallUtbetalinger)
+        assertEquals(5, inspektør.antallUtbetalinger)
         inspektør.utbetaling(2).also {
             assertEquals(it.korrelasjonsId, inspektør.utbetaling(0).korrelasjonsId)
             assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId)
@@ -133,6 +144,16 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
             assertEquals(31.januar, it.arbeidsgiverOppdrag[1].inspektør.tom)
         }
         inspektør.utbetaling(3).also {
+            assertEquals(it.korrelasjonsId, inspektør.utbetaling(3).korrelasjonsId)
+            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(3).arbeidsgiverOppdrag.fagsystemId)
+            assertEquals(3, it.arbeidsgiverOppdrag.size)
+            assertEquals(Endringskode.UEND, it.arbeidsgiverOppdrag[0].inspektør.endringskode)
+            assertEquals(Endringskode.UEND, it.arbeidsgiverOppdrag[1].inspektør.endringskode)
+            assertEquals(Endringskode.NY, it.arbeidsgiverOppdrag[2].inspektør.endringskode)
+            assertEquals(1.mars, it.arbeidsgiverOppdrag[2].inspektør.fom)
+            assertEquals(16.mars, it.arbeidsgiverOppdrag[2].inspektør.tom)
+        }
+        inspektør.utbetaling(4).also {
             assertEquals(it.korrelasjonsId, inspektør.utbetaling(1).korrelasjonsId)
             assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId)
             assertEquals(1, it.arbeidsgiverOppdrag.size)
