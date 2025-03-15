@@ -1281,7 +1281,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun forkast(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-        person.søppelbøtte(hendelse, aktivitetslogg, TIDLIGERE_OG_ETTERGØLGENDE(this))
+        person.søppelbøtte(hendelse, aktivitetslogg, OVERLAPPENDE_OG_ETTERGØLGENDE(this))
     }
 
     private fun registrerKontekst(aktivitetslogg: IAktivitetslogg): IAktivitetslogg {
@@ -1601,7 +1601,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun førsteFraværsdagerForForespørsel(): List<PersonObserver.FørsteFraværsdag> {
-        val deAndre = person.vedtaksperioder(MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT(this))
+        val deAndre = person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(this.skjæringstidspunkt))
             .filterNot { it.arbeidsgiver === this.arbeidsgiver }
             .groupBy { it.arbeidsgiver }
             .mapNotNull { (arbeidsgiver, perioder) ->
@@ -3309,27 +3309,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         // Fredet funksjonsnavn
-        internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
-            val medSammeAGP = MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT(segSelv)
+        internal val OVERLAPPENDE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             return fun(other: Vedtaksperiode): Boolean {
-                if (other.periode.start >= segSelv.periode.start) return true // Forkaster nyere perioder på tvers av arbeidsgivere
-                return medSammeAGP(other)
-            }
-        }
-        internal val MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
-            val skjæringstidspunkt = segSelv.skjæringstidspunkt
-            val arbeidsgiverperiode = segSelv.behandlinger
-                .arbeidsgiverperiode()
-                .arbeidsgiverperioder
-                .periode()
-            return fun(other: Vedtaksperiode): Boolean {
-                val arbeidsgiverperiodeOther = other
-                    .behandlinger
-                    .arbeidsgiverperiode()
-                    .arbeidsgiverperioder
-                    .periode()
-                if (arbeidsgiverperiode != null && other.arbeidsgiver === segSelv.arbeidsgiver && arbeidsgiverperiodeOther?.overlapperMed(arbeidsgiverperiode) == true) return true // Forkaster samme arbeidsgiverperiode (kun for samme arbeidsgiver)
-                return other.skjæringstidspunkt == skjæringstidspunkt // Forkaster alt med samme skjæringstidspunkt på tvers av arbeidsgivere
+                return segSelv.periode.overlapperEllerStarterFør(other.periode)
             }
         }
 

@@ -169,16 +169,12 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
         generasjoner {
-            assertEquals(3, size)
+            assertEquals(2, size)
             0.generasjon {
-                assertEquals(1, size)
-                uberegnetPeriode(0) fra 1.januar til 10.januar medTilstand Annullert
-            }
-            1.generasjon {
                 assertEquals(1, size)
                 uberegnetPeriode(0) fra 1.januar til 10.januar medTilstand IngenUtbetaling medHendelser setOf(søknad, im)
             }
-            2.generasjon {
+            1.generasjon {
                 assertEquals(1, size)
                 uberegnetPeriode(0) fra 1.januar til 10.januar medTilstand IngenUtbetaling medHendelser setOf(søknad)
             }
@@ -1733,18 +1729,14 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
 
         generasjoner {
-            assertEquals(3, size)
+            assertEquals(2, size)
 
             0.generasjon {
                 assertEquals(2, size)
                 uberegnetPeriode(0) fra 21.januar til 27.januar medTilstand Annullert
-                uberegnetPeriode(1) fra 10.januar til 20.januar medTilstand Annullert
+                uberegnetPeriode(1) fra 10.januar til 20.januar medTilstand IngenUtbetaling
             }
             1.generasjon {
-                assertEquals(1, size)
-                uberegnetPeriode(0) fra 10.januar til 20.januar medTilstand IngenUtbetaling
-            }
-            2.generasjon {
                 assertEquals(2, size)
                 uberegnetPeriode(0) fra 21.januar til 27.januar medTilstand IngenUtbetaling
                 uberegnetPeriode(1) fra 12.januar til 20.januar medTilstand IngenUtbetaling

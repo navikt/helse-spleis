@@ -132,6 +132,9 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     fun slutterEtter(other: LocalDate) =
         other <= this.endInclusive
 
+    fun overlapperEllerStarterFør(other: Periode) =
+        this.start <= other.endInclusive
+
     fun utenfor(other: Periode) =
         this.start < other.start || this.endInclusive > other.endInclusive
 

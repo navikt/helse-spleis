@@ -115,7 +115,8 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
             assertVilkårsgrunnlagFraSpleisFor(1.januar)
 
             håndterAnnullering(inspektør.sisteUtbetaling().utbetalingId)
-            assertIngenVilkårsgrunnlagFraSpleis()
+            håndterUtbetalt()
+            assertVilkårsgrunnlagFraSpleisFor(1.januar)
         }
     }
 

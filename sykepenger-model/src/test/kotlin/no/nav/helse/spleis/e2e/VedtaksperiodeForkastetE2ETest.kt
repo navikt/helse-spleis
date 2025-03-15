@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -39,11 +40,8 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `forkaster kort periode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
         håndterSøknad(1.januar til 5.januar)
-        håndterSykmelding(Sykmeldingsperiode(6.januar, 15.januar))
         håndterSøknad(6.januar til 15.januar)
-        håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar))
         håndterSøknad(16.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(3.vedtaksperiode)
@@ -52,10 +50,11 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
         håndterAnnullerUtbetaling(a1)
-        assertEquals(3, observatør.forkastedePerioder())
+        håndterUtbetalt()
+        assertEquals(1, observatør.forkastedePerioder())
         assertEquals(AVSLUTTET, observatør.forkastet(3.vedtaksperiode.id(a1)).gjeldendeTilstand)
-        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
     }
 

@@ -35,6 +35,31 @@ internal class PeriodeTest {
     private val periode = Periode(1.juli, 10.juli)
 
     @Test
+    fun overlapperEllerStarterFør() {
+        val p1 = 3.januar til 5.januar
+
+        (1.januar til 2.januar).also { p2 ->
+            assertFalse(p1.overlapperEllerStarterFør(p2))
+            assertTrue(p2.overlapperEllerStarterFør(p1))
+        }
+
+        (3.januar til 4.januar).also { p2 ->
+            assertTrue(p1.overlapperEllerStarterFør(p2))
+            assertTrue(p2.overlapperEllerStarterFør(p1))
+        }
+
+        (5.januar til 6.januar).also { p2 ->
+            assertTrue(p1.overlapperEllerStarterFør(p2))
+            assertTrue(p2.overlapperEllerStarterFør(p1))
+        }
+
+        (6.januar til 7.januar).also { p2 ->
+            assertTrue(p1.overlapperEllerStarterFør(p2))
+            assertFalse(p2.overlapperEllerStarterFør(p1))
+        }
+    }
+
+    @Test
     fun mursteinsperioder() {
         val perioder = listOf(
             1.januar til 10.januar,
