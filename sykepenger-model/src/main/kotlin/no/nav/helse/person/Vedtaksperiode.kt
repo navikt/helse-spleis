@@ -3314,8 +3314,7 @@ internal class Vedtaksperiode private constructor(
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             val medSammeAGP = MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT(segSelv)
             return fun(other: Vedtaksperiode): Boolean {
-                if (other.periode.start >= segSelv.periode.start) return true // Forkaster nyere perioder på tvers av arbeidsgivere
-                return medSammeAGP(other)
+                return segSelv.periode.overlapperEllerStarterFør(other.periode)
             }
         }
         internal val MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
