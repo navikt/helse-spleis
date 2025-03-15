@@ -2,7 +2,7 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -28,6 +28,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -172,8 +173,8 @@ internal class InfotrygdhistorikkTest {
         )
         val nå = LocalDateTime.now()
         val gammel = nå.minusHours(24)
-        assertTrue(historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = gammel)))
-        assertFalse(historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = nå)))
+        assertEquals(1.januar, historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = gammel)))
+        assertNull(historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = nå)))
         historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato)
         assertEquals(1, historikk.inspektør.elementer())
         assertTrue(nå < historikk.inspektør.opprettet(0))
@@ -228,7 +229,7 @@ internal class InfotrygdhistorikkTest {
             )
         )
         assertEquals(1, historikk.inspektør.elementer())
-        assertFalse(historikk.oppdaterHistorikk(historikkelement(perioder)))
+        assertNull(historikk.oppdaterHistorikk(historikkelement(perioder)))
         assertEquals(1, historikk.inspektør.elementer())
     }
 

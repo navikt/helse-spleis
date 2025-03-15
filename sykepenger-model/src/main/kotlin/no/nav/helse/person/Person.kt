@@ -76,6 +76,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.view.PersonView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -285,20 +286,22 @@ class Person private constructor(
 
     fun håndter(utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler historikk fra infotrygd")
-        håndterHistorikkFraInfotrygd(utbetalingshistorikkEtterInfotrygdendring, aktivitetsloggMedPersonkontekst) {
-            utbetalingshistorikkEtterInfotrygdendring.oppdaterHistorikk(aktivitetsloggMedPersonkontekst, it)
-        }
+        håndterHistorikkFraInfotrygd(utbetalingshistorikkEtterInfotrygdendring, aktivitetsloggMedPersonkontekst, utbetalingshistorikkEtterInfotrygdendring.element)
     }
 
     fun håndter(utbetalingshistorikk: Utbetalingshistorikk, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler historikk fra infotrygd")
-        håndterHistorikkFraInfotrygd(utbetalingshistorikk, aktivitetsloggMedPersonkontekst) {
-            utbetalingshistorikk.oppdaterHistorikk(aktivitetsloggMedPersonkontekst, it)
-        }
+        håndterHistorikkFraInfotrygd(utbetalingshistorikk, aktivitetsloggMedPersonkontekst, utbetalingshistorikk.element)
     }
 
-    private fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, oppdatertHistorikk: (infotrygdhistorikk: Infotrygdhistorikk) -> Boolean) {
-        oppdatertHistorikk(infotrygdhistorikk)
+    private fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, element: InfotrygdhistorikkElement) {
+        aktivitetslogg.info("Oppdaterer Infotrygdhistorikk")
+        val tidligsteDatoForEndring = infotrygdhistorikk.oppdaterHistorikk(element)
+        if (tidligsteDatoForEndring == null) {
+            aktivitetslogg.info("Oppfrisket Infotrygdhistorikk medførte ingen endringer")
+        } else {
+            aktivitetslogg.info("Oppfrisket Infotrygdhistorikk ble lagret, tidligste endring $tidligsteDatoForEndring")
+        }
         sykdomshistorikkEndret()
         val revurderingseventyr = arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, aktivitetslogg, infotrygdhistorikk)
         val alleVedtaksperioder = arbeidsgivere.vedtaksperioder { true }

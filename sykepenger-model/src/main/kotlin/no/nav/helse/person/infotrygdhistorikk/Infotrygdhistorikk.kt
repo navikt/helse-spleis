@@ -66,10 +66,11 @@ internal class Infotrygdhistorikk private constructor(
         return siste.sykdomstidslinje()
     }
 
-    internal fun oppdaterHistorikk(element: InfotrygdhistorikkElement): Boolean {
-        if (harHistorikk() && element.erstatter(siste)) return false
+    internal fun oppdaterHistorikk(element: InfotrygdhistorikkElement): LocalDate? {
+        if (harHistorikk() && element.erstatter(siste)) return null
+        val forrige = _elementer.firstOrNull()
         _elementer.add(0, element)
-        return true
+        return element.tidligsteEndringMellom(forrige)
     }
 
     internal fun harEndretHistorikk(utbetaling: Utbetaling): Boolean {
