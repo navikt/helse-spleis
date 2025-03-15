@@ -3320,9 +3320,17 @@ internal class Vedtaksperiode private constructor(
         }
         internal val MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             val skjæringstidspunkt = segSelv.skjæringstidspunkt
-            val arbeidsgiverperiode = segSelv.finnArbeidsgiverperiode()
+            val arbeidsgiverperiode = segSelv.behandlinger
+                .arbeidsgiverperiode()
+                .arbeidsgiverperioder
+                .periode()
             return fun(other: Vedtaksperiode): Boolean {
-                if (arbeidsgiverperiode != null && other.arbeidsgiver === segSelv.arbeidsgiver && other.periode in arbeidsgiverperiode) return true // Forkaster samme arbeidsgiverperiode (kun for samme arbeidsgiver)
+                val arbeidsgiverperiodeOther = other
+                    .behandlinger
+                    .arbeidsgiverperiode()
+                    .arbeidsgiverperioder
+                    .periode()
+                if (arbeidsgiverperiode != null && other.arbeidsgiver === segSelv.arbeidsgiver && arbeidsgiverperiodeOther?.overlapperMed(arbeidsgiverperiode) == true) return true // Forkaster samme arbeidsgiverperiode (kun for samme arbeidsgiver)
                 return other.skjæringstidspunkt == skjæringstidspunkt // Forkaster alt med samme skjæringstidspunkt på tvers av arbeidsgivere
             }
         }
