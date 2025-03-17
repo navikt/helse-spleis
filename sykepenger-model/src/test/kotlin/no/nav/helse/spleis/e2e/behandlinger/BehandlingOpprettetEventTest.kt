@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.behandlinger
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -14,9 +14,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -115,8 +113,7 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
     fun `anmoder en periode om forkasting`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 10.januar, 100.prosent, 500.daglig)))
-            assertVarsel(Varselkode.RV_IT_3, 1.vedtaksperiode.filter())
+            håndterAnmodningOmForkasting(1.vedtaksperiode)
             val behandlingOpprettet = observatør.behandlingOpprettetEventer
             assertEquals(2, behandlingOpprettet.size)
             assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettet[0].type)

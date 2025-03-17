@@ -13,10 +13,9 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.mai
 import no.nav.helse.person.Person
+import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -24,6 +23,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -51,9 +51,7 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
-import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
@@ -120,30 +118,8 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-
-        håndterYtelser(3.vedtaksperiode)
-
-        assertEquals(4, inspektør.antallUtbetalinger)
-        inspektør.utbetaling(2).also {
-            assertEquals(it.korrelasjonsId, inspektør.utbetaling(0).korrelasjonsId)
-            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId)
-            assertEquals(2, it.arbeidsgiverOppdrag.size)
-            assertEquals(Endringskode.ENDR, it.arbeidsgiverOppdrag[0].inspektør.endringskode)
-            assertEquals(17.januar, it.arbeidsgiverOppdrag[0].inspektør.fom)
-            assertEquals(18.januar, it.arbeidsgiverOppdrag[0].inspektør.tom)
-            assertEquals(Endringskode.NY, it.arbeidsgiverOppdrag[1].inspektør.endringskode)
-            assertEquals(20.januar, it.arbeidsgiverOppdrag[1].inspektør.fom)
-            assertEquals(31.januar, it.arbeidsgiverOppdrag[1].inspektør.tom)
-        }
-        inspektør.utbetaling(3).also {
-            assertEquals(it.korrelasjonsId, inspektør.utbetaling(3).korrelasjonsId)
-            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(3).arbeidsgiverOppdrag.fagsystemId)
-            assertEquals(1, it.arbeidsgiverOppdrag.size)
-            assertEquals(Endringskode.UEND, it.arbeidsgiverOppdrag[0].inspektør.endringskode)
-            assertEquals(17.mai, it.arbeidsgiverOppdrag[0].inspektør.fom)
-            assertEquals(31.mai, it.arbeidsgiverOppdrag[0].inspektør.tom)
-        }
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
     }
 
     private fun createDobbelutbetalingPerson() = createTestPerson { jurist ->

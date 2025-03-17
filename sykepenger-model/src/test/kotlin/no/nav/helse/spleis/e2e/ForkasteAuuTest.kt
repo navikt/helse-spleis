@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
@@ -15,9 +14,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
@@ -71,10 +67,19 @@ internal class ForkasteAuuTest : AbstractDslTest() {
         a1 {
             nyPeriode(2.januar til 16.januar)
             nyPeriode(17.januar til 31.januar)
-
-            håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT)))
-            assertVarsel(Varselkode.RV_IT_3, 1.vedtaksperiode.filter())
+            håndterAnmodningOmForkasting(1.vedtaksperiode)
             assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `Forkastet AUU skal ikke forkaste tidligere`() {
+        a1 {
+            nyPeriode(2.januar til 16.januar)
+            nyPeriode(17.januar til 31.januar)
+            håndterAnmodningOmForkasting(2.vedtaksperiode)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
         }
     }

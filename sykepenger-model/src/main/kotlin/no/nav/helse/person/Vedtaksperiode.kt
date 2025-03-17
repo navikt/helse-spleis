@@ -128,7 +128,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
@@ -903,8 +902,6 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         when (tilstand) {
-            AvsluttetUtenUtbetaling -> return omgjøreEtterInfotrygdendring(hendelse, aktivitetsloggMedVedtaksperiodekontekst, infotrygdhistorikk)
-
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering -> {
                 if (!behandlinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) {
@@ -927,6 +924,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             Avsluttet,
+            AvsluttetUtenUtbetaling,
             AvventerBlokkerendePeriode,
             AvventerHistorikkRevurdering,
             AvventerHistorikk,
@@ -944,30 +942,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         return null
-    }
-
-    private fun omgjøreEtterInfotrygdendring(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk): Revurderingseventyr? {
-        if (!skalOmgjøres()) return null
-        behandlinger.sikreNyBehandling(
-            arbeidsgiver,
-            hendelse.metadata.behandlingkilde,
-            person.beregnSkjæringstidspunkt(),
-            arbeidsgiver.beregnArbeidsgiverperiode()
-        )
-
-        val kanForkastes = arbeidsgiver.kanForkastes(this, aktivitetslogg)
-        val måInnhenteInntektEllerRefusjon = måInnhenteInntektEllerRefusjon()
-
-        if (kanForkastes && måInnhenteInntektEllerRefusjon) {
-            infotrygdhistorikk.validerMedFunksjonellFeil(aktivitetslogg, periode)
-            aktivitetslogg.info("Forkaster perioden fordi perioden har ikke tilstrekkelig informasjon til utbetaling")
-            forkast(hendelse, aktivitetslogg)
-            return null
-        }
-
-        infotrygdhistorikk.validerMedVarsel(aktivitetslogg, periode)
-        aktivitetslogg.varsel(RV_IT_38)
-        return Revurderingseventyr.infotrygdendring(hendelse, skjæringstidspunkt, periode)
     }
 
     internal fun håndter(

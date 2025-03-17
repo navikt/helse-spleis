@@ -14,9 +14,7 @@ import no.nav.helse.person.BehandlingView.TilstandView.TIL_INFOTRYGD
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -67,8 +65,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
     fun `behandling uten vedtak forkastes`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
-            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 10.januar, 100.prosent, 500.daglig)))
-            assertVarsel(Varselkode.RV_IT_3, 1.vedtaksperiode.filter())
+            håndterAnmodningOmForkasting(1.vedtaksperiode)
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id

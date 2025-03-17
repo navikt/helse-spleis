@@ -22,7 +22,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -373,7 +372,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT),
             inntektshistorikk = listOf(Inntektsopplysning(a1, 17.januar, INNTEKT, true))
         )
-        assertVarsler(listOf(Varselkode.RV_IM_3, RV_IT_3, Varselkode.RV_IT_38), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IM_3), 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 

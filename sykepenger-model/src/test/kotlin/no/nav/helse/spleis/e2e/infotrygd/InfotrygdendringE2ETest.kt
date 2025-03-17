@@ -20,7 +20,6 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -52,7 +51,6 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         assertEquals(2.januar(2025), inspektør.vedtaksperioder(2.vedtaksperiode).skjæringstidspunkt)
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 20.november(2024), 30.november(2024), 100.prosent, INNTEKT))
 
-        assertVarsler(listOf(Varselkode.RV_IT_37, Varselkode.RV_IT_38), 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
     }
