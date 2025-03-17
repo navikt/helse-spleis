@@ -449,15 +449,16 @@ internal fun AbstractEndToEndTest.håndterArbeidsgiveropplysninger(
     id: UUID = UUID.randomUUID(),
     opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-    vedtaksperiodeIdInnhenter: IdInnhenter
+    vedtaksperiodeIdInnhenter: IdInnhenter,
+    innsendt: LocalDateTime = LocalDateTime.now()
 ): UUID {
 
     val vedtaksperiodeId = inspektør(orgnummer).vedtaksperiodeId(vedtaksperiodeIdInnhenter)
 
     val arbeidsgiveropplysninger = Arbeidsgiveropplysninger(
         meldingsreferanseId = MeldingsreferanseId(id),
-        innsendt = LocalDateTime.now(),
-        registrert = LocalDateTime.now().plusSeconds(1),
+        innsendt = innsendt,
+        registrert = innsendt.plusSeconds(1),
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId,
         opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
@@ -483,7 +484,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     id: UUID = UUID.randomUUID(),
     opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-    harFlereInntektsmeldinger: Boolean = false
+    harFlereInntektsmeldinger: Boolean = false,
+    mottatt: LocalDateTime? = null
 ): UUID {
     return håndterInntektsmelding(
         inntektsmelding(
@@ -495,7 +497,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             orgnummer = orgnummer,
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+            mottatt = mottatt
         )
     )
 }

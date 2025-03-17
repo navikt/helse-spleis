@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
+import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
@@ -19,6 +20,7 @@ import no.nav.helse.hendelser.Dagtype.Permisjonsdag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -35,6 +37,7 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -65,6 +68,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpsti
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
+import no.nav.helse.spleis.e2e.IdInnhenter
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
@@ -122,7 +126,48 @@ import org.junit.jupiter.api.assertDoesNotThrow
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `En AUU med arbeid blir valgt til å håndtere inntekt`() {
+    fun `Avsluttet-periode uten åpen behandling håndterer inntekt fra inntektsmelding - pga arbeidsgiveropplysninger & IM som kommer inn til spleis i motsatt rekkefølge av innsendingen `() {
+        håndterSøknad(27.januar til 30.januar)
+        håndterSøknad(31.januar til 14.februar)
+        håndterInntektsmelding(listOf(27.januar til 11.februar))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterSøknad(18.februar til 5.mars)
+
+        val arbeidsgiveropplysningerInnstendt = LocalDateTime.now()
+        // Denne venter i Spedisjon i 30 min, så vi får arbeidsgiveropplysningene først tross forskjellig rekkefølge
+        // Pga. den megadumme tidsstempel-sjekket på beløpstidslinje ender vi da ikke opp med nye refusjonsopplysninger (nyeste timestamp vinner)
+        val lpsInntektsmeldingInnsendt = arbeidsgiveropplysningerInnstendt.minusMinutes(15)
+
+        håndterArbeidsgiveropplysninger(
+            arbeidsgiverperioder = null,
+            beregnetInntekt = INNTEKT,
+            refusjon = Refusjon(INGEN, null),
+            vedtaksperiodeIdInnhenter = 3.vedtaksperiode,
+            innsendt = arbeidsgiveropplysningerInnstendt
+        )
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndtererInntektsmeldingInntektUtenDokumentsporing(3.vedtaksperiode) {
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(element = 27.januar til 11.februar),
+                førsteFraværsdag = 18.februar,
+                refusjon = Refusjon(INGEN, null),
+                mottatt = lpsInntektsmeldingInnsendt
+            )
+        }
+    }
+
+    @Test
+    fun `AvsluttetUtenUtbetaling-periode uten åpen behandling håndterer inntekt fra inntektsmeldingen - pga hen kun består av arbeidager`() {
         håndterSøknad(1.januar til 16.januar)
         håndterSøknad(17.januar til 31.januar)
         håndterSøknad(februar)
@@ -139,13 +184,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
-        val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
-        // Håndtert og håndter fru-blom, men rar er den hvert fall
-        assertTrue(im to (2.vedtaksperiode.id(a1)) in observatør.inntektsmeldingHåndtert)
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        håndtererInntektsmeldingInntektUtenDokumentsporing(2.vedtaksperiode) {
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+        }
     }
 
     @Test
@@ -2482,5 +2523,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             assertInntektsgrunnlag(a1, INNTEKT)
             assertInntektsgrunnlag(a2, INNTEKT)
         }
+    }
+
+    private fun håndtererInntektsmeldingInntektUtenDokumentsporing(vedtaksperiode: IdInnhenter, orgnummer: String = a1, håndterInntektsmelding: () -> UUID) {
+        val inntektsmeldingId = håndterInntektsmelding()
+        val vedtaksperiodeId = vedtaksperiode.id(orgnummer)
+        assertTrue((inntektsmeldingId to vedtaksperiodeId) in observatør.inntektsmeldingHåndtert)
+        val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(MeldingsreferanseId(inntektsmeldingId))
+        assertFalse(dokumentsporing in inspektør(orgnummer).vedtaksperioder(vedtaksperiode).behandlinger.hendelser)
     }
 }
