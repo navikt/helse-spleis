@@ -303,15 +303,8 @@ class Person private constructor(
             aktivitetslogg.info("Oppfrisket Infotrygdhistorikk medførte ingen endringer")
             null
         } else {
-            aktivitetslogg.info("Oppfrisket Infotrygdhistorikk ble lagret, tidligste endring $tidligsteDatoForEndring")
-
+            aktivitetslogg.info("Oppfrisket Infotrygdhistorikk ble lagret, starter revurdering fra tidligste endring $tidligsteDatoForEndring")
             Revurderingseventyr.infotrygdendring(hendelse, tidligsteDatoForEndring, tidligsteDatoForEndring.somPeriode())
-                .takeIf { Toggle.RevurderingVedInfotrygdendring.enabled }
-                .also {
-                    if (it == null) {
-                        aktivitetslogg.info("Ville ha startet revurdering fra $tidligsteDatoForEndring som følge av infotrygdendring")
-                    }
-                }
         }
         sykdomshistorikkEndret()
         val revurderingseventyrVedtaksperiode = arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, aktivitetslogg, infotrygdhistorikk)
