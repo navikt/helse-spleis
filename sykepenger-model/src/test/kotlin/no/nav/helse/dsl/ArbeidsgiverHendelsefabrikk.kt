@@ -249,7 +249,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         Utbetalingshistorikk(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            vedtaksperiodeId = vedtaksperiodeId,
             element = InfotrygdhistorikkElement.opprett(
                 oppdatert = besvart,
                 hendelseId = MeldingsreferanseId(UUID.randomUUID()),

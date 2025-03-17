@@ -49,7 +49,6 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
             besvart = LocalDate.EPOCH.atStartOfDay()
         )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
     }
 
     @Test

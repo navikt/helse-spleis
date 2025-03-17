@@ -57,7 +57,7 @@ import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Validation.Companion.validation
+import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
@@ -895,27 +895,18 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndterHistorikkFraInfotrygd(
-        hendelse: Hendelse,
-        aktivitetslogg: IAktivitetslogg,
-        infotrygdhistorikk: Infotrygdhistorikk
-    ): Revurderingseventyr? {
+        hendelse: Utbetalingshistorikk,
+        aktivitetslogg: IAktivitetslogg
+    ) {
+        if (hendelse.vedtaksperiodeId != this.id) return
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-
         when (tilstand) {
-            AvventerInfotrygdHistorikk,
-            AvventerInntektsmelding -> {
-                validation(aktivitetsloggMedVedtaksperiodekontekst) {
-                    onValidationFailed { forkast(hendelse, aktivitetsloggMedVedtaksperiodekontekst) }
-                    valider { infotrygdhistorikk.validerMedFunksjonellFeil(this, periode) }
-                    if (tilstand == AvventerInfotrygdHistorikk) {
-                        onSuccess { tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding) }
-                    }
-                }
-            }
+            AvventerInfotrygdHistorikk -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
 
             Avsluttet,
             AvsluttetUtenUtbetaling,
             AvventerBlokkerendePeriode,
+            AvventerInntektsmelding,
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
             AvventerHistorikkRevurdering,
@@ -932,8 +923,6 @@ internal class Vedtaksperiode private constructor(
                 /* gjør ingenting */
             }
         }
-
-        return null
     }
 
     internal fun håndter(

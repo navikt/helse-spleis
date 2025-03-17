@@ -14,12 +14,10 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -73,9 +71,6 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         nyPeriode(21.januar til 31.januar)
         håndterInfotrygdendring()
         val meldingsreferanseId = håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT))
-
-        assertVarsel(Varselkode.RV_IT_3, 1.vedtaksperiode.filter())
-        assertVarsel(Varselkode.RV_IT_3, 2.vedtaksperiode.filter())
 
         assertEquals(2, observatør.overlappendeInfotrygdperioder.size)
         val event = observatør.overlappendeInfotrygdperioder.last()

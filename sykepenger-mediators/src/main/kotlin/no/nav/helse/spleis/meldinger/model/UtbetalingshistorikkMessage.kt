@@ -5,6 +5,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDate
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -117,7 +118,7 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val mel
         Utbetalingshistorikk(
             meldingsreferanseId = meldingsporing.id,
             organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeId = vedtaksperiodeId.toUUID(),
             element = infotrygdhistorikk(meldingsporing.id),
             besvart = besvart
         )

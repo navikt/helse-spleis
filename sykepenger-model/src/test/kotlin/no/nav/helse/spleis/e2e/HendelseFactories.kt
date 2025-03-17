@@ -293,7 +293,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
     return Utbetalingshistorikk(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
+        vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer),
         besvart = LocalDateTime.now(),
         element = InfotrygdhistorikkElement.opprett(
             oppdatert = besvart,

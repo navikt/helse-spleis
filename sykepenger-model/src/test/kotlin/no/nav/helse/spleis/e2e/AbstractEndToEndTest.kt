@@ -22,6 +22,7 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Person
@@ -115,7 +116,7 @@ internal abstract class AbstractEndToEndTest {
         Utbetalingshistorikk(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             organisasjonsnummer = a1,
-            vedtaksperiodeId = UUID.randomUUID().toString(),
+            vedtaksperiodeId = UUID.randomUUID(),
             element = InfotrygdhistorikkElement.opprett(
                 LocalDateTime.now(),
                 MeldingsreferanseId(UUID.randomUUID()),
@@ -127,10 +128,8 @@ internal abstract class AbstractEndToEndTest {
         ).håndter(Person::håndter)
     }
     protected fun createOvergangFraInfotrygdPerson() = createTestPerson { regelverkslogg -> overgangFraInfotrygdPerson(regelverkslogg) }.also {
-        Utbetalingshistorikk(
+        UtbetalingshistorikkEtterInfotrygdendring(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            organisasjonsnummer = a1,
-            vedtaksperiodeId = UUID.randomUUID().toString(),
             element = InfotrygdhistorikkElement.opprett(
                 LocalDateTime.now(),
                 MeldingsreferanseId(UUID.randomUUID()),

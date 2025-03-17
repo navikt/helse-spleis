@@ -59,7 +59,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.fjernSykmeldingsperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
-import no.nav.helse.person.Arbeidsgiver.Companion.håndterHistorikkFraInfotrygd
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvRefusjon
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
@@ -293,13 +292,15 @@ class Person private constructor(
 
     fun håndter(utbetalingshistorikk: Utbetalingshistorikk, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler historikk fra infotrygd")
+        finnArbeidsgiver(utbetalingshistorikk.behandlingsporing, aktivitetsloggMedPersonkontekst)
+            .håndterHistorikkFraInfotrygd(utbetalingshistorikk, aktivitetsloggMedPersonkontekst)
         håndterHistorikkFraInfotrygd(utbetalingshistorikk, aktivitetsloggMedPersonkontekst, utbetalingshistorikk.element)
     }
 
     private fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, element: InfotrygdhistorikkElement) {
         aktivitetslogg.info("Oppdaterer Infotrygdhistorikk")
         val tidligsteDatoForEndring = infotrygdhistorikk.oppdaterHistorikk(element)
-        val defaultRevurderingseventyr = if (tidligsteDatoForEndring == null) {
+        val revurderingseventyr = if (tidligsteDatoForEndring == null) {
             aktivitetslogg.info("Oppfrisket Infotrygdhistorikk medførte ingen endringer")
             null
         } else {
@@ -307,19 +308,16 @@ class Person private constructor(
             Revurderingseventyr.infotrygdendring(hendelse, tidligsteDatoForEndring, tidligsteDatoForEndring.somPeriode())
         }
         sykdomshistorikkEndret()
-        val revurderingseventyrVedtaksperiode = arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, aktivitetslogg, infotrygdhistorikk)
-        val revurderingseventyr = listOfNotNull(defaultRevurderingseventyr, revurderingseventyrVedtaksperiode).tidligsteEventyr()
-        val alleVedtaksperioder = arbeidsgivere.vedtaksperioder { true }
-        emitOverlappendeInfotrygdperioder(alleVedtaksperioder)
+        emitOverlappendeInfotrygdperioder()
         if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
         håndterGjenoppta(hendelse, aktivitetslogg)
     }
 
-    private fun emitOverlappendeInfotrygdperioder(alleVedtaksperioder: List<Vedtaksperiode>) {
+    private fun emitOverlappendeInfotrygdperioder() {
         if (!infotrygdhistorikk.harHistorikk()) return
         val hendelseId = infotrygdhistorikk.siste.hendelseId
         val perioder = infotrygdhistorikk.siste.perioder
-        val event = alleVedtaksperioder.fold(PersonObserver.OverlappendeInfotrygdperioder(emptyList(), hendelseId.id)) { result, vedtaksperiode ->
+        val event = vedtaksperioder { true }.fold(PersonObserver.OverlappendeInfotrygdperioder(emptyList(), hendelseId.id)) { result, vedtaksperiode ->
             vedtaksperiode.overlappendeInfotrygdperioder(result, perioder)
         }
         observers.forEach { it.overlappendeInfotrygdperioder(event) }

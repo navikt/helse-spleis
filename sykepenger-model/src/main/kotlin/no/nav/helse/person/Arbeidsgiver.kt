@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
@@ -38,6 +38,7 @@ import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.Utbetalingpåminnelse
+import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
@@ -182,16 +183,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.aktiveSkjæringstidspunkter(): Set<LocalDate> {
             return flatMap { it.vedtaksperioder }.aktiveSkjæringstidspunkter()
-        }
-
-        internal fun List<Arbeidsgiver>.håndterHistorikkFraInfotrygd(
-            hendelse: Hendelse,
-            aktivitetslogg: IAktivitetslogg,
-            infotrygdhistorikk: Infotrygdhistorikk
-        ): Revurderingseventyr? {
-            return this
-                .mapNotNull { arbeidsgiver -> arbeidsgiver.håndterHistorikkFraInfotrygd(hendelse, aktivitetslogg, infotrygdhistorikk) }
-                .tidligsteEventyr()
         }
 
         internal fun List<Arbeidsgiver>.håndter(
@@ -641,12 +632,11 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndterHistorikkFraInfotrygd(
-        hendelse: Hendelse,
-        aktivitetslogg: IAktivitetslogg,
-        infotrygdhistorikk: Infotrygdhistorikk
-    ): Revurderingseventyr? {
+        hendelse: Utbetalingshistorikk,
+        aktivitetslogg: IAktivitetslogg
+    ) {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        return håndter { it.håndterHistorikkFraInfotrygd(hendelse, aktivitetsloggMedArbeidsgiverkontekst, infotrygdhistorikk) }.tidligsteEventyr()
+        håndter { it.håndterHistorikkFraInfotrygd(hendelse, aktivitetsloggMedArbeidsgiverkontekst) }
     }
 
     internal fun håndter(
