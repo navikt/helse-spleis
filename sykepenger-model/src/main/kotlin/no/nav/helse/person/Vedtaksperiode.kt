@@ -902,16 +902,6 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         when (tilstand) {
-            AvventerGodkjenning,
-            AvventerGodkjenningRevurdering -> {
-                if (!behandlinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) {
-                    aktivitetsloggMedVedtaksperiodekontekst.info("Infotrygdhistorikken er uendret, reberegner ikke periode")
-                    return null
-                }
-                aktivitetsloggMedVedtaksperiodekontekst.info("Infotrygdhistorikken har endret seg, reberegner periode")
-                return Revurderingseventyr.infotrygdendring(hendelse, skjæringstidspunkt, periode)
-            }
-
             AvventerInfotrygdHistorikk,
             AvventerInntektsmelding -> {
                 validation(aktivitetsloggMedVedtaksperiodekontekst) {
@@ -926,6 +916,8 @@ internal class Vedtaksperiode private constructor(
             Avsluttet,
             AvsluttetUtenUtbetaling,
             AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
             AvventerHistorikkRevurdering,
             AvventerHistorikk,
             AvventerRevurdering,
