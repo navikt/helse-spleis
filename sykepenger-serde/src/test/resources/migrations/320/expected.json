@@ -1,0 +1,897 @@
+{
+  "fødselsnummer": "11111111111",
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1",
+      "vedtaksperioder": [
+        {
+          "id": "72efb75f-3355-4443-8784-1ac4903b685f",
+          "behandlinger": [
+            {
+              "id": "1f365c27-0aba-4cfa-ae72-4315845a9e2d",
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  }
+                },
+                {
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  }
+                },
+                {
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  }
+                },
+                {
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "0d2b534a-5ad5-4db4-a22d-8c0b942a9d9e",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.250392"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "0d2b534a-5ad5-4db4-a22d-8c0b942a9d9e",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.250392"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "vilkårsgrunnlagId": "d4bcfc92-efb5-433b-9ae0-295f7fdbcea8",
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "0d2b534a-5ad5-4db4-a22d-8c0b942a9d9e",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.250392"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "b4ec09a3-e751-4f1d-905f-8a16ac5a3c9b",
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "0d2b534a-5ad5-4db4-a22d-8c0b942a9d9e",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.250392"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "vilkårsgrunnlagId": "001a48ec-4ad1-4aad-9993-29efeaaed678",
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "0d2b534a-5ad5-4db4-a22d-8c0b942a9d9e",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.250392"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "9171b34e-0640-4445-935b-c86c8988eb63",
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "0d2b534a-5ad5-4db4-a22d-8c0b942a9d9e",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.250392"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "vilkårsgrunnlagId": "1f314e07-b690-4334-befd-fdb889217946",
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dagligBeløp": 1788.4615384615386,
+                        "meldingsreferanseId": "6f24d094-5231-4fab-a0e9-aa94c0c3d6bd",
+                        "avsender": "SAKSBEHANDLER",
+                        "tidsstempel": "2025-03-18T15:27:43.597684"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "d957945c-6d82-4b19-bdd8-19f495b660d6",
+          "behandlinger": [
+            {
+              "id": "ca003522-91b2-4afe-8e88-23c392034f34",
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "fom": "2018-03-01",
+                  "tom": "2018-03-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  }
+                },
+                {
+                  "fom": "2018-03-01",
+                  "tom": "2018-03-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  }
+                },
+                {
+                  "fom": "2018-03-01",
+                  "tom": "2018-03-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  }
+                },
+                {
+                  "fom": "2018-03-01",
+                  "tom": "2018-03-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-03-01",
+                        "tom": "2018-03-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "473e62f1-a7e4-4a58-9b38-a96beb7bc02b",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.617195"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "fom": "2018-03-01",
+                  "tom": "2018-03-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-03-01",
+                        "tom": "2018-03-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "473e62f1-a7e4-4a58-9b38-a96beb7bc02b",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.617195"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "fom": "2018-03-01",
+                  "tom": "2018-03-31",
+                  "vilkårsgrunnlagId": "8dacbe9a-742c-4b0f-8fc9-d7ca58f8b58b",
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-03-01",
+                        "tom": "2018-03-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "473e62f1-a7e4-4a58-9b38-a96beb7bc02b",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.617195"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "e9f9e7be-f2dd-4295-9084-118f38cd09ce",
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "fom": "2018-03-01",
+                  "tom": "2018-03-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-03-01",
+                        "tom": "2018-03-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "473e62f1-a7e4-4a58-9b38-a96beb7bc02b",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.617195"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "fom": "2018-03-01",
+                  "tom": "2018-03-31",
+                  "vilkårsgrunnlagId": "edcd6dae-1768-4ded-99c8-e06164b3788f",
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-03-01",
+                        "tom": "2018-03-31",
+                        "dagligBeløp": 2146.153846153846,
+                        "meldingsreferanseId": "223f0300-bcb4-4905-9205-1fd3827f1b87",
+                        "avsender": "SAKSBEHANDLER",
+                        "tidsstempel": "2025-03-18T15:27:43.638763"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "df179bfd-3aae-4be1-aeeb-869fc750841c",
+          "behandlinger": [
+            {
+              "id": "c03b99a3-4590-43bc-8b1d-c30c80c4a5d4",
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "fom": "2018-05-01",
+                  "tom": "2018-05-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  }
+                },
+                {
+                  "fom": "2018-05-01",
+                  "tom": "2018-05-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  }
+                },
+                {
+                  "fom": "2018-05-01",
+                  "tom": "2018-05-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  }
+                },
+                {
+                  "fom": "2018-05-01",
+                  "tom": "2018-05-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-05-01",
+                        "tom": "2018-05-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "7401be7c-cfb7-4e6e-ad35-c14ff6ba206e",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.658162"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "fom": "2018-05-01",
+                  "tom": "2018-05-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-05-01",
+                        "tom": "2018-05-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "7401be7c-cfb7-4e6e-ad35-c14ff6ba206e",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.658162"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "fom": "2018-05-01",
+                  "tom": "2018-05-31",
+                  "vilkårsgrunnlagId": "00fa1fcf-2aea-490d-a0cd-249648acc883",
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-05-01",
+                        "tom": "2018-05-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "7401be7c-cfb7-4e6e-ad35-c14ff6ba206e",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.659526"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "102a1099-10ae-4e03-979d-dd6161a7b4f7",
+          "behandlinger": [
+            {
+              "id": "1431d0d0-e16a-4669-ba93-54054c3e9051",
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "fom": "2018-07-01",
+                  "tom": "2018-07-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  }
+                },
+                {
+                  "fom": "2018-07-01",
+                  "tom": "2018-07-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  }
+                },
+                {
+                  "fom": "2018-07-01",
+                  "tom": "2018-07-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  }
+                },
+                {
+                  "fom": "2018-07-01",
+                  "tom": "2018-07-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-07-01",
+                        "tom": "2018-07-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "be665bc6-0ac1-46b1-9340-d00cb2faaaa8",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.688277"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "fom": "2018-07-01",
+                  "tom": "2018-07-31",
+                  "vilkårsgrunnlagId": null,
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-07-01",
+                        "tom": "2018-07-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "be665bc6-0ac1-46b1-9340-d00cb2faaaa8",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.688277"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "fom": "2018-07-01",
+                  "tom": "2018-07-31",
+                  "vilkårsgrunnlagId": "1eacf09a-1509-450f-ad8e-7ee477da4a55",
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-07-01",
+                        "tom": "2018-07-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "be665bc6-0ac1-46b1-9340-d00cb2faaaa8",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-03-18T15:27:43.688277"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "7b1e394e-636a-47f6-bc94-9e1df8eeba65",
+                  "dato": "2018-01-01",
+                  "hendelseId": "0d2b534a-5ad5-4db4-a22d-8c0b942a9d9e",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-03-18T15:27:43.275355",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": {
+                  "id": "0627c71b-53ad-4d53-8d21-6156f0796000",
+                  "dato": "2018-01-01",
+                  "hendelseId": "72a201df-d30a-4b4d-a920-883f883c3478",
+                  "beløp": 34100.00000000001,
+                  "tidsstempel": "2025-03-18T15:27:43.56642"
+                },
+                "skjønnsmessigFastsatt": {
+                  "id": "f3b3ec05-95e7-41ec-bc78-5e7a3353e6a8",
+                  "dato": "2018-01-01",
+                  "hendelseId": "6f24d094-5231-4fab-a0e9-aa94c0c3d6bd",
+                  "beløp": 38750.0,
+                  "tidsstempel": "2025-03-18T15:27:43.597684"
+                }
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "1f314e07-b690-4334-befd-fdb889217946"
+        },
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "0f23cb76-f375-4605-b161-08fbecb9fba5",
+                  "dato": "2018-03-01",
+                  "hendelseId": "473e62f1-a7e4-4a58-9b38-a96beb7bc02b",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-03-18T15:27:43.618253",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": {
+                  "id": "75ebfff7-f87f-447d-8c64-eee1afaf4270",
+                  "dato": "2018-03-01",
+                  "hendelseId": "223f0300-bcb4-4905-9205-1fd3827f1b87",
+                  "beløp": 46500.0,
+                  "tidsstempel": "2025-03-18T15:27:43.638763"
+                },
+                "skjønnsmessigFastsatt": null
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "edcd6dae-1768-4ded-99c8-e06164b3788f"
+        },
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "8acbe2a4-b0c3-4fc9-abd1-8edb433a117a",
+                  "dato": "2018-05-01",
+                  "hendelseId": "7401be7c-cfb7-4e6e-ad35-c14ff6ba206e",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-03-18T15:27:43.659526",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "00fa1fcf-2aea-490d-a0cd-249648acc883"
+        },
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "281d03bb-4a65-408e-8094-b1c13cbdf100",
+                  "dato": "2018-07-01",
+                  "hendelseId": "be665bc6-0ac1-46b1-9340-d00cb2faaaa8",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-03-18T15:27:43.689594",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "1eacf09a-1509-450f-ad8e-7ee477da4a55"
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "7b1e394e-636a-47f6-bc94-9e1df8eeba65",
+                  "dato": "2018-01-01",
+                  "hendelseId": "0d2b534a-5ad5-4db4-a22d-8c0b942a9d9e",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-03-18T15:27:43.275355",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": {
+                  "id": "0627c71b-53ad-4d53-8d21-6156f0796000",
+                  "dato": "2018-01-01",
+                  "hendelseId": "72a201df-d30a-4b4d-a920-883f883c3478",
+                  "beløp": 34100.00000000001,
+                  "tidsstempel": "2025-03-18T15:27:43.56642"
+                },
+                "skjønnsmessigFastsatt": {
+                  "id": "f3b3ec05-95e7-41ec-bc78-5e7a3353e6a8",
+                  "dato": "2018-01-01",
+                  "hendelseId": "6f24d094-5231-4fab-a0e9-aa94c0c3d6bd",
+                  "beløp": 38750.0,
+                  "tidsstempel": "2025-03-18T15:27:43.597684"
+                }
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "1f314e07-b690-4334-befd-fdb889217946"
+        },
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "0f23cb76-f375-4605-b161-08fbecb9fba5",
+                  "dato": "2018-03-01",
+                  "hendelseId": "473e62f1-a7e4-4a58-9b38-a96beb7bc02b",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-03-18T15:27:43.618253",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": {
+                  "id": "75ebfff7-f87f-447d-8c64-eee1afaf4270",
+                  "dato": "2018-03-01",
+                  "hendelseId": "223f0300-bcb4-4905-9205-1fd3827f1b87",
+                  "beløp": 46500.0,
+                  "tidsstempel": "2025-03-18T15:27:43.638763"
+                },
+                "skjønnsmessigFastsatt": null
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "edcd6dae-1768-4ded-99c8-e06164b3788f"
+        },
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "8acbe2a4-b0c3-4fc9-abd1-8edb433a117a",
+                  "dato": "2018-05-01",
+                  "hendelseId": "7401be7c-cfb7-4e6e-ad35-c14ff6ba206e",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-03-18T15:27:43.659526",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "00fa1fcf-2aea-490d-a0cd-249648acc883"
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "7b1e394e-636a-47f6-bc94-9e1df8eeba65",
+                  "dato": "2018-01-01",
+                  "hendelseId": "0d2b534a-5ad5-4db4-a22d-8c0b942a9d9e",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-03-18T15:27:43.275355",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": {
+                  "id": "0627c71b-53ad-4d53-8d21-6156f0796000",
+                  "dato": "2018-01-01",
+                  "hendelseId": "72a201df-d30a-4b4d-a920-883f883c3478",
+                  "beløp": 34100.00000000001,
+                  "tidsstempel": "2025-03-18T15:27:43.56642"
+                },
+                "skjønnsmessigFastsatt": {
+                  "id": "f3b3ec05-95e7-41ec-bc78-5e7a3353e6a8",
+                  "dato": "2018-01-01",
+                  "hendelseId": "6f24d094-5231-4fab-a0e9-aa94c0c3d6bd",
+                  "beløp": 38750.0,
+                  "tidsstempel": "2025-03-18T15:27:43.597684"
+                }
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "1f314e07-b690-4334-befd-fdb889217946"
+        },
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "0f23cb76-f375-4605-b161-08fbecb9fba5",
+                  "dato": "2018-03-01",
+                  "hendelseId": "473e62f1-a7e4-4a58-9b38-a96beb7bc02b",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-03-18T15:27:43.618253",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": {
+                  "id": "75ebfff7-f87f-447d-8c64-eee1afaf4270",
+                  "dato": "2018-03-01",
+                  "hendelseId": "223f0300-bcb4-4905-9205-1fd3827f1b87",
+                  "beløp": 46500.0,
+                  "tidsstempel": "2025-03-18T15:27:43.638763"
+                },
+                "skjønnsmessigFastsatt": null
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "edcd6dae-1768-4ded-99c8-e06164b3788f"
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "7b1e394e-636a-47f6-bc94-9e1df8eeba65",
+                  "dato": "2018-01-01",
+                  "hendelseId": "0d2b534a-5ad5-4db4-a22d-8c0b942a9d9e",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-03-18T15:27:43.275355",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": {
+                  "id": "0627c71b-53ad-4d53-8d21-6156f0796000",
+                  "dato": "2018-01-01",
+                  "hendelseId": "72a201df-d30a-4b4d-a920-883f883c3478",
+                  "beløp": 34100.00000000001,
+                  "tidsstempel": "2025-03-18T15:27:43.56642"
+                },
+                "skjønnsmessigFastsatt": {
+                  "id": "f3b3ec05-95e7-41ec-bc78-5e7a3353e6a8",
+                  "dato": "2018-01-01",
+                  "hendelseId": "6f24d094-5231-4fab-a0e9-aa94c0c3d6bd",
+                  "beløp": 38750.0,
+                  "tidsstempel": "2025-03-18T15:27:43.597684"
+                }
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "1f314e07-b690-4334-befd-fdb889217946"
+        },
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "0f23cb76-f375-4605-b161-08fbecb9fba5",
+                  "dato": "2018-03-01",
+                  "hendelseId": "473e62f1-a7e4-4a58-9b38-a96beb7bc02b",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-03-18T15:27:43.618253",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "8dacbe9a-742c-4b0f-8fc9-d7ca58f8b58b"
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "7b1e394e-636a-47f6-bc94-9e1df8eeba65",
+                  "dato": "2018-01-01",
+                  "hendelseId": "0d2b534a-5ad5-4db4-a22d-8c0b942a9d9e",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-03-18T15:27:43.275355",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": {
+                  "id": "0627c71b-53ad-4d53-8d21-6156f0796000",
+                  "dato": "2018-01-01",
+                  "hendelseId": "72a201df-d30a-4b4d-a920-883f883c3478",
+                  "beløp": 34100.00000000001,
+                  "tidsstempel": "2025-03-18T15:27:43.56642"
+                },
+                "skjønnsmessigFastsatt": {
+                  "id": "f3b3ec05-95e7-41ec-bc78-5e7a3353e6a8",
+                  "dato": "2018-01-01",
+                  "hendelseId": "6f24d094-5231-4fab-a0e9-aa94c0c3d6bd",
+                  "beløp": 38750.0,
+                  "tidsstempel": "2025-03-18T15:27:43.597684"
+                }
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "1f314e07-b690-4334-befd-fdb889217946"
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "7b1e394e-636a-47f6-bc94-9e1df8eeba65",
+                  "dato": "2018-01-01",
+                  "hendelseId": "0d2b534a-5ad5-4db4-a22d-8c0b942a9d9e",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-03-18T15:27:43.275355",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": {
+                  "id": "0627c71b-53ad-4d53-8d21-6156f0796000",
+                  "dato": "2018-01-01",
+                  "hendelseId": "72a201df-d30a-4b4d-a920-883f883c3478",
+                  "beløp": 34100.00000000001,
+                  "tidsstempel": "2025-03-18T15:27:43.56642"
+                },
+                "skjønnsmessigFastsatt": null
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "001a48ec-4ad1-4aad-9993-29efeaaed678"
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "7b1e394e-636a-47f6-bc94-9e1df8eeba65",
+                  "dato": "2018-01-01",
+                  "hendelseId": "0d2b534a-5ad5-4db4-a22d-8c0b942a9d9e",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-03-18T15:27:43.275355",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "d4bcfc92-efb5-433b-9ae0-295f7fdbcea8"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 320
+}
