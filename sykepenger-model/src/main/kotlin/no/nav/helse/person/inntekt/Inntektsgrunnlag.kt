@@ -50,7 +50,7 @@ import no.nav.helse.økonomi.Inntekt
 internal class Inntektsgrunnlag private constructor(
     private val alder: Alder,
     private val skjæringstidspunkt: LocalDate,
-    private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
+    val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
     private val vurdertInfotrygd: Boolean,
     `6G`: Inntekt? = null

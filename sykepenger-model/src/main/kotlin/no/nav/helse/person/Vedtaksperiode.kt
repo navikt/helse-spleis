@@ -47,6 +47,7 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Påminnelse.Predikat
 import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
 import no.nav.helse.hendelser.Påminnelse.Predikat.VentetMinst
 import no.nav.helse.hendelser.Revurderingseventyr
@@ -2094,6 +2095,22 @@ internal class Vedtaksperiode private constructor(
         tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
     }
 
+    private fun sikreRefusjonsopplysningerHvisTomt(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+        if (!påminnelse.når(Flagg("fullRefusjon"))) return
+        if (!behandlinger.refusjonstidslinje().isEmpty()) return
+        val grunnlag = vilkårsgrunnlag ?: return
+        val inntekt = grunnlag.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.firstOrNull { it.orgnummer == arbeidsgiver.organisasjonsnummer } ?: return
+        behandlinger.håndterRefusjonstidslinje(
+            arbeidsgiver = arbeidsgiver,
+            behandlingkilde = påminnelse.metadata.behandlingkilde,
+            dokumentsporing = null,
+            aktivitetslogg = aktivitetslogg,
+            beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
+            beregnArbeidsgiverperiode = arbeidsgiver.beregnArbeidsgiverperiode(),
+            refusjonstidslinje = Beløpstidslinje.fra(periode, inntekt.fastsattÅrsinntekt, Kilde(inntekt.faktaavklartInntekt.inntektsdata.hendelseId, Avsender.ARBEIDSGIVER, inntekt.faktaavklartInntekt.inntektsdata.tidsstempel)
+        ))
+    }
+
     private fun prioritertNabolag(): List<Vedtaksperiode> {
         val (nabolagFør, nabolagEtter) = this.arbeidsgiver.finnSammenhengendeVedtaksperioder(this)
             .partition { it.periode.endInclusive < this.periode.start }
@@ -2352,6 +2369,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+            vedtaksperiode.sikreRefusjonsopplysningerHvisTomt(påminnelse, aktivitetslogg)
             if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
                 vedtaksperiode.videreførEksisterendeOpplysninger(påminnelse.metadata.behandlingkilde, aktivitetslogg)
                 if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) return
