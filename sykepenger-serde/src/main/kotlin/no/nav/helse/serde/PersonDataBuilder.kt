@@ -40,7 +40,6 @@ import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.FeriepengeUtDto
 import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdArbeidsgiverutbetalingsperiodeUtDto
-import no.nav.helse.dto.serialisering.InfotrygdInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
@@ -692,8 +691,6 @@ private fun InfotrygdhistorikkelementUtDto.tilPersonData() = PersonData.Infotryg
     ferieperioder = this.ferieperioder.map { it.tilPersonData() },
     arbeidsgiverutbetalingsperioder = this.arbeidsgiverutbetalingsperioder.map { it.tilPersonData() },
     personutbetalingsperioder = this.personutbetalingsperioder.map { it.tilPersonData() },
-    inntekter = this.inntekter.map { it.tilPersonData() },
-    arbeidskategorikoder = arbeidskategorikoder,
     oppdatert = oppdatert
 )
 
@@ -716,15 +713,6 @@ private fun InfotrygdPersonutbetalingsperiodeUtDto.tilPersonData() = PersonData.
     tom = this.periode.tom,
     grad = this.grad.prosent,
     inntekt = this.inntekt.dagligInt.beløp
-)
-
-private fun InfotrygdInntektsopplysningUtDto.tilPersonData() = PersonData.InfotrygdhistorikkElementData.InntektsopplysningData(
-    orgnr = this.orgnummer,
-    sykepengerFom = this.sykepengerFom,
-    inntekt = this.inntekt.månedligDouble.beløp,
-    refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
-    refusjonTom = refusjonTom,
-    lagret = lagret
 )
 
 private fun VilkårsgrunnlagInnslagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagInnslagData(

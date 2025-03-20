@@ -23,7 +23,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
@@ -348,8 +347,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     @Test
     fun `hensyntar historikk fra infotrygd - får vite om det før IM`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(Inntektsopplysning(a1, 17.januar, INNTEKT, true))
+            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT)
         )
         håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar))
         håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
@@ -369,8 +367,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(Inntektsopplysning(a1, 17.januar, INNTEKT, true))
+            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT)
         )
         assertVarsler(listOf(Varselkode.RV_IM_3), 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -384,8 +381,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 2.februar
         )
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(Inntektsopplysning(a1, 17.januar, INNTEKT, true))
+            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT)
         )
         håndterSøknad(Sykdom(2.februar, 2.februar, 100.prosent))
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)

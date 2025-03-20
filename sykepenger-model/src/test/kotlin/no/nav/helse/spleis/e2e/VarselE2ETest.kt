@@ -4,8 +4,6 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.a3
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
@@ -34,7 +32,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_5
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -122,10 +119,6 @@ internal class VarselE2ETest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                inntektshistorikk = listOf(
-                    Inntektsopplysning(a2, 1.januar, inntekt = INNTEKT, true, null),
-                    Inntektsopplysning(a3, 1.januar, inntekt = INNTEKT, true, null)
-                )
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
@@ -140,8 +133,7 @@ internal class VarselE2ETest : AbstractDslTest() {
             forlengVedtak(februar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.februar, Dagtype.Feriedag)))
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT)),
-                inntektshistorikk = listOf(Inntektsopplysning(a1, 17.januar, INNTEKT, true))
+                utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT))
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
@@ -161,10 +153,7 @@ internal class VarselE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             nullstillTilstandsendringer()
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 9.januar, 100.prosent, INNTEKT)),
-                inntektshistorikk = listOf(
-                    Inntektsopplysning(a1, 1.januar, INNTEKT, true)
-                )
+                utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 9.januar, 100.prosent, INNTEKT))
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -182,10 +171,7 @@ internal class VarselE2ETest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
             håndterSøknad(mars)
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                listOf(ArbeidsgiverUtbetalingsperiode(a1, 5.februar, 11.februar, 100.prosent, INNTEKT)),
-                inntektshistorikk = listOf(
-                    Inntektsopplysning(a1, 5.februar, INNTEKT, true)
-                )
+                listOf(ArbeidsgiverUtbetalingsperiode(a1, 5.februar, 11.februar, 100.prosent, INNTEKT))
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)

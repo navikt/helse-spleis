@@ -20,14 +20,11 @@ class InfotrygdhistorikkElement private constructor(
     val tidsstempel: LocalDateTime,
     val hendelseId: MeldingsreferanseId,
     perioder: List<Infotrygdperiode>,
-    inntekter: List<Inntektsopplysning>,
-    private val arbeidskategorikoder: Map<String, LocalDate>,
     oppdatert: LocalDateTime,
     private var nyOpprettet: Boolean = false
 ) {
     var oppdatert = oppdatert
         private set
-    private val inntekter = Inntektsopplysning.sorter(inntekter)
     val perioder = Infotrygdperiode.sorter(perioder)
     private val kilde = Hendelseskilde("Infotrygdhistorikk", hendelseId, tidsstempel)
 
@@ -39,17 +36,13 @@ class InfotrygdhistorikkElement private constructor(
         fun opprett(
             oppdatert: LocalDateTime,
             hendelseId: MeldingsreferanseId,
-            perioder: List<Infotrygdperiode>,
-            inntekter: List<Inntektsopplysning>,
-            arbeidskategorikoder: Map<String, LocalDate>
+            perioder: List<Infotrygdperiode>
         ) =
             InfotrygdhistorikkElement(
                 id = UUID.randomUUID(),
                 tidsstempel = LocalDateTime.now(),
                 hendelseId = hendelseId,
                 perioder = perioder,
-                inntekter = inntekter,
-                arbeidskategorikoder = arbeidskategorikoder,
                 oppdatert = oppdatert,
                 nyOpprettet = true
             )
@@ -62,8 +55,6 @@ class InfotrygdhistorikkElement private constructor(
                 perioder = dto.arbeidsgiverutbetalingsperioder.map { ArbeidsgiverUtbetalingsperiode.gjenopprett(it) } +
                     dto.personutbetalingsperioder.map { PersonUtbetalingsperiode.gjenopprett(it) } +
                     dto.ferieperioder.map { Friperiode.gjenopprett(it) },
-                inntekter = dto.inntekter.map { Inntektsopplysning.gjenopprett(it) },
-                arbeidskategorikoder = dto.arbeidskategorikoder,
                 oppdatert = dto.oppdatert
             )
         }
@@ -85,8 +76,7 @@ class InfotrygdhistorikkElement private constructor(
         }
     }
 
-    private fun erTom() =
-        perioder.isEmpty() && inntekter.isEmpty() && arbeidskategorikoder.isEmpty()
+    private fun erTom() = perioder.isEmpty()
 
     internal fun validerMedFunksjonellFeil(aktivitetslogg: IAktivitetslogg, periode: Periode): Boolean {
         aktivitetslogg.info("Sjekker utbetalte perioder")
@@ -111,16 +101,12 @@ class InfotrygdhistorikkElement private constructor(
             .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
     internal fun funksjoneltLik(other: InfotrygdhistorikkElement): Boolean {
-        if (!harLikePerioder(other)) return false
-        if (!harLikeInntekter(other)) return false
-        return this.arbeidskategorikoder == other.arbeidskategorikoder
+        return harLikePerioder(other)
     }
 
-    private fun harLikePerioder(other: InfotrygdhistorikkElement) = likhet(this.perioder, other.perioder, Infotrygdperiode::funksjoneltLik)
-    private fun harLikeInntekter(other: InfotrygdhistorikkElement) = likhet(this.inntekter, other.inntekter, Inntektsopplysning::funksjoneltLik)
-    private fun <R> likhet(one: List<R>, two: List<R>, comparator: (R, R) -> Boolean): Boolean {
-        if (one.size != two.size) return false
-        return one.zip(two, comparator).all { it }
+    private fun harLikePerioder(other: InfotrygdhistorikkElement): Boolean {
+        if (other.perioder.size != this.perioder.size) return false
+        return other.perioder.zip(this.perioder, Infotrygdperiode::funksjoneltLik).all { it }
     }
 
     internal fun erstatter(other: InfotrygdhistorikkElement): Boolean {
@@ -167,8 +153,6 @@ class InfotrygdhistorikkElement private constructor(
         ferieperioder = this.perioder.filterIsInstance<Friperiode>().map { it.dto() },
         arbeidsgiverutbetalingsperioder = this.perioder.filterIsInstance<ArbeidsgiverUtbetalingsperiode>().map { it.dto() },
         personutbetalingsperioder = this.perioder.filterIsInstance<PersonUtbetalingsperiode>().map { it.dto() },
-        inntekter = this.inntekter.map { it.dto() },
-        arbeidskategorikoder = this.arbeidskategorikoder,
         oppdatert = this.oppdatert
     )
 }

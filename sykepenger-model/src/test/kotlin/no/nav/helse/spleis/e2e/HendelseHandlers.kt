@@ -59,7 +59,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.refusjonstidslinjer
@@ -728,7 +727,6 @@ internal fun AbstractEndToEndTest.håndterInfotrygdendring() {
 private fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     vararg utbetalinger: Infotrygdperiode,
-    inntektshistorikk: List<Inntektsopplysning> = emptyList(),
     orgnummer: String = a1,
     besvart: LocalDateTime = LocalDateTime.now()
 ) {
@@ -737,7 +735,6 @@ private fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
     utbetalingshistorikk(
         vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
         utbetalinger = utbetalinger.toList(),
-        inntektshistorikk = inntektshistorikk,
         orgnummer = orgnummer,
         besvart = besvart
     ).håndter(Person::håndter)
@@ -745,16 +742,12 @@ private fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
 
 internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkEtterInfotrygdendring(
     vararg utbetalinger: Infotrygdperiode,
-    inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-    arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
     besvart: LocalDateTime = LocalDateTime.now(),
     meldingsreferanseId: UUID = UUID.randomUUID()
 ): UUID {
     utbetalingshistorikkEtterInfotrygdEndring(
         meldingsreferanseId = meldingsreferanseId,
         utbetalinger = utbetalinger.toList(),
-        inntektshistorikk = inntektshistorikk,
-        arbeidskategorikoder = arbeidskategorikoder,
         besvart = besvart
     ).håndter(Person::håndter)
     return meldingsreferanseId

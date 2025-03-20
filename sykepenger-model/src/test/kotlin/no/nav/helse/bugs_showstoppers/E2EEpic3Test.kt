@@ -37,7 +37,6 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
@@ -78,18 +77,13 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
     fun `inntektsmelding starter etter sykmeldingsperioden`() {
-        val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 3.april(2019), INNTEKT, true),
-            Inntektsopplysning(a1, 18.mars(2018), INNTEKT, true),
-            Inntektsopplysning(a1, 13.november(2017), INNTEKT, true)
-        )
         val utbetalinger = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a1, 3.april(2019), 30.april(2019), 100.prosent, 100.daglig),
             ArbeidsgiverUtbetalingsperiode(a1, 18.mars(2018), 2.april(2018), 100.prosent, 100.daglig),
             ArbeidsgiverUtbetalingsperiode(a1, 29.november(2017), 3.desember(2017), 100.prosent, 100.daglig),
             ArbeidsgiverUtbetalingsperiode(a1, 13.november(2017), 28.november(2017), 100.prosent, 100.daglig)
         )
-        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger, inntektshistorikk = inntektshistorikk)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger)
 
         håndterSykmelding(Sykmeldingsperiode(15.januar(2020), 12.februar(2020)))
         håndterSøknad(Sykdom(15.januar(2020), 12.februar(2020), 100.prosent))

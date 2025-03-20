@@ -34,7 +34,6 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.REVURDERING
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -630,8 +629,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         utbetalPeriode(1.vedtaksperiode)
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 10.februar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.februar, INNTEKT, true))
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 10.februar, 100.prosent, INNTEKT))
         )
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),

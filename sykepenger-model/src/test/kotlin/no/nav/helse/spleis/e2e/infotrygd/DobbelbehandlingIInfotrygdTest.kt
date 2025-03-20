@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDate
-import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -14,7 +13,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -42,10 +40,8 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         val historie1 = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a1, 3.januar, 26.januar, 100.prosent, 1000.daglig)
         )
-        val inntektshistorikk1 = listOf(Inntektsopplysning(a1, 3.januar, INNTEKT, true))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             *historie1,
-            inntektshistorikk = inntektshistorikk1,
             besvart = LocalDate.EPOCH.atStartOfDay()
         )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
@@ -59,10 +55,8 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         val historie1 = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 26.januar, 100.prosent, 1000.daglig)
         )
-        val inntektshistorikk1 = listOf(Inntektsopplysning(a1, 3.januar, INNTEKT, true))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             *historie1,
-            inntektshistorikk = inntektshistorikk1,
             besvart = LocalDate.EPOCH.atStartOfDay()
         )
 

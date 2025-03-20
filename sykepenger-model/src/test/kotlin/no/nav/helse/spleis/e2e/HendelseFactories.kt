@@ -52,7 +52,6 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -288,7 +287,6 @@ internal fun påminnelse(
 internal fun AbstractEndToEndTest.utbetalingshistorikk(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     utbetalinger: List<Infotrygdperiode> = listOf(),
-    inntektshistorikk: List<Inntektsopplysning> = emptyList(),
     orgnummer: String = a1,
     besvart: LocalDateTime = LocalDateTime.now(),
 ): Utbetalingshistorikk {
@@ -300,9 +298,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
         element = InfotrygdhistorikkElement.opprett(
             oppdatert = besvart,
             hendelseId = MeldingsreferanseId(UUID.randomUUID()),
-            perioder = utbetalinger,
-            inntekter = inntektshistorikk,
-            arbeidskategorikoder = emptyMap()
+            perioder = utbetalinger
         )
     )
 }
@@ -310,8 +306,6 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
 internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
     meldingsreferanseId: UUID = UUID.randomUUID(),
     utbetalinger: List<Infotrygdperiode> = listOf(),
-    inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-    arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
     besvart: LocalDateTime = LocalDateTime.now(),
 ): UtbetalingshistorikkEtterInfotrygdendring {
     return UtbetalingshistorikkEtterInfotrygdendring(
@@ -319,9 +313,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
         element = InfotrygdhistorikkElement.opprett(
             oppdatert = besvart,
             hendelseId = MeldingsreferanseId(meldingsreferanseId),
-            perioder = utbetalinger,
-            inntekter = inntektshistorikk,
-            arbeidskategorikoder = arbeidskategorikoder
+            perioder = utbetalinger
         ),
         besvart = LocalDateTime.now()
     )

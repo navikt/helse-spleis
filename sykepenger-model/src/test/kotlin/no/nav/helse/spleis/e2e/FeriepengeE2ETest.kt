@@ -25,7 +25,6 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
 import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.sisteBehov
@@ -341,10 +340,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Legger ikke infotrygdcache til grunn for feriepenger`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2020), 31.januar(2020), 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(a1, 1.januar(2020), INNTEKT, true)
-            )
+            ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2020), 31.januar(2020), 100.prosent, INNTEKT)
         )
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknad(1.juni(2020) til 30.juni(2020))

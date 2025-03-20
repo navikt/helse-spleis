@@ -43,8 +43,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forlengelse av infotrygd uten inntektsopplysninger`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT),
-            inntektshistorikk = emptyList()
+            ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT)
         )
         håndterSøknad(1.februar til 23.februar)
         assertEquals(0, inspektør.antallUtbetalinger)

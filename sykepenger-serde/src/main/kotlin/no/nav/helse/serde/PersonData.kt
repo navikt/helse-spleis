@@ -55,7 +55,6 @@ import no.nav.helse.dto.deserialisering.FaktaavklartInntektInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeInnDto
 import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdArbeidsgiverutbetalingsperiodeInnDto
-import no.nav.helse.dto.deserialisering.InfotrygdInntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdPersonutbetalingsperiodeInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
@@ -114,8 +113,6 @@ data class PersonData(
         val ferieperioder: List<FerieperiodeData>,
         val arbeidsgiverutbetalingsperioder: List<ArbeidsgiverutbetalingsperiodeData>,
         val personutbetalingsperioder: List<PersonutbetalingsperiodeData>,
-        val inntekter: List<InntektsopplysningData>,
-        val arbeidskategorikoder: Map<String, LocalDate>,
         val oppdatert: LocalDateTime
     ) {
         fun tilDto() = InfotrygdhistorikkelementInnDto(
@@ -125,8 +122,6 @@ data class PersonData(
             ferieperioder = this.ferieperioder.map { it.tilDto() },
             arbeidsgiverutbetalingsperioder = this.arbeidsgiverutbetalingsperioder.map { it.tilDto() },
             personutbetalingsperioder = this.personutbetalingsperioder.map { it.tilDto() },
-            inntekter = this.inntekter.map { it.tilDto() },
-            arbeidskategorikoder = this.arbeidskategorikoder,
             oppdatert = this.oppdatert
         )
 
@@ -172,24 +167,6 @@ data class PersonData(
                 periode = PeriodeDto(fom = this.fom, tom = this.tom),
                 grad = ProsentdelDto(prosent = grad),
                 inntekt = InntektbeløpDto.DagligInt(inntekt)
-            )
-        }
-
-        data class InntektsopplysningData(
-            val orgnr: String,
-            val sykepengerFom: LocalDate,
-            val inntekt: Double,
-            val refusjonTilArbeidsgiver: Boolean,
-            val refusjonTom: LocalDate?,
-            val lagret: LocalDateTime?
-        ) {
-            fun tilDto() = InfotrygdInntektsopplysningInnDto(
-                orgnummer = this.orgnr,
-                sykepengerFom = this.sykepengerFom,
-                inntekt = InntektbeløpDto.MånedligDouble(inntekt),
-                refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
-                refusjonTom = refusjonTom,
-                lagret = lagret
             )
         }
     }

@@ -51,7 +51,6 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 
@@ -211,8 +210,6 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     internal fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
         utbetalinger: List<Infotrygdperiode> = listOf(),
-        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-        harStatslønn: Boolean = false,
         besvart: LocalDateTime = LocalDateTime.now()
     ) =
         Utbetalingshistorikk(
@@ -222,16 +219,13 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             element = InfotrygdhistorikkElement.opprett(
                 oppdatert = besvart,
                 hendelseId = MeldingsreferanseId(UUID.randomUUID()),
-                perioder = utbetalinger,
-                inntekter = inntektshistorikk,
-                arbeidskategorikoder = emptyMap()
+                perioder = utbetalinger
             ),
             besvart = LocalDateTime.now()
         )
 
     internal fun lagUtbetalingshistorikkEtterInfotrygdendring(
         utbetalinger: List<Infotrygdperiode> = listOf(),
-        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         besvart: LocalDateTime = LocalDateTime.now(),
         id: UUID = UUID.randomUUID()
     ) =
@@ -240,9 +234,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             element = InfotrygdhistorikkElement.opprett(
                 oppdatert = besvart,
                 hendelseId = MeldingsreferanseId(UUID.randomUUID()),
-                perioder = utbetalinger,
-                inntekter = inntektshistorikk,
-                arbeidskategorikoder = emptyMap()
+                perioder = utbetalinger
             ),
             besvart = LocalDateTime.now()
         )

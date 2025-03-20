@@ -29,7 +29,6 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpsti
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
@@ -101,8 +100,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `Infotrygdhistorikk som er nærme`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 30.januar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 30.januar, 100.prosent, INNTEKT))
         )
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
@@ -112,8 +110,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `Infotrygdhistorikk som ikke medfører utkasting`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 30.januar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 30.januar, 100.prosent, INNTEKT))
         )
         håndterSøknad(Sykdom(20.februar, 28.mars, 100.prosent))
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)

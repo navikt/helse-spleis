@@ -7,27 +7,23 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import java.time.LocalDate
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 // Understands a JSON message representing an Ytelserbehov
 internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
 
     companion object {
-        internal fun JsonMessage.harStatslønn() = this["@løsning.${Sykepengehistorikk.name}"].any { it["statslønn"].asBoolean() }
         internal fun JsonMessage.utbetalinger() = this["@løsning.${Sykepengehistorikk.name}"]
             .flatMap { it.path("utbetalteSykeperioder") }
             .filter(::erGyldigPeriode)
@@ -72,27 +68,6 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val mel
             val tom = node["tom"].asOptionalLocalDate()
             return fom != null && tom != null && tom >= fom
         }
-
-        internal fun JsonMessage.arbeidskategorikoder() = this["@løsning.${Sykepengehistorikk.name}"]
-            .flatMap { element ->
-                element.path("utbetalteSykeperioder").mapNotNull { utbetaling ->
-                    utbetaling["fom"].asOptionalLocalDate()?.let {
-                        element.path("arbeidsKategoriKode").asText() to it
-                    }
-                }
-            }.sortedBy { (_, dato) -> dato }.toMap()
-
-        internal fun JsonMessage.inntektshistorikk() = this["@løsning.${Sykepengehistorikk.name}"]
-            .flatMap { it.path("inntektsopplysninger") }
-            .map { opplysning ->
-                Inntektsopplysning(
-                    sykepengerFom = opplysning["sykepengerFom"].asLocalDate(),
-                    inntekt = opplysning["inntekt"].asDouble().månedlig,
-                    orgnummer = opplysning["orgnummer"].asText(),
-                    refusjonTilArbeidsgiver = opplysning["refusjonTilArbeidsgiver"].asBoolean(),
-                    refusjonTom = opplysning["refusjonTom"].asOptionalLocalDate()
-                )
-            }
     }
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
@@ -101,17 +76,11 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val mel
 
     private val utbetalinger = packet.utbetalinger()
 
-    private val arbeidskategorikoder: Map<String, LocalDate> = packet.arbeidskategorikoder()
-
-    private val inntektshistorikk = packet.inntektshistorikk()
-
     private fun infotrygdhistorikk(meldingsreferanseId: MeldingsreferanseId) =
         InfotrygdhistorikkElement.opprett(
             oppdatert = besvart,
             hendelseId = meldingsreferanseId,
-            perioder = utbetalinger,
-            inntekter = inntektshistorikk,
-            arbeidskategorikoder = arbeidskategorikoder
+            perioder = utbetalinger
         )
 
     private fun utbetalingshistorikk() =

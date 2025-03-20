@@ -44,7 +44,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -230,9 +229,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 17.januar, INNTEKT, true)
-        )
+            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 27.januar, 100.prosent, INNTEKT)
         )
         håndterYtelser(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
@@ -248,8 +245,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            PersonUtbetalingsperiode(a1, 1.januar, 27.januar, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, false))
+            PersonUtbetalingsperiode(a1, 1.januar, 27.januar, 100.prosent, INNTEKT)
         )
         håndterYtelser(1.vedtaksperiode)
 
@@ -277,9 +273,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a2)
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            PersonUtbetalingsperiode(a2, 1.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-            Inntektsopplysning(a2, 1.januar, INNTEKT, false)
-        )
+            PersonUtbetalingsperiode(a2, 1.januar, 27.januar, 100.prosent, INNTEKT)
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter(orgnummer = a2))
@@ -940,8 +934,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         nullstillTilstandsendringer()
         val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 20.januar, 100.prosent, INNTEKT))
-        val inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
-        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
         håndterYtelser(1.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)

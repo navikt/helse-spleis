@@ -43,7 +43,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.IdInnhenter
@@ -1036,13 +1035,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    a1,
-                    17.januar, INNTEKT, true
-                )
-            )
+            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, 1000.daglig)
         )
         håndterOverstyrTidslinje((20.januar til 26.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
@@ -1087,13 +1080,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    a1,
-                    1.februar, INNTEKT, true
-                )
-            )
+            ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, 1000.daglig)
         )
         håndterOverstyrTidslinje((20.januar til 26.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
@@ -1193,12 +1180,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(a1, 1.november(2017), 30.november(2017), 100.prosent, 32000.månedlig),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    orgnummer = a1, sykepengerFom = 1.november, 32000.månedlig, refusjonTilArbeidsgiver = true
-                )
-            )
+            ArbeidsgiverUtbetalingsperiode(a1, 1.november(2017), 30.november(2017), 100.prosent, 32000.månedlig)
         )
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
 
@@ -1303,8 +1285,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(a1, 1.mars, 31.mars, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.mars, INNTEKT, true))
+            ArbeidsgiverUtbetalingsperiode(a1, 1.mars, 31.mars, 100.prosent, INNTEKT)
         )
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Dagtype.Sykedag, 80)))
         håndterYtelser(1.vedtaksperiode)

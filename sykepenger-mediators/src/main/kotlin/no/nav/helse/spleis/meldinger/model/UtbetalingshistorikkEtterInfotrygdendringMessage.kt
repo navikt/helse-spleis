@@ -3,14 +3,11 @@ package no.nav.helse.spleis.meldinger.model
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import java.time.LocalDate
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
-import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage.Companion.arbeidskategorikoder
-import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage.Companion.inntektshistorikk
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage.Companion.utbetalinger
 
 // Understands a JSON message representing an Ytelserbehov
@@ -20,17 +17,11 @@ internal class UtbetalingshistorikkEtterInfotrygdendringMessage(packet: JsonMess
 
     private val utbetalinger = packet.utbetalinger()
 
-    private val arbeidskategorikoder: Map<String, LocalDate> = packet.arbeidskategorikoder()
-
-    private val inntektshistorikk = packet.inntektshistorikk()
-
     private fun infotrygdhistorikk(meldingsreferanseId: MeldingsreferanseId) =
         InfotrygdhistorikkElement.opprett(
             oppdatert = besvart,
             hendelseId = meldingsreferanseId,
-            perioder = utbetalinger,
-            inntekter = inntektshistorikk,
-            arbeidskategorikoder = arbeidskategorikoder
+            perioder = utbetalinger
         )
 
     private fun utbetalingshistorikkEtterInfotrygdendring() =

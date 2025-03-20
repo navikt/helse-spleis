@@ -221,8 +221,6 @@ internal class InfotrygdhistorikkTest {
                             PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.januar, 31.januar, 100.0, 1154)
                         ),
                         personutbetalingsperioder = emptyList(),
-                        inntekter = emptyList(),
-                        arbeidskategorikoder = emptyMap(),
                         oppdatert = nå
                     ).tilDto()
                 )
@@ -246,7 +244,7 @@ internal class InfotrygdhistorikkTest {
                 listOf(
                     ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 15.februar, 100.prosent, 1500.daglig),
                     Friperiode(15.mars, 20.mars)
-                ), inntekter = listOf(Inntektsopplysning("ag1", 1.februar, 1000.daglig, true))
+                )
             )
         )
         Aktivitetslogg().also {
@@ -348,8 +346,7 @@ internal class InfotrygdhistorikkTest {
         assertFalse(historikk.harEndretHistorikk(utbetaling))
         historikk.oppdaterHistorikk(
             historikkelement(
-                perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)),
-                inntekter = listOf(Inntektsopplysning("ag1", 1.januar, 1000.daglig, true))
+                perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig))
             )
         )
         assertFalse(historikk.harEndretHistorikk(utbetaling))
@@ -375,8 +372,7 @@ internal class InfotrygdhistorikkTest {
         assertFalse(historikk.harEndretHistorikk(utbetaling))
         historikk.oppdaterHistorikk(
             historikkelement(
-                perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)),
-                arbeidskategorikoder = mapOf("123" to LocalDate.now())
+                perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig))
             )
         )
         assertFalse(historikk.harEndretHistorikk(utbetaling))
@@ -397,16 +393,12 @@ internal class InfotrygdhistorikkTest {
 
     private fun historikkelement(
         perioder: List<Infotrygdperiode> = emptyList(),
-        inntekter: List<Inntektsopplysning> = emptyList(),
-        arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
         hendelseId: UUID = UUID.randomUUID(),
         oppdatert: LocalDateTime = LocalDateTime.now()
     ) =
         InfotrygdhistorikkElement.opprett(
             oppdatert = oppdatert,
             hendelseId = MeldingsreferanseId(hendelseId),
-            perioder = perioder,
-            inntekter = inntekter,
-            arbeidskategorikoder = arbeidskategorikoder
+            perioder = perioder
         )
 }

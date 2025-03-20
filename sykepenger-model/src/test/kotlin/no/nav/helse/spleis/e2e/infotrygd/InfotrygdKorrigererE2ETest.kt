@@ -30,7 +30,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -134,9 +133,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
                 hendelseId = MeldingsreferanseId(UUID.randomUUID()),
                 perioder = listOf(
                     Friperiode(fom = 1.februar, tom = 28.februar)
-                ),
-                inntekter = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true)),
-                arbeidskategorikoder = emptyMap()
+                )
             ),
             besvart = LocalDateTime.now()
         ).håndter(Person::håndter)

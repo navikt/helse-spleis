@@ -18,7 +18,6 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
@@ -36,12 +35,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `forkaster ikke førstegangsbehandling selv om det er lagret inntekter i IT`() {
-        håndterUtbetalingshistorikkEtterInfotrygdendring(
-            inntektshistorikk = listOf(
-                Inntektsopplysning(a1, 17.januar, INNTEKT, true),
-                Inntektsopplysning(a2, 17.januar, INNTEKT, true)
-            )
-        )
+        håndterUtbetalingshistorikkEtterInfotrygdendring()
         håndterSøknad(januar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
@@ -63,7 +57,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `forlenger ferieperiode i Infotrygd på samme arbeidsgiver`() {
-        håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.januar, 31.januar), inntektshistorikk = emptyList())
+        håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.januar, 31.januar))
         nyPeriode(februar)
         assertForlengerInfotrygdperiode()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
@@ -72,15 +66,14 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `forlenger ferieperiode i Infotrygd på samme arbeidsgiver - reagerer på endring`() {
         nyPeriode(februar)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.januar, 31.januar), inntektshistorikk = emptyList())
+        håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.januar, 31.januar))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
 
     @Test
     fun `forlenger utbetaling i Infotrygd på samme arbeidsgiver`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT))
         )
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
@@ -90,7 +83,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `forlenger utbetaling i Infotrygd på annen arbeidsgiver`() {
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true)))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT))
         nyPeriode(februar, a1)
         assertForlengerInfotrygdperiode()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
@@ -99,9 +92,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `bare ferie - etter infotrygdutbetaling`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT), inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 1.desember(2017), INNTEKT, true)
-        )
+            ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT)
         )
         håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))

@@ -24,7 +24,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -52,8 +51,7 @@ internal class SkjæringstidspunktE2ETest : AbstractEndToEndTest() {
     fun `periode med bare ferie - tidligere sykdom`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 10.januar, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
+            ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 10.januar, 100.prosent, INNTEKT)
         )
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(1.mars, 31.mars))
         assertEquals(1.mars, inspektør.skjæringstidspunkt(1.vedtaksperiode))

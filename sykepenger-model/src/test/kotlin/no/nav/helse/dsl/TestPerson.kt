@@ -54,7 +54,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spill_av_im.Forespørsel
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -591,11 +590,10 @@ internal class TestPerson(
 
         internal fun håndterUtbetalingshistorikkEtterInfotrygdendring(
             utbetalinger: List<Infotrygdperiode> = listOf(),
-            inntektshistorikk: List<Inntektsopplysning> = emptyList(),
             besvart: LocalDateTime = LocalDateTime.now(),
             id: UUID = UUID.randomUUID()
         ) =
-            arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikkEtterInfotrygdendring(utbetalinger, inntektshistorikk, besvart, id)
+            arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikkEtterInfotrygdendring(utbetalinger, besvart, id)
                 .håndter(Person::håndter)
 
         internal fun håndterUtbetalingshistorikkForFeriepenger(

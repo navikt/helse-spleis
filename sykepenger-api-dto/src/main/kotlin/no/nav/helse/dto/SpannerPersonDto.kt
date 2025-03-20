@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.RefusjonservitørData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
@@ -23,7 +23,6 @@ import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.FeriepengeUtDto
 import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdArbeidsgiverutbetalingsperiodeUtDto
-import no.nav.helse.dto.serialisering.InfotrygdInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
@@ -62,8 +61,6 @@ data class SpannerPersonDto(
         val ferieperioder: List<FerieperiodeData>,
         val arbeidsgiverutbetalingsperioder: List<ArbeidsgiverutbetalingsperiodeData>,
         val personutbetalingsperioder: List<PersonutbetalingsperiodeData>,
-        val inntekter: List<InntektsopplysningData>,
-        val arbeidskategorikoder: Map<String, LocalDate>,
         val oppdatert: LocalDateTime
     ) {
         data class FerieperiodeData(
@@ -85,15 +82,6 @@ data class SpannerPersonDto(
             val tom: LocalDate,
             val grad: Double,
             val inntekt: Int
-        )
-
-        data class InntektsopplysningData(
-            val orgnr: String,
-            val sykepengerFom: LocalDate,
-            val inntekt: Double,
-            val refusjonTilArbeidsgiver: Boolean,
-            val refusjonTom: LocalDate?,
-            val lagret: LocalDateTime?
         )
     }
 
@@ -1422,8 +1410,6 @@ private fun InfotrygdhistorikkelementUtDto.tilPersonData() =
         ferieperioder = this.ferieperioder.map { it.tilPersonData() },
         arbeidsgiverutbetalingsperioder = this.arbeidsgiverutbetalingsperioder.map { it.tilPersonData() },
         personutbetalingsperioder = this.personutbetalingsperioder.map { it.tilPersonData() },
-        inntekter = this.inntekter.map { it.tilPersonData() },
-        arbeidskategorikoder = arbeidskategorikoder,
         oppdatert = oppdatert
     )
 
@@ -1449,16 +1435,6 @@ private fun InfotrygdPersonutbetalingsperiodeUtDto.tilPersonData() =
         tom = this.periode.tom,
         grad = this.grad.prosent,
         inntekt = this.inntekt.dagligInt.beløp
-    )
-
-private fun InfotrygdInntektsopplysningUtDto.tilPersonData() =
-    SpannerPersonDto.InfotrygdhistorikkElementData.InntektsopplysningData(
-        orgnr = this.orgnummer,
-        sykepengerFom = this.sykepengerFom,
-        inntekt = this.inntekt.dagligDouble.beløp,
-        refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
-        refusjonTom = refusjonTom,
-        lagret = lagret
     )
 
 private fun VilkårsgrunnlagInnslagUtDto.tilPersonData() = VilkårsgrunnlagInnslagData(

@@ -109,9 +109,7 @@ internal abstract class AbstractObservableTest {
         element = InfotrygdhistorikkElement.opprett(
             oppdatert = LocalDateTime.now(),
             hendelseId = MeldingsreferanseId(UUID.randomUUID()),
-            perioder = emptyList(),
-            inntekter = emptyList(),
-            arbeidskategorikoder = emptyMap()
+            perioder = emptyList()
         ),
         besvart = LocalDateTime.now()
     )

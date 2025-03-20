@@ -32,7 +32,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -120,9 +119,7 @@ internal abstract class AbstractEndToEndTest {
             element = InfotrygdhistorikkElement.opprett(
                 LocalDateTime.now(),
                 MeldingsreferanseId(UUID.randomUUID()),
-                listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, INNTEKT)),
-                listOf(Inntektsopplysning(a1, 1.februar, INNTEKT, true)),
-                emptyMap()
+                listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, INNTEKT))
             ),
             besvart = LocalDateTime.now()
         ).håndter(Person::håndter)
@@ -133,9 +130,7 @@ internal abstract class AbstractEndToEndTest {
             element = InfotrygdhistorikkElement.opprett(
                 LocalDateTime.now(),
                 MeldingsreferanseId(UUID.randomUUID()),
-                listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT)),
-                listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true)),
-                emptyMap()
+                listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT))
             ),
             besvart = LocalDateTime.now()
         ).håndter(Person::håndter)
