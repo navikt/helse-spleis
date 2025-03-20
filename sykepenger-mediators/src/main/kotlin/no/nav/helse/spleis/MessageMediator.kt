@@ -1,11 +1,13 @@
 package no.nav.helse.spleis
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import java.sql.SQLException
+import java.time.LocalDateTime.now
 import kotlin.time.DurationUnit
 import kotlin.time.measureTime
 import no.nav.helse.serde.DeserializationException
@@ -186,7 +188,7 @@ internal class MessageMediator(
                 sikkerLogg.info("brukte $label ($antallSekunder s) på å prosessere meldingen")
             }
         } catch (err: Exception) {
-            if (kritiskFeilSomSkalMedføreAtPoddenDør(err, message)) severeErrorHandler(err, message)
+            if (kritiskFeilSomSkalMedføreAtPoddenDør(err, message)) severeErrorHandler(err, message, context)
             else errorHandler(err, message)
         }
     }
@@ -262,8 +264,19 @@ internal class MessageMediator(
         sikkerLogg.error("kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${riverErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
     }
 
-    private fun severeErrorHandler(err: Exception, message: HendelseMessage) {
+    private fun MessageContext.sendPåSlack(message: HendelseMessage) {
+        val kibanaurl = "<https://logs.adeo.no/app/kibana#/discover?_a=(index:'tjenestekall-*',query:(language:lucene,query:'%22${message.meldingsporing.id.id}%22'))&_g=(time:(from:'${now().minusDays(1)}',mode:absolute,to:now))|${message.navn}>"
+        val melding = "\n\nEn $kibanaurl får Spleis til å gå ned!!"
+        val slackmelding = JsonMessage.newMessage("slackmelding", mapOf(
+            "melding" to "$melding\n\n - Deres erbødig SPleis :spleis-realistisk:",
+            "level" to "ERROR"
+        )).toJson()
+        publish(slackmelding)
+    }
+
+    private fun severeErrorHandler(err: Exception, message: HendelseMessage, context: MessageContext) {
         errorHandler("kritisk feil (podden dør!!)", err, message.toJson(), message.secureDiagnosticinfo())
+        context.sendPåSlack(message)
         throw err
     }
 

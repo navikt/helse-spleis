@@ -16,7 +16,7 @@ import org.slf4j.Logger
 
 internal sealed class HendelseMessage(private val packet: JsonMessage) : Aktivitetskontekst {
     abstract val meldingsporing: Meldingsporing
-    private val navn = packet["@event_name"].asText()
+    internal val navn = packet["@event_name"].asText()
     protected val opprettet = packet["@opprettet"].asLocalDateTime()
 
     internal abstract fun behandle(mediator: IHendelseMediator, context: MessageContext)
