@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.august
 import no.nav.helse.desember
-import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -629,7 +628,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         utbetalPeriode(1.vedtaksperiode)
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 10.februar, 100.prosent, INNTEKT))
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 10.februar))
         )
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),

@@ -7,7 +7,6 @@ import no.nav.helse.Alder
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
-import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
@@ -29,13 +28,11 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -119,7 +116,7 @@ internal abstract class AbstractEndToEndTest {
             element = InfotrygdhistorikkElement.opprett(
                 LocalDateTime.now(),
                 MeldingsreferanseId(UUID.randomUUID()),
-                listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, INNTEKT))
+                listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar))
             ),
             besvart = LocalDateTime.now()
         ).håndter(Person::håndter)
@@ -130,14 +127,10 @@ internal abstract class AbstractEndToEndTest {
             element = InfotrygdhistorikkElement.opprett(
                 LocalDateTime.now(),
                 MeldingsreferanseId(UUID.randomUUID()),
-                listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT))
+                listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
             ),
             besvart = LocalDateTime.now()
         ).håndter(Person::håndter)
-
-        håndterYtelser(1.vedtaksperiode)
-        assertVarsel(Varselkode.RV_IT_14, 1.vedtaksperiode.filter())
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
     }
 
     protected fun createTestPerson(block: (regelverkslogg: Regelverkslogg) -> Person): Person {

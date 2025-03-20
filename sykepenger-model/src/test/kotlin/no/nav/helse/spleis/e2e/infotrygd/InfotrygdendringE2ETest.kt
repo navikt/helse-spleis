@@ -28,7 +28,6 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -47,7 +46,8 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertEquals(2.januar(2025), inspektør.vedtaksperioder(2.vedtaksperiode).skjæringstidspunkt)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 20.november(2024), 30.november(2024), 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 20.november(2024), 30.november(2024)
+        ))
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -58,7 +58,8 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 16.januar)
         håndterInfotrygdendring()
         assertTrue(personlogg.harBehov(Sykepengehistorikk))
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2016), 31.januar(2016), 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2016), 31.januar(2016)
+        ))
 
         val infotrygdHistorikk = person.inspektør.utbetaltIInfotrygd
         assertEquals(1.januar(2016) til 31.januar(2016), infotrygdHistorikk.single())
@@ -70,7 +71,8 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 20.januar)
         nyPeriode(21.januar til 31.januar)
         håndterInfotrygdendring()
-        val meldingsreferanseId = håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT))
+        val meldingsreferanseId = håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar
+        ))
 
         assertEquals(2, observatør.overlappendeInfotrygdperioder.size)
         val event = observatør.overlappendeInfotrygdperioder.last()

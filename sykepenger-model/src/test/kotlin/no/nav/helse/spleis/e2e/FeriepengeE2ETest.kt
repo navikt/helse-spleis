@@ -33,7 +33,6 @@ import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -340,7 +339,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Legger ikke infotrygdcache til grunn for feriepenger`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2020), 31.januar(2020), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2020), 31.januar(2020))
         )
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknad(1.juni(2020) til 30.juni(2020))

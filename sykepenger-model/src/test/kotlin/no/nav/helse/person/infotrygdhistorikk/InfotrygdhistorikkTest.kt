@@ -23,9 +23,6 @@ import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingsak
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -169,7 +166,7 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `oppdaterer tidspunkt når ny historikk er lik gammel`() {
         val perioder = listOf(
-            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar, 100.prosent, 25000.månedlig)
+            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar)
         )
         val nå = LocalDateTime.now()
         val gammel = nå.minusHours(24)
@@ -191,7 +188,7 @@ internal class InfotrygdhistorikkTest {
         historikk.oppdaterHistorikk(
             historikkelement(
                 listOf(
-                    ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar, 100.prosent, 25000.månedlig)
+                    ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar)
                 )
             )
         )
@@ -203,8 +200,8 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `rekkefølge respekteres ved deserialisering`() {
         val perioder = listOf(
-            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar, 100.prosent, 1154.daglig),
-            ArbeidsgiverUtbetalingsperiode("orgnr", 1.februar, 28.februar, 100.prosent, 1154.daglig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 1.februar, 28.februar),
             Friperiode(1.mars, 31.mars)
         )
         val nå = LocalDateTime.now()
@@ -217,8 +214,8 @@ internal class InfotrygdhistorikkTest {
                         hendelseId = UUID.randomUUID(),
                         ferieperioder = listOf(PersonData.InfotrygdhistorikkElementData.FerieperiodeData(1.mars, 31.mars)),
                         arbeidsgiverutbetalingsperioder = listOf(
-                            PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.februar, 28.februar, 100.0, 1154),
-                            PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.januar, 31.januar, 100.0, 1154)
+                            PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.februar, 28.februar),
+                            PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.januar, 31.januar)
                         ),
                         personutbetalingsperioder = emptyList(),
                         oppdatert = nå
@@ -242,7 +239,7 @@ internal class InfotrygdhistorikkTest {
         historikk.oppdaterHistorikk(
             historikkelement(
                 listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 15.februar, 100.prosent, 1500.daglig),
+                    ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 15.februar),
                     Friperiode(15.mars, 20.mars)
                 )
             )
@@ -268,11 +265,11 @@ internal class InfotrygdhistorikkTest {
         historikk.oppdaterHistorikk(
             historikkelement(
                 listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 5.januar, 10.januar, 100.prosent, 25000.månedlig),
+                    ArbeidsgiverUtbetalingsperiode("ag1", 5.januar, 10.januar),
                     Friperiode(11.januar, 12.januar),
-                    ArbeidsgiverUtbetalingsperiode("ag2", 13.januar, 15.januar, 100.prosent, 25000.månedlig),
-                    ArbeidsgiverUtbetalingsperiode("ag1", 16.januar, 20.januar, 100.prosent, 25000.månedlig),
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 28.februar, 100.prosent, 25000.månedlig)
+                    ArbeidsgiverUtbetalingsperiode("ag2", 13.januar, 15.januar),
+                    ArbeidsgiverUtbetalingsperiode("ag1", 16.januar, 20.januar),
+                    ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 28.februar)
                 )
             )
         )
@@ -304,7 +301,7 @@ internal class InfotrygdhistorikkTest {
         historikk.oppdaterHistorikk(
             historikkelement(
                 listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig),
+                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar),
                     Friperiode(26.januar, 31.januar),
                 )
             )
@@ -318,7 +315,7 @@ internal class InfotrygdhistorikkTest {
         historikk.oppdaterHistorikk(
             historikkelement(
                 listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig),
+                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar),
                     Friperiode(26.januar, 31.januar),
                 )
             )
@@ -331,7 +328,7 @@ internal class InfotrygdhistorikkTest {
         historikk.oppdaterHistorikk(
             historikkelement(
                 listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)
+                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar)
                 )
             )
         )
@@ -339,14 +336,14 @@ internal class InfotrygdhistorikkTest {
         historikk.oppdaterHistorikk(
             historikkelement(
                 listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)
+                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar)
                 )
             )
         )
         assertFalse(historikk.harEndretHistorikk(utbetaling))
         historikk.oppdaterHistorikk(
             historikkelement(
-                perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig))
+                perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar))
             )
         )
         assertFalse(historikk.harEndretHistorikk(utbetaling))
@@ -357,7 +354,7 @@ internal class InfotrygdhistorikkTest {
         historikk.oppdaterHistorikk(
             historikkelement(
                 listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)
+                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar)
                 )
             )
         )
@@ -365,14 +362,14 @@ internal class InfotrygdhistorikkTest {
         historikk.oppdaterHistorikk(
             historikkelement(
                 listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)
+                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar)
                 )
             )
         )
         assertFalse(historikk.harEndretHistorikk(utbetaling))
         historikk.oppdaterHistorikk(
             historikkelement(
-                perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig))
+                perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar))
             )
         )
         assertFalse(historikk.harEndretHistorikk(utbetaling))

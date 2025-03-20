@@ -140,33 +140,25 @@ data class PersonData(
         data class PersonutbetalingsperiodeData(
             val orgnr: String,
             val fom: LocalDate,
-            val tom: LocalDate,
-            val grad: Double,
-            val inntekt: Int
+            val tom: LocalDate
         ) {
             fun tilDto() = InfotrygdPersonutbetalingsperiodeInnDto(
                 orgnr = this.orgnr,
                 periode = PeriodeDto(
                     fom = this.fom,
                     tom = this.tom
-                ),
-                grad = ProsentdelDto(prosent = this.grad),
-                inntekt = InntektbeløpDto.DagligInt(this.inntekt)
+                )
             )
         }
 
         data class ArbeidsgiverutbetalingsperiodeData(
             val orgnr: String,
             val fom: LocalDate,
-            val tom: LocalDate,
-            val grad: Double,
-            val inntekt: Int
+            val tom: LocalDate
         ) {
             fun tilDto() = InfotrygdArbeidsgiverutbetalingsperiodeInnDto(
                 orgnr = this.orgnr,
-                periode = PeriodeDto(fom = this.fom, tom = this.tom),
-                grad = ProsentdelDto(prosent = grad),
-                inntekt = InntektbeløpDto.DagligInt(inntekt)
+                periode = PeriodeDto(fom = this.fom, tom = this.tom)
             )
         }
     }

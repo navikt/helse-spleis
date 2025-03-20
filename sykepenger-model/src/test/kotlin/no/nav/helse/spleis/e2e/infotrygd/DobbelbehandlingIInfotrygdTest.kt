@@ -25,7 +25,6 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -38,7 +37,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         val historie1 = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 3.januar, 26.januar, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(a1, 3.januar, 26.januar)
         )
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             *historie1,
@@ -53,7 +52,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         forlengVedtak(februar)
 
         val historie1 = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 26.januar, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 26.januar)
         )
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             *historie1,

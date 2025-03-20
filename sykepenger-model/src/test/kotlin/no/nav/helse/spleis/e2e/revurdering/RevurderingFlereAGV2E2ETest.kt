@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import no.nav.helse.april
-import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
@@ -569,7 +568,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 18.februar, 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 18.februar)
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23, Varselkode.RV_IT_3), 1.vedtaksperiode.filter(orgnummer = a1))

@@ -64,7 +64,6 @@ import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -78,10 +77,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     fun `inntektsmelding starter etter sykmeldingsperioden`() {
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 3.april(2019), 30.april(2019), 100.prosent, 100.daglig),
-            ArbeidsgiverUtbetalingsperiode(a1, 18.mars(2018), 2.april(2018), 100.prosent, 100.daglig),
-            ArbeidsgiverUtbetalingsperiode(a1, 29.november(2017), 3.desember(2017), 100.prosent, 100.daglig),
-            ArbeidsgiverUtbetalingsperiode(a1, 13.november(2017), 28.november(2017), 100.prosent, 100.daglig)
+            ArbeidsgiverUtbetalingsperiode(a1, 3.april(2019), 30.april(2019)),
+            ArbeidsgiverUtbetalingsperiode(a1, 18.mars(2018), 2.april(2018)),
+            ArbeidsgiverUtbetalingsperiode(a1, 29.november(2017), 3.desember(2017)),
+            ArbeidsgiverUtbetalingsperiode(a1, 13.november(2017), 28.november(2017))
         )
         håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger)
 

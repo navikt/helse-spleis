@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import no.nav.helse.april
 import no.nav.helse.desember
-import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -123,7 +122,8 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 29.januar, 2.februar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 29.januar, 2.februar
+        ))
         håndterYtelser(2.vedtaksperiode)
         assertVarsel(Varselkode.RV_IT_3, 2.vedtaksperiode.filter())
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)

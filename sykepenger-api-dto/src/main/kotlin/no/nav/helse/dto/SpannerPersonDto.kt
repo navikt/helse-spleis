@@ -71,17 +71,13 @@ data class SpannerPersonDto(
         data class PersonutbetalingsperiodeData(
             val orgnr: String,
             val fom: LocalDate,
-            val tom: LocalDate,
-            val grad: Double,
-            val inntekt: Int
+            val tom: LocalDate
         )
 
         data class ArbeidsgiverutbetalingsperiodeData(
             val orgnr: String,
             val fom: LocalDate,
-            val tom: LocalDate,
-            val grad: Double,
-            val inntekt: Int
+            val tom: LocalDate
         )
     }
 
@@ -1423,18 +1419,14 @@ private fun InfotrygdArbeidsgiverutbetalingsperiodeUtDto.tilPersonData() =
     SpannerPersonDto.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData(
         orgnr = this.orgnr,
         fom = this.periode.fom,
-        tom = this.periode.tom,
-        grad = this.grad.prosent,
-        inntekt = this.inntekt.dagligInt.beløp
+        tom = this.periode.tom
     )
 
 private fun InfotrygdPersonutbetalingsperiodeUtDto.tilPersonData() =
     SpannerPersonDto.InfotrygdhistorikkElementData.PersonutbetalingsperiodeData(
         orgnr = this.orgnr,
         fom = this.periode.fom,
-        tom = this.periode.tom,
-        grad = this.grad.prosent,
-        inntekt = this.inntekt.dagligInt.beløp
+        tom = this.periode.tom
     )
 
 private fun VilkårsgrunnlagInnslagUtDto.tilPersonData() = VilkårsgrunnlagInnslagData(

@@ -58,7 +58,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     fun `En uheldig bivirkning av å behandle perioder uten AGP`() {
         nyttVedtak(1.januar(2017) til 31.januar(2017))
 
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.mars(2017), 10.mars(2017), 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.mars(2017), 10.mars(2017)))
 
         nyttVedtak(februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         inspektør.utbetalinger(2.vedtaksperiode).last().inspektør.korrelasjonsId
@@ -100,7 +100,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `Infotrygdhistorikk som er nærme`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 30.januar, 100.prosent, INNTEKT))
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 30.januar))
         )
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
@@ -110,7 +110,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `Infotrygdhistorikk som ikke medfører utkasting`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 30.januar, 100.prosent, INNTEKT))
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 30.januar))
         )
         håndterSøknad(Sykdom(20.februar, 28.mars, 100.prosent))
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)

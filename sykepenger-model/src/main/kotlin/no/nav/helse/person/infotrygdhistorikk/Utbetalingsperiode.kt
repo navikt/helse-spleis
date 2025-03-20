@@ -10,24 +10,16 @@ import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 
 sealed class Utbetalingsperiode(
     val orgnr: String,
     fom: LocalDate,
-    tom: LocalDate,
-    val grad: Prosentdel,
-    val inntekt: Inntekt
+    tom: LocalDate
 ) : Infotrygdperiode(fom, tom) {
-    companion object {
-        // inntektbeløpet i Infotrygd-utbetalingene er gradert; justerer derfor "opp igjen"
-        fun inntekt(inntekt: Inntekt, grad: Prosentdel) = Inntekt.fraGradert(inntekt, grad)
-    }
-
     override fun sykdomstidslinje(kilde: Hendelseskilde): Sykdomstidslinje {
-        return Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, grad, kilde)
+        return Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, 100.prosent, kilde)
     }
 
     override fun utbetalingstidslinje() =
@@ -45,18 +37,16 @@ sealed class Utbetalingsperiode(
     override fun funksjoneltLik(other: Infotrygdperiode): Boolean {
         if (!super.funksjoneltLik(other)) return false
         other as Utbetalingsperiode
-        return this.orgnr == other.orgnr && this.periode.start == other.periode.start && this.grad == other.grad && this.inntekt == other.inntekt
+        return this.orgnr == other.orgnr && this.periode.start == other.periode.start
     }
 }
 
-class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
-    Utbetalingsperiode(orgnr, fom, tom, grad, inntekt) {
+class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate) :
+    Utbetalingsperiode(orgnr, fom, tom) {
 
     internal fun dto() = InfotrygdArbeidsgiverutbetalingsperiodeUtDto(
         orgnr = orgnr,
-        periode = periode.dto(),
-        grad = grad.dto(),
-        inntekt = inntekt.dto()
+        periode = periode.dto()
     )
 
     internal companion object {
@@ -65,22 +55,18 @@ class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDa
             return ArbeidsgiverUtbetalingsperiode(
                 orgnr = dto.orgnr,
                 fom = periode.start,
-                tom = periode.endInclusive,
-                grad = Prosentdel.gjenopprett(dto.grad),
-                inntekt = Inntekt.gjenopprett(dto.inntekt)
+                tom = periode.endInclusive
             )
         }
     }
 }
 
-class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
-    Utbetalingsperiode(orgnr, fom, tom, grad, inntekt) {
+class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate) :
+    Utbetalingsperiode(orgnr, fom, tom) {
 
     internal fun dto() = InfotrygdPersonutbetalingsperiodeUtDto(
         orgnr = orgnr,
-        periode = periode.dto(),
-        grad = grad.dto(),
-        inntekt = inntekt.dto()
+        periode = periode.dto()
     )
 
     internal companion object {
@@ -89,9 +75,7 @@ class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, gr
             return PersonUtbetalingsperiode(
                 orgnr = dto.orgnr,
                 fom = periode.start,
-                tom = periode.endInclusive,
-                grad = Prosentdel.gjenopprett(dto.grad),
-                inntekt = Inntekt.gjenopprett(dto.inntekt)
+                tom = periode.endInclusive
             )
         }
     }

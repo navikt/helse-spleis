@@ -702,17 +702,13 @@ private fun InfotrygdFerieperiodeDto.tilPersonData() = PersonData.Infotrygdhisto
 private fun InfotrygdArbeidsgiverutbetalingsperiodeUtDto.tilPersonData() = PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData(
     orgnr = this.orgnr,
     fom = this.periode.fom,
-    tom = this.periode.tom,
-    grad = this.grad.prosent,
-    inntekt = this.inntekt.dagligInt.beløp
+    tom = this.periode.tom
 )
 
 private fun InfotrygdPersonutbetalingsperiodeUtDto.tilPersonData() = PersonData.InfotrygdhistorikkElementData.PersonutbetalingsperiodeData(
     orgnr = this.orgnr,
     fom = this.periode.fom,
-    tom = this.periode.tom,
-    grad = this.grad.prosent,
-    inntekt = this.inntekt.dagligInt.beløp
+    tom = this.periode.tom
 )
 
 private fun VilkårsgrunnlagInnslagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagInnslagData(
