@@ -14,6 +14,7 @@ import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkj�
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta
+import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -121,6 +122,10 @@ internal class UtkastTilVedtakBuilder(
 
     internal fun sykdomstidslinje(sykdomstidslinje: Sykdomstidslinje) = apply {
         if (sykdomstidslinje.any { it is Dag.Feriedag }) tags.add(Tag.Ferie)
+    }
+
+    internal fun refusjonstidslinje(refusjonstidslinje: Beløpstidslinje) = apply {
+        if (refusjonstidslinje.sumOf { it.beløp.årlig } > 0) tags.add(Tag.ArbeidsgiverØnskerRefusjon)
     }
 
     private var sykepengegrunnlag by Delegates.notNull<Double>()
@@ -345,6 +350,7 @@ internal class UtkastTilVedtakBuilder(
         Innvilget,
         Ferie,
         InntektFraAOrdningenLagtTilGrunn,
+        ArbeidsgiverØnskerRefusjon
     }
 
     private companion object {

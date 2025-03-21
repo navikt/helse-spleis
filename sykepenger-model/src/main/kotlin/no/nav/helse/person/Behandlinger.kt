@@ -703,7 +703,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved godkjenningsbehov" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjenningsbehov" }
                 val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(utbetaling)
-                utkastTilVedtakBuilder.utbetalingstidslinje(utbetalingstidslinje).utbetaling(utbetaling).sykdomstidslinje(sykdomstidslinje)
+                utkastTilVedtakBuilder.utbetalingstidslinje(utbetalingstidslinje).utbetaling(utbetaling).sykdomstidslinje(sykdomstidslinje).refusjonstidslinje(refusjonstidslinje)
                 grunnlagsdata.berik(utkastTilVedtakBuilder)
                 behandling.observatører.forEach { it.utkastTilVedtak(utkastTilVedtakBuilder.buildUtkastTilVedtak()) }
                 Aktivitet.Behov.godkjenning(aktivitetsloggMedUtbetalingkontekst, utkastTilVedtakBuilder.buildGodkjenningsbehov())
@@ -712,7 +712,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             internal fun berik(builder: UtkastTilVedtakBuilder) {
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved utkast til vedtak" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved utkast til vedtak" }
-                builder.utbetalingstidslinje(utbetalingstidslinje).utbetaling(utbetaling).sykdomstidslinje(sykdomstidslinje)
+                builder.utbetalingstidslinje(utbetalingstidslinje).utbetaling(utbetaling).sykdomstidslinje(sykdomstidslinje).refusjonstidslinje(refusjonstidslinje)
                 grunnlagsdata.berik(builder)
             }
 

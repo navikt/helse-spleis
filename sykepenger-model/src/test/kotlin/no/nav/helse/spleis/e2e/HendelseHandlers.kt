@@ -124,6 +124,7 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
     periode: Periode,
     vararg organisasjonsnummere: String,
     beregnetInntekt: Inntekt = INNTEKT,
+    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null),
     arbeidsgiverperiode: List<Periode> = listOf(Periode(periode.start, periode.start.plusDays(15))),
     inntektsmeldingId: UUID = UUID.randomUUID(),
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode
@@ -136,7 +137,8 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
             beregnetInntekt = beregnetInntekt,
             orgnummer = it,
             id = inntektsmeldingId,
-            vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter
+            vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
+            refusjon = refusjon
         )
     }
 
