@@ -21,9 +21,6 @@ internal class Infotrygdhistorikk private constructor(
     constructor() : this(mutableListOf())
 
     internal companion object {
-        private fun oppfriskningsperiode(tidligsteDato: LocalDate) =
-            tidligsteDato.minusYears(4) til LocalDate.now()
-
         internal fun gjenopprett(dto: InfotrygdhistorikkInnDto): Infotrygdhistorikk {
             return Infotrygdhistorikk(
                 _elementer = dto.elementer.map { InfotrygdhistorikkElement.gjenopprett(it) }.toMutableList()
@@ -61,6 +58,13 @@ internal class Infotrygdhistorikk private constructor(
 
     internal fun oppfrisk(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
         utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode(tidligsteDato))
+    }
+
+    private fun oppfriskningsperiode(tidligsteDato: LocalDate): Periode {
+        val fireÅrFørSpleisdag = tidligsteDato.minusYears(4)
+        val førsteInfotrygddag = if (harHistorikk()) siste.perioder.firstOrNull()?.periode?.start else null
+        val fom = førsteInfotrygddag?.let { minOf(fireÅrFørSpleisdag, førsteInfotrygddag) } ?: fireÅrFørSpleisdag
+        return fom til LocalDate.now()
     }
 
     internal fun utbetalingstidslinje(): Utbetalingstidslinje {
