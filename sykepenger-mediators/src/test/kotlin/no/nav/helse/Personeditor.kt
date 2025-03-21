@@ -1,5 +1,7 @@
 package no.nav.helse
 
+import com.fasterxml.jackson.core.util.DefaultIndenter
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.sql_dsl.connection
 import com.github.navikt.tbd_libs.sql_dsl.firstOrNull
@@ -75,7 +77,7 @@ internal object Personeditor {
                 }
                 with(resultatfil) {
                     createNewFile()
-                    writeText(objectMapper.readTree(data).toPrettyString())
+                    writeText(objectMapper.writer(printer).writeValueAsString(objectMapper.readTree(data)))
                 }
 
                 println("## Nå er vi klar får å endre personen her 🥷")
@@ -198,5 +200,8 @@ internal object Personeditor {
         .replace("got", "til")
         .replace("but none found", "<slettet>")
 
+    private val printer = DefaultPrettyPrinter().apply {
+        indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE)
+    }
     private val objectMapper = jacksonObjectMapper()
 }
