@@ -43,14 +43,22 @@ class InntekterForBeregningTest {
         }
 
         inntekterForBeregning.hensyntattAlleInntektskilder(
-            mapOf(
-                "a1" to listOf(tidslinjeOf(16.AP, 8.NAV)),
-                "a2" to listOf(tidslinjeOf(20.UTELATE, 8.AP))
+            listOf(
+                InntekterForBeregning.Arbeidsgiverberegning("a1", listOf(InntekterForBeregning.Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(16.AP, 8.NAV))), emptyList()),
+                InntekterForBeregning.Arbeidsgiverberegning("a2", listOf(InntekterForBeregning.Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(20.UTELATE, 8.AP))), emptyList()),
             )
         ).also { result ->
             assertEquals(2, result.size)
-            assertEquals(28, result["a1"]?.size)
-            assertEquals(28, result["a2"]?.size)
+            result.first().also {
+                assertEquals("a1", it.orgnummer)
+                assertEquals("PPPPPPP PPPPPPP PPNNNHH NNN", it.vedtaksperioder.single().utbetalingstidslinje.toString())
+                assertEquals("AAFF", it.ghostOgØvrig.single().toString())
+            }
+            result.last().also {
+                assertEquals("a2", it.orgnummer)
+                assertEquals("P PPPPPPP", it.vedtaksperioder.single().utbetalingstidslinje.toString())
+                assertEquals("AAAAAFF AAAAAFF AAAAAF", it.ghostOgØvrig.single().toString())
+            }
         }
     }
 
