@@ -163,9 +163,7 @@ internal class UtkastTilVedtakBuilder(
         }
 
         private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta = when {
-            tags.contains(Tag.InngangsvilkårFraInfotrygd) -> FastsattIInfotrygd(totalOmregnetÅrsinntekt).also {
-                check(Tag.FlereArbeidsgivere !in tags) { "Skal ikke være mulig med vilkårsgrunnlag fra Infotrygd og flere arbeidsgivere!" }
-            }
+            tags.contains(Tag.InngangsvilkårFraInfotrygd) -> FastsattIInfotrygd(totalOmregnetÅrsinntekt)
 
             skjønnsfastsatt -> FastsattEtterSkjønn(
                 omregnetÅrsinntekt = totalOmregnetÅrsinntekt,
