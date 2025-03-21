@@ -23,7 +23,8 @@ internal class UtkastTilVedtakKontraktTest : AbstractEndToEndMediatorTest() {
                 "Førstegangsbehandling",
                 "Innvilget",
                 "Arbeidsgiverutbetaling",
-                "EnArbeidsgiver"
+                "EnArbeidsgiver",
+                "ArbeidsgiverØnskerRefusjon"
             ]
         }
         """

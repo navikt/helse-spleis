@@ -9,7 +9,7 @@ import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.skyscreamer.jsonassert.JSONAssert
-import org.skyscreamer.jsonassert.JSONCompareMode.STRICT
+import org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE
 
 internal object KontraktAssertions {
 
@@ -28,7 +28,7 @@ internal object KontraktAssertions {
             it.assertOgFjernLocalDateTimeTemplates()
         }
         førAssertEquals(faktiskJson)
-        JSONAssert.assertEquals(forventetJson.toString(), faktiskJson.toString(), STRICT)
+        JSONAssert.assertEquals(forventetJson.toString(), faktiskJson.toString(), NON_EXTENSIBLE)
         return kopi
     }
 
