@@ -122,11 +122,6 @@ internal class Infotrygdhistorikk private constructor(
         return siste.harFerieI(periode)
     }
 
-    internal fun sisteUtbetalteDag(): LocalDate? {
-        if (!harHistorikk()) return null
-        return siste.perioder.maxOfOrNull { it.periode.endInclusive }
-    }
-
     internal fun dto() = InfotrygdhistorikkUtDto(
         elementer = this._elementer.map { it.dto() }
     )
