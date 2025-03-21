@@ -11,6 +11,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.etterlevelse.Regelverkslogg
+import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
 import org.skyscreamer.jsonassert.JSONCompare
 import org.skyscreamer.jsonassert.JSONCompareMode
@@ -171,7 +173,10 @@ internal object Personeditor {
         val json = try { objectMapper.readTree(readText()).toString() } catch (feil: Exception) {
             throw IllegalArgumentException("❌ Du har laget en ugylig json!", feil)
         }
-        try { SerialisertPerson(json).tilPersonDto() } catch (feil: Exception) {
+        val dto = try { SerialisertPerson(json).tilPersonDto() } catch (feil: Exception) {
+            throw IllegalArgumentException("❌ Du har laget en ugylig person-json!", feil)
+        }
+        try { Person.gjenopprett(Regelverkslogg.EmptyLog, dto) } catch (feil: Exception) {
             throw IllegalArgumentException("❌ Du har laget en ugylig person-json!", feil)
         }
         return json
