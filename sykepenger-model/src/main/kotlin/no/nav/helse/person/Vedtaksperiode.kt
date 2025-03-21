@@ -2073,18 +2073,16 @@ internal class Vedtaksperiode private constructor(
         ): List<Arbeidsgiverberegning> {
             val input = tidslinjer.map { it.samletTidslinje }
             val result = filter.filter(input, periode, aktivitetslogg, subsumsjonslogg)
-            return tidslinjer.zip(result) { a, filtrertTidslinje ->
+            val tilslutt = tidslinjer.zip(result) { a, filtrertTidslinje ->
                 a.copy(
                     vedtaksperioder = a.vedtaksperioder.map { b ->
                         b.copy(
                             utbetalingstidslinje = filtrertTidslinje.subset(b.utbetalingstidslinje.periode())
                         )
-                    },
-                    ghostOgØvrig = a.ghostOgØvrig.map { b ->
-                        filtrertTidslinje.subset(b.periode())
                     }
                 )
             }
+            return tilslutt
         }
         val beregnetTidslinjePerArbeidsgiver = filtere.fold(uberegnetTidslinjePerArbeidsgiver) { tidslinjer, filter ->
             kjørFilter(tidslinjer, filter)

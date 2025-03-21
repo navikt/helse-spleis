@@ -150,8 +150,8 @@ internal class InntekterForBeregning private constructor(
         val vedtaksperioder: List<Vedtaksperiodeberegning>,
         val ghostOgØvrig: List<Utbetalingstidslinje>
     ) {
-        val samletVedtaksperiodetidslinje = vedtaksperioder.map { it.utbetalingstidslinje }.fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+        val samletVedtaksperiodetidslinje = vedtaksperioder.map { it.utbetalingstidslinje }
         val samletGhostOgØvrig = ghostOgØvrig.fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
-        val samletTidslinje = samletVedtaksperiodetidslinje.plus(samletGhostOgØvrig)
+        val samletTidslinje = samletVedtaksperiodetidslinje.fold(samletGhostOgØvrig, Utbetalingstidslinje::plus)
     }
 }
