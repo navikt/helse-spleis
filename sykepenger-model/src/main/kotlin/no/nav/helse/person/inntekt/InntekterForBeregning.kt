@@ -38,25 +38,34 @@ internal class InntekterForBeregning private constructor(
             .filterValues { inntekter -> inntekter.isNotEmpty() }
     }
 
-    internal fun hensyntattAlleInntektskilder(beregnedeUtbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
-        return inntekterPerInntektskilde.mapValues { (inntektskilde, inntekter) ->
-            val beregnedeUtbetalingstidslinjerForInntektskilde = beregnedeUtbetalingstidslinjer[inntektskilde.id] ?: emptyList()
-            val beregendePerioderForInntektskilde = beregnedeUtbetalingstidslinjerForInntektskilde.map(Utbetalingstidslinje::periode)
-            val uberegnedeDagerForArbeidsgiver = beregningsperiode.uten(beregendePerioderForInntektskilde).flatten()
+    internal fun hensyntattAlleInntektskilder(beregnedeUtbetalingstidslinjer: List<Arbeidsgiverberegning>): List<Arbeidsgiverberegning> {
+        return inntekterPerInntektskilde.map { (inntektskilde, inntekter) ->
+            val arbeidsgiverberegning = beregnedeUtbetalingstidslinjer.firstOrNull { it.orgnummer == inntektskilde.id } ?: Arbeidsgiverberegning(
+                orgnummer = inntektskilde.id,
+                vedtaksperioder = emptyList(),
+                ghostOgØvrig = emptyList()
+            )
+            val beregnedeUtbetalingstidslinjerForInntektskilde = arbeidsgiverberegning.vedtaksperioder
+            val beregendePerioderForInntektskilde = beregnedeUtbetalingstidslinjerForInntektskilde.map { it.utbetalingstidslinje.periode() }
+            val uberegnedeDagerForArbeidsgiver = beregningsperiode.uten(beregendePerioderForInntektskilde)
             val uberegnetUtbetalingstidslinjeForArbeidsgiver = arbeidsdager(inntekter, uberegnedeDagerForArbeidsgiver)
-            beregnedeUtbetalingstidslinjerForInntektskilde.fold(uberegnetUtbetalingstidslinjeForArbeidsgiver, Utbetalingstidslinje::plus)
-        }.mapKeys { (inntektskilde, _) -> inntektskilde.id }.filterValues { it.isNotEmpty() }
-    }
-
-    private fun arbeidsdager(inntekter: Beløpstidslinje, dager: List<LocalDate>) = with(Utbetalingstidslinje.Builder()) {
-        dager.forEach { dato ->
-            if (dato.erHelg()) addFridag(dato, Økonomi.ikkeBetalt())
-            else addArbeidsdag(
-                dato = dato,
-                økonomi = Økonomi.ikkeBetalt(aktuellDagsinntekt = inntekter[dato].beløp)
+            arbeidsgiverberegning.copy(
+                ghostOgØvrig = uberegnetUtbetalingstidslinjeForArbeidsgiver
             )
         }
-        build()
+    }
+
+    private fun arbeidsdager(inntekter: Beløpstidslinje, perioderMedArbeid: List<Periode>) = perioderMedArbeid.map { periode ->
+        with(Utbetalingstidslinje.Builder()) {
+            periode.forEach { dato ->
+                if (dato.erHelg()) addFridag(dato, Økonomi.ikkeBetalt())
+                else addArbeidsdag(
+                    dato = dato,
+                    økonomi = Økonomi.ikkeBetalt(aktuellDagsinntekt = inntekter[dato].beløp)
+                )
+            }
+            build()
+        }
     }
 
     internal class Builder(private val beregningsperiode: Periode) {
@@ -128,5 +137,22 @@ internal class InntekterForBeregning private constructor(
             // Når vi skal lage en utbetalingstidslinje på en AUU hvor det finnes inntektsgrunnlag så lagrer vi ned de ekte inntektene
             return inntektstidslinje to inntekterForBeregning
         }
+    }
+
+    data class Vedtaksperiodeberegning(
+        val vedtaksperiodeId: UUID,
+        val utbetalingstidslinje: Utbetalingstidslinje
+    ) {
+        val periode = utbetalingstidslinje.periode()
+    }
+
+    data class Arbeidsgiverberegning(
+        val orgnummer: String,
+        val vedtaksperioder: List<Vedtaksperiodeberegning>,
+        val ghostOgØvrig: List<Utbetalingstidslinje>
+    ) {
+        private val samletVedtaksperiodetidslinje = vedtaksperioder.map { it.utbetalingstidslinje }
+        private val samletGhostOgØvrig = ghostOgØvrig.fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+        val samletTidslinje = samletVedtaksperiodetidslinje.fold(samletGhostOgØvrig, Utbetalingstidslinje::plus)
     }
 }
