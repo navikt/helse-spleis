@@ -8,7 +8,6 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.merge
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
@@ -143,15 +142,17 @@ internal class InntekterForBeregning private constructor(
     data class Vedtaksperiodeberegning(
         val vedtaksperiodeId: UUID,
         val utbetalingstidslinje: Utbetalingstidslinje
-    )
+    ) {
+        val periode = utbetalingstidslinje.periode()
+    }
 
     data class Arbeidsgiverberegning(
         val orgnummer: String,
         val vedtaksperioder: List<Vedtaksperiodeberegning>,
         val ghostOgØvrig: List<Utbetalingstidslinje>
     ) {
-        val samletVedtaksperiodetidslinje = vedtaksperioder.map { it.utbetalingstidslinje }
-        val samletGhostOgØvrig = ghostOgØvrig.fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+        private val samletVedtaksperiodetidslinje = vedtaksperioder.map { it.utbetalingstidslinje }
+        private val samletGhostOgØvrig = ghostOgØvrig.fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
         val samletTidslinje = samletVedtaksperiodetidslinje.fold(samletGhostOgØvrig, Utbetalingstidslinje::plus)
     }
 }
