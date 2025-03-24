@@ -2054,9 +2054,22 @@ internal class Vedtaksperiode private constructor(
         val historisktidslinje = historisktidslinjePerArbeidsgiver.values
             .fold(person.infotrygdhistorikk.utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
+        val sykdomsgradfilter = Sykdomsgradfilter(person.minimumSykdomsgradsvurdering)
+        val vurdertTotalSykdomsgrad = sykdomsgradfilter
+            .filter(uberegnetTidslinjePerArbeidsgiver.map { it.samletTidslinje }, periode, aktivitetslogg, subsumsjonslogg)
+            .zip(uberegnetTidslinjePerArbeidsgiver) { vurdertTidslinje, arbeidsgiver ->
+                arbeidsgiver.copy(
+                    vedtaksperioder = arbeidsgiver.vedtaksperioder.map { v ->
+                        v.copy(
+                            utbetalingstidslinje = vurdertTidslinje.subset(v.periode)
+                        )
+                    }
+                )
+            }
+            .filter { it.vedtaksperioder.isNotEmpty() } // herfra og ut bryr vi oss kun om arbeidsforhold med vedtaksperioder
+
         val maksdatofilter = MaksimumSykepengedagerfilter(person.alder, person.regler, historisktidslinje)
         val filtere = listOf(
-            Sykdomsgradfilter(person.minimumSykdomsgradsvurdering),
             AvvisDagerEtterDødsdatofilter(person.alder),
             AvvisInngangsvilkårfilter(grunnlagsdata),
             maksdatofilter,
@@ -2070,7 +2083,7 @@ internal class Vedtaksperiode private constructor(
             tidslinjer: List<Arbeidsgiverberegning>,
             filter: UtbetalingstidslinjerFilter
         ): List<Arbeidsgiverberegning> {
-            val input = tidslinjer.map { it.samletTidslinje }
+            val input = tidslinjer.map { it.samletVedtaksperiodetidslinje }
             val result = filter.filter(input, periode, aktivitetslogg, subsumsjonslogg)
             val tilslutt = tidslinjer.zip(result) { a, filtrertTidslinje ->
                 a.copy(
@@ -2078,12 +2091,17 @@ internal class Vedtaksperiode private constructor(
                         b.copy(
                             utbetalingstidslinje = filtrertTidslinje.subset(b.utbetalingstidslinje.periode())
                         )
-                    }
+                    },
+                    // kopierer ghostOgØvrig kun for å bevare total utbetalingsgrad-verdien.
+                    // det løser vi heller ved å unngå å sende ghost-dagene til utbetaling..
+                    /*ghostOgØvrig = a.ghostOgØvrig.map {
+                        filtrertTidslinje.subset(it.periode())
+                    }*/
                 )
             }
             return tilslutt
         }
-        val beregnetTidslinjePerArbeidsgiver = filtere.fold(uberegnetTidslinjePerArbeidsgiver) { tidslinjer, filter ->
+        val beregnetTidslinjePerArbeidsgiver = filtere.fold(vurdertTotalSykdomsgrad) { tidslinjer, filter ->
             kjørFilter(tidslinjer, filter)
         }
 

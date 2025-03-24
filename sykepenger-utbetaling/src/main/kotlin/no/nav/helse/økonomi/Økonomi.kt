@@ -16,6 +16,7 @@ data class Økonomi(
     val aktuellDagsinntekt: Inntekt,
     val dekningsgrunnlag: Inntekt,
     val totalSykdomsgrad: Prosentdel = sykdomsgrad,
+    val totalUtbetalingsgrad: Prosentdel = utbetalingsgrad,
     val arbeidsgiverbeløp: Inntekt? = null,
     val personbeløp: Inntekt? = null
 ) {
@@ -51,17 +52,22 @@ data class Økonomi(
 
         fun totalSykdomsgrad(økonomiList: List<Økonomi>): List<Økonomi> {
             val totalgrad = totalSykdomsgrad(økonomiList, Økonomi::sykdomsgrad)
+            val utbetalingsgrad = totalSykdomsgrad(økonomiList, Økonomi::utbetalingsgrad)
             return økonomiList.map { økonomi: Økonomi ->
-                økonomi.copy(totalSykdomsgrad = totalgrad)
+                økonomi.copy(
+                    totalSykdomsgrad = totalgrad,
+                    totalUtbetalingsgrad = utbetalingsgrad
+                )
             }
         }
 
         fun List<Økonomi>.erUnderGrensen() = none { !it.totalSykdomsgrad.erUnderGrensen() }
 
-        private fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) = totalSykdomsgrad(økonomiList, Økonomi::utbetalingsgrad)
-
         fun betal(sykepengegrunnlagBegrenset6G: Inntekt, økonomiList: List<Økonomi>): List<Økonomi> {
-            val utbetalingsgrad = totalUtbetalingsgrad(økonomiList)
+            // bruker utbetalingsgraden fra økonomi satt tidligere
+            // fordi vi slår sammen vedtaksperiode-tidslinjer til én før vi beregner så vil det kunne oppstå
+            // "fyll-dager". disse hopper vi over...
+            val utbetalingsgrad = økonomiList.firstOrNull { it.totalUtbetalingsgrad > 0.prosent }?.totalUtbetalingsgrad ?: 0.prosent
             val foreløpig = delteUtbetalinger(økonomiList)
             return fordelBeløp(foreløpig, sykepengegrunnlagBegrenset6G, utbetalingsgrad)
         }
