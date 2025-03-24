@@ -24,23 +24,23 @@ internal class TidslinjefusjonTest {
     @Test
     fun `slå sammen betalingstidslinjer som ikke er tilstøtende`() {
         val inspektør = (tidslinjeOf(15.NAV) + tidslinjeOf(15.UTELATE, 3.UTELATE, 15.NAV)).inspektør
-        assertEquals(33, inspektør.size)
+        assertEquals(30, inspektør.size)
         assertEquals(22, inspektør.navDagTeller)
         assertEquals(8, inspektør.navHelgDagTeller)
         assertEquals(0, inspektør.ukjentDagTeller)
-        assertEquals(3, inspektør.arbeidsdagTeller)
+        assertEquals(0, inspektør.arbeidsdagTeller)
         assertEquals(0, inspektør.fridagTeller)
     }
 
     @Test
     fun `slå sammen ikke-tilstøtende betalingstider med helger`() {
         val inspektør = (tidslinjeOf(15.NAV) + tidslinjeOf(15.UTELATE, 7.UTELATE, 15.NAV)).inspektør
-        assertEquals(37, inspektør.size)
+        assertEquals(30, inspektør.size)
         assertEquals(22, inspektør.navDagTeller)
         assertEquals(8, inspektør.navHelgDagTeller)
         assertEquals(0, inspektør.ukjentDagTeller)
-        assertEquals(5, inspektør.arbeidsdagTeller)
-        assertEquals(2, inspektør.fridagTeller)
+        assertEquals(0, inspektør.arbeidsdagTeller)
+        assertEquals(0, inspektør.fridagTeller)
     }
 
     @Test
@@ -59,12 +59,12 @@ internal class TidslinjefusjonTest {
             tidslinjeOf(15.UTELATE, 7.UTELATE, 15.NAV) +
             tidslinjeOf(15.UTELATE, 22.UTELATE, 7.UTELATE, 15.NAV)
             ).inspektør
-        assertEquals(59, inspektør.size)
+        assertEquals(45, inspektør.size)
         assertEquals(33, inspektør.navDagTeller)
         assertEquals(12, inspektør.navHelgDagTeller)
         assertEquals(0, inspektør.ukjentDagTeller)
-        assertEquals(10, inspektør.arbeidsdagTeller)
-        assertEquals(4, inspektør.fridagTeller)
+        assertEquals(0, inspektør.arbeidsdagTeller)
+        assertEquals(0, inspektør.fridagTeller)
     }
 
     // The following tests handle overlapping Utbetalingstidslinjer. This should only be for multiple arbeitsgivere

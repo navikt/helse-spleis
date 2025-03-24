@@ -62,27 +62,28 @@ internal class MaksimumSykepengedagerfilter(
         tidslinjegrunnlag = tidslinjer + listOf(infotrygdtidslinje.fremTilOgMed(periode.endInclusive))
         beregnetTidslinje = tidslinjegrunnlag.reduce(Utbetalingstidslinje::plus)
 
-        beregnetTidslinje.forEach { dag ->
-            when (dag) {
-                is Utbetalingsdag.Arbeidsdag -> state.oppholdsdag(this, dag.dato)
-                is Utbetalingsdag.ArbeidsgiverperiodeDag -> state.oppholdsdag(this, dag.dato)
-                is Utbetalingsdag.ArbeidsgiverperiodedagNav -> state.oppholdsdag(this, dag.dato)
-                is Utbetalingsdag.AvvistDag -> state.avvistDag(this, dag.dato)
-                is Utbetalingsdag.ForeldetDag -> state.oppholdsdag(this, dag.dato)
-                is Utbetalingsdag.Fridag -> state.fridag(this, dag.dato)
-                is NavDag -> {
-                    if (alder.mistetSykepengerett(dag.dato)) state(State.ForGammel)
-                    state.betalbarDag(this, dag.dato)
-                }
+        Utbetalingstidslinje.periode(tidslinjegrunnlag)
+            ?.forEach { dato ->
+                when (val dag = beregnetTidslinje[dato]) {
+                    is Utbetalingsdag.Arbeidsdag -> state.oppholdsdag(this, dag.dato)
+                    is Utbetalingsdag.ArbeidsgiverperiodeDag -> state.oppholdsdag(this, dag.dato)
+                    is Utbetalingsdag.ArbeidsgiverperiodedagNav -> state.oppholdsdag(this, dag.dato)
+                    is Utbetalingsdag.AvvistDag -> state.avvistDag(this, dag.dato)
+                    is Utbetalingsdag.ForeldetDag -> state.oppholdsdag(this, dag.dato)
+                    is Utbetalingsdag.Fridag -> state.fridag(this, dag.dato)
+                    is NavDag -> {
+                        if (alder.mistetSykepengerett(dag.dato)) state(State.ForGammel)
+                        state.betalbarDag(this, dag.dato)
+                    }
 
-                is Utbetalingsdag.NavHelgDag -> {
-                    if (alder.mistetSykepengerett(dag.dato)) state(State.ForGammel)
-                    state.sykdomshelg(this, dag.dato)
-                }
+                    is Utbetalingsdag.NavHelgDag -> {
+                        if (alder.mistetSykepengerett(dag.dato)) state(State.ForGammel)
+                        state.sykdomshelg(this, dag.dato)
+                    }
 
-                is UkjentDag -> state.oppholdsdag(this, dag.dato)
+                    is UkjentDag -> state.oppholdsdag(this, dag.dato)
+                }
             }
-        }
 
         /** går gjennom alle maksdato-sakene og avslår dager. EGENTLIG er det nok å avslå dagene
          *  fra sisteVurdering, men det er noen enhetstester som tester veldig lange

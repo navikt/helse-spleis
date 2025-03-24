@@ -6,7 +6,6 @@ import java.util.SortedMap
 import no.nav.helse.dto.BegrunnelseDto
 import no.nav.helse.dto.deserialisering.UtbetalingstidslinjeInnDto
 import no.nav.helse.dto.serialisering.UtbetalingstidslinjeUtDto
-import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
@@ -112,15 +111,11 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
         if (this.isEmpty()) return other
         val tidligsteDato = this.tidligsteDato(other)
         val sisteDato = this.sisteDato(other)
-        val nyeDager = (tidligsteDato til sisteDato).map { dag ->
+        val nyeDager = (tidligsteDato til sisteDato).mapNotNull { dag ->
             val venstre = this.utbetalingsdager[dag]
             val høyre = other.utbetalingsdager[dag]
             when {
-                venstre == null && høyre == null -> when (dag.erHelg()) {
-                    true -> Fridag(dag, Økonomi.ikkeBetalt())
-                    false -> Arbeidsdag(dag, Økonomi.ikkeBetalt())
-                }
-
+                venstre == null && høyre == null -> null
                 venstre == null -> høyre!!
                 høyre == null -> venstre
                 else -> maxOf(venstre, høyre)
