@@ -67,7 +67,7 @@ internal class AktivitetsloggAsserts(
 
     internal fun assertFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter) {
         val errors = collectFunksjonelleFeil(filter)
-        assertTrue(errors.contains(varselkode.funksjonellFeilTekst), "fant ikke forventet error. Errors:\n${errors.joinToString("\n")}")
+        assertTrue(errors.contains(varselkode.varseltekst), "fant ikke forventet error. Errors:\n${errors.joinToString("\n")}")
     }
 
     internal fun assertIngenBehov(vedtaksperiode: UUID, behovtype: Aktivitet.Behov.Behovtype) {

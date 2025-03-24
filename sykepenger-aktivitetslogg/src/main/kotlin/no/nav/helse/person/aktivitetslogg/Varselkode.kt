@@ -6,7 +6,6 @@ private val regex = "^$varselkodeformat$".toRegex()
 
 enum class Varselkode(
     val varseltekst: String,
-    val funksjonellFeilTekst: String = varseltekst,
     val avviklet: Boolean = false
 ) {
 
@@ -106,7 +105,7 @@ enum class Varselkode(
     RV_RE_2("Mangler refusjonsopplysninger", avviklet = true),
 
     // IT: Infotrygd
-    RV_IT_1("Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig", funksjonellFeilTekst = "Det er utbetalt en nyere periode i Infotrygd"),
+    RV_IT_1("Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig"),
     RV_IT_2("Perioden er lagt inn i Infotrygd, men ikke utbetalt. Fjern fra Infotrygd hvis det utbetales via speil.", avviklet = true),
     RV_IT_3("Utbetaling i Infotrygd overlapper med vedtaksperioden"), // funksjonellFeil
     RV_IT_4("Det er registrert utbetaling på nødnummer", avviklet = true), // funksjonellFeil
@@ -176,7 +175,7 @@ enum class Varselkode(
     RV_IV_1("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.", avviklet = true),
 
     @Deprecated("Denne skal ikke være i bruk i Spleis mer, brukes av spinnvill")
-    RV_IV_2("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", funksjonellFeilTekst = "Har mer enn 25 % avvik"),
+    RV_IV_2("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene."),
     RV_IV_3("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene"),
     RV_IV_4("Finnes inntekter fra flere virksomheter siste tre måneder", avviklet = true),
     RV_IV_5("Har inntekt på flere arbeidsgivere med forskjellig fom dato", avviklet = true),
@@ -285,7 +284,7 @@ enum class Varselkode(
         Aktivitet.Varsel.opprett(kontekster, this, varseltekst)
 
     internal fun funksjonellFeil(kontekster: List<SpesifikkKontekst>): Aktivitet.FunksjonellFeil =
-        Aktivitet.FunksjonellFeil.opprett(kontekster, this, funksjonellFeilTekst)
+        Aktivitet.FunksjonellFeil.opprett(kontekster, this, varseltekst)
 
     override fun toString() = "${this.name}: $varseltekst"
 
