@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
@@ -46,7 +47,9 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_21
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
@@ -66,6 +69,7 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlagFlereArbeidsgivere
@@ -84,6 +88,34 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class YtelserE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Å foreslå foreldrepenger en hel periode kan medføre at vi feilaktig annullerer tidligere utebetalte perioder`() {
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
+        nyttVedtak(mars)
+        nyttVedtak(mai, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        val korrelasjonsIdMars = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
+        val korrelasjonsIdMai = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
+
+        håndterSøknad(juli)
+        håndterArbeidsgiveropplysninger(listOf(1.juli til 16.juli), vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+
+        assertEquals(listOf(1.juli til 16.juli), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.arbeidsgiverperiode)
+
+        håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(juli, 100)))
+
+        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.arbeidsgiverperiode)
+
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+        val korrelasjonsIdJuli = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
+
+        assertEquals(korrelasjonsIdMars, korrelasjonsIdJuli) // Siden vi ikke har agp bygger vi videre på første utbetaling etter siste utbetalingsdag i Infotrygd
+        assertTrue(inspektør.utbetalinger.last { it.korrelasjonsId == korrelasjonsIdMai }.erAnnullering) // Også annullerer vi alt mellom utbetalingen vi bygger videre på og perioden vi nå behandler
+        assertVarsler(listOf(RV_AY_5, RV_UT_21), 3.vedtaksperiode.filter())
+    }
 
     @Test
     fun `vilkårsgrunnlag forsvinner når foreldrepengene legges inn`() {
