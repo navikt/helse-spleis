@@ -34,9 +34,11 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
+@Disabled("Har skrudd av å foreslå foreldrepenger ettersom det kan føre til feilaktige annulleringer")
 internal class ForeslåForeldrepengerE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Å foreslå foreldrepenger en hel periode kan medføre at vi feilaktig annullerer tidligere utebetalte perioder`() {

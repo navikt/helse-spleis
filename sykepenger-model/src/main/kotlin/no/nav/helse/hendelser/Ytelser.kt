@@ -39,9 +39,7 @@ class Ytelser(
         )
     }
 
-    private val YTELSER_SOM_KAN_OPPDATERE_HISTORIKK: List<AnnenYtelseSomKanOppdatereHistorikk> = listOf(
-        foreldrepenger
-    )
+    private val YTELSER_SOM_KAN_OPPDATERE_HISTORIKK: List<AnnenYtelseSomKanOppdatereHistorikk> = emptyList()
     private val sykdomstidslinjer = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK
         .map { it to it.sykdomstidslinje(metadata.meldingsreferanseId, metadata.registrert) }
 
