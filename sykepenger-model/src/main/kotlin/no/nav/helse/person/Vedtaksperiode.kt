@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -47,7 +47,6 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.Påminnelse.Predikat
 import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
 import no.nav.helse.hendelser.Påminnelse.Predikat.VentetMinst
 import no.nav.helse.hendelser.Revurderingseventyr
@@ -2639,7 +2638,7 @@ internal class Vedtaksperiode private constructor(
         private fun vurderOmInntektsmeldingAldriKommer(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse): Boolean {
             if (påminnelse.når(Flagg("ønskerInntektFraAOrdningen"))) return true
             if (Toggle.InntektsmeldingSomIkkeKommer.disabled) return false
-            if (vedtaksperiode.person.alder.fødselsdato.dayOfMonth !in 29 .. 31) return false
+            if (vedtaksperiode.person.alder.fødselsdato.dayOfMonth !in 15..31) return false
             val ventetMinst3Måneder = påminnelse.når(VentetMinst(Period.ofMonths(3)))
             val ikkeForGammel = !påminnelse.når(Påminnelse.Predikat.VentetFørCutoff)
             return ventetMinst3Måneder && ikkeForGammel
