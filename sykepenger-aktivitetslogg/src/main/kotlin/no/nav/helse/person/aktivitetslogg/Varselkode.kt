@@ -42,7 +42,7 @@ enum class Varselkode(
     RV_SØ_24("Mottatt flere søknade for perioden - den første søknaden som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt", avviklet = true),
     RV_SØ_25("Permisjon oppgitt i perioden i søknaden. Vurder rett til sykepenger og korriger sykmeldingsperioden", avviklet = true),
     RV_SØ_26("Søknaden inneholder Feriedager utenfor perioden søknaden gjelder for", avviklet = true),
-    RV_SØ_27("Mottatt søknad out of order innenfor 18 dager til neste"),
+    RV_SØ_27("Mottatt søknad out of order innenfor 18 dager til neste", avviklet = true),
     RV_SØ_28("Søknad har mindre enn 20 dagers gap til en forkastet periode"),
     RV_SØ_29("Søknaden er opprettet fra en utenlandsk sykmelding"),
     RV_SØ_30("Søknaden er markert med flagget sendTilGosys"),
@@ -137,7 +137,7 @@ enum class Varselkode(
     RV_IT_30("Perioden er lagt inn i Infotrygd, men ikke utbetalt. Fjern fra Infotrygd hvis det utbetales via speil.", avviklet = true),
     RV_IT_31("Perioden forlenger en behandling i Infotrygd, og har historikk fra ny løsning: Undersøk at antall dager igjen er beregnet riktig.", avviklet = true),
     RV_IT_32("Perioden forlenger en behandling i ny løsning, og har historikk i Infotrygd også: Undersøk at antall dager igjen er beregnet riktig.", avviklet = true),
-    RV_IT_33("Skjæringstidspunktet har endret seg som følge av historikk fra Infotrygd"),
+    RV_IT_33("Skjæringstidspunktet har endret seg som følge av historikk fra Infotrygd", avviklet = true),
     RV_IT_34("Avslutter perioden fordi tidligere periode gikk til Infotrygd", avviklet = true),
     RV_IT_35("Det er en utbetalingsperiode i Infotrygd som mangler fom- eller tomdato", avviklet = true),
     RV_IT_36("Periode som før var uten utbetalingsdager har nå utbetalingsdager etter endringer fra Infotrygd", avviklet = true),
@@ -174,8 +174,7 @@ enum class Varselkode(
     // IV: Inntektsvurdering
     RV_IV_1("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.", avviklet = true),
 
-    @Deprecated("Denne skal ikke være i bruk i Spleis mer, brukes av spinnvill")
-    RV_IV_2("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene."),
+    RV_IV_2("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", avviklet = true), // Denne er avviklet i context av Spleis. Legges nå til av Spinnvill
     RV_IV_3("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene"),
     RV_IV_4("Finnes inntekter fra flere virksomheter siste tre måneder", avviklet = true),
     RV_IV_5("Har inntekt på flere arbeidsgivere med forskjellig fom dato", avviklet = true),
@@ -246,7 +245,7 @@ enum class Varselkode(
     RV_OS_3("Endrer tidligere oppdrag. Kontroller simuleringen."),
 
     // RV: Revurdering
-    RV_RV_1("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden"),
+    RV_RV_1("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", avviklet = true),
     RV_RV_2("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger."),
     RV_RV_3("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)", avviklet = true),
     RV_RV_4("Revurdering er igangsatt og må fullføres", avviklet = true),
@@ -263,7 +262,7 @@ enum class Varselkode(
     RV_VT_6("Forventet ikke overstyring fra saksbehandler", avviklet = true),
     RV_VT_7("Forventet ikke ytelsehistorikk", avviklet = true),
 
-    RV_AG_1("Finner ikke arbeidsgiver"),
+    RV_AG_1("Finner ikke arbeidsgiver", true),
 
     //AN: Annet
     RV_AN_1("Avslutter perioden på grunn av tilbakestilling", avviklet = true),

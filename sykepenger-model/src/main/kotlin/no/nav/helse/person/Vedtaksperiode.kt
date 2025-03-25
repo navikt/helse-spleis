@@ -131,7 +131,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SY_4
@@ -3126,7 +3125,7 @@ internal class Vedtaksperiode private constructor(
                     dokumentsporing = null,
                     aktivitetslogg = aktivitetslogg
                 )
-                aktivitetslogg.info(RV_RV_1.varseltekst)
+                aktivitetslogg.info("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden")
                 if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
                     aktivitetslogg.info("mangler nødvendige opplysninger fra arbeidsgiver")
                     return vedtaksperiode.tilstand(aktivitetslogg, AvventerInntektsmelding)

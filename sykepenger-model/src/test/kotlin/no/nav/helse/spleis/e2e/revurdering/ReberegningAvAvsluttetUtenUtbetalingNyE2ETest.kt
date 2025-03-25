@@ -41,7 +41,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
@@ -432,7 +431,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(2.vedtaksperiode)
 
         //assertVarsel(RV_IM_4, 2.vedtaksperiode.filter(a1)) // huh? Ser bare 1 IM
-        assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(a1))
+        assertInfo("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 2.vedtaksperiode.filter(a1))
         nullstillTilstandsendringer()
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -513,7 +512,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
         håndterInntektsmelding(listOf(10.januar til 25.januar))
-        assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(a1))
+        assertInfo("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 2.vedtaksperiode.filter(a1))
 
         assertVarsler(emptyList(), 1.vedtaksperiode.filter(a1))
         assertVarsler(emptyList(), 2.vedtaksperiode.filter(a1))
@@ -973,8 +972,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        assertInfo(RV_RV_1.varseltekst, 1.vedtaksperiode.filter(a1))
-        assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(a1))
+        assertInfo("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 1.vedtaksperiode.filter(a1))
+        assertInfo("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 2.vedtaksperiode.filter(a1))
 
         assertInntektsgrunnlag(22.januar, forventetAntallArbeidsgivere = 1) {
             assertInntektsgrunnlag(a1, riktigInntekt)
