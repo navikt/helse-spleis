@@ -6,7 +6,6 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype
@@ -30,7 +29,6 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
             testMessageFactory.lagVilkårsgrunnlag(
                 vedtaksperiodeId = UUID.randomUUID(),
                 skjæringstidspunkt = 1.januar,
-                tilstand = TilstandType.START,
                 inntekterForSykepengegrunnlag = listOf(
                     TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(
                         måned = YearMonth.of(2017, 12),
@@ -58,7 +56,6 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
             testMessageFactory.lagVilkårsgrunnlag(
                 vedtaksperiodeId = UUID.randomUUID(),
                 skjæringstidspunkt = 1.januar,
-                tilstand = TilstandType.START,
                 inntekterForSykepengegrunnlag = listOf(
                     TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(
                         måned = YearMonth.of(2017, 12),

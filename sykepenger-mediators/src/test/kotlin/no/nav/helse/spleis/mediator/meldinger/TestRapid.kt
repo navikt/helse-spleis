@@ -8,7 +8,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import java.util.UUID
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel.Companion.finn
@@ -119,17 +118,16 @@ internal class TestRapid : RapidsConnection() {
             get() = tilstander.filter { it.key !in forkastedeVedtaksperiodeIder }
 
         private val behov
-            get() = mutableMapOf<UUID, MutableList<Pair<Aktivitet.Behov.Behovtype, TilstandType>>>().apply {
+            get() = buildMap<UUID, MutableList<Aktivitet.Behov.Behovtype>> {
                 events("behov") {
                     val vedtaksperiodeIdString = it.path("vedtaksperiodeId")
                         .takeIf { id -> !id.isMissingNode }
                         ?.asText() ?: return@events
 
                     val id = UUID.fromString(vedtaksperiodeIdString)
-                    val tilstand = TilstandType.valueOf(it.path("tilstand").asText())
                     this.getOrPut(id) { mutableListOf() }.apply {
                         it.path("@behov").onEach {
-                            add(Aktivitet.Behov.Behovtype.valueOf(it.asText()) to tilstand)
+                            add(Aktivitet.Behov.Behovtype.valueOf(it.asText()))
                         }
                     }
                 }
@@ -181,16 +179,13 @@ internal class TestRapid : RapidsConnection() {
         fun forkastedeTilstander(vedtaksperiodeId: UUID) = forkastedeTilstander[vedtaksperiodeId]?.toList() ?: emptyList()
 
         fun harEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitet.Behov.Behovtype) =
-            behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it.first == behovtype } ?: false
+            behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it == behovtype } ?: false
 
         fun etterspurteBehov(behovtype: Aktivitet.Behov.Behovtype) =
             behovmeldinger.last { it.first == behovtype }.second
 
         fun alleEtterspurteBehov(behovtype: Aktivitet.Behov.Behovtype) =
             behovmeldinger.filter { it.first == behovtype }.map { it.second }
-
-        fun tilstandForEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitet.Behov.Behovtype) =
-            behov.getValue(vedtaksperiodeId(vedtaksperiodeIndeks)).last { it.first == behovtype }.second
 
         fun varsel(vedtaksperiodeId: UUID, varselkode: Varselkode) = varsler.finn(vedtaksperiodeId, varselkode)
         fun varsler() = varsler

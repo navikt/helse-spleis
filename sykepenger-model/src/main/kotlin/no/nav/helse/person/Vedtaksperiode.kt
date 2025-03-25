@@ -1239,7 +1239,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun registrerKontekst(aktivitetslogg: IAktivitetslogg): IAktivitetslogg {
-        return aktivitetslogg.kontekst(arbeidsgiver).kontekst(this).kontekst(this.tilstand)
+        return aktivitetslogg.kontekst(arbeidsgiver).kontekst(this)
     }
 
     private fun tilstand(
@@ -2190,7 +2190,7 @@ internal class Vedtaksperiode private constructor(
         refusjonstidslinje + ubrukteRefusjonsopplysningerEtter(ubrukteRefusjonsopplysninger)
 
     // Gang of four State pattern
-    internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {
+    internal sealed interface Vedtaksperiodetilstand {
         val type: TilstandType
         val erFerdigBehandlet: Boolean get() = false
 
@@ -2201,14 +2201,6 @@ internal class Vedtaksperiode private constructor(
         fun håndterMakstid(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.funksjonellFeil(RV_VT_1)
             vedtaksperiode.forkast(påminnelse, aktivitetslogg)
-        }
-
-        override fun toSpesifikkKontekst(): SpesifikkKontekst {
-            return SpesifikkKontekst(
-                "Tilstand", mapOf(
-                "tilstand" to type.name
-            )
-            )
         }
 
         // Gitt at du er nestemann som skal behandles - hva venter du på?

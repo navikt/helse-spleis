@@ -80,7 +80,7 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
         detaljerFor(vedtaksperiodebehov(vedtaksperiodeId), behovtype)
 
     internal fun detaljerFor(filter: (Behov) -> Boolean, behovtype: Behovtype) =
-        behov.filter { filter(it) && it.type == behovtype }.map { it.detaljer() to it.kontekst() }
+        behov.filter { filter(it) && it.type == behovtype }.map { it.detaljer() to it.alleKontekster }
 
     private fun kvitterVedtaksperiode(vedtaksperiodeId: UUID) {
         val vedtaksperiodebehov = behov.filter(vedtaksperiodebehov(vedtaksperiodeId)).takeUnless { it.isEmpty() } ?: return
@@ -140,11 +140,11 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
     private companion object {
         private val Behov.utbetalingId
             get() =
-                kontekst()["utbetalingId"]?.let { UUID.fromString(it) }
+                alleKontekster["utbetalingId"]?.let { UUID.fromString(it) }
         private val Behov.vedtaksperiodeId
             get() =
-                kontekst()["vedtaksperiodeId"]?.let { UUID.fromString(it) }
-        private val Behov.orgnummer get() = kontekst()["organisasjonsnummer"]
+                alleKontekster["vedtaksperiodeId"]?.let { UUID.fromString(it) }
+        private val Behov.orgnummer get() = alleKontekster["organisasjonsnummer"]
 
         private val vedtaksperiodebehov = { vedtaksperiodeId: UUID -> { behov: Behov -> behov.vedtaksperiodeId == vedtaksperiodeId } }
         private val orgnummerbehov = { orgnummer: String -> { behov: Behov -> behov.orgnummer == orgnummer } }

@@ -840,8 +840,8 @@ internal fun AbstractEndToEndTest.håndterUtbetalingsgodkjenning(
     orgnummer: String = a1,
     automatiskBehandling: Boolean = false,
     utbetalingId: UUID = UUID.fromString(
-        personlogg.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"]
-            ?: throw IllegalStateException("Finner ikke utbetalingId i: ${personlogg.sisteBehov(Behovtype.Godkjenning).kontekst()}")
+        personlogg.sisteBehov(Behovtype.Godkjenning).alleKontekster["utbetalingId"]
+            ?: throw IllegalStateException("Finner ikke utbetalingId i: ${personlogg.sisteBehov(Behovtype.Godkjenning).alleKontekster}")
     ),
 ) {
     assertEtterspurt(Utbetalingsgodkjenning::class, Behovtype.Godkjenning, vedtaksperiodeIdInnhenter, orgnummer)
@@ -855,7 +855,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
     utbetalingId: UUID? = null,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) {
-    val faktiskUtbetalingId = utbetalingId?.toString() ?: personlogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId")
+    val faktiskUtbetalingId = utbetalingId?.toString() ?: personlogg.sisteBehov(Behovtype.Utbetaling).alleKontekster.getValue("utbetalingId")
     utbetaling(
         fagsystemId = fagsystemId,
         status = status,
@@ -870,7 +870,7 @@ private fun Oppdrag.fagsytemIdOrNull() = if (harUtbetalinger()) inspektør.fagsy
 private fun AbstractEndToEndTest.førsteUhåndterteUtbetalingsbehov(orgnummer: String): Pair<UUID, List<String>>? {
     val utbetalingsbehovUtbetalingIder = personlogg.behov
         .filter { it.type == Behovtype.Utbetaling }
-        .map { UUID.fromString(it.kontekst().getValue("utbetalingId")) }
+        .map { UUID.fromString(it.alleKontekster.getValue("utbetalingId")) }
 
     return inspektør(orgnummer).utbetalingerInFlight()
         .also { require(it.size < 2) { "For mange utbetalinger i spill! Er sendt ut godkjenningsbehov for periodene ${it.map { utbetaling -> utbetaling.periode }}" } }

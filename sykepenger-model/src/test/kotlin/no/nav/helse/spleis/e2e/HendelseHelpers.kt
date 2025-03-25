@@ -1,12 +1,10 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.*
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 
 internal class EtterspurtBehov(
     private val type: Aktivitet.Behov.Behovtype,
-    private val tilstand: TilstandType,
     private val orgnummer: String,
     private val vedtaksperiodeId: UUID
 ) {
@@ -17,15 +15,13 @@ internal class EtterspurtBehov(
 
         internal fun finnEtterspurteBehov(behovsliste: List<Aktivitet.Behov>) =
             behovsliste
-                .filter { "tilstand" in it.kontekst() }
-                .filter { "organisasjonsnummer" in it.kontekst() }
-                .filter { "vedtaksperiodeId" in it.kontekst() }
+                .filter { "organisasjonsnummer" in it.alleKontekster }
+                .filter { "vedtaksperiodeId" in it.alleKontekster }
                 .map {
                     EtterspurtBehov(
                         type = it.type,
-                        tilstand = enumValueOf(it.kontekst()["tilstand"] as String),
-                        orgnummer = (it.kontekst()["organisasjonsnummer"] as String),
-                        vedtaksperiodeId = UUID.fromString(it.kontekst()["vedtaksperiodeId"] as String)
+                        orgnummer = (it.alleKontekster["organisasjonsnummer"] as String),
+                        vedtaksperiodeId = UUID.fromString(it.alleKontekster["vedtaksperiodeId"] as String)
                     )
                 }
 
@@ -37,17 +33,5 @@ internal class EtterspurtBehov(
         ) =
             ikkeBesvarteBehov.firstOrNull { it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeIdInnhenter.id(orgnummer) }
 
-        internal fun finnEtterspurtBehov(
-            ikkeBesvarteBehov: MutableList<EtterspurtBehov>,
-            type: Aktivitet.Behov.Behovtype,
-            vedtaksperiodeIdInnhenter: IdInnhenter,
-            orgnummer: String,
-            tilstand: TilstandType
-        ) =
-            ikkeBesvarteBehov.firstOrNull {
-                it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeIdInnhenter.id(orgnummer) && it.tilstand == tilstand
-            }
     }
-
-    override fun toString() = "$type ($tilstand)"
 }

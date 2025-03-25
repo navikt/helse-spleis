@@ -22,7 +22,7 @@ internal class VilkårsgrunnlagRiver(
     override val riverName = "Vilkårsgrunnlag"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("vedtaksperiodeId", "tilstand")
+        message.requireKey("vedtaksperiodeId")
         message.require("${InntekterForSykepengegrunnlag.name}.skjæringstidspunkt", JsonNode::asLocalDate)
         message.require("${InntekterForOpptjeningsvurdering.name}.skjæringstidspunkt", JsonNode::asLocalDate)
         message.require("${ArbeidsforholdV2.name}.skjæringstidspunkt", JsonNode::asLocalDate)

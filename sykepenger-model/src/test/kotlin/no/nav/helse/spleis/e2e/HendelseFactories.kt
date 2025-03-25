@@ -73,7 +73,9 @@ internal fun AbstractEndToEndTest.utbetaling(
         meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
-        utbetalingId = utbetalingId ?: personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId").let { UUID.fromString(it) },
+        utbetalingId = utbetalingId
+            ?: personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).alleKontekster.getValue("utbetalingId")
+                .let { UUID.fromString(it) },
         status = status,
         melding = "hei",
         avstemmingsnøkkel = 123456L,
@@ -90,7 +92,8 @@ internal fun AbstractEndToEndTest.feriepengeutbetaling(
         meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
-        utbetalingId = personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId").let { UUID.fromString(it) },
+        utbetalingId = personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).alleKontekster.getValue("utbetalingId")
+            .let { UUID.fromString(it) },
         status = status,
         melding = "hey",
         avstemmingsnøkkel = 654321L,
@@ -406,7 +409,7 @@ internal fun AbstractEndToEndTest.simulering(
         fagområde = simuleringsBehov.detaljer().getValue("fagområde") as String,
         simuleringOK = simuleringOK,
         melding = "",
-        utbetalingId = UUID.fromString(simuleringsBehov.kontekst().getValue("utbetalingId")),
+        utbetalingId = UUID.fromString(simuleringsBehov.alleKontekster.getValue("utbetalingId")),
         simuleringsResultat = simuleringsresultat
     )
 }
@@ -458,10 +461,10 @@ internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     orgnummer: String,
     automatiskBehandling: Boolean,
     utbetalingId: UUID = UUID.fromString(
-        personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"]
+        personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).alleKontekster["utbetalingId"]
             ?: throw IllegalStateException(
                 "Finner ikke utbetalingId i: ${
-                    personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).kontekst()
+                    personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).alleKontekster
                 }"
             )
     ),

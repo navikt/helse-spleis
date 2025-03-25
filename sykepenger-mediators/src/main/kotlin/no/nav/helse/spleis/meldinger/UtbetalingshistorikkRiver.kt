@@ -27,7 +27,7 @@ internal class UtbetalingshistorikkRiver(
     }
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("vedtaksperiodeId", "tilstand")
+        message.requireKey("vedtaksperiodeId")
         validerSykepengehistorikk(message)
     }
 

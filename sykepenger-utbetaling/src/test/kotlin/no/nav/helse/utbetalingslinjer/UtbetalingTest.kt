@@ -208,7 +208,7 @@ internal class UtbetalingTest {
         assertEquals(1, hendelse.behov.size)
         hendelse.sisteBehov(Behovtype.Utbetaling).also { behov ->
             val detaljer = behov.detaljer()
-            val kontekster = behov.kontekst()
+            val kontekster = behov.alleKontekster
 
             val oppdragInspektør = annullering1.inspektør.arbeidsgiverOppdrag.inspektør
             assertEquals(oppdragInspektør.mottaker, detaljer.getValue("mottaker"))
@@ -288,7 +288,7 @@ internal class UtbetalingTest {
         assertEquals(1, hendelse.behov.size)
         hendelse.sisteBehov(Behovtype.Utbetaling).also { behov ->
             val detaljer = behov.detaljer()
-            val kontekster = behov.kontekst()
+            val kontekster = behov.alleKontekster
 
             val oppdragInspektør = annullering1.inspektør.arbeidsgiverOppdrag.inspektør
             assertEquals(oppdragInspektør.mottaker, detaljer.getValue("mottaker"))
@@ -312,7 +312,7 @@ internal class UtbetalingTest {
         assertEquals(1, kvitteringen.behov.size)
         kvitteringen.sisteBehov(Behovtype.Utbetaling).also { behov ->
             val detaljer = behov.detaljer()
-            val kontekster = behov.kontekst()
+            val kontekster = behov.alleKontekster
 
             val oppdragInspektør = utbetalingen.inspektør.arbeidsgiverOppdrag.inspektør
             assertEquals(oppdragInspektør.mottaker, detaljer.getValue("mottaker"))

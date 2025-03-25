@@ -850,7 +850,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             val aktivitetslogg = Aktivitetslogg()
             person.håndter(ytelser, aktivitetslogg)
             val simuleringsbehov = aktivitetslogg.behov.last { it.type == Simulering }
-            val utbetalingId = UUID.fromString(simuleringsbehov.kontekst().getValue("utbetalingId"))
+            val utbetalingId = UUID.fromString(simuleringsbehov.alleKontekster.getValue("utbetalingId"))
             val fagsystemId = simuleringsbehov.detaljer().getValue("fagsystemId") as String
             val fagområde = simuleringsbehov.detaljer().getValue("fagområde") as String
             person.håndter(simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde), Aktivitetslogg())

@@ -435,7 +435,6 @@ internal abstract class AbstractEndToEndMediatorTest {
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             orgnummer = orgnummer,
             utbetalingId = UUID.fromString(testRapid.inspektør.etterspurteBehov(Godkjenning).path("utbetalingId").asText()),
-            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Godkjenning),
             utbetalingGodkjent = godkjent,
             saksbehandlerIdent = saksbehandlerIdent,
             saksbehandlerEpost = saksbehandlerEpost,
@@ -467,7 +466,6 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForBeregning))
         val (_, message) = meldingsfabrikk.lagYtelser(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger),
             pleiepenger = pleiepenger,
             omsorgspenger = omsorgspenger,
             opplæringspenger = opplæringspenger,
@@ -488,7 +486,6 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
         val (_, message) = meldingsfabrikk.lagUtbetalingshistorikk(
             testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            TilstandType.AVVENTER_INNTEKTSMELDING,
             sykepengehistorikk,
             orgnummer = orgnummer
         )
@@ -519,7 +516,6 @@ internal abstract class AbstractEndToEndMediatorTest {
             vedtaksperiodeId = vedtaksperiodeId,
             orgnummer = orgnummer,
             skjæringstidspunkt = skjæringstidspunkt,
-            tilstand = TilstandType.AVVENTER_INNTEKTSMELDING,
             inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag
         )
         testRapid.sendTestMessage(message)
@@ -546,7 +542,6 @@ internal abstract class AbstractEndToEndMediatorTest {
         val (_, message) = meldingsfabrikk.lagVilkårsgrunnlag(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             skjæringstidspunkt = skjæringstidspunktFraBehov,
-            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag),
             inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
             inntekterForOpptjeningsvurdering = listOf(
                 InntekterForOpptjeningsvurderingFraLøsning(
@@ -588,7 +583,6 @@ internal abstract class AbstractEndToEndMediatorTest {
             val (_, message) = meldingsfabrikk.lagSimulering(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
                 orgnummer = orgnummer,
-                tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
                 status = status,
                 utbetalingId = UUID.fromString(behov.path("utbetalingId").asText()),
                 fagsystemId = behov.path("Simulering").path("fagsystemId").asText(),

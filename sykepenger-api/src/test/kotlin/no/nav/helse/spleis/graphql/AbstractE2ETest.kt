@@ -509,18 +509,18 @@ internal abstract class AbstractE2ETest {
         ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Sykepengehistorikk))?.single()?.let {
             ubesvarteBehov.remove(it)
             Infotrygdhistorikkbehov(
-                vedtaksperiodeId = UUID.fromString(it.kontekst().getValue("vedtaksperiodeId")),
-                orgnummer = it.kontekst().getValue("organisasjonsnummer")
+                vedtaksperiodeId = UUID.fromString(it.alleKontekster.getValue("vedtaksperiodeId")),
+                orgnummer = it.alleKontekster.getValue("organisasjonsnummer")
             )
         }
 
     private fun IAktivitetslogg.vilkårsgrunnlagbehov() =
         ønsketBehov(setOf(Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag, Aktivitet.Behov.Behovtype.ArbeidsforholdV2, Aktivitet.Behov.Behovtype.Medlemskap))?.let {
             ubesvarteBehov.removeAll(it)
-            val (vedtaksperiodeId, behovene) = it.groupBy { UUID.fromString(it.kontekst().getValue("vedtaksperiodeId")) }.entries.single()
+            val (vedtaksperiodeId, behovene) = it.groupBy { UUID.fromString(it.alleKontekster.getValue("vedtaksperiodeId")) }.entries.single()
             Vilkårsgrunnlagbehov(
                 vedtaksperiodeId = vedtaksperiodeId,
-                orgnummer = behovene.first().kontekst().getValue("organisasjonsnummer"),
+                orgnummer = behovene.first().alleKontekster.getValue("organisasjonsnummer"),
                 skjæringstidspunkt = LocalDate.parse(behovene.first().detaljer().getValue("skjæringstidspunkt") as String)
             )
         }
@@ -538,10 +538,10 @@ internal abstract class AbstractE2ETest {
     )
         ?.let {
             ubesvarteBehov.removeAll(it)
-            val (vedtaksperiodeId, behovene) = it.groupBy { UUID.fromString(it.kontekst().getValue("vedtaksperiodeId")) }.entries.single()
+            val (vedtaksperiodeId, behovene) = it.groupBy { UUID.fromString(it.alleKontekster.getValue("vedtaksperiodeId")) }.entries.single()
             Ytelserbehov(
                 vedtaksperiodeId = vedtaksperiodeId,
-                orgnummer = it.first().kontekst().getValue("organisasjonsnummer")
+                orgnummer = it.first().alleKontekster.getValue("organisasjonsnummer")
             )
         }
 
@@ -549,9 +549,9 @@ internal abstract class AbstractE2ETest {
         ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Simulering))
             ?.let {
                 ubesvarteBehov.removeAll(it)
-                it.groupBy { UUID.fromString(it.kontekst().getValue("utbetalingId")) }.map { (utbetalingId, oppdrag)  ->
-                    val vedtaksperiodeId = UUID.fromString(oppdrag.first().kontekst().getValue("vedtaksperiodeId"))
-                    val orgnummer = oppdrag.first().kontekst().getValue("organisasjonsnummer")
+                it.groupBy { UUID.fromString(it.alleKontekster.getValue("utbetalingId")) }.map { (utbetalingId, oppdrag)  ->
+                    val vedtaksperiodeId = UUID.fromString(oppdrag.first().alleKontekster.getValue("vedtaksperiodeId"))
+                    val orgnummer = oppdrag.first().alleKontekster.getValue("organisasjonsnummer")
                     Simuleringbehov(
                         vedtaksperiodeId = vedtaksperiodeId,
                         orgnummer = orgnummer,
@@ -559,7 +559,7 @@ internal abstract class AbstractE2ETest {
                         oppdrag = oppdrag.map {
                             Oppdragbehov(
                                 fagområde = it.detaljer().getValue("fagområde") as String,
-                                fagsystemId = it.kontekst().getValue("fagsystemId"),
+                                fagsystemId = it.alleKontekster.getValue("fagsystemId"),
                             )
                         }
                     )
@@ -569,9 +569,9 @@ internal abstract class AbstractE2ETest {
     private fun IAktivitetslogg.godkjenningbehov() = ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Godkjenning))?.single()?.let {
         ubesvarteBehov.remove(it)
         Godkjenningbehov(
-            vedtaksperiodeId = UUID.fromString(it.kontekst().getValue("vedtaksperiodeId")),
-            orgnummer = it.kontekst().getValue("organisasjonsnummer"),
-            utbetalingId = UUID.fromString(it.kontekst().getValue("utbetalingId"))
+            vedtaksperiodeId = UUID.fromString(it.alleKontekster.getValue("vedtaksperiodeId")),
+            orgnummer = it.alleKontekster.getValue("organisasjonsnummer"),
+            utbetalingId = UUID.fromString(it.alleKontekster.getValue("utbetalingId"))
         )
     }
 
@@ -579,15 +579,15 @@ internal abstract class AbstractE2ETest {
         ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Utbetaling))
             ?.let {
                 ubesvarteBehov.removeAll(it)
-                val (utbetalingId, oppdrag) = it.groupBy { UUID.fromString(it.kontekst().getValue("utbetalingId")) }.entries.single()
-                val orgnummer = oppdrag.first().kontekst().getValue("organisasjonsnummer")
+                val (utbetalingId, oppdrag) = it.groupBy { UUID.fromString(it.alleKontekster.getValue("utbetalingId")) }.entries.single()
+                val orgnummer = oppdrag.first().alleKontekster.getValue("organisasjonsnummer")
                 Utbetalingbehov(
                     orgnummer = orgnummer,
                     utbetalingId = utbetalingId,
                     oppdrag = oppdrag.map {
                         Oppdragbehov(
                             fagområde = it.detaljer().getValue("fagområde") as String,
-                            fagsystemId = it.kontekst().getValue("fagsystemId"),
+                            fagsystemId = it.alleKontekster.getValue("fagsystemId"),
                         )
                     }
                 )

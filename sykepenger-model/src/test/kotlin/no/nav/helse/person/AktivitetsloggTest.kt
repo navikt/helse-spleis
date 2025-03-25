@@ -184,9 +184,9 @@ internal class AktivitetsloggTest {
         )
 
         assertEquals(1, aktivitetslogg.behov.size)
-        assertEquals(1, aktivitetslogg.behov.first().kontekst().size)
+        assertEquals(1, aktivitetslogg.behov.first().alleKontekster.size)
         assertEquals(2, aktivitetslogg.behov.first().detaljer().size)
-        assertEquals("Person 1", aktivitetslogg.behov.first().kontekst()["Person"])
+        assertEquals("Person 1", aktivitetslogg.behov.first().alleKontekster["Person"])
         assertEquals(param1, aktivitetslogg.behov.first().detaljer()["param1"])
         assertEquals(param2, aktivitetslogg.behov.first().detaljer()["param2"])
     }

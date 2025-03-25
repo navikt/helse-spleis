@@ -198,7 +198,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertFalse(kanAvvises(1.vedtaksperiode))
 
-        val utbetalingId = UUID.fromString(personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"])
+        val utbetalingId = UUID.fromString(personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).alleKontekster["utbetalingId"])
         val utbetaling = inspektør.utbetalinger(1.vedtaksperiode).last()
         assertEquals(utbetalingId, utbetaling.inspektør.utbetalingId)
 

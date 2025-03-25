@@ -23,12 +23,12 @@ internal fun Aktivitetslogg.harBehov(behov: Aktivitet.Behov.Behovtype) =
 
 internal fun Aktivitetslogg.antallEtterspurteBehov(vedtaksperiodeId: UUID, behov: Aktivitet.Behov.Behovtype) =
     this.behov.filter {
-        it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString()
+        it.alleKontekster["vedtaksperiodeId"] == vedtaksperiodeId.toString()
     }.count { it.type == behov }
 
 internal fun Aktivitetslogg.etterspurteBehovFinnes(vedtaksperiodeId: UUID, behov: Aktivitet.Behov.Behovtype) =
     this.behov.filter {
-        it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString()
+        it.alleKontekster["vedtaksperiodeId"] == vedtaksperiodeId.toString()
     }.any { it.type == behov }
 
 internal fun Aktivitetslogg.etterspurteBehov(vedtaksperiodeId: UUID) =
