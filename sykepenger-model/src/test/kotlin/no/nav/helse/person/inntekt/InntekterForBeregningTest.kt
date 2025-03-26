@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
@@ -24,8 +25,9 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinj
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
+import no.nav.helse.utbetalingstidslinje.Vedtaksperiodeberegning
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -37,20 +39,87 @@ class InntekterForBeregningTest {
 
     @Test
     fun `lager ghosttidslinjer for dagene vi ikke har beregnet utbetalingstidslinje`() {
-        val inntekterForBeregning = inntekterForBeregning(1.januar til 28.januar) {
+        val inntekterForBeregning = inntekterForBeregning(1.januar til 28.februar) {
             fraInntektsgrunnlag(a1, 1000.daglig)
             fraInntektsgrunnlag(a2, 1000.daglig)
         }
 
-        inntekterForBeregning.hensyntattAlleInntektskilder(
-            mapOf(
-                "a1" to listOf(tidslinjeOf(16.AP, 8.NAV)),
-                "a2" to listOf(tidslinjeOf(20.UTELATE, 8.AP))
-            )
-        ).also { result ->
+        val a1 = Arbeidsgiverberegning(
+            orgnummer = "a1",
+            vedtaksperioder = listOf(
+                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(16.AP, 8.NAV, startDato = 1.januar)), // 1.-24.jan
+                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(11.NAV, startDato = 7.februar)) // 7.-17.feb
+            ),
+            ghostOgAndreInntektskilder = emptyList()
+        )
+        val a2 = Arbeidsgiverberegning(
+            orgnummer = "a2",
+            vedtaksperioder = listOf(
+                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(16.AP, 6.NAV, startDato = 20.januar)), // 20.jan-10.feb
+                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(11.NAV, startDato = 18.februar)) // 18.feb - 28.feb
+            ),
+            ghostOgAndreInntektskilder = emptyList()
+        )
+        inntekterForBeregning.hensyntattAlleInntektskilder(listOf(a1, a2)).also { result ->
             assertEquals(2, result.size)
-            assertEquals(28, result["a1"]?.size)
-            assertEquals(28, result["a2"]?.size)
+            result.first().also {
+                assertEquals("a1", it.orgnummer)
+                assertEquals(2, it.vedtaksperioder.size)
+                it.vedtaksperioder[0].also {
+                    assertEquals("PPPPPPP PPPPPPP PPNNNHH NNN", it.utbetalingstidslinje.toString())
+                    assertEquals(1.januar til 24.januar, it.periode)
+                }
+                it.vedtaksperioder[1].also {
+                    assertEquals("NNNHH NNNNNH", it.utbetalingstidslinje.toString())
+                    assertEquals(7.februar til 17.februar, it.periode)
+                }
+                assertEquals(2, it.ghostOgAndreInntektskilder.size)
+                it.ghostOgAndreInntektskilder[0].also {
+                    assertEquals("AAFF AAAAAFF AA", it.toString())
+                    assertEquals(25.januar til 6.februar, it.periode())
+                }
+                it.ghostOgAndreInntektskilder[1].also {
+                    assertEquals("F AAAAAFF AAA", it.toString())
+                    assertEquals(18.februar til 28.februar, it.periode())
+                }
+                assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNAAFF AAAAAFF AANNNHH NNNNNHF AAAAAFF AAA", it.samletTidslinje.toString())
+                assertEquals(listOf(
+                    1.januar til 26.januar,
+                    29.januar til 2.februar,
+                    5.februar til 17.februar,
+                    19.februar til 23.februar,
+                    26.februar til 28.februar
+                ), it.samletTidslinje.inspektør.perioderMedBeløp)
+            }
+            result.last().also {
+                assertEquals("a2", it.orgnummer)
+                assertEquals(2, it.vedtaksperioder.size)
+                it.vedtaksperioder[0].also {
+                    assertEquals("PP PPPPPPP PPPPPPP NNNNNH", it.utbetalingstidslinje.toString())
+                    assertEquals(20.januar til 10.februar, it.periode)
+                }
+                it.vedtaksperioder[1].also {
+                    assertEquals("H NNNNNHH NNN", it.utbetalingstidslinje.toString())
+                    assertEquals(18.februar til 28.februar, it.periode)
+                }
+                assertEquals(2, it.ghostOgAndreInntektskilder.size)
+                it.ghostOgAndreInntektskilder[0].also {
+                    assertEquals("AAAAAFF AAAAAFF AAAAA", it.toString())
+                    assertEquals(1.januar til 19.januar, it.periode())
+                }
+                it.ghostOgAndreInntektskilder[1].also {
+                    assertEquals("F AAAAAF", it.toString())
+                    assertEquals(11.februar til 17.februar, it.periode())
+                }
+                assertEquals("AAAAAFF AAAAAFF AAAAAPP PPPPPPP PPPPPPP NNNNNHF AAAAAFH NNNNNHH NNN", it.samletTidslinje.toString())
+                assertEquals(listOf(
+                    1.januar til 5.januar,
+                    8.januar til 12.januar,
+                    15.januar til 10.februar,
+                    12.februar til 16.februar,
+                    18.februar til 28.februar
+                ), it.samletTidslinje.inspektør.perioderMedBeløp)
+            }
         }
     }
 

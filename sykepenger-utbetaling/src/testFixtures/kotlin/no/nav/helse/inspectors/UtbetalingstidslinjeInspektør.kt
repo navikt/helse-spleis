@@ -2,6 +2,7 @@ package no.nav.helse.inspectors
 
 import java.time.LocalDate
 import kotlin.reflect.KClass
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
@@ -14,6 +15,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
 
 val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
@@ -46,6 +48,9 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
 
     private val økonomi = mutableMapOf<LocalDate, Økonomi>()
     val unikedager = mutableSetOf<KClass<out Utbetalingsdag>>()
+
+    val dagerMedBeløp get() = økonomi.filterValues { it.aktuellDagsinntekt > Inntekt.INGEN }
+    val perioderMedBeløp get() = dagerMedBeløp.keys.grupperSammenhengendePerioder()
 
     val size
         get() =

@@ -77,7 +77,9 @@ data class Økonomi(
             val inntektstapSomSkalDekkesAvNAV = maxOf(INGEN, (sykepengegrunnlagBegrenset6G * utbetalingsgrad).rundTilDaglig())
             val fordelingRefusjon = fordel(økonomiList, totalArbeidsgiver, inntektstapSomSkalDekkesAvNAV, { økonomi, inntekt -> økonomi.copy(arbeidsgiverbeløp = inntekt) }, arbeidsgiverBeløp)
             val totalArbeidsgiverrefusjon = totalArbeidsgiver(fordelingRefusjon)
-            val fordelingPerson = fordel(fordelingRefusjon, total - totalArbeidsgiverrefusjon, inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon, { økonomi, inntekt -> økonomi.copy(personbeløp = inntekt) }, personBeløp)
+            val fordelingPerson = fordel(fordelingRefusjon, total - totalArbeidsgiverrefusjon, inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon, { økonomi, inntekt ->
+                økonomi.copy(personbeløp = inntekt)
+            }, personBeløp)
             val totalPersonbeløp = totalPerson(fordelingPerson)
             val restbeløp = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon - totalPersonbeløp
             val restfordeling = restfordeling(fordelingPerson, restbeløp)
