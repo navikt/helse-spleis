@@ -3,9 +3,6 @@ package no.nav.helse
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit.YEARS
 import no.nav.helse.dto.AlderDto
-import no.nav.helse.hendelser.til
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 class Alder(val fødselsdato: LocalDate, val dødsdato: LocalDate?) {
     internal val syttiårsdagen: LocalDate = fødselsdato.plusYears(70)
@@ -39,11 +36,6 @@ class Alder(val fødselsdato: LocalDate, val dødsdato: LocalDate?) {
     }
 
     internal fun forUngForÅSøke(søknadstidspunkt: LocalDate) = alderPåDato(søknadstidspunkt) < MINSTEALDER_UTEN_FULLMAKT_FRA_VERGE
-
-    internal fun avvisDager(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
-        if (dødsdato == null) return tidslinjer
-        return Utbetalingstidslinje.avvis(tidslinjer, listOf(dødsdato.nesteDag til LocalDate.MAX), listOf(Begrunnelse.EtterDødsdato))
-    }
 
     internal fun dto() = AlderDto(fødselsdato = fødselsdato, dødsdato = dødsdato)
 }

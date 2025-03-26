@@ -6,9 +6,9 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal interface UtbetalingstidslinjerFilter {
     fun filter(
-        tidslinjer: List<Utbetalingstidslinje>,
+        arbeidsgivere: List<Arbeidsgiverberegning>,
         periode: Periode,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonslogg: Subsumsjonslogg
-    ): List<Utbetalingstidslinje>
+    ): List<Arbeidsgiverberegning>
 }

@@ -10,7 +10,6 @@ import no.nav.helse.person.MinimumSykdomsgradsvurdering
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_17
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvis
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvisteDager
 import no.nav.helse.økonomi.Prosentdel
 
@@ -18,27 +17,38 @@ internal class Sykdomsgradfilter(private val minimumSykdomsgradsvurdering: Minim
     UtbetalingstidslinjerFilter {
 
     override fun filter(
-        tidslinjer: List<Utbetalingstidslinje>,
+        arbeidsgivere: List<Arbeidsgiverberegning>,
         periode: Periode,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonslogg: Subsumsjonslogg
-    ): List<Utbetalingstidslinje> {
-        val tidslinjerForSubsumsjon = tidslinjer.subsumsjonsformat()
+    ): List<Arbeidsgiverberegning> {
+        val oppdaterte = Utbetalingstidslinje.totalSykdomsgrad(arbeidsgivere.map { it.samletTidslinje })
+            .zip(arbeidsgivere) { beregnetTidslinje, arbeidsgiver ->
+                arbeidsgiver.copy(
+                    vedtaksperioder = arbeidsgiver.vedtaksperioder.map { vedtaksperiodeberegning ->
+                        vedtaksperiodeberegning.copy(
+                            utbetalingstidslinje = beregnetTidslinje.subset(vedtaksperiodeberegning.periode)
+                        )
+                    },
+                    ghostOgAndreInntektskilder = arbeidsgiver.ghostOgAndreInntektskilder.map {
+                        beregnetTidslinje.subset(it.periode())
+                    }
+                )
+            }
 
-        val oppdaterte = Utbetalingstidslinje.totalSykdomsgrad(tidslinjer)
-
-        val tentativtAvvistePerioder = Utbetalingsdag.dagerUnderGrensen(oppdaterte)
+        val tentativtAvvistePerioder = Utbetalingsdag.dagerUnderGrensen(oppdaterte.map { it.samletVedtaksperiodetidslinje })
         val avvistePerioder = minimumSykdomsgradsvurdering.fjernDagerSomSkalUtbetalesLikevel(tentativtAvvistePerioder)
         if (!avvistePerioder.containsAll(tentativtAvvistePerioder)) {
             aktivitetslogg.varsel(RV_VV_17)
         }
 
-        val avvisteTidslinjer = avvis(oppdaterte, avvistePerioder, listOf(Begrunnelse.MinimumSykdomsgrad))
+        val avvisteTidslinjer = oppdaterte.avvis(avvistePerioder, Begrunnelse.MinimumSykdomsgrad)
 
+        val tidslinjerForSubsumsjon = arbeidsgivere.map { it.samletVedtaksperiodetidslinje }.subsumsjonsformat()
         Prosentdel.subsumsjon(subsumsjonslogg) { grense ->
             logg(`§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, grense, avvistePerioder))
         }
-        val avvisteDager = avvisteDager(avvisteTidslinjer, periode, Begrunnelse.MinimumSykdomsgrad)
+        val avvisteDager = avvisteDager(avvisteTidslinjer.map { it.samletVedtaksperiodetidslinje }, periode, Begrunnelse.MinimumSykdomsgrad)
         val harAvvisteDager = avvisteDager.isNotEmpty()
         `§ 8-13 ledd 1`(periode, avvisteDager.map { it.dato }.grupperSammenhengendePerioderMedHensynTilHelg(), tidslinjerForSubsumsjon).forEach {
             subsumsjonslogg.logg(it)

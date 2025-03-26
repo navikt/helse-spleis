@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.inspectors.inspektør
@@ -65,6 +66,26 @@ internal class MaksimumUtbetalingFilterTest {
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
-    private fun Utbetalingstidslinje.betal(sykepengegrunnlag: Inntekt) =
-        MaksimumUtbetalingFilter(sykepengegrunnlag, false).betal(listOf(this), this.periode(), aktivitetslogg, EmptyLog).single()
+    private fun Utbetalingstidslinje.betal(sykepengegrunnlag: Inntekt): Utbetalingstidslinje {
+        val input = listOf(
+            Arbeidsgiverberegning(
+                orgnummer = "a1",
+                vedtaksperioder = listOf(
+                    Vedtaksperiodeberegning(
+                        vedtaksperiodeId = UUID.randomUUID(),
+                        utbetalingstidslinje = this
+                    )
+                ),
+                ghostOgAndreInntektskilder = emptyList()
+            )
+        )
+        val filter = MaksimumUtbetalingFilter(sykepengegrunnlag, false)
+
+        return filter
+            .filter(input, this.periode(), aktivitetslogg, EmptyLog)
+            .single()
+            .vedtaksperioder
+            .single()
+            .utbetalingstidslinje
+    }
 }

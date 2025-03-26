@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.april
 import no.nav.helse.desember
@@ -775,7 +776,22 @@ internal class MaksimumSykepengedagerfilterTest {
             Periode::plus
         )
         val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(fødselsdato.alder, NormalArbeidstaker, personTidslinje)
-        avvisteTidslinjer = maksimumSykepengedagerfilter.filter(this, filterperiode, aktivitetslogg, EmptyLog)
+        val tidslinjer = this.mapIndexed { index, it ->
+            Arbeidsgiverberegning(
+                orgnummer = "a${index + 1}",
+                vedtaksperioder = listOf(
+                    Vedtaksperiodeberegning(
+                        vedtaksperiodeId = UUID.randomUUID(),
+                        utbetalingstidslinje = it
+                    )
+                ),
+                ghostOgAndreInntektskilder = emptyList()
+            )
+        }
+        avvisteTidslinjer = maksimumSykepengedagerfilter
+            .filter(tidslinjer, filterperiode, aktivitetslogg, EmptyLog)
+            .map { it.samletVedtaksperiodetidslinje }
+
         val maksdatoresultat = maksimumSykepengedagerfilter.maksdatoresultatForVedtaksperiode(filterperiode).resultat
         maksdatoer = maksimumSykepengedagerfilter.maksdatosaker
             .map { it.beregnMaksdato(fødselsdato.alder, NormalArbeidstaker, Utbetalingstidslinje()) }

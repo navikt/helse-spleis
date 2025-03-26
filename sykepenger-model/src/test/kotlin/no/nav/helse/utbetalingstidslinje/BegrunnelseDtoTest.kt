@@ -5,7 +5,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodedagNa
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.økonomi.Økonomi
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -30,11 +29,5 @@ internal class BegrunnelseDtoTest {
     fun `over70 avviser ikke helg`() {
         assertTrue(Begrunnelse.Over70.skalAvvises(NavDag(1.januar, økonomi)))
         assertFalse(Begrunnelse.Over70.skalAvvises(NavHelgDag(1.januar, økonomi)))
-    }
-
-    @Test
-    fun `avviser med flere begrunnelser`() {
-        val dag = NavDag(1.januar, økonomi)
-        assertEquals(2, dag.avvis(listOf(Begrunnelse.MinimumSykdomsgrad, Begrunnelse.MinimumInntekt))?.begrunnelser?.size ?: 0)
     }
 }

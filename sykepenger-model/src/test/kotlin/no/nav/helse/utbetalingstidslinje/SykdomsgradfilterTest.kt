@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.util.*
+import kotlin.collections.mapIndexed
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.februar
@@ -136,7 +137,21 @@ internal class SykdomsgradfilterTest {
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode): List<Utbetalingstidslinje> {
         aktivitetslogg = Aktivitetslogg()
-        val resultat = Sykdomsgradfilter(MinimumSykdomsgradsvurdering()).filter(tidslinjer, periode, aktivitetslogg, subsumsjonslogg)
+        val input = tidslinjer.mapIndexed { index, it ->
+            Arbeidsgiverberegning(
+                orgnummer = "a${index + 1}",
+                vedtaksperioder = listOf(
+                    Vedtaksperiodeberegning(
+                        vedtaksperiodeId = UUID.randomUUID(),
+                        utbetalingstidslinje = it
+                    )
+                ),
+                ghostOgAndreInntektskilder = emptyList()
+            )
+        }
+        val resultat = Sykdomsgradfilter(MinimumSykdomsgradsvurdering())
+            .filter(input, periode, aktivitetslogg, subsumsjonslogg)
+            .map { it.samletVedtaksperiodetidslinje }
         inspektør = resultat.inspektør(0)
         return resultat
     }

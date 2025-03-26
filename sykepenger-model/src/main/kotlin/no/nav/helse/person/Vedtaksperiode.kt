@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -2068,24 +2068,8 @@ internal class Vedtaksperiode private constructor(
             )
         )
 
-        val kjørFilter = fun(
-            tidslinjer: List<Arbeidsgiverberegning>,
-            filter: UtbetalingstidslinjerFilter
-        ): List<Arbeidsgiverberegning> {
-            val input = tidslinjer.map { it.samletTidslinje }
-            val result = filter.filter(input, periode, aktivitetslogg, subsumsjonslogg)
-            return tidslinjer.zip(result) { arbeidsgiver, filtrertTidslinje ->
-                arbeidsgiver.copy(
-                    vedtaksperioder = arbeidsgiver.vedtaksperioder.map { vedtaksperiode ->
-                        vedtaksperiode.copy(
-                            utbetalingstidslinje = filtrertTidslinje.subset(vedtaksperiode.periode)
-                        )
-                    }
-                )
-            }
-        }
         val beregnetTidslinjePerArbeidsgiver = filtere.fold(uberegnetTidslinjePerArbeidsgiver) { tidslinjer, filter ->
-            kjørFilter(tidslinjer, filter)
+            filter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonslogg)
         }
 
         return beregnetTidslinjePerArbeidsgiver.flatMap {

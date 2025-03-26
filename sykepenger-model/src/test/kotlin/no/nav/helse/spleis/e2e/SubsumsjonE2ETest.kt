@@ -335,7 +335,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag()
         håndterYtelser()
-
         SubsumsjonInspektør(regelverkslogg).assertOppfylt(
             paragraf = PARAGRAF_8_3,
             ledd = LEDD_2,
@@ -572,6 +571,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag()
+        håndterYtelser()
         SubsumsjonInspektør(regelverkslogg).assertBeregnet(
             paragraf = PARAGRAF_8_10,
             ledd = LEDD_2,
@@ -600,6 +600,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag()
+        håndterYtelser()
         SubsumsjonInspektør(regelverkslogg).assertBeregnet(
             paragraf = PARAGRAF_8_10,
             ledd = LEDD_2,

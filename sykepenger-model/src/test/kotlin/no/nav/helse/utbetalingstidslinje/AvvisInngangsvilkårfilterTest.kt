@@ -123,7 +123,21 @@ class AvvisInngangsvilkårfilterTest {
             medlemskapstatus = medlemskapstatus,
             opptjening = opptjening
         )
-        val avviste = filter.filter(tidslinjer, periode(tidslinjer)!!, Aktivitetslogg(), subsumsjonslogg)
-        return avviste.flatMap { it.inspektør.avvistedager }
+        val arbeidsgivere = tidslinjer.mapIndexed { index, it ->
+            Arbeidsgiverberegning(
+                orgnummer = "a${index + 1}",
+                vedtaksperioder = listOf(
+                    Vedtaksperiodeberegning(
+                        vedtaksperiodeId = UUID.randomUUID(),
+                        utbetalingstidslinje = it
+                    )
+                ),
+                ghostOgAndreInntektskilder = emptyList()
+            )
+        }
+        val avviste = filter.filter(arbeidsgivere, periode(tidslinjer)!!, Aktivitetslogg(), subsumsjonslogg)
+        return avviste.flatMap {
+            it.vedtaksperioder.single().utbetalingstidslinje.inspektør.avvistedager
+        }
     }
 }

@@ -70,11 +70,11 @@ internal class UtbetalingstidslinjeTest {
     fun `avviser perioder med flere begrunnelser`() {
         val periode = 1.januar til 5.januar
         tidslinjeOf(5.NAV).also {
-            val første = Utbetalingstidslinje.avvis(listOf(it), listOf(periode), listOf(Begrunnelse.MinimumSykdomsgrad))
-            val andre = Utbetalingstidslinje.avvis(første, listOf(periode), listOf(Begrunnelse.EtterDødsdato))
-            val tredje = Utbetalingstidslinje.avvis(andre, listOf(periode), listOf(Begrunnelse.ManglerMedlemskap))
+            val første = it.avvis(listOf(periode), Begrunnelse.MinimumSykdomsgrad)
+            val andre = første.avvis(listOf(periode), Begrunnelse.EtterDødsdato)
+            val tredje = andre.avvis(listOf(periode), Begrunnelse.ManglerMedlemskap)
             periode.forEach { dato ->
-                val dag = tredje.single()[dato] as AvvistDag
+                val dag = tredje[dato] as AvvistDag
                 assertEquals(3, dag.begrunnelser.size)
             }
         }

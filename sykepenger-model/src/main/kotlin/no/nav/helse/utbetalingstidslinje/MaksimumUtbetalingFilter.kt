@@ -10,25 +10,26 @@ internal class MaksimumUtbetalingFilter(
     private val er6GBegrenset: Boolean
 ) : UtbetalingstidslinjerFilter {
     override fun filter(
-        tidslinjer: List<Utbetalingstidslinje>,
+        arbeidsgivere: List<Arbeidsgiverberegning>,
         periode: Periode,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonslogg: Subsumsjonslogg
-    ): List<Utbetalingstidslinje> {
-        val betalteTidslinjer = Utbetalingstidslinje.betale(sykepengegrunnlagBegrenset6G, tidslinjer)
+    ): List<Arbeidsgiverberegning> {
+        val betalteTidslinjer = Utbetalingstidslinje
+            .betale(sykepengegrunnlagBegrenset6G, arbeidsgivere.map { it.samletTidslinje })
+            .zip(arbeidsgivere) { beregnetTidslinje, arbeidsgiver ->
+                arbeidsgiver.copy(
+                    vedtaksperioder = arbeidsgiver.vedtaksperioder.map { vedtaksperiode ->
+                        vedtaksperiode.copy(
+                            utbetalingstidslinje = beregnetTidslinje.subset(vedtaksperiode.periode)
+                        )
+                    }
+                )
+            }
         if (er6GBegrenset)
             aktivitetslogg.info("Redusert utbetaling minst én dag på grunn av inntekt over 6G")
         else
             aktivitetslogg.info("Utbetaling har ikke blitt redusert på grunn av 6G")
         return betalteTidslinjer
-    }
-
-    internal fun betal(
-        tidslinjer: List<Utbetalingstidslinje>,
-        periode: Periode,
-        aktivitetslogg: IAktivitetslogg,
-        subsumsjonslogg: Subsumsjonslogg
-    ): List<Utbetalingstidslinje> {
-        return filter(tidslinjer, periode, aktivitetslogg, subsumsjonslogg)
     }
 }

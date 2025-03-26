@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.util.UUID
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.inspectors.inspektør
@@ -24,8 +25,19 @@ internal class AvvisAndreYtelserFilterTest {
             omsorgspenger = listOf(9.januar.somPeriode()),
         )
 
-        val tidslinje = tidslinjeOf(9.NAV)
-        val result = filter.filter(listOf(tidslinje), tidslinje.periode(), Aktivitetslogg(), EmptyLog).single().inspektør
+        val tidslinjer = listOf(
+            Arbeidsgiverberegning(
+                orgnummer = "a1",
+                vedtaksperioder = listOf(
+                    Vedtaksperiodeberegning(
+                        vedtaksperiodeId = UUID.randomUUID(),
+                        utbetalingstidslinje = tidslinjeOf(9.NAV)
+                    )
+                ),
+                ghostOgAndreInntektskilder = emptyList()
+            )
+        )
+        val result = filter.filter(tidslinjer, januar, Aktivitetslogg(), EmptyLog).single().samletVedtaksperiodetidslinje.inspektør
 
         assertEquals(7, result.avvistDagTeller)
         assertEquals(Begrunnelse.AndreYtelserForeldrepenger, result.begrunnelse(1.januar).single())

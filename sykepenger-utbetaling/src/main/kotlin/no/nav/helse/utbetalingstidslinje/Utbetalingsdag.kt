@@ -22,12 +22,9 @@ sealed class Utbetalingsdag(
 
     override fun toString() = "${this.javaClass.simpleName} ($dato) ${økonomi.brukAvrundetGrad { grad -> grad }} %"
 
-    fun avvis(begrunnelser: List<Begrunnelse>) = begrunnelser
-        .filter { it.skalAvvises(this) }
-        .takeIf(List<*>::isNotEmpty)
-        ?.let(::avvisDag)
+    fun avvis(begrunnelse: Begrunnelse) = if (begrunnelse.skalAvvises(this)) this.avvisDag(begrunnelse) else null
 
-    protected open fun avvisDag(begrunnelser: List<Begrunnelse>) = AvvistDag(dato, økonomi, begrunnelser)
+    protected open fun avvisDag(begrunnelse: Begrunnelse) = AvvistDag(dato, økonomi, listOf(begrunnelse))
     internal abstract fun kopierMed(økonomi: Økonomi): Utbetalingsdag
 
     open fun erAvvistMed(begrunnelse: Begrunnelse): AvvistDag? = null
@@ -138,8 +135,8 @@ sealed class Utbetalingsdag(
         val begrunnelser: List<Begrunnelse>
     ) : Utbetalingsdag(dato, økonomi.ikkeBetalt()) {
         override val prioritet = 60
-        override fun avvisDag(begrunnelser: List<Begrunnelse>) =
-            AvvistDag(dato, økonomi, this.begrunnelser + begrunnelser)
+        override fun avvisDag(begrunnelse: Begrunnelse) =
+            AvvistDag(dato, økonomi, this.begrunnelser + begrunnelse)
 
 
         override fun erAvvistMed(begrunnelse: Begrunnelse) = takeIf { begrunnelse in begrunnelser }

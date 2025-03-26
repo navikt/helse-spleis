@@ -53,13 +53,13 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     override fun filter(
-        tidslinjer: List<Utbetalingstidslinje>,
+        arbeidsgivere: List<Arbeidsgiverberegning>,
         periode: Periode,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonslogg: Subsumsjonslogg
-    ): List<Utbetalingstidslinje> {
+    ): List<Arbeidsgiverberegning> {
         this.subsumsjonslogg = subsumsjonslogg
-        tidslinjegrunnlag = tidslinjer + listOf(infotrygdtidslinje.fremTilOgMed(periode.endInclusive))
+        tidslinjegrunnlag = arbeidsgivere.map { it.samletVedtaksperiodetidslinje } + listOf(infotrygdtidslinje.fremTilOgMed(periode.endInclusive))
         beregnetTidslinje = tidslinjegrunnlag.reduce(Utbetalingstidslinje::plus)
 
         Utbetalingstidslinje.periode(tidslinjegrunnlag)
@@ -93,8 +93,8 @@ internal class MaksimumSykepengedagerfilter(
             .flatMap { maksdatosak -> maksdatosak.begrunnelseForAvslåtteDager(alder, arbeidsgiverRegler, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) }
             .groupBy(keySelector = { it.first }, valueTransform = { it.second })
 
-        val avvisteTidslinjer = begrunnelser.entries.fold(tidslinjer) { result, (begrunnelse, dager) ->
-            Utbetalingstidslinje.avvis(result, dager.grupperSammenhengendePerioder(), listOf(begrunnelse))
+        val avvisteTidslinjer = begrunnelser.entries.fold(arbeidsgivere) { result, (begrunnelse, dager) ->
+            result.avvis(dager.grupperSammenhengendePerioder(), begrunnelse)
         }
 
         if (sisteVurdering.fremdelesSykEtterTilstrekkeligOpphold(periode, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER)) {

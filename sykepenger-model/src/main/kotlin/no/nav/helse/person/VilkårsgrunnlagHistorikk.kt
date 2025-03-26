@@ -31,7 +31,6 @@ import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.inntekt.InntektsgrunnlagView
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class VilkårsgrunnlagHistorikk private constructor(private val historikk: MutableList<Innslag>) {
 
@@ -145,10 +144,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) = inntektsgrunnlag.erArbeidsgiverRelevant(organisasjonsnummer)
 
         internal fun inntektskilde() = inntektsgrunnlag.inntektskilde()
-
-        internal open fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode, periode: Periode, subsumsjonslogg: Subsumsjonslogg): List<Utbetalingstidslinje> {
-            return tidslinjer
-        }
 
         final override fun toSpesifikkKontekst() = SpesifikkKontekst(
             kontekstType = "vilkårsgrunnlag",

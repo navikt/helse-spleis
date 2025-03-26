@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import java.time.LocalDate.EPOCH
+import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.Periode
@@ -91,7 +92,22 @@ internal class AvvisDagerEtterDødsdatofilterTest {
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, dødsdato: LocalDate?, periode: Periode): List<Utbetalingstidslinje> {
         aktivitetslogg = Aktivitetslogg()
-        val resultat = AvvisDagerEtterDødsdatofilter(Alder(EPOCH, dødsdato)).filter(tidslinjer, periode, aktivitetslogg, EmptyLog)
+        val input = tidslinjer.mapIndexed { index, it ->
+            Arbeidsgiverberegning(
+                orgnummer = "a${index+1}",
+                vedtaksperioder = listOf(
+                    Vedtaksperiodeberegning(
+                        vedtaksperiodeId = UUID.randomUUID(),
+                        utbetalingstidslinje = it
+                    )
+                ),
+                ghostOgAndreInntektskilder = emptyList()
+            )
+        }
+        val resultat = AvvisDagerEtterDødsdatofilter(Alder(EPOCH, dødsdato))
+            .filter(input, periode, aktivitetslogg, EmptyLog)
+            .map { it.samletVedtaksperiodetidslinje }
+
         inspektør = resultat.first().inspektør
         return resultat
     }

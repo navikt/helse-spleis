@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.util.SortedMap
+import java.util.*
 import no.nav.helse.dto.BegrunnelseDto
 import no.nav.helse.dto.deserialisering.UtbetalingstidslinjeInnDto
 import no.nav.helse.dto.serialisering.UtbetalingstidslinjeUtDto
@@ -46,12 +46,6 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
             .map { it.periode() }
             .takeUnless { it.isEmpty() }
             ?.reduce(Periode::plus)
-
-        fun avvis(
-            tidslinjer: List<Utbetalingstidslinje>,
-            avvistePerioder: List<Periode>,
-            begrunnelser: List<Begrunnelse>
-        ) = tidslinjer.map { it.avvis(avvistePerioder, begrunnelser) }
 
         fun avvisteDager(
             tidslinjer: List<Utbetalingstidslinje>,
@@ -98,8 +92,7 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
         }
     }
 
-    private fun avvis(avvistePerioder: List<Periode>, begrunnelser: List<Begrunnelse>): Utbetalingstidslinje {
-        if (begrunnelser.isEmpty()) return this
+    fun avvis(avvistePerioder: List<Periode>, begrunnelser: Begrunnelse): Utbetalingstidslinje {
         return Utbetalingstidslinje(utbetalingsdager.map { (dato, utbetalingsdag) ->
             val avvistDag = if (dato in avvistePerioder) utbetalingsdag.avvis(begrunnelser) else null
             avvistDag ?: utbetalingsdag
@@ -309,6 +302,3 @@ sealed class Begrunnelse {
         }
     }
 }
-
-fun List<Utbetalingstidslinje>.avvis(avvistePerioder: List<Periode>, begrunnelser: List<Begrunnelse>) =
-    Utbetalingstidslinje.avvis(this, avvistePerioder, begrunnelser)

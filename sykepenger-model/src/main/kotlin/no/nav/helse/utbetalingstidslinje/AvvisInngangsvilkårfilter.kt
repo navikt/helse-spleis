@@ -26,18 +26,18 @@ internal class AvvisInngangsvilkårfilter(
 ) : UtbetalingstidslinjerFilter {
 
     override fun filter(
-        tidslinjer: List<Utbetalingstidslinje>,
+        arbeidsgivere: List<Arbeidsgiverberegning>,
         periode: Periode,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonslogg: Subsumsjonslogg
-    ): List<Utbetalingstidslinje> {
-        return tidslinjer
+    ): List<Arbeidsgiverberegning> {
+        return arbeidsgivere
             .minsteinntekt(periode, aktivitetslogg, subsumsjonslogg)
             .avvisMedlemskap()
             .avvisOpptjening()
     }
 
-    private fun List<Utbetalingstidslinje>.minsteinntekt(periode: Periode, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): List<Utbetalingstidslinje> {
+    private fun List<Arbeidsgiverberegning>.minsteinntekt(periode: Periode, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): List<Arbeidsgiverberegning> {
         // dager frem til og med alder.redusertYtelseAlder avvises hvis sykepengegrunnlaget er under halvG
         val minsteinntektkravTilFylte67 = halvG.minsteinntekt(skjæringstidspunkt)
         val erUnderMinsteinntektskravTilFylte67 = inntektsgrunnlag.sykepengegrunnlag < minsteinntektkravTilFylte67
@@ -49,12 +49,12 @@ internal class AvvisInngangsvilkårfilter(
         val aktuellPeriodeEtterFylte67 = alder.redusertYtelseAlder.nesteDag til LocalDate.MAX
 
         val avviste = this
-            .avvis(if (erUnderMinsteinntektskravTilFylte67) listOf(aktuellPeriodeTilFylte67) else emptyList(), listOf(Begrunnelse.MinimumInntekt))
-            .avvis(if (erUnderMinsteinntektEtterFylte67) listOf(aktuellPeriodeEtterFylte67) else emptyList(), listOf(Begrunnelse.MinimumInntektOver67))
+            .avvis(if (erUnderMinsteinntektskravTilFylte67) listOf(aktuellPeriodeTilFylte67) else emptyList(), Begrunnelse.MinimumInntekt)
+            .avvis(if (erUnderMinsteinntektEtterFylte67) listOf(aktuellPeriodeEtterFylte67) else emptyList(), Begrunnelse.MinimumInntektOver67)
 
 
-        val avvisteDagerFremTil67 = avvisteDager(avviste, periode, Begrunnelse.MinimumInntekt).map { it.dato }
-        val avvisteDagerOver67 = avvisteDager(avviste, periode, Begrunnelse.MinimumInntektOver67).map { it.dato }
+        val avvisteDagerFremTil67 = avvisteDager(avviste.map { it.samletVedtaksperiodetidslinje }, periode, Begrunnelse.MinimumInntekt).map { it.dato }
+        val avvisteDagerOver67 = avvisteDager(avviste.map { it.samletVedtaksperiodetidslinje }, periode, Begrunnelse.MinimumInntektOver67).map { it.dato }
 
         if (avvisteDagerFremTil67.isNotEmpty() || avvisteDagerOver67.isNotEmpty()) {
             aktivitetslogg.varsel(RV_SV_1)
@@ -94,13 +94,13 @@ internal class AvvisInngangsvilkårfilter(
         return avviste
     }
 
-    private fun List<Utbetalingstidslinje>.avvisMedlemskap(): List<Utbetalingstidslinje> {
+    private fun List<Arbeidsgiverberegning>.avvisMedlemskap(): List<Arbeidsgiverberegning> {
         if (medlemskapstatus != Medlemskapsvurdering.Medlemskapstatus.Nei) return this
-        return avvis(listOf(LocalDate.MIN til LocalDate.MAX), listOf(Begrunnelse.ManglerMedlemskap))
+        return avvis(listOf(LocalDate.MIN til LocalDate.MAX), Begrunnelse.ManglerMedlemskap)
     }
 
-    private fun List<Utbetalingstidslinje>.avvisOpptjening(): List<Utbetalingstidslinje> {
+    private fun List<Arbeidsgiverberegning>.avvisOpptjening(): List<Arbeidsgiverberegning> {
         if (opptjening == null || opptjening.harTilstrekkeligAntallOpptjeningsdager()) return this
-        return avvis(listOf(LocalDate.MIN til LocalDate.MAX), listOf(Begrunnelse.ManglerOpptjening))
+        return avvis(listOf(LocalDate.MIN til LocalDate.MAX), Begrunnelse.ManglerOpptjening)
     }
 }
