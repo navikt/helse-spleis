@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.util.*
-import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.desember
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
@@ -27,12 +26,7 @@ import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsfor
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.sykepengegrunnlag
-import no.nav.helse.testhelpers.AP
-import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
-import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -281,113 +275,5 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
         assertFalse(grunnlagsdataInspektør.vurdertOk)
-    }
-
-    @Test
-    fun `Avviser kun utbetalingsdager som har likt skjæringstidspunkt som et vilkårsgrunnlag som ikke er ok`() {
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
-        val vilkårsgrunnlag1 = Vilkårsgrunnlag(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            skjæringstidspunkt = 1.januar,
-            orgnummer = "ORGNUMMER",
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold
-        )
-        vilkårsgrunnlag1.valider(
-            Aktivitetslogg(),
-            10000.månedlig.sykepengegrunnlag,
-            subsumsjonslogg
-        )
-        val vilkårsgrunnlag2 = Vilkårsgrunnlag(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            skjæringstidspunkt = 1.januar,
-            orgnummer = "ORGNUMMER",
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold
-        )
-        vilkårsgrunnlag2.valider(
-            Aktivitetslogg(),
-            10000.månedlig.sykepengegrunnlag,
-            subsumsjonslogg
-        )
-        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
-        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
-        val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, subsumsjonslogg).single()
-        assertEquals(8, resultat.filterIsInstance<Utbetalingsdag.NavDag>().size)
-    }
-
-    @Test
-    fun `Avslår vilkår for minimum inntekt med riktig begrunnelse for personer under 67 år`() {
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
-        val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            skjæringstidspunkt = 1.januar,
-            orgnummer = "ORGNUMMER",
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold
-        )
-        vilkårsgrunnlag.valider(
-            Aktivitetslogg(),
-            10.månedlig.sykepengegrunnlag,
-            subsumsjonslogg
-        )
-        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
-        assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
-        assertFalse(grunnlagsdataInspektør.vurdertOk)
-        val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, subsumsjonslogg).single()
-        resultat.filterIsInstance<Utbetalingsdag.AvvistDag>().let { avvisteDager ->
-            assertEquals(8, avvisteDager.size)
-            avvisteDager.forEach {
-                assertEquals(1, it.begrunnelser.size)
-                assertEquals(Begrunnelse.MinimumInntekt, it.begrunnelser.first())
-            }
-        }
-    }
-
-    @Test
-    fun `Avslår vilkår for minimum inntekt med riktig begrunnelse for dem mellom 67 og 70`() {
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
-        val fødselsdato = 1.januar(1950)
-        val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            skjæringstidspunkt = 1.januar,
-            orgnummer = "ORGNUMMER",
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold
-        )
-        vilkårsgrunnlag.valider(
-            Aktivitetslogg(),
-            10.månedlig.inntektsgrunnlag(fødselsdato.alder),
-            subsumsjonslogg
-        )
-        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
-        assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.view())
-        assertFalse(grunnlagsdataInspektør.vurdertOk)
-        val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, subsumsjonslogg).single()
-
-        resultat.filterIsInstance<Utbetalingsdag.AvvistDag>().let { avvisteDager ->
-            assertEquals(8, avvisteDager.size)
-            avvisteDager.forEach {
-                assertEquals(1, it.begrunnelser.size)
-                assertEquals(Begrunnelse.MinimumInntektOver67, it.begrunnelser.first())
-            }
-        }
     }
 }

@@ -334,7 +334,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag()
-
+        håndterYtelser()
         SubsumsjonInspektør(regelverkslogg).assertOppfylt(
             paragraf = PARAGRAF_8_3,
             ledd = LEDD_2,
@@ -360,7 +360,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag()
-
+        håndterYtelser()
         SubsumsjonInspektør(regelverkslogg).assertOppfylt(
             paragraf = PARAGRAF_8_3,
             ledd = LEDD_2,
@@ -375,9 +375,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
         SubsumsjonInspektør(regelverkslogg).assertIkkeVurdert(PARAGRAF_8_51, LEDD_2, 1.punktum)
 
-        håndterYtelser()
         håndterSimulering()
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 50000.årlig)))
+        håndterYtelser()
 
         SubsumsjonInspektør(regelverkslogg).assertPaaIndeks(
             index = 1,
@@ -407,6 +407,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag()
+        håndterYtelser()
         assertVarsler(listOf(Varselkode.RV_SV_1), 1.vedtaksperiode.filter())
 
         SubsumsjonInspektør(regelverkslogg).assertIkkeOppfylt(
@@ -570,6 +571,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag()
+        håndterYtelser()
         SubsumsjonInspektør(regelverkslogg).assertBeregnet(
             paragraf = PARAGRAF_8_10,
             ledd = LEDD_2,
@@ -598,6 +600,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag()
+        håndterYtelser()
         SubsumsjonInspektør(regelverkslogg).assertBeregnet(
             paragraf = PARAGRAF_8_10,
             ledd = LEDD_2,
@@ -1901,13 +1904,17 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag()
+        håndterYtelser()
         SubsumsjonInspektør(regelverkslogg).assertOppfylt(
             paragraf = PARAGRAF_8_51,
             ledd = LEDD_2,
             versjon = 16.desember(2011),
             input = mapOf(
-                "skjæringstidspunkt" to 1.januar,
-                "alderPåSkjæringstidspunkt" to 73,
+                "sekstisyvårsdag" to 1.januar(2012),
+                "utfallFom" to 1.januar,
+                "utfallTom" to 31.januar,
+                "periodeFom" to 1.januar,
+                "periodeTom" to 31.januar,
                 "grunnlagForSykepengegrunnlag" to 187268.0,
                 "minimumInntekt" to 187268.0
             ),
@@ -1928,15 +1935,18 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag()
-
+        håndterYtelser()
         assertVarsler(listOf(Varselkode.RV_SV_1), 1.vedtaksperiode.filter())
         SubsumsjonInspektør(regelverkslogg).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_51,
             ledd = LEDD_2,
             versjon = 16.desember(2011),
             input = mapOf(
-                "skjæringstidspunkt" to 1.januar,
-                "alderPåSkjæringstidspunkt" to 73,
+                "sekstisyvårsdag" to 1.januar(2012),
+                "utfallFom" to 1.januar,
+                "utfallTom" to 31.januar,
+                "periodeFom" to 1.januar,
+                "periodeTom" to 31.januar,
                 "grunnlagForSykepengegrunnlag" to 187267.0,
                 "minimumInntekt" to 187268.0
             ),
@@ -1962,6 +1972,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
 
         forlengVedtak(februar)
+        assertVarsel(Varselkode.RV_SV_1, 2.vedtaksperiode.filter())
         SubsumsjonInspektør(regelverkslogg).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_51,
             ledd = LEDD_2,
@@ -1979,8 +1990,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
 
         forlengVedtak(mars)
+        assertVarsel(Varselkode.RV_SV_1, 3.vedtaksperiode.filter())
         assertEquals(
-            1, SubsumsjonInspektør(regelverkslogg).antallSubsumsjoner(
+            2, SubsumsjonInspektør(regelverkslogg).antallSubsumsjoner(
             paragraf = PARAGRAF_8_3,
             ledd = LEDD_2,
             punktum = 1.punktum,

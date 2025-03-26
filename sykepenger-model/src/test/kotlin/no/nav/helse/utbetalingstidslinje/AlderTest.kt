@@ -52,20 +52,4 @@ internal class AlderTest {
     fun `får lov å søke dersom personen er minst 18 år`() {
         assertFalse(FYLLER_18_ÅR_2_NOVEMBER_2018.forUngForÅSøke(2.november))
     }
-
-    @Test
-    fun `forhøyet inntektskrav`() {
-        assertFalse(FYLLER_67_ÅR_1_JANUAR_2018.forhøyetInntektskrav(1.januar))
-        assertTrue(FYLLER_67_ÅR_1_JANUAR_2018.forhøyetInntektskrav(2.januar))
-    }
-
-    @Test
-    fun `riktig begrunnelse for minimum inntekt ved alder over 67`() {
-        assertEquals(Begrunnelse.MinimumInntektOver67, FYLLER_67_ÅR_1_JANUAR_2018.begrunnelseForMinimumInntekt(2.januar))
-    }
-
-    @Test
-    fun `riktig begrunnelse for minimum inntekt ved alder 67 eller under`() {
-        assertEquals(Begrunnelse.MinimumInntekt, FYLLER_67_ÅR_1_JANUAR_2018.begrunnelseForMinimumInntekt(1.januar))
-    }
 }

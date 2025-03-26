@@ -6,18 +6,11 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -57,45 +50,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
-        }
-    }
-
-    @Test
-    fun `Forkaster ikke etterfølgende perioder dersom vilkårsprøving feiler pga minimum inntekt på første periode`() {
-        a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar))
-            håndterSøknad(1.januar til 17.januar)
-
-            val arbeidsgiverperioder = listOf(1.januar til 16.januar)
-
-            håndterInntektsmelding(
-                arbeidsgiverperioder = arbeidsgiverperioder,
-                beregnetInntekt = 1000.månedlig,
-                refusjon = Inntektsmelding.Refusjon(1000.månedlig, null, emptyList()),
-            )
-
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
-
-            håndterSykmelding(Sykmeldingsperiode(18.januar, 20.januar))
-            håndterSøknad(18.januar til 20.januar)
-
-            assertTilstander(
-                1.vedtaksperiode,
-                START,
-                AVVENTER_INFOTRYGDHISTORIKK,
-                AVVENTER_INNTEKTSMELDING,
-                AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_VILKÅRSPRØVING,
-                AVVENTER_HISTORIKK,
-            )
-
-            assertTilstander(
-                2.vedtaksperiode,
-                START,
-                AVVENTER_INNTEKTSMELDING,
-                AVVENTER_BLOKKERENDE_PERIODE
-            )
         }
     }
 

@@ -9,8 +9,6 @@ internal val Inntektsgrunnlag.inspektør get() = view().inspektør
 internal val InntektsgrunnlagView.inspektør get() = InntektsgrunnlagInspektør(this)
 
 internal class InntektsgrunnlagInspektør(view: InntektsgrunnlagView) {
-    val minsteinntekt: Inntekt = view.minsteinntekt
-    val oppfyllerMinsteinntektskrav = view.oppfyllerMinsteinntektskrav
     val sykepengegrunnlag: Inntekt = view.sykepengegrunnlag
     val beregningsgrunnlag = view.beregningsgrunnlag
     val omregnetÅrsinntekt = view.omregnetÅrsinntekt

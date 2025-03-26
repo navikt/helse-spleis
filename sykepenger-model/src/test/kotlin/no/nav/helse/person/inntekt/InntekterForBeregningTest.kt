@@ -26,6 +26,8 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
+import no.nav.helse.utbetalingstidslinje.Vedtaksperiodeberegning
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -42,19 +44,19 @@ class InntekterForBeregningTest {
             fraInntektsgrunnlag(a2, 1000.daglig)
         }
 
-        val a1 = InntekterForBeregning.Arbeidsgiverberegning(
+        val a1 = Arbeidsgiverberegning(
             orgnummer = "a1",
             vedtaksperioder = listOf(
-                InntekterForBeregning.Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(16.AP, 8.NAV, startDato = 1.januar)), // 1.-24.jan
-                InntekterForBeregning.Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(11.NAV, startDato = 7.februar)) // 7.-17.feb
+                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(16.AP, 8.NAV, startDato = 1.januar)), // 1.-24.jan
+                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(11.NAV, startDato = 7.februar)) // 7.-17.feb
             ),
             ghostOgØvrig = emptyList()
         )
-        val a2 = InntekterForBeregning.Arbeidsgiverberegning(
+        val a2 = Arbeidsgiverberegning(
             orgnummer = "a2",
             vedtaksperioder = listOf(
-                InntekterForBeregning.Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(16.AP, 6.NAV, startDato = 20.januar)), // 20.jan-10.feb
-                InntekterForBeregning.Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(11.NAV, startDato = 18.februar)) // 18.feb - 28.feb
+                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(16.AP, 6.NAV, startDato = 20.januar)), // 20.jan-10.feb
+                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(11.NAV, startDato = 18.februar)) // 18.feb - 28.feb
             ),
             ghostOgØvrig = emptyList()
         )

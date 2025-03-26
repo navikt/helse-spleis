@@ -34,8 +34,8 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             nyPeriode(januar, a1)
             håndterInntektsmelding(listOf(1.januar til 16.januar), inntekt)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
                 assertEquals(11, utbetalingstidslinjeInspektør.avvistDagTeller)
                 assertEquals((17.januar til 31.januar).filterNot { it.erHelg() }, utbetalingstidslinjeInspektør.avvistedatoer)
@@ -57,6 +57,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             håndterInntektsmelding(listOf(22.januar til 6.februar), inntekt)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
                 assertEquals(16, utbetalingstidslinjeInspektør.avvistDagTeller)
                 assertEquals((7.februar til 28.februar).filterNot { it.erHelg() }, utbetalingstidslinjeInspektør.avvistedatoer)
@@ -78,8 +79,8 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             nyPeriode(februar, a1)
             håndterInntektsmelding(listOf(1.februar til 16.februar), inntekt)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
                 assertEquals(8, utbetalingstidslinjeInspektør.avvistDagTeller)
                 assertEquals((17.februar til 28.februar).filterNot { it.erHelg() }, utbetalingstidslinjeInspektør.avvistedatoer)
@@ -100,8 +101,8 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             nyPeriode(15.januar til 28.februar, a1)
             håndterInntektsmelding(listOf(15.januar til 30.januar), inntekt)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
                 assertEquals(21, utbetalingstidslinjeInspektør.avvistDagTeller)
                 assertEquals((31.januar til 28.februar).filterNot { it.erHelg() }, utbetalingstidslinjeInspektør.avvistedatoer)

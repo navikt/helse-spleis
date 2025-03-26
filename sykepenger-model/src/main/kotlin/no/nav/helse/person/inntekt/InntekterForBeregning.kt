@@ -2,7 +2,7 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.InntektskildeDto
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Avsender.SYSTEM
@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -137,23 +138,5 @@ internal class InntekterForBeregning private constructor(
             // Når vi skal lage en utbetalingstidslinje på en AUU hvor det finnes inntektsgrunnlag så lagrer vi ned de ekte inntektene
             return inntektstidslinje to inntekterForBeregning
         }
-    }
-
-    data class Vedtaksperiodeberegning(
-        val vedtaksperiodeId: UUID,
-        val utbetalingstidslinje: Utbetalingstidslinje
-    ) {
-        val periode = utbetalingstidslinje.periode()
-    }
-
-    data class Arbeidsgiverberegning(
-        val orgnummer: String,
-        val vedtaksperioder: List<Vedtaksperiodeberegning>,
-        val ghostOgØvrig: List<Utbetalingstidslinje>
-    ) {
-        private val vedtaksperiodeutbetalingstidslinjer = vedtaksperioder.map { it.utbetalingstidslinje }
-        private val samletGhostOgØvrig = ghostOgØvrig.fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
-        val samletVedtaksperiodetidslinje = vedtaksperiodeutbetalingstidslinjer.fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
-        val samletTidslinje = vedtaksperiodeutbetalingstidslinjer.fold(samletGhostOgØvrig, Utbetalingstidslinje::plus)
     }
 }

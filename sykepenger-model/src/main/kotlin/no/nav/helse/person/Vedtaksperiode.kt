@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -158,8 +158,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.InntekterForBeregning
-import no.nav.helse.person.inntekt.InntekterForBeregning.Arbeidsgiverberegning
-import no.nav.helse.person.inntekt.InntekterForBeregning.Vedtaksperiodeberegning
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
@@ -174,6 +172,7 @@ import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
 import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
@@ -186,6 +185,7 @@ import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
+import no.nav.helse.utbetalingstidslinje.Vedtaksperiodeberegning
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -960,7 +960,6 @@ internal class Vedtaksperiode private constructor(
         val maksdatoresultat = beregnUtbetalinger(aktivitetslogg, inntekterForBeregningBuilder)
 
         checkNotNull(vilkårsgrunnlag).valider(aktivitetslogg, arbeidsgiver.organisasjonsnummer)
-        checkNotNull(vilkårsgrunnlag).inntektsgrunnlag.valider(aktivitetslogg)
         checkNotNull(vilkårsgrunnlag).opptjening?.validerOpptjeningsdager(aktivitetslogg)
         infotrygdhistorikk.validerMedVarsel(aktivitetslogg, periode)
         infotrygdhistorikk.validerNyereOpplysninger(aktivitetslogg, periode)
@@ -2054,24 +2053,17 @@ internal class Vedtaksperiode private constructor(
         val historisktidslinje = historisktidslinjePerArbeidsgiver.values
             .fold(person.infotrygdhistorikk.utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
-        val sykdomsgradfilter = Sykdomsgradfilter(person.minimumSykdomsgradsvurdering)
-        val vurdertTotalSykdomsgrad = sykdomsgradfilter
-            .filter(uberegnetTidslinjePerArbeidsgiver.map { it.samletTidslinje }, periode, aktivitetslogg, subsumsjonslogg)
-            .zip(uberegnetTidslinjePerArbeidsgiver) { vurdertTidslinje, arbeidsgiver ->
-                arbeidsgiver.copy(
-                    vedtaksperioder = arbeidsgiver.vedtaksperioder.map { v ->
-                        v.copy(
-                            utbetalingstidslinje = vurdertTidslinje.subset(v.periode)
-                        )
-                    }
-                )
-            }
-            .filter { it.vedtaksperioder.isNotEmpty() } // herfra og ut bryr vi oss kun om arbeidsforhold med vedtaksperioder
-
         val maksdatofilter = MaksimumSykepengedagerfilter(person.alder, person.regler, historisktidslinje)
         val filtere = listOf(
+            Sykdomsgradfilter(person.minimumSykdomsgradsvurdering),
             AvvisDagerEtterDødsdatofilter(person.alder),
-            AvvisInngangsvilkårfilter(grunnlagsdata),
+            AvvisInngangsvilkårfilter(
+                skjæringstidspunkt = skjæringstidspunkt,
+                alder = person.alder,
+                inntektsgrunnlag = grunnlagsdata.inntektsgrunnlag,
+                medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus,
+                opptjening = grunnlagsdata.opptjening
+            ),
             maksdatofilter,
             MaksimumUtbetalingFilter(
                 sykepengegrunnlagBegrenset6G = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag,
@@ -2079,30 +2071,8 @@ internal class Vedtaksperiode private constructor(
             )
         )
 
-        val kjørFilter = fun(
-            tidslinjer: List<Arbeidsgiverberegning>,
-            filter: UtbetalingstidslinjerFilter
-        ): List<Arbeidsgiverberegning> {
-            val input = tidslinjer.map { it.samletVedtaksperiodetidslinje }
-            val result = filter.filter(input, periode, aktivitetslogg, subsumsjonslogg)
-            val tilslutt = tidslinjer.zip(result) { a, filtrertTidslinje ->
-                a.copy(
-                    vedtaksperioder = a.vedtaksperioder.map { b ->
-                        b.copy(
-                            utbetalingstidslinje = filtrertTidslinje.subset(b.utbetalingstidslinje.periode())
-                        )
-                    },
-                    // kopierer ghostOgØvrig kun for å bevare total utbetalingsgrad-verdien.
-                    // det løser vi heller ved å unngå å sende ghost-dagene til utbetaling..
-                    /*ghostOgØvrig = a.ghostOgØvrig.map {
-                        filtrertTidslinje.subset(it.periode())
-                    }*/
-                )
-            }
-            return tilslutt
-        }
-        val beregnetTidslinjePerArbeidsgiver = filtere.fold(vurdertTotalSykdomsgrad) { tidslinjer, filter ->
-            kjørFilter(tidslinjer, filter)
+        val beregnetTidslinjePerArbeidsgiver = filtere.fold(uberegnetTidslinjePerArbeidsgiver) { tidslinjer, filter ->
+            filter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonslogg)
         }
 
         return beregnetTidslinjePerArbeidsgiver.flatMap {

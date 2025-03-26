@@ -1,6 +1,7 @@
 package no.nav.helse.økonomi
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.til
@@ -11,9 +12,11 @@ import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Vedtaksperiodeberegning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -131,6 +134,18 @@ internal class ØkonomiDagTest {
 
     private fun List<Utbetalingstidslinje>.betal(sykepengegrunnlagBegrenset6G: Inntekt, virkningsdato: LocalDate = 1.januar): List<Utbetalingstidslinje> {
         val periode = virkningsdato til virkningsdato // Brukes ikke når vi eksplisitt setter virkningsdato
-        return MaksimumUtbetalingFilter(sykepengegrunnlagBegrenset6G, false).betal(this, periode, Aktivitetslogg(), EmptyLog)
+        val input = mapIndexed { index, it ->
+            Arbeidsgiverberegning(
+                orgnummer = "a${index + 1}",
+                vedtaksperioder = listOf(
+                    Vedtaksperiodeberegning(
+                        vedtaksperiodeId = UUID.randomUUID(),
+                        utbetalingstidslinje = it
+                    )
+                ),
+                ghostOgØvrig = emptyList()
+            )
+        }
+        return MaksimumUtbetalingFilter(sykepengegrunnlagBegrenset6G, false).filter(input, periode, Aktivitetslogg(), EmptyLog).map { it.vedtaksperioder.single().utbetalingstidslinje }
     }
 }

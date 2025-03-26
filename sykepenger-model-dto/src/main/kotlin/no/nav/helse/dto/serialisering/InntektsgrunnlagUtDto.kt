@@ -10,8 +10,5 @@ data class InntektsgrunnlagUtDto(
     val sykepengegrunnlag: InntektDto,
     val totalOmregnetÅrsinntekt: InntektDto,
     val beregningsgrunnlag: InntektDto,
-    val er6GBegrenset: Boolean,
-    val forhøyetInntektskrav: Boolean,
-    val minsteinntekt: InntektDto,
-    val oppfyllerMinsteinntektskrav: Boolean
+    val er6GBegrenset: Boolean
 )

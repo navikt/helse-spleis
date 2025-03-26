@@ -15,18 +15,18 @@ internal class AvvisAndreYtelserFilter(
 ) : UtbetalingstidslinjerFilter {
 
     override fun filter(
-        tidslinjer: List<Utbetalingstidslinje>,
+        arbeidsgivere: List<Arbeidsgiverberegning>,
         periode: Periode,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonslogg: Subsumsjonslogg
-    ): List<Utbetalingstidslinje> {
-        return tidslinjer
-            .avvis(foreldrepenger, listOf(Begrunnelse.AndreYtelserForeldrepenger))
-            .avvis(svangerskapspenger, listOf(Begrunnelse.AndreYtelserSvangerskapspenger))
-            .avvis(pleiepenger, listOf(Begrunnelse.AndreYtelserPleiepenger))
-            .avvis(dagpenger, listOf(Begrunnelse.AndreYtelserDagpenger))
-            .avvis(arbeidsavklaringspenger, listOf(Begrunnelse.AndreYtelserAap))
-            .avvis(opplæringspenger, listOf(Begrunnelse.AndreYtelserOpplaringspenger))
-            .avvis(omsorgspenger, listOf(Begrunnelse.AndreYtelserOmsorgspenger))
+    ): List<Arbeidsgiverberegning> {
+        return arbeidsgivere
+            .avvis(foreldrepenger, Begrunnelse.AndreYtelserForeldrepenger)
+            .avvis(svangerskapspenger, Begrunnelse.AndreYtelserSvangerskapspenger)
+            .avvis(pleiepenger, Begrunnelse.AndreYtelserPleiepenger)
+            .avvis(dagpenger, Begrunnelse.AndreYtelserDagpenger)
+            .avvis(arbeidsavklaringspenger, Begrunnelse.AndreYtelserAap)
+            .avvis(opplæringspenger, Begrunnelse.AndreYtelserOpplaringspenger)
+            .avvis(omsorgspenger, Begrunnelse.AndreYtelserOmsorgspenger)
     }
 }
