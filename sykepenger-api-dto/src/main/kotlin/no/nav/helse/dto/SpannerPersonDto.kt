@@ -1382,13 +1382,13 @@ private fun FeriepengeUtDto.tilPersonData() =
         sendPersonoppdragTilOS = sendPersonoppdragTilOS
     )
 
-private fun UtbetaltDagDto.tilPersonData() =
+private fun UtbetaltDagUtDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.UtbetaltDagData(
         type = when (this) {
-            is UtbetaltDagDto.InfotrygdArbeidsgiver -> "InfotrygdArbeidsgiverDag"
-            is UtbetaltDagDto.InfotrygdPerson -> "InfotrygdPersonDag"
-            is UtbetaltDagDto.SpleisArbeidsgiver -> "SpleisArbeidsgiverDag"
-            is UtbetaltDagDto.SpleisPerson -> "SpleisPersonDag"
+            is UtbetaltDagUtDto.InfotrygdArbeidsgiver -> "InfotrygdArbeidsgiverDag"
+            is UtbetaltDagUtDto.InfotrygdPerson -> "InfotrygdPersonDag"
+            is UtbetaltDagUtDto.SpleisArbeidsgiver -> "SpleisArbeidsgiverDag"
+            is UtbetaltDagUtDto.SpleisPerson -> "SpleisPersonDag"
         },
         orgnummer = orgnummer,
         dato = dato,

@@ -1,11 +1,10 @@
-package no.nav.helse.utbetalingslinjer
+package no.nav.helse.feriepenger
 
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.Year
 import java.util.UUID
 import kotlin.math.roundToInt
-import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.deserialisering.FeriepengeInnDto
 import no.nav.helse.dto.serialisering.FeriepengeUtDto
@@ -19,10 +18,18 @@ import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDeta
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
+import no.nav.helse.utbetalingslinjer.Fagområde
+import no.nav.helse.utbetalingslinjer.Klassekode
+import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Satstype
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
+import no.nav.helse.utbetalingslinjer.genererUtbetalingsreferanse
 
 internal class Feriepengeutbetaling private constructor(
-    private val feriepengeberegner: Feriepengeberegner,
+    private val feriepengegrunnlag: Feriepengeutbetalinggrunnlag,
     private val infotrygdFeriepengebeløpPerson: Double,
     private val infotrygdFeriepengebeløpArbeidsgiver: Double,
     private val spleisFeriepengebeløpArbeidsgiver: Double,
@@ -39,9 +46,17 @@ internal class Feriepengeutbetaling private constructor(
     companion object {
         fun List<Feriepengeutbetaling>.gjelderFeriepengeutbetaling(hendelse: UtbetalingHendelse) = any { hendelse.fagsystemId == it.oppdrag.fagsystemId || hendelse.fagsystemId == it.personoppdrag.fagsystemId }
 
-        internal fun gjenopprett(alder: Alder, dto: FeriepengeInnDto): Feriepengeutbetaling {
+        internal fun gjenopprett(dto: FeriepengeInnDto): Feriepengeutbetaling {
             return Feriepengeutbetaling(
-                feriepengeberegner = Feriepengeberegner.gjenopprett(alder, dto.feriepengeberegner),
+                feriepengegrunnlag = Feriepengeutbetalinggrunnlag(
+                    opptjeningsår = dto.feriepengeberegner.opptjeningsår,
+                    utbetalteDager = dto.feriepengeberegner.utbetalteDager.map {
+                        Feriepengeutbetalinggrunnlag.UtbetaltDag.gjenopprett(it)
+                    },
+                    feriepengedager = dto.feriepengeberegner.feriepengedager.map {
+                        Feriepengeutbetalinggrunnlag.UtbetaltDag.gjenopprett(it)
+                    }
+                ),
                 infotrygdFeriepengebeløpPerson = dto.infotrygdFeriepengebeløpPerson,
                 infotrygdFeriepengebeløpArbeidsgiver = dto.infotrygdFeriepengebeløpArbeidsgiver,
                 spleisFeriepengebeløpArbeidsgiver = dto.spleisFeriepengebeløpArbeidsgiver,
@@ -120,7 +135,7 @@ internal class Feriepengeutbetaling private constructor(
         if (sendPersonoppdragTilOS) personoppdrag.overfør(aktivitetsloggMedUtbetalingkontekst, null, "SPLEIS")
     }
 
-    internal fun gjelderForÅr(år: Year) = feriepengeberegner.gjelderForÅr(år)
+    internal fun gjelderForÅr(år: Year) = feriepengegrunnlag.opptjeningsår == år
 
     internal class Builder(
         private val personidentifikator: Personidentifikator,
@@ -285,7 +300,7 @@ internal class Feriepengeutbetaling private constructor(
             )
 
             return Feriepengeutbetaling(
-                feriepengeberegner = feriepengeberegner,
+                feriepengegrunnlag = feriepengeberegner.grunnlag(),
                 infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
                 infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
                 spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
@@ -300,7 +315,7 @@ internal class Feriepengeutbetaling private constructor(
     }
 
     internal fun dto() = FeriepengeUtDto(
-        feriepengeberegner = feriepengeberegner.dto(),
+        feriepengeberegner = feriepengegrunnlag.dto(),
         infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
         infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
         spleisFeriepengebeløpPerson = spleisFeriepengebeløpPerson,

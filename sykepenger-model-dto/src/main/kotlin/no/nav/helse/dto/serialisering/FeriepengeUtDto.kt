@@ -1,10 +1,10 @@
 package no.nav.helse.dto.serialisering
 
-import java.util.UUID
-import no.nav.helse.dto.FeriepengeberegnerDto
+import java.util.*
+import no.nav.helse.dto.FeriepengeutbetalinggrunnlagUtDto
 
 data class FeriepengeUtDto(
-    val feriepengeberegner: FeriepengeberegnerDto,
+    val feriepengeberegner: FeriepengeutbetalinggrunnlagUtDto,
     val infotrygdFeriepengebeløpPerson: Double,
     val infotrygdFeriepengebeløpArbeidsgiver: Double,
     val spleisFeriepengebeløpArbeidsgiver: Double,

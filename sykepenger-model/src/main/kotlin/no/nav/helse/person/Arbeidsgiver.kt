@@ -3,13 +3,19 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.UbrukteRefusjonsopplysningerUtDto
+import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.Regelverkslogg
+import no.nav.helse.feriepenger.Arbeidsgiverferiepengegrunnlag
+import no.nav.helse.feriepenger.Arbeidsgiverferiepengegrunnlag.Feriepengegrunnlag
+import no.nav.helse.feriepenger.Arbeidsgiverferiepengegrunnlag.Feriepengegrunnlag.UtbetaltDag
+import no.nav.helse.feriepenger.Feriepengeberegner
+import no.nav.helse.feriepenger.Feriepengeutbetaling
+import no.nav.helse.feriepenger.Feriepengeutbetaling.Companion.gjelderFeriepengeutbetaling
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
@@ -78,12 +84,9 @@ import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
-import no.nav.helse.utbetalingslinjer.Arbeidsgiverferiepengegrunnlag
-import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
-import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling.Companion.gjelderFeriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.grunnlagForFeriepenger
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -93,7 +96,6 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeberegner
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperioderesultat
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperioderesultat.Companion.finn
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
-import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -284,7 +286,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun gjenopprett(
             person: Person,
-            alder: Alder,
             dto: ArbeidsgiverInnDto,
             regelverkslogg: Regelverkslogg,
             grunnlagsdata: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>
@@ -304,7 +305,7 @@ internal class Arbeidsgiver private constructor(
                 vedtaksperioder = vedtaksperioder,
                 forkastede = forkastede,
                 utbetalinger = utbetalinger.toMutableList(),
-                feriepengeutbetalinger = dto.feriepengeutbetalinger.map { Feriepengeutbetaling.gjenopprett(alder, it) }
+                feriepengeutbetalinger = dto.feriepengeutbetalinger.map { Feriepengeutbetaling.gjenopprett(it) }
                     .toMutableList(),
                 ubrukteRefusjonsopplysninger = Refusjonsservitør.gjenopprett(dto.ubrukteRefusjonsopplysninger),
                 yrkesaktivitet = dto.organisasjonsnummer.tilYrkesaktivitet(),
@@ -354,10 +355,27 @@ internal class Arbeidsgiver private constructor(
 
     internal fun organisasjonsnummer() = organisasjonsnummer
     internal fun utbetaling() = utbetalinger.lastOrNull()
-    internal fun grunnlagForFeriepenger() = Arbeidsgiverferiepengegrunnlag(
-        orgnummer = organisasjonsnummer,
-        utbetalinger = utbetalinger.grunnlagForFeriepenger()
-    )
+    internal fun grunnlagForFeriepenger(): Arbeidsgiverferiepengegrunnlag {
+        val utbetalteDager = fun (oppdrag: Oppdrag): List<UtbetaltDag> {
+            return oppdrag
+                .flatMap { linje ->
+                    linje
+                        .filterNot { it.erHelg() }
+                        .map { UtbetaltDag(it, linje.beløp!!) }
+                }
+        }
+        return Arbeidsgiverferiepengegrunnlag(
+            orgnummer = organisasjonsnummer,
+            utbetalinger = utbetalinger
+                .aktive()
+                .map {
+                    Feriepengegrunnlag(
+                        arbeidsgiverUtbetalteDager = utbetalteDager(it.arbeidsgiverOppdrag),
+                        personUtbetalteDager = utbetalteDager(it.personOppdrag)
+                    )
+                }
+        )
+    }
 
     internal fun lagUtbetaling(
         aktivitetslogg: IAktivitetslogg,

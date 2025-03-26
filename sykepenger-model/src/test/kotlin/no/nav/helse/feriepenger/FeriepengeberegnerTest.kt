@@ -1,4 +1,4 @@
-package no.nav.helse.utbetalingstidslinje
+package no.nav.helse.feriepenger
 
 import java.time.Year
 import no.nav.helse.Alder
@@ -264,13 +264,13 @@ internal class FeriepengeberegnerTest {
         ORGNUMMER.itPerson(periode)
 
     private fun String.itPerson(periode: Periode) =
-        periode.map { Feriepengeberegner.UtbetaltDag.InfotrygdPerson(this, it, InfotrygdPersonbeløp) }
+        periode.map { Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdPerson(this, it, InfotrygdPersonbeløp) }
 
     private fun itArbeidsgiver(periode: Periode) =
         ORGNUMMER.itArbeidsgiver(periode)
 
     private fun String.itArbeidsgiver(periode: Periode) =
-        periode.map { Feriepengeberegner.UtbetaltDag.InfotrygdArbeidsgiver(this, it, InfotrygdArbeidsgiverbeløp) }
+        periode.map { Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdArbeidsgiver(this, it, InfotrygdArbeidsgiverbeløp) }
 
     private fun spleisArbeidsgiver(periode: Periode) =
         ORGNUMMER.spleisArbeidsgiver(periode)
@@ -279,18 +279,18 @@ internal class FeriepengeberegnerTest {
         ORGNUMMER.spleisPerson(periode)
 
     private fun String.spleisArbeidsgiver(periode: Periode) =
-        periode.map { Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver(this, it, SpleisArbeidsgiverbeløp) }
+        periode.map { Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisArbeidsgiver(this, it, SpleisArbeidsgiverbeløp) }
 
     private fun String.spleisPerson(periode: Periode) =
-        periode.map { Feriepengeberegner.UtbetaltDag.SpleisPerson(this, it, SpleisPersonbeløp) }
+        periode.map { Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisPerson(this, it, SpleisPersonbeløp) }
 
     private fun feriepengeberegner(
         alder: Alder = UNG,
         opptjeningsår: Year = Year.of(2018),
-        infotrygdPerson: List<Feriepengeberegner.UtbetaltDag.InfotrygdPerson> = emptyList(),
-        infotrygdArbeidsgiver: List<Feriepengeberegner.UtbetaltDag.InfotrygdArbeidsgiver> = emptyList(),
-        spleisArbeidsgiver: List<Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver> = emptyList(),
-        spleisPerson: List<Feriepengeberegner.UtbetaltDag.SpleisPerson> = emptyList()
+        infotrygdPerson: List<Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdPerson> = emptyList(),
+        infotrygdArbeidsgiver: List<Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdArbeidsgiver> = emptyList(),
+        spleisArbeidsgiver: List<Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisArbeidsgiver> = emptyList(),
+        spleisPerson: List<Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisPerson> = emptyList()
     ) = Feriepengeberegner(
         alder,
         opptjeningsår,

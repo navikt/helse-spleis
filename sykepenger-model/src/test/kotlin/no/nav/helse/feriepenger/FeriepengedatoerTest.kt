@@ -1,4 +1,4 @@
-package no.nav.helse.utbetalingstidslinje
+package no.nav.helse.feriepenger
 
 import java.time.LocalDate
 import java.time.Year

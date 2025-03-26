@@ -1,7 +1,6 @@
 package no.nav.helse
 
 import java.time.LocalDate
-import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
 import no.nav.helse.dto.AlderDto
 import no.nav.helse.hendelser.til
@@ -13,7 +12,6 @@ class Alder(val fødselsdato: LocalDate, val dødsdato: LocalDate?) {
     internal val redusertYtelseAlder: LocalDate = fødselsdato.plusYears(67)
 
     companion object {
-        private const val ALDER_FOR_FORHØYET_FERIEPENGESATS = 59
         private const val MINSTEALDER_UTEN_FULLMAKT_FRA_VERGE = 18
 
         internal fun gjenopprett(dto: AlderDto): Alder {
@@ -40,17 +38,7 @@ class Alder(val fødselsdato: LocalDate, val dødsdato: LocalDate?) {
         return YEARS.between(fødselsdato, dagen).toInt()
     }
 
-    private fun alderVedSluttenAvÅret(year: Year) = YEARS.between(Year.from(fødselsdato), year).toInt()
-
     internal fun forUngForÅSøke(søknadstidspunkt: LocalDate) = alderPåDato(søknadstidspunkt) < MINSTEALDER_UTEN_FULLMAKT_FRA_VERGE
-
-    internal fun beregnFeriepenger(opptjeningsår: Year, beløp: Int): Double {
-        val alderVedSluttenAvÅret = alderVedSluttenAvÅret(opptjeningsår)
-        val prosentsats = if (alderVedSluttenAvÅret < ALDER_FOR_FORHØYET_FERIEPENGESATS) 0.102 else 0.125
-        val feriepenger = beløp * prosentsats
-        //TODO: subsumsjonObserver.`§8-33 ledd 3`(beløp, opptjeningsår, prosentsats, alderVedSluttenAvÅret, feriepenger)
-        return feriepenger
-    }
 
     internal fun avvisDager(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
         if (dødsdato == null) return tidslinjer

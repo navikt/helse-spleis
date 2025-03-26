@@ -10,6 +10,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.Regelverkslogg
+import no.nav.helse.feriepenger.Feriepengeberegner
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
@@ -81,7 +82,6 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.view.PersonView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 
 class Person private constructor(
     personidentifikator: Personidentifikator,
@@ -119,7 +119,7 @@ class Person private constructor(
                 tidligereBehandlinger = tidligereBehandlinger
             )
             arbeidsgivere.addAll(dto.arbeidsgivere.map {
-                Arbeidsgiver.gjenopprett(person, alder, it, regelverkslogg, grunnlagsdataMap)
+                Arbeidsgiver.gjenopprett(person, it, regelverkslogg, grunnlagsdataMap)
             })
             return person
         }

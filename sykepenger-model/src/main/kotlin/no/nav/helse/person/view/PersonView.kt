@@ -1,12 +1,12 @@
 package no.nav.helse.person.view
 
+import no.nav.helse.feriepenger.FeriepengeutbetalingView
 import no.nav.helse.person.SykmeldingsperioderView
 import no.nav.helse.person.VedtaksperiodeView
 import no.nav.helse.person.VilkårsgrunnlagHistorikkView
 import no.nav.helse.person.inntekt.InntektshistorikkView
 import no.nav.helse.person.refusjon.RefusjonsservitørView
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkView
-import no.nav.helse.utbetalingslinjer.FeriepengeutbetalingView
 import no.nav.helse.utbetalingslinjer.UtbetalingView
 
 internal data class PersonView(

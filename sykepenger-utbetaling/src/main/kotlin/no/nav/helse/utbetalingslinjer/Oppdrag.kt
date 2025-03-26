@@ -9,7 +9,6 @@ import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
-import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringHendelse
 import no.nav.helse.hendelser.UtbetalingmodulHendelse
@@ -21,8 +20,11 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
-import no.nav.helse.utbetalingslinjer.Feriepengegrunnlag.UtbetaltDag
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.*
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT_MED_FEIL
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.OVERFØRT
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kjedeSammenLinjer
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kobleTil
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.normaliserLinjer
@@ -458,16 +460,6 @@ class Oppdrag private constructor(
                 return listOf(nyLinje)
             }
         }
-    }
-
-    internal fun betalteDager() = linjerUtenOpphør().flatMap { linje ->
-        linje
-            .takeIf { linje.beløp != null }
-            ?.asSequence()
-            ?.filterNot { it.erHelg() }
-            ?.map { UtbetaltDag(it, linje.beløp!!) }
-            ?.toList()
-            ?: emptyList()
     }
 
     fun dto() = OppdragUtDto(

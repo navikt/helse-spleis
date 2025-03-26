@@ -29,7 +29,7 @@ import no.nav.helse.dto.SykmeldingsperioderDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingVurderingDto
 import no.nav.helse.dto.UtbetalingtypeDto
-import no.nav.helse.dto.UtbetaltDagDto
+import no.nav.helse.dto.UtbetaltDagUtDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
@@ -672,12 +672,12 @@ private fun FeriepengeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Feriep
     sendPersonoppdragTilOS = sendPersonoppdragTilOS
 )
 
-private fun UtbetaltDagDto.tilPersonData() = PersonData.ArbeidsgiverData.FeriepengeutbetalingData.UtbetaltDagData(
+private fun UtbetaltDagUtDto.tilPersonData() = PersonData.ArbeidsgiverData.FeriepengeutbetalingData.UtbetaltDagData(
     type = when (this) {
-        is UtbetaltDagDto.InfotrygdArbeidsgiver -> "InfotrygdArbeidsgiverDag"
-        is UtbetaltDagDto.InfotrygdPerson -> "InfotrygdPersonDag"
-        is UtbetaltDagDto.SpleisArbeidsgiver -> "SpleisArbeidsgiverDag"
-        is UtbetaltDagDto.SpleisPerson -> "SpleisPersonDag"
+        is UtbetaltDagUtDto.InfotrygdArbeidsgiver -> "InfotrygdArbeidsgiverDag"
+        is UtbetaltDagUtDto.InfotrygdPerson -> "InfotrygdPersonDag"
+        is UtbetaltDagUtDto.SpleisArbeidsgiver -> "SpleisArbeidsgiverDag"
+        is UtbetaltDagUtDto.SpleisPerson -> "SpleisPersonDag"
     },
     orgnummer = orgnummer,
     dato = dato,

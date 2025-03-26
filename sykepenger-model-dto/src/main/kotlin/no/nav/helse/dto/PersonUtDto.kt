@@ -163,13 +163,13 @@ data class ArbeidsforholdDto(
     val deaktivert: Boolean
 )
 
-data class FeriepengeberegnerDto(
+data class FeriepengeutbetalinggrunnlagUtDto(
     val opptjeningsår: Year,
-    val utbetalteDager: List<UtbetaltDagDto>,
-    val feriepengedager: List<UtbetaltDagDto>
+    val utbetalteDager: List<UtbetaltDagUtDto>,
+    val feriepengedager: List<UtbetaltDagUtDto>
 )
 
-sealed class UtbetaltDagDto {
+sealed class UtbetaltDagUtDto {
     abstract val orgnummer: String
     abstract val dato: LocalDate
     abstract val beløp: Int
@@ -178,25 +178,25 @@ sealed class UtbetaltDagDto {
         override val orgnummer: String,
         override val dato: LocalDate,
         override val beløp: Int
-    ) : UtbetaltDagDto()
+    ) : UtbetaltDagUtDto()
 
     data class InfotrygdPerson(
         override val orgnummer: String,
         override val dato: LocalDate,
         override val beløp: Int
-    ) : UtbetaltDagDto()
+    ) : UtbetaltDagUtDto()
 
     data class SpleisArbeidsgiver(
         override val orgnummer: String,
         override val dato: LocalDate,
         override val beløp: Int
-    ) : UtbetaltDagDto()
+    ) : UtbetaltDagUtDto()
 
     data class SpleisPerson(
         override val orgnummer: String,
         override val dato: LocalDate,
         override val beløp: Int
-    ) : UtbetaltDagDto()
+    ) : UtbetaltDagUtDto()
 }
 
 data class InfotrygdFerieperiodeDto(val periode: PeriodeDto)

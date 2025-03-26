@@ -19,7 +19,6 @@ import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.DokumenttypeDto
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
-import no.nav.helse.dto.FeriepengeberegnerDto
 import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.dto.InfotrygdFerieperiodeDto
 import no.nav.helse.dto.InntektbeløpDto
@@ -43,7 +42,6 @@ import no.nav.helse.dto.SykmeldingsperioderDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingVurderingDto
 import no.nav.helse.dto.UtbetalingtypeDto
-import no.nav.helse.dto.UtbetaltDagDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
@@ -53,6 +51,8 @@ import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
 import no.nav.helse.dto.deserialisering.BehandlingerInnDto
 import no.nav.helse.dto.deserialisering.FaktaavklartInntektInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeInnDto
+import no.nav.helse.dto.deserialisering.FeriepengeutbetalinggrunnlagInnDto
+import no.nav.helse.dto.deserialisering.FeriepengeutbetalinggrunnlagInnDto.UtbetaltDagInnDto
 import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdArbeidsgiverutbetalingsperiodeInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdPersonutbetalingsperiodeInnDto
@@ -563,7 +563,7 @@ data class PersonData(
             val sendPersonoppdragTilOS: Boolean,
         ) {
             fun tilDto() = FeriepengeInnDto(
-                feriepengeberegner = FeriepengeberegnerDto(
+                feriepengeberegner = FeriepengeutbetalinggrunnlagInnDto(
                     opptjeningsår = this.opptjeningsår,
                     utbetalteDager = this.utbetalteDager.map { it.tilDto() },
                     feriepengedager = this.feriepengedager.map { it.tilDto() }
@@ -585,26 +585,26 @@ data class PersonData(
                 val dato: LocalDate,
                 val beløp: Int,
             ) {
-                fun tilDto(): UtbetaltDagDto = when (type) {
-                    "InfotrygdPersonDag" -> UtbetaltDagDto.InfotrygdPerson(
+                fun tilDto(): UtbetaltDagInnDto = when (type) {
+                    "InfotrygdPersonDag" -> UtbetaltDagInnDto.InfotrygdPerson(
                         orgnummer = orgnummer,
                         dato = dato,
                         beløp = beløp
                     )
 
-                    "InfotrygdArbeidsgiverDag" -> UtbetaltDagDto.InfotrygdArbeidsgiver(
+                    "InfotrygdArbeidsgiverDag" -> UtbetaltDagInnDto.InfotrygdArbeidsgiver(
                         orgnummer = orgnummer,
                         dato = dato,
                         beløp = beløp
                     )
 
-                    "SpleisArbeidsgiverDag" -> UtbetaltDagDto.SpleisArbeidsgiver(
+                    "SpleisArbeidsgiverDag" -> UtbetaltDagInnDto.SpleisArbeidsgiver(
                         orgnummer = orgnummer,
                         dato = dato,
                         beløp = beløp
                     )
 
-                    "SpleisPersonDag" -> UtbetaltDagDto.SpleisPerson(
+                    "SpleisPersonDag" -> UtbetaltDagInnDto.SpleisPerson(
                         orgnummer = orgnummer,
                         dato = dato,
                         beløp = beløp

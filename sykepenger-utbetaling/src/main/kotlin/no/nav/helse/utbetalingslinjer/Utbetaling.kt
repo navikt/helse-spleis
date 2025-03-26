@@ -43,8 +43,8 @@ class Utbetaling private constructor(
     private val korrelasjonsId: UUID,
     private val periode: Periode,
     val utbetalingstidslinje: Utbetalingstidslinje,
-    private val arbeidsgiverOppdrag: Oppdrag,
-    private val personOppdrag: Oppdrag,
+    val arbeidsgiverOppdrag: Oppdrag,
+    val personOppdrag: Oppdrag,
     private val tidsstempel: LocalDateTime,
     tilstand: Tilstand,
     val type: Utbetalingtype,
@@ -379,15 +379,6 @@ class Utbetaling private constructor(
             listOf(utbetalingen.arbeidsgiverOppdrag, utbetalingen.personOppdrag).valider(aktivitetslogg)
             return utbetalingen to annulleringer
         }
-
-        fun Collection<Utbetaling>.grunnlagForFeriepenger() = this
-            .grupperUtbetalinger(Utbetaling::erAktiv)
-            .map {
-                Feriepengegrunnlag(
-                    arbeidsgiverUtbetalteDager = it.arbeidsgiverOppdrag.betalteDager(),
-                    personUtbetalteDager = it.personOppdrag.betalteDager()
-                )
-            }
 
         fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv).filterNot { it.tilstand is Annullert  }
         private fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)

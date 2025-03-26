@@ -4,12 +4,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import no.nav.helse.erHelg
+import no.nav.helse.feriepenger.Arbeidsgiverferiepengegrunnlag
+import no.nav.helse.feriepenger.Arbeidsgiverferiepengegrunnlag.Feriepengegrunnlag
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode.Companion.kodeForDato
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilArbeidsgiver
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilPerson
-import no.nav.helse.utbetalingslinjer.Arbeidsgiverferiepengegrunnlag
-import no.nav.helse.utbetalingslinjer.Feriepengegrunnlag
 
 class UtbetalingshistorikkForFeriepenger(
     meldingsreferanseId: MeldingsreferanseId,
