@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`6G`
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -79,10 +78,10 @@ internal class MaksimumUtbetalingFilterTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         )
-        val filter = MaksimumUtbetalingFilter(sykepengegrunnlag, false)
+        val filter = MaksimumUtbetalingFilter(sykepengegrunnlag, false, aktivitetslogg)
 
         return filter
-            .filter(input, this.periode(), aktivitetslogg, EmptyLog)
+            .filter(input, this.periode())
             .single()
             .vedtaksperioder
             .single()

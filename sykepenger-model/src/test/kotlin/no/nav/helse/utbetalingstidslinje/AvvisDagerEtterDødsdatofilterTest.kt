@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import java.util.UUID
 import no.nav.helse.Alder
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
@@ -104,8 +103,8 @@ internal class AvvisDagerEtterDødsdatofilterTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         }
-        val resultat = AvvisDagerEtterDødsdatofilter(Alder(EPOCH, dødsdato))
-            .filter(input, periode, aktivitetslogg, EmptyLog)
+        val resultat = AvvisDagerEtterDødsdatofilter(Alder(EPOCH, dødsdato), aktivitetslogg)
+            .filter(input, periode)
             .map { it.samletVedtaksperiodetidslinje }
 
         inspektør = resultat.first().inspektør

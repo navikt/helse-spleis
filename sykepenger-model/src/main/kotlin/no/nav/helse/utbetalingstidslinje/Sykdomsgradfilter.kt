@@ -13,14 +13,15 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvisteDager
 import no.nav.helse.økonomi.Prosentdel
 
-internal class Sykdomsgradfilter(private val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering) :
-    UtbetalingstidslinjerFilter {
+internal class Sykdomsgradfilter(
+    private val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering,
+    private val subsumsjonslogg: Subsumsjonslogg,
+    private val aktivitetslogg: IAktivitetslogg
+) : UtbetalingstidslinjerFilter {
 
     override fun filter(
         arbeidsgivere: List<Arbeidsgiverberegning>,
-        periode: Periode,
-        aktivitetslogg: IAktivitetslogg,
-        subsumsjonslogg: Subsumsjonslogg
+        vedtaksperiode: Periode
     ): List<Arbeidsgiverberegning> {
         val oppdaterte = Utbetalingstidslinje.totalSykdomsgrad(arbeidsgivere.map { it.samletTidslinje })
             .zip(arbeidsgivere) { beregnetTidslinje, arbeidsgiver ->
@@ -46,11 +47,11 @@ internal class Sykdomsgradfilter(private val minimumSykdomsgradsvurdering: Minim
 
         val tidslinjerForSubsumsjon = arbeidsgivere.map { it.samletVedtaksperiodetidslinje }.subsumsjonsformat()
         Prosentdel.subsumsjon(subsumsjonslogg) { grense ->
-            logg(`§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, grense, avvistePerioder))
+            logg(`§ 8-13 ledd 2`(vedtaksperiode, tidslinjerForSubsumsjon, grense, avvistePerioder))
         }
-        val avvisteDager = avvisteDager(avvisteTidslinjer.map { it.samletVedtaksperiodetidslinje }, periode, Begrunnelse.MinimumSykdomsgrad)
+        val avvisteDager = avvisteDager(avvisteTidslinjer.map { it.samletVedtaksperiodetidslinje }, vedtaksperiode, Begrunnelse.MinimumSykdomsgrad)
         val harAvvisteDager = avvisteDager.isNotEmpty()
-        `§ 8-13 ledd 1`(periode, avvisteDager.map { it.dato }.grupperSammenhengendePerioderMedHensynTilHelg(), tidslinjerForSubsumsjon).forEach {
+        `§ 8-13 ledd 1`(vedtaksperiode, avvisteDager.map { it.dato }.grupperSammenhengendePerioderMedHensynTilHelg(), tidslinjerForSubsumsjon).forEach {
             subsumsjonslogg.logg(it)
         }
         if (harAvvisteDager) aktivitetslogg.varsel(RV_VV_4)

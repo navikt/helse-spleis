@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.Alder
-import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
@@ -11,17 +10,16 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvisteD
 
 internal class AvvisDagerEtterDødsdatofilter(
     private val alder: Alder,
+    private val aktivitetslogg: IAktivitetslogg
 ) : UtbetalingstidslinjerFilter {
 
     override fun filter(
         arbeidsgivere: List<Arbeidsgiverberegning>,
-        periode: Periode,
-        aktivitetslogg: IAktivitetslogg,
-        subsumsjonslogg: Subsumsjonslogg
+        vedtaksperiode: Periode
     ): List<Arbeidsgiverberegning> {
         val avvisteTidslinjer = alder.avvisDager(arbeidsgivere)
 
-        val avvisteDager = avvisteDager(avvisteTidslinjer.map { it.samletVedtaksperiodetidslinje }, periode, Begrunnelse.EtterDødsdato)
+        val avvisteDager = avvisteDager(avvisteTidslinjer.map { it.samletVedtaksperiodetidslinje }, vedtaksperiode, Begrunnelse.EtterDødsdato)
         if (avvisteDager.isNotEmpty()) aktivitetslogg.info("Utbetaling stoppet etter ${avvisteDager.first().dato} grunnet dødsfall")
 
         return avvisteTidslinjer

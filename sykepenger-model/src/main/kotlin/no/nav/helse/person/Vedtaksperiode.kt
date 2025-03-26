@@ -2041,13 +2041,15 @@ internal class Vedtaksperiode private constructor(
             .map { it.behandlinger.utbetalingstidslinje() }
             .fold(person.infotrygdhistorikk.utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
-        val maksdatofilter = MaksimumSykepengedagerfilter(person.alder, person.regler, historisktidslinje)
+        val maksdatofilter = MaksimumSykepengedagerfilter(person.alder, subsumsjonslogg, aktivitetslogg, person.regler, historisktidslinje)
         val filtere = listOf(
-            Sykdomsgradfilter(person.minimumSykdomsgradsvurdering),
-            AvvisDagerEtterDødsdatofilter(person.alder),
+            Sykdomsgradfilter(person.minimumSykdomsgradsvurdering, subsumsjonslogg, aktivitetslogg),
+            AvvisDagerEtterDødsdatofilter(person.alder, aktivitetslogg),
             AvvisInngangsvilkårfilter(
                 skjæringstidspunkt = skjæringstidspunkt,
                 alder = person.alder,
+                subsumsjonslogg = subsumsjonslogg,
+                aktivitetslogg = aktivitetslogg,
                 inntektsgrunnlag = grunnlagsdata.inntektsgrunnlag,
                 medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus,
                 opptjening = grunnlagsdata.opptjening
@@ -2055,12 +2057,13 @@ internal class Vedtaksperiode private constructor(
             maksdatofilter,
             MaksimumUtbetalingFilter(
                 sykepengegrunnlagBegrenset6G = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag,
-                er6GBegrenset = grunnlagsdata.inntektsgrunnlag.er6GBegrenset()
+                er6GBegrenset = grunnlagsdata.inntektsgrunnlag.er6GBegrenset(),
+                aktivitetslogg = aktivitetslogg
             )
         )
 
         val beregnetTidslinjePerArbeidsgiver = filtere.fold(uberegnetTidslinjePerArbeidsgiver) { tidslinjer, filter ->
-            filter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonslogg)
+            filter.filter(tidslinjer, periode)
         }
 
         return beregnetTidslinjePerArbeidsgiver.flatMap {

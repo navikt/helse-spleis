@@ -119,6 +119,8 @@ class AvvisInngangsvilkårfilterTest {
         val filter = AvvisInngangsvilkårfilter(
             skjæringstidspunkt = skjæringstidspunkt,
             alder = ALDER,
+            subsumsjonslogg = subsumsjonslogg,
+            aktivitetslogg = Aktivitetslogg(),
             inntektsgrunnlag = inntektsgrunnlag,
             medlemskapstatus = medlemskapstatus,
             opptjening = opptjening
@@ -135,7 +137,7 @@ class AvvisInngangsvilkårfilterTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         }
-        val avviste = filter.filter(arbeidsgivere, periode(tidslinjer)!!, Aktivitetslogg(), subsumsjonslogg)
+        val avviste = filter.filter(arbeidsgivere, periode(tidslinjer)!!)
         return avviste.flatMap {
             it.vedtaksperioder.single().utbetalingstidslinje.inspektør.avvistedager
         }

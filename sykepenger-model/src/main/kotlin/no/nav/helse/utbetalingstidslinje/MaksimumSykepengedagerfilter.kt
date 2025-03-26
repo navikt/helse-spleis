@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
 import no.nav.helse.etterlevelse.`§ 8-12 ledd 1 punktum 1`
@@ -22,6 +21,8 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 
 internal class MaksimumSykepengedagerfilter(
     private val alder: Alder,
+    private val subsumsjonslogg: Subsumsjonslogg,
+    private val aktivitetslogg: IAktivitetslogg,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
     private val infotrygdtidslinje: Utbetalingstidslinje
 ) : UtbetalingstidslinjerFilter {
@@ -37,7 +38,6 @@ internal class MaksimumSykepengedagerfilter(
     private var state: State = State.Initiell
     private lateinit var beregnetTidslinje: Utbetalingstidslinje
     private lateinit var tidslinjegrunnlag: List<Utbetalingstidslinje>
-    private var subsumsjonslogg: Subsumsjonslogg = EmptyLog
 
     private val tidslinjegrunnlagsubsumsjon by lazy { tidslinjegrunnlag.subsumsjonsformat() }
     private val beregnetTidslinjesubsumsjon by lazy { beregnetTidslinje.subsumsjonsformat() }
@@ -54,12 +54,9 @@ internal class MaksimumSykepengedagerfilter(
 
     override fun filter(
         arbeidsgivere: List<Arbeidsgiverberegning>,
-        periode: Periode,
-        aktivitetslogg: IAktivitetslogg,
-        subsumsjonslogg: Subsumsjonslogg
+        vedtaksperiode: Periode
     ): List<Arbeidsgiverberegning> {
-        this.subsumsjonslogg = subsumsjonslogg
-        tidslinjegrunnlag = arbeidsgivere.map { it.samletVedtaksperiodetidslinje } + listOf(infotrygdtidslinje.fremTilOgMed(periode.endInclusive))
+        tidslinjegrunnlag = arbeidsgivere.map { it.samletVedtaksperiodetidslinje } + listOf(infotrygdtidslinje.fremTilOgMed(vedtaksperiode.endInclusive))
         beregnetTidslinje = tidslinjegrunnlag.reduce(Utbetalingstidslinje::plus)
 
         Utbetalingstidslinje.periode(tidslinjegrunnlag)
@@ -97,10 +94,10 @@ internal class MaksimumSykepengedagerfilter(
             result.avvis(dager.grupperSammenhengendePerioder(), begrunnelse)
         }
 
-        if (sisteVurdering.fremdelesSykEtterTilstrekkeligOpphold(periode, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER)) {
+        if (sisteVurdering.fremdelesSykEtterTilstrekkeligOpphold(vedtaksperiode, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER)) {
             aktivitetslogg.funksjonellFeil(RV_VV_9)
         }
-        if (sisteVurdering.harNåddMaks(periode))
+        if (sisteVurdering.harNåddMaks(vedtaksperiode))
             aktivitetslogg.info("Maks antall sykepengedager er nådd i perioden")
         else
             aktivitetslogg.info("Maksimalt antall sykedager overskrides ikke i perioden")

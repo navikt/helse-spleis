@@ -149,8 +149,8 @@ internal class SykdomsgradfilterTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         }
-        val resultat = Sykdomsgradfilter(MinimumSykdomsgradsvurdering())
-            .filter(input, periode, aktivitetslogg, subsumsjonslogg)
+        val resultat = Sykdomsgradfilter(MinimumSykdomsgradsvurdering(), subsumsjonslogg, aktivitetslogg)
+            .filter(input, periode)
             .map { it.samletVedtaksperiodetidslinje }
         inspektør = resultat.inspektør(0)
         return resultat

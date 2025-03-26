@@ -3,7 +3,6 @@ package no.nav.helse.økonomi
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`6G`
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -146,6 +145,7 @@ internal class ØkonomiDagTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         }
-        return MaksimumUtbetalingFilter(sykepengegrunnlagBegrenset6G, false).filter(input, periode, Aktivitetslogg(), EmptyLog).map { it.vedtaksperioder.single().utbetalingstidslinje }
+        return MaksimumUtbetalingFilter(sykepengegrunnlagBegrenset6G, false, Aktivitetslogg())
+            .filter(input, periode).map { it.vedtaksperioder.single().utbetalingstidslinje }
     }
 }

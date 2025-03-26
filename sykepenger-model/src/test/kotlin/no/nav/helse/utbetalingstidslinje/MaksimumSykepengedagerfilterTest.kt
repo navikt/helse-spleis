@@ -775,7 +775,7 @@ internal class MaksimumSykepengedagerfilterTest {
         ).reduce(
             Periode::plus
         )
-        val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(fødselsdato.alder, NormalArbeidstaker, personTidslinje)
+        val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(fødselsdato.alder, EmptyLog, aktivitetslogg, NormalArbeidstaker, personTidslinje)
         val tidslinjer = this.mapIndexed { index, it ->
             Arbeidsgiverberegning(
                 orgnummer = "a${index + 1}",
@@ -789,7 +789,7 @@ internal class MaksimumSykepengedagerfilterTest {
             )
         }
         avvisteTidslinjer = maksimumSykepengedagerfilter
-            .filter(tidslinjer, filterperiode, aktivitetslogg, EmptyLog)
+            .filter(tidslinjer, filterperiode)
             .map { it.samletVedtaksperiodetidslinje }
 
         val maksdatoresultat = maksimumSykepengedagerfilter.maksdatoresultatForVedtaksperiode(filterperiode).resultat

@@ -28,7 +28,6 @@ import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.erHelg
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -196,7 +195,8 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                 ghostOgAndreInntektskilder = emptyList()
             )
         )
-        val tidslinje = MaksimumUtbetalingFilter(sykepengegrunnlag, false).filter(input, januar, Aktivitetslogg(), EmptyLog).single()
+        val tidslinje = MaksimumUtbetalingFilter(sykepengegrunnlag, false, Aktivitetslogg())
+            .filter(input, januar).single()
         val dto = tidslinje.vedtaksperioder.single().utbetalingstidslinje.dto()
         assertEquals(10, dto.dager.size)
         dto.dager[0].also { dag ->

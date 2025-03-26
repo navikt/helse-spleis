@@ -20,6 +20,8 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvisteD
 internal class AvvisInngangsvilkårfilter(
     private val skjæringstidspunkt: LocalDate,
     private val alder: Alder,
+    private val subsumsjonslogg: Subsumsjonslogg,
+    private val aktivitetslogg: IAktivitetslogg,
     private val inntektsgrunnlag: Inntektsgrunnlag,
     private val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus?,
     private val opptjening: Opptjening?
@@ -27,17 +29,15 @@ internal class AvvisInngangsvilkårfilter(
 
     override fun filter(
         arbeidsgivere: List<Arbeidsgiverberegning>,
-        periode: Periode,
-        aktivitetslogg: IAktivitetslogg,
-        subsumsjonslogg: Subsumsjonslogg
+        vedtaksperiode: Periode
     ): List<Arbeidsgiverberegning> {
         return arbeidsgivere
-            .minsteinntekt(periode, aktivitetslogg, subsumsjonslogg)
+            .minsteinntekt(vedtaksperiode)
             .avvisMedlemskap()
             .avvisOpptjening()
     }
 
-    private fun List<Arbeidsgiverberegning>.minsteinntekt(periode: Periode, aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): List<Arbeidsgiverberegning> {
+    private fun List<Arbeidsgiverberegning>.minsteinntekt(periode: Periode): List<Arbeidsgiverberegning> {
         // dager frem til og med alder.redusertYtelseAlder avvises hvis sykepengegrunnlaget er under halvG
         val minsteinntektkravTilFylte67 = halvG.minsteinntekt(skjæringstidspunkt)
         val erUnderMinsteinntektskravTilFylte67 = inntektsgrunnlag.sykepengegrunnlag < minsteinntektkravTilFylte67

@@ -1,11 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.util.UUID
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -37,7 +35,7 @@ internal class AvvisAndreYtelserFilterTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         )
-        val result = filter.filter(tidslinjer, januar, Aktivitetslogg(), EmptyLog).single().samletVedtaksperiodetidslinje.inspektør
+        val result = filter.filter(tidslinjer, januar).single().samletVedtaksperiodetidslinje.inspektør
 
         assertEquals(7, result.avvistDagTeller)
         assertEquals(Begrunnelse.AndreYtelserForeldrepenger, result.begrunnelse(1.januar).single())
