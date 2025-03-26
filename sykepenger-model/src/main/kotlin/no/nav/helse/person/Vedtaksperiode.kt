@@ -1450,7 +1450,6 @@ internal class Vedtaksperiode private constructor(
         val ghosts = ghostArbeidsgivere(inntektsgrunnlagArbeidsgivere, skatteopplysninger)
         if (ghosts.isNotEmpty()) aktivitetslogg.varsel(Varselkode.RV_VV_2)
         return Inntektsgrunnlag.opprett(
-            alder = person.alder,
             arbeidsgiverInntektsopplysninger = inntektsgrunnlagArbeidsgivere + ghosts,
             deaktiverteArbeidsforhold = emptyList(),
             skjæringstidspunkt = skjæringstidspunkt,

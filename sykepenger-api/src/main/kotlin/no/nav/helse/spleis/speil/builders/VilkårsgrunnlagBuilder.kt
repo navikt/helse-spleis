@@ -15,6 +15,7 @@ import no.nav.helse.dto.serialisering.SaksbehandlerUtDto
 import no.nav.helse.dto.serialisering.SkjønnsmessigFastsattUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
+import no.nav.helse.spleis.speil.dto.AlderDTO
 import no.nav.helse.spleis.speil.dto.GhostPeriodeDTO
 import no.nav.helse.spleis.speil.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.spleis.speil.dto.SkjønnsmessigFastsattDTO
@@ -164,7 +165,7 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
     }
 }
 
-internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: VilkårsgrunnlaghistorikkUtDto) {
+internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: VilkårsgrunnlaghistorikkUtDto, val alderDTO: AlderDTO) {
     private val inntekter = mutableMapOf<UUID, IOmregnetÅrsinntekt>()
     private val historikk = LinkedList<Map<UUID, IVilkårsgrunnlag>>()
 
@@ -195,7 +196,13 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             }
             .map { it.id }
             .toSet()
-
+        val alderPåSkjæringstidspunktet = alderDTO.alderPåDato(grunnlagsdata.skjæringstidspunkt)
+        val minsteinntektkrav = if (alderPåSkjæringstidspunktet <= 67) 0.5 else 2.0
+        val `1g` = grunnlagsdata.inntektsgrunnlag.`6G`.årlig.beløp / 6.0
+        val minsteinntekt = `1g` * minsteinntektkrav
+        // todo: det gir ikke mye mening å si om dette kravet er oppfylt på skjæringstidspunktet når det er et dag-for-dag vilkår...
+        // dagene under kravet vil uansett avslås på utbetalingstidslinjen og varsles om...
+        val oppfyllerMinsteinntekt = (grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag.årlig.beløp >= minsteinntekt)
         return ISpleisGrunnlag(
             skjæringstidspunkt = grunnlagsdata.skjæringstidspunkt,
             overstyringer = overstyringer,
@@ -207,7 +214,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             sykepengegrunnlagsgrense = begrensning,
             meldingsreferanseId = grunnlagsdata.meldingsreferanseId?.id,
             antallOpptjeningsdagerErMinst = grunnlagsdata.opptjening.opptjeningsdager,
-            oppfyllerKravOmMinstelønn = grunnlagsdata.inntektsgrunnlag.oppfyllerMinsteinntektskrav,
+            oppfyllerKravOmMinstelønn = oppfyllerMinsteinntekt,
             oppfyllerKravOmOpptjening = grunnlagsdata.opptjening.erOppfylt,
             oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
             id = grunnlagsdata.vilkårsgrunnlagId

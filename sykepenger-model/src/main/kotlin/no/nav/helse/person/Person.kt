@@ -111,7 +111,6 @@ class Person private constructor(
                 opprettet = dto.opprettet,
                 infotrygdhistorikk = Infotrygdhistorikk.gjenopprett(dto.infotrygdhistorikk),
                 vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk.gjenopprett(
-                    alder,
                     dto.vilkårsgrunnlagHistorikk,
                     grunnlagsdataMap
                 ),

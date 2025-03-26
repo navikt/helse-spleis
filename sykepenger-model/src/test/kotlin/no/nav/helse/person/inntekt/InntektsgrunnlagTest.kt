@@ -3,9 +3,7 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -67,10 +65,9 @@ internal class InntektsgrunnlagTest {
         val sluttdatoA1 = skjæringstidspunkt.minusMonths(1).withDayOfMonth(1)
         val startdatoA2 = skjæringstidspunkt.minusMonths(1).withDayOfMonth(2)
 
-        val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
-            alder = UNG_PERSON_FØDSELSDATO.alder,
+        val inntektsgrunnlag = Inntektsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiverInntektsopplysninger = listOf(
+            arbeidsgiverInntektsopplysninger = listOf<ArbeidsgiverInntektsopplysning>(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     faktaavklartInntekt = arbeidsgiverinntekt(
@@ -142,10 +139,9 @@ internal class InntektsgrunnlagTest {
     @Test
     fun `lager varsel dersom en arbeidsgiver i sykepengegrunnlaget ikke har registrert opptjening`() {
         val skjæringstidspunkt = 1.mars
-        val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
-            alder = UNG_PERSON_FØDSELSDATO.alder,
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiverInntektsopplysninger = listOf(
+        val inntektsgrunnlag = Inntektsgrunnlag(
+            skjæringstidspunkt,
+            listOf<ArbeidsgiverInntektsopplysning>(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     faktaavklartInntekt = arbeidsgiverinntekt(
@@ -165,8 +161,8 @@ internal class InntektsgrunnlagTest {
                     skjønnsmessigFastsatt = null
                 )
             ),
-            deaktiverteArbeidsforhold = emptyList(),
-            vurdertInfotrygd = false
+            emptyList<ArbeidsgiverInntektsopplysning>(),
+            false
         )
 
         val opptjeningUtenA2 = Opptjening.nyOpptjening(

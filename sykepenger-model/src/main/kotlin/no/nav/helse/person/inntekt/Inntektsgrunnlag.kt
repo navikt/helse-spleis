@@ -1,10 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.Grunnbeløp.Companion.`2G`
-import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
@@ -39,8 +36,7 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_IKKE_6G_BEGRE
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTRYGD
 import no.nav.helse.økonomi.Inntekt
 
-internal class Inntektsgrunnlag private constructor(
-    private val alder: Alder,
+internal class Inntektsgrunnlag(
     private val skjæringstidspunkt: LocalDate,
     val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
@@ -62,18 +58,13 @@ internal class Inntektsgrunnlag private constructor(
     val sykepengegrunnlag = beregningsgrunnlag.coerceAtMost(this.`6G`)
     private val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (beregningsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
-    private val forhøyetInntektskrav = alder.forhøyetInntektskrav(skjæringstidspunkt)
-    private val minsteinntekt = (if (forhøyetInntektskrav) `2G` else halvG).minsteinntekt(skjæringstidspunkt)
-    private val oppfyllerMinsteinntektskrav = beregningsgrunnlag >= minsteinntekt
-
     internal constructor(
-        alder: Alder,
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
         skjæringstidspunkt: LocalDate,
         subsumsjonslogg: Subsumsjonslogg,
         vurdertInfotrygd: Boolean = false
-    ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd) {
+    ) : this(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd) {
         subsumsjonslogg.apply {
             logg(
                 `§ 8-10 ledd 2 punktum 1`(
@@ -98,7 +89,6 @@ internal class Inntektsgrunnlag private constructor(
         }
 
         fun opprett(
-            alder: Alder,
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
             deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
@@ -109,7 +99,6 @@ internal class Inntektsgrunnlag private constructor(
                 "det er oppgitt duplikat orgnumre i inntektsgrunnlaget: ${alleInntekter.joinToString { it.orgnummer }}"
             }
             return Inntektsgrunnlag(
-                alder = alder,
                 arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
                 deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -117,20 +106,8 @@ internal class Inntektsgrunnlag private constructor(
             )
         }
 
-        fun ferdigSykepengegrunnlag(
-            alder: Alder,
-            skjæringstidspunkt: LocalDate,
-            arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-            deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
-            vurdertInfotrygd: Boolean,
-            `6G`: Inntekt? = null
-        ): Inntektsgrunnlag {
-            return Inntektsgrunnlag(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd, `6G`)
-        }
-
-        fun gjenopprett(alder: Alder, skjæringstidspunkt: LocalDate, dto: InntektsgrunnlagInnDto): Inntektsgrunnlag {
+        fun gjenopprett(skjæringstidspunkt: LocalDate, dto: InntektsgrunnlagInnDto): Inntektsgrunnlag {
             return Inntektsgrunnlag(
-                alder = alder,
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiverInntektsopplysninger = dto.arbeidsgiverInntektsopplysninger.map { ArbeidsgiverInntektsopplysning.gjenopprett(it) },
                 deaktiverteArbeidsforhold = dto.deaktiverteArbeidsforhold.map { ArbeidsgiverInntektsopplysning.gjenopprett(it) },
@@ -147,8 +124,6 @@ internal class Inntektsgrunnlag private constructor(
         `6G` = `6G`,
         begrensning = begrensning,
         vurdertInfotrygd = vurdertInfotrygd,
-        minsteinntekt = minsteinntekt,
-        oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav,
         arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
         deaktiverteArbeidsgiverInntektsopplysninger = deaktiverteArbeidsforhold,
         deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.map { it.orgnummer }
@@ -241,7 +216,6 @@ internal class Inntektsgrunnlag private constructor(
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
         nyttSkjæringstidspunkt: LocalDate = skjæringstidspunkt
     ) = Inntektsgrunnlag(
-        alder = alder,
         skjæringstidspunkt = nyttSkjæringstidspunkt,
         arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
         deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
@@ -295,10 +269,7 @@ internal class Inntektsgrunnlag private constructor(
         sykepengegrunnlag = this.sykepengegrunnlag.dto(),
         totalOmregnetÅrsinntekt = this.omregnetÅrsinntekt.dto(),
         beregningsgrunnlag = this.beregningsgrunnlag.dto(),
-        er6GBegrenset = beregningsgrunnlag > this.`6G`,
-        forhøyetInntektskrav = this.forhøyetInntektskrav,
-        minsteinntekt = this.minsteinntekt.dto(),
-        oppfyllerMinsteinntektskrav = this.oppfyllerMinsteinntektskrav
+        er6GBegrenset = beregningsgrunnlag > this.`6G`
     )
 }
 
@@ -320,8 +291,6 @@ internal data class InntektsgrunnlagView(
     val `6G`: Inntekt,
     val begrensning: Inntektsgrunnlag.Begrensning,
     val vurdertInfotrygd: Boolean,
-    val minsteinntekt: Inntekt,
-    val oppfyllerMinsteinntektskrav: Boolean,
     val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     val deaktiverteArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     val deaktiverteArbeidsforhold: List<String>

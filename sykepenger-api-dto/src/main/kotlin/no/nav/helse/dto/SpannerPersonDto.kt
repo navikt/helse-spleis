@@ -107,10 +107,7 @@ data class SpannerPersonDto(
             val vurdertInfotrygd: Boolean,
             val totalOmregnetÅrsinntekt: InntektbeløpDto.Årlig,
             val beregningsgrunnlag: InntektbeløpDto.Årlig,
-            val er6GBegrenset: Boolean,
-            val forhøyetInntektskrav: Boolean,
-            val minsteinntekt: InntektbeløpDto.Årlig,
-            val oppfyllerMinsteinntektskrav: Boolean
+            val er6GBegrenset: Boolean
         )
 
         data class ArbeidsgiverInntektsopplysningData(
@@ -1493,10 +1490,7 @@ private fun InntektsgrunnlagUtDto.tilPersonData() =
         vurdertInfotrygd = this.vurdertInfotrygd,
         totalOmregnetÅrsinntekt = totalOmregnetÅrsinntekt.årlig,
         beregningsgrunnlag = beregningsgrunnlag.årlig,
-        er6GBegrenset = er6GBegrenset,
-        forhøyetInntektskrav = forhøyetInntektskrav,
-        minsteinntekt = minsteinntekt.årlig,
-        oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav
+        er6GBegrenset = er6GBegrenset
     )
 
 private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() =

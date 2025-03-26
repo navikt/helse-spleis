@@ -75,7 +75,6 @@ class AvvisInngangsvilkårfilterTest {
     ): List<Utbetalingsdag.AvvistDag> {
         val skjæringstidspunkt = 1.januar
         val inntektsgrunnlag = Inntektsgrunnlag(
-            alder = ALDER,
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = "a1",

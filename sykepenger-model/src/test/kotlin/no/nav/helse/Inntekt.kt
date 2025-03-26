@@ -1,8 +1,6 @@
 package no.nav.helse
 
 import java.time.LocalDate
-import no.nav.helse.Alder.Companion.alder
-import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.dsl.a1
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
@@ -12,14 +10,13 @@ import no.nav.helse.økonomi.Inntekt
 
 internal val Inntekt.sykepengegrunnlag get() = inntektsgrunnlag(a1)
 
-internal fun Inntekt.inntektsgrunnlag(orgnr: String) = inntektsgrunnlag(UNG_PERSON_FØDSELSDATO.alder, orgnr, 1.januar)
-internal fun Inntekt.inntektsgrunnlag(alder: Alder) = inntektsgrunnlag(alder, a1, 1.januar)
+internal fun Inntekt.inntektsgrunnlag(orgnr: String) = inntektsgrunnlag(orgnr, 1.januar)
+internal fun Inntekt.inntektsgrunnlag() = inntektsgrunnlag(a1, 1.januar)
 internal fun Inntekt.inntektsgrunnlag(skjæringstidspunkt: LocalDate) =
-    inntektsgrunnlag(UNG_PERSON_FØDSELSDATO.alder, a1, skjæringstidspunkt)
+    inntektsgrunnlag(a1, skjæringstidspunkt)
 
-internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstidspunkt: LocalDate, subsumsjonslogg: Subsumsjonslogg = Subsumsjonslogg.EmptyLog) =
+internal fun Inntekt.inntektsgrunnlag(orgnr: String, skjæringstidspunkt: LocalDate, subsumsjonslogg: Subsumsjonslogg = Subsumsjonslogg.EmptyLog) =
     Inntektsgrunnlag(
-        alder = alder,
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
                 orgnummer = orgnr,
@@ -34,10 +31,9 @@ internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstid
     )
 
 internal fun Inntekt.inntektsgrunnlag(orgnr: String, skjæringstidspunkt: LocalDate, virkningstidspunkt: LocalDate) =
-    Inntektsgrunnlag.ferdigSykepengegrunnlag(
-        alder = UNG_PERSON_FØDSELSDATO.alder,
+    Inntektsgrunnlag(
         skjæringstidspunkt = skjæringstidspunkt,
-        arbeidsgiverInntektsopplysninger = listOf(
+        arbeidsgiverInntektsopplysninger = listOf<ArbeidsgiverInntektsopplysning>(
             ArbeidsgiverInntektsopplysning(
                 orgnummer = orgnr,
                 faktaavklartInntekt = arbeidsgiverinntekt(skjæringstidspunkt, this),

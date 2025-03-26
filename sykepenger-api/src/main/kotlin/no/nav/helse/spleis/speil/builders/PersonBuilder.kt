@@ -14,8 +14,7 @@ internal class PersonBuilder(
 ) {
     internal fun build(): PersonDTO {
         val alder = AlderDTO(personUtDto.alder.fødselsdato, personUtDto.alder.dødsdato)
-
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(personUtDto.vilkårsgrunnlagHistorikk).build()
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(personUtDto.vilkårsgrunnlagHistorikk, alder).build()
         val arbeidsgivere = personUtDto.arbeidsgivere
             .map { arbeidsgiverDto ->
                 ArbeidsgiverBuilder(arbeidsgiverDto, pølsepakke.pakker.singleOrNull { it.yrkesaktivitetidentifikator == arbeidsgiverDto.organisasjonsnummer })
