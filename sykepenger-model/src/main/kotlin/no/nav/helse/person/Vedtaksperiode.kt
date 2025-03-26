@@ -183,7 +183,6 @@ import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
 import no.nav.helse.utbetalingstidslinje.Vedtaksperiodeberegning
 import no.nav.helse.yearMonth
@@ -1954,8 +1953,6 @@ internal class Vedtaksperiode private constructor(
         førstePeriodeAnnenArbeidsgiverSomTrengerInntekt()
             ?: førstePeriodeSomTrengerRefusjonsopplysninger()
 
-    private fun utbetalingstidslinje() = behandlinger.utbetalingstidslinje()
-
     private val beregningsperiode get() = checkNotNull(perioderSomMåHensyntasVedBeregning().map { it.periode }.periode()) { "Hvordan kan det ha seg at vi ikke har noen beregningsperiode?" }
     private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg, inntekterForBeregningBuilder: InntekterForBeregning.Builder): Maksdatoresultat {
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
@@ -2038,16 +2035,10 @@ internal class Vedtaksperiode private constructor(
         uberegnetTidslinjePerArbeidsgiver: List<Arbeidsgiverberegning>,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
     ): List<Vedtaksperiodeberegningsresultat> {
-        // grunnlaget for maksdatoberegning er alt som har skjedd før, frem til og med vedtaksperioden som
-        // beregnes
-        val historisktidslinjePerArbeidsgiver = person.vedtaksperioder { it.periode.endInclusive < periode.start }
-            .groupBy { it.arbeidsgiver.organisasjonsnummer }
-            .mapValues {
-                it.value.map { vedtaksperiode -> vedtaksperiode.utbetalingstidslinje() }
-                    .reduce(Utbetalingstidslinje::plus)
-            }
-
-        val historisktidslinje = historisktidslinjePerArbeidsgiver.values
+        // grunnlaget for maksdatoberegning er alt som har skjedd før,
+        // frem til og med vedtaksperioden som beregnes
+        val historisktidslinje = person.vedtaksperioder { it.periode.endInclusive < periode.start }
+            .map { it.behandlinger.utbetalingstidslinje() }
             .fold(person.infotrygdhistorikk.utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
         val maksdatofilter = MaksimumSykepengedagerfilter(person.alder, person.regler, historisktidslinje)
