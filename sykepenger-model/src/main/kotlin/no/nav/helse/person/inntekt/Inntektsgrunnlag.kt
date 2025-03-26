@@ -9,19 +9,13 @@ import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-10 ledd 2 punktum 1`
-import no.nav.helse.etterlevelse.`§ 8-3 ledd 2 punktum 1`
-import no.nav.helse.etterlevelse.`§ 8-51 ledd 2`
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.berik
@@ -43,8 +37,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.vali
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTRYGD
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 
 internal class Inntektsgrunnlag private constructor(
@@ -66,7 +58,7 @@ internal class Inntektsgrunnlag private constructor(
     private val omregnetÅrsinntekt = arbeidsgiverInntektsopplysninger.totalOmregnetÅrsinntekt()
 
     // summen av alle inntekter
-    private val beregningsgrunnlag = arbeidsgiverInntektsopplysninger.fastsattÅrsinntekt()
+    val beregningsgrunnlag = arbeidsgiverInntektsopplysninger.fastsattÅrsinntekt()
     val sykepengegrunnlag = beregningsgrunnlag.coerceAtMost(this.`6G`)
     private val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (beregningsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
@@ -91,34 +83,7 @@ internal class Inntektsgrunnlag private constructor(
                     beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig
                 )
             )
-            subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, this)
         }
-    }
-
-    private fun subsummerMinsteSykepengegrunnlag(
-        alder: Alder,
-        skjæringstidspunkt: LocalDate,
-        subsumsjonslogg: Subsumsjonslogg
-    ) {
-        if (alder.forhøyetInntektskrav(skjæringstidspunkt))
-            subsumsjonslogg.logg(
-                `§ 8-51 ledd 2`(
-                    oppfylt = oppfyllerMinsteinntektskrav,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
-                    beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
-                    minimumInntektÅrlig = minsteinntekt.årlig
-                )
-            )
-        else
-            subsumsjonslogg.logg(
-                `§ 8-3 ledd 2 punktum 1`(
-                    oppfylt = oppfyllerMinsteinntektskrav,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
-                    minimumInntektÅrlig = minsteinntekt.årlig
-                )
-            )
     }
 
     internal fun beverte(builder: InntekterForBeregning.Builder) {
@@ -175,39 +140,6 @@ internal class Inntektsgrunnlag private constructor(
         }
     }
 
-    internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode, periode: Periode, subsumsjonslogg: Subsumsjonslogg): List<Utbetalingstidslinje> {
-        val tidslinjeperiode = Utbetalingstidslinje.periode(tidslinjer) ?: return tidslinjer
-        if (tidslinjeperiode.starterEtter(skjæringstidspunktperiode) || tidslinjeperiode.endInclusive < skjæringstidspunkt) return tidslinjer
-
-        val avvisningsperiode = skjæringstidspunktperiode.start til minOf(tidslinjeperiode.endInclusive, skjæringstidspunktperiode.endInclusive)
-        val avvisteDager = avvisningsperiode.filter { dato ->
-            val faktor = if (alder.forhøyetInntektskrav(dato)) `2G` else halvG
-            beregningsgrunnlag < faktor.minsteinntekt(skjæringstidspunkt)
-        }
-        if (avvisteDager.isEmpty()) return tidslinjer
-        val (avvisteDagerOver67, avvisteDagerTil67) = avvisteDager.partition { alder.forhøyetInntektskrav(it) }
-
-        if (avvisteDagerOver67.isNotEmpty()) {
-            alder.fraOgMedFylte67(
-                oppfylt = false,
-                utfallFom = avvisteDagerOver67.min(),
-                utfallTom = avvisteDagerOver67.max(),
-                periodeFom = periode.start,
-                periodeTom = periode.endInclusive,
-                beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
-                minimumInntektÅrlig = `2G`.minsteinntekt(avvisteDagerOver67.min()).årlig,
-                jurist = subsumsjonslogg
-            )
-        }
-        val dager = listOf(
-            Begrunnelse.MinimumInntektOver67 to avvisteDagerOver67.grupperSammenhengendePerioder(),
-            Begrunnelse.MinimumInntekt to avvisteDagerTil67.grupperSammenhengendePerioder()
-        )
-        return dager.fold(tidslinjer) { result, (begrunnelse, perioder) ->
-            Utbetalingstidslinje.avvis(result, perioder, listOf(begrunnelse))
-        }
-    }
-
     internal fun view() = InntektsgrunnlagView(
         sykepengegrunnlag = sykepengegrunnlag,
         omregnetÅrsinntekt = omregnetÅrsinntekt,
@@ -221,12 +153,6 @@ internal class Inntektsgrunnlag private constructor(
         deaktiverteArbeidsgiverInntektsopplysninger = deaktiverteArbeidsforhold,
         deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.map { it.orgnummer }
     )
-
-    internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
-        if (oppfyllerMinsteinntektskrav) aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
-        else aktivitetslogg.varsel(RV_SV_1)
-        return oppfyllerMinsteinntektskrav && !aktivitetslogg.harFunksjonelleFeilEllerVerre()
-    }
 
     internal fun harNødvendigInntektForVilkårsprøving(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.harInntekt(organisasjonsnummer)
@@ -267,27 +193,26 @@ internal class Inntektsgrunnlag private constructor(
         return hendelse.overstyr(this, subsumsjonslogg)
     }
 
-    internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonslogg: Subsumsjonslogg): EndretInntektsgrunnlag? {
+    internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger): EndretInntektsgrunnlag? {
         val resultat = this.arbeidsgiverInntektsopplysninger.overstyrMedSaksbehandler(hendelse.arbeidsgiveropplysninger)
-        return lagEndring(resultat, subsumsjonslogg)
+        return lagEndring(resultat)
     }
 
-    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, subsumsjonslogg: Subsumsjonslogg): EndretInntektsgrunnlag? {
+    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse): EndretInntektsgrunnlag? {
         val resultat = this.arbeidsgiverInntektsopplysninger.skjønnsfastsett(hendelse.arbeidsgiveropplysninger)
-        return lagEndring(resultat, subsumsjonslogg)
+        return lagEndring(resultat)
     }
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
         organisasjonsnummer: String,
-        inntekt: FaktaavklartInntekt,
-        subsumsjonslogg: Subsumsjonslogg
+        inntekt: FaktaavklartInntekt
     ): EndretInntektsgrunnlag? {
         val resultat = arbeidsgiverInntektsopplysninger.overstyrMedInntektsmelding(organisasjonsnummer, inntekt)
-        return lagEndring(resultat, subsumsjonslogg)
+        return lagEndring(resultat)
     }
 
-    private fun lagEndring(nyeInntekter: List<ArbeidsgiverInntektsopplysning>, subsumsjonslogg: Subsumsjonslogg): EndretInntektsgrunnlag? {
-        val nyttInntektsgrunnlag = kopierSykepengegrunnlagOgValiderMinsteinntekt(nyeInntekter, deaktiverteArbeidsforhold, subsumsjonslogg) ?: return null
+    private fun lagEndring(nyeInntekter: List<ArbeidsgiverInntektsopplysning>): EndretInntektsgrunnlag? {
+        val nyttInntektsgrunnlag = kopierSykepengegrunnlagHvisFunksjonellEndring(nyeInntekter, deaktiverteArbeidsforhold) ?: return null
         return EndretInntektsgrunnlag(
             inntekter = nyeInntekter.mapNotNull { potensiellEndret ->
                 val eksisterende = arbeidsgiverInntektsopplysninger.single { eksisterende -> potensiellEndret.orgnummer == eksisterende.orgnummer }
@@ -303,15 +228,12 @@ internal class Inntektsgrunnlag private constructor(
         )
     }
 
-    private fun kopierSykepengegrunnlagOgValiderMinsteinntekt(
+    private fun kopierSykepengegrunnlagHvisFunksjonellEndring(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-        deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
-        subsumsjonslogg: Subsumsjonslogg
+        deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>
     ): Inntektsgrunnlag? {
         if (!arbeidsgiverInntektsopplysninger.harFunksjonellEndring(this.arbeidsgiverInntektsopplysninger)) return null
-        return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold).apply {
-            subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, subsumsjonslogg)
-        }
+        return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold)
     }
 
     private fun kopierSykepengegrunnlag(

@@ -86,7 +86,6 @@ class Vilkårsgrunnlag(
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, inntektsgrunnlag: Inntektsgrunnlag, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
-        val sykepengegrunnlagOk = inntektsgrunnlag.valider(aktivitetslogg)
         arbeidsforhold.forEach { it.validerFrilans(aktivitetslogg, skjæringstidspunkt, arbeidsforhold, inntektsvurderingForSykepengegrunnlag) }
         val opptjening = opptjening()
         subsumsjonslogg.logg(opptjening.subsumsjon)
@@ -104,7 +103,7 @@ class Vilkårsgrunnlag(
             inntektsgrunnlag = inntektsgrunnlag,
             opptjening = opptjening,
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
-            vurdertOk = sykepengegrunnlagOk && opptjeningvurderingOk && medlemskapsvurderingOk,
+            vurdertOk = opptjeningvurderingOk && medlemskapsvurderingOk,
             meldingsreferanseId = metadata.meldingsreferanseId,
             vilkårsgrunnlagId = UUID.randomUUID()
         )

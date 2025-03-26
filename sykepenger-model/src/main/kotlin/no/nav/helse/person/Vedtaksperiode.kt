@@ -462,8 +462,7 @@ internal class Vedtaksperiode private constructor(
         /* fest setebeltet. nå skal vi prøve å endre vilkårsgrunnlaget */
         val resultat = grunnlag.nyeArbeidsgiverInntektsopplysninger(
             organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-            inntekt = korrigertInntekt,
-            subsumsjonslogg = subsumsjonslogg
+            inntekt = korrigertInntekt
         ) ?: return false
 
         val (nyttGrunnlag, _) = resultat
@@ -698,8 +697,7 @@ internal class Vedtaksperiode private constructor(
                 id = UUID.randomUUID(),
                 inntektsdata = inntektsdata,
                 inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.Arbeidsgiver)
-            ),
-            subsumsjonslogg = subsumsjonslogg
+            )
         )
             // todo: per 10. januar 2025 så sender alltid Hag inntekt i portal-inntektsmeldinger selv om vi ikke har bedt om det, derfor må vi ta høyde for at det ikke nødvendigvis er endringer
             ?: return emptyList()
@@ -957,7 +955,6 @@ internal class Vedtaksperiode private constructor(
         val maksdatoresultat = beregnUtbetalinger(aktivitetslogg, inntekterForBeregningBuilder)
 
         checkNotNull(vilkårsgrunnlag).valider(aktivitetslogg, arbeidsgiver.organisasjonsnummer)
-        checkNotNull(vilkårsgrunnlag).inntektsgrunnlag.valider(aktivitetslogg)
         checkNotNull(vilkårsgrunnlag).opptjening?.validerOpptjeningsdager(aktivitetslogg)
         infotrygdhistorikk.validerMedVarsel(aktivitetslogg, periode)
         infotrygdhistorikk.validerNyereOpplysninger(aktivitetslogg, periode)
@@ -2042,7 +2039,13 @@ internal class Vedtaksperiode private constructor(
         val filtere = listOf(
             Sykdomsgradfilter(person.minimumSykdomsgradsvurdering),
             AvvisDagerEtterDødsdatofilter(person.alder),
-            AvvisInngangsvilkårfilter(grunnlagsdata),
+            AvvisInngangsvilkårfilter(
+                skjæringstidspunkt = skjæringstidspunkt,
+                alder = person.alder,
+                inntektsgrunnlag = grunnlagsdata.inntektsgrunnlag,
+                medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus,
+                opptjening = grunnlagsdata.opptjening
+            ),
             maksdatofilter,
             MaksimumUtbetalingFilter(
                 sykepengegrunnlagBegrenset6G = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag,

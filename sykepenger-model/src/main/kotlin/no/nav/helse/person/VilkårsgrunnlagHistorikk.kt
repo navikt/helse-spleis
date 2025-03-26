@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnDto
@@ -23,7 +23,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -33,7 +32,6 @@ import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.inntekt.InntektsgrunnlagView
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class VilkårsgrunnlagHistorikk private constructor(private val historikk: MutableList<Innslag>) {
@@ -60,9 +58,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
         sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)
 
-    internal fun avvisInngangsvilkår(tidslinjer: List<Utbetalingstidslinje>, periode: Periode, subsumsjonslogg: Subsumsjonslogg) =
-        sisteInnlag()?.avvis(tidslinjer, periode, subsumsjonslogg) ?: tidslinjer
-
     internal fun blitt6GBegrensetSidenSist(skjæringstidspunkt: LocalDate): Boolean {
         if (sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)?.er6GBegrenset() == false) return false
         return forrigeInnslag()?.vilkårsgrunnlagFor(skjæringstidspunkt)?.er6GBegrenset() == false
@@ -81,14 +76,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
             vilkårsgrunnlag[skjæringstidspunkt]
-
-        internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, periode: Periode, subsumsjonslogg: Subsumsjonslogg): List<Utbetalingstidslinje> {
-            val skjæringstidspunktperioder = skjæringstidspunktperioder(vilkårsgrunnlag.values)
-            return vilkårsgrunnlag.entries.fold(tidslinjer) { resultat, (skjæringstidspunkt, element) ->
-                val skjæringstidspunktperiode = checkNotNull(skjæringstidspunktperioder.singleOrNull { it.start == skjæringstidspunkt })
-                element.avvis(resultat, skjæringstidspunktperiode, periode, subsumsjonslogg)
-            }
-        }
 
         internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, sykefraværstilfeller: Set<LocalDate>): Innslag? {
             val gyldigeVilkårsgrunnlag = beholdAktiveSkjæringstidspunkter(sykefraværstilfeller)
@@ -175,13 +162,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonslogg: Subsumsjonslogg): Pair<VilkårsgrunnlagElement, EndretInntektsgrunnlag>? {
             if (this is InfotrygdVilkårsgrunnlag) return null
-            val endretInntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsgiveropplysninger(hendelse, subsumsjonslogg) ?: return null
+            val endretInntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsgiveropplysninger(hendelse) ?: return null
             return kopierMed(endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, subsumsjonslogg) to endretInntektsgrunnlag
         }
 
         internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, subsumsjonslogg: Subsumsjonslogg): VilkårsgrunnlagElement? {
             if (this is InfotrygdVilkårsgrunnlag) return null
-            val endretInntektsgrunnlag = inntektsgrunnlag.skjønnsmessigFastsettelse(hendelse, subsumsjonslogg) ?: return null
+            val endretInntektsgrunnlag = inntektsgrunnlag.skjønnsmessigFastsettelse(hendelse) ?: return null
             return kopierMed(endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, subsumsjonslogg)
         }
 
@@ -207,10 +194,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun nyeArbeidsgiverInntektsopplysninger(
             organisasjonsnummer: String,
-            inntekt: FaktaavklartInntekt,
-            subsumsjonslogg: Subsumsjonslogg
+            inntekt: FaktaavklartInntekt
         ): Pair<VilkårsgrunnlagElement, EndretInntektsgrunnlag>? {
-            val endretInntektsgrunnlag = inntektsgrunnlag.nyeArbeidsgiverInntektsopplysninger(organisasjonsnummer, inntekt, subsumsjonslogg) ?: return null
+            val endretInntektsgrunnlag = inntektsgrunnlag.nyeArbeidsgiverInntektsopplysninger(organisasjonsnummer, inntekt) ?: return null
             val grunnlag = kopierMed(endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, EmptyLog)
             return grunnlag to endretInntektsgrunnlag
         }
@@ -289,14 +275,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String): Boolean {
             inntektsgrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, organisasjonsnummer)
             return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
-        }
-
-        override fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode, periode: Periode, subsumsjonslogg: Subsumsjonslogg): List<Utbetalingstidslinje> {
-            val foreløpigAvvist = inntektsgrunnlag.avvis(tidslinjer, skjæringstidspunktperiode, periode, subsumsjonslogg)
-            val begrunnelser = mutableListOf<Begrunnelse>()
-            if (medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
-            if (!opptjening!!.harTilstrekkeligAntallOpptjeningsdager()) begrunnelser.add(Begrunnelse.ManglerOpptjening)
-            return Utbetalingstidslinje.avvis(foreløpigAvvist, listOf(skjæringstidspunktperiode), begrunnelser)
         }
 
         override fun vilkårsgrunnlagtype() = "Spleis"
