@@ -12,6 +12,8 @@ jobs:
   deployDev:
     name: apply dev-gcp
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
@@ -22,6 +24,8 @@ jobs:
   deployProd:
     name: apply prod-gcp
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
