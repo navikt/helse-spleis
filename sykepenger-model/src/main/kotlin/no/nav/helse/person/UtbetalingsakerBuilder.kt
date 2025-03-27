@@ -49,11 +49,44 @@ internal class UtbetalingsakerBuilder(
             ?: vedtaksperiode.vedtaksperiode.start
     }
 
-    private fun infotrygdutbetalingEtterArbeidsgiverperiodenOgFørVedtaksperioden(infotrygdbetalinger: List<Periode>, vedtaksperiode: ArbeidsgiverperiodeForVedtaksperiode) =
-        infotrygdbetalinger.lastOrNull { infotrygdperiode ->
+    private fun infotrygdutbetalingEtterArbeidsgiverperiodenOgFørVedtaksperioden(infotrygdbetalinger: List<Periode>, vedtaksperiode: ArbeidsgiverperiodeForVedtaksperiode): Periode? {
+        //if (vedtaksperiode.førsteDagUtbetaltIInfotrygd()) return null
+        return infotrygdbetalinger.lastOrNull { infotrygdperiode ->
             (vedtaksperiode.arbeidsgiverperioder.isEmpty() || infotrygdperiode.start > vedtaksperiode.arbeidsgiverperioder.last().endInclusive)
                 && infotrygdperiode.endInclusive < vedtaksperiode.vedtaksperiode.start
         }
+    }
+
+    /**
+     * Når arbeidsgiverperioden er en tom liste skal det være ensbetydende med at arbeidsgiverperioden
+     * er gjennomført i Infotrygd, og vi ikke skal påstarte en ny telling av arbeisdgiverperioden i Spleis.
+     * Da utbetales det fra dag én i Spleis-perioden.
+     *
+     * Når infotrygdutbetalingen ligger i forkant av Spleis-perioden så klarer vi å hekte oss på riktig utbetalingssak.
+     * - Det er situasjoner hvor infotrygdutbetalingen ligger med et gap på maks 15 dager til Spleis-perioden.
+     *
+     * I spesialtilfellet hvor vi har en periode i Spleis som blir utbetalt fra dag én i Infotrygd så
+     * har vi også en tom liste med arbeidsgiverperiode.
+     * Da vet vi ikke om det utelukkende er på grunn av at dag én er utbetalt i Infotrygd, eller om det også er utbetalt i
+     * Infotrygd i forkant (med maks 15 dagers gap ☝) slik at det uansett ville blitt en tom liste med arbeidsgiverperiode.
+     *
+     * Når det ikke er utbetalt i forkant i Infotrygd, og det kun er utbetalingen av dag én i Infotrygd som forårsaker
+     * at vi har en tom liste med arbeidsgiverperiode leter "algoritmen" som skal finne rett utbetalingssak uansett etter
+     * Infotrygdutbetalinger _før_ vedtaksperioden.
+     * Da kan det være at denne utbetalingen i Infotrygd er flere år gammel, og vi antar den er relevant for vår
+     * utbetalingssak. Da blir eventuell mellomliggende perioder utbetalt i Spleis annullert uten at de tilhørende
+     * vedtaksperiodene blir revurdert, eller det er veldig tydlig for hverken saksbehandler eller oss.
+     *
+     * For å unngå å havne i den situasjonen velger vi heller å starte en ny utbetalingssak i dette spesialtilfellet.
+     * Da blir beløpene som utbetales rett, men vi kan ende opp med fler utbetalingssaker innenfor én arbeidsgiverperiode
+     * hvor det ideelt sett skulle vært én. Det er mye mindre konsekvenser ved å godta den "feilen" fremfor
+     * feilsituasjonen som beskrevet ovenfor.
+     *
+     */
+    private fun ArbeidsgiverperiodeForVedtaksperiode.førsteDagUtbetaltIInfotrygd(): Boolean {
+        if (arbeidsgiverperioder.isNotEmpty()) return false
+        return infotrygdbetalinger.any { vedtaksperiode.start in it }
+    }
 
     private fun utbetalteInfotrygdperioderMellomVedtaksperioder(vedtaksperiodene: List<ArbeidsgiverperiodeForVedtaksperiode>) =
         infotrygdbetalinger.flatMap { periode ->
