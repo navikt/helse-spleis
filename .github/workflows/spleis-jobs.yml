@@ -44,8 +44,6 @@ jobs:
           image_suffix: jobs
           dockerfile: Dockerfile
           docker_context: jobs
-          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
 
