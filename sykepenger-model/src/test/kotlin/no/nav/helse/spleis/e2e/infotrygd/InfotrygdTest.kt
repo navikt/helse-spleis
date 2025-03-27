@@ -1,12 +1,13 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
-import java.util.UUID
+import java.util.*
 import no.nav.helse.april
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -20,6 +21,7 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
@@ -27,6 +29,8 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_37
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_21
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
@@ -34,6 +38,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.IdInnhenter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
@@ -61,6 +66,47 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Arbeidsgiverperiode utført i Infotrygd med kort gap til periode i Spleis som utbetales i Infotrygd mens den står til godkjenning`() {
+        nyttVedtak(10.februar til 28.februar)
+        val februarKorrelasjonsId = gjeldendeKorrelasjonsId(1.vedtaksperiode)
+        assertEquals(listOf(10.februar til 25.februar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
+        assertEquals(emptyList<Periode>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertEquals(februarKorrelasjonsId, gjeldendeKorrelasjonsId(1.vedtaksperiode))
+        assertVarsler(listOf(RV_OS_2, RV_IT_37), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_OS_2, RV_IT_37), 1.vedtaksperiode.filter())
+
+        håndterSøknad(10.mars til 31.mars)
+        håndterArbeidsgiveropplysninger(
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+            beregnetInntekt = INNTEKT,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null),
+            arbeidsgiverperioder = null
+        )
+        assertEquals(emptyList<Periode>(), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        assertEquals(februarKorrelasjonsId, gjeldendeKorrelasjonsId(2.vedtaksperiode))
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+
+        // Mens Mars står til godkjenning utbetales den i Infotrygd
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar), ArbeidsgiverUtbetalingsperiode(a1, 10.mars, 31.mars))
+        assertEquals(emptyList<Periode>(), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        assertEquals(februarKorrelasjonsId, gjeldendeKorrelasjonsId(2.vedtaksperiode))
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertVarsler(listOf(RV_IT_3), 2.vedtaksperiode.filter())
+    }
 
     @Test
     fun `Når perioden utbetales i Infotrygd kan det medføre at vi feilaktig annullerer tidligere utebetalte perioder`() {
@@ -199,4 +245,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         }
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
+
+    private fun gjeldendeKorrelasjonsId(vedtaksperiodeIdInnhenter: IdInnhenter) =
+        inspektør.vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
 }
