@@ -438,14 +438,14 @@ internal class TestHendelseMediator : IHendelseMediator {
     }
 
     override fun behandle(
-        avbruttSøknadMessage: AvbruttSøknadMessage,
+        message: AvbruttSøknadMessage,
         avbruttSøknad: AvbruttSøknad,
         context: MessageContext
     ) {
     }
 
     override fun behandle(
-        avbruttArbeidsledigSøknadMessage: AvbruttArbeidsledigSøknadMessage,
+        message: AvbruttArbeidsledigSøknadMessage,
         avbruttSøknad: AvbruttSøknad,
         context: MessageContext
     ) {

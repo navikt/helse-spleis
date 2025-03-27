@@ -10,16 +10,14 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class PersonRepositoryTest : DBTest() {
 
     private lateinit var personRepository: PersonRepository
 
     @BeforeEach
     fun `start postgres`() {
-        personRepository = PersonRepository(dataSource)
+        personRepository = PersonRepository(dataSource.ds)
     }
 
     @Test
@@ -33,7 +31,7 @@ internal class PersonRepositoryTest : DBTest() {
     }
 
     private fun finnPerson(fødselsnummer: String): Int {
-        return dataSource.connection {
+        return dataSource.ds.connection {
             prepareStatementWithNamedParameters("SELECT COUNT(1) FROM person WHERE fnr = :fnr") {
                 withParameter("fnr", fødselsnummer.toLong())
             }.use {
@@ -45,7 +43,7 @@ internal class PersonRepositoryTest : DBTest() {
     }
 
     private fun finnMelding(fødselsnummer: String): Int {
-        return dataSource.connection {
+        return dataSource.ds.connection {
             prepareStatementWithNamedParameters("SELECT COUNT(1) FROM melding WHERE fnr = :fnr") {
                 withParameter("fnr", fødselsnummer.toLong())
             }.use {
@@ -57,7 +55,7 @@ internal class PersonRepositoryTest : DBTest() {
     }
 
     private fun opprettDummyPerson(fødselsnummer: String) {
-        dataSource.connection {
+        dataSource.ds.connection {
             transaction {
                 @Language("PostgreSQL")
                 val opprettMelding = "INSERT INTO melding(fnr, melding_id, melding_type, data, behandlet_tidspunkt) VALUES(:fnr, :meldingId, :meldingType, cast(:data as json), now())"

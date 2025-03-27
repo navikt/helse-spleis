@@ -1,4 +1,4 @@
-val jacksonVersion = "2.18.1"
+val jacksonVersion = "2.18.3"
 val ktorVersion = "2.2.2"
 val kGraphQLVersion = "0.19.0"
 val jsonassertVersion = "1.5.1"

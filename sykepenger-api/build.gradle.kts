@@ -4,9 +4,9 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.4.0"
 }
 
-val tbdLibsVersion = "2025.01.27-12.50-76316f3b"
+val tbdLibsVersion = "2025.03.27-18.30-c228796d"
 val spekematVersion = "2024.03.07-12.49-d2ad6319"
-val ktorVersion = "3.0.1"
+val ktorVersion = "3.1.2"
 val awaitilityVersion = "4.2.2"
 val mockVersion = "1.13.13"
 val jsonassertVersion = "1.5.3"
@@ -42,9 +42,6 @@ dependencies {
 
     testImplementation(project(":sykepenger-mediators")) // for å få tilgang på db/migrations-filene
     testImplementation(libs.bundles.flyway)
-    testImplementation(libs.testcontainers) {
-        exclude("com.fasterxml.jackson.core")
-    }
 
     testImplementation("com.github.navikt.tbd-libs:naisful-test-app:$tbdLibsVersion")
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")

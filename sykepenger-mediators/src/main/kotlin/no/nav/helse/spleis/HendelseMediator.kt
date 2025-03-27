@@ -698,8 +698,8 @@ internal interface IHendelseMediator {
 
     fun behandle(message: UtbetalingshistorikkEtterInfotrygdendringMessage, utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, context: MessageContext)
     fun behandle(message: ForkastSykmeldingsperioderMessage, forkastSykmeldingsperioder: ForkastSykmeldingsperioder, context: MessageContext)
-    fun behandle(avbruttSøknadMessage: AvbruttSøknadMessage, avbruttSøknad: AvbruttSøknad, context: MessageContext)
-    fun behandle(avbruttArbeidsledigSøknadMessage: AvbruttArbeidsledigSøknadMessage, avbruttSøknad: AvbruttSøknad, context: MessageContext)
+    fun behandle(message: AvbruttSøknadMessage, avbruttSøknad: AvbruttSøknad, context: MessageContext)
+    fun behandle(message: AvbruttArbeidsledigSøknadMessage, avbruttSøknad: AvbruttSøknad, context: MessageContext)
     fun behandle(message: SkjønnsmessigFastsettelseMessage, skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse, context: MessageContext)
     fun behandle(message: MinimumSykdomsgradVurdertMessage, minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding, context: MessageContext)
 }

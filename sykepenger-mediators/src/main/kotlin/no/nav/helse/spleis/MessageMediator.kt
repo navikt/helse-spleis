@@ -297,9 +297,9 @@ internal class MessageMediator(
             rapidsConnection.register(this)
         }
 
-        override fun onMessage(message: String, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
+        override fun onMessage(message: String, context: MessageContext, metadata: MessageMetadata, metrics: MeterRegistry) {
             beforeRiverHandling()
-            notifyMessage(message, context, metadata, meterRegistry)
+            notifyMessage(message, context, metadata, metrics)
             afterRiverHandling(message)
         }
 

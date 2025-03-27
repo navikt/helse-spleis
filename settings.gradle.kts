@@ -5,21 +5,20 @@ include(
     "sykepenger-utbetaling-dto", "sykepenger-aktivitetslogg", "sykepenger-aktivitetslogg-dto", "sykepenger-etterlevelse-api"
 )
 
-val rapidsAndRiversVersion = "2025012712551737978926.de930d8e0feb"
-val tbdLibsVersion = "2025.02.25-15.45-523b4479"
+val rapidsAndRiversVersion = "2025032719521743101565.4abbf0c3af65"
+val tbdLibsVersion = "2025.03.27-18.30-c228796d"
 
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            version("testcontainers", "1.20.3")
             version("rapids-and-rivers", rapidsAndRiversVersion)
-            version("postgres", "42.7.4")
-            version("hikari", "6.1.0")
+            version("postgres", "42.7.5")
+            version("hikari", "6.3.0")
             version("cloudsql", "1.20.0")
-            version("flyway", "10.21.0")
+            version("flyway", "11.5.0")
             version("logback", "1.5.12")
             version("logstash", "8.0")
-            version("jackson", "2.18.1")
+            version("jackson", "2.18.3")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
 
@@ -35,8 +34,6 @@ dependencyResolutionManagement {
 
             library("cloudsql", "com.google.cloud.sql", "postgres-socket-factory").versionRef("cloudsql")
             library("flyway-postgres", "org.flywaydb", "flyway-database-postgresql").versionRef("flyway")
-
-            library("testcontainers", "org.testcontainers", "postgresql").versionRef("testcontainers")
 
             bundle("flyway", listOf("flyway-postgres"))
             bundle("database", listOf("postgresql", "hikari", "tbd-sql"))

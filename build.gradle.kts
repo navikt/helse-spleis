@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "2.1.20"
 }
 
-val junitJupiterVersion = "5.11.3"
+val junitJupiterVersion = "5.12.1"
 
 allprojects {
     group = "no.nav.helse"

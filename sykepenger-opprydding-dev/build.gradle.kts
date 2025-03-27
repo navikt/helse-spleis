@@ -5,7 +5,7 @@ plugins {
 }
 
 val mainClass = "no.nav.helse.opprydding.AppKt"
-val tbdLibsVersion = "2025.01.27-12.50-76316f3b"
+val tbdLibsVersion = "2025.03.27-18.30-c228796d"
 
 dependencies {
     implementation(libs.rapids.and.rivers)
@@ -16,10 +16,8 @@ dependencies {
 
     testImplementation(project(":sykepenger-mediators")) // for å få  tilgang på db/migrations-filene
     testImplementation("com.github.navikt.tbd-libs:rapids-and-rivers-test:$tbdLibsVersion")
+    testImplementation("com.github.navikt.tbd-libs:postgres-testdatabaser:$tbdLibsVersion")
     testImplementation(libs.bundles.flyway)
-    testImplementation(libs.testcontainers) {
-        exclude("com.fasterxml.jackson.core")
-    }
 }
 
 tasks.named<Jar>("jar") {

@@ -6,10 +6,10 @@ plugins {
 
 val mainClass = "no.nav.helse.AppKt"
 
-val tbdLibsVersion = "2025.01.27-12.50-76316f3b"
+val tbdLibsVersion = "2025.03.27-18.30-c228796d"
 val tbdSpillAvImMatchingVersion = "2025.01.10-13.12-f8327f35"
 val syfokafkaVersion = "2024.10.21-14.49-932f4f94"
-val mockkVersion = "1.13.9"
+val mockkVersion = "1.13.17"
 val jsonSchemaValidatorVersion = "1.0.70"
 val jsonassertVersion = "1.5.0"
 
@@ -22,9 +22,6 @@ dependencies {
     implementation(libs.bundles.flyway)
     implementation("com.github.navikt.tbd-libs:naisful-postgres:$tbdLibsVersion")
 
-    testImplementation(libs.testcontainers) {
-        exclude("com.fasterxml.jackson.core")
-    }
     testImplementation("com.github.navikt.tbd-libs:rapids-and-rivers-test:$tbdLibsVersion")
     testImplementation("com.github.navikt.tbd-libs:postgres-testdatabaser:$tbdLibsVersion")
     testImplementation("com.networknt:json-schema-validator:$jsonSchemaValidatorVersion")
