@@ -35,7 +35,7 @@ internal class UtbetalingsakerBuilder(
 
     private fun finnStartdatoForUtbetalingsakForVedtaksperiode(vedtaksperiode: ArbeidsgiverperiodeForVedtaksperiode, infotrygdbetalinger: List<Periode>, vedtaksperiodene: List<ArbeidsgiverperiodeForVedtaksperiode>): LocalDate {
         // eventuell infotrygdutbetaling som ligger mellom arbeidsgiverperioden og vedtaksperioden
-        val mellomliggendeInfotrygdutbetaling = infotrygdutbetalingEtterArbeidsgiverperiodenOgFørVedtaksperioden(infotrygdbetalinger, vedtaksperiode)
+        val mellomliggendeInfotrygdutbetaling = infotrygdutbetalingEtterArbeidsgiverperiodenOgFørVedtaksperioden(infotrygdbetalinger, vedtaksperiode, vedtaksperiodene)
         val infotrygdutbetalingsakStartdato = mellomliggendeInfotrygdutbetaling?.let { infotrygdDag ->
             vedtaksperiodene.first { it.vedtaksperiode.start > infotrygdDag.endInclusive }.vedtaksperiode.start
         }
@@ -49,11 +49,37 @@ internal class UtbetalingsakerBuilder(
             ?: vedtaksperiode.vedtaksperiode.start
     }
 
-    private fun infotrygdutbetalingEtterArbeidsgiverperiodenOgFørVedtaksperioden(infotrygdbetalinger: List<Periode>, vedtaksperiode: ArbeidsgiverperiodeForVedtaksperiode) =
-        infotrygdbetalinger.lastOrNull { infotrygdperiode ->
-            (vedtaksperiode.arbeidsgiverperioder.isEmpty() || infotrygdperiode.start > vedtaksperiode.arbeidsgiverperioder.last().endInclusive)
-                && infotrygdperiode.endInclusive < vedtaksperiode.vedtaksperiode.start
+    private fun infotrygdutbetalingEtterArbeidsgiverperiodenOgFørVedtaksperioden(infotrygdbetalinger: List<Periode>, vedtaksperiode: ArbeidsgiverperiodeForVedtaksperiode, vedtaksperiodene: List<ArbeidsgiverperiodeForVedtaksperiode>): Periode? {
+        if (vedtaksperiode.arbeidsgiverperioder.isEmpty()) {
+            val sisteInfotrygdutbetalingFørVedtaksperiode = infotrygdbetalinger.lastOrNull { infotrygdperiode ->
+                infotrygdperiode.endInclusive < vedtaksperiode.vedtaksperiode.start
+            } ?: return null
+
+            val gapMellomInfotrygdUtbetalingOgVedtaksperiode = sisteInfotrygdutbetalingFørVedtaksperiode.periodeMellom(vedtaksperiode.vedtaksperiode.start) ?: return sisteInfotrygdutbetalingFørVedtaksperiode
+            val andreVedtaksperioderIGapet = vedtaksperiodene.filter { it.vedtaksperiode.overlapperMed(gapMellomInfotrygdUtbetalingOgVedtaksperiode) }
+
+            // Om det finnes vedtaksperioder i gapet _med_ arbeidsgiverperiode kan det umulig være rett å bygge videre på Infotrygd 🤞
+            if (andreVedtaksperioderIGapet.any { it.arbeidsgiverperioder.isNotEmpty() }) return null
+
+            // Nå vet vi at alle (om noen) i gapet også er _uten_ arbeidsgiverperiode
+            // - Det kan jo være AUU'er, så i perfect storm så kan det fortsatt gå galt ?
+            // - Halen på perioden kan jo være arbeidsdager, så egentlig kan "gapet" være større enn vi kan evaluere her
+            val sisteVedtaksperiodeSomAlleredeByggerPåInfotrygdutbetaling = andreVedtaksperioderIGapet.lastOrNull()
+
+            val gap = when (sisteVedtaksperiodeSomAlleredeByggerPåInfotrygdutbetaling) {
+                null -> gapMellomInfotrygdUtbetalingOgVedtaksperiode.count()
+                else -> sisteVedtaksperiodeSomAlleredeByggerPåInfotrygdutbetaling.vedtaksperiode.periodeMellom(vedtaksperiode.vedtaksperiode.start)?.count() ?: 0
+            }
+
+            return sisteInfotrygdutbetalingFørVedtaksperiode.takeIf { gap < 16 }
         }
+
+        // Hvorfor kan vi ikke alltid returnere null nå 🤔?
+        return infotrygdbetalinger.lastOrNull { infotrygdperiode ->
+            infotrygdperiode.start > vedtaksperiode.arbeidsgiverperioder.last().endInclusive &&
+            infotrygdperiode.endInclusive < vedtaksperiode.vedtaksperiode.start
+        }
+    }
 
     private fun utbetalteInfotrygdperioderMellomVedtaksperioder(vedtaksperiodene: List<ArbeidsgiverperiodeForVedtaksperiode>) =
         infotrygdbetalinger.flatMap { periode ->
