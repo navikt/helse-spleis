@@ -22,11 +22,16 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
             is Utbetalingsdag.NavDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.NavDag)
             is Utbetalingsdag.NavHelgDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag)
             is Utbetalingsdag.Fridag -> {
-                val (dagtype, begrunnelse) = when (sykdomstidslinje[dag.dato]) {
-                    is Dag.Permisjonsdag -> Permisjonsdag to null
-                    is Dag.Feriedag -> Feriedag to null
-                    is Dag.ArbeidIkkeGjenopptattDag -> ArbeidIkkeGjenopptattDag to null
-                    is Dag.AndreYtelser -> AndreYtelser to eksternBegrunnelse(sykdomstidslinje[dag.dato])?.let { listOf(it) }
+                when (val sykdomsdag = sykdomstidslinje[dag.dato]) {
+                    is Dag.AndreYtelser -> PersonObserver.Utbetalingsdag(
+                        dato = dag.dato,
+                        type = AndreYtelser,
+                        begrunnelser = listOf(sykdomsdag.tilEksternBegrunnelse())
+                    )
+
+                    is Dag.Permisjonsdag -> PersonObserver.Utbetalingsdag(dag.dato, Permisjonsdag)
+                    is Dag.Feriedag -> PersonObserver.Utbetalingsdag(dag.dato, Feriedag)
+                    is Dag.ArbeidIkkeGjenopptattDag -> PersonObserver.Utbetalingsdag(dag.dato, ArbeidIkkeGjenopptattDag)
                     is Dag.Arbeidsdag,
                     is Dag.ArbeidsgiverHelgedag,
                     is Dag.Arbeidsgiverdag,
@@ -35,16 +40,17 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                     is Dag.ProblemDag,
                     is Dag.SykHelgedag,
                     is Dag.Sykedag,
-                    is Dag.UkjentDag -> Fridag to null
+                    is Dag.UkjentDag -> PersonObserver.Utbetalingsdag(dag.dato, Fridag)
                 }
-                PersonObserver.Utbetalingsdag(dag.dato, dagtype, begrunnelse)
             }
 
-            is Utbetalingsdag.AvvistDag -> {
-                PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.AvvistDag, dag.begrunnelser.map {
+            is Utbetalingsdag.AvvistDag -> PersonObserver.Utbetalingsdag(
+                dato = dag.dato,
+                type = PersonObserver.Utbetalingsdag.Dagtype.AvvistDag,
+                begrunnelser = dag.begrunnelser.map {
                     PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.fraBegrunnelse(it)
-                })
-            }
+                }
+            )
 
             is Utbetalingsdag.ForeldetDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.ForeldetDag)
             is Utbetalingsdag.UkjentDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.UkjentDag)
@@ -53,12 +59,5 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
 
     internal fun result(): List<PersonObserver.Utbetalingsdag> {
         return utbetalingsdager
-    }
-
-    private fun eksternBegrunnelse(dag: Dag): PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO? {
-        return when (dag) {
-            is Dag.AndreYtelser -> dag.tilEksternBegrunnelse()
-            else -> null
-        }
     }
 }

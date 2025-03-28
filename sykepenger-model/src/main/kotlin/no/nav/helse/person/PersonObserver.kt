@@ -323,8 +323,10 @@ interface PersonObserver {
     data class Utbetalingsdag(
         val dato: LocalDate,
         val type: Dagtype,
-        val begrunnelser: List<EksternBegrunnelseDTO>? = null
+        val begrunnelser: List<EksternBegrunnelseDTO>?
     ) {
+        constructor(dato: LocalDate, type: Dagtype) : this(dato, type, null)
+
         enum class Dagtype {
             ArbeidsgiverperiodeDag,
             NavDag,
