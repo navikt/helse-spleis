@@ -447,13 +447,6 @@ internal class PersonMediator(
             "hendelser" to event.hendelseIder,
             "skjæringstidspunkt" to event.skjæringstidspunkt,
             "sykepengegrunnlag" to event.sykepengegrunnlag,
-            // disse fjerner vi snart
-            // <deprecated>
-            "grunnlagForSykepengegrunnlag" to 0.0,
-            "grunnlagForSykepengegrunnlagPerArbeidsgiver" to emptyMap<Nothing, Nothing>(),
-            "begrensning" to "",
-            "inntekt" to 0.0,
-            // </deprecated>
             "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt,
             "utbetalingId" to event.utbetalingId,
             "sykepengegrunnlagsfakta" to when (val fakta = event.sykepengegrunnlagsfakta) {
