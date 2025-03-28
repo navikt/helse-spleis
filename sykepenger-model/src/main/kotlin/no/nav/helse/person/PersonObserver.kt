@@ -535,11 +535,7 @@ interface PersonObserver {
         val hendelseIder: Set<UUID>,
         val skjæringstidspunkt: LocalDate,
         val sykepengegrunnlag: Double,
-        val beregningsgrunnlag: Double,
-        val omregnetÅrsinntektPerArbeidsgiver: Map<String, Double>,
-        val inntekt: Double,
         val utbetalingId: UUID,
-        val sykepengegrunnlagsbegrensning: String,
         val vedtakFattetTidspunkt: LocalDateTime,
         val sykepengegrunnlagsfakta: UtkastTilVedtakEvent.Sykepengegrunnlagsfakta
     )

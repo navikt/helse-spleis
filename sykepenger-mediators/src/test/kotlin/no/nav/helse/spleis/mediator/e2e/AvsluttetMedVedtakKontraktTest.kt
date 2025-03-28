@@ -44,12 +44,10 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "tom": "2018-01-26",
             "skjæringstidspunkt": "2018-01-03",
             "sykepengegrunnlag": 372000.0,
-            "grunnlagForSykepengegrunnlag": 372000.0,
-            "grunnlagForSykepengegrunnlagPerArbeidsgiver": {
-                "987654321": 372000.0
-            },
-            "inntekt" : 31000.0,
-            "begrensning" : "ER_IKKE_6G_BEGRENSET",
+            "grunnlagForSykepengegrunnlag": 0.0,
+            "grunnlagForSykepengegrunnlagPerArbeidsgiver": {},
+            "inntekt" : 0.0,
+            "begrensning" : "",
             "hendelser": ["$søknadId", "$inntektsmeldingId"],
             "sykepengegrunnlagsfakta": {
               "fastsatt": "EtterHovedregel",
@@ -99,12 +97,10 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "tom": "2018-01-26",
             "skjæringstidspunkt": "2018-01-03",
             "sykepengegrunnlag": 561804.0,
-            "grunnlagForSykepengegrunnlag": 570000.0,
-            "grunnlagForSykepengegrunnlagPerArbeidsgiver": {
-                "987654321": 570000.0
-            },
-            "inntekt" : 47500.0,
-            "begrensning" : "ER_6G_BEGRENSET",
+            "grunnlagForSykepengegrunnlag": 0.0,
+            "grunnlagForSykepengegrunnlagPerArbeidsgiver": {},
+            "inntekt" : 0.0,
+            "begrensning" : "",
             "hendelser": ["$søknadId", "$inntektsmeldingId"],
             "sykepengegrunnlagsfakta": {
                 "fastsatt": "EtterSkjønn",
@@ -188,12 +184,10 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "tom" : "2018-01-31",
             "skjæringstidspunkt": "2018-01-03",
             "sykepengegrunnlag": 372000.0,
-            "grunnlagForSykepengegrunnlag": 372000.0,
-            "grunnlagForSykepengegrunnlagPerArbeidsgiver": {
-                "987654321": 372000.0
-            },
-            "inntekt" : 31000.0,
-            "begrensning" : "ER_IKKE_6G_BEGRENSET",
+            "grunnlagForSykepengegrunnlag": 0.0,
+            "grunnlagForSykepengegrunnlagPerArbeidsgiver": {},
+            "inntekt" : 0.0,
+            "begrensning" : "",
             "hendelser": ["$søknadId"],
             "sykepengegrunnlagsfakta": {
               "fastsatt": "EtterHovedregel",

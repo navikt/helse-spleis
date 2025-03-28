@@ -198,18 +198,6 @@ internal class UtkastTilVedtakBuilder(
             )
         }
 
-        private val beregningsgrunnlagForAvsluttetMedVedtak: Double = sykepengegrunnlagsfakta.beregningsgrunnlagForAvsluttetMedVedtak().also {
-            check(it == beregningsgrunnlag.årlig) { "Beregningsgrunnlag ${beregningsgrunnlag.årlig} er noe annet enn beregningsgrunnlag beregnet fra sykepengegrunnlagsfakta $it" }
-        }
-
-        private val inntektForAvsluttetMedVedtak: Double = sykepengegrunnlagsfakta.inntektForAvsluttetMedVedtak().also {
-            check(it == beregningsgrunnlag.månedlig) { "Inntekt ${beregningsgrunnlag.månedlig} er noe annet enn inntekt beregnet fra sykepengegrunnlagsfakta $it" }
-        }
-
-        private val omregnetÅrsinntektPerArbeidsgiverForAvsluttedMedVedtak = sykepengegrunnlagsfakta.omregnetÅrsinntektPerArbeidsgiverForAvsluttedMedVedtak()
-
-        private val sykepengegrunnlagsbegrensningForAvsluttetMedVedtak = sykepengegrunnlagsfakta.sykepengegrunnlagsbegrensningForAvsluttedMedVedtak(tags)
-
         private val periodetypeForGodkjenningsbehov = sykepengegrunnlagsfakta.periodetypeForGodkjenningsbehov(tags)
 
         private val omregnedeÅrsinntekterForGodkjenningsbehov = sykepengegrunnlagsfakta.omregnedeÅrsinntekterForGodkjenningsbehov(arbeidsgiver)
@@ -301,15 +289,7 @@ internal class UtkastTilVedtakBuilder(
             hendelseIder = hendelseIder + historiskeHendelseIder.map { it.id }, // TODO: 10.12.24: Enten klaske på historiske på godkjenningsbehovet (eget felt) eller fjerne "dokumenter" i vedtak_fattet
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = sykepengegrunnlag, // TODO: 10.12.24: Legge til for skjønnsmessig og infotrygd i tillegg til hovedregel
-            // Til ettertanke: Denne mappes ut i JSON som "grunnlagForSykepengegrunnlag"
-            beregningsgrunnlag = beregningsgrunnlagForAvsluttetMedVedtak,
-            // Til ettertanke: Den var jo uventet, men er jo slik det har vært 🤷‍
-            // Til ettertanke: Denne hentet data fra sykepengegrunnlagsfakta som har to desimaler
-            // Til ettertanke: Denne mappes ut i JSON som "grunnlagForSykepengegrunnlagPerArbeidsgiver"
-            omregnetÅrsinntektPerArbeidsgiver = omregnetÅrsinntektPerArbeidsgiverForAvsluttedMedVedtak,
-            inntekt = inntektForAvsluttetMedVedtak, // TODO: Til ettertanke: What? 👀 Denne håper jeg ingen bruker
             utbetalingId = utbetalingId,
-            sykepengegrunnlagsbegrensning = sykepengegrunnlagsbegrensningForAvsluttetMedVedtak,
             vedtakFattetTidspunkt = vedtakFattet,
             // Til ettertanke: Akkurat i avsluttet i vedtak blir beløp i sykepengegrunnlagsfakta avrundet til to desimaler.
             sykepengegrunnlagsfakta = when (val fakta = sykepengegrunnlagsfakta) {
@@ -356,23 +336,6 @@ internal class UtkastTilVedtakBuilder(
     private companion object {
         private val Double.toDesimaler get() = toBigDecimal().setScale(2, RoundingMode.HALF_UP).toDouble()
         private val Set<Tag>.utgående get() = map { it.name }.toSet()
-        private fun Sykepengegrunnlagsfakta.beregningsgrunnlagForAvsluttetMedVedtak() = when (val fakta = this) {
-            is FastsattEtterSkjønn -> fakta.skjønnsfastsatt
-            else -> fakta.omregnetÅrsinntekt
-        }
-
-        private fun Sykepengegrunnlagsfakta.inntektForAvsluttetMedVedtak() = beregningsgrunnlagForAvsluttetMedVedtak() / 12
-        private fun Sykepengegrunnlagsfakta.omregnetÅrsinntektPerArbeidsgiverForAvsluttedMedVedtak(): Map<String, Double> = when (val fakta = this) {
-            is FastsattIInfotrygd -> emptyMap()
-            is FastsattEtterHovedregel -> fakta.arbeidsgivere.associate { it.arbeidsgiver to it.omregnetÅrsinntekt.toDesimaler }
-            is FastsattEtterSkjønn -> fakta.arbeidsgivere.associate { it.arbeidsgiver to it.skjønnsfastsatt.toDesimaler }
-        }
-
-        private fun Sykepengegrunnlagsfakta.sykepengegrunnlagsbegrensningForAvsluttedMedVedtak(tags: Set<Tag>) = when {
-            this is FastsattIInfotrygd -> "VURDERT_I_INFOTRYGD"
-            tags.contains(Tag.`6GBegrenset`) -> "ER_6G_BEGRENSET"
-            else -> "ER_IKKE_6G_BEGRENSET"
-        }
 
         private fun Sykepengegrunnlagsfakta.periodetypeForGodkjenningsbehov(tags: Set<Tag>): String {
             val erForlengelse = tags.contains(Tag.Forlengelse)
