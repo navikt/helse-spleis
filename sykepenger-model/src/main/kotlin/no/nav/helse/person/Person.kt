@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import kotlin.math.roundToInt
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
@@ -436,7 +436,6 @@ class Person private constructor(
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler påminnelse")
         val revurderingseventyr = finnArbeidsgiver(påminnelse.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(påminnelse, aktivitetsloggMedPersonkontekst)
         if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
-        return håndterGjenoppta(påminnelse, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(påminnelse, aktivitetsloggMedPersonkontekst)
     }
 
