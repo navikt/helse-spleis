@@ -50,7 +50,7 @@ internal class UtbetalingsakerBuilder(
     }
 
     private fun infotrygdutbetalingEtterArbeidsgiverperiodenOgFørVedtaksperioden(infotrygdbetalinger: List<Periode>, vedtaksperiode: ArbeidsgiverperiodeForVedtaksperiode): Periode? {
-        //if (vedtaksperiode.førsteDagUtbetaltIInfotrygd()) return null
+        if (vedtaksperiode.førsteDagUtbetaltIInfotrygd()) return null
         return infotrygdbetalinger.lastOrNull { infotrygdperiode ->
             (vedtaksperiode.arbeidsgiverperioder.isEmpty() || infotrygdperiode.start > vedtaksperiode.arbeidsgiverperioder.last().endInclusive)
                 && infotrygdperiode.endInclusive < vedtaksperiode.vedtaksperiode.start

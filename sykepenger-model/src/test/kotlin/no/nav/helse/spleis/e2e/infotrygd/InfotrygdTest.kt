@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
-import java.util.*
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -31,7 +31,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_37
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_21
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
@@ -62,6 +62,7 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -103,9 +104,13 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         assertEquals(emptyList<Periode>(), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        assertEquals(februarKorrelasjonsId, gjeldendeKorrelasjonsId(2.vedtaksperiode))
+        assertNotEquals(februarKorrelasjonsId, gjeldendeKorrelasjonsId(2.vedtaksperiode))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         assertVarsler(listOf(RV_IT_3), 2.vedtaksperiode.filter())
+
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
+        håndterYtelser(2.vedtaksperiode)
+        assertEquals(februarKorrelasjonsId, gjeldendeKorrelasjonsId(2.vedtaksperiode))
     }
 
     @Test
@@ -114,7 +119,6 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         nyttVedtak(mars)
         nyttVedtak(mai, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         val korrelasjonsIdMars = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
-        val korrelasjonsIdMai = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
 
         håndterSøknad(juli)
         håndterArbeidsgiveropplysninger(listOf(1.juli til 16.juli), vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
@@ -133,11 +137,19 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         val korrelasjonsIdJuli = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
         håndterUtbetalt()
-        håndterUtbetalt()
 
-        assertEquals(korrelasjonsIdMars, korrelasjonsIdJuli) // Siden vi ikke har agp bygger vi videre på første utbetaling etter siste utbetalingsdag i Infotrygd
-        assertTrue(inspektør.utbetalinger.last { it.korrelasjonsId == korrelasjonsIdMai }.erAnnullering) // Også annullerer vi alt mellom utbetalingen vi bygger videre på og perioden vi nå behandler
-        assertVarsler(listOf(RV_UT_21, RV_IT_3), 3.vedtaksperiode.filter())
+        assertNotEquals(korrelasjonsIdMars, korrelasjonsIdJuli)
+        assertTrue(inspektør.utbetalinger.none { it.erAnnullering })
+        assertVarsler(listOf(RV_IT_3), 3.vedtaksperiode.filter())
+
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+
+        val nyKorrelasjonsIdJuli = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
+        assertNotEquals(korrelasjonsIdMars, nyKorrelasjonsIdJuli)
+        assertEquals(listOf(1.juli til 16.juli), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.arbeidsgiverperiode)
+        assertVarsler(listOf(RV_OS_2, RV_UT_23, RV_IT_3), 3.vedtaksperiode.filter())
     }
 
     @Test
