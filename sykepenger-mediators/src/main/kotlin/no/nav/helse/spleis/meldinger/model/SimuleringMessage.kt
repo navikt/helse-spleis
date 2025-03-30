@@ -1,9 +1,7 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
-import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
@@ -23,51 +21,49 @@ internal class SimuleringMessage(packet: JsonMessage, override val meldingsporin
     private val fagområde = packet["Simulering.fagområde"].asText()
     private val status = valueOf(packet["@løsning.${Behovtype.Simulering.name}.status"].asText())
     private val simuleringOK = status == OK
-    private val melding = packet["@løsning.${Behovtype.Simulering.name}.feilmelding"].asText() + " (status=$status)"
-    private val simuleringResultat =
-        packet["@løsning.${Behovtype.Simulering.name}.simulering"].takeUnless(JsonNode::isMissingOrNull)
-            ?.let {
-                SimuleringResultatDto(
-                    totalbeløp = it.path("totalBelop").asInt(),
-                    perioder = it.path("periodeList").map { periode ->
-                        SimuleringResultatDto.SimulertPeriode(
-                            fom = periode.path("fom").asLocalDate(),
-                            tom = periode.path("tom").asLocalDate(),
-                            utbetalinger = periode.path("utbetaling").map { utbetaling ->
-                                SimuleringResultatDto.SimulertUtbetaling(
-                                    forfallsdato = utbetaling.path("forfall").asLocalDate(),
-                                    utbetalesTil = SimuleringResultatDto.Mottaker(
-                                        id = utbetaling.path("utbetalesTilId").asText(),
-                                        navn = utbetaling.path("utbetalesTilNavn").asText()
+    private val melding = if (!simuleringOK) packet["@løsning.${Behovtype.Simulering.name}.feilmelding"].asText() + " (status=$status)" else ""
+    private val simuleringResultat = if (simuleringOK) packet["@løsning.${Behovtype.Simulering.name}.simulering"].let {
+        SimuleringResultatDto(
+            totalbeløp = it.path("totalBelop").asInt(),
+            perioder = it.path("periodeList").map { periode ->
+                SimuleringResultatDto.SimulertPeriode(
+                    fom = periode.path("fom").asLocalDate(),
+                    tom = periode.path("tom").asLocalDate(),
+                    utbetalinger = periode.path("utbetaling").map { utbetaling ->
+                        SimuleringResultatDto.SimulertUtbetaling(
+                            forfallsdato = utbetaling.path("forfall").asLocalDate(),
+                            utbetalesTil = SimuleringResultatDto.Mottaker(
+                                id = utbetaling.path("utbetalesTilId").asText(),
+                                navn = utbetaling.path("utbetalesTilNavn").asText()
+                            ),
+                            feilkonto = utbetaling.path("feilkonto").asBoolean(),
+                            detaljer = utbetaling.path("detaljer").map { detalj ->
+                                SimuleringResultatDto.Detaljer(
+                                    fom = detalj.path("faktiskFom").asLocalDate(),
+                                    tom = detalj.path("faktiskTom").asLocalDate(),
+                                    konto = detalj.path("konto").asText(),
+                                    beløp = detalj.path("belop").asInt(),
+                                    klassekode = SimuleringResultatDto.Klassekode(
+                                        kode = detalj.path("klassekode").asText(),
+                                        beskrivelse = detalj.path("klassekodeBeskrivelse").asText()
                                     ),
-                                    feilkonto = utbetaling.path("feilkonto").asBoolean(),
-                                    detaljer = utbetaling.path("detaljer").map { detalj ->
-                                        SimuleringResultatDto.Detaljer(
-                                            fom = detalj.path("faktiskFom").asLocalDate(),
-                                            tom = detalj.path("faktiskTom").asLocalDate(),
-                                            konto = detalj.path("konto").asText(),
-                                            beløp = detalj.path("belop").asInt(),
-                                            klassekode = SimuleringResultatDto.Klassekode(
-                                                kode = detalj.path("klassekode").asText(),
-                                                beskrivelse = detalj.path("klassekodeBeskrivelse").asText()
-                                            ),
-                                            uføregrad = detalj.path("uforegrad").asInt(),
-                                            utbetalingstype = detalj.path("utbetalingsType").asText(),
-                                            refunderesOrgnummer = detalj.path("refunderesOrgNr").asText(),
-                                            tilbakeføring = detalj.path("tilbakeforing").asBoolean(),
-                                            sats = SimuleringResultatDto.Sats(
-                                                sats = detalj.path("sats").asDouble(),
-                                                antall = detalj.path("antallSats").asInt(),
-                                                type = detalj.path("typeSats").asText()
-                                            )
-                                        )
-                                    }
+                                    uføregrad = detalj.path("uforegrad").asInt(),
+                                    utbetalingstype = detalj.path("utbetalingsType").asText(),
+                                    refunderesOrgnummer = detalj.path("refunderesOrgNr").asText(),
+                                    tilbakeføring = detalj.path("tilbakeforing").asBoolean(),
+                                    sats = SimuleringResultatDto.Sats(
+                                        sats = detalj.path("sats").asDouble(),
+                                        antall = detalj.path("antallSats").asInt(),
+                                        type = detalj.path("typeSats").asText()
+                                    )
                                 )
                             }
                         )
                     }
                 )
             }
+        )
+    } else null
 
     private val simulering
         get() = Simulering(
