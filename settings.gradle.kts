@@ -5,8 +5,8 @@ include(
     "sykepenger-utbetaling-dto", "sykepenger-aktivitetslogg", "sykepenger-aktivitetslogg-dto", "sykepenger-etterlevelse-api"
 )
 
-val rapidsAndRiversVersion = "2025032719521743101565.4abbf0c3af65"
-val tbdLibsVersion = "2025.03.27-18.30-c228796d"
+val rapidsAndRiversVersion = "2025033013081743332933.20de2f3d8983"
+val tbdLibsVersion = "2025.03.30-13.02-f7cb11ef"
 
 dependencyResolutionManagement {
     versionCatalogs {
