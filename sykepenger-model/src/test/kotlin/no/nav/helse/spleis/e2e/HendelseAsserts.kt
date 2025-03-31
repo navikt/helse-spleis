@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import kotlin.reflect.KClass
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.AktivitetsloggAsserts
@@ -186,6 +186,9 @@ internal fun Aktivitetslogg.assertLogiskFeil(severe: String, filter: Aktivitetsl
 
 internal fun Aktivitetslogg.assertHarTag(vedtaksperiode: IdInnhenter, orgnummer: String = a1, forventetTag: String, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
     AktivitetsloggAsserts(this, assertetVarsler).assertHarTag(vedtaksperiode.id(orgnummer), forventetTag)
+
+internal fun Aktivitetslogg.assertHarIkkeTag(vedtaksperiode: IdInnhenter, orgnummer: String = a1, ikkeForventetTag: String, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
+    AktivitetsloggAsserts(this, assertetVarsler).assertHarIkkeTag(vedtaksperiode.id(orgnummer), ikkeForventetTag)
 
 internal fun interface AktivitetsloggFilter {
     companion object {

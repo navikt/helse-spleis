@@ -8,6 +8,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 
 internal class AktivitetsloggAsserts(
@@ -117,6 +118,15 @@ internal class AktivitetsloggAsserts(
             felt = "tags"
         )
         assertTrue(tags?.contains(forventetTag) ?: false, "Fant ikke forventet tag: $forventetTag. Faktiske tags: $tags ")
+    }
+
+    internal fun assertHarIkkeTag(vedtaksperiode: UUID, ikkeForventetTag: String) {
+        val tags = aktivitetslogg.hentFeltFraBehov<Set<String>>(
+            vedtaksperiodeId = vedtaksperiode,
+            behov = Aktivitet.Behov.Behovtype.Godkjenning,
+            felt = "tags"
+        )
+        assertFalse(tags?.contains(ikkeForventetTag) ?: true, "Fant tag vi ikke forventet: $ikkeForventetTag. Faktiske tags: $tags ")
     }
 
     private fun <A : Aktivitet> List<A>.collect(filter: AktivitetsloggFilter) =

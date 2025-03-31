@@ -41,6 +41,8 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.IdInnhenter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
+import no.nav.helse.spleis.e2e.assertHarIkkeTag
+import no.nav.helse.spleis.e2e.assertHarTag
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -67,6 +69,30 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Legger på en tag når perioden til godkjenning overlapper med en periode i Infotrygd`() {
+        nyttVedtak(januar)
+        assertEquals(1, observatør.utkastTilVedtakEventer.size)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        assertVarsler(listOf(RV_IT_3, RV_OS_2), 1.vedtaksperiode.filter())
+        assertEquals(2, observatør.utkastTilVedtakEventer.size)
+        hendelselogg.assertHarTag(
+            vedtaksperiode = 1.vedtaksperiode,
+            forventetTag = "OverlapperMedInfotrygd"
+        )
+
+        håndterUtbetalingshistorikkEtterInfotrygdendring()
+        håndterYtelser(1.vedtaksperiode)
+
+        hendelselogg.assertHarIkkeTag(
+            vedtaksperiode = 1.vedtaksperiode,
+            ikkeForventetTag = "OverlapperMedInfotrygd"
+        )
+    }
 
     @Test
     fun `Arbeidsgiverperiode utført i Infotrygd med kort gap til periode i Spleis som utbetales i Infotrygd mens den står til godkjenning`() {

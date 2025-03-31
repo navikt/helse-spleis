@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -1795,7 +1795,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiodeId = id,
             kanForkastes = arbeidsgiver.kanForkastes(this, Aktivitetslogg()),
             erForlengelse = erForlengelse(),
-            harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
+            harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null,
+            overlapperMedInfotrygd = person.infotrygdhistorikk.overlapperMed(periode)
         )
         person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .sorted()
