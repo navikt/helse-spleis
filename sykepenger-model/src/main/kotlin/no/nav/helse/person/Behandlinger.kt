@@ -708,7 +708,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     .utbetaling(utbetaling)
                     .sykdomstidslinje(sykdomstidslinje)
                     .refusjonstidslinje(refusjonstidslinje)
-                    .overlappendeInfotrygdhistorikk()
                 grunnlagsdata.berik(utkastTilVedtakBuilder)
                 behandling.observatører.forEach { it.utkastTilVedtak(utkastTilVedtakBuilder.buildUtkastTilVedtak()) }
                 Aktivitet.Behov.godkjenning(aktivitetsloggMedUtbetalingkontekst, utkastTilVedtakBuilder.buildGodkjenningsbehov())

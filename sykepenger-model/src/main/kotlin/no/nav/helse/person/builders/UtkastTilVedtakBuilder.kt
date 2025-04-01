@@ -31,13 +31,15 @@ internal class UtkastTilVedtakBuilder(
     private val kanForkastes: Boolean,
     erForlengelse: Boolean,
     private val harPeriodeRettFør: Boolean,
-    private val overlapperMedInfotrygd: Boolean
+    overlapperMedInfotrygd: Boolean
 ) {
     private val tags = mutableSetOf<Tag>()
 
     init {
         if (erForlengelse) tags.add(Tag.Forlengelse)
         else tags.add(Tag.Førstegangsbehandling)
+
+        if (overlapperMedInfotrygd) tags.add(Tag.OverlapperMedInfotrygd)
     }
 
     internal fun grunnbeløpsregulert() = apply { tags.add(Tag.Grunnbeløpsregulering) }
@@ -127,10 +129,6 @@ internal class UtkastTilVedtakBuilder(
 
     internal fun refusjonstidslinje(refusjonstidslinje: Beløpstidslinje) = apply {
         if (refusjonstidslinje.sumOf { it.beløp.årlig } > 0) tags.add(Tag.ArbeidsgiverØnskerRefusjon)
-    }
-
-    internal fun overlappendeInfotrygdhistorikk() = apply {
-        if (overlapperMedInfotrygd) tags.add(Tag.OverlapperMedInfotrygd)
     }
 
     private var sykepengegrunnlag by Delegates.notNull<Double>()
