@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory
 internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, private val messageMediator: IMessageMediator) : River.PacketValidation {
     protected val river = River(rapidsConnection)
     protected abstract val eventName: String
+    protected open val alternativEventName: String? = null // TODO: Hackiboi fjern dette når arbeidsgiveropplysninger kommer som arbeidsgiveropplysninger
     protected abstract val riverName: String
 
     init {
@@ -32,7 +33,7 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
 
     private inner class RiverImpl(river: River) : River.PacketListener {
         init {
-            river.precondition { it.requireValue("@event_name", eventName) }
+            river.precondition { it.requireAny("@event_name", listOfNotNull(eventName, alternativEventName)) }
             river.validate { packet ->
                 packet.require("@opprettet", JsonNode::asLocalDateTime)
                 packet.require("@id") { UUID.fromString(it.asText()) }
