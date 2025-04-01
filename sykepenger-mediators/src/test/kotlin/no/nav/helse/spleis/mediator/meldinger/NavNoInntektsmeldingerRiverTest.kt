@@ -15,6 +15,7 @@ import no.nav.helse.mai
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.NavNoInntektsmeldingerRiver
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
+import no.nav.inntektsmeldingkontrakt.ArsakTilInnsending
 import no.nav.inntektsmeldingkontrakt.AvsenderSystem
 import no.nav.inntektsmeldingkontrakt.EndringIRefusjon
 import no.nav.inntektsmeldingkontrakt.Naturalytelse.ELEKTRONISKKOMMUNIKASJON
@@ -52,7 +53,8 @@ internal class NavNoInntektsmeldingerRiverTest : RiverTest() {
         innsenderFulltNavn = "SPLEIS MEDIATOR",
         innsenderTelefon = "tlfnr",
         inntektsdato = null,
-        vedtaksperiodeId = UUID.randomUUID()
+        vedtaksperiodeId = UUID.randomUUID(),
+        arsakTilInnsending = ArsakTilInnsending.Ny
     )
     private val InvalidJson = "foo"
     private val UnknownJson = "{\"foo\": \"bar\"}"
@@ -85,10 +87,11 @@ internal class NavNoInntektsmeldingerRiverTest : RiverTest() {
     @Test
     fun `valid inntektsmelding`() {
         assertNoErrors(ValidInntektsmeldingWithUnknownFieldsJson)
-        assertNoErrors(ValidInntektsmeldingJson)
+        assertNoErrors(ValidInntektsmeldingJson.also { println(it) })
         assertNoErrors(ValidInntektsmeldingUtenRefusjon)
         assertNoErrors(ValidInntektsmeldingUtenBeregnetInntekt)
         assertNoErrors(ValidInntektsmeldingMedOpphørAvNaturalytelser)
+        assertNoErrors(im.asObjectNode("arbeidsgiveropplysninger").toJson())
     }
 
     private fun JsonNode.toJson(): String = (this as ObjectNode).put("fødselsdato", "$fødselsdato").toString()
@@ -98,10 +101,8 @@ private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-private fun Inntektsmeldingkontrakt.asObjectNode(): ObjectNode = objectMapper.valueToTree<ObjectNode>(this).apply {
+private fun Inntektsmeldingkontrakt.asObjectNode(eventname: String = "inntektsmelding"): ObjectNode = objectMapper.valueToTree<ObjectNode>(this).apply {
     put("@id", UUID.randomUUID().toString())
-    put("@event_name", "inntektsmelding")
+    put("@event_name", eventname)
     put("@opprettet", LocalDateTime.now().toString())
 }
-
-private fun List<OpphoerAvNaturalytelse>.toJsonNode(): JsonNode = objectMapper.valueToTree(this)

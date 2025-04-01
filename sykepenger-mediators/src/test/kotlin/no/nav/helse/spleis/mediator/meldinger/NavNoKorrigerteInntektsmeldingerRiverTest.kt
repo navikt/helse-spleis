@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mai
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.meldinger.NavNoSelvbestemtInntektsmeldingerRiver
+import no.nav.helse.spleis.meldinger.NavNoKorrigerteInntektsmeldingerRiver
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.ArsakTilInnsending
 import no.nav.inntektsmeldingkontrakt.AvsenderSystem
@@ -25,7 +25,7 @@ import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
 import org.junit.jupiter.api.Test
 
-internal class NavNoSelvbestemtInntektsmeldingerRiverTest : RiverTest() {
+internal class NavNoKorrigerteInntektsmeldingerRiverTest : RiverTest() {
 
     private val fødselsdato = 17.mai(1995)
     private val im = Inntektsmeldingkontrakt(
@@ -49,13 +49,14 @@ internal class NavNoSelvbestemtInntektsmeldingerRiverTest : RiverTest() {
         foersteFravaersdag = LocalDate.now(),
         mottattDato = LocalDateTime.now(),
         naerRelasjon = null,
-        avsenderSystem = AvsenderSystem("NAV_NO_SELVBESTEMT", "1.0"),
+        avsenderSystem = AvsenderSystem("NAV_NO", "1.0"),
         innsenderFulltNavn = "SPLEIS MEDIATOR",
         innsenderTelefon = "tlfnr",
         inntektsdato = null,
         vedtaksperiodeId = UUID.randomUUID(),
-        arsakTilInnsending = listOf(ArsakTilInnsending.Ny, ArsakTilInnsending.Endring).random()
+        arsakTilInnsending = ArsakTilInnsending.Endring
     )
+
     private val InvalidJson = "foo"
     private val UnknownJson = "{\"foo\": \"bar\"}"
     private val ValidInntektsmelding = im.asObjectNode()
@@ -73,7 +74,7 @@ internal class NavNoSelvbestemtInntektsmeldingerRiverTest : RiverTest() {
     private val ValidInntektsmeldingUtenVedtaksperiodeId = ValidInntektsmelding.apply { this.remove("vedtaksperiodeId") }.toJson()
 
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
-        NavNoSelvbestemtInntektsmeldingerRiver(rapidsConnection, mediator)
+        NavNoKorrigerteInntektsmeldingerRiver(rapidsConnection, mediator)
     }
 
     @Test
@@ -90,7 +91,7 @@ internal class NavNoSelvbestemtInntektsmeldingerRiverTest : RiverTest() {
         assertNoErrors(ValidInntektsmeldingUtenRefusjon)
         assertNoErrors(ValidInntektsmeldingUtenBeregnetInntekt)
         assertNoErrors(ValidInntektsmeldingMedOpphørAvNaturalytelser)
-        assertNoErrors(im.asObjectNode("selvbestemte_arbeidsgiveropplysninger").toJson())
+        assertNoErrors(im.asObjectNode("korrigerte_arbeidsgiveropplysninger").toJson())
     }
 
     private fun JsonNode.toJson(): String = (this as ObjectNode).put("fødselsdato", "$fødselsdato").toString()

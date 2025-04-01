@@ -11,7 +11,9 @@ internal class NavNoInntektsmeldingerRiver(
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventName = "inntektsmelding"
-    override val riverName = "Nav.no-inntektsmelding (førstegangs)"
+    override val alternativEventName = "arbeidsgiveropplysninger"
+    override val riverName = "Arbeidsgiveropplysninger"
+
     override fun precondition(packet: JsonMessage) {
         packet.requireValue("avsenderSystem.navn", "NAV_NO")
         packet.requireKey("vedtaksperiodeId")
