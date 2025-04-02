@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -45,7 +45,6 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilYtelser
-import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -261,22 +260,17 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
 
         assertVarsel(Varselkode.RV_UT_23, 3.vedtaksperiode.filter())
-        val førsteUtbetaling = inspektør.utbetaling(0)
-        val revurdering = inspektør.utbetaling(3)
-        assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
-        assertEquals(1, revurdering.personOppdrag.size)
-        revurdering.arbeidsgiverOppdrag.also { oppdrag ->
-            assertEquals(17.januar, oppdrag[0].inspektør.fom)
-            assertEquals(28.februar, oppdrag[0].inspektør.tom)
-            assertEquals(1431, oppdrag[0].inspektør.beløp)
-            assertEquals(ENDR, oppdrag[0].inspektør.endringskode)
-
-            assertEquals(1.mars, oppdrag[1].inspektør.fom)
-            assertEquals(30.mars, oppdrag[1].inspektør.tom)
-            assertEquals(715, oppdrag[1].inspektør.beløp)
-            assertEquals(NY, oppdrag[1].inspektør.endringskode)
+        val førsteMarsUtbetaling = inspektør.utbetaling(2)
+        val revurderingMarsUtbetaling = inspektør.utbetaling(3)
+        assertEquals(førsteMarsUtbetaling.korrelasjonsId, revurderingMarsUtbetaling.korrelasjonsId)
+        assertEquals(1, revurderingMarsUtbetaling.personOppdrag.size)
+        revurderingMarsUtbetaling.arbeidsgiverOppdrag.also { oppdrag ->
+            assertEquals(1.mars, oppdrag[0].inspektør.fom)
+            assertEquals(30.mars, oppdrag[0].inspektør.tom)
+            assertEquals(715, oppdrag[0].inspektør.beløp)
+            assertEquals(NY, oppdrag[0].inspektør.endringskode)
         }
-        revurdering.personOppdrag.also { oppdrag ->
+        revurderingMarsUtbetaling.personOppdrag.also { oppdrag ->
             assertEquals(1.mars, oppdrag[0].inspektør.fom)
             assertEquals(30.mars, oppdrag[0].inspektør.tom)
             assertEquals(716, oppdrag[0].inspektør.beløp)
