@@ -499,14 +499,15 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        val oppdrag = inspektør(a1).utbetaling(1).arbeidsgiverOppdrag
-
-        val a1Linje = oppdrag.first()
+        val førsteOppdrag = inspektør(a1).utbetaling(0).arbeidsgiverOppdrag
+        val a1Linje = førsteOppdrag.single()
         assertEquals(17.januar, a1Linje.fom)
         assertEquals(15.mars, a1Linje.tom)
         assertEquals(1080, a1Linje.beløp)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        val a1Linje2 = oppdrag.last()
+
+        val andreOppdrag = inspektør(a1).utbetaling(1).arbeidsgiverOppdrag
+        val a1Linje2 = andreOppdrag.single()
         assertEquals(26.mars, a1Linje2.fom)
         assertEquals(10.april, a1Linje2.tom)
         assertEquals(1080, a1Linje2.beløp)

@@ -17,7 +17,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
@@ -265,12 +264,10 @@ class Oppdrag private constructor(
             eldre.ingenUtbetalteDager() -> kjørFrem(eldre)
             // "fom" kan flytte seg fremover i tid dersom man, eksempelvis, revurderer en utbetalt periode til å starte med ikke-utbetalte dager (f.eks. ferie)
             fomHarFlyttetSegFremover(eldre.kopierUtenOpphørslinjer()) -> {
-                aktivitetslogg.varsel(RV_OS_2)
                 returførOgKjørFrem(eldre.kopierUtenOpphørslinjer())
             }
             // utbetaling kan endres til å starte tidligere, eksempelvis via revurdering der feriedager egentlig er sykedager
             fomHarFlyttetSegBakover(eldre.kopierUtenOpphørslinjer()) -> {
-                aktivitetslogg.varsel(RV_OS_2)
                 kjørFrem(eldre.kopierUtenOpphørslinjer())
             }
             // fom er lik, men endring kan oppstå overalt ellers

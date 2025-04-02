@@ -36,7 +36,6 @@ import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
-import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -45,7 +44,6 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.manuellFeriedag
 import no.nav.helse.spleis.e2e.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.sykdomstidslinje.Dag
@@ -216,46 +214,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `skal kunne overstyre inntekt i utkast til revurdering ved revurdering av tidslinje`() {
-        nyttVedtak(januar)
-        forlengVedtak(februar)
-        nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(
-            dato = 22.januar,
-            arbeidsgiverbeløp = 1431.daglig,
-            personbeløp = INGEN,
-            aktuellDagsinntekt = INNTEKT
-        )
-
-        håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
-        håndterYtelser(1.vedtaksperiode)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-        håndterSimulering(1.vedtaksperiode)
-        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(
-            dato = 22.januar,
-            arbeidsgiverbeløp = INGEN,
-            personbeløp = INGEN,
-            aktuellDagsinntekt = INNTEKT
-        )
-
-        val overstyrtInntekt = 20000.månedlig
-        håndterOverstyrInntekt(inntekt = overstyrtInntekt, skjæringstidspunkt = 1.januar)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        assertDag<Sykedag, NavDag>(
-            dato = 17.januar,
-            arbeidsgiverbeløp = overstyrtInntekt.rundTilDaglig(),
-            personbeløp = INGEN,
-            aktuellDagsinntekt = overstyrtInntekt
-        )
-        assertDiff(-11126)
-
-        assertEquals(33235, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.totalbeløp())
-        assertEquals("SSSSSHH SSSSSHH SSSSSFF FFFFFFF FSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
-        assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString().trim())
-    }
-
-    @Test
     fun `Ved overstyring av revurdering av inntekt til under krav til minste sykepengegrunnlag skal vi opphøre den opprinnelige utbetalingen`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
@@ -342,59 +300,53 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
-
-        assertTilstander(
-            1.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING
-        )
-
-        assertTilstander(
-            2.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_REVURDERING
-        )
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
         assertEquals(3, inspektør.antallUtbetalinger)
 
-        val korrelasjonsIdPåUtbetaling1 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
-        val korrelasjonsIdPåUtbetaling2 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.korrelasjonsId
-
-        assertEquals(korrelasjonsIdPåUtbetaling1, korrelasjonsIdPåUtbetaling2)
         assertDiff(506)
-        inspektør.utbetaling(2).also { revurdering ->
+        inspektør.utbetaling(2).also { revurderingJanuar ->
             val januarutbetaling = inspektør.utbetaling(0)
-            val februarutbetaling = inspektør.utbetaling(1)
-            assertEquals(januarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
-            assertEquals(februarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
+            assertEquals(januarutbetaling.korrelasjonsId, revurderingJanuar.korrelasjonsId)
 
             assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString().trim())
             assertEquals(januar, januarutbetaling.periode)
-            assertEquals(1.januar til 28.februar, februarutbetaling.periode)
-            assertEquals(januar, revurdering.periode)
-            assertEquals(1, revurdering.personOppdrag.size)
-            assertEquals(2, revurdering.arbeidsgiverOppdrag.size)
-            assertEquals(Endringskode.UEND, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
-            assertEquals(0, revurdering.arbeidsgiverOppdrag.inspektør.nettoBeløp)
-            revurdering.arbeidsgiverOppdrag.inspektør.also { arbeidsgiveroppdrag ->
+            assertEquals(januar, revurderingJanuar.periode)
+            assertEquals(1, revurderingJanuar.personOppdrag.size)
+            assertEquals(1, revurderingJanuar.arbeidsgiverOppdrag.size)
+            assertEquals(Endringskode.UEND, revurderingJanuar.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(0, revurderingJanuar.arbeidsgiverOppdrag.inspektør.nettoBeløp)
+
+            revurderingJanuar.arbeidsgiverOppdrag.inspektør.also { arbeidsgiveroppdrag ->
                 assertEquals(17.januar, arbeidsgiveroppdrag.fom(0))
                 assertEquals(31.januar, arbeidsgiveroppdrag.tom(0))
                 assertEquals(1431, arbeidsgiveroppdrag.beløp(0))
                 assertEquals(Endringskode.UEND, arbeidsgiveroppdrag.endringskode(0))
-
-                assertEquals(2.februar, arbeidsgiveroppdrag.fom(1))
-                assertEquals(28.februar, arbeidsgiveroppdrag.tom(1))
-                assertEquals(1431, arbeidsgiveroppdrag.beløp(1))
-                assertEquals(Endringskode.UEND, arbeidsgiveroppdrag.endringskode(1))
             }
-            assertEquals(506, revurdering.personOppdrag.inspektør.nettoBeløp)
-            revurdering.personOppdrag.inspektør.also { personoppdrag ->
+            assertEquals(506, revurderingJanuar.personOppdrag.inspektør.nettoBeløp)
+            revurderingJanuar.personOppdrag.inspektør.also { personoppdrag ->
                 assertEquals(17.januar, personoppdrag.fom(0))
                 assertEquals(31.januar, personoppdrag.tom(0))
                 assertEquals(46, personoppdrag.beløp(0))
                 assertEquals(Endringskode.NY, personoppdrag.endringskode(0))
+            }
+        }
+
+        håndterYtelser(2.vedtaksperiode)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        assertEquals(4, inspektør.antallUtbetalinger)
+
+        inspektør.utbetaling(3).also { revurderingFebruar ->
+            val februarutbetaling = inspektør.utbetaling(1)
+            assertEquals(februarutbetaling.korrelasjonsId, revurderingFebruar.korrelasjonsId)
+            revurderingFebruar.arbeidsgiverOppdrag.inspektør.also { arbeidsgiveroppdrag ->
+                assertEquals(2.februar, arbeidsgiveroppdrag.fom(0))
+                assertEquals(28.februar, arbeidsgiveroppdrag.tom(0))
+                assertEquals(1431, arbeidsgiveroppdrag.beløp(0))
+                assertEquals(Endringskode.UEND, arbeidsgiveroppdrag.endringskode(0))
             }
         }
     }

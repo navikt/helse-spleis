@@ -26,43 +26,22 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `vi sender vedtaksperiode annullert-hendelser når saksbehandler annullerer en vedtaksperiode i et lengre sykdomsforløp`() {
+    fun `sender bare vedtaksperiode annullert-hendelse på vedtaksperioden vi faktisk annullerer`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
-        nyttVedtak(5.mars til 31.mars, vedtaksperiodeIdInnhenter = 3.vedtaksperiode, arbeidsgiverperiode = emptyList())
-        håndterAnnullerUtbetaling()
 
-        assertEquals(3, observatør.vedtaksperiodeAnnullertEventer.size)
-        assertEquals(
-            1.januar til 31.januar,
-            observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom
-        )
-        assertEquals(
-            februar,
-            observatør.vedtaksperiodeAnnullertEventer[1].fom til observatør.vedtaksperiodeAnnullertEventer[1].tom
-        )
-        assertEquals(
-            5.mars til 31.mars,
-            observatør.vedtaksperiodeAnnullertEventer[2].fom til observatør.vedtaksperiodeAnnullertEventer[2].tom
-        )
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(2.vedtaksperiode))
+
+        assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
+        assertEquals(1.februar til 28.februar, observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom)
     }
-
+    
     @Test
     fun `vi sender ikke ut vedtaksperiode annullert-hendelse for vedtaksperioder som ikke er utbetalt`() {
-        nyttVedtak(januar)
-        forlengVedtak(februar)
-        tilGodkjenning(5.mars til 31.mars, a1, vedtaksperiodeIdInnhenter = 3.vedtaksperiode, arbeidsgiverperiode = emptyList())
+        tilGodkjenning(januar, organisasjonsnummere = arrayOf(a1))
         håndterAnnullerUtbetaling()
 
-        assertEquals(2, observatør.vedtaksperiodeAnnullertEventer.size)
-        assertEquals(
-            1.januar til 31.januar,
-            observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom
-        )
-        assertEquals(
-            februar,
-            observatør.vedtaksperiodeAnnullertEventer[1].fom til observatør.vedtaksperiodeAnnullertEventer[1].tom
-        )
+        assertEquals(0, observatør.vedtaksperiodeAnnullertEventer.size)
     }
 
     @Test

@@ -46,6 +46,7 @@ internal abstract class AbstractEndToEndTest {
 
         private fun overgangFraInfotrygdPerson(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", regelverkslogg)
         private fun pingPongPerson(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/pingpong.json", regelverkslogg)
+        private fun toVedtakMedSammeFagsystemId(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/to_vedtak_samme_fagsystem_id.json", regelverkslogg)
     }
 
     internal val assertetVarsler = Varslersamler.AssertetVarsler()
@@ -107,6 +108,8 @@ internal abstract class AbstractEndToEndTest {
     protected fun createTestPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate, dødsdato: LocalDate? = null) = createTestPerson { regelverkslogg ->
         Person(personidentifikator, Alder(fødseldato, dødsdato), regelverkslogg)
     }
+
+    protected fun createPersonMedToVedtakPåSammeFagsystemId() = createTestPerson { regelverkslogg -> toVedtakMedSammeFagsystemId(regelverkslogg) }
 
     protected fun createPingPongPerson() = createTestPerson { regelverkslogg -> pingPongPerson(regelverkslogg) }.also {
         Utbetalingshistorikk(

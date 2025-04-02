@@ -60,7 +60,6 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_OS_2, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
 
             assertEquals(2, inspektør.antallUtbetalinger)

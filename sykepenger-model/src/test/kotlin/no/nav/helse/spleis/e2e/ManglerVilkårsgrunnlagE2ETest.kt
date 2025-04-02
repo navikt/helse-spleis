@@ -79,7 +79,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertVarsler(listOf(Varselkode.RV_VV_2, Varselkode.RV_OS_2, Varselkode.RV_IT_14), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_VV_2, Varselkode.RV_IT_14), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -93,15 +93,13 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertEquals(emptyList<Any>(), inspektør.arbeidsgiverperioder(2.vedtaksperiode))
 
         håndterYtelser(2.vedtaksperiode)
-        // utbetalingen endres -ikke- fordi det fremdeles lages agp-dager for februar, siden 1.vedtaksperiode ikke åpnes opp
         inspektør.utbetaling(1).also { utbetalinginspektør ->
             assertEquals(1, utbetalinginspektør.arbeidsgiverOppdrag.size)
             assertEquals(1.februar til 28.februar, utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.periode)
         }
         inspektør.utbetaling(2).also { utbetalinginspektør ->
-            assertEquals(2, utbetalinginspektør.arbeidsgiverOppdrag.size)
-            assertEquals(1.februar til 28.februar, utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.periode)
-            assertEquals(10.mars til 30.mars, utbetalinginspektør.arbeidsgiverOppdrag[1].inspektør.periode)
+            assertEquals(1, utbetalinginspektør.arbeidsgiverOppdrag.size)
+            assertEquals(10.mars til 30.mars, utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.periode)
         }
     }
 
