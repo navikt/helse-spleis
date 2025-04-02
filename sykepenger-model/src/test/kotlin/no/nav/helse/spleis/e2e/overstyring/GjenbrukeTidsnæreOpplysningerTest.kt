@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import kotlin.reflect.KClass
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
@@ -256,7 +256,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
-            assertVarsel(Varselkode.RV_OS_2, 2.vedtaksperiode.filter())
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
@@ -441,7 +440,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertVarsler(listOf(RV_IV_7, Varselkode.RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IV_7, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
             val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
@@ -504,8 +503,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
             assertEquals(januar, revurdering.periode)
 
-            assertEquals(førsteUtbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
-            assertEquals(1.januar til 28.februar, februarutbetaling.periode)
+            assertNotEquals(førsteUtbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
+            assertEquals(februar, februarutbetaling.periode)
 
             assertTilstander(
                 1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING,
@@ -532,7 +531,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             })
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertVarsler(listOf(RV_IV_7, Varselkode.RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IV_7, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
 
             val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
@@ -586,7 +585,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
-            assertVarsler(listOf(RV_IV_7, Varselkode.RV_OS_2, Varselkode.RV_UT_23), 2.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IV_7, Varselkode.RV_UT_23), 2.vedtaksperiode.filter())
 
             val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
@@ -628,18 +627,13 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
                 ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
             })
 
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-
-            håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
 
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
 
             val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
@@ -650,45 +644,36 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
             val januarutbetaling = inspektør.utbetaling(0)
             val februarutbetaling = inspektør.utbetaling(1)
-            val revurderingJanuar = inspektør.utbetaling(2)
-            val revurderingFebruar = inspektør.utbetaling(3)
+            val revurderingFebruar = inspektør.utbetaling(2)
 
-            assertEquals(januarutbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
+            assertNotEquals(januarutbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
             assertEquals(januar, januarutbetaling.periode)
-            assertEquals(1.januar til 10.mars, februarutbetaling.periode)
+            assertEquals(14.februar til 10.mars, februarutbetaling.periode)
 
             februarutbetaling.arbeidsgiverOppdrag.also { oppdrag ->
-                assertEquals(2, oppdrag.size)
+                assertEquals(1, oppdrag.size)
                 oppdrag[0].inspektør.also { linje ->
-                    assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
-                    assertEquals(Endringskode.UEND, linje.endringskode)
-                }
-                oppdrag[1].inspektør.also { linje ->
                     assertEquals(14.februar til 9.mars, linje.fom til linje.tom)
                     assertEquals(Endringskode.NY, linje.endringskode)
                 }
             }
             assertEquals(0, februarutbetaling.personOppdrag.size)
 
-            assertEquals(januarutbetaling.korrelasjonsId, revurderingJanuar.korrelasjonsId)
-            assertEquals(januar, revurderingJanuar.periode)
-            revurderingJanuar.arbeidsgiverOppdrag.also { oppdrag ->
-                assertEquals(1, oppdrag.size)
-                oppdrag[0].inspektør.also { linje ->
-                    assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
-                    assertEquals(Endringskode.NY, linje.endringskode)
-                }
-            }
-            assertEquals(0, revurderingJanuar.personOppdrag.size)
-
-            assertNotEquals(revurderingJanuar.korrelasjonsId, revurderingFebruar.korrelasjonsId)
+            assertEquals(februarutbetaling.korrelasjonsId, revurderingFebruar.korrelasjonsId)
             assertEquals(14.februar til 10.mars, revurderingFebruar.periode)
             assertEquals(0, revurderingFebruar.personOppdrag.size)
-            assertEquals(1, revurderingFebruar.arbeidsgiverOppdrag.size)
-            assertEquals(Endringskode.NY, revurderingFebruar.arbeidsgiverOppdrag.inspektør.endringskode)
-            revurderingFebruar.arbeidsgiverOppdrag.single().inspektør.also { linje ->
-                assertEquals(5.mars til 9.mars, linje.fom til linje.tom)
-                assertEquals(Endringskode.NY, linje.endringskode)
+            assertEquals(Endringskode.ENDR, revurderingFebruar.arbeidsgiverOppdrag.inspektør.endringskode)
+            revurderingFebruar.arbeidsgiverOppdrag.also { oppdrag ->
+                assertEquals(2, oppdrag.size)
+                oppdrag[0].inspektør.also { linje ->
+                    assertEquals(14.februar til 9.mars, linje.fom til linje.tom)
+                    assertEquals(Endringskode.ENDR, linje.endringskode)
+                    assertEquals(14.februar, linje.datoStatusFom)
+                }
+                oppdrag[1].inspektør.also { linje ->
+                    assertEquals(5.mars til 9.mars, linje.fom til linje.tom)
+                    assertEquals(Endringskode.NY, linje.endringskode)
+                }
             }
         }
     }
@@ -704,18 +689,9 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
                 ManuellOverskrivingDag(dag, Dagtype.Feriedag, 100)
             })
 
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-
-            håndterYtelser(1.vedtaksperiode)
-            assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-
             håndterVilkårsgrunnlag(2.vedtaksperiode)
-            assertVarsler(listOf(RV_IV_7), 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
+            assertVarsler(listOf(RV_IV_7, Varselkode.RV_UT_23), 2.vedtaksperiode.filter())
 
             val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
@@ -726,45 +702,38 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
             val januarutbetaling = inspektør.utbetaling(0)
             val februarutbetaling = inspektør.utbetaling(1)
-            val revurderingJanuar = inspektør.utbetaling(2)
-            val revurderingFebruar = inspektør.utbetaling(3)
+            val revurderingFebruar = inspektør.utbetaling(2)
 
-            assertEquals(januarutbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
+            assertNotEquals(januarutbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
             assertEquals(januar, januarutbetaling.periode)
-            assertEquals(1.januar til 10.mars, februarutbetaling.periode)
+            assertEquals(14.februar til 10.mars, februarutbetaling.periode)
 
             februarutbetaling.arbeidsgiverOppdrag.also { oppdrag ->
-                assertEquals(2, oppdrag.size)
+                assertEquals(1, oppdrag.size)
                 oppdrag[0].inspektør.also { linje ->
-                    assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
-                    assertEquals(Endringskode.UEND, linje.endringskode)
-                }
-                oppdrag[1].inspektør.also { linje ->
                     assertEquals(14.februar til 9.mars, linje.fom til linje.tom)
                     assertEquals(Endringskode.NY, linje.endringskode)
                 }
             }
             assertEquals(0, februarutbetaling.personOppdrag.size)
 
-            assertEquals(januarutbetaling.korrelasjonsId, revurderingJanuar.korrelasjonsId)
-            assertEquals(januar, revurderingJanuar.periode)
-            revurderingJanuar.arbeidsgiverOppdrag.also { oppdrag ->
-                assertEquals(1, oppdrag.size)
-                oppdrag[0].inspektør.also { linje ->
-                    assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
-                    assertEquals(Endringskode.NY, linje.endringskode)
-                }
-            }
-            assertEquals(0, revurderingJanuar.personOppdrag.size)
-
-            assertNotEquals(revurderingJanuar.korrelasjonsId, revurderingFebruar.korrelasjonsId)
+            assertNotEquals(januarutbetaling.korrelasjonsId, revurderingFebruar.korrelasjonsId)
+            assertEquals(februarutbetaling.korrelasjonsId, revurderingFebruar.korrelasjonsId)
             assertEquals(14.februar til 10.mars, revurderingFebruar.periode)
             assertEquals(0, revurderingFebruar.personOppdrag.size)
-            assertEquals(1, revurderingFebruar.arbeidsgiverOppdrag.size)
-            assertEquals(Endringskode.NY, revurderingFebruar.arbeidsgiverOppdrag.inspektør.endringskode)
-            revurderingFebruar.arbeidsgiverOppdrag.single().inspektør.also { linje ->
-                assertEquals(5.mars til 9.mars, linje.fom til linje.tom)
-                assertEquals(Endringskode.NY, linje.endringskode)
+            assertEquals(2, revurderingFebruar.arbeidsgiverOppdrag.size)
+            assertEquals(Endringskode.ENDR, revurderingFebruar.arbeidsgiverOppdrag.inspektør.endringskode)
+            revurderingFebruar.arbeidsgiverOppdrag.also { oppdrag ->
+                assertEquals(2, oppdrag.size)
+                oppdrag[0].inspektør.also { linje ->
+                    assertEquals(14.februar til 9.mars, linje.fom til linje.tom)
+                    assertEquals(Endringskode.ENDR, linje.endringskode)
+                    assertEquals(14.februar, linje.datoStatusFom)
+                }
+                oppdrag[1].inspektør.also { linje ->
+                    assertEquals(5.mars til 9.mars, linje.fom til linje.tom)
+                    assertEquals(Endringskode.NY, linje.endringskode)
+                }
             }
         }
     }
@@ -1111,7 +1080,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertVarsler(listOf(RV_IV_7, Varselkode.RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IV_7, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -1166,7 +1135,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_OS_2, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()

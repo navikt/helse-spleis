@@ -326,7 +326,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
 
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter())
         assertTilstander(
             1.vedtaksperiode,
             START,

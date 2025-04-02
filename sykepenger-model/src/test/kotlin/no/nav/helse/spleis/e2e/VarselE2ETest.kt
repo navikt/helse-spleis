@@ -26,7 +26,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_9
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_5
@@ -98,7 +97,7 @@ internal class VarselE2ETest : AbstractDslTest() {
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.januar, 31.januar)))
 
-            assertVarsler(listOf(RV_AY_9, RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_AY_9, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         }
     }
 
@@ -120,7 +119,7 @@ internal class VarselE2ETest : AbstractDslTest() {
             håndterUtbetalingshistorikkEtterInfotrygdendring(
             )
             håndterYtelser(1.vedtaksperiode)
-            assertVarsler(listOf(RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
             assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
         }
     }
@@ -174,7 +173,6 @@ internal class VarselE2ETest : AbstractDslTest() {
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(RV_OS_2, 1.vedtaksperiode.filter())
             assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)

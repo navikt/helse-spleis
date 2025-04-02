@@ -17,7 +17,6 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
@@ -486,7 +485,6 @@ internal class UtbetalingslinjeForskjellTest {
             ), actual
         )
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
-        aktivitetslogg.assertVarsel(RV_OS_2)
     }
 
     @Test

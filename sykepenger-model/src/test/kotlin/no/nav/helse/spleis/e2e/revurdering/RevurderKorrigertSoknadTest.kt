@@ -25,7 +25,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -71,7 +70,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         håndterYtelser(1.vedtaksperiode)
 
-        assertVarsler(listOf(RV_OS_2, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         assertTrue(inspektør.sykdomstidslinje[17.januar] is Feriedag)
         assertTrue(inspektør.sykdomstidslinje[18.januar] is Feriedag)
         assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar] is Fridag)
@@ -198,8 +197,6 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertEquals(Feriedag::class, inspektør.sykdomstidslinje[17.januar]::class)
         assertEquals(Feriedag::class, inspektør.sykdomstidslinje[18.januar]::class)
-
-        assertVarsel(RV_OS_2, 1.vedtaksperiode.filter())
 
         val arbeidsgiverOppdrag = inspektør.sisteUtbetaling().arbeidsgiverOppdrag
         assertEquals(2, arbeidsgiverOppdrag.size)

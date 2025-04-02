@@ -272,7 +272,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar til 25.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
-        assertVarsel(Varselkode.RV_OS_2, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
@@ -335,8 +334,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
-
-        assertVarsel(Varselkode.RV_OS_2, 3.vedtaksperiode.filter())
 
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -454,7 +451,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
-        assertVarsel(Varselkode.RV_OS_2, 3.vedtaksperiode.filter())
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
@@ -1071,7 +1067,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSimulering(februarId)
         håndterUtbetalingsgodkjenning(februarId)
         håndterUtbetalt()
-        assertVarsel(Varselkode.RV_OS_2, februarId.filter())
 
         håndterYtelser(marsId)
         håndterSimulering(marsId)
@@ -1092,7 +1087,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSimulering(januarId)
         håndterUtbetalingsgodkjenning(januarId)
         håndterUtbetalt()
-        assertVarsel(Varselkode.RV_OS_2, januarId.filter())
 
         assertSisteTilstand(januarId, AVSLUTTET)
         assertSisteTilstand(februarId, AVVENTER_HISTORIKK_REVURDERING)
@@ -1116,7 +1110,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSimulering(januarId)
         håndterUtbetalingsgodkjenning(januarId)
         håndterUtbetalt()
-        assertVarsel(Varselkode.RV_OS_2, januarId.filter())
 
         assertSisteTilstand(februarId, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(januarId, AVSLUTTET)

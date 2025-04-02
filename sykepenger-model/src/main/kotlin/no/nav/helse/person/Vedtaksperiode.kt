@@ -389,6 +389,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun nyArbeidsgiverperiodeEtterEndring(other: Vedtaksperiode): Boolean {
+        if (Toggle.SendFeriepengeOppdrag.enabled) return false
         if (this.behandlinger.erUtbetaltPåForskjelligeUtbetalinger(other.behandlinger)) return false
         val arbeidsgiverperiodeOther = other.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode()
         val arbeidsgiverperiodeThis = this.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode()
