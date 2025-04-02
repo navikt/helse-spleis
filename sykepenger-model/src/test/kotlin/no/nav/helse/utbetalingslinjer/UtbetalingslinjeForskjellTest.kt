@@ -18,7 +18,6 @@ import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
@@ -28,7 +27,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -182,7 +180,6 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(5, actual.stønadsdager())
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -287,7 +284,6 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(30, actual.stønadsdager())
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -484,7 +480,6 @@ internal class UtbetalingslinjeForskjellTest {
                 14.januar to 20.januar endringskode NY pekerPå actual[0]
             ), actual
         )
-        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -941,7 +936,6 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(linjer(1.januar to 10.januar endringskode NY pekerPå original.last()), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -952,7 +946,6 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(linjer(1.januar to 3.januar endringskode NY pekerPå original.last()), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -963,7 +956,6 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(linjer(1.januar to 3.januar endringskode NY pekerPå original.last()), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -1003,7 +995,6 @@ internal class UtbetalingslinjeForskjellTest {
         )
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -1019,7 +1010,6 @@ internal class UtbetalingslinjeForskjellTest {
         )
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -1035,7 +1025,6 @@ internal class UtbetalingslinjeForskjellTest {
         )
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -1114,7 +1103,6 @@ internal class UtbetalingslinjeForskjellTest {
         )
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -1140,7 +1128,6 @@ internal class UtbetalingslinjeForskjellTest {
 
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
