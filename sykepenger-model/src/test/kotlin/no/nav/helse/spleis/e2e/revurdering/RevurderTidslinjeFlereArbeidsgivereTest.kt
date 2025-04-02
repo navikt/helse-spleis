@@ -193,7 +193,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterOverstyrTidslinje((17.januar til 21.januar).map { ManuellOverskrivingDag(it, Feriedag) }, orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)

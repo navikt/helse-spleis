@@ -131,38 +131,6 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `foreldet søknad forlenger annen foreldet søknad - deler korrelasjonsId`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 19.januar))
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar))
-
-        // foreldet søknad :(
-        håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
-        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-
-        // foreldet søknad :(
-        håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
-        håndterYtelser(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-
-        assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
-        assertVarsel(RV_SØ_2, 2.vedtaksperiode.filter())
-        val førsteUtbetaling = inspektør.utbetaling(0)
-        val andreUtbetaling = inspektør.utbetaling(1)
-
-        assertEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
-        assertEquals(0, førsteUtbetaling.arbeidsgiverOppdrag.size)
-        assertEquals(0, førsteUtbetaling.personOppdrag.size)
-        assertEquals(0, andreUtbetaling.arbeidsgiverOppdrag.size)
-        assertEquals(0, andreUtbetaling.personOppdrag.size)
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-    }
-
-    @Test
     fun `foreldet søknad etter annen foreldet søknad - samme arbeidsgiverperiode - deler korrelasjonsId`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 19.januar))
         håndterSykmelding(Sykmeldingsperiode(24.januar, 31.januar))
@@ -192,17 +160,18 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
         assertVarsel(RV_SØ_2, 2.vedtaksperiode.filter())
 
-        val førsteUtbetaling = inspektør.utbetaling(0)
-        val andreUtbetaling = inspektør.utbetaling(1)
-        val tredjeUtbetaling = inspektør.utbetaling(2)
+        val utbetalingJanuarFørste = inspektør.utbetaling(0)
+        val utbetalingRevurdering = inspektør.utbetaling(1)
+        val utbetalingJanuarSiste = inspektør.utbetaling(2)
 
-        assertEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
-        assertEquals(0, førsteUtbetaling.arbeidsgiverOppdrag.size)
-        assertEquals(0, førsteUtbetaling.personOppdrag.size)
-        assertEquals(0, andreUtbetaling.arbeidsgiverOppdrag.size)
-        assertEquals(0, andreUtbetaling.personOppdrag.size)
-        assertEquals(0, tredjeUtbetaling.arbeidsgiverOppdrag.size)
-        assertEquals(0, tredjeUtbetaling.personOppdrag.size)
+        assertEquals(utbetalingJanuarFørste.korrelasjonsId, utbetalingRevurdering.korrelasjonsId)
+        assertNotEquals(utbetalingJanuarFørste.korrelasjonsId, utbetalingJanuarSiste.korrelasjonsId)
+        assertEquals(0, utbetalingJanuarFørste.arbeidsgiverOppdrag.size)
+        assertEquals(0, utbetalingJanuarFørste.personOppdrag.size)
+        assertEquals(0, utbetalingRevurdering.arbeidsgiverOppdrag.size)
+        assertEquals(0, utbetalingRevurdering.personOppdrag.size)
+        assertEquals(0, utbetalingJanuarSiste.arbeidsgiverOppdrag.size)
+        assertEquals(0, utbetalingJanuarSiste.personOppdrag.size)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)

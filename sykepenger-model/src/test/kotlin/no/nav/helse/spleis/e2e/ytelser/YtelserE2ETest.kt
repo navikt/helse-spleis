@@ -109,11 +109,13 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
 
         assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.arbeidsgiverperiode)
-        val korrelasjonsIdJuli = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
+        val juliutbetaling = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør
+        val korrelasjonsIdJuli = juliutbetaling.korrelasjonsId
 
-        assertEquals(korrelasjonsIdMars, korrelasjonsIdJuli) // Siden vi ikke har agp bygger vi videre på første utbetaling etter siste utbetalingsdag i Infotrygd
-        assertTrue(inspektør.utbetalinger.last { it.korrelasjonsId == korrelasjonsIdMai }.erAnnullering) // Også annullerer vi alt mellom utbetalingen vi bygger videre på og perioden vi nå behandler
-        assertVarsler(listOf(RV_UT_21), 3.vedtaksperiode.filter())
+        assertEquals(4, inspektør.utbetalinger.size)
+        assertNotEquals(korrelasjonsIdMars, korrelasjonsIdJuli)
+        assertTrue(juliutbetaling.annulleringer.isEmpty())
+        assertVarsler(listOf(RV_UT_23), 3.vedtaksperiode.filter())
     }
 
     @Test

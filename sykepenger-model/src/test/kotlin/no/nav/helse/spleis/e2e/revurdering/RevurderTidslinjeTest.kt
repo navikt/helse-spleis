@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.antallEtterspurteBehov
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -40,6 +39,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -146,7 +147,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt(Oppdragstatus.AVVIST)
 
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetaling(1).utbetalingId)
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetaling(2).utbetalingId)
         assertTrue(hendelselogg.harFunksjonelleFeilEllerVerre()) { "kan pt. ikke annullere når siste utbetaling har feilet" }
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -165,9 +166,11 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         }
         assertVarsler(listOf(RV_UT_23, Varselkode.RV_UT_24), 1.vedtaksperiode.filter())
         nullstillTilstandsendringer()
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetaling(1).utbetalingId)
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetaling(2).utbetalingId)
+        håndterUtbetalt()
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, TIL_INFOTRYGD)
+        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        assertVarsler(listOf(RV_RV_7, RV_IV_7), 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -326,7 +329,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
 
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter())
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -837,93 +840,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forleng uferdig revurdering`() {
-        nyttVedtak(3.januar til 26.januar)
-
-        håndterOverstyrTidslinje((16.januar til 26.januar).map { manuellFeriedag(it) })
-
-        håndterYtelser(1.vedtaksperiode)
-        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
-        håndterSimulering(1.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(27.januar, 5.februar))
-        håndterSøknad(Sykdom(27.januar, 5.februar, 100.prosent))
-
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
-
-        val førsteUtbetaling = inspektør.utbetaling(0)
-        val andreUtbetaling = inspektør.utbetaling(1)
-        val tredjeUtbetaling = inspektør.utbetaling(2)
-
-        assertEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
-        assertEquals(andreUtbetaling.korrelasjonsId, tredjeUtbetaling.korrelasjonsId)
-
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-    }
-
-    @Test
-    fun `revurdering endrer arbeidsgiverperioden`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), Arbeid(25.januar, 26.januar))
-        håndterArbeidsgiveropplysninger(listOf(3.januar til 18.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        // for at ferie skal regnes som del av arbeidsgiverperioden, må det være sykdom
-        // på begge sider av feriedagene. i utgangspunktet er arbeidsgiverperioden 3. - 18. januar,
-        // men for at feriedagene 16. - 18. januar skal telle med, må det være sykdom 27. januar.
-        // Siden 27. januar hittil er ukjent for oss, regnes det som antatt arbeidsdag.
-        // Altså blir arbeidsgiverperioden 1. januar - 15.januar med denne overstyringen, med 16. januar-26.januar
-        // tellende som oppholdsdager
-        håndterOverstyrTidslinje((16.januar til 26.januar).map { manuellFeriedag(it) })
-
-        håndterYtelser(1.vedtaksperiode)
-        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        // registrerer sykdomsdag 27. januar som gjør at arbeidsgiverperioden blir 3.januar - 18.januar,
-        // siden det nå er sykdom på begge sider av feriedagene
-        håndterSykmelding(Sykmeldingsperiode(27.januar, 5.februar))
-        håndterSøknad(Sykdom(27.januar, 5.februar, 100.prosent))
-
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
-
-        val førsteUtbetaling = inspektør.utbetaling(0)
-        val andreUtbetaling = inspektør.utbetaling(1)
-        val tredjeUtbetaling = inspektør.utbetaling(2)
-
-        assertEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
-        assertEquals(andreUtbetaling.korrelasjonsId, tredjeUtbetaling.korrelasjonsId)
-    }
-
-    @Test
     fun `forlengelse samtidig som en aktiv revurdering hvor forlengelsen sin IM flytter skjæringstidspunktet til aktive revurderingen`() {
         nyttVedtak(3.januar til 26.januar)
 
@@ -946,7 +862,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertVarsler(listOf(Varselkode.RV_IV_7, RV_UT_23, RV_IM_24), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IV_7, RV_UT_23, RV_IM_24), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -1119,45 +1035,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             assertEquals(26.januar, oppdrag[1].fom)
             assertEquals(26.januar, oppdrag[1].tom)
             assertEquals(80, oppdrag[1].grad)
-        }
-    }
-
-    @Test
-    fun `revurderer siste utbetalte periode i en forlengelse med bare ferie og permisjon`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterInntektsmelding(
-            listOf(Periode(2.januar, 17.januar)),
-            førsteFraværsdag = 2.januar
-        )
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt()
-
-        håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
-        håndterSøknad(Sykdom(29.januar, 23.februar, 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt()
-
-        håndterOverstyrTidslinje((29.januar til 15.februar).map { manuellFeriedag(it) } + (16.februar til 23.februar).map { manuellPermisjonsdag(it) })
-        håndterYtelser(2.vedtaksperiode)
-        assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
-        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(1))
-        assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetalingtilstand(2))
-        assertEquals(inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId, inspektør.utbetaling(2).arbeidsgiverOppdrag.fagsystemId)
-        inspektør.utbetaling(2).arbeidsgiverOppdrag.also { oppdrag ->
-            assertEquals(1, oppdrag.size)
-            assertEquals(18.januar, oppdrag[0].fom)
-            assertEquals(26.januar, oppdrag[0].tom)
-            assertTrue(oppdrag[0].erForskjell())
-            assertEquals(100, oppdrag[0].grad)
         }
     }
 

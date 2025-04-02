@@ -82,6 +82,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
@@ -167,31 +168,34 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
+        val førsteUtbetaling = inspektør.utbetaling(0)
         val andreUtbetaling = inspektør.utbetaling(1)
         val outOfOrderUtbetaling = inspektør.utbetaling(2)
         val revurderingutbetaling = inspektør.utbetaling(3)
 
-        assertEquals(andreUtbetaling.korrelasjonsId, outOfOrderUtbetaling.korrelasjonsId)
-        assertEquals(revurderingutbetaling.korrelasjonsId, outOfOrderUtbetaling.korrelasjonsId)
-        val arbeidsgiverOppdrag = outOfOrderUtbetaling.arbeidsgiverOppdrag
-        assertEquals(1, arbeidsgiverOppdrag.size)
-        arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(UEND, linje.endringskode)
+        førsteUtbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(NY, linje.endringskode)
             assertEquals(17.januar, linje.fom)
-            assertEquals(9.februar, linje.tom)
-            assertEquals(1, linje.delytelseId)
-            assertNull(linje.refDelytelseId)
-            assertNull(linje.datoStatusFom)
+            assertEquals(26.januar, linje.tom)
         }
+
+        assertEquals(1, andreUtbetaling.arbeidsgiverOppdrag.size)
+        assertEquals(0, andreUtbetaling.personOppdrag.size)
+        andreUtbetaling.arbeidsgiverOppdrag.single().inspektør.also { linje ->
+            assertEquals(NY, linje.endringskode)
+            assertEquals(29.januar, linje.fom)
+            assertEquals(9.februar, linje.tom)
+        }
+
+        val arbeidsgiverOppdrag = outOfOrderUtbetaling.arbeidsgiverOppdrag
+        assertTrue(arbeidsgiverOppdrag.isEmpty())
+
         assertEquals(1, revurderingutbetaling.arbeidsgiverOppdrag.size)
         assertEquals(0, revurderingutbetaling.personOppdrag.size)
         revurderingutbetaling.arbeidsgiverOppdrag.single().inspektør.also { linje ->
             assertEquals(UEND, linje.endringskode)
-            assertEquals(17.januar, linje.fom)
+            assertEquals(29.januar, linje.fom)
             assertEquals(9.februar, linje.tom)
-            assertEquals(1, linje.delytelseId)
-            assertNull(linje.refDelytelseId)
-            assertNull(linje.datoStatusFom)
         }
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
@@ -217,18 +221,25 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_GODKJENNING)
 
-        val utbetaling1 = inspektør.utbetaling(0)
-
-        inspektør.utbetaling(2).also { inspektør ->
-            assertEquals(inspektør.korrelasjonsId, utbetaling1.korrelasjonsId)
-            assertEquals(inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetaling1.arbeidsgiverOppdrag.inspektør.fagsystemId())
-            assertEquals(2, inspektør.arbeidsgiverOppdrag.size)
-            assertEquals(UEND, inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
+        inspektør.utbetaling(0).also { inspektør ->
+            assertEquals(1, inspektør.arbeidsgiverOppdrag.size)
+            assertEquals(NY, inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
             assertEquals(17.januar, inspektør.arbeidsgiverOppdrag[0].inspektør.fom)
             assertEquals(31.januar, inspektør.arbeidsgiverOppdrag[0].inspektør.tom)
-            assertEquals(NY, inspektør.arbeidsgiverOppdrag[1].inspektør.endringskode)
-            assertEquals(10.februar, inspektør.arbeidsgiverOppdrag[1].inspektør.fom)
-            assertEquals(28.februar, inspektør.arbeidsgiverOppdrag[1].inspektør.tom)
+        }
+
+        inspektør.utbetaling(1).also { inspektør ->
+            assertEquals(1, inspektør.arbeidsgiverOppdrag.size)
+            assertEquals(NY, inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
+            assertEquals(17.april, inspektør.arbeidsgiverOppdrag[0].inspektør.fom)
+            assertEquals(30.april, inspektør.arbeidsgiverOppdrag[0].inspektør.tom)
+        }
+
+        inspektør.utbetaling(2).also { inspektør ->
+            assertEquals(1, inspektør.arbeidsgiverOppdrag.size)
+            assertEquals(NY, inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
+            assertEquals(10.februar, inspektør.arbeidsgiverOppdrag[0].inspektør.fom)
+            assertEquals(28.februar, inspektør.arbeidsgiverOppdrag[0].inspektør.tom)
         }
     }
 
@@ -274,7 +285,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar til 25.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
-        assertVarsel(Varselkode.RV_OS_2, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
@@ -338,8 +348,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
 
-        assertVarsel(Varselkode.RV_OS_2, 3.vedtaksperiode.filter())
-
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -359,23 +367,14 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         inspektør.utbetaling(1).also { outOfOrderUtbetalingen ->
             assertEquals(Utbetalingtype.UTBETALING, outOfOrderUtbetalingen.type)
             outOfOrderUtbetalingen.arbeidsgiverOppdrag.also { oppdraget ->
-                assertEquals(ENDR, oppdraget.inspektør.endringskode)
-                assertEquals(2, oppdraget.size)
+                assertEquals(NY, oppdraget.inspektør.endringskode)
+                assertEquals(1, oppdraget.size)
                 oppdraget[0].inspektør.also { linje1 ->
                     assertEquals(18.januar, linje1.fom)
                     assertEquals(25.januar, linje1.tom)
                     assertEquals(1431, linje1.beløp)
-                    assertEquals(2, linje1.delytelseId)
-                    assertEquals(1, linje1.refDelytelseId)
+                    assertEquals(1, linje1.delytelseId)
                     assertEquals(NY, linje1.endringskode)
-                }
-                oppdraget[1].inspektør.also { linje2 ->
-                    assertEquals(30.januar, linje2.fom)
-                    assertEquals(15.februar, linje2.tom)
-                    assertEquals(1431, linje2.beløp)
-                    assertEquals(3, linje2.delytelseId)
-                    assertEquals(2, linje2.refDelytelseId)
-                    assertEquals(NY, linje2.endringskode)
                 }
             }
         }
@@ -383,22 +382,14 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             assertEquals(Utbetalingtype.REVURDERING, revurderingen.type)
             revurderingen.arbeidsgiverOppdrag.also { oppdraget ->
                 assertEquals(ENDR, oppdraget.inspektør.endringskode)
-                assertEquals(2, oppdraget.size)
+                assertEquals(1, oppdraget.size)
                 oppdraget[0].inspektør.also { linje1 ->
-                    assertEquals(18.januar, linje1.fom)
-                    assertEquals(25.januar, linje1.tom)
+                    assertEquals(29.januar, linje1.fom)
+                    assertEquals(15.februar, linje1.tom)
                     assertEquals(1431, linje1.beløp)
                     assertEquals(2, linje1.delytelseId)
                     assertEquals(1, linje1.refDelytelseId)
-                    assertEquals(UEND, linje1.endringskode)
-                }
-                oppdraget[1].inspektør.also { linje2 ->
-                    assertEquals(29.januar, linje2.fom)
-                    assertEquals(15.februar, linje2.tom)
-                    assertEquals(1431, linje2.beløp)
-                    assertEquals(4, linje2.delytelseId)
-                    assertEquals(3, linje2.refDelytelseId)
-                    assertEquals(NY, linje2.endringskode)
+                    assertEquals(NY, linje1.endringskode)
                 }
             }
         }
@@ -456,7 +447,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
-        assertVarsel(Varselkode.RV_OS_2, 3.vedtaksperiode.filter())
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
@@ -477,15 +467,21 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         val februarUtbetaling = inspektør.utbetaling(0)
         val januarUtbetaling = inspektør.utbetaling(1)
         val februarRevurderingUtbetaling = inspektør.utbetaling(2)
-        assertEquals(februarUtbetaling.korrelasjonsId, januarUtbetaling.korrelasjonsId)
+
+        assertEquals(1, februarUtbetaling.arbeidsgiverOppdrag.size)
+        februarUtbetaling.arbeidsgiverOppdrag[0].also { linje ->
+            assertEquals(29.januar til 15.februar, linje.fom til linje.tom)
+            assertEquals(1431, linje.beløp)
+            assertEquals(NY, linje.endringskode)
+        }
         assertEquals(1, januarUtbetaling.arbeidsgiverOppdrag.size)
         januarUtbetaling.arbeidsgiverOppdrag[0].also { linje ->
-            assertEquals(17.januar til 15.februar, linje.fom til linje.tom)
+            assertEquals(17.januar til 26.januar, linje.fom til linje.tom)
             assertEquals(1431, linje.beløp)
         }
         assertEquals(1, februarRevurderingUtbetaling.arbeidsgiverOppdrag.size)
         februarRevurderingUtbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(17.januar til 15.februar, linje.fom til linje.tom)
+            assertEquals(29.januar til 15.februar, linje.fom til linje.tom)
             assertEquals(1431, linje.beløp)
             assertEquals(UEND, linje.endringskode)
         }
@@ -1075,7 +1071,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSimulering(februarId)
         håndterUtbetalingsgodkjenning(februarId)
         håndterUtbetalt()
-        assertVarsel(Varselkode.RV_OS_2, februarId.filter())
 
         håndterYtelser(marsId)
         håndterSimulering(marsId)
@@ -1096,7 +1091,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSimulering(januarId)
         håndterUtbetalingsgodkjenning(januarId)
         håndterUtbetalt()
-        assertVarsel(Varselkode.RV_OS_2, januarId.filter())
 
         assertSisteTilstand(januarId, AVSLUTTET)
         assertSisteTilstand(februarId, AVVENTER_HISTORIKK_REVURDERING)
@@ -1120,7 +1114,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSimulering(januarId)
         håndterUtbetalingsgodkjenning(januarId)
         håndterUtbetalt()
-        assertVarsel(Varselkode.RV_OS_2, januarId.filter())
 
         assertSisteTilstand(februarId, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(januarId, AVSLUTTET)

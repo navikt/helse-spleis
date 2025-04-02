@@ -39,14 +39,12 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
-import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -76,7 +74,6 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertVarsel(Varselkode.RV_OS_2, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         val utbetalingstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
         assertTrue(utbetalingstidslinje.subset(1.januar til 16.januar).all {
@@ -123,7 +120,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23, RV_IM_24), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23, RV_IM_24), 1.vedtaksperiode.filter())
         val utbetalingstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
         assertTrue(utbetalingstidslinje[1.januar] is Utbetalingsdag.Arbeidsdag)
         assertEquals(0.daglig, utbetalingstidslinje[1.januar].økonomi.inspektør.arbeidsgiverbeløp)
@@ -162,9 +159,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         nyttVedtak(10.januar til 31.januar)
         forlengVedtak(februar)
         forlengVedtak(mars)
-        håndterInntektsmelding(
-            listOf(1.februar til 16.februar)
-        )
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
 
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
@@ -186,6 +181,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
         assertVarsler(listOf(RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -243,6 +239,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
@@ -259,11 +256,8 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertVarsler(listOf(RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
         assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
 
-        val utbetalingFebruar = inspektør.utbetaling(2)
-
         val revurdering1Vedtaksperiode = inspektør.utbetaling(3)
         revurdering1Vedtaksperiode.also { utbetalingInspektør ->
-            assertEquals(revurdering1Vedtaksperiode.korrelasjonsId, utbetalingFebruar.korrelasjonsId)
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(0, utbetalingInspektør.personOppdrag.size)
             utbetalingInspektør.arbeidsgiverOppdrag.inspektør.also { oppdragInspektør ->
@@ -274,22 +268,24 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         }
         val revurdering2Vedtaksperiode = inspektør.utbetaling(4)
         revurdering2Vedtaksperiode.also { utbetalingInspektør ->
-            assertNotEquals(revurdering2Vedtaksperiode.korrelasjonsId, revurdering1Vedtaksperiode.korrelasjonsId)
-            assertEquals(NY, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
-            assertEquals(0, utbetalingInspektør.arbeidsgiverOppdrag.size)
+            assertEquals(ENDR, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(0, utbetalingInspektør.personOppdrag.size)
         }
         val revurdering3Vedtaksperiode = inspektør.utbetaling(5)
         revurdering3Vedtaksperiode.also { utbetalingInspektør ->
-            assertNotEquals(revurdering3Vedtaksperiode.korrelasjonsId, revurdering1Vedtaksperiode.korrelasjonsId)
-            assertNotEquals(revurdering3Vedtaksperiode.korrelasjonsId, revurdering2Vedtaksperiode.korrelasjonsId)
-            assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
-            assertEquals(NY, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(2, utbetalingInspektør.arbeidsgiverOppdrag.size)
+            assertEquals(ENDR, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
             utbetalingInspektør.arbeidsgiverOppdrag[0].inspektør.also { linjeInspektør ->
+                assertEquals(1.februar til 28.februar, linjeInspektør.periode)
+            }
+            utbetalingInspektør.arbeidsgiverOppdrag[1].inspektør.also { linjeInspektør ->
                 assertEquals(17.februar til 28.februar, linjeInspektør.periode)
             }
             assertEquals(0, utbetalingInspektør.personOppdrag.size)
         }
+        assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
+        assertVarsel(RV_UT_23, 3.vedtaksperiode.filter())
     }
 
     @Test
@@ -306,7 +302,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
         assertInntektsgrunnlag(15.januar, forventetAntallArbeidsgivere = 1) {
             assertInntektsgrunnlag(a1, INNTEKT * 1.1)
         }
@@ -349,7 +345,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_IM_3, RV_UT_23, RV_IM_24), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_3, RV_UT_23, RV_IM_24), 2.vedtaksperiode.filter())
     }
 
     @Test

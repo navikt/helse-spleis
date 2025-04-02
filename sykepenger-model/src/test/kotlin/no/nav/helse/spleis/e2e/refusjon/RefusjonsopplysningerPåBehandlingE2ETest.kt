@@ -205,7 +205,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_OS_2, 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(2.januar til 31.januar, INNTEKT), inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
@@ -297,7 +296,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                 )
             )
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_OS_2, 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -856,7 +854,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(vedtaksperiodeJanuar)
             håndterUtbetalt()
 
-            assertVarsel(Varselkode.RV_OS_2, vedtaksperiodeJanuar.filter())
             assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
 
             assertSisteTilstand(vedtaksperiodeFebruar, AVVENTER_HISTORIKK)

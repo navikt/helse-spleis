@@ -76,38 +76,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
-
-    @Test
-    fun `forlengelse etter revurdering uten endring`() {
-        nyttVedtak(januar)
-        nyttVedtak(april, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        forlengVedtak(mai)
-
-        håndterOverstyrTidslinje(
-            listOf(
-                ManuellOverskrivingDag(31.januar, Feriedag)
-            )
-        )
-        håndterYtelser(1.vedtaksperiode)
-        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterYtelser(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-
-        forlengVedtak(juni)
-
-        val utbetaling5 = inspektør.utbetaling(5)
-        val utbetaling6 = inspektør.utbetaling(6)
-        assertEquals(utbetaling6.korrelasjonsId, utbetaling5.korrelasjonsId)
-        assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, utbetaling5.tilstand)
-        assertEquals(Utbetalingstatus.UTBETALT, utbetaling6.tilstand)
-    }
-
+    
     @Test
     fun `revurdere første periode`() {
         nyttVedtak(januar)
@@ -140,7 +109,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
 
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter())
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
         val utbetalinger = inspektør.utbetalinger(2.vedtaksperiode)
@@ -271,13 +240,12 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             val januarutbetaling = inspektør.utbetaling(0)
             val februarutbetaling = inspektør.utbetaling(1)
             assertEquals(revurdering.korrelasjonsId, januarutbetaling.korrelasjonsId)
-            assertEquals(revurdering.korrelasjonsId, februarutbetaling.korrelasjonsId)
             assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString().trim())
             assertEquals(januar, januarutbetaling.periode)
-            assertEquals(1.januar til 28.februar, februarutbetaling.periode)
+            assertEquals(10.februar til 28.februar, februarutbetaling.periode)
             assertEquals(januar, revurdering.periode)
             assertEquals(0, revurdering.personOppdrag.size)
-            assertEquals(2, revurdering.arbeidsgiverOppdrag.size)
+            assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
             assertEquals(Endringskode.UEND, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
             assertEquals(0, revurdering.arbeidsgiverOppdrag.inspektør.nettoBeløp)
             revurdering.arbeidsgiverOppdrag.inspektør.also { arbeidsgiveroppdrag ->
@@ -285,11 +253,6 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
                 assertEquals(31.januar, arbeidsgiveroppdrag.tom(0))
                 assertEquals(1431, arbeidsgiveroppdrag.beløp(0))
                 assertEquals(Endringskode.UEND, arbeidsgiveroppdrag.endringskode(0))
-
-                assertEquals(10.februar, arbeidsgiveroppdrag.fom(1))
-                assertEquals(28.februar, arbeidsgiveroppdrag.tom(1))
-                assertEquals(1431, arbeidsgiveroppdrag.beløp(1))
-                assertEquals(Endringskode.UEND, arbeidsgiveroppdrag.endringskode(1))
             }
         }
     }
@@ -376,7 +339,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(2.vedtaksperiode, 19.mars, 0.0)
         assertDiff(-1431)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 2.vedtaksperiode.filter())
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
@@ -406,37 +369,29 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             val januar2utbetaling = inspektør.utbetaling(1)
             val februarutbetaling = inspektør.utbetaling(2)
             val marsutbetaling = inspektør.utbetaling(3)
-            assertEquals(revurdering.korrelasjonsId, januar1utbetaling.korrelasjonsId)
-            assertEquals(revurdering.korrelasjonsId, januar2utbetaling.korrelasjonsId)
             assertEquals(revurdering.korrelasjonsId, februarutbetaling.korrelasjonsId)
-            assertEquals(revurdering.korrelasjonsId, marsutbetaling.korrelasjonsId)
             assertEquals("PPPPPPP PPPPPPP PPNNNH", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString().trim())
             assertEquals("H NNNNNHH NNN", inspektør.utbetalingstidslinjer(2.vedtaksperiode).toString().trim())
             assertEquals("HH NNNFNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(3.vedtaksperiode).toString().trim())
             assertEquals(1.januar til 20.januar, januar1utbetaling.periode)
-            assertEquals(januar, januar2utbetaling.periode)
-            assertEquals(1.januar til 28.februar, februarutbetaling.periode)
-            assertEquals(1.januar til 31.mars, marsutbetaling.periode)
-            assertEquals(1.januar til 28.februar, revurdering.periode)
+            assertEquals(21.januar til 31.januar, januar2utbetaling.periode)
+            assertEquals(10.februar til 28.februar, februarutbetaling.periode)
+            assertEquals(1.mars til 31.mars, marsutbetaling.periode)
+            assertEquals(10.februar til 28.februar, revurdering.periode)
             assertEquals(0, revurdering.personOppdrag.size)
-            assertEquals(3, revurdering.arbeidsgiverOppdrag.size)
+            assertEquals(2, revurdering.arbeidsgiverOppdrag.size)
             assertEquals(Endringskode.ENDR, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
             assertEquals(-1431, revurdering.arbeidsgiverOppdrag.inspektør.nettoBeløp)
             revurdering.arbeidsgiverOppdrag.inspektør.also { arbeidsgiveroppdrag ->
-                assertEquals(17.januar, arbeidsgiveroppdrag.fom(0))
-                assertEquals(31.januar, arbeidsgiveroppdrag.tom(0))
+                assertEquals(10.februar, arbeidsgiveroppdrag.fom(0))
+                assertEquals(14.februar, arbeidsgiveroppdrag.tom(0))
                 assertEquals(1431, arbeidsgiveroppdrag.beløp(0))
-                assertEquals(Endringskode.UEND, arbeidsgiveroppdrag.endringskode(0))
+                assertEquals(Endringskode.ENDR, arbeidsgiveroppdrag.endringskode(0))
 
-                assertEquals(10.februar, arbeidsgiveroppdrag.fom(1))
-                assertEquals(14.februar, arbeidsgiveroppdrag.tom(1))
+                assertEquals(16.februar, arbeidsgiveroppdrag.fom(1))
+                assertEquals(28.februar, arbeidsgiveroppdrag.tom(1))
                 assertEquals(1431, arbeidsgiveroppdrag.beløp(1))
-                assertEquals(Endringskode.ENDR, arbeidsgiveroppdrag.endringskode(1))
-
-                assertEquals(16.februar, arbeidsgiveroppdrag.fom(2))
-                assertEquals(30.mars, arbeidsgiveroppdrag.tom(2))
-                assertEquals(1431, arbeidsgiveroppdrag.beløp(2))
-                assertEquals(Endringskode.NY, arbeidsgiveroppdrag.endringskode(2))
+                assertEquals(Endringskode.NY, arbeidsgiveroppdrag.endringskode(1))
             }
         }
 
@@ -611,7 +566,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -643,7 +598,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter())
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
         håndterSimulering(1.vedtaksperiode)
@@ -666,7 +621,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         nullstillTilstandsendringer()
@@ -685,7 +640,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         nullstillTilstandsendringer()
@@ -704,7 +659,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -727,7 +682,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -750,7 +705,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(2.vedtaksperiode, 19.mars, 0.0)
         assertDiff(-1431)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 2.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
 
@@ -772,7 +727,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(2.vedtaksperiode, 19.mars, 0.0)
         assertDiff(-1431)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
@@ -814,7 +769,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -850,7 +805,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(4.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(4.vedtaksperiode, 17.juli, 0.0)
         assertDiff(-1431)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 4.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 4.vedtaksperiode.filter())
         håndterSimulering(4.vedtaksperiode)
         håndterUtbetalingsgodkjenning(4.vedtaksperiode)
         håndterUtbetalt()
@@ -1004,7 +959,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter())
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 17.januar, 0.0)
         assertDiff(-1431)
         håndterSimulering(1.vedtaksperiode)
@@ -1021,7 +976,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
@@ -1041,7 +996,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.februar, Feriedag)))
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        assertVarsler(listOf(Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
     }
@@ -1052,7 +1007,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.januar til 10.januar, 100)))
 
-        assertVarsler(listOf(RV_AY_5, RV_UT_23, Varselkode.RV_OS_2), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_AY_5, RV_UT_23), 1.vedtaksperiode.filter())
         assertIngenFunksjonelleFeil()
     }
 
@@ -1086,7 +1041,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
 
-        assertVarsler(listOf(RV_VV_4, Varselkode.RV_OS_2, RV_UT_23), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_VV_4, RV_UT_23), 1.vedtaksperiode.filter())
         assertVarsler(listOf(RV_VV_4, RV_UT_23), 2.vedtaksperiode.filter())
         assertEquals(19, inspektør.sykdomstidslinje.inspektør.grader[17.januar])
         assertEquals(19, inspektør.sykdomstidslinje.inspektør.grader[16.februar])

@@ -24,13 +24,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
+import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.OVERFØRT
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.UTBETALT
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
@@ -51,19 +51,31 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingpåminnelse(2, OVERFØRT)
         håndterUtbetalt()
 
-        val første = inspektør.utbetaling(0)
-        inspektør.utbetaling(2).also { utbetalingInspektør ->
-            assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), første.arbeidsgiverOppdrag.inspektør.fagsystemId())
-            assertEquals(Endringskode.ENDR, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
-            assertEquals(2, utbetalingInspektør.arbeidsgiverOppdrag.size)
-            assertTrue(utbetalingInspektør.arbeidsgiverOppdrag.harUtbetalinger())
-            assertEquals(17.januar, utbetalingInspektør.arbeidsgiverOppdrag[0].fom)
-            assertEquals(30.januar, utbetalingInspektør.arbeidsgiverOppdrag[0].tom)
-            assertEquals(1.februar, utbetalingInspektør.arbeidsgiverOppdrag[1].fom)
-            assertEquals(28.februar, utbetalingInspektør.arbeidsgiverOppdrag[1].tom)
-            assertTrue(utbetalingInspektør.arbeidsgiverOppdrag[0].erForskjell())
-            assertTrue(utbetalingInspektør.arbeidsgiverOppdrag[1].erForskjell())
+        val utbetalingJanuar = inspektør.utbetaling(0)
+        assertEquals(1, utbetalingJanuar.arbeidsgiverOppdrag.size)
+        utbetalingJanuar.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(NY, linje.endringskode)
+            assertEquals(17.januar, linje.fom)
+            assertEquals(31.januar, linje.tom)
         }
+
+        val utbetalingFebruar = inspektør.utbetaling(1)
+        assertEquals(1, utbetalingFebruar.arbeidsgiverOppdrag.size)
+        utbetalingFebruar.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(NY, linje.endringskode)
+            assertEquals(1.februar, linje.fom)
+            assertEquals(28.februar, linje.tom)
+        }
+
+        val utbetalingOverstyringJanuar = inspektør.utbetaling(2)
+        assertEquals(1, utbetalingOverstyringJanuar.arbeidsgiverOppdrag.size)
+        assertEquals(utbetalingJanuar.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetalingOverstyringJanuar.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        utbetalingOverstyringJanuar.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(ENDR, linje.endringskode)
+            assertEquals(17.januar, linje.fom)
+            assertEquals(30.januar, linje.tom)
+        }
+
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
     }

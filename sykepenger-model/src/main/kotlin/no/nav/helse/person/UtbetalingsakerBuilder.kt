@@ -1,8 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import kotlin.collections.component1
-import kotlin.collections.component2
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingslinjer.Utbetalingsak
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
@@ -34,6 +33,8 @@ internal class UtbetalingsakerBuilder(
     }
 
     private fun finnStartdatoForUtbetalingsakForVedtaksperiode(vedtaksperiode: ArbeidsgiverperiodeForVedtaksperiode, infotrygdbetalinger: List<Periode>, vedtaksperiodene: List<ArbeidsgiverperiodeForVedtaksperiode>): LocalDate {
+        if (Toggle.EgenFagsystemIdPerVedtaksperiode.enabled) return vedtaksperiode.vedtaksperiode.start
+
         // eventuell infotrygdutbetaling som ligger mellom arbeidsgiverperioden og vedtaksperioden
         val mellomliggendeInfotrygdutbetaling = infotrygdutbetalingEtterArbeidsgiverperiodenOgFørVedtaksperioden(infotrygdbetalinger, vedtaksperiode)
         val infotrygdutbetalingsakStartdato = mellomliggendeInfotrygdutbetaling?.let { infotrygdDag ->
