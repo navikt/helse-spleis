@@ -14,6 +14,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
 import no.nav.helse.dsl.assertInntektsgrunnlag
+import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
@@ -67,8 +68,21 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
+
+    @Test
+    fun `En kort AUU på annen arbeidsgiver på eget skjæringstidspunkt, så kommer søknad på opprinnelig arbeidsgiver som gjør at hen er på samme skjæringstidspunkt`() {
+        a1 { nyttVedtak(januar) }
+        a2 { håndterSøknad(10.februar til 20.februar) }
+        a1 {
+            assertEquals(
+                "Key Inntektskilde(id=a2) is missing in the map.",
+                assertThrows<NoSuchElementException> { forlengVedtak(februar) }.message
+            )
+        }
+    }
 
     @Test
     fun `når vi har ventet 3 måneder på søknad på andre arbeisgivere går vi videre med varsel`() {
