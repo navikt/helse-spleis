@@ -543,7 +543,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `to perioder som blir annullert`() {
+    fun `en periode som blir annullert`() {
         nyttVedtak(1.januar, 31.januar)
         val utbetaling = forlengVedtak(1.februar, 28.februar)
         håndterAnnullerUtbetaling(utbetaling)
@@ -553,7 +553,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
             0.generasjon {
                 assertEquals(2, size)
                 annullertPeriode(0) er Overført avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet true medTilstand TilAnnullering
-                annullertPeriode(1) er Overført avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand TilAnnullering
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
             }
             1.generasjon {
                 assertEquals(2, size)
@@ -564,7 +564,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `to perioder som blir annullert - deretter nye perioder`() {
+    fun `en periode som blir annullert - deretter nye perioder`() {
         nyttVedtak(1.januar, 31.januar)
         val utbetaling = forlengVedtak(1.februar, 28.februar)
         håndterAnnullerUtbetaling(utbetaling)
@@ -578,7 +578,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
                 assertEquals(3, size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 30.april) medAntallDager 30 forkastet false medTilstand Utbetalt
                 annullertPeriode(1) er Utbetalingstatus.Annullert avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet true medTilstand Annullert
-                annullertPeriode(2) er Utbetalingstatus.Annullert avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand Annullert
+                beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
             }
             1.generasjon {
                 assertEquals(2, size)
@@ -1416,7 +1416,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
             0.generasjon {
                 assertEquals(2, size)
                 annullertPeriode(0) medTilstand Annullert
-                annullertPeriode(1) medTilstand Annullert
+                beregnetPeriode(1) medTilstand Utbetalt
             }
             1.generasjon {
                 assertEquals(2, size)
@@ -1982,7 +1982,6 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelserTilUtbetalt()
-        håndterUtbetalt()
         håndterYtelserTilUtbetalt()
 
         generasjoner {

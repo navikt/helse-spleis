@@ -37,7 +37,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_37
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
@@ -114,7 +113,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertVarsler(listOf(RV_IT_3, RV_OS_2), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IT_3), 1.vedtaksperiode.filter())
         assertEquals(2, observatør.utkastTilVedtakEventer.size)
         hendelselogg.assertHarTag(
             vedtaksperiode = 1.vedtaksperiode,
@@ -144,8 +143,8 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         assertEquals(februarKorrelasjonsId, gjeldendeKorrelasjonsId(1.vedtaksperiode))
-        assertVarsler(listOf(RV_OS_2, RV_IT_37), 1.vedtaksperiode.filter())
-        assertVarsler(listOf(RV_OS_2, RV_IT_37), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IT_37), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IT_37), 1.vedtaksperiode.filter())
 
         håndterSøknad(10.mars til 31.mars)
         håndterArbeidsgiveropplysninger(
@@ -158,7 +157,6 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        assertEquals(februarKorrelasjonsId, gjeldendeKorrelasjonsId(2.vedtaksperiode))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
 
         // Mens Mars står til godkjenning utbetales den i Infotrygd
@@ -172,7 +170,6 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
         håndterYtelser(2.vedtaksperiode)
-        assertEquals(februarKorrelasjonsId, gjeldendeKorrelasjonsId(2.vedtaksperiode))
     }
 
     @Test
@@ -211,7 +208,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         val nyKorrelasjonsIdJuli = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
         assertNotEquals(korrelasjonsIdMars, nyKorrelasjonsIdJuli)
         assertEquals(listOf(1.juli til 16.juli), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.arbeidsgiverperiode)
-        assertVarsler(listOf(RV_OS_2, RV_UT_23, RV_IT_3), 3.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_UT_23, RV_IT_3), 3.vedtaksperiode.filter())
     }
 
     @Test

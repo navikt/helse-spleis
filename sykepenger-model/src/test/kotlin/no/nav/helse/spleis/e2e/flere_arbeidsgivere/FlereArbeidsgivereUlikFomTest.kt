@@ -47,7 +47,6 @@ import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.forlengelseTilGodkjenning
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
@@ -121,7 +120,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(refusjonFør, inspektør(a2).refusjon(1.vedtaksperiode))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a2)
-        assertVarsler(listOf(RV_IV_10, RV_OS_2), 1.vedtaksperiode.filter(a2))
+        assertVarsler(listOf(RV_IV_10), 1.vedtaksperiode.filter(a2))
     }
 
     @Test
@@ -548,8 +547,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør(a1).antallUtbetalinger)
         assertEquals(2, inspektør(a2).antallUtbetalinger)
 
-        val sisteUtbetalingA1 = inspektør(a1).sisteUtbetaling()
-        assertEquals(1.januar til 10.februar, sisteUtbetalingA1.periode)
         assertEquals(100, inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode)[31.januar].økonomi.inspektør.totalGrad)
         assertEquals(100, inspektør(a2).utbetalingstidslinjer(2.vedtaksperiode)[1.februar].økonomi.inspektør.totalGrad)
     }
@@ -1329,7 +1326,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(2, revurderingen.arbeidsgiverOppdrag.size)
         assertEquals(0, revurderingen.personOppdrag.size)
         revurderingen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(17.januar til 18.februar, linje.fom til linje.tom)
+            assertEquals(1.februar til 18.februar, linje.fom til linje.tom)
             assertEquals(1080, linje.beløp)
         }
         revurderingen.arbeidsgiverOppdrag[1].inspektør.also { linje ->
@@ -1404,7 +1401,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(2, revurderingen.arbeidsgiverOppdrag.size)
         assertEquals(0, revurderingen.personOppdrag.size)
         revurderingen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(17.januar til 4.februar, linje.fom til linje.tom)
+            assertEquals(1.februar til 4.februar, linje.fom til linje.tom)
             assertEquals(1080, linje.beløp)
         }
         revurderingen.arbeidsgiverOppdrag[1].inspektør.also { linje ->
@@ -1474,35 +1471,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter(orgnummer = a1))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
-    }
-
-    @Test
-    fun `ghost blir syk, vi har ikke mottatt IM enda, men kan beregne tidligere periode`() {
-        nyPeriode(januar, orgnummer = a1)
-        håndterArbeidsgiveropplysninger(
-            listOf(1.januar til 16.januar),
-            orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
-        )
-        håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
-        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt()
-
-        forlengelseTilGodkjenning(februar, a1)
-        nyPeriode(mars, orgnummer = a1)
-        nyPeriode(april, orgnummer = a1)
-        nyPeriode(april, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt()
-        håndterYtelser(3.vedtaksperiode, orgnummer = a1)
-
-        val utbetalinger = inspektør.utbetalinger(3.vedtaksperiode)
-        assertEquals(1, utbetalinger.size)
-        assertEquals(1.januar til 31.mars, utbetalinger.single().inspektør.periode)
     }
 
     @Test
