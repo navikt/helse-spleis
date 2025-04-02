@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
-import java.util.*
+import java.util.UUID
 import kotlin.reflect.KClass
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
@@ -477,7 +477,6 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.Inntekt,
             PersonObserver.Refusjon,
-            PersonObserver.Arbeidsgiverperiode
         )
 
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
@@ -939,7 +938,6 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.Inntekt,
             PersonObserver.Refusjon,
-            PersonObserver.Arbeidsgiverperiode
         )
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(expectedForespurteOpplysninger, actualForespørsel.forespurteOpplysninger)
