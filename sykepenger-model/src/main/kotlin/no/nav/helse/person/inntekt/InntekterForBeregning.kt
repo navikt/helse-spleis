@@ -30,7 +30,7 @@ internal class InntekterForBeregning private constructor(
     private val inntekterPerInntektskilde: Map<Inntektskilde, Beløpstidslinje>,
     private val beregningsperiode: Periode
 ) {
-    internal fun tilBeregning(organisasjonsnummer: String) = inntekterPerInntektskilde.getValue(Inntektskilde(organisasjonsnummer))
+    internal fun tilBeregning(organisasjonsnummer: String) = inntekterPerInntektskilde[Inntektskilde(organisasjonsnummer)] ?: ingenInntekt(beregningsperiode)
 
     internal fun forPeriode(periode: Periode): Map<Inntektskilde, Beløpstidslinje> {
         check(periode in beregningsperiode) { "Perioden $periode er utenfor beregningsperioden $beregningsperiode" }
@@ -118,25 +118,6 @@ internal class InntekterForBeregning private constructor(
         private val TøyseteMeldingsreferanseId = MeldingsreferanseId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
         private val TøyseteTidsstempel = LocalDate.EPOCH.atStartOfDay()
         private val TøyseteOpplysningskilde = Kilde(TøyseteMeldingsreferanseId, SYSTEM, TøyseteTidsstempel)
-
-        fun forAuu(periode: Periode, organisasjonsnummer: String, inntektsgrunnlag: Inntektsgrunnlag?): Pair<Beløpstidslinje, InntekterForBeregning> {
-            if (inntektsgrunnlag == null) {
-                // Når vi skal lage en utbetalingstidslinje på en AUU hvor det ikke finnes noe inntektsgrunnlag vil vi ikke lagre de tøysete verdiene på behandlingen, bare bruke dem for å lage utbetalingstidslinje
-                return Beløpstidslinje.fra(periode, INGEN, TøyseteOpplysningskilde) to Builder(periode).build()
-            }
-
-            val inntekterForBeregning = with(Builder(periode)) {
-                inntektsgrunnlag.beverte(this)
-                build()
-            }
-
-            val inntektstidslinje = inntekterForBeregning.inntekterPerInntektskilde[Inntektskilde(organisasjonsnummer)] ?: error(
-                "Det er en arbeidsgiver som ikke inngår i SP: $organisasjonsnummer som har søknader: $periode.\n" +
-                "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?"
-            )
-
-            // Når vi skal lage en utbetalingstidslinje på en AUU hvor det finnes inntektsgrunnlag så lagrer vi ned de ekte inntektene
-            return inntektstidslinje to inntekterForBeregning
-        }
+        private fun ingenInntekt(periode: Periode) = Beløpstidslinje.fra(periode, INGEN, TøyseteOpplysningskilde)
     }
 }

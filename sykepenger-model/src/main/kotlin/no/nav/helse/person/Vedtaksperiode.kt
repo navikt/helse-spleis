@@ -3085,8 +3085,14 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun avsluttUtenVedtak(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            val (inntektstidslinje, inntekterForBeregning) = InntekterForBeregning.forAuu(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver.organisasjonsnummer, vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag)
+            val inntekterForBeregning = with(InntekterForBeregning.Builder(vedtaksperiode.periode)) {
+                vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag?.beverte(this)
+                build()
+            }
+            val inntektstidslinje = inntekterForBeregning.tilBeregning(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
+
             val utbetalingstidslinje = vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektstidslinje)
+
             vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
         }
 

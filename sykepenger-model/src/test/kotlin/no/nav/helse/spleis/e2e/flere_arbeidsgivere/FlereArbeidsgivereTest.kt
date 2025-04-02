@@ -68,7 +68,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
@@ -77,10 +76,12 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { nyttVedtak(januar) }
         a2 { håndterSøknad(10.februar til 20.februar) }
         a1 {
-            assertEquals(
-                "Key Inntektskilde(id=a2) is missing in the map.",
-                assertThrows<NoSuchElementException> { forlengVedtak(februar) }.message
-            )
+            forlengVedtak(februar)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        }
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
