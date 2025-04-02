@@ -1163,9 +1163,9 @@ internal class Vedtaksperiode private constructor(
         return vilkårsgrunnlag?.harNødvendigInntektForVilkårsprøving(arbeidsgiver.organisasjonsnummer) == false
     }
 
-    internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, aktivitetslogg: IAktivitetslogg, hendelse: Hendelse? = null): Boolean {
+    internal fun kanForkastes(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg, hendelse: Hendelse? = null): Boolean {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        if (behandlinger.kanForkastes(aktivitetsloggMedVedtaksperiodekontekst, arbeidsgiverUtbetalinger)) {
+        if (behandlinger.kanForkastes(aktivitetsloggMedVedtaksperiodekontekst, vedtaksperioder.map { it.behandlinger })) {
             aktivitetsloggMedVedtaksperiodekontekst.info("Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet")
             return true
         }
@@ -1180,10 +1180,10 @@ internal class Vedtaksperiode private constructor(
     internal fun forkast(
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg,
-        utbetalinger: List<Utbetaling>
+        vedtaksperioder: List<Vedtaksperiode>
     ): VedtaksperiodeForkastetEventBuilder? {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        if (!kanForkastes(utbetalinger, aktivitetsloggMedVedtaksperiodekontekst, hendelse)) return null
+        if (!kanForkastes(vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst, hendelse)) return null
         aktivitetsloggMedVedtaksperiodekontekst.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.behandlinger.forkast(arbeidsgiver, hendelse.metadata.behandlingkilde, hendelse.metadata.automatiskBehandling, aktivitetsloggMedVedtaksperiodekontekst)
         val arbeidsgiverperiodeHensyntarForkastede = finnArbeidsgiverperiodeHensyntarForkastede()
