@@ -92,57 +92,10 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Sendes ut overstyring i gangsatt når det er en periode som står i avventer inntektsmelding ved endring fra saksbehandler`() {
-        nyttVedtak(januar)
-
-        håndterSøknad(15.februar til 28.februar)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-
-        // Når saksbehandler overstyrer tidslinjen forventer Speilvendt å få overstyring igangsatt for å håndhenve totrinns
-        håndterOverstyrTidslinje((1.februar til 14.februar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
-
-        val overstyringIgangsatt = observatør.overstyringIgangsatt.single()
-        assertEquals(
-            listOf(
-                PersonObserver.OverstyringIgangsatt.VedtaksperiodeData(
-                    orgnummer = a1,
-                    vedtaksperiodeId = 2.vedtaksperiode.id(a1),
-                    periode = 1.februar til 28.februar,
-                    skjæringstidspunkt = 1.januar,
-                    typeEndring = "ENDRING"
-                )
-            ), overstyringIgangsatt.berørtePerioder
-        )
-        assertEquals("SYKDOMSTIDSLINJE", overstyringIgangsatt.årsak)
-    }
-
-    @Test
     fun `sendes ikke ut overstyring igangsatt når det kommer inntektsmelding i avventer inntektsmelding`() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         assertEquals(0, observatør.overstyringIgangsatt.size)
-    }
-
-    @Test
-    fun `Sendes ut overstyring i gangsatt når det er en periode som står i avventer blokkerende periode ved endring fra saksbehandler`() {
-        tilGodkjenning(januar, a1)
-        håndterSøknad(februar)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 60)))
-        val overstyringIgangsatt = observatør.overstyringIgangsatt.single()
-        assertEquals(
-            listOf(
-                PersonObserver.OverstyringIgangsatt.VedtaksperiodeData(
-                    orgnummer = a1,
-                    vedtaksperiodeId = 2.vedtaksperiode.id(a1),
-                    periode = 1.februar til 28.februar,
-                    skjæringstidspunkt = 1.januar,
-                    typeEndring = "ENDRING"
-                )
-            ), overstyringIgangsatt.berørtePerioder
-        )
-        assertEquals("SYKDOMSTIDSLINJE", overstyringIgangsatt.årsak)
     }
 
     @Test

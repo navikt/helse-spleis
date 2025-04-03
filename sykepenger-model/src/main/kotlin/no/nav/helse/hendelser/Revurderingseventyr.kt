@@ -60,19 +60,13 @@ class Revurderingseventyr private constructor(
 
     private val vedtaksperioder = mutableListOf<VedtaksperiodeData>()
 
-    internal fun inngåSomRevurdering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, periode: Periode) =
-        inngå(vedtaksperiode, aktivitetslogg, TypeEndring.REVURDERING, periode)
+    internal fun inngåSomRevurdering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) =
+        inngå(vedtaksperiode, aktivitetslogg, TypeEndring.REVURDERING)
 
-    internal fun inngåSomEndring(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, periode: Periode) =
-        inngå(vedtaksperiode, aktivitetslogg, TypeEndring.ENDRING, periode)
+    internal fun inngåSomEndring(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) =
+        inngå(vedtaksperiode, aktivitetslogg, TypeEndring.ENDRING)
 
-    internal fun inngåVedSaksbehandlerendring(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, periode: Periode) {
-        if (hendelse.metadata.avsender != Avsender.SAKSBEHANDLER) return
-        if (!periode.overlapperMed(periodeForEndring)) return
-        inngåSomEndring(vedtaksperiode, aktivitetslogg, periode)
-    }
-
-    private fun inngå(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, typeEndring: TypeEndring, periode: Periode) {
+    private fun inngå(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, typeEndring: TypeEndring) {
         hvorfor.dersomInngått(aktivitetslogg, vedtaksperioder.isEmpty())
         vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder, typeEndring.name)
     }

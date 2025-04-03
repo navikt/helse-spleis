@@ -2082,7 +2082,7 @@ internal class Vedtaksperiode private constructor(
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        revurdering.inngåSomRevurdering(this, aktivitetslogg, periode)
+        revurdering.inngåSomRevurdering(this, aktivitetslogg)
         behandlinger.sikreNyBehandling(
             arbeidsgiver,
             revurdering.hendelse.metadata.behandlingkilde,
@@ -2096,7 +2096,7 @@ internal class Vedtaksperiode private constructor(
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        revurdering.inngåSomEndring(this, aktivitetslogg, periode)
+        revurdering.inngåSomEndring(this, aktivitetslogg)
         behandlinger.forkastUtbetaling(aktivitetslogg)
         if (måInnhenteInntektEllerRefusjon()) return tilstand(aktivitetslogg, AvventerInntektsmelding)
         tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
@@ -2568,7 +2568,6 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.tilstand == AvventerInntektsmelding && vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger()) {
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
             }
-            revurdering.inngåVedSaksbehandlerendring(vedtaksperiode, aktivitetslogg, vedtaksperiode.periode)
         }
 
         override fun håndter(
@@ -2746,7 +2745,6 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg,
                 AvventerInntektsmelding
             )
-            revurdering.inngåVedSaksbehandlerendring(vedtaksperiode, aktivitetslogg, vedtaksperiode.periode)
         }
 
         private fun tilstand(
@@ -3121,7 +3119,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
             )
             if (vedtaksperiode.skalOmgjøres()) {
-                revurdering.inngåSomEndring(vedtaksperiode, aktivitetslogg, vedtaksperiode.periode)
+                revurdering.inngåSomEndring(vedtaksperiode, aktivitetslogg)
                 revurdering.loggDersomKorrigerendeSøknad(
                     aktivitetslogg,
                     "Startet omgjøring grunnet korrigerende søknad"
@@ -3200,7 +3198,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
             )
             vedtaksperiode.subsumsjonslogg.logg(`fvl § 35 ledd 1`())
-            revurdering.inngåSomRevurdering(vedtaksperiode, aktivitetslogg, vedtaksperiode.periode)
+            revurdering.inngåSomRevurdering(vedtaksperiode, aktivitetslogg)
             vedtaksperiode.tilstand(aktivitetslogg, AvventerRevurdering)
         }
     }
