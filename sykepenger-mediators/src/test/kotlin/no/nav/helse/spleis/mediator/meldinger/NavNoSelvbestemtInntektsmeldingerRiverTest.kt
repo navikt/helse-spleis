@@ -90,7 +90,6 @@ internal class NavNoSelvbestemtInntektsmeldingerRiverTest : RiverTest() {
         assertNoErrors(ValidInntektsmeldingUtenRefusjon)
         assertNoErrors(ValidInntektsmeldingUtenBeregnetInntekt)
         assertNoErrors(ValidInntektsmeldingMedOpphørAvNaturalytelser)
-        assertNoErrors(im.asObjectNode("selvbestemte_arbeidsgiveropplysninger").toJson())
     }
 
     private fun JsonNode.toJson(): String = (this as ObjectNode).put("fødselsdato", "$fødselsdato").toString()
@@ -100,8 +99,8 @@ private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-private fun Inntektsmeldingkontrakt.asObjectNode(eventName: String = "inntektsmelding"): ObjectNode = objectMapper.valueToTree<ObjectNode>(this).apply {
+private fun Inntektsmeldingkontrakt.asObjectNode(): ObjectNode = objectMapper.valueToTree<ObjectNode>(this).apply {
     put("@id", UUID.randomUUID().toString())
-    put("@event_name", eventName)
+    put("@event_name", "selvbestemte_arbeidsgiveropplysninger")
     put("@opprettet", LocalDateTime.now().toString())
 }

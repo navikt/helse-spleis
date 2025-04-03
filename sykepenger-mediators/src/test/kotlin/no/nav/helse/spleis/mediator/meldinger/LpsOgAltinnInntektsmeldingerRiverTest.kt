@@ -116,8 +116,6 @@ internal class LpsOgAltinnInntektsmeldingerRiverTest : RiverTest() {
         listOf(OpphoerAvNaturalytelse(ELEKTRONISKKOMMUNIKASJON, LocalDate.now(), BigDecimal(589.00))).toJsonNode()
     ).toJson()
 
-    private val ValidInntektsmeldingMedVedtaksperiodeId = ValidInntektsmelding.put("vedtaksperiodeId", UUID.randomUUID().toString()).toJson()
-
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
         LpsOgAltinnInntektsmeldingerRiver(rapidsConnection, mediator)
     }
@@ -127,7 +125,6 @@ internal class LpsOgAltinnInntektsmeldingerRiverTest : RiverTest() {
         assertIgnored(InvalidInntektsmeldingUtenAgpOgFørsteFraværsdag)
         assertIgnored(InvalidJson)
         assertIgnored(UnknownJson)
-        assertIgnored(ValidInntektsmeldingMedVedtaksperiodeId)
     }
 
     @Test

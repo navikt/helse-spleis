@@ -513,7 +513,7 @@ internal class TestMessageFactory(
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         vedtaksperiodeId: UUID
     ) = nyHendelse(
-        "inntektsmelding", lagInntektsmelding(
+        "arbeidsgiveropplysninger", lagInntektsmelding(
         arbeidsgiverperiode,
         null,
         opphørAvNaturalytelser,
@@ -536,7 +536,7 @@ internal class TestMessageFactory(
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         vedtaksperiodeId: UUID
     ) = nyHendelse(
-        "inntektsmelding", lagInntektsmelding(
+        "korrigerte_arbeidsgiveropplysninger", lagInntektsmelding(
         arbeidsgiverperiode,
         null,
         opphørAvNaturalytelser,
@@ -559,7 +559,7 @@ internal class TestMessageFactory(
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         vedtaksperiodeId: UUID
     ) = nyHendelse(
-        "inntektsmelding", lagInntektsmelding(
+        "selvbestemte_arbeidsgiveropplysninger", lagInntektsmelding(
         arbeidsgiverperiode,
         null,
         opphørAvNaturalytelser,

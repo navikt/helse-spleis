@@ -15,15 +15,11 @@ internal class LpsOgAltinnInntektsmeldingerRiver(
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventName = "inntektsmelding"
     override val riverName = "Lps- og Altinn-inntektsmeldinger"
-    override fun precondition(packet: JsonMessage) {
-        packet.forbidValues("avsenderSystem.navn", listOf("NAV_NO", "NAV_NO_SELVBESTEMT"))
-        packet.forbid("vedtaksperiodeId")
-    }
 
     override fun validate(message: JsonMessage) {
         standardInntektsmeldingvalidering(message)
         message.requireKey("beregnetInntekt")
-        message.interestedIn("harFlereInntektsmeldinger", "avsenderSystem")
+        message.interestedIn("harFlereInntektsmeldinger")
         message.interestedIn("foersteFravaersdag")
         message.require("arbeidsgiverperioder") { agp ->
             if (agp.size() == 0) {
