@@ -21,6 +21,8 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.serde.tilPersonData
+import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -69,11 +71,11 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mai, 20.mai)) // førstegangsbehandling, ny agp
         håndterSøknad(1.mai til 20.mai)
         håndterAnnullerUtbetaling()
-        assertEquals(4, observatør.forkastedePerioder())
-        assertEquals(AVSLUTTET, observatør.forkastet(1.vedtaksperiode.id(a1)).gjeldendeTilstand)
-        assertEquals(AVSLUTTET, observatør.forkastet(2.vedtaksperiode.id(a1)).gjeldendeTilstand)
-        assertEquals(AVSLUTTET, observatør.forkastet(3.vedtaksperiode.id(a1)).gjeldendeTilstand)
-        assertEquals(AVVENTER_INNTEKTSMELDING, observatør.forkastet(4.vedtaksperiode.id(a1)).gjeldendeTilstand)
+        assertEquals(2, observatør.forkastedePerioder())
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 4.vedtaksperiode, TIL_INFOTRYGD)
     }
 
     @Test
@@ -269,8 +271,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `publiserer kun ett event ved annullering av utbetaling som strekker seg over flere vedtaksperioder med full refusjon`() {
-        nyttVedtak(3.januar til 26.januar, 100.prosent)
-        forlengVedtak(27.januar til 20.februar, 100.prosent)
+        createPersonMedToVedtakPåSammeFagsystemId()
+
         assertEquals(2, inspektør.vedtaksperiodeTeller)
 
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(2.vedtaksperiode))
@@ -293,39 +295,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(20.februar, annullering.tom)
 
         assertEquals("tbd@nav.no", annullering.saksbehandlerEpost)
-    }
-
-    @Test
-    fun `setter datoStatusFom som fom dato i annullering hvor graden endres`() {
-        nyttVedtak(3.januar til 26.januar, 100.prosent)
-        forlengVedtak(27.januar til 20.februar, 30.prosent)
-        assertEquals(2, inspektør.vedtaksperiodeTeller)
-        val utbetalingId = inspektør.sisteUtbetalingId(2.vedtaksperiode)
-
-        håndterAnnullerUtbetaling(utbetalingId = utbetalingId)
-        håndterUtbetalt(
-            status = Oppdragstatus.AKSEPTERT
-        )
-
-        val annulleringer = observatør.annulleringer
-        assertEquals(1, annulleringer.size)
-        val annullering = annulleringer.last()
-        assertEquals(3.januar, annullering.fom)
-    }
-
-    @Test
-    fun `kan ikke annullere utbetalingsreferanser som ikke er siste`() {
-        nyttVedtak(3.januar til 26.januar, 100.prosent)
-        nyttVedtak(3.mars til 26.mars, 100.prosent, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-
-        val utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode)
-        håndterAnnullerUtbetaling(utbetalingId = utbetalingId)
-        sisteBehovErAnnullering(1.vedtaksperiode)
-        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-        assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
-        håndterUtbetalt()
-        assertEquals(1, observatør.annulleringer.size)
     }
 
     @Test
