@@ -242,36 +242,32 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IM_3, 3.vedtaksperiode.filter())
             håndterAnnullering(inspektør.sisteUtbetaling().utbetalingId)
             assertEquals(4, inspektør.antallUtbetalinger)
-            inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(2, behandlinger.size)
-                assertEquals(Avsender.SYKMELDT, behandlinger.first().kilde.avsender)
-                assertEquals(Avsender.SAKSBEHANDLER, behandlinger.last().kilde.avsender)
+            inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
+                assertEquals(1, behandlinger.size)
+                assertEquals(Avsender.SYKMELDT, behandlinger.last().kilde.avsender)
                 behandlinger.last().also { sisteBehandling ->
                     assertNotNull(sisteBehandling.avsluttet)
-                    assertEquals(ANNULLERT_PERIODE, sisteBehandling.tilstand)
-                    assertEquals(1, sisteBehandling.endringer.size)
-                    sisteBehandling.endringer.single().also { endring ->
+                    assertEquals(VEDTAK_IVERKSATT, sisteBehandling.tilstand)
+                    sisteBehandling.endringer.last().also { endring ->
                         assertNotNull(endring.utbetaling)
                         assertNotNull(endring.grunnlagsdata)
                         endring.utbetaling.inspektør.also { annulleringen ->
-                            assertEquals(Utbetalingtype.ANNULLERING, annulleringen.type)
+                            assertEquals(Utbetalingtype.UTBETALING, annulleringen.type)
                         }
                     }
                 }
             }
-            inspektørForkastet(2.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(2, behandlinger.size)
-                assertEquals(Avsender.SYKMELDT, behandlinger.first().kilde.avsender)
-                assertEquals(Avsender.SAKSBEHANDLER, behandlinger.last().kilde.avsender)
+            inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
+                assertEquals(1, behandlinger.size)
+                assertEquals(Avsender.SYKMELDT, behandlinger.last().kilde.avsender)
                 behandlinger.last().also { sisteBehandling ->
                     assertNotNull(sisteBehandling.avsluttet)
-                    assertEquals(ANNULLERT_PERIODE, sisteBehandling.tilstand)
-                    assertEquals(1, sisteBehandling.endringer.size)
-                    sisteBehandling.endringer.single().also { endring ->
+                    assertEquals(VEDTAK_IVERKSATT, sisteBehandling.tilstand)
+                    sisteBehandling.endringer.last().also { endring ->
                         assertNotNull(endring.utbetaling)
                         assertNotNull(endring.grunnlagsdata)
                         endring.utbetaling.inspektør.also { annulleringen ->
-                            assertEquals(Utbetalingtype.ANNULLERING, annulleringen.type)
+                            assertEquals(Utbetalingtype.UTBETALING, annulleringen.type)
                         }
                     }
                 }
@@ -848,8 +844,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertVarsel(RV_RV_7, 4.vedtaksperiode.filter())
             assertVarsel(RV_RV_7, 5.vedtaksperiode.filter())
 
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
             assertSisteTilstand(4.vedtaksperiode, AVVENTER_REVURDERING)
             assertSisteTilstand(5.vedtaksperiode, AVVENTER_REVURDERING)

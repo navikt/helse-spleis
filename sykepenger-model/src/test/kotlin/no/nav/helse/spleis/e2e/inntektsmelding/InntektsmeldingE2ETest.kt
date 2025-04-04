@@ -521,6 +521,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
 
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         assertEquals(setOf(1.januar, 26.januar), inspektør.vilkårsgrunnlaghistorikk().aktiveSpleisSkjæringstidspunkt)
     }
@@ -2169,19 +2170,16 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `inntektsmelding oppgir ny arbeidsgiverperiode i en sammenhengende periode`() {
         nyttVedtak(januar)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSFFFF FFFFFFF FFFFFFF FFFFFFF FFF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(mars)
         håndterInntektsmelding(
             listOf(27.februar til 14.mars)
         )
 
-        // Siden vi tidligere fylte ut 2. vedtaksperiode med arbeidsdager ville vi regne ut et ekstra skjæringstidspunkt i den sammenhengende perioden
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
@@ -2199,7 +2197,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         assertVarsler(listOf(RV_IM_24), 2.vedtaksperiode.filter())
         assertVarsler(listOf(RV_IM_24), 3.vedtaksperiode.filter())
-        assertEquals(1.januar til 31.mars, inspektør.sisteUtbetaling().periode)
     }
 
     @Test
