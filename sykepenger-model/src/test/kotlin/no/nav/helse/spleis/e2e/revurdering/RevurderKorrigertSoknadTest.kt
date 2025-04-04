@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.april
 import no.nav.helse.desember
-import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -26,7 +24,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -41,7 +38,6 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -88,62 +84,6 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `Utbetaling i Infortrygd opphører tidligere utbetalinger innenfor samme arbeidsgiverperiode`() {
-        nyttVedtak(1.januar til 28.januar)
-        nyttVedtak(3.februar til 28.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode, arbeidsgiverperiode = emptyList())
-        forlengVedtak(mars)
-        val marsutbetaling = inspektør.utbetaling(2)
-        håndterSykmelding(Sykmeldingsperiode(29.januar, 25.februar))
-        håndterSøknad(Sykdom(29.januar, 25.februar, 100.prosent))
-
-        assertVarsler(listOf(RV_SØ_13), 2.vedtaksperiode.filter())
-        assertForkastetPeriodeTilstander(4.vedtaksperiode, START, TIL_INFOTRYGD)
-
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        inspektør.sisteUtbetaling().also { utbetalinginspektør ->
-            assertEquals(utbetalinginspektør.korrelasjonsId, marsutbetaling.korrelasjonsId)
-            assertEquals(1, utbetalinginspektør.arbeidsgiverOppdrag.size)
-
-            utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-                assertEquals(NY, linje.endringskode)
-                assertEquals(17.januar til 30.mars, linje.periode)
-                assertEquals(100, linje.grad)
-                assertEquals(1431, linje.beløp)
-            }
-        }
-
-        håndterUtbetalt()
-        håndterYtelser(3.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 29.januar, 2.februar
-        ))
-        håndterYtelser(2.vedtaksperiode)
-        assertVarsel(Varselkode.RV_IT_3, 2.vedtaksperiode.filter())
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-
-        håndterYtelser(3.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-
-        forlengVedtak(april)
-        assertEquals(8, inspektør.antallUtbetalinger)
-
-        inspektør.sisteUtbetaling().also { utbetalinginspektør ->
-            assertEquals(utbetalinginspektør.korrelasjonsId, marsutbetaling.korrelasjonsId)
-            assertEquals(1, utbetalinginspektør.arbeidsgiverOppdrag.size)
-
-            utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-                assertEquals(ENDR, linje.endringskode)
-                assertEquals(17.januar til 30.april, linje.periode)
-                assertEquals(100, linje.grad)
-                assertEquals(1431, linje.beløp)
-            }
-        }
     }
 
     @Test

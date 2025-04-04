@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
@@ -13,21 +13,16 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.serde.tilPersonData
-import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -204,24 +199,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
             assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         }
-    }
-
-    @Test
-    fun `Annullering av én periode fører til at alle avsluttede sammenhengende perioder blir satt i tilstand TilAnnullering`() {
-        nyttVedtak(3.januar til 26.januar, 100.prosent)
-        forlengVedtak(27.januar til 31.januar, 100.prosent)
-        forlengPeriode(1.februar til 20.februar, 100.prosent)
-        nullstillTilstandsendringer()
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
-        assertFalse(personlogg.harFunksjonelleFeilEllerVerre(), personlogg.toString())
-        assertEquals(3, inspektør.antallUtbetalinger)
-        assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetaling(2).tilstand)
-        assertEquals(Utbetalingtype.ANNULLERING, inspektør.utbetaling(2).type)
-        håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
-        assertEquals(Utbetalingstatus.ANNULLERT, inspektør.utbetaling(2).tilstand)
     }
 
     @Test

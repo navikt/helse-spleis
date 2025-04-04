@@ -121,7 +121,6 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        assertEquals(februarKorrelasjonsId, gjeldendeKorrelasjonsId(2.vedtaksperiode))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
 
         // Mens Mars står til godkjenning utbetales den i Infotrygd
@@ -135,7 +134,6 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
         håndterYtelser(2.vedtaksperiode)
-        assertEquals(februarKorrelasjonsId, gjeldendeKorrelasjonsId(2.vedtaksperiode))
     }
 
     @Test

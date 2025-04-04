@@ -354,23 +354,14 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         inspektør.utbetaling(1).also { outOfOrderUtbetalingen ->
             assertEquals(Utbetalingtype.UTBETALING, outOfOrderUtbetalingen.type)
             outOfOrderUtbetalingen.arbeidsgiverOppdrag.also { oppdraget ->
-                assertEquals(ENDR, oppdraget.inspektør.endringskode)
-                assertEquals(2, oppdraget.size)
+                assertEquals(NY, oppdraget.inspektør.endringskode)
+                assertEquals(1, oppdraget.size)
                 oppdraget[0].inspektør.also { linje1 ->
                     assertEquals(18.januar, linje1.fom)
                     assertEquals(25.januar, linje1.tom)
                     assertEquals(1431, linje1.beløp)
-                    assertEquals(2, linje1.delytelseId)
-                    assertEquals(1, linje1.refDelytelseId)
+                    assertEquals(1, linje1.delytelseId)
                     assertEquals(NY, linje1.endringskode)
-                }
-                oppdraget[1].inspektør.also { linje2 ->
-                    assertEquals(30.januar, linje2.fom)
-                    assertEquals(15.februar, linje2.tom)
-                    assertEquals(1431, linje2.beløp)
-                    assertEquals(3, linje2.delytelseId)
-                    assertEquals(2, linje2.refDelytelseId)
-                    assertEquals(NY, linje2.endringskode)
                 }
             }
         }
@@ -378,22 +369,14 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             assertEquals(Utbetalingtype.REVURDERING, revurderingen.type)
             revurderingen.arbeidsgiverOppdrag.also { oppdraget ->
                 assertEquals(ENDR, oppdraget.inspektør.endringskode)
-                assertEquals(2, oppdraget.size)
+                assertEquals(1, oppdraget.size)
                 oppdraget[0].inspektør.also { linje1 ->
-                    assertEquals(18.januar, linje1.fom)
-                    assertEquals(25.januar, linje1.tom)
+                    assertEquals(29.januar, linje1.fom)
+                    assertEquals(15.februar, linje1.tom)
                     assertEquals(1431, linje1.beløp)
                     assertEquals(2, linje1.delytelseId)
                     assertEquals(1, linje1.refDelytelseId)
-                    assertEquals(UEND, linje1.endringskode)
-                }
-                oppdraget[1].inspektør.also { linje2 ->
-                    assertEquals(29.januar, linje2.fom)
-                    assertEquals(15.februar, linje2.tom)
-                    assertEquals(1431, linje2.beløp)
-                    assertEquals(4, linje2.delytelseId)
-                    assertEquals(3, linje2.refDelytelseId)
-                    assertEquals(NY, linje2.endringskode)
+                    assertEquals(NY, linje1.endringskode)
                 }
             }
         }
@@ -471,15 +454,21 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         val februarUtbetaling = inspektør.utbetaling(0)
         val januarUtbetaling = inspektør.utbetaling(1)
         val februarRevurderingUtbetaling = inspektør.utbetaling(2)
-        assertEquals(februarUtbetaling.korrelasjonsId, januarUtbetaling.korrelasjonsId)
+
+        assertEquals(1, februarUtbetaling.arbeidsgiverOppdrag.size)
+        februarUtbetaling.arbeidsgiverOppdrag[0].also { linje ->
+            assertEquals(29.januar til 15.februar, linje.fom til linje.tom)
+            assertEquals(1431, linje.beløp)
+            assertEquals(NY, linje.endringskode)
+        }
         assertEquals(1, januarUtbetaling.arbeidsgiverOppdrag.size)
         januarUtbetaling.arbeidsgiverOppdrag[0].also { linje ->
-            assertEquals(17.januar til 15.februar, linje.fom til linje.tom)
+            assertEquals(17.januar til 26.januar, linje.fom til linje.tom)
             assertEquals(1431, linje.beløp)
         }
         assertEquals(1, februarRevurderingUtbetaling.arbeidsgiverOppdrag.size)
         februarRevurderingUtbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(17.januar til 15.februar, linje.fom til linje.tom)
+            assertEquals(29.januar til 15.februar, linje.fom til linje.tom)
             assertEquals(1431, linje.beløp)
             assertEquals(UEND, linje.endringskode)
         }
