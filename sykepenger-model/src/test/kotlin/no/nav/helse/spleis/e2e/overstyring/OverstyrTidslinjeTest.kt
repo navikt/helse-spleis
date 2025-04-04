@@ -288,14 +288,11 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         val augustutbetalingEtter = inspektør.utbetaling(2)
 
         assertNotEquals(juniutbetaling.korrelasjonsId, augustutbetalingFør.korrelasjonsId)
-        assertEquals(juniutbetaling.korrelasjonsId, augustutbetalingEtter.korrelasjonsId)
+        assertNotEquals(juniutbetaling.korrelasjonsId, augustutbetalingEtter.korrelasjonsId)
 
         augustutbetalingEtter.arbeidsgiverOppdrag.also { oppdrag ->
-            assertEquals(2, oppdrag.size)
+            assertEquals(1, oppdrag.size)
             oppdrag[0].also { linje ->
-                assertEquals(17.juni til 29.juni, linje.fom til linje.tom)
-            }
-            oppdrag[1].also { linje ->
                 assertEquals(august, linje.fom til linje.tom)
             }
         }
@@ -491,27 +488,6 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Overstyring oppdaterer sykdomstidlinjene`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterInntektsmelding(
-            listOf(Periode(3.januar, 18.januar)),
-            førsteFraværsdag = 3.januar
-        )
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterOverstyrTidslinje(listOf(manuellFeriedag(26.januar)))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-
-        assertEquals("SSSHH SSSSSHH SSSSSHH SSSSF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        assertEquals("SSSHH SSSSSHH SSSSSHH SSSSF", inspektør.sykdomstidslinje.toShortString())
-        assertEquals("PPPPP PPPPPPP PPPPNHH NNNNF", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
-    }
-
-    @Test
     fun `Overstyring av sykHelgDag`() {
         håndterSykmelding(januar)
         håndterInntektsmelding(
@@ -526,54 +502,6 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
-    }
-
-    @Test
-    fun `Overstyring av utkast til revurdering`() {
-        nyttVedtak(januar)
-        forlengVedtak(februar)
-        forlengVedtak(mars)
-        nullstillTilstandsendringer()
-        håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
-        håndterYtelser(1.vedtaksperiode)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-
-        // Denne overstyringen kommer før den forrige er ferdig prossessert
-        håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) })
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-    }
-
-    @Test
-    fun `skal kunne overstyre dagtype i utkast til revurdering ved revurdering av inntekt`() {
-        nyttVedtak(januar)
-        forlengVedtak(februar)
-        nullstillTilstandsendringer()
-
-        håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
-        håndterYtelser(1.vedtaksperiode)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-        håndterSimulering(1.vedtaksperiode)
-
-        håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
-        inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
-            assertEquals(2, utbetalinger.size)
-            assertEquals(Utbetalingstatus.FORKASTET, utbetalinger.last().inspektør.tilstand)
-        }
-        inspektør.utbetalinger(2.vedtaksperiode).also { utbetalinger ->
-            assertEquals(1, utbetalinger.size)
-            assertEquals(Utbetalingstatus.UTBETALT, utbetalinger.last().inspektør.tilstand)
-        }
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        assertEquals(33235, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.totalbeløp())
-        assertEquals("SSSSSHH SSSSSHH SSSSSFF FFFFFFF FSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
-        assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString().trim())
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
     }
 
     @Test

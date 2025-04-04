@@ -20,6 +20,7 @@ class UtbetalingInspektør(view: UtbetalingView) {
     val arbeidsgiverOppdrag: Oppdrag = view.arbeidsgiverOppdrag
     val personOppdrag: Oppdrag = view.personOppdrag
     val nettobeløp = arbeidsgiverOppdrag.nettoBeløp() + personOppdrag.nettoBeløp()
+    val annulleringer = view.annulleringer
 
     val type: Utbetalingtype = view.type
     var avstemmingsnøkkel: Long? = null
