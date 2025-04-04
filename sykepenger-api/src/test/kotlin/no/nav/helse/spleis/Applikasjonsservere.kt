@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import com.auth0.jwk.JwkProviderBuilder
+import com.github.navikt.tbd_libs.signed_jwt_issuer_test.Issuer
 import com.github.navikt.tbd_libs.speed.SpeedClient
 import com.github.navikt.tbd_libs.test_support.TestDataSource
 import io.ktor.client.HttpClient
@@ -22,6 +23,8 @@ import io.mockk.mockk
 import java.net.ServerSocket
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -30,6 +33,25 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import org.junit.jupiter.api.Assertions
+
+private class SuspendableIssuer {
+    val issuer = Issuer("Microsoft AD", "spleis_azure_ad_app_id")
+    suspend fun start(): Boolean {
+        return suspendCoroutine { continuation ->
+            issuer.start()
+            retry {
+                if (issuer.startet()) true
+                else error("Issuer ${issuer.navn} ble aldri klar!!")
+            }
+            continuation.resume(true) // returnerer true bare for å ha en verdi
+        }
+    }
+
+    suspend fun stop() = suspendCoroutine {
+        issuer.stop()
+        it.resume(true) // returnerer true bare for å ha en verdi
+    }
+}
 
 internal class Applikasjonsservere(private val poolSize: Int) {
     constructor() : this(POOL_SIZE)
@@ -42,12 +64,11 @@ internal class Applikasjonsservere(private val poolSize: Int) {
         private val POOL_SIZE = minOf(MAX_POOL_SIZE, maxOf(MIN_POOL_SIZE, JUNIT_PARALLELISM))
     }
 
-    private val issuer = Issuer("Microsoft AD")
-    private val azureTokenStub = AzureTokenStub(issuer)
+    private val suspendableIssuer = SuspendableIssuer()
     private val azureConfig = AzureAdAppConfig(
-        clientId = Issuer.AUDIENCE,
-        issuer = issuer.navn,
-        jwkProvider = JwkProviderBuilder(azureTokenStub.wellKnownEndpoint().toURL()).build(),
+        clientId = "spleis_azure_ad_app_id",
+        issuer = suspendableIssuer.issuer.navn,
+        jwkProvider = JwkProviderBuilder(suspendableIssuer.issuer.jwksUri().toURL()).build(),
     )
     private val tilgjengelige by lazy {
         ArrayBlockingQueue(poolSize, false, opprettApplikasjonsserver())
@@ -55,7 +76,7 @@ internal class Applikasjonsservere(private val poolSize: Int) {
 
     init {
         runBlocking(Dispatchers.IO) {
-            azureTokenStub.startServer()
+            suspendableIssuer.start()
         }
     }
 
@@ -82,7 +103,7 @@ internal class Applikasjonsservere(private val poolSize: Int) {
         runBlocking(Dispatchers.IO) {
             tilgjengelige
                 .map { async { it.stopp() } }
-                .plusElement(async { azureTokenStub.stopServer() })
+                .plusElement(async { suspendableIssuer.stop() })
                 .awaitAll()
 
         }
@@ -91,10 +112,10 @@ internal class Applikasjonsservere(private val poolSize: Int) {
     private fun opprettApplikasjonsserver() = (1..poolSize).map {
         val navn = "appserver_$it"
         println("oppretter appserver $navn")
-        Applikasjonserver(navn, azureConfig, issuer)
+        Applikasjonserver(azureConfig, suspendableIssuer.issuer)
     }
 
-    internal class Applikasjonserver(private val navn: String, azureConfig: AzureAdAppConfig, issuer: Issuer) {
+    internal class Applikasjonserver(azureConfig: AzureAdAppConfig, issuer: Issuer) {
         private val randomPort = ServerSocket(0).use { it.localPort }
         private lateinit var testDataSource: TestDataSource
         private val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
@@ -163,7 +184,7 @@ internal class Applikasjonsservere(private val poolSize: Int) {
             headers: Map<String, String> = emptyMap(),
             testBlock: String.() -> Unit = {}
         ) {
-            val token = issuer.createToken(Issuer.AUDIENCE)
+            val token = issuer.accessToken()
 
             runBlocking {
                 client.get(this@httpGet) {
@@ -182,7 +203,7 @@ internal class Applikasjonsservere(private val poolSize: Int) {
             postBody: Map<String, String> = emptyMap(),
             testBlock: String.() -> Unit = {}
         ) {
-            val token = issuer.createToken(Issuer.AUDIENCE)
+            val token = issuer.accessToken()
 
             runBlocking {
                 client.post(this@httpPost) {

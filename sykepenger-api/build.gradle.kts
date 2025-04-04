@@ -4,13 +4,12 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.4.0"
 }
 
-val tbdLibsVersion = "2025.03.27-18.30-c228796d"
+val tbdLibsVersion = "2025.04.04-09.18-7cc3badf"
 val spekematVersion = "2024.03.07-12.49-d2ad6319"
 val ktorVersion = "3.1.2"
 val awaitilityVersion = "4.2.2"
 val mockVersion = "1.13.13"
 val jsonassertVersion = "1.5.3"
-val wiremockVersion = "3.9.2"
 
 val mainClass = "no.nav.helse.spleis.AppKt"
 
@@ -45,14 +44,12 @@ dependencies {
 
     testImplementation("com.github.navikt.tbd-libs:naisful-test-app:$tbdLibsVersion")
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
-    testImplementation("org.wiremock:wiremock:$wiremockVersion") {
-        exclude(group = "junit")
-    }
     testImplementation("io.mockk:mockk:$mockVersion")
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
 
     testImplementation("com.github.navikt.tbd-libs:mock-http-client:$tbdLibsVersion")
     testImplementation("com.github.navikt.tbd-libs:postgres-testdatabaser:$tbdLibsVersion")
+    testImplementation("com.github.navikt.tbd-libs:signed-jwt-issuer-test:$tbdLibsVersion")
 
     testImplementation("com.github.navikt.spekemat:fabrikk:$spekematVersion")
 

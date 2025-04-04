@@ -1,5 +1,6 @@
 package no.nav.helse.spleis
 
+import com.github.navikt.tbd_libs.signed_jwt_issuer_test.Issuer
 import com.github.navikt.tbd_libs.sql_dsl.connection
 import com.github.navikt.tbd_libs.sql_dsl.long
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
@@ -76,12 +77,14 @@ internal class RestApiTest {
 
         val body = """{"query": "$query"}"""
 
-        val annenIssuer = Issuer("annen")
+        val annenIssuer = Issuer("annen", "annen_audience")
 
         post(body, HttpStatusCode.Unauthorized, accessToken = null)
-        post(body, HttpStatusCode.Unauthorized, accessToken = issuer.createToken("feil_audience"))
-        post(body, HttpStatusCode.Unauthorized, accessToken = annenIssuer.createToken())
-        post(body, HttpStatusCode.OK, accessToken = issuer.createToken(Issuer.AUDIENCE))
+        post(body, HttpStatusCode.Unauthorized, accessToken = issuer.accessToken {
+            withAudience("feil_audience")
+        })
+        post(body, HttpStatusCode.Unauthorized, accessToken = annenIssuer.accessToken())
+        post(body, HttpStatusCode.OK, accessToken = issuer.accessToken())
     }
 
     private fun blackboxTestApplication(testblokk: suspend Applikasjonsservere.BlackboxTestContext.() -> Unit) {
