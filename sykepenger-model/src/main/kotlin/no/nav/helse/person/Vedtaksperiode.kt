@@ -997,16 +997,77 @@ internal class Vedtaksperiode private constructor(
         })
     }
 
-    internal fun håndter(
-        sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
-        aktivitetslogg: IAktivitetslogg
-    ): Boolean {
+    internal fun håndter(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg): Boolean {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        if (tilstand != AvventerInntektsmelding) return false
-        if (!sykepengegrunnlagForArbeidsgiver.erRelevant(aktivitetsloggMedVedtaksperiodekontekst, skjæringstidspunkt)) return false
+        return when (tilstand) {
+            AvventerInntektsmelding ->  {
+                if (!sykepengegrunnlagForArbeidsgiver.erRelevant(aktivitetsloggMedVedtaksperiodekontekst, skjæringstidspunkt)) return false
+                håndterSykepengegrunnlagForArbeidsgiver(sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedVedtaksperiodekontekst)
+                tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
+                true
+            }
+            Avsluttet,
+            AvsluttetUtenUtbetaling,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering,
+            RevurderingFeilet,
+            Start,
+            TilInfotrygd,
+            TilUtbetaling -> false
+        }
+    }
 
-        tilstand.håndter(this, sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedVedtaksperiodekontekst)
-        return true
+    private fun håndterSykepengegrunnlagForArbeidsgiver(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg) {
+        aktivitetslogg.info("Håndterer sykepengegrunnlag for arbeidsgiver")
+        aktivitetslogg.varsel(RV_IV_10)
+
+        val skatteopplysninger = sykepengegrunnlagForArbeidsgiver.inntekter()
+        val omregnetÅrsinntekt = Skatteopplysning.omregnetÅrsinntekt(skatteopplysninger)
+
+        arbeidsgiver.lagreInntektFraAOrdningen(
+            meldingsreferanseId = sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            omregnetÅrsinntekt = omregnetÅrsinntekt
+        )
+        val ingenRefusjon = Beløpstidslinje.fra(
+            periode = periode,
+            beløp = INGEN,
+            kilde = Kilde(
+                sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
+                sykepengegrunnlagForArbeidsgiver.metadata.avsender,
+                sykepengegrunnlagForArbeidsgiver.metadata.innsendt
+            )
+        )
+        behandlinger.håndterRefusjonstidslinje(
+            arbeidsgiver = arbeidsgiver,
+            behandlingkilde = sykepengegrunnlagForArbeidsgiver.metadata.behandlingkilde,
+            dokumentsporing = inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId),
+            aktivitetslogg = aktivitetslogg,
+            beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
+            beregnArbeidsgiverperiode = arbeidsgiver.beregnArbeidsgiverperiode(),
+            refusjonstidslinje = ingenRefusjon
+        )
+
+        val event = PersonObserver.SkatteinntekterLagtTilGrunnEvent(
+            organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+            vedtaksperiodeId = id,
+            behandlingId = behandlinger.sisteBehandlingId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            skatteinntekter = skatteopplysninger.map {
+                PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.måned, it.beløp.månedlig)
+            },
+            omregnetÅrsinntekt = omregnetÅrsinntekt.årlig
+        )
+        person.sendSkatteinntekterLagtTilGrunn(event)
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, aktivitetslogg: IAktivitetslogg) {
@@ -2237,14 +2298,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterKorrigerendeInntektsmelding(dager, aktivitetslogg)
         }
 
-        fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            aktivitetslogg.info("Forventet ikke sykepengegrunnlag for arbeidsgiver i %s".format(type.name))
-        }
-
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
@@ -2568,56 +2621,6 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.tilstand == AvventerInntektsmelding && vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger()) {
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
             }
-        }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            aktivitetslogg.info("Håndterer sykepengegrunnlag for arbeidsgiver")
-            aktivitetslogg.varsel(RV_IV_10)
-
-            val skatteopplysninger = sykepengegrunnlagForArbeidsgiver.inntekter()
-            val omregnetÅrsinntekt = Skatteopplysning.omregnetÅrsinntekt(skatteopplysninger)
-
-            vedtaksperiode.arbeidsgiver.lagreInntektFraAOrdningen(
-                meldingsreferanseId = sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
-                skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
-                omregnetÅrsinntekt = omregnetÅrsinntekt
-            )
-            val ingenRefusjon = Beløpstidslinje.fra(
-                periode = vedtaksperiode.periode,
-                beløp = INGEN,
-                kilde = Kilde(
-                    sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
-                    sykepengegrunnlagForArbeidsgiver.metadata.avsender,
-                    sykepengegrunnlagForArbeidsgiver.metadata.innsendt
-                )
-            )
-            vedtaksperiode.behandlinger.håndterRefusjonstidslinje(
-                arbeidsgiver = vedtaksperiode.arbeidsgiver,
-                behandlingkilde = sykepengegrunnlagForArbeidsgiver.metadata.behandlingkilde,
-                dokumentsporing = inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId),
-                aktivitetslogg = aktivitetslogg,
-                beregnSkjæringstidspunkt = vedtaksperiode.person.beregnSkjæringstidspunkt(),
-                beregnArbeidsgiverperiode = vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode(),
-                refusjonstidslinje = ingenRefusjon
-            )
-
-            val event = PersonObserver.SkatteinntekterLagtTilGrunnEvent(
-                organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiode.id,
-                behandlingId = vedtaksperiode.behandlinger.sisteBehandlingId,
-                skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
-                skatteinntekter = skatteopplysninger.map {
-                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.måned, it.beløp.månedlig)
-                },
-                omregnetÅrsinntekt = omregnetÅrsinntekt.årlig
-            )
-            vedtaksperiode.person.sendSkatteinntekterLagtTilGrunn(event)
-
-            vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
