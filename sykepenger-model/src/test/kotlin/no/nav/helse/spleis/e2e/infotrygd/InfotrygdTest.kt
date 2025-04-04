@@ -2,9 +2,11 @@ package no.nav.helse.spleis.e2e.infotrygd
 
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
+import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -24,9 +26,11 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.VedtaksperiodeVenter
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_37
@@ -69,6 +73,27 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Saksbehandler legger til en utbetaling i forkant av en periode som er lagt til grunn ved infotrygdovergang`() {
+        createOvergangFraInfotrygdPerson()
+        assertEquals(emptyList<VedtaksperiodeVenter>(), observatør.vedtaksperiodeVenter)
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+
+        val eksisterendeUtbetaling = ArbeidsgiverUtbetalingsperiode("a1", 1.januar, 31.januar)
+        val nyUtbetaling = ArbeidsgiverUtbetalingsperiode("a1", 20.desember(2017), 31.desember(2017))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(eksisterendeUtbetaling, nyUtbetaling)
+
+        assertEquals(20.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+        with(observatør.vedtaksperiodeVenter.single().venterPå) {
+            assertEquals(1.vedtaksperiode.id(a1), vedtaksperiodeId)
+            assertEquals(20.desember(2017), skjæringstidspunkt)
+            assertEquals("INNTEKTSMELDING", venteårsak.hva)
+            assertEquals("SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING", venteårsak.hvorfor)
+        }
+    }
 
     @Test
     fun `Legger på en tag når perioden til godkjenning overlapper med en periode i Infotrygd`() {
