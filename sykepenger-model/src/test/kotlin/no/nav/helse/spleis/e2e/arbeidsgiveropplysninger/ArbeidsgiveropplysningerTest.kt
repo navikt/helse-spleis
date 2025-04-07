@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -27,6 +28,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbe
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.MeldingsreferanseId
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -36,7 +38,7 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.DokumentType
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.Arbeidsgiverperiode
 import no.nav.helse.person.PersonObserver.Inntekt
 import no.nav.helse.person.PersonObserver.Refusjon
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -139,13 +141,25 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             val forespørselPgaEgenmeldingsdager = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 2.vedtaksperiode }
             assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
-            assertEquals(listOf(Inntekt, Refusjon), forespørselPgaEgenmeldingsdager.forespurteOpplysninger)
+            assertEquals(listOf(Inntekt, Refusjon, Arbeidsgiverperiode), forespørselPgaEgenmeldingsdager.forespurteOpplysninger)
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.clear()
-            håndterArbeidsgiveropplysninger(2.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()))
+            håndterArbeidsgiveropplysninger(2.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()), OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            val forespørselPgaEgenmeldingsdager2 = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 2.vedtaksperiode }
-            assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
-            assertEquals(listOf(Inntekt, Refusjon), forespørselPgaEgenmeldingsdager2.forespurteOpplysninger)
+            assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+            assertForventetFeil(
+                forklaring = "Vi kvitterer ikke ut egenmeldingsperioden 5. februar og skaper en loop der februarperioden alltid sender ut en forespørsel",
+                nå = {
+                    val forespørselPgaEgenmeldingsdager2 = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 2.vedtaksperiode }
+                    assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
+                    assertEquals(listOf(Inntekt, Refusjon, Arbeidsgiverperiode), forespørselPgaEgenmeldingsdager2.forespurteOpplysninger)
+                },
+                ønsket = {
+                    assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder)
+                    assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
+                }
+            )
         }
     }
 
@@ -498,7 +512,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertInfo("Håndterer ikke arbeidsgiverperiode i AVSLUTTET", 1.vedtaksperiode.filter())
             assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
             val forespørselFebruar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.vedtaksperiodeId == 2.vedtaksperiode }
-            assertEquals(0, forespørselFebruar.forespurteOpplysninger.filterIsInstance<PersonObserver.Arbeidsgiverperiode>().size)
+            assertEquals(0, forespørselFebruar.forespurteOpplysninger.filterIsInstance<Arbeidsgiverperiode>().size)
             assertEquals(0, forespørselFebruar.forespurteOpplysninger.filterIsInstance<Inntekt>().size)
             assertEquals(1, forespørselFebruar.forespurteOpplysninger.filterIsInstance<Refusjon>().size)
         }

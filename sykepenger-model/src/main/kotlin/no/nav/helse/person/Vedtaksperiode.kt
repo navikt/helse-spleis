@@ -1603,9 +1603,9 @@ internal class Vedtaksperiode private constructor(
         return arbeidsgiverperiode.forventerOpplysninger(periode)
     }
 
-    private fun sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode: Arbeidsgiverperiode? = finnArbeidsgiverperiode()) {
-        checkNotNull(arbeidsgiverperiode) { "Må ha arbeidsgiverperiode før vi sier dette." }
-
+    private fun sendTrengerArbeidsgiveropplysninger() {
+        val arbeidsgiverperiode = checkNotNull(finnArbeidsgiverperiode()) { "Må ha arbeidsgiverperiode før vi sier dette." }
+        
         val forespurteOpplysninger = listOfNotNull(
             PersonObserver.Inntekt.takeIf { vilkårsgrunnlag == null },
             PersonObserver.Refusjon,
@@ -3080,7 +3080,22 @@ internal class Vedtaksperiode private constructor(
             if (arbeidsgiverperiode?.forventerInntekt(vedtaksperiode.periode) == true) {
                 // Dersom egenmeldingene hinter til at perioden er utenfor AGP, da ønsker vi å sende en ekte forespørsel til arbeidsgiver om opplysninger
                 aktivitetslogg.info("Sender trenger arbeidsgiveropplysninger fra AvsluttetUtenUtbetaling på grunn av egenmeldingsdager")
-                vedtaksperiode.sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode)
+                val vedtaksperioderMedSammeArbeidsgiverperiode = vedtaksperiode.arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
+                vedtaksperiode.person.trengerArbeidsgiveropplysninger(
+                    PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+                        organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer,
+                        vedtaksperiodeId = vedtaksperiode.id,
+                        skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
+                        sykmeldingsperioder = sykmeldingsperioder(vedtaksperioderMedSammeArbeidsgiverperiode),
+                        egenmeldingsperioder = egenmeldingsperioder(vedtaksperioderMedSammeArbeidsgiverperiode),
+                        førsteFraværsdager = vedtaksperiode.førsteFraværsdagerForForespørsel(),
+                        forespurteOpplysninger = listOf(
+                            PersonObserver.Inntekt,
+                            PersonObserver.Refusjon,
+                            PersonObserver.Arbeidsgiverperiode
+                        )
+                    )
+                )
             }
             avsluttUtenVedtak(vedtaksperiode, aktivitetslogg)
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
