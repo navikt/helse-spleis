@@ -805,11 +805,10 @@ internal fun AbstractEndToEndTest.håndterUtbetalingpåminnelse(
 internal fun AbstractEndToEndTest.håndterPersonPåminnelse() = PersonHendelsefabrikk().lagPåminnelse().håndter(Person::håndter)
 
 internal fun AbstractEndToEndTest.håndterSykepengegrunnlagForArbeidsgiver(
-    vedtaksperiodeId: IdInnhenter,
     skjæringstidspunkt: LocalDate = 1.januar,
     orgnummer: String = a1
 ): UUID {
-    val inntektFraAOrdningen: SykepengegrunnlagForArbeidsgiver = sykepengegrunnlagForArbeidsgiver(vedtaksperiodeId.id(orgnummer), skjæringstidspunkt, orgnummer)
+    val inntektFraAOrdningen: SykepengegrunnlagForArbeidsgiver = sykepengegrunnlagForArbeidsgiver(skjæringstidspunkt, orgnummer)
     inntektFraAOrdningen.håndter(Person::håndter)
     return inntektFraAOrdningen.metadata.meldingsreferanseId.id
 }

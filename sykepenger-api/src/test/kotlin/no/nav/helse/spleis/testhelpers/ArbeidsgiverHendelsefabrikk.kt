@@ -150,7 +150,6 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     internal fun lagSykepengegrunnlagForArbeidsgiver(vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, inntekter: List<ArbeidsgiverInntekt.MånedligInntekt>): SykepengegrunnlagForArbeidsgiver {
         return SykepengegrunnlagForArbeidsgiver(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkt,
             orgnummer = organisasjonsnummer,
             inntekter = ArbeidsgiverInntekt(organisasjonsnummer, inntekter)

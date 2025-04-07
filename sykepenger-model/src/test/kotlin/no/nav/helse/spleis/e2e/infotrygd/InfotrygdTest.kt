@@ -1,12 +1,11 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
-import java.util.UUID
+import java.util.*
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -24,16 +23,20 @@ import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.VedtaksperiodeVenter
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_37
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -50,12 +53,14 @@ import no.nav.helse.spleis.e2e.assertHarTag
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
+import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -63,6 +68,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -80,19 +86,24 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         assertEquals(emptyList<VedtaksperiodeVenter>(), observatør.vedtaksperiodeVenter)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        val refusjonFør = inspektør.refusjon(1.vedtaksperiode)
 
         val eksisterendeUtbetaling = ArbeidsgiverUtbetalingsperiode("a1", 1.januar, 31.januar)
         val nyUtbetaling = ArbeidsgiverUtbetalingsperiode("a1", 20.desember(2017), 31.desember(2017))
         håndterUtbetalingshistorikkEtterInfotrygdendring(eksisterendeUtbetaling, nyUtbetaling)
 
         assertEquals(20.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
-        with(observatør.vedtaksperiodeVenter.single().venterPå) {
-            assertEquals(1.vedtaksperiode.id(a1), vedtaksperiodeId)
-            assertEquals(20.desember(2017), skjæringstidspunkt)
-            assertEquals("INNTEKTSMELDING", venteårsak.hva)
-            assertEquals("SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING", venteårsak.hvorfor)
-        }
+        assertEquals(emptyList<VedtaksperiodeVenter>(), observatør.vedtaksperiodeVenter)
+        nullstillTilstandsendringer()
+        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
+
+        håndterSykepengegrunnlagForArbeidsgiver(skjæringstidspunkt = 20.desember(2017))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+
+        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+        assertVarsler(listOf(RV_IV_10, RV_IT_14), 1.vedtaksperiode.filter(a1))
+        assertEquals(refusjonFør, inspektør.refusjon(1.vedtaksperiode))
     }
 
     @Test

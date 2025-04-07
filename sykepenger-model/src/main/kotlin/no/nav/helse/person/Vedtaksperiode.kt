@@ -101,7 +101,6 @@ import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
 import no.nav.helse.person.Venteårsak.Hva.SØKNAD
 import no.nav.helse.person.Venteårsak.Hva.UTBETALING
 import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
-import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
@@ -1001,9 +1000,13 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         return when (tilstand) {
             AvventerInntektsmelding ->  {
-                if (!sykepengegrunnlagForArbeidsgiver.erRelevant(aktivitetsloggMedVedtaksperiodekontekst, skjæringstidspunkt)) return false
-                håndterSykepengegrunnlagForArbeidsgiver(sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedVedtaksperiodekontekst)
+                if (!håndterSykepengegrunnlagForArbeidsgiver(sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedVedtaksperiodekontekst)) return false
                 tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
+                true
+            }
+            AvventerRevurdering -> {
+                if (!håndterSykepengegrunnlagForArbeidsgiver(sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedVedtaksperiodekontekst)) return false
+                person.gjenopptaBehandling(aktivitetslogg)
                 true
             }
             Avsluttet,
@@ -1014,7 +1017,6 @@ internal class Vedtaksperiode private constructor(
             AvventerHistorikk,
             AvventerHistorikkRevurdering,
             AvventerInfotrygdHistorikk,
-            AvventerRevurdering,
             AvventerSimulering,
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
@@ -1026,18 +1028,14 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun håndterSykepengegrunnlagForArbeidsgiver(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg) {
-        aktivitetslogg.info("Håndterer sykepengegrunnlag for arbeidsgiver")
-        aktivitetslogg.varsel(RV_IV_10)
-
-        val skatteopplysninger = sykepengegrunnlagForArbeidsgiver.inntekter()
-        val omregnetÅrsinntekt = Skatteopplysning.omregnetÅrsinntekt(skatteopplysninger)
-
-        arbeidsgiver.lagreInntektFraAOrdningen(
-            meldingsreferanseId = sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            omregnetÅrsinntekt = omregnetÅrsinntekt
+    private fun videreførEllerIngenRefusjon(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg) {
+        videreførEksisterendeRefusjonsopplysninger(
+            behandlingkilde = sykepengegrunnlagForArbeidsgiver.metadata.behandlingkilde,
+            dokumentsporing = null,
+            aktivitetslogg = aktivitetslogg
         )
+        if (refusjonstidslinje.isNotEmpty()) return
+
         val ingenRefusjon = Beløpstidslinje.fra(
             periode = periode,
             beløp = INGEN,
@@ -1056,6 +1054,27 @@ internal class Vedtaksperiode private constructor(
             beregnArbeidsgiverperiode = arbeidsgiver.beregnArbeidsgiverperiode(),
             refusjonstidslinje = ingenRefusjon
         )
+    }
+
+    private fun håndterSykepengegrunnlagForArbeidsgiver(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg): Boolean {
+        if (sykepengegrunnlagForArbeidsgiver.skjæringstidspunkt != skjæringstidspunkt) {
+            aktivitetslogg.info("Vilkårsgrunnlag var relevant for Vedtaksperiode, men skjæringstidspunktene var ulikte: [$skjæringstidspunkt, ${sykepengegrunnlagForArbeidsgiver.skjæringstidspunkt}]")
+            return false
+        }
+
+        aktivitetslogg.info("Håndterer sykepengegrunnlag for arbeidsgiver")
+        aktivitetslogg.varsel(RV_IV_10)
+
+        val skatteopplysninger = sykepengegrunnlagForArbeidsgiver.inntekter()
+        val omregnetÅrsinntekt = Skatteopplysning.omregnetÅrsinntekt(skatteopplysninger)
+
+        arbeidsgiver.lagreInntektFraAOrdningen(
+            meldingsreferanseId = sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            omregnetÅrsinntekt = omregnetÅrsinntekt
+        )
+
+        videreførEllerIngenRefusjon(sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
 
         val event = PersonObserver.SkatteinntekterLagtTilGrunnEvent(
             organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
@@ -1068,6 +1087,7 @@ internal class Vedtaksperiode private constructor(
             omregnetÅrsinntekt = omregnetÅrsinntekt.årlig
         )
         person.sendSkatteinntekterLagtTilGrunn(event)
+        return true
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, aktivitetslogg: IAktivitetslogg) {
@@ -2442,58 +2462,43 @@ internal class Vedtaksperiode private constructor(
             val førstePeriodeSomTrengerInntektsmelding = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()
             if (førstePeriodeSomTrengerInntektsmelding != null) {
                 if (førstePeriodeSomTrengerInntektsmelding === vedtaksperiode)
-                    return TrengerInntektsmelding(vedtaksperiode)
-                return TrengerInntektsmeldingAnnenArbeidsgiver(førstePeriodeSomTrengerInntektsmelding)
+                    return TrengerInnteksopplysninger(vedtaksperiode)
+                return TrengerInntektsopplysningerAnnenArbeidsgiver(førstePeriodeSomTrengerInntektsmelding)
             }
             if (vedtaksperiode.vilkårsgrunnlag == null) return KlarForVilkårsprøving
             return KlarForBeregning
         }
 
         private sealed interface Tilstand {
-            fun venteårsak(): Venteårsak?
+            fun venteårsak(): Venteårsak? = null
             fun venterPå(): Vedtaksperiode? = null
             fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg)
         }
 
-        private data class TrengerInntektsmelding(private val vedtaksperiode: Vedtaksperiode) : Tilstand {
+        private data class TrengerInnteksopplysninger(private val vedtaksperiode: Vedtaksperiode) : Tilstand {
             override fun venterPå() = vedtaksperiode
-            override fun venteårsak() = INNTEKTSMELDING fordi SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING
-            override fun gjenopptaBehandling(
-                vedtaksperiode: Vedtaksperiode,
-                aktivitetslogg: IAktivitetslogg
-            ) {
-                aktivitetslogg.info("Trenger inntektsmelding for perioden etter igangsatt revurdering")
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+                aktivitetslogg.info("Trenger inntektsopplysninger etter igangsatt revurdering. Etterspør inntekt fra skatt")
+                vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
             }
         }
 
         private data object HarPågåendeUtbetaling : Tilstand {
-            override fun venteårsak(): Venteårsak {
-                return UTBETALING.utenBegrunnelse
-            }
-
+            override fun venteårsak() = UTBETALING.utenBegrunnelse
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
                 aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
             }
         }
 
-        private data class TrengerInntektsmeldingAnnenArbeidsgiver(private val trengerInntektsmelding: Vedtaksperiode) :
-            Tilstand {
-            override fun venteårsak() = trengerInntektsmelding.venteårsak()
+        private data class TrengerInntektsopplysningerAnnenArbeidsgiver(private val trengerInntektsmelding: Vedtaksperiode) : Tilstand {
             override fun venterPå() = trengerInntektsmelding
-            override fun gjenopptaBehandling(
-                vedtaksperiode: Vedtaksperiode,
-                aktivitetslogg: IAktivitetslogg
-            ) {
-                aktivitetslogg.info("Trenger inntektsmelding på annen arbeidsgiver etter igangsatt revurdering")
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+                aktivitetslogg.info("Trenger inntektsopplysninger etter igangsatt revurdering på annen arbeidsgiver.")
             }
         }
 
         private data object KlarForVilkårsprøving : Tilstand {
-            override fun venteårsak() = null
-            override fun gjenopptaBehandling(
-                vedtaksperiode: Vedtaksperiode,
-                aktivitetslogg: IAktivitetslogg
-            ) {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
                 vedtaksperiode.tilstand(aktivitetslogg, AvventerVilkårsprøvingRevurdering) {
                     aktivitetslogg.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
                 }
@@ -2501,11 +2506,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         private data object KlarForBeregning : Tilstand {
-            override fun venteårsak() = null
-            override fun gjenopptaBehandling(
-                vedtaksperiode: Vedtaksperiode,
-                aktivitetslogg: IAktivitetslogg
-            ) {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
                 vedtaksperiode.tilstand(aktivitetslogg, AvventerHistorikkRevurdering)
             }
         }

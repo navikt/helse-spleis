@@ -2,15 +2,12 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.hendelser.Avsender.SYSTEM
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.Skatteopplysning
 
 class SykepengegrunnlagForArbeidsgiver(
     meldingsreferanseId: MeldingsreferanseId,
-    private val vedtaksperiodeId: UUID,
-    private val skjæringstidspunkt: LocalDate,
+    internal val skjæringstidspunkt: LocalDate,
     orgnummer: String,
     private val inntekter: ArbeidsgiverInntekt
 ) : Hendelse {
@@ -25,15 +22,6 @@ class SykepengegrunnlagForArbeidsgiver(
             registrert = nå,
             automatiskBehandling = true
         )
-    }
-
-    internal fun erRelevant(
-        aktivitetslogg: IAktivitetslogg,
-        skjæringstidspunktVedtaksperiode: LocalDate
-    ): Boolean {
-        if (skjæringstidspunktVedtaksperiode == skjæringstidspunkt) return true
-        aktivitetslogg.info("Vilkårsgrunnlag var relevant for Vedtaksperiode, men skjæringstidspunktene var ulikte: [$skjæringstidspunkt, $skjæringstidspunktVedtaksperiode]")
-        return false
     }
 
     internal fun inntekter(): List<Skatteopplysning> {

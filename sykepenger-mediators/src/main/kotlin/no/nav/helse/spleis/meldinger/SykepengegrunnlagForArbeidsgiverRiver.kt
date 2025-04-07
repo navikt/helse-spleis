@@ -19,7 +19,6 @@ internal class SykepengegrunnlagForArbeidsgiverRiver(
     override val riverName = "Sykepengegrunnlag for Arbeidsgiver"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("vedtaksperiodeId")
         message.require("${InntekterForSykepengegrunnlagForArbeidsgiver.name}.skjæringstidspunkt", JsonNode::asLocalDate)
         message.requireArray("@løsning.${InntekterForSykepengegrunnlagForArbeidsgiver.name}") {
             require("årMåned", JsonNode::asYearMonth)
@@ -32,9 +31,10 @@ internal class SykepengegrunnlagForArbeidsgiverRiver(
     }
 
     override fun createMessage(packet: JsonMessage) = SykepengegrunnlagForArbeidsgiverMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
+        packet = packet,
+        meldingsporing = Meldingsporing(
+            id = packet.meldingsreferanseId(),
+            fødselsnummer = packet["fødselsnummer"].asText()
+        )
     )
 }

@@ -240,13 +240,11 @@ internal fun utbetalingpåminnelse(
 }
 
 internal fun sykepengegrunnlagForArbeidsgiver(
-    vedtaksperiodeId: UUID,
     skjæringstidspunkt: LocalDate = 1.januar,
     orgnummer: String = a1,
 ): SykepengegrunnlagForArbeidsgiver {
     return SykepengegrunnlagForArbeidsgiver(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        vedtaksperiodeId = vedtaksperiodeId,
         skjæringstidspunkt = skjæringstidspunkt,
         orgnummer = orgnummer,
         inntekter = ArbeidsgiverInntekt(orgnummer, (1..3).map {

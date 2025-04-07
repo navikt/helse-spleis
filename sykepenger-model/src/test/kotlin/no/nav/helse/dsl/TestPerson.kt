@@ -535,7 +535,10 @@ internal class TestPerson(
             skjæringstidspunkt: LocalDate,
             inntekter: List<MånedligInntekt>
         ): UUID {
-            val inntektFraOrdningen = arbeidsgiverHendelsefabrikk.lagSykepengegrunnlagForArbeidsgiver(vedtaksperiodeId, skjæringstidspunkt, inntekter)
+            val inntektFraOrdningen = arbeidsgiverHendelsefabrikk.lagSykepengegrunnlagForArbeidsgiver(
+                skjæringstidspunkt,
+                inntekter
+            )
             inntektFraOrdningen.håndter(Person::håndter)
             return inntektFraOrdningen.metadata.meldingsreferanseId.id
         }

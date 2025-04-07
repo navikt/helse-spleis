@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -37,6 +36,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.VedtaksperiodeVenter
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
@@ -51,6 +53,7 @@ import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -100,30 +103,25 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
-
+        val refusjonFør = inspektør(a2).refusjon(1.vedtaksperiode)
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, INNTEKT)
             assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
 
-        nullstillTilstandsendringer()
         observatør.vedtaksperiodeVenter.clear()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Arbeidsdag)), orgnummer = a2)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        nullstillTilstandsendringer()
 
-        assertForventetFeil(
-            forklaring = "Ettersom a2 har skatt i inntektsgrunnlaget slår ikke gjenbruk av opplysninger til.",
-            nå = {
-                assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a2)
-                val venterPå = observatør.vedtaksperiodeVenter.single().venterPå
-                assertEquals(1.vedtaksperiode.id(a2), venterPå.vedtaksperiodeId)
-                assertEquals("INNTEKTSMELDING", venterPå.venteårsak.hva)
-                assertEquals("SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING", venterPå.venteårsak.hvorfor)
-            },
-            ønsket = {
-                assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_VILKÅRSPRØVING_REVURDERING, orgnummer = a2)
-            }
-        )
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Arbeidsdag)), orgnummer = a2)
+        assertEquals(emptyList<VedtaksperiodeVenter>(), observatør.vedtaksperiodeVenter)
+        håndterSykepengegrunnlagForArbeidsgiver(skjæringstidspunkt = 2.februar, orgnummer = a2)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        assertEquals(refusjonFør, inspektør(a2).refusjon(1.vedtaksperiode))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a2)
+        assertVarsler(listOf(RV_IV_10, RV_OS_2), 1.vedtaksperiode.filter(a2))
     }
 
     @Test
