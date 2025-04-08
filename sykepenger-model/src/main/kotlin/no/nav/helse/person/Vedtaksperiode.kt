@@ -1597,24 +1597,42 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
+    // TODO: slette dinna?
     private fun sjekkTrengerArbeidsgiveropplysninger(): Boolean {
         if (!måInnhenteInntektEllerRefusjon()) return false
         val arbeidsgiverperiode = finnArbeidsgiverperiode() ?: return false
         return arbeidsgiverperiode.forventerOpplysninger(periode)
     }
 
+    // TODO: endre navn
+    private fun TRENGER_VI_AGP(): Boolean {
+        val arbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder
+
+        if (behandlinger.dagerNavOvertarAnsvar.isNotEmpty()) return false   // Trenger ikke opplysninger om arbeidsgiverperiode dersom Nav har overtatt ansvar for den
+        if (arbeidsgiverperiode.isEmpty()) return false
+        if (arbeidsgiverperiode.last().overlapperMed(periode)) return true
+        if (arbeidsgiverperiode.last().erRettFør(periode)) return true        // Forlenger perioden en AUU og må arbeidsgiver få mulighet til å uttale seg om arbeidsgiverperiode
+        return false
+    }
+
+    private fun giMegDetViFaktiskTrenger(): List<PersonObserver.ForespurtOpplysning> {
+        if (!skalBehandlesISpeil()) return emptyList() // perioden er AUU
+
+        val opplysninger = mutableListOf<PersonObserver.ForespurtOpplysning>()
+        if (!harEksisterendeInntekt()) opplysninger.add(PersonObserver.Inntekt)
+        if (refusjonstidslinje.isEmpty()) opplysninger.add(PersonObserver.Refusjon)
+        if (TRENGER_VI_AGP()) opplysninger.add(PersonObserver.Arbeidsgiverperiode)
+
+        return opplysninger
+    }
+
     private fun sendTrengerArbeidsgiveropplysninger() {
         val arbeidsgiverperiode = checkNotNull(finnArbeidsgiverperiode()) { "Må ha arbeidsgiverperiode før vi sier dette." }
-        
-        val forespurteOpplysninger = listOfNotNull(
-            PersonObserver.Inntekt.takeIf { vilkårsgrunnlag == null },
-            PersonObserver.Refusjon,
-            forespurtArbeidsgiverperiode(arbeidsgiverperiode)
-        )
+        val forespurteOpplysninger = giMegDetViFaktiskTrenger().takeUnless { it.isEmpty() } ?: return
 
         val vedtaksperioder = when {
             // For å beregne riktig arbeidsgiverperiode/første fraværsdag
-            PersonObserver.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode)
+            PersonObserver.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne()
             // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
             else -> listOf(this)
         }
@@ -1651,9 +1669,10 @@ internal class Vedtaksperiode private constructor(
         return deAndre.plusElement(minEgen)
     }
 
-    private fun vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Vedtaksperiode> {
-        if (arbeidsgiverperiode == null) return listOf(this)
-        return arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).filter { it <= this }
+    private fun vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(): List<Vedtaksperiode> {
+        val arbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder
+        if (arbeidsgiverperiode.isEmpty()) return listOf(this)
+        return arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiodeNy(this).filter { it <= this }
     }
 
     private fun trengerIkkeArbeidsgiveropplysninger() {
@@ -1665,18 +1684,17 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun forespurtArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) =
-        if (trengerArbeidsgiverperiode(arbeidsgiverperiode)) PersonObserver.Arbeidsgiverperiode else null
-
     private fun trengerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) =
         arbeidsgiverperiode != null && arbeidsgiverperiode.forventerArbeidsgiverperiodeopplysning(periode)
 
     private fun trengerInntektsmeldingReplay() {
         val arbeidsgiverperiode = finnArbeidsgiverperiode()
-        val trengerArbeidsgiverperiode = trengerArbeidsgiverperiode(arbeidsgiverperiode)
+        val trengerArbeidsgiverperiode2 = trengerArbeidsgiverperiode(arbeidsgiverperiode)
+        val trengerArbeidsgiverperiode = TRENGER_VI_AGP()
+        check(trengerArbeidsgiverperiode == trengerArbeidsgiverperiode2)
         val vedtaksperioder = when {
             // For å beregne riktig arbeidsgiverperiode/første fraværsdag
-            trengerArbeidsgiverperiode -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode)
+            trengerArbeidsgiverperiode -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne()
             // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
             else -> listOf(this)
         }
@@ -3078,7 +3096,7 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             val arbeidsgiverperiode = vedtaksperiode.arbeidsgiver.arbeidsgiverperiodeHensyntattEgenmeldinger(vedtaksperiode.periode)
             if (arbeidsgiverperiode?.forventerInntekt(vedtaksperiode.periode) == true) {
-                // Dersom egenmeldingene hinter til at perioden er utenfor AGP, da ønsker vi å sende en ekte forespørsel til arbeidsgiver om opplysninger
+                // Dersom egenmeldingene hinter til at perioden er utenfor AGP, da ønsker vi å sende en forespørsel til arbeidsgiver der vi ber om alle opplysninger
                 aktivitetslogg.info("Sender trenger arbeidsgiveropplysninger fra AvsluttetUtenUtbetaling på grunn av egenmeldingsdager")
                 val vedtaksperioderMedSammeArbeidsgiverperiode = vedtaksperiode.arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
                 vedtaksperiode.person.trengerArbeidsgiveropplysninger(
@@ -3307,6 +3325,13 @@ internal class Vedtaksperiode private constructor(
         internal val OVERLAPPENDE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             return fun(other: Vedtaksperiode): Boolean {
                 return segSelv.periode.overlapperEllerStarterFør(other.periode)
+            }
+        }
+
+        internal val SAMME_ARBEIDSGIVERPERIODE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
+            return fun(other: Vedtaksperiode): Boolean {
+                return segSelv.arbeidsgiver.organisasjonsnummer == other.arbeidsgiver.organisasjonsnummer
+                    && segSelv.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.firstOrNull()?.start == other.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.firstOrNull()?.start
             }
         }
 
