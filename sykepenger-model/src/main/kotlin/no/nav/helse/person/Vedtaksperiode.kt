@@ -3080,7 +3080,7 @@ internal class Vedtaksperiode private constructor(
             if (arbeidsgiverperiode?.forventerInntekt(vedtaksperiode.periode) == true) {
                 // Dersom egenmeldingene hinter til at perioden er utenfor AGP, da ønsker vi å sende en ekte forespørsel til arbeidsgiver om opplysninger
                 aktivitetslogg.info("Sender trenger arbeidsgiveropplysninger fra AvsluttetUtenUtbetaling på grunn av egenmeldingsdager")
-                val vedtaksperioderMedSammeArbeidsgiverperiode = vedtaksperiode.arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
+                val vedtaksperioderMedSammeArbeidsgiverperiode = vedtaksperiode.vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode)
                 vedtaksperiode.person.trengerArbeidsgiveropplysninger(
                     PersonObserver.TrengerArbeidsgiveropplysningerEvent(
                         organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer,
