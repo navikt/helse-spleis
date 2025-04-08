@@ -45,6 +45,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
@@ -1614,7 +1615,7 @@ internal class Vedtaksperiode private constructor(
 
         val vedtaksperioder = when {
             // For å beregne riktig arbeidsgiverperiode/første fraværsdag
-            PersonObserver.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode)
+            PersonObserver.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne()
             // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
             else -> listOf(this)
         }
@@ -1651,7 +1652,7 @@ internal class Vedtaksperiode private constructor(
         return deAndre.plusElement(minEgen)
     }
 
-    private fun vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Vedtaksperiode> {
+    private fun vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode: Periode? = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode()): List<Vedtaksperiode> {
         if (arbeidsgiverperiode == null) return listOf(this)
         return arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).filter { it <= this }
     }
@@ -1676,7 +1677,7 @@ internal class Vedtaksperiode private constructor(
         val trengerArbeidsgiverperiode = trengerArbeidsgiverperiode(arbeidsgiverperiode)
         val vedtaksperioder = when {
             // For å beregne riktig arbeidsgiverperiode/første fraværsdag
-            trengerArbeidsgiverperiode -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode)
+            trengerArbeidsgiverperiode -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne()
             // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
             else -> listOf(this)
         }
@@ -3080,7 +3081,9 @@ internal class Vedtaksperiode private constructor(
             if (arbeidsgiverperiode?.forventerInntekt(vedtaksperiode.periode) == true) {
                 // Dersom egenmeldingene hinter til at perioden er utenfor AGP, da ønsker vi å sende en ekte forespørsel til arbeidsgiver om opplysninger
                 aktivitetslogg.info("Sender trenger arbeidsgiveropplysninger fra AvsluttetUtenUtbetaling på grunn av egenmeldingsdager")
-                val vedtaksperioderMedSammeArbeidsgiverperiode = vedtaksperiode.vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode)
+                val vedtaksperioderMedSammeArbeidsgiverperiode = vedtaksperiode.vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(
+                    arbeidsgiverperiode = omsluttendeArbeidsgiverperiode(vedtaksperiode, arbeidsgiverperiode)
+                )
                 vedtaksperiode.person.trengerArbeidsgiveropplysninger(
                     PersonObserver.TrengerArbeidsgiveropplysningerEvent(
                         organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer,
@@ -3099,6 +3102,15 @@ internal class Vedtaksperiode private constructor(
             }
             avsluttUtenVedtak(vedtaksperiode, aktivitetslogg)
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
+        }
+
+        /* Finner den omsluttende arbeidsgiverperioden når vi vurderer den som ligger på behandlingen og den som har hensyntatt egenmeldingsdager */
+        private fun omsluttendeArbeidsgiverperiode(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiodeHensyntattEgenmeldinger: Arbeidsgiverperiode): Periode? {
+            val potensiell = arbeidsgiverperiodeHensyntattEgenmeldinger.omsluttendePeriode
+            val faktisk = vedtaksperiode.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode()
+            val fom = setOfNotNull(potensiell?.start, faktisk?.start).minOrNull() ?: return null
+            val tom = setOfNotNull(potensiell?.endInclusive, faktisk?.endInclusive).max()
+            return fom til tom
         }
 
         private fun avsluttUtenVedtak(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
@@ -3307,6 +3319,12 @@ internal class Vedtaksperiode private constructor(
         internal val OVERLAPPENDE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             return fun(other: Vedtaksperiode): Boolean {
                 return segSelv.periode.overlapperEllerStarterFør(other.periode)
+            }
+        }
+
+        internal val SAMME_ARBEIDSGIVERPERIODE = fun (arbeidsgiver: Arbeidsgiver, arbeidsgiverperiode: Periode): VedtaksperiodeFilter {
+            return fun(other: Vedtaksperiode): Boolean {
+                return other.arbeidsgiver.organisasjonsnummer == arbeidsgiver.organisasjonsnummer && (other.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode()?.overlapperMed(arbeidsgiverperiode) == true)
             }
         }
 
