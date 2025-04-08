@@ -38,6 +38,7 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.DokumentType
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Arbeidsgiverperiode
 import no.nav.helse.person.PersonObserver.Inntekt
 import no.nav.helse.person.PersonObserver.Refusjon
@@ -130,6 +131,29 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 Beløpstidslinje.fra(1.februar.somPeriode(), INNTEKT, kilde2) + Beløpstidslinje.fra(2.februar.somPeriode(), 0.daglig, kilde2),
                 inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar)
             )
+        }
+    }
+
+    @Test
+    fun `Forespørsel fra AUU hvor egenmeldingsdager smelter sammen to arbeidsgiverperioder`() {
+        a1 {
+            nyttVedtak(januar)
+            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.clear()
+            håndterSøknad(Sykdom(17.februar, 28.februar, 100.prosent), egenmeldinger = listOf(10.februar.somPeriode()))
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            val forventet = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+                organisasjonsnummer = a1,
+                vedtaksperiodeId = 2.vedtaksperiode,
+                skjæringstidspunkt = 17.februar,
+                sykmeldingsperioder = listOf(januar, 17.februar til 28.februar),
+                egenmeldingsperioder = listOf(10.februar.somPeriode()),
+                førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(
+                    organisasjonsnummer = a1,
+                    førsteFraværsdag = 17.februar
+                )),
+                forespurteOpplysninger = listOf(Inntekt, Refusjon, Arbeidsgiverperiode)
+            )
+            assertEquals(forventet, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.singleOrNull())
         }
     }
 
