@@ -19,6 +19,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -39,6 +40,24 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Inntektsmelding med begrunnelseForReduksjon & FF kommer før kort søknad`() {
+        håndterInntektsmelding(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "VilIkke", førsteFraværsdag = 1.januar)
+        nyPeriode(1.januar til 16.januar)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertEquals(listOf(1.januar til 1.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+        assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `Inntektsmelding med begrunnelseForReduksjon & AGP kommer før kort søknad`() {
+        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "VilIkke")
+        nyPeriode(1.januar til 16.januar)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertEquals(listOf(1.januar til 16.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+        assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+    }
 
     @Test
     fun `Avhengig av replay av inntektsmelding for inntekt også i ikke-ghost-situasjon - første fraværsdag kant-i-kant`() {
