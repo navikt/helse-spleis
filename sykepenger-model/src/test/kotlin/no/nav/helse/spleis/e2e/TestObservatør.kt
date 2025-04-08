@@ -182,8 +182,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         sykmeldingsperioder: List<Periode>,
         egenmeldingsperioder: List<Periode>,
         førsteFraværsdager: List<FørsteFraværsdag>,
-        trengerArbeidsgiverperiode: Boolean,
-        erPotensiellForespørsel: Boolean
+        trengerArbeidsgiverperiode: Boolean
     ) {
         inntektsmeldingReplayEventer.add(
             Forespørsel(
@@ -194,8 +193,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
                 førsteFraværsdager = førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.organisasjonsnummer, it.førsteFraværsdag) },
                 sykmeldingsperioder = sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
                 egenmeldinger = egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-                harForespurtArbeidsgiverperiode = trengerArbeidsgiverperiode,
-                erPotensiellForespørsel = erPotensiellForespørsel
+                harForespurtArbeidsgiverperiode = trengerArbeidsgiverperiode
             )
         )
     }

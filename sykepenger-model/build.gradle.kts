@@ -1,5 +1,5 @@
 val jsonassertVersion = "1.5.0"
-val tbdSpillAvImMatchingVersion = "2025.01.10-13.12-f8327f35"
+val tbdSpillAvImMatchingVersion = "2025.04.08-12.41-e519e1f8"
 
 dependencies {
     // bruker "api" sånn at avhengigheten blir kopiert ut til konsumenter av denne modulen

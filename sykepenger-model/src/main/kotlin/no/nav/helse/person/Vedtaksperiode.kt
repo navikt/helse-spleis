@@ -1691,8 +1691,7 @@ internal class Vedtaksperiode private constructor(
             sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
             egenmeldingsperioder = egenmeldingsperioder(vedtaksperioder),
             førsteFraværsdager = førsteFraværsdager,
-            trengerArbeidsgiverperiode = trengerArbeidsgiverperiode,
-            erPotensiellForespørsel = false
+            trengerArbeidsgiverperiode = trengerArbeidsgiverperiode
         )
     }
 

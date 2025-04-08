@@ -584,8 +584,7 @@ interface PersonObserver {
         sykmeldingsperioder: List<Periode>,
         egenmeldingsperioder: List<Periode>,
         førsteFraværsdager: List<FørsteFraværsdag>,
-        trengerArbeidsgiverperiode: Boolean,
-        erPotensiellForespørsel: Boolean
+        trengerArbeidsgiverperiode: Boolean
     ) {
     }
 

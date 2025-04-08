@@ -517,8 +517,7 @@ class Person private constructor(
         sykmeldingsperioder: List<Periode>,
         egenmeldingsperioder: List<Periode>,
         førsteFraværsdager: List<FørsteFraværsdag>,
-        trengerArbeidsgiverperiode: Boolean,
-        erPotensiellForespørsel: Boolean
+        trengerArbeidsgiverperiode: Boolean
     ) {
         observers.forEach {
             it.inntektsmeldingReplay(
@@ -529,8 +528,7 @@ class Person private constructor(
                 sykmeldingsperioder = sykmeldingsperioder,
                 egenmeldingsperioder = egenmeldingsperioder,
                 førsteFraværsdager = førsteFraværsdager,
-                trengerArbeidsgiverperiode = trengerArbeidsgiverperiode,
-                erPotensiellForespørsel = erPotensiellForespørsel
+                trengerArbeidsgiverperiode = trengerArbeidsgiverperiode
             )
         }
     }

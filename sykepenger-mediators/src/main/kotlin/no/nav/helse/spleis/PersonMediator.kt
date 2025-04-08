@@ -51,36 +51,34 @@ internal class PersonMediator(
         sykmeldingsperioder: List<Periode>,
         egenmeldingsperioder: List<Periode>,
         førsteFraværsdager: List<FørsteFraværsdag>,
-        trengerArbeidsgiverperiode: Boolean,
-        erPotensiellForespørsel: Boolean
+        trengerArbeidsgiverperiode: Boolean
     ) {
         queueMessage(
             JsonMessage.newMessage(
                 "trenger_inntektsmelding_replay", mapOf(
-                "organisasjonsnummer" to organisasjonsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "sykmeldingsperioder" to sykmeldingsperioder.map {
-                    mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
-                    )
-                },
-                "egenmeldingsperioder" to egenmeldingsperioder.map {
-                    mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
-                    )
-                },
-                "førsteFraværsdager" to førsteFraværsdager.map {
-                    mapOf(
-                        "organisasjonsnummer" to it.organisasjonsnummer,
-                        "førsteFraværsdag" to it.førsteFraværsdag
-                    )
-                },
-                "trengerArbeidsgiverperiode" to trengerArbeidsgiverperiode,
-                "potensiellForespørsel" to erPotensiellForespørsel
-            )
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "sykmeldingsperioder" to sykmeldingsperioder.map {
+                        mapOf(
+                            "fom" to it.start,
+                            "tom" to it.endInclusive
+                        )
+                    },
+                    "egenmeldingsperioder" to egenmeldingsperioder.map {
+                        mapOf(
+                            "fom" to it.start,
+                            "tom" to it.endInclusive
+                        )
+                    },
+                    "førsteFraværsdager" to førsteFraværsdager.map {
+                        mapOf(
+                            "organisasjonsnummer" to it.organisasjonsnummer,
+                            "førsteFraværsdag" to it.førsteFraværsdag
+                        )
+                    },
+                    "trengerArbeidsgiverperiode" to trengerArbeidsgiverperiode
+                )
             )
         )
     }
