@@ -1674,7 +1674,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerInntektsmeldingReplay() {
         val arbeidsgiverperiode = finnArbeidsgiverperiode()
-        val trengerArbeidsgiverperiode = trengerArbeidsgiverperiode(arbeidsgiverperiode)
+        val erKortPeriode = !skalBehandlesISpeil()
+        val trengerArbeidsgiverperiode = trengerArbeidsgiverperiode(arbeidsgiverperiode) || erKortPeriode
         val vedtaksperioder = when {
             // For å beregne riktig arbeidsgiverperiode/første fraværsdag
             trengerArbeidsgiverperiode -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne()
@@ -1691,7 +1692,7 @@ internal class Vedtaksperiode private constructor(
             egenmeldingsperioder = egenmeldingsperioder(vedtaksperioder),
             førsteFraværsdager = førsteFraværsdager,
             trengerArbeidsgiverperiode = trengerArbeidsgiverperiode,
-            erPotensiellForespørsel = !skalBehandlesISpeil()
+            erPotensiellForespørsel = false
         )
     }
 
