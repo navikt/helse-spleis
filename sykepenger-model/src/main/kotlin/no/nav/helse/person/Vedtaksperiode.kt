@@ -1598,12 +1598,6 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun sjekkTrengerArbeidsgiveropplysninger(): Boolean {
-        if (!måInnhenteInntektEllerRefusjon()) return false
-        val arbeidsgiverperiode = finnArbeidsgiverperiode() ?: return false
-        return arbeidsgiverperiode.forventerOpplysninger(periode)
-    }
-
     private fun opplysningerViTrenger(): Set<PersonObserver.ForespurtOpplysning> {
         if (!skalBehandlesISpeil()) return emptySet() // perioden er AUU ✋
         if (arbeidsgiver.finnVedtaksperiodeRettFør(this)?.skalBehandlesISpeil() == true) return emptySet() // Da har perioden foran oss spurt for oss/ vi har det vi trenger ✋
@@ -1627,14 +1621,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun sendTrengerArbeidsgiveropplysninger() {
-        val arbeidsgiverperiode = checkNotNull(finnArbeidsgiverperiode()) { "Må ha arbeidsgiverperiode før vi sier dette." }
-        
-        val forespurteOpplysninger = listOfNotNull(
-            PersonObserver.Inntekt.takeIf { vilkårsgrunnlag == null },
-            PersonObserver.Refusjon,
-            forespurtArbeidsgiverperiode(arbeidsgiverperiode)
-        )
-
+        val forespurteOpplysninger = opplysningerViTrenger().takeUnless { it.isEmpty() } ?: return
         val vedtaksperioder = when {
             // For å beregne riktig arbeidsgiverperiode/første fraværsdag
             PersonObserver.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne()
@@ -1646,11 +1633,14 @@ internal class Vedtaksperiode private constructor(
             vedtaksperioder = vedtaksperioder,
             forespurteOpplysninger = forespurteOpplysninger
         ))
+
+        // ved out-of-order gir vi beskjed om at vi ikke trenger arbeidsgiveropplysninger for den seneste perioden lenger
+        arbeidsgiver.finnVedtaksperiodeRettEtter(this)?.trengerIkkeArbeidsgiveropplysninger()
     }
 
     private fun trengerArbeidsgiveropplysninger(
         vedtaksperioder: List<Vedtaksperiode>,
-        forespurteOpplysninger: List<PersonObserver.ForespurtOpplysning>
+        forespurteOpplysninger: Set<PersonObserver.ForespurtOpplysning>
     ) = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
         personidentifikator = person.personidentifikator,
         organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
@@ -1694,9 +1684,6 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun forespurtArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) =
-        if (trengerArbeidsgiverperiode(arbeidsgiverperiode)) PersonObserver.Arbeidsgiverperiode else null
-
     private fun trengerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) =
         arbeidsgiverperiode != null && arbeidsgiverperiode.forventerArbeidsgiverperiodeopplysning(periode)
 
@@ -1712,7 +1699,7 @@ internal class Vedtaksperiode private constructor(
         }
         person.inntektsmeldingReplay(trengerArbeidsgiveropplysninger(
             vedtaksperioder = vedtaksperioder,
-            forespurteOpplysninger = if (trengerArbeidsgiverperiode) listOf(PersonObserver.Arbeidsgiverperiode) else emptyList()
+            forespurteOpplysninger = if (trengerArbeidsgiverperiode) setOf(PersonObserver.Arbeidsgiverperiode) else emptySet()
         ))
     }
 
@@ -2641,7 +2628,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             vurderOmKanGåVidere(vedtaksperiode, revurdering.hendelse, aktivitetslogg)
             if (vedtaksperiode.tilstand !in setOf(AvventerInntektsmelding, AvventerBlokkerendePeriode)) return
-            if (vedtaksperiode.tilstand == AvventerInntektsmelding && vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger()) {
+            if (vedtaksperiode.tilstand == AvventerInntektsmelding) {
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
             }
         }
@@ -2656,9 +2643,7 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg.info("Nå henter vi inntekt fra skatt!")
                 return vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
             }
-            if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger()) {
-                vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
-            }
+            vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
         }
 
         private fun vurderOmInntektsmeldingAldriKommer(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse): Boolean {
@@ -2679,13 +2664,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun replayUtført(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-            if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger()) {
-                vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
-                // ved out-of-order gir vi beskjed om at vi ikke trenger arbeidsgiveropplysninger for den seneste perioden lenger
-                vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)?.also {
-                    it.trengerIkkeArbeidsgiveropplysninger()
-                }
-            }
+            vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
             vurderOmKanGåVidere(vedtaksperiode, hendelse, aktivitetslogg)
         }
 
@@ -3106,7 +3085,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperioder = vedtaksperiode.vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(
                         arbeidsgiverperiode = omsluttendeArbeidsgiverperiode(vedtaksperiode, arbeidsgiverperiode)
                     ),
-                    forespurteOpplysninger = listOf(PersonObserver.Inntekt, PersonObserver.Refusjon, PersonObserver.Arbeidsgiverperiode)
+                    forespurteOpplysninger = setOf(PersonObserver.Inntekt, PersonObserver.Refusjon, PersonObserver.Arbeidsgiverperiode)
                 ))
             }
             avsluttUtenVedtak(vedtaksperiode, aktivitetslogg)

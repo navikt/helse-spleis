@@ -450,7 +450,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        observatør.assertEtterspurt(2.vedtaksperiode.id(a2), PersonObserver.Inntekt::class, PersonObserver.Refusjon::class)
+        observatør.assertEtterspurt(2.vedtaksperiode.id(a2), PersonObserver.Refusjon::class)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -504,7 +504,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        observatør.assertEtterspurt(2.vedtaksperiode.id(a2), PersonObserver.Inntekt::class, PersonObserver.Refusjon::class)
+        observatør.assertEtterspurt(2.vedtaksperiode.id(a2), PersonObserver.Refusjon::class)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)

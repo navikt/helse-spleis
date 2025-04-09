@@ -57,7 +57,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 PersonObserver.FørsteFraværsdag(a2, 1.januar),
                 PersonObserver.FørsteFraværsdag(a1, 2.januar)
             ),
-            forespurteOpplysninger = listOf(
+            forespurteOpplysninger = setOf(
                 PersonObserver.Inntekt,
                 PersonObserver.Refusjon,
                 PersonObserver.Arbeidsgiverperiode
@@ -114,7 +114,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                     PersonObserver.FørsteFraværsdag(a2, 1.februar),
                     PersonObserver.FørsteFraværsdag(a1, 1.mars)
                 ),
-                forespurteOpplysninger = listOf(
+                forespurteOpplysninger = setOf(
                     PersonObserver.Refusjon,
                     PersonObserver.Arbeidsgiverperiode
                 )
@@ -152,7 +152,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             sykmeldingsperioder = listOf(10.februar til 10.mars),
             egenmeldingsperioder = emptyList(),
             førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(a1, 10.februar)),
-            forespurteOpplysninger = listOf(
+            forespurteOpplysninger = setOf(
                 PersonObserver.Inntekt,
                 PersonObserver.Refusjon
             )

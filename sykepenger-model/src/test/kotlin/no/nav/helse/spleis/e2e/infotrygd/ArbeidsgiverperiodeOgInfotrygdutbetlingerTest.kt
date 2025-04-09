@@ -25,7 +25,7 @@ internal class ArbeidsgiverperiodeOgInfotrygdutbetlingerTest: AbstractDslTest() 
             emptyList<Periode>(),
             arbeidsgiverperiodeVed(vedtaksperiode = januar, infotrygdutbetaling = 1.januar)
         )
-        observatør.assertEtterspurt(1.vedtaksperiode, PersonObserver.Inntekt::class, PersonObserver.Refusjon::class, PersonObserver.Arbeidsgiverperiode::class)
+        observatør.assertEtterspurt(1.vedtaksperiode, PersonObserver.Inntekt::class, PersonObserver.Refusjon::class)
     }
 
     @Test

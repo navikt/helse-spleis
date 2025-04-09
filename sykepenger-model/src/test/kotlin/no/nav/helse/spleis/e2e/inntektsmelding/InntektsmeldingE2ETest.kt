@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -126,16 +126,12 @@ import org.junit.jupiter.api.assertDoesNotThrow
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `sender ikke forespørsel når man går fra auu til avim pga annen im & dager nav dekker`() {
+    fun `sender forespørsel når man går fra auu til avim pga annen im & dager nav dekker`() {
         håndterSøknad(1.januar til 12.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 16.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "Neitakk")
         assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter(a1))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
-        assertForventetFeil(
-            forklaring = "Vi finner ut om vi skal spørre uten å hensynta dager nav dekker",
-            ønsket = { assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size) },
-            nå = { assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size) }
-        )
+        assertEquals(1.vedtaksperiode.id(a1), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single().vedtaksperiodeId)
     }
 
     @Test

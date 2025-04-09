@@ -800,7 +800,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 beregnetInntekt = INNTEKT
             )
             håndterSøknad(25.januar til 10.februar)
-            observatør.assertEtterspurt(2.vedtaksperiode, PersonObserver.Inntekt::class, PersonObserver.Refusjon::class)
+            observatør.assertEtterspurt(2.vedtaksperiode, PersonObserver.Refusjon::class)
         }
         a2 {
             håndterInntektsmelding(
@@ -1457,7 +1457,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { håndterSøknad(januar) }
         a2 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            observatør.assertEtterspurt(2.vedtaksperiode, PersonObserver.Inntekt::class, PersonObserver.Refusjon::class)
+            observatør.assertEtterspurt(2.vedtaksperiode, PersonObserver.Refusjon::class)
         }
         a1 { assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING) }
         a2 {

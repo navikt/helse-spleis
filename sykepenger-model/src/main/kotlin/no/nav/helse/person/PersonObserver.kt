@@ -3,7 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
@@ -130,7 +130,7 @@ interface PersonObserver {
         val sykmeldingsperioder: List<Periode>,
         val egenmeldingsperioder: List<Periode>,
         val førsteFraværsdager: List<FørsteFraværsdag>,
-        val forespurteOpplysninger: List<ForespurtOpplysning>
+        val forespurteOpplysninger: Set<ForespurtOpplysning>
     ) {
         fun toJsonMap(): Map<String, Any> =
             mapOf(
@@ -178,7 +178,7 @@ interface PersonObserver {
     sealed class ForespurtOpplysning {
 
         companion object {
-            fun List<ForespurtOpplysning>.toJsonMap() = map { forespurtOpplysning ->
+            fun Set<ForespurtOpplysning>.toJsonMap() = map { forespurtOpplysning ->
                 when (forespurtOpplysning) {
                     is Arbeidsgiverperiode -> mapOf(
                         "opplysningstype" to "Arbeidsgiverperiode"

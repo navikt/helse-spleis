@@ -153,7 +153,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                     organisasjonsnummer = a1,
                     førsteFraværsdag = 17.februar
                 )),
-                forespurteOpplysninger = listOf(Inntekt, Refusjon, Arbeidsgiverperiode)
+                forespurteOpplysninger = setOf(Inntekt, Refusjon, Arbeidsgiverperiode)
             )
             assertEquals(forventet, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.singleOrNull())
         }
@@ -167,7 +167,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             val forespørselPgaEgenmeldingsdager = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 2.vedtaksperiode }
             assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
-            assertEquals(listOf(Inntekt, Refusjon, Arbeidsgiverperiode), forespørselPgaEgenmeldingsdager.forespurteOpplysninger)
+            assertEquals(setOf(Inntekt, Refusjon, Arbeidsgiverperiode), forespørselPgaEgenmeldingsdager.forespurteOpplysninger)
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.clear()
             håndterArbeidsgiveropplysninger(2.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()), OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)))
             håndterYtelser(1.vedtaksperiode)
@@ -179,7 +179,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 nå = {
                     val forespørselPgaEgenmeldingsdager2 = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 2.vedtaksperiode }
                     assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
-                    assertEquals(listOf(Inntekt, Refusjon, Arbeidsgiverperiode), forespørselPgaEgenmeldingsdager2.forespurteOpplysninger)
+                    assertEquals(setOf(Inntekt, Refusjon, Arbeidsgiverperiode), forespørselPgaEgenmeldingsdager2.forespurteOpplysninger)
                 },
                 ønsket = {
                     assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder)

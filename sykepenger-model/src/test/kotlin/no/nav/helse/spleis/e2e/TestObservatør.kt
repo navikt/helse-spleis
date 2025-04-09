@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import java.util.*
+import java.util.UUID
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Person
@@ -137,7 +137,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         tilstandsendringer.replaceAll { _, value -> mutableListOf(value.last()) }
     }
 
-    private val trengerArbeidsgiveroppysninger = mutableMapOf<UUID, List<PersonObserver.ForespurtOpplysning>>()
+    private val trengerArbeidsgiveroppysninger = mutableMapOf<UUID, Set<PersonObserver.ForespurtOpplysning>>()
     internal fun forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg oppgitt: Arbeidsgiveropplysning) {
         val forespurt = trengerArbeidsgiveroppysninger[vedtaksperiodeId] ?: error("Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId")
         if (oppgitt.isEmpty()) return
