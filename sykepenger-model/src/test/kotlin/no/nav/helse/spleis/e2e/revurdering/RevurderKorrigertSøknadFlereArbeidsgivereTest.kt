@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
@@ -21,6 +22,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
@@ -180,6 +182,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars))
             håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent))
+            observatør.assertEtterspurt(2.vedtaksperiode, PersonObserver.Inntekt::class, PersonObserver.Refusjon::class, PersonObserver.Arbeidsgiverperiode::class)
             håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = INNTEKT)
         }
         a2 {
@@ -474,6 +477,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars))
             håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent))
+            observatør.assertEtterspurt(2.vedtaksperiode, PersonObserver.Inntekt::class, PersonObserver.Refusjon::class, PersonObserver.Arbeidsgiverperiode::class)
             håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = INNTEKT)
         }
         a2 {
@@ -596,6 +600,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterSykmelding(Sykmeldingsperiode(10.februar, 10.mars))
             håndterSøknad(Sykdom(10.februar, 10.mars, 100.prosent))
+            observatør.assertEtterspurt(2.vedtaksperiode, PersonObserver.Inntekt::class, PersonObserver.Refusjon::class)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, 10.februar)
         }
         a2 {

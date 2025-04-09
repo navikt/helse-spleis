@@ -32,7 +32,9 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
+import no.nav.helse.spleis.e2e.IdInnhenter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
+import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -985,8 +987,13 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
     }
 
-    private fun assertEtterspurt(vedtaksperiode: UUID, vararg forventet: KClass<out PersonObserver.ForespurtOpplysning>) {
-        val forespurteOpplysninger = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.lastOrNull { it.vedtaksperiodeId == vedtaksperiode }?.forespurteOpplysninger ?: emptyList()
-        assertEquals(forventet.toSet(), forespurteOpplysninger.map { it::class }.toSet())
+    private fun assertEtterspurt(vedtaksperiode: UUID, vararg forventet: KClass<out PersonObserver.ForespurtOpplysning>) =
+        observatør.assertEtterspurt(vedtaksperiode, *forventet)
+
+    internal companion object {
+        fun TestObservatør.assertEtterspurt(vedtaksperiode: UUID, vararg forventet: KClass<out PersonObserver.ForespurtOpplysning>) {
+            val forespurteOpplysninger = trengerArbeidsgiveropplysningerVedtaksperioder.lastOrNull { it.vedtaksperiodeId == vedtaksperiode }?.forespurteOpplysninger ?: emptyList()
+            assertEquals(forventet.toSet(), forespurteOpplysninger.map { it::class }.toSet())
+        }
     }
 }

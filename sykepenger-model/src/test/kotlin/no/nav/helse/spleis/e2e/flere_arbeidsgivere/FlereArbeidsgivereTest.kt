@@ -35,6 +35,7 @@ import no.nav.helse.mai
 import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.onsdag
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -56,6 +57,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.til
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -798,6 +800,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 beregnetInntekt = INNTEKT
             )
             håndterSøknad(25.januar til 10.februar)
+            observatør.assertEtterspurt(2.vedtaksperiode, PersonObserver.Inntekt::class, PersonObserver.Refusjon::class)
         }
         a2 {
             håndterInntektsmelding(
@@ -1452,7 +1455,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSøknad(25.januar til 31.januar)
         }
         a1 { håndterSøknad(januar) }
-        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a2 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            observatør.assertEtterspurt(2.vedtaksperiode, PersonObserver.Inntekt::class, PersonObserver.Refusjon::class)
+        }
         a1 { assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING) }
         a2 {
             assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
