@@ -23,7 +23,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
-import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
@@ -175,12 +174,6 @@ class Sykdomstidslinje private constructor(
     internal fun subsumsjonsformat(): List<Tidslinjedag> = SykdomstidslinjeBuilder(this).dager()
 
     internal companion object {
-        internal fun List<Sykdomstidslinje>.slåSammenForkastedeSykdomstidslinjer() =
-            fold(Sykdomstidslinje()) { acc, sykdomstidslinje ->
-                val utenProblemdager = Sykdomstidslinje(sykdomstidslinje.dager.filter { (_, dag) -> dag !is ProblemDag }.toSortedMap(), sykdomstidslinje.periode)
-                acc.merge(utenProblemdager, replace)
-            }
-
         internal fun beregnSkjæringstidspunkt(tidslinjer: List<Sykdomstidslinje>) =
             Skjæringstidspunkt(samletTidslinje(tidslinjer))
 

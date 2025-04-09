@@ -13,7 +13,6 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -74,7 +73,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         håndterSøknad(februar, sendTilGosys = true)
 
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
-        assertEquals(listOf(januar, februar), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
+        assertEquals(emptyList<Periode>(), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
     }
 
     @Test
@@ -84,7 +83,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         håndterSøknad(29.januar til 28.februar, sendTilGosys = true)
 
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
-        assertEquals(listOf(1.januar til 26.januar, 29.januar til 28.februar), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
+        assertEquals(emptyList<Periode>(), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
     }
 
     @Test
@@ -97,7 +96,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         håndterSøknad(februar, sendTilGosys = true)
 
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
-        assertEquals(listOf(januar, februar), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
+        assertEquals(emptyList<Periode>(), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
     }
 
     @Test
@@ -110,7 +109,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         håndterSøknad(29.januar til 28.februar, sendTilGosys = true)
 
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
-        assertEquals(listOf(1.januar til 26.januar, 29.januar til 28.februar), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
+        assertEquals(emptyList<Periode>(), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
     }
 
     @Test
@@ -144,7 +143,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
 
         val event = observatør.forkastet(1.vedtaksperiode.id(a1))
         assertFalse(event.trengerArbeidsgiveropplysninger)
-        assertEquals(listOf(1.januar til 10.januar), observatør.forkastet(1.vedtaksperiode.id(a1)).sykmeldingsperioder)
+        assertEquals(emptyList<Periode>(), observatør.forkastet(1.vedtaksperiode.id(a1)).sykmeldingsperioder)
     }
 
     @Test
@@ -155,7 +154,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         håndterSøknad(11.januar til 15.januar, sendTilGosys = true)
 
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
-        assertEquals(listOf(1.januar til 10.januar, 11.januar til 15.januar), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
+        assertEquals(emptyList<Periode>(), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
     }
 
     @Test
@@ -179,7 +178,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         håndterSøknad(11.januar til 15.januar)
 
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
-        assertEquals(listOf(1.januar til 10.januar, 11.januar til 15.januar), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
+        assertEquals(emptyList<Periode>(), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
     }
 
     @Test
@@ -217,7 +216,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 15.januar))
         håndterSøknad(10.januar til 15.januar)
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
-        assertEquals(listOf(1.januar til 5.januar, 10.januar til 15.januar), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
+        assertEquals(emptyList<Periode>(), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
     }
 
     @Test
@@ -270,40 +269,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
 
         nyPeriode(31.januar til 31.januar)
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
-        assertEquals(listOf(januar, 31.januar til 31.januar), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
-    }
-
-    @Test
-    fun `Forventer arbeidsgiveropplysninger fra kort periode som mottar overlappende søknad som gjør at perioden går utover AGP`() {
-        nyPeriode(1.januar til 1.januar)
-        forkastAlle()
-        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-
-        nyPeriode(januar)
-        assertTrue(observatør.forkastet(2.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
-        assertEquals(listOf(1.januar til 1.januar, 1.januar til 31.januar), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
-    }
-
-    @Test
-    fun `Sender forventede sykmeldingsperioder når søknad blir kastet ut pga delvis overlapp`() {
-        håndterSøknad(1.januar til 25.januar, sendTilGosys = true)
-
-        håndterSykmelding(januar)
-        håndterSøknad(januar)
-        assertTrue(observatør.forkastet(1.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
-        assertTrue(observatør.forkastet(2.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
-        assertEquals(listOf(1.januar til 25.januar, 1.januar til 31.januar), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
-    }
-
-    @Test
-    fun `Forventer arbeidsgiveropplysninger når søknad delvis overlapper med en kort periode`() {
-        nyPeriode(1.januar til 15.januar)
-
-        håndterSykmelding(januar)
-        håndterSøknad(januar)
-        assertVarsel(Varselkode.RV_SØ_13, 1.vedtaksperiode.filter())
-        assertEquals(listOf(1.januar til 15.januar, 1.januar til 31.januar), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
-        assertTrue(observatør.forkastet(2.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
+        assertEquals(emptyList<Periode>(), observatør.forkastet(2.vedtaksperiode.id(a1)).sykmeldingsperioder)
     }
 
     @Test

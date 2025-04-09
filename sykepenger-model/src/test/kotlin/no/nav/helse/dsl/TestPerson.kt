@@ -165,10 +165,12 @@ internal class TestPerson(
 
         internal fun håndterSøknad(
             periode: Periode,
-            inntekterFraNyeArbeidsforhold: Boolean = false
+            inntekterFraNyeArbeidsforhold: Boolean = false,
+            sendTilGosys: Boolean = false
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, 100.prosent),
-            inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold
+            inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
+            sendTilGosys = sendTilGosys
         )
 
         internal fun håndterArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning): UUID {
@@ -199,7 +201,7 @@ internal class TestPerson(
             sendTilGosys: Boolean = false,
             registrert: LocalDateTime = LocalDateTime.now(),
             merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
-            inntekterFraNyeArbeidsforhold: Boolean = false
+            inntekterFraNyeArbeidsforhold: Boolean = false,
         ) =
             behovsamler.fangInntektsmeldingReplay({
                 vedtaksperiodesamler.fangVedtaksperiode(this.orgnummer) {

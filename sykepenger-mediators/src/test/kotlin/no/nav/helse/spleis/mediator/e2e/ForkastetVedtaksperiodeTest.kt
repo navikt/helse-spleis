@@ -63,7 +63,7 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "harPeriodeInnenfor16Dager" : false,
               "trengerArbeidsgiveropplysninger": true,
               "hendelser": ["$søknadId2"],
-              "sykmeldingsperioder": [{"fom": "2018-01-03", "tom": "2018-01-26"}, {"fom": "2018-01-03", "tom": "2018-01-27"}],
+              "sykmeldingsperioder": [{"fom": "2018-01-03", "tom": "2018-01-27"}],
               "vedtaksperiodeId": "<uuid>"
             }
         """
@@ -134,7 +134,7 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
                 1.februar,
                 28.februar,
                 false,
-                listOf(1.januar til 31.januar, 1.februar til 28.februar)
+                emptyList()
             ), 1
         )
     }

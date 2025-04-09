@@ -444,7 +444,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
                 trengerArbeidsgiveropplysninger = false,
-                sykmeldingsperioder = listOf(januar, 28.januar til 28.februar)
+                sykmeldingsperioder = emptyList()
             ), observatør.forkastet(2.vedtaksperiode.id(a1))
         )
     }
@@ -522,7 +522,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 forlengerPeriode = true,
                 harPeriodeInnenfor16Dager = false,
                 trengerArbeidsgiveropplysninger = false,
-                sykmeldingsperioder = listOf(11.januar til 16.januar, 10.januar til 15.januar)
+                sykmeldingsperioder = emptyList()
             ), observatør.forkastet(2.vedtaksperiode.id(a1))
         )
     }

@@ -5,11 +5,8 @@ import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.hendelser.DagerFraInntektsmelding
-import no.nav.helse.person.Vedtaksperiode.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 
 internal class ForkastetVedtaksperiode(
     private val vedtaksperiode: Vedtaksperiode
@@ -18,33 +15,24 @@ internal class ForkastetVedtaksperiode(
     fun view() = vedtaksperiode.view()
 
     internal companion object {
-        private fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.vedtaksperiode }
+        private fun Iterable<ForkastetVedtaksperiode>.vedtaksperioder() = map { it.vedtaksperiode }
+
+        internal fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.vedtaksperiode.periode }
 
         internal fun List<ForkastetVedtaksperiode>.overlapperMed(dagerFraInntektsmelding: DagerFraInntektsmelding) =
-            perioder().any { dagerFraInntektsmelding.overlapperMed(it.periode) }
+            vedtaksperioder().any { dagerFraInntektsmelding.overlapperMed(it.periode) }
 
         internal fun harNyereForkastetPeriode(forkastede: Iterable<ForkastetVedtaksperiode>, vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) =
-            Vedtaksperiode.harNyereForkastetPeriode(forkastede.perioder(), vedtaksperiode, aktivitetslogg)
+            Vedtaksperiode.harNyereForkastetPeriode(forkastede.vedtaksperioder(), vedtaksperiode, aktivitetslogg)
 
         internal fun harOverlappendeForkastetPeriode(forkastede: Iterable<ForkastetVedtaksperiode>, vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) =
-            Vedtaksperiode.harOverlappendeForkastetPeriode(forkastede.perioder(), vedtaksperiode, aktivitetslogg)
+            Vedtaksperiode.harOverlappendeForkastetPeriode(forkastede.vedtaksperioder(), vedtaksperiode, aktivitetslogg)
 
         internal fun forlengerForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, aktivitetslogg: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) =
-            Vedtaksperiode.forlengerForkastet(forkastede.perioder(), aktivitetslogg, vedtaksperiode)
-
-        internal fun Iterable<ForkastetVedtaksperiode>.slåSammenSykdomstidslinjer(sykdomstidslinje: Sykdomstidslinje) = perioder().slåSammenForkastedeSykdomstidslinjer(sykdomstidslinje)
+            Vedtaksperiode.forlengerForkastet(forkastede.vedtaksperioder(), aktivitetslogg, vedtaksperiode)
 
         internal fun harKortGapTilForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, aktivitetslogg: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) =
-            Vedtaksperiode.harKortGapTilForkastet(forkastede.perioder(), aktivitetslogg, vedtaksperiode)
-
-        internal fun hørerTilArbeidsgiverperiode(
-            forkastede: List<ForkastetVedtaksperiode>,
-            vedtaksperioder: List<Vedtaksperiode>,
-            arbeidsgiverperiode: Arbeidsgiverperiode
-        ): List<Vedtaksperiode> =
-            (forkastede.map { it.vedtaksperiode } + vedtaksperioder)
-                .sorted()
-                .filter { arbeidsgiverperiode.hørerTil(it.periode) }
+            Vedtaksperiode.harKortGapTilForkastet(forkastede.vedtaksperioder(), aktivitetslogg, vedtaksperiode)
 
         internal fun gjenopprett(
             person: Person,

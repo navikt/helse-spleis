@@ -50,7 +50,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrArbeidsgiveropplysninger
-import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
+import no.nav.helse.person.ForkastetVedtaksperiode.Companion.perioder
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
@@ -948,12 +948,6 @@ internal class Arbeidsgiver private constructor(
         return sykdomshistorikk.sykdomstidslinje()
     }
 
-    private fun sykdomstidslinjeInkludertForkastet(sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
-        return forkastede
-            .slåSammenSykdomstidslinjer(sykdomstidslinje)
-            .merge(sykdomstidslinje(), replace)
-    }
-
     private fun arbeidsgiverperiodeFor(sykdomstidslinje: Sykdomstidslinje): List<Arbeidsgiverperioderesultat> {
         val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
         val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller)
@@ -982,9 +976,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun arbeidsgiverperiode(periode: Periode) =
         arbeidsgiverperiode(periode, sykdomstidslinje())
-
-    internal fun arbeidsgiverperiodeInkludertForkastet(periode: Periode, sykdomstidslinje: Sykdomstidslinje) =
-        arbeidsgiverperiode(periode, sykdomstidslinjeInkludertForkastet(sykdomstidslinje))
 
     internal fun arbeidsgiverperiodeHensyntattEgenmeldinger(periode: Periode): Arbeidsgiverperiode? {
         val egenmeldingsperioder = vedtaksperioder.egenmeldingsperioder()
@@ -1159,11 +1150,6 @@ internal class Arbeidsgiver private constructor(
         return vedtaksperioder.filter(SAMME_ARBEIDSGIVERPERIODE(this, arbeidsgiverperiode))
     }
 
-    fun vedtaksperioderKnyttetTilArbeidsgiverperiodeInkludertForkastede(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Vedtaksperiode> {
-        if (arbeidsgiverperiode == null) return emptyList()
-        return ForkastetVedtaksperiode.hørerTilArbeidsgiverperiode(forkastede, vedtaksperioder, arbeidsgiverperiode)
-    }
-
     internal fun vedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.filter { it.slutterEtter(dato) }
     internal fun dto(nestemann: Vedtaksperiode?): ArbeidsgiverUtDto {
         val vedtaksperioderDto = vedtaksperioder.map { it.dto(nestemann) }
@@ -1189,5 +1175,11 @@ internal class Arbeidsgiver private constructor(
                 sisteBehandlingId = refusjonsopplysningerPåSisteBehandling?.first
             )
         )
+    }
+
+    internal fun alleVedtaksperider(): List<Periode> {
+        val forkastedePerioder = forkastede.perioder()
+        val aktivePeriode = vedtaksperioder.map { it.periode }
+        return (forkastedePerioder + aktivePeriode).sortedBy { it.start }
     }
 }

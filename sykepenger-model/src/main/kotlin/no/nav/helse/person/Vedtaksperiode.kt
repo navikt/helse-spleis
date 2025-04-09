@@ -45,6 +45,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Påminnelse
@@ -170,7 +171,6 @@ import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -1289,23 +1289,44 @@ internal class Vedtaksperiode private constructor(
 
             AvventerInfotrygdHistorikk,
             Start -> {
-                val arbeidsgiverperiodeHensyntarForkastede = finnArbeidsgiverperiodeHensyntarForkastede()
-                val trengerArbeidsgiveropplysninger = arbeidsgiverperiodeHensyntarForkastede?.forventerOpplysninger(periode) == true
-                val sykmeldingsperioder = sykmeldingsperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiodeHensyntarForkastede)
+                val (trengerArbeidsgiveropplysninger, sykmeldingsperioder) = trengerArbeidsgiveropplysningerForForkastetPeriode()
 
                 VedtaksperiodeForkastetEventBuilder(tilstand.type, trengerArbeidsgiveropplysninger, sykmeldingsperioder)
             }
         }
-        
         tilstand(aktivitetsloggMedVedtaksperiodekontekst, TilInfotrygd)
         return vedtaksperiodeForkastetEventBuilder
     }
 
-    private fun sykmeldingsperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Periode> {
-        val forkastedeVedtaksperioder =
-            arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiodeInkludertForkastede(arbeidsgiverperiode)
-        return (forkastedeVedtaksperioder.map { it.sykmeldingsperiode }
-            .filter { it.start < sykmeldingsperiode.endInclusive } + listOf(sykmeldingsperiode)).distinct()
+    private fun trengerArbeidsgiveropplysningerForForkastetPeriode(): Pair<Boolean, List<Periode>> {
+        val alleVedtaksperioderFørMeg = arbeidsgiver.alleVedtaksperider()
+            .filter { it.start < periode.start }
+
+        val perioderKnyttetTilSammeArbeidsgiverperiode = alleVedtaksperioderFørMeg
+            .reversed()
+            .fold(listOf(periode)) { relevantePerioder, nestePeriode ->
+                val eldsteRelevantePeriode = relevantePerioder.minBy { it.start }
+                val forStortGapTilÅVæreInteressant = (nestePeriode.periodeMellom(eldsteRelevantePeriode.start)?.count() ?: 0) >= 16
+                if (forStortGapTilÅVæreInteressant) {
+                    return@fold relevantePerioder
+                }
+                relevantePerioder + listOf(nestePeriode)
+            }
+
+        // Alle relevante perioder er innenfor AGP
+        val antallDagerMedMeg = perioderKnyttetTilSammeArbeidsgiverperiode.grupperSammenhengendePerioder().sumOf { it.count() }
+        if (antallDagerMedMeg <= 16) return Pair(false, emptyList())
+
+        // Den forkastede vedtaksperioden er den første som strekker seg utover AGP
+        val antallDagerUtenMeg = antallDagerMedMeg - periode.count()
+        if (antallDagerUtenMeg <= 16) return Pair(true, perioderKnyttetTilSammeArbeidsgiverperiode.reversed())
+
+        // Tidligere perioder har strukket seg forbi AGP, denne perioden trenger kun opplysninger dersom det er gap til forrige periode
+        val erForlengelse = perioderKnyttetTilSammeArbeidsgiverperiode
+            .filterNot { it == periode }
+            .any { it.erRettFør(periode) || it.overlapperMed(periode) }
+        if (erForlengelse) return Pair(false, emptyList())
+        return Pair(true, perioderKnyttetTilSammeArbeidsgiverperiode.reversed())
     }
 
     internal inner class VedtaksperiodeForkastetEventBuilder(
@@ -1876,8 +1897,6 @@ internal class Vedtaksperiode private constructor(
         "${this.periode.start} - ${this.periode.endInclusive} (${this.tilstand::class.simpleName})"
 
     private fun finnArbeidsgiverperiode() = arbeidsgiver.arbeidsgiverperiode(periode)
-    private fun finnArbeidsgiverperiodeHensyntarForkastede() =
-        arbeidsgiver.arbeidsgiverperiodeInkludertForkastet(periode, sykdomstidslinje)
 
     private fun skalBehandlesISpeil(): Boolean {
         return forventerInntekt() || behandlinger.navOvertarAnsvar()
@@ -3481,9 +3500,6 @@ internal class Vedtaksperiode private constructor(
                 return dagerMellom < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
             }
         }
-
-        internal fun List<Vedtaksperiode>.slåSammenForkastedeSykdomstidslinjer(sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje =
-            map { it.sykdomstidslinje }.plusElement(sykdomstidslinje).slåSammenForkastedeSykdomstidslinjer()
 
         internal fun gjenopprett(
             person: Person,
