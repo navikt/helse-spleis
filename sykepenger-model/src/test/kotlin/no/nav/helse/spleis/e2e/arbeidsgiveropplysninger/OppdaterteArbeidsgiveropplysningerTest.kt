@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import no.nav.helse.dsl.INNTEKT
+import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
@@ -46,6 +47,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }.size)
 
         val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+            personidentifikator = UNG_PERSON_FNR_2018,
             organisasjonsnummer = a1,
             vedtaksperiodeId = 1.vedtaksperiode.id(a1),
             skjæringstidspunkt = 1.januar,
@@ -102,6 +104,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(2, arbeidsgiveropplysningerEventer.size)
         arbeidsgiveropplysningerEventer.last().also { trengerArbeidsgiveropplysningerEvent ->
             val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+                personidentifikator = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                 skjæringstidspunkt = 1.januar,
@@ -142,6 +145,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+            personidentifikator = UNG_PERSON_FNR_2018,
             organisasjonsnummer = a1,
             vedtaksperiodeId = 2.vedtaksperiode.id(a1),
             skjæringstidspunkt = 10.februar,

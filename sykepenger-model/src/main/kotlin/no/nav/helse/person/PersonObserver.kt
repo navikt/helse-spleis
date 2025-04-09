@@ -123,6 +123,7 @@ interface PersonObserver {
     }
 
     data class TrengerArbeidsgiveropplysningerEvent(
+        val personidentifikator: Personidentifikator,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val skjæringstidspunkt: LocalDate,
@@ -576,18 +577,7 @@ interface PersonObserver {
         val behandlingId: UUID
     )
 
-    fun inntektsmeldingReplay(
-        personidentifikator: Personidentifikator,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        skjæringstidspunkt: LocalDate,
-        sykmeldingsperioder: List<Periode>,
-        egenmeldingsperioder: List<Periode>,
-        førsteFraværsdager: List<FørsteFraværsdag>,
-        trengerArbeidsgiverperiode: Boolean
-    ) {
-    }
-
+    fun inntektsmeldingReplay(event: TrengerArbeidsgiveropplysningerEvent) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {}
     fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, nåværendeTilstand: TilstandType) {}

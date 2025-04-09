@@ -1,14 +1,10 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
 import java.util.*
-import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spill_av_im.Forespørsel
@@ -174,26 +170,17 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         trengerArbeidsgiveroppysninger.remove(event.vedtaksperiodeId)
     }
 
-    override fun inntektsmeldingReplay(
-        personidentifikator: Personidentifikator,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        skjæringstidspunkt: LocalDate,
-        sykmeldingsperioder: List<Periode>,
-        egenmeldingsperioder: List<Periode>,
-        førsteFraværsdager: List<FørsteFraværsdag>,
-        trengerArbeidsgiverperiode: Boolean
-    ) {
+    override fun inntektsmeldingReplay(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
         inntektsmeldingReplayEventer.add(
             Forespørsel(
-                fnr = personidentifikator.toString(),
-                orgnr = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                skjæringstidspunkt = skjæringstidspunkt,
-                førsteFraværsdager = førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.organisasjonsnummer, it.førsteFraværsdag) },
-                sykmeldingsperioder = sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-                egenmeldinger = egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-                harForespurtArbeidsgiverperiode = trengerArbeidsgiverperiode
+                fnr = event.personidentifikator.toString(),
+                orgnr = event.organisasjonsnummer,
+                vedtaksperiodeId = event.vedtaksperiodeId,
+                skjæringstidspunkt = event.skjæringstidspunkt,
+                førsteFraværsdager = event.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.organisasjonsnummer, it.førsteFraværsdag) },
+                sykmeldingsperioder = event.sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
+                egenmeldinger = event.egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
+                harForespurtArbeidsgiverperiode = PersonObserver.Arbeidsgiverperiode in event.forespurteOpplysninger
             )
         )
     }

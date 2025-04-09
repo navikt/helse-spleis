@@ -1,11 +1,7 @@
 package no.nav.helse.dsl
 
-import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -101,25 +97,18 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
     }
 
     override fun inntektsmeldingReplay(
-        personidentifikator: Personidentifikator,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        skjæringstidspunkt: LocalDate,
-        sykmeldingsperioder: List<Periode>,
-        egenmeldingsperioder: List<Periode>,
-        førsteFraværsdager: List<FørsteFraværsdag>,
-        trengerArbeidsgiverperiode: Boolean
+        event: PersonObserver.TrengerArbeidsgiveropplysningerEvent
     ) {
         replays.add(
             Forespørsel(
-                fnr = personidentifikator.toString(),
-                orgnr = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                skjæringstidspunkt = skjæringstidspunkt,
-                førsteFraværsdager = førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.organisasjonsnummer, it.førsteFraværsdag) },
-                sykmeldingsperioder = sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-                egenmeldinger = egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-                harForespurtArbeidsgiverperiode = trengerArbeidsgiverperiode
+                fnr = event.personidentifikator.toString(),
+                orgnr = event.organisasjonsnummer,
+                vedtaksperiodeId = event.vedtaksperiodeId,
+                skjæringstidspunkt = event.skjæringstidspunkt,
+                førsteFraværsdager = event.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.organisasjonsnummer, it.førsteFraværsdag) },
+                sykmeldingsperioder = event.sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
+                egenmeldinger = event.egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
+                harForespurtArbeidsgiverperiode = PersonObserver.Arbeidsgiverperiode in event.forespurteOpplysninger
             )
         )
     }

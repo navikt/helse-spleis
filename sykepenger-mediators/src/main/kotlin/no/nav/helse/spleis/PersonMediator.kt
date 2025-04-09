@@ -5,13 +5,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import java.time.LocalDate
-import java.util.UUID
-import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.Periode
+import java.util.*
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
@@ -43,44 +39,8 @@ internal class PersonMediator(
         meldinger.add(Pakke(fødselsnummer, eventName, message))
     }
 
-    override fun inntektsmeldingReplay(
-        personidentifikator: Personidentifikator,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        skjæringstidspunkt: LocalDate,
-        sykmeldingsperioder: List<Periode>,
-        egenmeldingsperioder: List<Periode>,
-        førsteFraværsdager: List<FørsteFraværsdag>,
-        trengerArbeidsgiverperiode: Boolean
-    ) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "trenger_inntektsmelding_replay", mapOf(
-                    "organisasjonsnummer" to organisasjonsnummer,
-                    "vedtaksperiodeId" to vedtaksperiodeId,
-                    "skjæringstidspunkt" to skjæringstidspunkt,
-                    "sykmeldingsperioder" to sykmeldingsperioder.map {
-                        mapOf(
-                            "fom" to it.start,
-                            "tom" to it.endInclusive
-                        )
-                    },
-                    "egenmeldingsperioder" to egenmeldingsperioder.map {
-                        mapOf(
-                            "fom" to it.start,
-                            "tom" to it.endInclusive
-                        )
-                    },
-                    "førsteFraværsdager" to førsteFraværsdager.map {
-                        mapOf(
-                            "organisasjonsnummer" to it.organisasjonsnummer,
-                            "førsteFraværsdag" to it.førsteFraværsdag
-                        )
-                    },
-                    "trengerArbeidsgiverperiode" to trengerArbeidsgiverperiode
-                )
-            )
-        )
+    override fun inntektsmeldingReplay(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
+        queueMessage(JsonMessage.newMessage("trenger_inntektsmelding_replay", event.toJsonMap()))
     }
 
     override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) {

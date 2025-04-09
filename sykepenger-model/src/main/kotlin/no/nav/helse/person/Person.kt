@@ -70,7 +70,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
 import no.nav.helse.person.Arbeidsgiver.Companion.validerTilstand
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.venter
-import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -510,27 +509,8 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodeEndret(event) }
     }
 
-    internal fun inntektsmeldingReplay(
-        vedtaksperiodeId: UUID,
-        skjæringstidspunkt: LocalDate,
-        organisasjonsnummer: String,
-        sykmeldingsperioder: List<Periode>,
-        egenmeldingsperioder: List<Periode>,
-        førsteFraværsdager: List<FørsteFraværsdag>,
-        trengerArbeidsgiverperiode: Boolean
-    ) {
-        observers.forEach {
-            it.inntektsmeldingReplay(
-                personidentifikator = personidentifikator,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                skjæringstidspunkt = skjæringstidspunkt,
-                sykmeldingsperioder = sykmeldingsperioder,
-                egenmeldingsperioder = egenmeldingsperioder,
-                førsteFraværsdager = førsteFraværsdager,
-                trengerArbeidsgiverperiode = trengerArbeidsgiverperiode
-            )
-        }
+    internal fun inntektsmeldingReplay(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
+        observers.forEach { it.inntektsmeldingReplay(event) }
     }
 
     internal fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {

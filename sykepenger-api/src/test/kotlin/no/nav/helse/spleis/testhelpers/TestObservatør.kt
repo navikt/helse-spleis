@@ -1,11 +1,7 @@
 package no.nav.helse.spleis.testhelpers
 
-import java.time.LocalDate
-import java.util.UUID
-import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.Periode
+import java.util.*
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.IdInnhenter
@@ -34,16 +30,9 @@ internal class TestObservatør : PersonObserver {
     }
 
     override fun inntektsmeldingReplay(
-        personidentifikator: Personidentifikator,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        skjæringstidspunkt: LocalDate,
-        sykmeldingsperioder: List<Periode>,
-        egenmeldingsperioder: List<Periode>,
-        førsteFraværsdager: List<FørsteFraværsdag>,
-        trengerArbeidsgiverperiode: Boolean
+        event: PersonObserver.TrengerArbeidsgiveropplysningerEvent
     ) {
-        ventendeReplays.add(organisasjonsnummer to vedtaksperiodeId)
+        ventendeReplays.add(event.organisasjonsnummer to event.vedtaksperiodeId)
     }
 
     override fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {

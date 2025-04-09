@@ -7,6 +7,7 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
+import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
@@ -142,6 +143,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSøknad(Sykdom(17.februar, 28.februar, 100.prosent), egenmeldinger = listOf(10.februar.somPeriode()))
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             val forventet = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+                personidentifikator = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 2.vedtaksperiode,
                 skjæringstidspunkt = 17.februar,

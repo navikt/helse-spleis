@@ -1641,20 +1641,26 @@ internal class Vedtaksperiode private constructor(
             // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
             else -> listOf(this)
         }
-        val førsteFraværsdager = førsteFraværsdagerForForespørsel()
 
-        person.trengerArbeidsgiveropplysninger(
-            PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                vedtaksperiodeId = id,
-                skjæringstidspunkt = skjæringstidspunkt,
-                sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
-                egenmeldingsperioder = egenmeldingsperioder(vedtaksperioder),
-                førsteFraværsdager = førsteFraværsdager,
-                forespurteOpplysninger = forespurteOpplysninger
-            )
-        )
+        person.trengerArbeidsgiveropplysninger(trengerArbeidsgiveropplysninger(
+            vedtaksperioder = vedtaksperioder,
+            forespurteOpplysninger = forespurteOpplysninger
+        ))
     }
+
+    private fun trengerArbeidsgiveropplysninger(
+        vedtaksperioder: List<Vedtaksperiode>,
+        forespurteOpplysninger: List<PersonObserver.ForespurtOpplysning>
+    ) = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+        personidentifikator = person.personidentifikator,
+        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+        vedtaksperiodeId = id,
+        skjæringstidspunkt = skjæringstidspunkt,
+        sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
+        egenmeldingsperioder = egenmeldingsperioder(vedtaksperioder),
+        førsteFraværsdager = førsteFraværsdagerForForespørsel(),
+        forespurteOpplysninger = forespurteOpplysninger
+    )
 
     private fun førsteFraværsdagerForForespørsel(): List<PersonObserver.FørsteFraværsdag> {
         val deAndre = person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(this.skjæringstidspunkt))
@@ -1704,17 +1710,10 @@ internal class Vedtaksperiode private constructor(
             // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
             else -> listOf(this)
         }
-        val førsteFraværsdager = førsteFraværsdagerForForespørsel()
-
-        person.inntektsmeldingReplay(
-            vedtaksperiodeId = id,
-            skjæringstidspunkt = skjæringstidspunkt,
-            organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-            sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
-            egenmeldingsperioder = egenmeldingsperioder(vedtaksperioder),
-            førsteFraværsdager = førsteFraværsdager,
-            trengerArbeidsgiverperiode = trengerArbeidsgiverperiode
-        )
+        person.inntektsmeldingReplay(trengerArbeidsgiveropplysninger(
+            vedtaksperioder = vedtaksperioder,
+            forespurteOpplysninger = if (trengerArbeidsgiverperiode) listOf(PersonObserver.Arbeidsgiverperiode) else emptyList()
+        ))
     }
 
     private fun emitVedtaksperiodeEndret(previousState: Vedtaksperiodetilstand) {
@@ -3103,24 +3102,12 @@ internal class Vedtaksperiode private constructor(
             if (arbeidsgiverperiode?.forventerInntekt(vedtaksperiode.periode) == true) {
                 // Dersom egenmeldingene hinter til at perioden er utenfor AGP, da ønsker vi å sende en ekte forespørsel til arbeidsgiver om opplysninger
                 aktivitetslogg.info("Sender trenger arbeidsgiveropplysninger fra AvsluttetUtenUtbetaling på grunn av egenmeldingsdager")
-                val vedtaksperioderMedSammeArbeidsgiverperiode = vedtaksperiode.vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(
-                    arbeidsgiverperiode = omsluttendeArbeidsgiverperiode(vedtaksperiode, arbeidsgiverperiode)
-                )
-                vedtaksperiode.person.trengerArbeidsgiveropplysninger(
-                    PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-                        organisasjonsnummer = vedtaksperiode.arbeidsgiver.organisasjonsnummer,
-                        vedtaksperiodeId = vedtaksperiode.id,
-                        skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
-                        sykmeldingsperioder = sykmeldingsperioder(vedtaksperioderMedSammeArbeidsgiverperiode),
-                        egenmeldingsperioder = egenmeldingsperioder(vedtaksperioderMedSammeArbeidsgiverperiode),
-                        førsteFraværsdager = vedtaksperiode.førsteFraværsdagerForForespørsel(),
-                        forespurteOpplysninger = listOf(
-                            PersonObserver.Inntekt,
-                            PersonObserver.Refusjon,
-                            PersonObserver.Arbeidsgiverperiode
-                        )
-                    )
-                )
+                vedtaksperiode.person.trengerArbeidsgiveropplysninger(vedtaksperiode.trengerArbeidsgiveropplysninger(
+                    vedtaksperioder = vedtaksperiode.vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(
+                        arbeidsgiverperiode = omsluttendeArbeidsgiverperiode(vedtaksperiode, arbeidsgiverperiode)
+                    ),
+                    forespurteOpplysninger = listOf(PersonObserver.Inntekt, PersonObserver.Refusjon, PersonObserver.Arbeidsgiverperiode)
+                ))
             }
             avsluttUtenVedtak(vedtaksperiode, aktivitetslogg)
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
