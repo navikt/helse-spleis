@@ -1604,15 +1604,18 @@ internal class Vedtaksperiode private constructor(
         return arbeidsgiverperiode.forventerOpplysninger(periode)
     }
 
-    private fun opplysningerViTrenger(): List<PersonObserver.ForespurtOpplysning> {
-        if (!skalBehandlesISpeil()) return emptyList() // perioden er AUU ✋
-        if (arbeidsgiver.finnVedtaksperiodeRettFør(this)?.skalBehandlesISpeil() == true) return emptyList() // Da har perioden foran oss spurt for oss/ vi har det vi trenger ✋
+    private fun opplysningerViTrenger(): Set<PersonObserver.ForespurtOpplysning> {
+        if (!skalBehandlesISpeil()) return emptySet() // perioden er AUU ✋
+        if (arbeidsgiver.finnVedtaksperiodeRettFør(this)?.skalBehandlesISpeil() == true) return emptySet() // Da har perioden foran oss spurt for oss/ vi har det vi trenger ✋
 
-        val opplysninger = mutableListOf<PersonObserver.ForespurtOpplysning>().apply {
-            if (!harEksisterendeInntekt()) add(PersonObserver.Inntekt)
+        val opplysninger = mutableSetOf<PersonObserver.ForespurtOpplysning>().apply {
+            if (!harEksisterendeInntekt()) {
+                add(PersonObserver.Inntekt)
+                add(PersonObserver.Refusjon) // TODO: Et lite hack for vi undersøker om HAG tåler at vi ikke spør om refusjon
+            }
             if (refusjonstidslinje.isEmpty()) add(PersonObserver.Refusjon)
         }
-        if (opplysninger.isEmpty()) return emptyList() // Om vi har inntekt og refusjon så er saken biff 🥩
+        if (opplysninger.isEmpty()) return emptySet() // Om vi har inntekt og refusjon så er saken biff 🥩
 
         return opplysninger.apply {
             val sisteDelAvAgp = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.lastOrNull()
