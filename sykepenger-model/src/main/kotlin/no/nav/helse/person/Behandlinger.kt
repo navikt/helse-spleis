@@ -1140,7 +1140,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         private fun avsluttetUtenVedtak(aktivitetslogg: IAktivitetslogg) {
             check(observatører.isNotEmpty()) { "behandlingen har ingen registrert observatør" }
-            observatører.forEach { it.avsluttetUtenVedtak(aktivitetslogg, id, avsluttet!!, periode, dokumentsporing.ider()) }
+            val dekkesAvArbeidsgiverperioden = arbeidsgiverperiode.periode()?.inneholder(periode) != false
+            observatører.forEach { it.avsluttetUtenVedtak(aktivitetslogg, id, avsluttet!!, periode, dekkesAvArbeidsgiverperioden, dokumentsporing.ider()) }
         }
 
         private fun emitNyBehandlingOpprettet(type: PersonObserver.BehandlingOpprettetEvent.Type) {

@@ -1771,9 +1771,10 @@ internal class Vedtaksperiode private constructor(
         behandlingId: UUID,
         tidsstempel: LocalDateTime,
         periode: Periode,
+        dekkesAvArbeidsgiverperioden: Boolean,
         dokumentsporing: Set<UUID>
     ) {
-        if (finnArbeidsgiverperiode()?.dekkesAvArbeidsgiver(periode) != false) {
+        if (dekkesAvArbeidsgiverperioden) {
             subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(periode, sykdomstidslinje.subsumsjonsformat()))
         }
         person.avsluttetUtenVedtak(

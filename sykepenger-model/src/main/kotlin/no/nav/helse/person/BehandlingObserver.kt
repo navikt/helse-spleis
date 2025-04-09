@@ -14,6 +14,7 @@ internal interface BehandlingObserver {
         behandlingId: UUID,
         tidsstempel: LocalDateTime,
         periode: Periode,
+        dekkesAvArbeidsgiverperioden: Boolean,
         dokumentsporing: Set<UUID>
     )
 
