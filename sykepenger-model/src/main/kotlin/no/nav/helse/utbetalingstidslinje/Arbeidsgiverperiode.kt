@@ -48,24 +48,10 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return !dekkesAvArbeidsgiver(periode) && erFørsteUtbetalingsdagFørEllerLik(periode)
     }
 
-    fun forventerArbeidsgiverperiodeopplysning(periode: Periode): Boolean {
-        if (dekkesAvArbeidsgiver(periode)) return false // trenger ikke opplysninger om perioden er innenfor agp
-        if (erEtterArbeidsgiverperiodeMedGap(periode)) return false
-        val utbetalingsperiode = utbetalingsdager.firstOrNull() ?: return false
-        return utbetalingsperiode.start in periode
-    }
-
     internal fun dekkesAvArbeidsgiver(periode: Periode): Boolean {
         if (fiktiv()) return false
         val arbeidsgiversAnsvar = dagerSomarbeidsgiverUtbetaler() ?: return false
         return (periode.overlapperMed(arbeidsgiversAnsvar) && arbeidsgiversAnsvar.slutterEtter(periode.endInclusive))
-    }
-
-    private fun erEtterArbeidsgiverperiodeMedGap(periode: Periode): Boolean {
-        if (fiktiv()) return false
-        val arbeidsgiversAnsvar = dagerSomarbeidsgiverUtbetaler() ?: return false
-        if (arbeidsgiversAnsvar.erRettFør(periode)) return false // da er det en forlengelse og da kan vi spørre 🤡
-        return periode.starterEtter(arbeidsgiversAnsvar)
     }
 
     private fun dagerSomarbeidsgiverUtbetaler(): Periode? {

@@ -1656,8 +1656,14 @@ internal class Vedtaksperiode private constructor(
 
         return opplysninger.apply {
             val sisteDelAvAgp = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.lastOrNull()
+
+            // Trenger ikke opplysninger om arbeidsgiverperiode dersom Nav har overtatt ansvar for den
+            val arbeidsgiverEierArbeidsgiverperiode = behandlinger.dagerNavOvertarAnsvar.isEmpty()
+
             // Vi "trenger" jo aldri AGP, men spør om vi perioden overlapper/er rett etter beregnet AGP
-            if (sisteDelAvAgp?.overlapperMed(periode) == true || sisteDelAvAgp?.erRettFør(periode) == true) {
+            val trengerArbeidsgiverperiode = sisteDelAvAgp?.overlapperMed(periode) == true || sisteDelAvAgp?.erRettFør(periode) == true
+
+            if (arbeidsgiverEierArbeidsgiverperiode && trengerArbeidsgiverperiode) {
                 add(PersonObserver.Arbeidsgiverperiode)
             }
         }
@@ -1727,22 +1733,20 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun trengerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) =
-        arbeidsgiverperiode != null && arbeidsgiverperiode.forventerArbeidsgiverperiodeopplysning(periode)
 
     private fun trengerInntektsmeldingReplay() {
-        val arbeidsgiverperiode = finnArbeidsgiverperiode()
         val erKortPeriode = !skalBehandlesISpeil()
-        val trengerArbeidsgiverperiode = trengerArbeidsgiverperiode(arbeidsgiverperiode) || erKortPeriode
+        val opplysningerViTrenger = if (erKortPeriode) opplysningerViTrenger() + PersonObserver.Arbeidsgiverperiode else opplysningerViTrenger()
+
         val vedtaksperioder = when {
             // For å beregne riktig arbeidsgiverperiode/første fraværsdag
-            trengerArbeidsgiverperiode -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne()
+            PersonObserver.Arbeidsgiverperiode in opplysningerViTrenger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne()
             // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
             else -> listOf(this)
         }
         person.inntektsmeldingReplay(trengerArbeidsgiveropplysninger(
             vedtaksperioder = vedtaksperioder,
-            forespurteOpplysninger = if (trengerArbeidsgiverperiode) setOf(PersonObserver.Arbeidsgiverperiode) else emptySet()
+            forespurteOpplysninger = opplysningerViTrenger
         ))
     }
 
