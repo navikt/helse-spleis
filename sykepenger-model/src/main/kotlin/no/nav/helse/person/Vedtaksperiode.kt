@@ -1268,13 +1268,35 @@ internal class Vedtaksperiode private constructor(
         if (!kanForkastes(vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst, hendelse)) return null
         aktivitetsloggMedVedtaksperiodekontekst.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.behandlinger.forkast(arbeidsgiver, hendelse.metadata.behandlingkilde, hendelse.metadata.automatiskBehandling, aktivitetsloggMedVedtaksperiodekontekst)
-        val arbeidsgiverperiodeHensyntarForkastede = finnArbeidsgiverperiodeHensyntarForkastede()
-        val trengerArbeidsgiveropplysninger =
-            arbeidsgiverperiodeHensyntarForkastede?.forventerOpplysninger(periode) == true
-        val sykmeldingsperioder =
-            sykmeldingsperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiodeHensyntarForkastede)
-        val vedtaksperiodeForkastetEventBuilder =
-            VedtaksperiodeForkastetEventBuilder(tilstand.type, trengerArbeidsgiveropplysninger, sykmeldingsperioder)
+        val vedtaksperiodeForkastetEventBuilder = when (tilstand) {
+            // Vedtaksperioder i disse tilstandene har rukket å sende ut egne forespørsler før de ble forkastet
+            Avsluttet,
+            AvsluttetUtenUtbetaling,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInntektsmelding,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering,
+            RevurderingFeilet,
+            TilInfotrygd,
+            TilUtbetaling -> VedtaksperiodeForkastetEventBuilder(tilstand.type, false, emptyList())
+
+            AvventerInfotrygdHistorikk,
+            Start -> {
+                val arbeidsgiverperiodeHensyntarForkastede = finnArbeidsgiverperiodeHensyntarForkastede()
+                val trengerArbeidsgiveropplysninger = arbeidsgiverperiodeHensyntarForkastede?.forventerOpplysninger(periode) == true
+                val sykmeldingsperioder = sykmeldingsperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiodeHensyntarForkastede)
+
+                VedtaksperiodeForkastetEventBuilder(tilstand.type, trengerArbeidsgiveropplysninger, sykmeldingsperioder)
+            }
+        }
+        
         tilstand(aktivitetsloggMedVedtaksperiodekontekst, TilInfotrygd)
         return vedtaksperiodeForkastetEventBuilder
     }

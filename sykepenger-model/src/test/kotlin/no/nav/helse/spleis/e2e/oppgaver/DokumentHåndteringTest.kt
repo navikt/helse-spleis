@@ -399,8 +399,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 behandletIInfotrygd = false,
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
-                trengerArbeidsgiveropplysninger = true,
-                sykmeldingsperioder = listOf(1.januar til 16.januar, 17.januar til 31.januar)
+                trengerArbeidsgiveropplysninger = false,
+                sykmeldingsperioder = emptyList()
             ), observatør.forkastet(2.vedtaksperiode.id(a1))
         )
         assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
@@ -466,8 +466,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 behandletIInfotrygd = false,
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
-                trengerArbeidsgiveropplysninger = true,
-                sykmeldingsperioder = listOf(januar, 10.februar til 28.februar)
+                trengerArbeidsgiveropplysninger = false,
+                sykmeldingsperioder = emptyList()
             ), observatør.forkastet(2.vedtaksperiode.id(a1))
         )
     }

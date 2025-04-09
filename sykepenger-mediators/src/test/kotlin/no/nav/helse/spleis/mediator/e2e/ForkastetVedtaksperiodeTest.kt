@@ -42,9 +42,9 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "behandletIInfotrygd": false,
               "forlengerPeriode" : false,
               "harPeriodeInnenfor16Dager" : false,
-              "trengerArbeidsgiveropplysninger": true,
+              "trengerArbeidsgiveropplysninger": false,
               "hendelser": ["$søknadId"],
-              "sykmeldingsperioder": [{"fom": "2018-01-03", "tom": "2018-01-26"}],
+              "sykmeldingsperioder": [],
               "vedtaksperiodeId": "<uuid>"
             }
         """

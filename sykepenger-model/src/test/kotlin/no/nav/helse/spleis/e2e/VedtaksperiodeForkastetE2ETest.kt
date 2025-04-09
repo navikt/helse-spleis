@@ -1,10 +1,10 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -258,16 +258,8 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         nyPeriode(januar)
         forkastAlle()
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertForventetFeil(
-            forklaring = "Falsk positiv",
-            nå = {
-                assertTrue(observatør.forkastet(1.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
-            },
-            ønsket = {
-                assertFalse(observatør.forkastet(1.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
-            }
-        )
-        assertEquals(listOf(januar), observatør.forkastet(1.vedtaksperiode.id(a1)).sykmeldingsperioder)
+        assertFalse(observatør.forkastet(1.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
+        assertEquals(emptyList<Periode>(), observatør.forkastet(1.vedtaksperiode.id(a1)).sykmeldingsperioder)
     }
 
     @Test
@@ -294,7 +286,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender forventede sykmeldingsperioder når søknad blir kastet ut pga delvis overlapp`() {
-        nyPeriode(1.januar til 25.januar)
+        håndterSøknad(1.januar til 25.januar, sendTilGosys = true)
 
         håndterSykmelding(januar)
         håndterSøknad(januar)
@@ -316,7 +308,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender ikke med senere sykmeldingsperioder enn vedtaksperioden som forkastes`() {
-        nyPeriode(januar)
+        håndterSøknad(januar, sendTilGosys = true)
         nyPeriode(februar)
         forkastAlle()
         assertEquals(listOf(januar), observatør.forkastet(1.vedtaksperiode.id(a1)).sykmeldingsperioder)
