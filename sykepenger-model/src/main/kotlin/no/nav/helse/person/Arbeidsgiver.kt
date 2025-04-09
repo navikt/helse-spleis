@@ -935,13 +935,13 @@ internal class Arbeidsgiver private constructor(
         return sykdomshistorikk.sykdomstidslinje()
     }
 
-    private fun arbeidsgiverperiodeFor(sykdomstidslinje: Sykdomstidslinje): List<Arbeidsgiverperioderesultat> {
+    private fun arbeidsgiverperiodeFor(): List<Arbeidsgiverperioderesultat> {
         val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
         val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller)
         // hensyntar historikk fra infotrygd, men spleis-tidslinjen overskriver eventuell overlappende info
         val samletTidslinje = person.infotrygdhistorikk
             .sykdomstidslinje(organisasjonsnummer)
-            .merge(sykdomstidslinje, replace)
+            .merge(sykdomstidslinjeHensyntattEgenmeldinger(), replace)
         return arbeidsgiverperiodeberegner.resultat(
             samletTidslinje,
             person.infotrygdhistorikk.betaltePerioder(organisasjonsnummer)
@@ -949,33 +949,28 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun beregnArbeidsgiverperiode() = { vedtaksperiode: Periode ->
-        arbeidsgiverperiodeFor(sykdomstidslinje())
+        arbeidsgiverperiodeFor()
             .finn(vedtaksperiode)
             ?.arbeidsgiverperiode
             ?.grupperSammenhengendePerioder()
             ?: emptyList()
     }
 
-    private fun arbeidsgiverperiode(periode: Periode, sykdomstidslinje: Sykdomstidslinje): Arbeidsgiverperiode? {
-        val arbeidsgiverperioder = arbeidsgiverperiodeFor(sykdomstidslinje)
+    internal fun arbeidsgiverperiode(periode: Periode): Arbeidsgiverperiode? {
+        val arbeidsgiverperioder = arbeidsgiverperiodeFor()
         return arbeidsgiverperioder.finn(periode)?.somArbeidsgiverperiode()
     }
 
-    internal fun arbeidsgiverperiode(periode: Periode) =
-        arbeidsgiverperiode(periode, sykdomstidslinje())
-
-    internal fun arbeidsgiverperiodeHensyntattEgenmeldinger(periode: Periode): Arbeidsgiverperiode? {
+    private fun sykdomstidslinjeHensyntattEgenmeldinger(): Sykdomstidslinje {
         val egenmeldingsperioder = vedtaksperioder.egenmeldingsperioder()
-        if (egenmeldingsperioder.isEmpty()) return arbeidsgiverperiode(periode)
+        if (egenmeldingsperioder.isEmpty()) return sykdomstidslinje()
 
         val tøyseteKilde = Hendelseskilde(Søknad::class, MeldingsreferanseId(UUID.randomUUID()), LocalDateTime.now())
         val egenmeldingstidslinje = egenmeldingsperioder
             .map { Sykdomstidslinje.arbeidsgiverdager(it.start, it.endInclusive, 100.prosent, tøyseteKilde) }
             .merge()
-            .fremTilOgMed(periode.endInclusive)
 
-        val sykdomstidslinjeMedEgenmeldinger = egenmeldingstidslinje.merge(sykdomstidslinje(), replace)
-        return arbeidsgiverperiode(periode, sykdomstidslinjeMedEgenmeldinger)
+        return egenmeldingstidslinje.merge(sykdomstidslinje(), replace)
     }
 
     /**

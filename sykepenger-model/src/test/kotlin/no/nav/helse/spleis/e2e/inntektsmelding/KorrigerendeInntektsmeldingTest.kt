@@ -333,14 +333,14 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     fun `Endring i siste del av agp`() {
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         nyttVedtak(10.januar til 31.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        val agpFør = inspektør.arbeidsgiver.arbeidsgiverperiode(10.januar til 31.januar)
+        val agpFør = inspektør.arbeidsgiverperiode(2.vedtaksperiode)
         håndterInntektsmelding(
             listOf(12.januar til 27.januar)
         )
-        val agpEtter = inspektør.arbeidsgiver.arbeidsgiverperiode(10.januar til 31.januar)
+        val agpEtter = inspektør.arbeidsgiverperiode(2.vedtaksperiode)
 
-        assertEquals(Arbeidsgiverperiode(listOf(1.januar til 5.januar, 10.januar til 26.januar)), agpFør)
-        assertEquals(Arbeidsgiverperiode(listOf(1.januar til 5.januar, 12.januar til 28.januar)), agpEtter)
+        assertEquals(listOf(1.januar til 5.januar, 10.januar til 20.januar), agpFør)
+        assertEquals(listOf(1.januar til 5.januar, 12.januar til 22.januar), agpEtter)
 
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
 

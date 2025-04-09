@@ -1661,35 +1661,32 @@ internal class Vedtaksperiode private constructor(
 
     private fun sendTrengerArbeidsgiveropplysninger() {
         val forespurteOpplysninger = opplysningerViTrenger().takeUnless { it.isEmpty() } ?: return
-        val vedtaksperioder = when {
-            // For å beregne riktig arbeidsgiverperiode/første fraværsdag
-            PersonObserver.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne()
-            // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
-            else -> listOf(this)
-        }
-
-        person.trengerArbeidsgiveropplysninger(trengerArbeidsgiveropplysninger(
-            vedtaksperioder = vedtaksperioder,
-            forespurteOpplysninger = forespurteOpplysninger
-        ))
+        person.trengerArbeidsgiveropplysninger(trengerArbeidsgiveropplysninger(forespurteOpplysninger))
 
         // ved out-of-order gir vi beskjed om at vi ikke trenger arbeidsgiveropplysninger for den seneste perioden lenger
         arbeidsgiver.finnVedtaksperiodeRettEtter(this)?.trengerIkkeArbeidsgiveropplysninger()
     }
 
     private fun trengerArbeidsgiveropplysninger(
-        vedtaksperioder: List<Vedtaksperiode>,
         forespurteOpplysninger: Set<PersonObserver.ForespurtOpplysning>
-    ) = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-        personidentifikator = person.personidentifikator,
-        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-        vedtaksperiodeId = id,
-        skjæringstidspunkt = skjæringstidspunkt,
-        sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
-        egenmeldingsperioder = egenmeldingsperioder(vedtaksperioder),
-        førsteFraværsdager = førsteFraværsdagerForForespørsel(),
-        forespurteOpplysninger = forespurteOpplysninger
-    )
+    ): PersonObserver.TrengerArbeidsgiveropplysningerEvent {
+        val vedtaksperioder = when {
+            // For å beregne riktig arbeidsgiverperiode/første fraværsdag
+            PersonObserver.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne()
+            // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
+            else -> listOf(this)
+        }
+        return PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+            personidentifikator = person.personidentifikator,
+            organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+            vedtaksperiodeId = id,
+            skjæringstidspunkt = skjæringstidspunkt,
+            sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
+            egenmeldingsperioder = egenmeldingsperioder(vedtaksperioder),
+            førsteFraværsdager = førsteFraværsdagerForForespørsel(),
+            forespurteOpplysninger = forespurteOpplysninger
+        )
+    }
 
     private fun førsteFraværsdagerForForespørsel(): List<PersonObserver.FørsteFraværsdag> {
         val deAndre = person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(this.skjæringstidspunkt))
@@ -1709,8 +1706,8 @@ internal class Vedtaksperiode private constructor(
         return deAndre.plusElement(minEgen)
     }
 
-    private fun vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode: Periode? = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode()): List<Vedtaksperiode> {
-        if (arbeidsgiverperiode == null) return listOf(this)
+    private fun vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(): List<Vedtaksperiode> {
+        val arbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode() ?: return listOf(this)
         return arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).filter { it <= this }
     }
 
@@ -1723,21 +1720,11 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-
     private fun trengerInntektsmeldingReplay() {
         val erKortPeriode = !skalBehandlesISpeil()
         val opplysningerViTrenger = if (erKortPeriode) opplysningerViTrenger() + PersonObserver.Arbeidsgiverperiode else opplysningerViTrenger()
 
-        val vedtaksperioder = when {
-            // For å beregne riktig arbeidsgiverperiode/første fraværsdag
-            PersonObserver.Arbeidsgiverperiode in opplysningerViTrenger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne()
-            // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
-            else -> listOf(this)
-        }
-        person.inntektsmeldingReplay(trengerArbeidsgiveropplysninger(
-            vedtaksperioder = vedtaksperioder,
-            forespurteOpplysninger = opplysningerViTrenger
-        ))
+        person.inntektsmeldingReplay(trengerArbeidsgiveropplysninger(opplysningerViTrenger))
     }
 
     private fun emitVedtaksperiodeEndret(previousState: Vedtaksperiodetilstand) {
@@ -1891,8 +1878,6 @@ internal class Vedtaksperiode private constructor(
     override fun toString() =
         "${this.periode.start} - ${this.periode.endInclusive} (${this.tilstand::class.simpleName})"
 
-    private fun finnArbeidsgiverperiode() = arbeidsgiver.arbeidsgiverperiode(periode)
-
     private fun skalBehandlesISpeil(): Boolean {
         return forventerInntekt() || behandlinger.navOvertarAnsvar()
     }
@@ -1902,7 +1887,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun forventerInntekt(): Boolean {
-        return finnArbeidsgiverperiode()?.forventerInntekt(periode) == true
+        return arbeidsgiver.arbeidsgiverperiode(periode)?.forventerInntekt(periode) == true
     }
 
     private fun måInnhenteInntektEllerRefusjon(): Boolean {
@@ -2240,8 +2225,8 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg = aktivitetslogg,
             beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
             beregnArbeidsgiverperiode = arbeidsgiver.beregnArbeidsgiverperiode(),
-            refusjonstidslinje = Beløpstidslinje.fra(periode, inntekt.fastsattÅrsinntekt, Kilde(inntekt.faktaavklartInntekt.inntektsdata.hendelseId, Avsender.ARBEIDSGIVER, inntekt.faktaavklartInntekt.inntektsdata.tidsstempel)
-        ))
+            refusjonstidslinje = Beløpstidslinje.fra(periode, inntekt.fastsattÅrsinntekt, Kilde(inntekt.faktaavklartInntekt.inntektsdata.hendelseId, Avsender.ARBEIDSGIVER, inntekt.faktaavklartInntekt.inntektsdata.tidsstempel))
+        )
     }
 
     private fun prioritertNabolag(): List<Vedtaksperiode> {
@@ -3113,16 +3098,9 @@ internal class Vedtaksperiode private constructor(
         override val erFerdigBehandlet = true
 
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            val arbeidsgiverperiode = vedtaksperiode.arbeidsgiver.arbeidsgiverperiodeHensyntattEgenmeldinger(vedtaksperiode.periode)
-            if (arbeidsgiverperiode?.forventerInntekt(vedtaksperiode.periode) == true) {
-                // Dersom egenmeldingene hinter til at perioden er utenfor AGP, da ønsker vi å sende en ekte forespørsel til arbeidsgiver om opplysninger
-                aktivitetslogg.info("Sender trenger arbeidsgiveropplysninger fra AvsluttetUtenUtbetaling på grunn av egenmeldingsdager")
-                vedtaksperiode.person.trengerArbeidsgiveropplysninger(vedtaksperiode.trengerArbeidsgiveropplysninger(
-                    vedtaksperioder = vedtaksperiode.vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(
-                        arbeidsgiverperiode = omsluttendeArbeidsgiverperiode(vedtaksperiode, arbeidsgiverperiode)
-                    ),
-                    forespurteOpplysninger = setOf(PersonObserver.Inntekt, PersonObserver.Refusjon, PersonObserver.Arbeidsgiverperiode)
-                ))
+            val arbeidsgiverperiode = vedtaksperiode.arbeidsgiver.arbeidsgiverperiode(vedtaksperiode.periode)
+            check(arbeidsgiverperiode?.forventerInntekt(vedtaksperiode.periode) != true) {
+                "i granskauen! skal jo ikke skje dette ?!"
             }
             avsluttUtenVedtak(vedtaksperiode, aktivitetslogg)
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
@@ -3408,7 +3386,6 @@ internal class Vedtaksperiode private constructor(
 
         internal fun Iterable<Vedtaksperiode>.nestePeriodeSomSkalGjenopptas() =
             firstOrNull(HAR_PÅGÅENDE_UTBETALING) ?: filter(IKKE_FERDIG_BEHANDLET).førstePeriode()
-
 
         internal fun Iterable<Vedtaksperiode>.checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas: Vedtaksperiode) {
             check(this.filterNot { it == periodeSomSkalGjenopptas }.none(HAR_AVVENTENDE_GODKJENNING)) {

@@ -996,7 +996,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(2.januar til 16.januar)
         håndterSøknad(Sykdom(25.januar, 25.januar, 100.prosent), egenmeldinger = listOf(24.januar til 24.januar))
 
-        assertTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
 
