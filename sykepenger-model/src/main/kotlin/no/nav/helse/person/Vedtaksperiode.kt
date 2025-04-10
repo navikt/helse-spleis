@@ -2848,7 +2848,7 @@ internal class Vedtaksperiode private constructor(
 
         private data class TrengerInntektsmeldingAnnenPeriode(private val trengerInntektsmelding: Vedtaksperiode) :
             Tilstand {
-            override fun venteårsak() = trengerInntektsmelding.venteårsak()
+            override fun venteårsak() = INNTEKTSMELDING.utenBegrunnelse
             override fun venterPå() = trengerInntektsmelding
             override fun gjenopptaBehandling(
                 vedtaksperiode: Vedtaksperiode,
