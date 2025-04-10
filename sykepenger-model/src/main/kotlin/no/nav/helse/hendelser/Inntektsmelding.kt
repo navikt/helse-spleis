@@ -10,8 +10,6 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.mapWithNext
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.ForkastetVedtaksperiode
-import no.nav.helse.person.ForkastetVedtaksperiode.Companion.overlapperMed
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
@@ -186,12 +184,12 @@ class Inntektsmelding(
         aktivitetslogg: IAktivitetslogg,
         person: Person,
         vedtaksperioder: List<Vedtaksperiode>,
-        forkastede: List<ForkastetVedtaksperiode>,
+        forkastede: List<Periode>,
         sykmeldingsperioder: Sykmeldingsperioder
     ) {
         if (håndtertInntekt) return // Definisjonen av om en inntektsmelding er håndtert eller ikke er at vi har håndtert inntekten i den... 🤡
         val relevanteSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(dager) + sykmeldingsperioder.perioderInnenfor16Dager(dager)
-        val overlapperMedForkastet = forkastede.overlapperMed(dager)
+        val overlapperMedForkastet = dager.overlapperMed(forkastede)
         val harPeriodeInnenfor16Dager = dager.harPeriodeInnenfor16Dager(vedtaksperioder)
         if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
             person.emitInntektsmeldingFørSøknadEvent(metadata.meldingsreferanseId.id, relevanteSykmeldingsperioder, behandlingsporing.organisasjonsnummer)

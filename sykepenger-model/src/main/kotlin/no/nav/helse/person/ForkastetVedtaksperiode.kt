@@ -4,7 +4,6 @@ import java.util.UUID
 import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
 import no.nav.helse.etterlevelse.Regelverkslogg
-import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Vedtaksperiode.Companion.MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -29,9 +28,6 @@ internal class ForkastetVedtaksperiode(
 
     internal companion object {
         internal fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.periode }
-
-        internal fun List<ForkastetVedtaksperiode>.overlapperMed(dagerFraInntektsmelding: DagerFraInntektsmelding) =
-            any { dagerFraInntektsmelding.overlapperMed(it.periode) }
 
         private fun List<ForkastetVedtaksperiode>.forlenger(nyPeriode: Periode, arbeidsgiver: String, aktivitetslogg: IAktivitetslogg) = this
             .filter { it.periode.erRettFør(nyPeriode) }

@@ -609,7 +609,7 @@ internal class Arbeidsgiver private constructor(
         }
 
         // 4. ferdigstiller håndtering av inntektsmelding
-        inntektsmelding.ferdigstill(aktivitetsloggMedArbeidsgiverkontekst, person, vedtaksperioder, forkastede, sykmeldingsperioder)
+        inntektsmelding.ferdigstill(aktivitetsloggMedArbeidsgiverkontekst, person, vedtaksperioder, forkastede.perioder(), sykmeldingsperioder)
 
         // 5. igangsetter
         val tidligsteOverstyring = listOfNotNull(inntektoverstyring, dagoverstyring, refusjonsoverstyring).tidligsteEventyr()

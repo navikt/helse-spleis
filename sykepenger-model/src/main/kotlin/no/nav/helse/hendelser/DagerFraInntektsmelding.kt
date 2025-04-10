@@ -253,9 +253,9 @@ internal class DagerFraInntektsmelding(
         }
     }
 
-    internal fun overlapperMed(periode: Periode): Boolean {
+    internal fun overlapperMed(perioder: List<Periode>): Boolean {
         if (overlappsperiode == null) return false
-        return overlappsperiode.overlapperMed(periode)
+        return perioder.any { it.overlapperMed(overlappsperiode) }
     }
 
     private fun validerOverstigerMaksimaltTillatAvstandMellomTidligereAGP(aktivitetslogg: IAktivitetslogg, gammelAgp: List<Periode>?) {
