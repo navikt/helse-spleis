@@ -2755,6 +2755,10 @@ internal class Vedtaksperiode private constructor(
             tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, hendelse, aktivitetslogg)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+            if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
+                vedtaksperiode.behandlinger.forkastUtbetaling(aktivitetslogg)
+                return vedtaksperiode.tilstand(aktivitetslogg, AvventerInntektsmelding)
+            }
             tilstand(vedtaksperiode).håndter(vedtaksperiode, påminnelse, aktivitetslogg)
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
