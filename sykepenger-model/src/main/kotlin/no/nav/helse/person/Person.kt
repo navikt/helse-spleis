@@ -429,6 +429,7 @@ class Person private constructor(
 
     fun håndter(påminnelse: PersonPåminnelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler personpåminnelse")
+        arbeidsgivere.beregnSkjæringstidspunkter(infotrygdhistorikk)
         arbeidsgivere.førsteAuuSomVilUtbetales()?.let {
             aktivitetsloggMedPersonkontekst.info("Igangsetter reberegning fra ${it.periode.start} på grunn av AUU som vil utbetales")
             igangsettOverstyring(Revurderingseventyr.reberegning(påminnelse, it.skjæringstidspunkt, it.periode), aktivitetsloggMedPersonkontekst)
