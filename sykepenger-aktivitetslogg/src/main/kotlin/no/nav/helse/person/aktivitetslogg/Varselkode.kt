@@ -95,7 +95,11 @@ enum class Varselkode(
     RV_IM_23("Arbeidsgiver har oppgitt hullete arbeidsgiverperiode og begrunnelse for redusert utbetaling i arbeidsgiverperiode"),
     RV_IM_24("Det har kommet ny inntektsmelding, vurder om arbeidsgiverperiode er riktig"),
     RV_IM_25("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden grunnet ferie eller avspasering"),
-    RV_IM_26("Portalinntektsmelding peker ikke på en aktiv vedtaksperiode"),
+    RV_IM_26("Portalinntektsmelding peker ikke på en aktiv vedtaksperiode", avviklet = true),
+
+    // AO: Arbeidsgiveropplysninger
+    RV_AO_1("Arbeidsgiveropplysninger for forkastet periode"),
+    RV_AO_2("Arbeidsgiveropplysninger for periode som allerede har opplysninger"),
 
     // ST: Sykdomstidslinje
     RV_ST_1("Sykdomstidslinjen inneholder ustøttet dag.", avviklet = true),
@@ -305,6 +309,9 @@ enum class Varselkode(
 
         val `Tilkommen inntekt som ikke støttes`= RV_IV_9
         val `Tilkommen inntekt som støttes` = RV_SV_5
+
+        val `Arbeidsgiveropplysninger for forkastet periode` = RV_AO_1
+        val `Arbeidsgiveropplysninger for periode som allerede har opplysninger` = RV_AO_2
 
         fun IAktivitetslogg.varsel(varselkode: Varselkode, detaljer: String) {
             varsel(varselkode)

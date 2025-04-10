@@ -56,6 +56,7 @@ import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDeta
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SAMME_ARBEIDSGIVERPERIODE
+import no.nav.helse.person.Vedtaksperiode.Companion.aktiv
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.arbeidsgiverperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
@@ -71,7 +72,8 @@ import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_26
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsgiveropplysninger for forkastet periode`
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsgiveropplysninger for periode som allerede har opplysninger`
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -579,8 +581,14 @@ internal class Arbeidsgiver private constructor(
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         val overstyring = énHåndtert(arbeidsgiveropplysninger) { håndter(arbeidsgiveropplysninger, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList(), inntektshistorikk, ubrukteRefusjonsopplysninger) }
         if (overstyring != null) return overstyring
+
         person.emitInntektsmeldingIkkeHåndtert(arbeidsgiveropplysninger, organisasjonsnummer, true)
-        aktivitetsloggMedArbeidsgiverkontekst.funksjonellFeil(RV_IM_26)
+
+        val funksjonellFeil = when (vedtaksperioder.aktiv(arbeidsgiveropplysninger.vedtaksperiodeId)) {
+            true -> `Arbeidsgiveropplysninger for periode som allerede har opplysninger`
+            false -> `Arbeidsgiveropplysninger for forkastet periode`
+        }
+        aktivitetsloggMedArbeidsgiverkontekst.funksjonellFeil(funksjonellFeil)
         return null
     }
 

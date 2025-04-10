@@ -3316,6 +3316,7 @@ internal class Vedtaksperiode private constructor(
 
             return startdatoer.values.toSet()
         }
+        internal fun List<Vedtaksperiode>.aktiv(vedtaksperiodeId: UUID) = any { it.id == vedtaksperiodeId }
 
         // Fredet funksjonsnavn
         internal val OVERLAPPENDE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
