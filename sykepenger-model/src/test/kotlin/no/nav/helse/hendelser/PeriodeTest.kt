@@ -22,6 +22,7 @@ import no.nav.helse.juni
 import no.nav.helse.lørdag
 import no.nav.helse.mai
 import no.nav.helse.mandag
+import no.nav.helse.mars
 import no.nav.helse.søndag
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -146,6 +147,14 @@ internal class PeriodeTest {
         assertNull(periode.periodeMellom(periode.start.minusDays(1)))
         assertNull(periode.periodeMellom(periode.endInclusive))
         assertEquals(11.juli til 15.juli, periode.periodeMellom(16.juli))
+    }
+
+    @Test
+    fun `periode mellom ikke mellom`() {
+        assertNull(Periode.mellom(januar, februar))
+        assertNull(Periode.mellom(februar, januar))
+        assertEquals(februar, Periode.mellom(januar, mars))
+        assertEquals(februar, Periode.mellom(mars, januar))
     }
 
     @Test

@@ -114,6 +114,9 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
             return resultat.toList()
         }
 
+        fun mellom(a: Periode, b: Periode) =
+            a.periodeMellom(b.start) ?: b.periodeMellom(a.start)
+
         fun gjenopprett(dto: PeriodeDto) = Periode(
             fom = dto.fom,
             tom = dto.tom
