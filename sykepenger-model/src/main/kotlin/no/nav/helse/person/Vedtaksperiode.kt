@@ -3106,15 +3106,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
 
-        /* Finner den omsluttende arbeidsgiverperioden når vi vurderer den som ligger på behandlingen og den som har hensyntatt egenmeldingsdager */
-        private fun omsluttendeArbeidsgiverperiode(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiodeHensyntattEgenmeldinger: Arbeidsgiverperiode): Periode? {
-            val potensiell = arbeidsgiverperiodeHensyntattEgenmeldinger.omsluttendePeriode
-            val faktisk = vedtaksperiode.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode()
-            val fom = setOfNotNull(potensiell?.start, faktisk?.start).minOrNull() ?: return null
-            val tom = setOfNotNull(potensiell?.endInclusive, faktisk?.endInclusive).max()
-            return fom til tom
-        }
-
         private fun avsluttUtenVedtak(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             val inntekterForBeregning = with(InntekterForBeregning.Builder(vedtaksperiode.periode)) {
                 vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag?.beverte(this)
@@ -3343,7 +3334,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val AUU_SOM_VIL_UTBETALES: VedtaksperiodeFilter = {
-            it.tilstand == AvsluttetUtenUtbetaling && it.skalBehandlesISpeil()
+            it.tilstand == AvsluttetUtenUtbetaling && it.skalOmgjøres()
         }
 
         internal val OVERLAPPENDE_ELLER_SENERE_MED_SAMME_SKJÆRINGSTIDSPUNKT = { segSelv: Vedtaksperiode ->
