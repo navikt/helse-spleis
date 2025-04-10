@@ -304,6 +304,7 @@ data class SpannerPersonDto(
             val inntektsendringer: List<BeløpstidslinjeperiodeData>,
             val refusjonstidslinjeHensyntattUbrukteRefusjonsopplysninger: List<BeløpstidslinjeperiodeData>,
             val dagerNavOvertarAnsvar: List<PeriodeData>,
+            val egenmeldingsdager: List<PeriodeData>,
             val utbetalingstidslinje: List<Any>,
             val arbeidsgiverperiode: List<PeriodeData>,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
@@ -325,7 +326,6 @@ data class SpannerPersonDto(
             val sykmeldingTom: LocalDate,
             val behandlinger: List<BehandlingData>,
             val venteårsak: VedtaksperiodeVenterDto?,
-            val egenmeldingsperioder: List<PeriodeDto>,
             val opprettet: LocalDateTime,
             val oppdatert: LocalDateTime,
             private val vilkårsgrunnlag: VilkårsgrunnlagElementData?,
@@ -351,6 +351,7 @@ data class SpannerPersonDto(
                         personOppdrag = utbetaling?.personOppdrag?.takeUnless { it.linjer.isEmpty() },
                         arbeidsgiverOppdrag = utbetaling?.arbeidsgiverOppdrag?.takeUnless { it.linjer.isEmpty() },
                         dagerNavOvertarAnsvar = gjeldendeEndring.dagerNavOvertarAnsvar,
+                        egenmeldingsdager = gjeldendeEndring.egenmeldingsdager,
                         inntekter = gjeldendeEndring.inntekter
                     )
                 }
@@ -478,6 +479,7 @@ data class SpannerPersonDto(
                     val dokumentsporing: DokumentsporingData,
                     val arbeidsgiverperiode: List<PeriodeData>,
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
+                    val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
                     val inntekter: Map<String, BeløpstidslinjeData>
                 )
@@ -978,7 +980,6 @@ private fun VedtaksperiodeUtDto.tilPersonData(
     sykmeldingTom = sykmeldingTom,
     behandlinger = behandlinger.behandlinger.map { it.tilPersonData() },
     venteårsak = utledVenteårsak(venteårsak),
-    egenmeldingsperioder = behandlinger.behandlinger.last().endringer.last().egenmeldingsdager,
     opprettet = opprettet,
     oppdatert = oppdatert,
     vilkårsgrunnlag = vilkårsgrunnlag,
@@ -1089,6 +1090,12 @@ private fun BehandlingendringUtDto.tilPersonData() =
             )
         },
         dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map {
+            SpannerPersonDto.ArbeidsgiverData.PeriodeData(
+                it.fom,
+                it.tom
+            )
+        },
+        egenmeldingsdager = egenmeldingsdager.map {
             SpannerPersonDto.ArbeidsgiverData.PeriodeData(
                 it.fom,
                 it.tom
