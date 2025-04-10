@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
-import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 
 data class VedtaksperiodeUtDto(
