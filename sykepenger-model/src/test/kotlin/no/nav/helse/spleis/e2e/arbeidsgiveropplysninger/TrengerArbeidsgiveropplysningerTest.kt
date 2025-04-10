@@ -30,6 +30,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -47,6 +49,7 @@ import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
+import no.nav.helse.spleis.e2e.håndterSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -66,6 +69,48 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `En annen vedtaksperiode håndterer innteksmelding, så forespørsel bli aldri kvittert ut`()  {
+        håndterSøknad(1.januar til 16.januar)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        håndterSøknad(17.januar til 31.januar)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        // Sendes forespørsel for periode nummer 2
+        assertEtterspurt(2.vedtaksperiode.id(a1), PersonObserver.Inntekt::class, PersonObserver.Refusjon::class, PersonObserver.Arbeidsgiverperiode::class)
+
+        // Arbeidsgiver svarer ikke på forespørselen, men sender en "gammel" inntektsmelding & opplyser om begrunnelseForReduksjonEllerIkkeUtbetalt
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "En eller annen kul verdi")
+        // Da er det periode nummer 1 som håndterer denne inntektsmeldingen
+        assertEquals(inntektsmeldingId to 1.vedtaksperiode.id(a1), observatør.inntektsmeldingHåndtert.single())
+
+        assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter(a1))
+
+        assertForventetFeil(
+            forklaring = "Her burde forespørselen kvitteres ut",
+            nå = { assertTrue(observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.isEmpty()) },
+            ønsket = { assertEquals(2.vedtaksperiode.id(a1), observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.singleOrNull()?.vedtaksperiodeId) }
+        )
+    }
+
+    @Test
+    fun `Vi går videre med skatt, så forespørsel bli aldri kvittert ut`() {
+        håndterSøknad(1.januar til 31.januar)
+        assertEtterspurt(1.vedtaksperiode.id(a1), PersonObserver.Inntekt::class, PersonObserver.Refusjon::class, PersonObserver.Arbeidsgiverperiode::class)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
+        håndterSykepengegrunnlagForArbeidsgiver(1.januar)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertTrue(observatør.inntektsmeldingHåndtert.isEmpty())
+
+        assertVarsler(listOf(RV_IV_10), 1.vedtaksperiode.filter(a1))
+
+        assertForventetFeil(
+            forklaring = "Her burde forespørselen kvitteres ut",
+            nå = { assertTrue(observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.isEmpty()) },
+            ønsket = { assertEquals(1.vedtaksperiode.id(a1), observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.singleOrNull()?.vedtaksperiodeId) }
+        )
+    }
 
     @Test
     fun `syk fra ghost samme måned som skjæringstidspunktet`() {
