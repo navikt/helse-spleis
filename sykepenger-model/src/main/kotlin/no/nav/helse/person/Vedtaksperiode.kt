@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -46,7 +46,6 @@ import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
@@ -164,7 +163,6 @@ import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
 import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
@@ -1878,24 +1876,6 @@ internal class Vedtaksperiode private constructor(
     override fun toString() =
         "${this.periode.start} - ${this.periode.endInclusive} (${this.tilstand::class.simpleName})"
 
-    private fun skalBehandlesISpeil(): Boolean {
-        return forventerInntekt() || behandlinger.navOvertarAnsvar()
-    }
-
-    private fun skalOmgjøres(): Boolean {
-        return forventerInntekt() || behandlinger.navOvertarAnsvar()
-    }
-
-    private fun forventerInntekt(): Boolean {
-        return arbeidsgiver.arbeidsgiverperiode(periode)?.forventerInntekt(periode) == true
-    }
-
-    private fun måInnhenteInntektEllerRefusjon(): Boolean {
-        if (!skalBehandlesISpeil()) return false
-        if (harInntektOgRefusjon()) return false
-        return true
-    }
-
     private fun trengerGodkjenning(aktivitetslogg: IAktivitetslogg) {
         behandlinger.godkjenning(aktivitetslogg, utkastTilVedtakBuilder())
     }
@@ -2037,6 +2017,37 @@ internal class Vedtaksperiode private constructor(
         return this.periode.overlapperMed(periodeSomBeregner.periode) && skjæringstidspunktet == this.skjæringstidspunkt && !this.tilstand.erFerdigBehandlet
     }
 
+    private fun skalBehandlesISpeil(): Boolean {
+        return forventerInntekt() || behandlinger.navOvertarAnsvar()
+    }
+
+    private fun skalOmgjøres(): Boolean {
+        return forventerInntekt() || behandlinger.navOvertarAnsvar()
+    }
+
+    private fun forventerInntekt(): Boolean {
+        return arbeidsgiver.arbeidsgiverperiode(periode)?.forventerInntekt(periode) == true
+    }
+
+    private fun måInnhenteInntektEllerRefusjon(): Boolean {
+        if (!skalBehandlesISpeil()) return false
+        if (harInntektOgRefusjon()) return false
+        return true
+    }
+
+    private fun harInntektOgRefusjon(): Boolean {
+        if (refusjonstidslinje.isEmpty()) return false
+        return harEksisterendeInntekt() || behandlinger.harGjenbrukbarInntekt(arbeidsgiver.organisasjonsnummer)
+    }
+
+    // Inntekt vi allerede har i vilkårsgrunnlag/inntektshistorikken på arbeidsgiver
+    private fun harEksisterendeInntekt(): Boolean {
+        // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag.
+        // hvis det finnes et vilkårsgrunnlag så antas det at inntekten er representert der (vil vi slå ut på tilkommen inntekt-error senere hvis ikke)
+        val vilkårsgrunnlag = vilkårsgrunnlag
+        return vilkårsgrunnlag != null || kanAvklareInntekt()
+    }
+
     private fun kanAvklareInntekt(): Boolean {
         val perioderMedSammeSkjæringstidspunkt = person
             .vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
@@ -2045,25 +2056,18 @@ internal class Vedtaksperiode private constructor(
         return arbeidsgiver.kanBeregneSykepengegrunnlag(skjæringstidspunkt, perioderMedSammeSkjæringstidspunkt)
     }
 
-    private fun førstePeriodeAnnenArbeidsgiverSomTrengerInntekt(): Vedtaksperiode? {
-        // trenger ikke inntekt for vilkårsprøving om vi har vilkårsprøvd før
-        if (vilkårsgrunnlag != null) return null
-        return person.vedtaksperioder {
-            it.arbeidsgiver.organisasjonsnummer != arbeidsgiver.organisasjonsnummer &&
-                it.skjæringstidspunkt == skjæringstidspunkt &&
-                it.skalBehandlesISpeil() &&
-                !it.kanAvklareInntekt()
-        }.minOrNull()
-    }
-
-    private fun førstePeriodeSomTrengerRefusjonsopplysninger(): Vedtaksperiode? {
-        return perioderSomMåHensyntasVedBeregning()
+    private fun førstePeriodeSomTrengerInntektsmelding(): Vedtaksperiode? {
+        val førsteMursteinsperiodeSomTrengerInntektEllerRefusjon = perioderSomMåHensyntasVedBeregning()
             .firstOrNull { it.måInnhenteInntektEllerRefusjon() }
-    }
 
-    private fun førstePeriodeSomTrengerInntektsmelding() =
-        førstePeriodeAnnenArbeidsgiverSomTrengerInntekt()
-            ?: førstePeriodeSomTrengerRefusjonsopplysninger()
+        if (vilkårsgrunnlag != null) return førsteMursteinsperiodeSomTrengerInntektEllerRefusjon
+
+        val førstePeriodePåSkjæringstidspunktetAnnenArbeidsgiverSomTrengerInntektEllerRefusjon = person.nåværendeVedtaksperioder { other ->
+            this.arbeidsgiver !== other.arbeidsgiver && other.skjæringstidspunkt == skjæringstidspunkt && other.måInnhenteInntektEllerRefusjon()
+        }.minOrNull()
+
+        return førstePeriodePåSkjæringstidspunktetAnnenArbeidsgiverSomTrengerInntektEllerRefusjon ?: førsteMursteinsperiodeSomTrengerInntektEllerRefusjon
+    }
 
     private val beregningsperiode get() = checkNotNull(perioderSomMåHensyntasVedBeregning().map { it.periode }.periode()) { "Hvordan kan det ha seg at vi ikke har noen beregningsperiode?" }
     private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg, inntekterForBeregningBuilder: InntekterForBeregning.Builder): Maksdatoresultat {
@@ -2267,11 +2271,6 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun harInntektOgRefusjon(): Boolean {
-        if (refusjonstidslinje.isEmpty()) return false
-        return harEksisterendeInntekt() || behandlinger.harGjenbrukbarInntekt(arbeidsgiver.organisasjonsnummer)
-    }
-
     private fun videreførEksisterendeOpplysninger(behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg) {
         lagreGjenbrukbarInntekt(aktivitetslogg)
         videreførEksisterendeRefusjonsopplysninger(
@@ -2293,14 +2292,6 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver = arbeidsgiver,
             aktivitetslogg = aktivitetslogg
         )
-    }
-
-    // Inntekt vi allerede har i vilkårsgrunnlag/inntektshistorikken på arbeidsgiver
-    private fun harEksisterendeInntekt(): Boolean {
-        // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag.
-        // hvis det finnes et vilkårsgrunnlag så antas det at inntekten er representert der (vil vi slå ut på tilkommen inntekt-error senere hvis ikke)
-        val vilkårsgrunnlag = vilkårsgrunnlag
-        return vilkårsgrunnlag != null || kanAvklareInntekt()
     }
 
     internal fun ubrukteRefusjonsopplysningerEtter(ubrukteRefusjonsopplysninger: Refusjonsservitør) =
