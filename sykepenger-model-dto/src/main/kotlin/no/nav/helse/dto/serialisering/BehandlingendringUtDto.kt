@@ -27,6 +27,7 @@ data class BehandlingendringUtDto(
     val inntektsendringer: BeløpstidslinjeDto,
     val arbeidsgiverperioder: List<PeriodeDto>,
     val dagerNavOvertarAnsvar: List<PeriodeDto>,
+    val egenmeldingsdager: List<PeriodeDto>,
     val maksdatoresultat: MaksdatoresultatUtDto,
     val inntekter: Map<InntektskildeDto, BeløpstidslinjeDto>
 )

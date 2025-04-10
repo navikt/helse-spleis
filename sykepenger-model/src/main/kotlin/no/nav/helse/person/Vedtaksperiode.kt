@@ -184,7 +184,6 @@ internal class Vedtaksperiode private constructor(
     private val id: UUID,
     private var tilstand: Vedtaksperiodetilstand,
     private val behandlinger: Behandlinger,
-    private var egenmeldingsperioder: List<Periode>,
     private val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime = opprettet,
     private val regelverkslogg: Regelverkslogg
@@ -207,14 +206,13 @@ internal class Vedtaksperiode private constructor(
         id = UUID.randomUUID(),
         tilstand = Start,
         behandlinger = Behandlinger(),
-        egenmeldingsperioder = egenmeldingsperioder,
         opprettet = LocalDateTime.now(),
         regelverkslogg = regelverkslogg
     ) {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         val periode = checkNotNull(sykdomstidslinje.periode()) { "sykdomstidslinjen er tom" }
         person.vedtaksperiodeOpprettet(id, arbeidsgiver.organisasjonsnummer, periode, periode.start, opprettet)
-        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, inntektsendringer, dokumentsporing, metadata.behandlingkilde)
+        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, egenmeldingsperioder, inntektsendringer, dokumentsporing, metadata.behandlingkilde)
     }
 
     private val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()
@@ -246,7 +244,7 @@ internal class Vedtaksperiode private constructor(
         oppdatert = oppdatert,
         skjæringstidspunkt = skjæringstidspunkt,
         skjæringstidspunkter = behandlinger.skjæringstidspunkter(),
-        egenmeldingsperioder = egenmeldingsperioder,
+        egenmeldingsdager = behandlinger.egenmeldingsdager(),
         behandlinger = behandlinger.view(),
         førsteFraværsdag = førsteFraværsdag,
         skalBehandlesISpeil = skalBehandlesISpeil()
@@ -875,11 +873,18 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg,
         validering: () -> Unit
     ) {
-        if (egenmeldingsperioder.isNotEmpty()) {
-            aktivitetslogg.info("Forkaster egenmeldinger oppgitt i sykmelding etter at arbeidsgiverperiode fra inntektsmeldingen er håndtert: $egenmeldingsperioder")
-            egenmeldingsperioder = emptyList()
+        if (behandlinger.egenmeldingsdager().isNotEmpty()) {
+            aktivitetslogg.info("Forkaster egenmeldinger oppgitt i sykmelding etter at arbeidsgiverperiode fra inntektsmeldingen er håndtert: ${behandlinger.egenmeldingsdager()}")
         }
-        oppdaterHistorikk(hendelse.metadata.behandlingkilde, inntektsmeldingDager(hendelse.metadata.meldingsreferanseId), bit.sykdomstidslinje, aktivitetslogg, bit.dagerNavOvertarAnsvar, validering = validering)
+        oppdaterHistorikk(
+            behandlingkilde = hendelse.metadata.behandlingkilde,
+            dokumentsporing = inntektsmeldingDager(hendelse.metadata.meldingsreferanseId),
+            hendelseSykdomstidslinje = bit.sykdomstidslinje,
+            aktivitetslogg = aktivitetslogg,
+            dagerNavOvertarAnsvar = bit.dagerNavOvertarAnsvar,
+            egenmeldingsdager = emptyList(),
+            validering = validering
+        )
     }
 
     internal fun håndterHistorikkFraInfotrygd(
@@ -1378,6 +1383,7 @@ internal class Vedtaksperiode private constructor(
         hendelseSykdomstidslinje: Sykdomstidslinje,
         aktivitetslogg: IAktivitetslogg,
         dagerNavOvertarAnsvar: List<Periode>? = null,
+        egenmeldingsdager: List<Periode>? = null,
         validering: () -> Unit
     ) {
         val haddeFlereSkjæringstidspunkt = behandlinger.harFlereSkjæringstidspunkt()
@@ -1388,6 +1394,7 @@ internal class Vedtaksperiode private constructor(
             dokumentsporing = dokumentsporing,
             hendelseSykdomstidslinje = hendelseSykdomstidslinje,
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
+            egenmeldingsdager = egenmeldingsdager,
             aktivitetslogg = aktivitetslogg,
             beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
             beregnArbeidsgiverperiode = arbeidsgiver.beregnArbeidsgiverperiode(),
@@ -1680,7 +1687,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiodeId = id,
             skjæringstidspunkt = skjæringstidspunkt,
             sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
-            egenmeldingsperioder = egenmeldingsperioder(vedtaksperioder),
+            egenmeldingsperioder = vedtaksperioder.egenmeldingsperioder(),
             førsteFraværsdager = førsteFraværsdagerForForespørsel(),
             forespurteOpplysninger = forespurteOpplysninger
         )
@@ -3278,7 +3285,7 @@ internal class Vedtaksperiode private constructor(
         // det kan derfor være mer enn 16 dager avstand mellom periodene, og arbeidsgiverperioden kan være den samme
         // Derfor bruker vi tallet 18 fremfor kanskje det forventende 16…
         internal const val MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD = 18L
-        internal fun List<Vedtaksperiode>.egenmeldingsperioder(): List<Periode> = flatMap { it.egenmeldingsperioder }
+        internal fun List<Vedtaksperiode>.egenmeldingsperioder(): List<Periode> = flatMap { it.behandlinger.egenmeldingsdager() }
         internal fun List<Vedtaksperiode>.arbeidsgiverperioder() = map { it.behandlinger.arbeidsgiverperiode() }
         internal fun List<Vedtaksperiode>.refusjonstidslinje() =
             fold(Beløpstidslinje()) { beløpstidslinje, vedtaksperiode ->
@@ -3337,9 +3344,6 @@ internal class Vedtaksperiode private constructor(
         private fun sykmeldingsperioder(vedtaksperioder: List<Vedtaksperiode>): List<Periode> {
             return vedtaksperioder.map { it.sykmeldingsperiode }
         }
-
-        private fun egenmeldingsperioder(vedtaksperioder: List<Vedtaksperiode>) =
-            vedtaksperioder.flatMap { it.egenmeldingsperioder }
 
         internal fun List<Vedtaksperiode>.beregnSkjæringstidspunkter(
             beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
@@ -3422,7 +3426,6 @@ internal class Vedtaksperiode private constructor(
                     VedtaksperiodetilstandDto.TIL_UTBETALING -> TilUtbetaling
                 },
                 behandlinger = Behandlinger.gjenopprett(dto.behandlinger, grunnlagsdata, utbetalinger),
-                egenmeldingsperioder = dto.egenmeldingsperioder.map { egenmeldingsperiode -> egenmeldingsperiode.fom til egenmeldingsperiode.tom },
                 opprettet = dto.opprettet,
                 oppdatert = dto.oppdatert,
                 regelverkslogg = regelverkslogg
@@ -3502,7 +3505,6 @@ internal class Vedtaksperiode private constructor(
         sykmeldingTom = this.sykmeldingsperiode.endInclusive,
         behandlinger = behandlinger.dto(),
         venteårsak = LazyVedtaksperiodeVenterDto { nestemann?.let { tilstand.venter(this, it)?.dto() } },
-        egenmeldingsperioder = egenmeldingsperioder.map { it.dto() },
         opprettet = opprettet,
         oppdatert = oppdatert
     )
@@ -3523,7 +3525,7 @@ internal data class VedtaksperiodeView(
     val oppdatert: LocalDateTime,
     val skjæringstidspunkt: LocalDate,
     val skjæringstidspunkter: List<LocalDate>,
-    val egenmeldingsperioder: List<Periode>,
+    val egenmeldingsdager: List<Periode>,
     val behandlinger: BehandlingerView,
     val førsteFraværsdag: LocalDate?,
     val skalBehandlesISpeil: Boolean

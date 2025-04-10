@@ -1,0 +1,34 @@
+{
+  "fødselsnummer": "11111111111",
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1",
+      "vedtaksperioder": [
+        {
+          "id": "72efb75f-3355-4443-8784-1ac4903b685f",
+          "egenmeldingsperioder": [{"fom": "2018-01-01", "tom": "2018-01-02"}],
+          "behandlinger": [
+            {
+              "id": "b4ec09a3-e751-4f1d-905f-8a16ac5a3c9b",
+              "endringer": [
+                {
+                }
+              ]
+            },
+            {
+              "id": "9171b34e-0640-4445-935b-c86c8988eb63",
+              "endringer": [
+                {
+
+                },
+                {
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 320
+}

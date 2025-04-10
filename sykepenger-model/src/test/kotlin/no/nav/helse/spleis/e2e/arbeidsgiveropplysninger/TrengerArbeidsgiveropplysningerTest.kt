@@ -148,7 +148,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterArbeidsgiveropplysninger(listOf(3.januar til 17.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
 
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).egenmeldingsperioder)
+        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).egenmeldingsdager)
     }
 
     @Test
@@ -162,14 +162,14 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             listOf(6.januar til 17.januar),
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).egenmeldingsperioder)
-        assertEquals(listOf(21.januar til 21.januar), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
+        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).egenmeldingsdager)
+        assertEquals(listOf(21.januar til 21.januar), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsdager)
 
         håndterArbeidsgiveropplysninger(
             listOf(6.januar til 17.januar, 22.januar til 25.januar),
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
-        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
+        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsdager)
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
 

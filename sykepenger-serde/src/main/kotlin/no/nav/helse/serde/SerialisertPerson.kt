@@ -45,6 +45,7 @@ import no.nav.helse.serde.migration.V317SykNavIEgenListe
 import no.nav.helse.serde.migration.V318FjerneSykNavSomSykdomstidslinjedagtype
 import no.nav.helse.serde.migration.V319BumpVersjon
 import no.nav.helse.serde.migration.V320ManglendeRefusjonsopplysninger
+import no.nav.helse.serde.migration.V321EgenmeldingsdagerPåBehandling
 import no.nav.helse.serde.migration.migrate
 
 class SerialisertPerson(val json: String) {
@@ -89,7 +90,8 @@ class SerialisertPerson(val json: String) {
             V317SykNavIEgenListe(),
             V318FjerneSykNavSomSykdomstidslinjedagtype(),
             V319BumpVersjon(),
-            V320ManglendeRefusjonsopplysninger()
+            V320ManglendeRefusjonsopplysninger(),
+            V321EgenmeldingsdagerPåBehandling()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)

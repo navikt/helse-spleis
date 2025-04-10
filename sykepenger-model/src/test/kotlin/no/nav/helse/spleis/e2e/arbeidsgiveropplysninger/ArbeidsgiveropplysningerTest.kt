@@ -125,7 +125,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSøknad(Sykdom(15.februar, 20.februar, 100.prosent), egenmeldinger = listOf(mandag(5.februar).somPeriode()))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             val forespørselPgaEgenmeldingsdager = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 2.vedtaksperiode }
-            assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
+            assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsdager)
             assertEquals(setOf(Inntekt, Refusjon), forespørselPgaEgenmeldingsdager.forespurteOpplysninger)
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.clear()
             håndterArbeidsgiveropplysninger(2.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()), OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)))
@@ -137,10 +137,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertForventetFeil(
                 forklaring = "Vi kvitterer ikke ut egenmeldingsperioden 5. februar og skaper en loop der februarperioden alltid sender ut en forespørsel",
                 nå = {
-                    assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
+                    assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsdager)
                 },
                 ønsket = {
-                    assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsperioder)
+                    assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsdager)
                 }
             )
         }

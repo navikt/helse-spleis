@@ -978,7 +978,7 @@ private fun VedtaksperiodeUtDto.tilPersonData(
     sykmeldingTom = sykmeldingTom,
     behandlinger = behandlinger.behandlinger.map { it.tilPersonData() },
     venteårsak = utledVenteårsak(venteårsak),
-    egenmeldingsperioder = egenmeldingsperioder,
+    egenmeldingsperioder = behandlinger.behandlinger.last().endringer.last().egenmeldingsdager,
     opprettet = opprettet,
     oppdatert = oppdatert,
     vilkårsgrunnlag = vilkårsgrunnlag,

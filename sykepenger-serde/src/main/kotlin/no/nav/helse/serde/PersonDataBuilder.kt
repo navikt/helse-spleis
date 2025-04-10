@@ -336,7 +336,6 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
     },
     skjæringstidspunkt = skjæringstidspunkt,
     behandlinger = behandlinger.behandlinger.map { it.tilPersonData() },
-    egenmeldingsperioder = egenmeldingsperioder.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     opprettet = opprettet,
     oppdatert = oppdatert
 )
@@ -395,6 +394,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     dokumentsporing = dokumentsporing.tilPersonData(),
     arbeidsgiverperioder = arbeidsgiverperioder.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
+    egenmeldingsdager = egenmeldingsdager.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     maksdatoresultat = maksdatoresultat.tilPersonData(),
     inntekter = inntekter.map { (inntektskilde, beløpstidslinje) ->
         inntektskilde.id to beløpstidslinje.tilPersonData()

@@ -17,7 +17,7 @@ internal class VedtaksperiodeInspektør(view: VedtaksperiodeView) {
 
     internal val utbetalingstidslinje: Utbetalingstidslinje get() = behandlinger.last().endringer.last().utbetalingstidslinje
     internal val behandlinger = view.behandlinger.behandlinger.map { it.inspektør.behandling }
-    internal val egenmeldingsperioder = view.egenmeldingsperioder
+    internal val egenmeldingsperioder = view.egenmeldingsdager
 
     internal val arbeidsgiverperiode get() = behandlinger.last().endringer.last().arbeidsgiverperiode
 

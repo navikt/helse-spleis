@@ -9,7 +9,7 @@ import no.nav.helse.dto.VedtaksperiodetilstandDto
 
 data class VedtaksperiodeUtDto(
     val id: UUID,
-    var tilstand: VedtaksperiodetilstandDto,
+    val tilstand: VedtaksperiodetilstandDto,
     val skjæringstidspunkt: LocalDate,
     val fom: LocalDate,
     val tom: LocalDate,
@@ -17,7 +17,6 @@ data class VedtaksperiodeUtDto(
     val sykmeldingTom: LocalDate,
     val behandlinger: BehandlingerUtDto,
     val venteårsak: LazyVedtaksperiodeVenterDto,
-    val egenmeldingsperioder: List<PeriodeDto>,
     val opprettet: LocalDateTime,
-    var oppdatert: LocalDateTime
+    val oppdatert: LocalDateTime
 )

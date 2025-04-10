@@ -628,8 +628,7 @@ data class PersonData(
             val skjæringstidspunkt: LocalDate,
             val behandlinger: List<BehandlingData>,
             val opprettet: LocalDateTime,
-            val oppdatert: LocalDateTime,
-            val egenmeldingsperioder: List<PeriodeData>
+            val oppdatert: LocalDateTime
         ) {
             enum class TilstandTypeData {
                 AVVENTER_HISTORIKK,
@@ -675,7 +674,6 @@ data class PersonData(
                     TilstandTypeData.AVVENTER_GODKJENNING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING
                 },
                 behandlinger = BehandlingerInnDto(this.behandlinger.map { it.tilDto() }),
-                egenmeldingsperioder = egenmeldingsperioder.map { it.tilDto() },
                 opprettet = opprettet,
                 oppdatert = oppdatert
             )
@@ -833,6 +831,7 @@ data class PersonData(
                     val dokumentsporing: DokumentsporingData,
                     val arbeidsgiverperioder: List<PeriodeData>,
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
+                    val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
                     val inntekter: Map<String, BeløpstidslinjeData>? // TODO: Fjerne optional når alle personer har fått seg det
                 ) {
@@ -852,6 +851,7 @@ data class PersonData(
                         skjæringstidspunkter = skjæringstidspunkter,
                         arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() },
                         dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map { it.tilDto() },
+                        egenmeldingsdager = egenmeldingsdager.map { it.tilDto() },
                         maksdatoresultat = maksdatoresultat.tilDto(),
                         inntekter = inntekter?.map { (inntektskilde, beløpstidslinje) ->
                             InntektskildeDto(inntektskilde) to beløpstidslinje.tilDto()
