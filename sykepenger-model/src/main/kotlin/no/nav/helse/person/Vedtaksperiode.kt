@@ -134,15 +134,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SY_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_31
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_32
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_33
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_34
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_35
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_36
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_37
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
@@ -287,7 +278,7 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId.id, id, arbeidsgiver.organisasjonsnummer)
         søknad.forUng(aktivitetsloggMedVedtaksperiodekontekst, person.alder)
-        arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(aktivitetsloggMedVedtaksperiodekontekst, this, arbeidsgivere)
+        arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(aktivitetsloggMedVedtaksperiodekontekst, periode, arbeidsgivere)
 
         infotrygdhistorikk.validerMedFunksjonellFeil(aktivitetsloggMedVedtaksperiodekontekst, periode)
         håndterSøknad(søknad, aktivitetsloggMedVedtaksperiodekontekst)
@@ -1345,11 +1336,10 @@ internal class Vedtaksperiode private constructor(
                     tom = periode.endInclusive,
                     behandletIInfotrygd = person.erBehandletIInfotrygd(periode),
                     forlengerPeriode = person.nåværendeVedtaksperioder {
-                        (it.periode.overlapperMed(periode) || it.periode.erRettFør(
-                            periode
-                        ))
+                        (it.periode.overlapperMed(periode) || it.periode.erRettFør(periode))
                     }.isNotEmpty(),
-                    harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { påvirkerArbeidsgiverperioden(it) }
+                    harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder {
+                        påvirkerArbeidsgiverperioden(it) }
                         .isNotEmpty(),
                     trengerArbeidsgiveropplysninger = trengerArbeidsgiveropplysninger,
                     sykmeldingsperioder = sykmeldingsperioder
@@ -3431,73 +3421,6 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) =
             forEach { it.validerTilstand(hendelse, aktivitetslogg) }
-
-        internal fun harNyereForkastetPeriode(
-            forkastede: Iterable<Vedtaksperiode>,
-            vedtaksperiode: Vedtaksperiode,
-            aktivitetslogg: IAktivitetslogg
-        ) =
-            forkastede
-                .filter { it.periode.start > vedtaksperiode.periode.endInclusive }
-                .onEach {
-                    val sammeArbeidsgiver =
-                        it.arbeidsgiver.organisasjonsnummer == vedtaksperiode.arbeidsgiver.organisasjonsnummer
-                    aktivitetslogg.funksjonellFeil(if (sammeArbeidsgiver) RV_SØ_31 else RV_SØ_32)
-                    aktivitetslogg.info("Søknaden ${vedtaksperiode.periode} er før en forkastet vedtaksperiode ${it.id} (${it.periode})")
-                }
-                .isNotEmpty()
-
-        internal fun harOverlappendeForkastetPeriode(
-            forkastede: Iterable<Vedtaksperiode>,
-            vedtaksperiode: Vedtaksperiode,
-            aktivitetslogg: IAktivitetslogg
-        ) =
-            forkastede
-                .filter { it.periode.overlapperMed(vedtaksperiode.periode) }
-                .onEach {
-                    val delvisOverlappende =
-                        !it.periode.inneholder(vedtaksperiode.periode) // hvorvidt vedtaksperioden strekker seg utenfor den forkastede
-                    val sammeArbeidsgiver =
-                        it.arbeidsgiver.organisasjonsnummer == vedtaksperiode.arbeidsgiver.organisasjonsnummer
-                    aktivitetslogg.funksjonellFeil(
-                        when {
-                            delvisOverlappende && sammeArbeidsgiver -> RV_SØ_35
-                            delvisOverlappende && !sammeArbeidsgiver -> RV_SØ_36
-                            !delvisOverlappende && sammeArbeidsgiver -> RV_SØ_33
-                            else -> RV_SØ_34
-                        }
-                    )
-                    aktivitetslogg.info("Søknad ${vedtaksperiode.periode} overlapper med en forkastet vedtaksperiode ${it.id} (${it.periode})")
-                }
-                .isNotEmpty()
-
-        internal fun harKortGapTilForkastet(
-            forkastede: Iterable<Vedtaksperiode>,
-            aktivitetslogg: IAktivitetslogg,
-            vedtaksperiode: Vedtaksperiode
-        ) =
-            forkastede
-                .filter { other -> vedtaksperiode.påvirkerArbeidsgiverperioden(other) }
-                .onEach {
-                    aktivitetslogg.funksjonellFeil(RV_SØ_28)
-                    aktivitetslogg.info("Søknad har et gap som er kortere enn 20 dager til en forkastet vedtaksperiode ${it.id}, vedtaksperiode periode: ${it.periode}")
-                }
-                .isNotEmpty()
-
-        internal fun forlengerForkastet(
-            forkastede: List<Vedtaksperiode>,
-            aktivitetslogg: IAktivitetslogg,
-            vedtaksperiode: Vedtaksperiode
-        ) =
-            forkastede
-                .filter { it.periode.erRettFør(vedtaksperiode.periode) }
-                .onEach {
-                    val sammeArbeidsgiver =
-                        it.arbeidsgiver.organisasjonsnummer == vedtaksperiode.arbeidsgiver.organisasjonsnummer
-                    aktivitetslogg.funksjonellFeil(if (sammeArbeidsgiver) RV_SØ_37 else RV_SØ_38)
-                    aktivitetslogg.info("Søknad forlenger forkastet vedtaksperiode ${it.id}, vedtaksperiode periode: ${it.periode}")
-                }
-                .isNotEmpty()
 
         internal fun List<Vedtaksperiode>.påvirkerArbeidsgiverperiode(periode: Periode): Boolean {
             return any { vedtaksperiode ->

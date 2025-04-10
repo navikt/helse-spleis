@@ -50,6 +50,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrArbeidsgiveropplysninger
+import no.nav.helse.person.ForkastetVedtaksperiode.Companion.blokkererBehandlingAv
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.perioder
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
@@ -506,30 +507,16 @@ internal class Arbeidsgiver private constructor(
 
     internal fun vurderOmSøknadIkkeKanHåndteres(
         aktivitetslogg: IAktivitetslogg,
-        vedtaksperiode: Vedtaksperiode,
+        nyPeriode: Periode,
         arbeidsgivere: List<Arbeidsgiver>
-    ): Boolean {
-        // sjekker først egen arbeidsgiver først
-        return yrkesaktivitet.erYrkesaktivitetenIkkeStøttet(aktivitetslogg) || this.harForkastetVedtaksperiodeSomBlokkererBehandling(
-            aktivitetslogg,
-            vedtaksperiode
-        )
-            || arbeidsgivere.any {
-            it !== this && it.harForkastetVedtaksperiodeSomBlokkererBehandling(
-                aktivitetslogg,
-                vedtaksperiode
-            )
+    ) {
+        // Sjekker først egen arbeidsgiver
+        if (yrkesaktivitet.erYrkesaktivitetenIkkeStøttet(aktivitetslogg)) return
+        if (forkastede.blokkererBehandlingAv(nyPeriode, organisasjonsnummer, aktivitetslogg)) return
+        // Også alle etterpå
+        arbeidsgivere.any { arbeidsgiver ->
+            arbeidsgiver.forkastede.blokkererBehandlingAv(nyPeriode, organisasjonsnummer, aktivitetslogg)
         }
-            || ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, aktivitetslogg, vedtaksperiode)
-    }
-
-    private fun harForkastetVedtaksperiodeSomBlokkererBehandling(
-        aktivitetslogg: IAktivitetslogg,
-        vedtaksperiode: Vedtaksperiode
-    ): Boolean {
-        return ForkastetVedtaksperiode.forlengerForkastet(forkastede, aktivitetslogg, vedtaksperiode)
-            || ForkastetVedtaksperiode.harOverlappendeForkastetPeriode(forkastede, vedtaksperiode, aktivitetslogg)
-            || ForkastetVedtaksperiode.harNyereForkastetPeriode(forkastede, vedtaksperiode, aktivitetslogg)
     }
 
     internal fun håndter(
@@ -1039,7 +1026,7 @@ internal class Arbeidsgiver private constructor(
             }
 
         vedtaksperioder.removeAll(perioder.map { it.first })
-        forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it.first) })
+        forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it.first, organisasjonsnummer, it.first.periode) })
         sykdomshistorikk.fjernDager(perioder.map { it.first.periode })
         return perioder.map { it.second }
     }
@@ -1057,7 +1044,7 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg.info("Oppretter forkastet vedtaksperiode ettersom Søknad inneholder errors")
         val vedtaksperiodeForkastetEventBuilder = vedtaksperiode.forkast(hendelse, aktivitetslogg, vedtaksperioder.toList())
         vedtaksperiodeForkastetEventBuilder!!.buildAndEmit()
-        forkastede.add(ForkastetVedtaksperiode(vedtaksperiode))
+        forkastede.add(ForkastetVedtaksperiode(vedtaksperiode, organisasjonsnummer, vedtaksperiode.periode))
     }
 
     internal fun finnVedtaksperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
