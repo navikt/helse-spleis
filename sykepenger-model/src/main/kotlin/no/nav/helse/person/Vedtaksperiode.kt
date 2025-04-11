@@ -51,7 +51,6 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
 import no.nav.helse.hendelser.Påminnelse.Predikat.VentetMinst
 import no.nav.helse.hendelser.Revurderingseventyr
-import no.nav.helse.hendelser.Revurderingseventyr.Companion.arbeidsgiverperiode
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
@@ -63,7 +62,6 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.mapWithNext
 import no.nav.helse.nesteDag
@@ -525,8 +523,8 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg, vedtaksperioder: List<Vedtaksperiode>, inntektshistorikk: Inntektshistorikk, ubrukteRefusjonsopplysninger: Refusjonsservitør): Revurderingseventyr? {
         if (arbeidsgiveropplysninger.vedtaksperiodeId != id) return null
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        // Vi må støtte AUU & AVBL på grunn av at det sendes forespørsel på entering i AUU om det er oppgitt egenmeldingsdager som gjør at perioden skal utbetaltes
-        if (tilstand !in setOf(AvventerInntektsmelding, AvventerBlokkerendePeriode, AvsluttetUtenUtbetaling)) {
+
+        if (tilstand !is AvventerInntektsmelding) {
             aktivitetsloggMedVedtaksperiodekontekst.info("Mottok arbeidsgiveropplysninger i ${tilstand.type}")
             return null
         }
@@ -702,22 +700,8 @@ internal class Vedtaksperiode private constructor(
     private fun håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
         if (arbeidsgiveropplysninger.filterIsInstance<IkkeNyArbeidsgiverperiode>().isEmpty()) return emptyList()
         aktivitetslogg.info("Arbeidsgiver mener at det ikke er noen ny arbeidsgiverperiode")
-
-        if (tilstand is AvventerInntektsmelding) {
-            aktivitetslogg.varsel(RV_IM_25)
-            return emptyList()
-        }
-        check(tilstand in setOf(AvsluttetUtenUtbetaling, AvventerBlokkerendePeriode)) {
-            "Vi skal bare legge på SykNav for å tvinge frem en behandling på AUU hvor saksbehandler mest sannsynlig skal strekke periode med AIG-dager"
-        }
-
-        return håndterNavUtbetalerArbeidsgiverperiode(
-            perioderNavUtbetaler = listOf(periode.start.somPeriode()), // Foreslår bare første dag for å tvinge frem en behandling
-            aktivitetslogg = aktivitetslogg,
-            arbeidsgiveropplysninger = arbeidsgiveropplysninger
-        ) {
-            aktivitetslogg.varsel(RV_IM_25)
-        }
+        aktivitetslogg.varsel(RV_IM_25)
+        return emptyList()
     }
 
     private fun håndterIkkeUtbetaltArbeidsgiverperiode(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
@@ -1421,7 +1405,7 @@ internal class Vedtaksperiode private constructor(
         val arbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode() ?: return emptyList()
         return arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
             .filter { it.håndterEgenmeldsingsdager(hendelse, dokumentsporing, it.registrerKontekst(aktivitetslogg), emptyList()) }
-            .map { arbeidsgiverperiode(hendelse, it.skjæringstidspunkt, it.periode) }
+            .map { Revurderingseventyr.arbeidsgiverperiode(hendelse, it.skjæringstidspunkt, it.periode) }
     }
 
     private fun håndterSøknad(
