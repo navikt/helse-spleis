@@ -1241,7 +1241,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun kanForkastes(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg, hendelse: Hendelse? = null): Boolean {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        if (behandlinger.kanForkastes(aktivitetsloggMedVedtaksperiodekontekst, vedtaksperioder.map { it.behandlinger })) {
+        if (behandlinger.kanForkastes(vedtaksperioder.map { it.behandlinger })) {
             aktivitetsloggMedVedtaksperiodekontekst.info("Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet")
             return true
         }

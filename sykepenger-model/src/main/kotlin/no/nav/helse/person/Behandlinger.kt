@@ -41,7 +41,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektskilde
 import no.nav.helse.sykdomstidslinje.Dag
@@ -112,8 +111,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun erAvvist() = siste?.erAvvist() == true
     internal fun harUtbetalinger() = siste?.harUtbetalinger() == true
     internal fun erUbetalt() = siste?.erUbetalt() == true
-    internal fun kanForkastes(aktivitetslogg: IAktivitetslogg, andreBehandlinger: List<Behandlinger>) =
-        behandlinger.last().kanForkastes(aktivitetslogg, andreBehandlinger.map { it.behandlinger.last() })
+    internal fun kanForkastes(andreBehandlinger: List<Behandlinger>) = behandlinger.last().kanForkastes(andreBehandlinger.map { it.behandlinger.last() })
 
     internal fun harFlereSkjæringstidspunkt() = behandlinger.last().harFlereSkjæringstidspunkt()
     internal fun håndterUtbetalinghendelse(hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) = behandlinger.any { it.håndterUtbetalinghendelse(hendelse, aktivitetslogg) }
@@ -123,8 +121,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun validerFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
     internal fun gjelderIkkeFor(hendelse: UtbetalingsavgjørelseHendelse) = siste?.gjelderFor(hendelse) != true
-    internal fun erHistorikkEndretSidenBeregning(infotrygdhistorikk: Infotrygdhistorikk) =
-        infotrygdhistorikk.harEndretHistorikk(siste!!)
 
     internal fun overlapperMed(other: Behandlinger): Boolean {
         if (!this.harUtbetalinger() || !other.harUtbetalinger()) return false
@@ -802,7 +798,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         internal fun navOvertarAnsvar() = gjeldende.dagerNavOvertarAnsvar.isNotEmpty()
-        internal fun harVærtBeregnet() = endringer.any { endring -> endring.grunnlagsdata != null }
         internal fun erFattetVedtak() = vedtakFattet != null
         internal fun erInFlight() = erFattetVedtak() && !erAvsluttet()
         internal fun erAvsluttet() = avsluttet != null
@@ -978,16 +973,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
             beregnArbeidsgiverperiode: (Periode) -> List<Periode>
         ): Endring {
-            val hendelseSykdomstidslinje = hendelseSykdomstidslinje.fremTilOgMed(periode.endInclusive)
-            val hendelseperiode = hendelseSykdomstidslinje.periode()
-            if (hendelseperiode == null) return endringer.last().kopierUtenEndring(dokumentsporing, dagerNavOvertarAnsvar, egenmeldingsdager, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+            val hendelseSykdomstidslinjeFremTilOgMed = hendelseSykdomstidslinje.fremTilOgMed(periode.endInclusive)
+            val hendelseperiode = hendelseSykdomstidslinjeFremTilOgMed.periode() ?: return endringer.last().kopierUtenEndring(dokumentsporing, dagerNavOvertarAnsvar, egenmeldingsdager, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
             val oppdatertPeriode = this.periode.oppdaterFom(hendelseperiode)
-            val sykdomstidslinje = arbeidsgiver.oppdaterSykdom(dokumentsporing.id, hendelseSykdomstidslinje).subset(oppdatertPeriode)
+            val sykdomstidslinje = arbeidsgiver.oppdaterSykdom(dokumentsporing.id, hendelseSykdomstidslinjeFremTilOgMed).subset(oppdatertPeriode)
             return endringer.last().kopierMedEndring(oppdatertPeriode, dokumentsporing, sykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
         }
 
         private fun oppdaterMedRefusjonstidslinje(dokumentsporing: Dokumentsporing, nyeRefusjonsopplysninger: Beløpstidslinje) {
-            val endring = endringer.last().kopierMedRefusjonstidslinje(dokumentsporing ?: this.gjeldende.dokumentsporing, nyeRefusjonsopplysninger)
+            val endring = endringer.last().kopierMedRefusjonstidslinje(dokumentsporing, nyeRefusjonsopplysninger)
             nyEndring(endring)
         }
 
@@ -1119,9 +1113,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return tilstand.håndterUtbetalinghendelse(this, hendelse, aktivitetslogg)
         }
 
-        fun kanForkastes(aktivitetslogg: IAktivitetslogg, andreBehandlinger: List<Behandling>): Boolean {
+        fun kanForkastes(andreBehandlinger: List<Behandling>): Boolean {
             return kanForkastesBasertPåTilstand {
-                kanForkastingAvKortPeriodeTillates(aktivitetslogg, andreBehandlinger)
+                kanForkastingAvKortPeriodeTillates(andreBehandlinger)
             }
         }
 
@@ -1233,7 +1227,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         /* hvorvidt en AUU- (eller har vært-auu)-periode kan forkastes */
-        private fun kanForkastingAvKortPeriodeTillates(aktivitetslogg: IAktivitetslogg, andreBehandlinger: List<Behandling>): Boolean {
+        private fun kanForkastingAvKortPeriodeTillates(andreBehandlinger: List<Behandling>): Boolean {
             val overlappendeBehandlinger = andreBehandlinger.filter { it.arbeidsgiverperiode.any { it.overlapperMed(this.periode) } }
             return overlappendeBehandlinger.all { it.kanForkastesBasertPåTilstand() }
         }
