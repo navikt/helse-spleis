@@ -17,7 +17,6 @@ data class Dokumentsporing(
         internal fun inntektFraAOrdingen(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.InntektFraAOrdningen)
         internal fun overstyrTidslinje(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.OverstyrTidslinje)
         internal fun overstyrArbeidsgiveropplysninger(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.OverstyrArbeidsgiveropplysninger)
-        internal fun andreYtelser(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.AndreYtelser)
 
         internal fun Iterable<Dokumentsporing>.eksterneIder() = filter { it.dokumentType.ekstern }.map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.ider() = eksterneIder().map { it.id }.toSet()

@@ -67,7 +67,6 @@ import no.nav.helse.mapWithNext
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger.Behandlingkilde
 import no.nav.helse.person.Behandlinger.Companion.berik
-import no.nav.helse.person.Dokumentsporing.Companion.andreYtelser
 import no.nav.helse.person.Dokumentsporing.Companion.inntektFraAOrdingen
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingDager
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingInntekt
@@ -918,17 +917,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterYtelser(ytelser: Ytelser, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
-        val overlappendeEllerSenerePeriode = person.nåværendeVedtaksperioder(OVERLAPPENDE_ELLER_SENERE_MED_SAMME_SKJÆRINGSTIDSPUNKT(this)).minOrNull()?.periode
-        val ytelsetidslinje = ytelser
-            .sykdomstidslinje(aktivitetslogg, periode, skjæringstidspunkt, overlappendeEllerSenerePeriode)
-            ?.subset(periode) // subsetter for å unngå strekking
-
-        if (ytelsetidslinje != null) {
-            oppdaterHistorikk(ytelser.metadata.behandlingkilde, andreYtelser(ytelser.metadata.meldingsreferanseId), ytelsetidslinje, aktivitetslogg) {
-                /* ingen validering */
-            }
-        }
-
         val inntekterForBeregningBuilder = InntekterForBeregning.Builder(beregningsperiode).apply {
             ytelser.inntektsendringer(this)
         }
@@ -3341,12 +3329,6 @@ internal class Vedtaksperiode private constructor(
 
         internal val AUU_SOM_VIL_UTBETALES: VedtaksperiodeFilter = {
             it.tilstand == AvsluttetUtenUtbetaling && it.skalOmgjøres()
-        }
-
-        internal val OVERLAPPENDE_ELLER_SENERE_MED_SAMME_SKJÆRINGSTIDSPUNKT = { segSelv: Vedtaksperiode ->
-            { vedtaksperiode: Vedtaksperiode ->
-                vedtaksperiode !== segSelv && vedtaksperiode.skjæringstidspunkt == segSelv.skjæringstidspunkt && vedtaksperiode.periode.start >= segSelv.periode.start
-            }
         }
 
         private fun sykmeldingsperioder(vedtaksperioder: List<Vedtaksperiode>): List<Periode> {

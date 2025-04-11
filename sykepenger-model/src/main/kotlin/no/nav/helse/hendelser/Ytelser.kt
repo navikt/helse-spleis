@@ -9,8 +9,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.InntekterForBeregning.Builder
 import no.nav.helse.person.inntekt.Inntektskilde
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.merge
 
 class Ytelser(
     meldingsreferanseId: MeldingsreferanseId,
@@ -39,10 +37,6 @@ class Ytelser(
         )
     }
 
-    private val YTELSER_SOM_KAN_OPPDATERE_HISTORIKK: List<AnnenYtelseSomKanOppdatereHistorikk> = emptyList()
-    private val sykdomstidslinjer = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK
-        .map { it to it.sykdomstidslinje(metadata.meldingsreferanseId, metadata.registrert) }
-
     companion object {
         internal val Periode.familieYtelserPeriode get() = oppdaterFom(start.minusWeeks(4))
     }
@@ -69,18 +63,6 @@ class Ytelser(
         if (institusjonsopphold.overlapper(aktivitetslogg, periodeForOverlappsjekk)) aktivitetslogg.funksjonellFeil(Varselkode.`Overlapper med institusjonsopphold`)
 
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
-    }
-
-    internal fun sykdomstidslinje(
-        aktivitetslogg: IAktivitetslogg,
-        periode: Periode,
-        skjæringstidspunkt: LocalDate,
-        periodeRettEtter: Periode?
-    ): Sykdomstidslinje? {
-        val result = sykdomstidslinjer.mapNotNull { (ytelse, tidslinje) ->
-            tidslinje.takeIf { ytelse.skalOppdatereHistorikk(aktivitetslogg, ytelse, periode, skjæringstidspunkt, periodeRettEtter) }
-        }
-        return if (result.isEmpty()) null else result.merge()
     }
 
     internal fun inntektsendringer(builder: Builder) {

@@ -1,16 +1,10 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
-import java.time.LocalDateTime
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
-class Foreldrepenger(
-    private val foreldrepengeytelse: List<GradertPeriode>
-) : AnnenYtelseSomKanOppdatereHistorikk() {
+class Foreldrepenger(private val foreldrepengeytelse: List<GradertPeriode>) {
     private val perioder get() = foreldrepengeytelse.map { it.periode }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean) {
@@ -34,19 +28,6 @@ class Foreldrepenger(
         val harForeldrepengerAlleDager = foreldrepengeperiodeFør.periode.erRettFør(sykdomsperiode) && foreldrepengeperiodeFør.periode.count() > 14 && foreldrepengeperiodeFør.grad == 100
         if (!harForeldrepengerAlleDager) return
         aktivitetslogg.varsel(Varselkode.`Forlenger foreldrepenger med mer enn 14 dager`)
-    }
-
-    override fun sykdomstidslinje(meldingsreferanseId: MeldingsreferanseId, registrert: LocalDateTime): Sykdomstidslinje {
-        if (foreldrepengeytelse.isEmpty()) return Sykdomstidslinje()
-        val hendelseskilde = Hendelseskilde(Ytelser::class, meldingsreferanseId, registrert)
-        val førsteDag = foreldrepengeytelse.map { it.periode }.minOf { it.start }
-        val sisteDag = foreldrepengeytelse.map { it.periode }.maxOf { it.endInclusive }
-        val sykdomstidslinje = Sykdomstidslinje.andreYtelsedager(førsteDag, sisteDag, hendelseskilde, Dag.AndreYtelser.AnnenYtelse.Foreldrepenger)
-        return sykdomstidslinje
-    }
-
-    override fun skalOppdatereHistorikk(vedtaksperiode: Periode, skjæringstidspunkt: LocalDate, vedtaksperiodeRettEtter: Periode?): Pair<Boolean, Companion.HvorforIkkeOppdatereHistorikk?> {
-        return foreldrepengeytelse.skalOppdatereHistorikkIHalen(vedtaksperiode, skjæringstidspunkt, vedtaksperiodeRettEtter)
     }
 
     internal fun perioder(): List<Periode> {
