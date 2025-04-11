@@ -1416,10 +1416,13 @@ internal class Vedtaksperiode private constructor(
         egenmeldingsdager = egenmeldingsdager
     )
 
-    private fun nullstillEgenmeldingsdagerIArbeidsgiverperiode(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing?): List<Vedtaksperiode> {
-        val agp = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode() ?: return emptyList()
-        val perioder = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(agp).takeUnless { it.isEmpty() } ?: return emptyList()
-        return perioder.filter { it.håndterEgenmeldsingsdager(hendelse, dokumentsporing, it.registrerKontekst(aktivitetslogg), emptyList()) }
+    private fun nullstillEgenmeldingsdagerIArbeidsgiverperiode(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing?, eventyr: (skjæringstidspunkt: LocalDate, periodeForEndring: Periode) -> Revurderingseventyr): Revurderingseventyr? {
+        val agp = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode() ?: return null
+        val perioderIAgp = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(agp).takeUnless { it.isEmpty() } ?: return null
+        val endredePerioder = perioderIAgp.filter { it.håndterEgenmeldsingsdager(hendelse, dokumentsporing, it.registrerKontekst(aktivitetslogg), emptyList()) }.takeUnless { it.isEmpty() } ?: return null
+        val skjæringstidspunkt = endredePerioder.first().skjæringstidspunkt
+        val periodeForEndring = endredePerioder.first().periode.start til endredePerioder.last().periode.endInclusive
+        return eventyr(skjæringstidspunkt, periodeForEndring)
     }
 
     private fun håndterSøknad(
@@ -1890,8 +1893,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         val overstyring = when (påminnelse.når(Flagg("nullstillEgenmeldingsdager"))) {
-            true -> nullstillEgenmeldingsdagerIArbeidsgiverperiode(påminnelse, aktivitetslogg, null).takeUnless { it.isEmpty() }?.let { perioder ->
-                Revurderingseventyr.reberegning(påminnelse, perioder.first().skjæringstidspunkt, perioder.first().periode.start til perioder.last().periode.endInclusive)
+            true -> nullstillEgenmeldingsdagerIArbeidsgiverperiode(påminnelse, aktivitetslogg, null) { skjæringstidspunkt, periodeForEndring ->
+                Revurderingseventyr.reberegning(påminnelse, skjæringstidspunkt, periodeForEndring)
             }
             false -> påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
         }
