@@ -447,7 +447,8 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         tilstand: TilstandType,
         tilstandsendringstidspunkt: LocalDateTime,
         nåtidspunkt: LocalDateTime = LocalDateTime.now(),
-        reberegning: Boolean = false
+        reberegning: Boolean = false,
+        flagg: Set<String> = emptySet()
     ) =
         Påminnelse(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -460,7 +461,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             påminnelsestidspunkt = nåtidspunkt,
             nestePåminnelsestidspunkt = nåtidspunkt,
             opprettet = nåtidspunkt,
-            flagg = mutableSetOf<String>().apply {
+            flagg = flagg.toMutableSet().apply {
                 if (reberegning) add("ønskerReberegning")
             }
         )

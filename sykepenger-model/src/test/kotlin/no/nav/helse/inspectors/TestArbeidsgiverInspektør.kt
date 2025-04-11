@@ -163,7 +163,8 @@ internal class TestArbeidsgiverInspektør(
     internal fun arbeidsgiverperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioden(vedtaksperiodeIdInnhenter)
     internal fun arbeidsgiverperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioder(vedtaksperiodeIdInnhenter)
     internal fun arbeidsgiverperiode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.arbeidsgiverperiode
-    private fun <R> Collection<R>.singleOrNullOrThrow() = if (size < 2) this.firstOrNull() else throw IllegalStateException("Listen inneholder $size elementer: $this")
+
+    internal fun egenmeldingsdager(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).egenmeldingsdager
 
     internal fun refusjon(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).refusjonstidslinje
     internal fun refusjon(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).refusjonstidslinje
