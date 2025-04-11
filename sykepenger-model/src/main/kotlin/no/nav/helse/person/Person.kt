@@ -58,7 +58,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.fjernSykmeldingsperiode
-import no.nav.helse.person.Arbeidsgiver.Companion.førsteAuuSomVilUtbetales
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvInntekt
@@ -429,11 +428,6 @@ class Person private constructor(
 
     fun håndter(påminnelse: PersonPåminnelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler personpåminnelse")
-        arbeidsgivere.beregnSkjæringstidspunkter(infotrygdhistorikk)
-        arbeidsgivere.førsteAuuSomVilUtbetales()?.let {
-            aktivitetsloggMedPersonkontekst.info("Igangsetter reberegning fra ${it.periode.start} på grunn av AUU som vil utbetales")
-            igangsettOverstyring(Revurderingseventyr.reberegning(påminnelse, it.skjæringstidspunkt, it.periode), aktivitetsloggMedPersonkontekst)
-        }
         håndterGjenoppta(påminnelse, aktivitetsloggMedPersonkontekst)
     }
 

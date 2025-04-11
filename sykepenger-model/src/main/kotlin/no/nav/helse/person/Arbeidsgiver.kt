@@ -260,7 +260,7 @@ internal class Arbeidsgiver private constructor(
         private fun Iterable<Arbeidsgiver>.harPågåeneAnnullering() =
             any { it.utbetalinger.any { utbetaling -> utbetaling.erAnnulleringInFlight() } }
 
-        internal fun Iterable<Arbeidsgiver>.førsteAuuSomVilUtbetales() =
+        private fun Iterable<Arbeidsgiver>.førsteAuuSomVilUtbetales() =
             nåværendeVedtaksperioder(AUU_SOM_VIL_UTBETALES).minOrNull()
 
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
