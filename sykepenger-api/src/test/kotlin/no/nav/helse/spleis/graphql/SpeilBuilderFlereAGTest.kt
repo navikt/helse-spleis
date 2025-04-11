@@ -462,7 +462,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     fun `lager ikke Ghostperiode på et vilkårsgrunnlag som ingen beregnede perioder peker på`() {
         håndterSøknad(1.januar til 16.januar)
         håndterSøknad(17.januar til 31.januar)
-        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiode = 2)
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
         håndterYtelserTilGodkjenning()
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)

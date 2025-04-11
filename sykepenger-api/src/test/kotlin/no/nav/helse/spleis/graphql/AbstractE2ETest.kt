@@ -219,6 +219,13 @@ internal abstract class AbstractE2ETest {
         return meldingsreferanseId
     }
 
+    protected fun håndterLpsInntektsmelding(førsteFraværsdag: LocalDate, orgnummer: String = a1, begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null, beregnetInntekt: Inntekt = INNTEKT) = håndterLpsInntektsmelding(
+        arbeidsgiverperioder = listOf(førsteFraværsdag til førsteFraværsdag.plusDays(15)),
+        førsteFraværsdag = førsteFraværsdag,
+        orgnummer = orgnummer,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        beregnetInntekt = beregnetInntekt
+    )
     protected fun håndterLpsInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOfOrNull { it.start },

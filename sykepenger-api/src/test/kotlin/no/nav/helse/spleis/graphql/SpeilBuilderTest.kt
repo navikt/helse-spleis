@@ -53,7 +53,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         håndterSøknad(27.januar til 27.februar, a2) // Skal utbetales
 
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), orgnummer = a1, vedtaksperiode = 2)
-        håndterArbeidsgiveropplysninger(listOf(11.januar til 26.januar), orgnummer = a2)
+        håndterArbeidsgiveropplysninger(listOf(11.januar til 26.januar), orgnummer = a2, vedtaksperiode = 2)
         håndterVilkårsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT))
         håndterYtelser()
         håndterSimulering()
@@ -127,7 +127,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     @Test
     fun `nav skal ikke utbetale agp for kort periode likevel - perioden går så til AUU`() {
         håndterSøknad(1.januar til 16.januar)
-        håndterArbeidsgiveropplysninger(1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer")
+        håndterLpsInntektsmelding(1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer")
         håndterVilkårsgrunnlag()
         håndterYtelserTilGodkjenning()
         val idOverstyring = UUID.randomUUID()
