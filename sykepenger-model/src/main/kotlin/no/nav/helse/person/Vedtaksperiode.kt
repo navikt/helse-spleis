@@ -51,6 +51,7 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
 import no.nav.helse.hendelser.Påminnelse.Predikat.VentetMinst
 import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.hendelser.Revurderingseventyr.Companion.arbeidsgiverperiode
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
@@ -1416,13 +1417,11 @@ internal class Vedtaksperiode private constructor(
         egenmeldingsdager = egenmeldingsdager
     )
 
-    private fun nullstillEgenmeldingsdagerIArbeidsgiverperiode(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing?, eventyr: (skjæringstidspunkt: LocalDate, periodeForEndring: Periode) -> Revurderingseventyr): Revurderingseventyr? {
-        val agp = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode() ?: return null
-        val perioderIAgp = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(agp).takeUnless { it.isEmpty() } ?: return null
-        val endredePerioder = perioderIAgp.filter { it.håndterEgenmeldsingsdager(hendelse, dokumentsporing, it.registrerKontekst(aktivitetslogg), emptyList()) }.takeUnless { it.isEmpty() } ?: return null
-        val skjæringstidspunkt = endredePerioder.first().skjæringstidspunkt
-        val periodeForEndring = endredePerioder.first().periode.start til endredePerioder.last().periode.endInclusive
-        return eventyr(skjæringstidspunkt, periodeForEndring)
+    private fun nullstillEgenmeldingsdagerIArbeidsgiverperiode(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing?): List<Revurderingseventyr> {
+        val arbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode() ?: return emptyList()
+        return arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
+            .filter { it.håndterEgenmeldsingsdager(hendelse, dokumentsporing, it.registrerKontekst(aktivitetslogg), emptyList()) }
+            .map { arbeidsgiverperiode(hendelse, it.skjæringstidspunkt, it.periode) }
     }
 
     private fun håndterSøknad(
@@ -1893,9 +1892,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         val overstyring = when (påminnelse.når(Flagg("nullstillEgenmeldingsdager"))) {
-            true -> nullstillEgenmeldingsdagerIArbeidsgiverperiode(påminnelse, aktivitetslogg, null) { skjæringstidspunkt, periodeForEndring ->
-                Revurderingseventyr.reberegning(påminnelse, skjæringstidspunkt, periodeForEndring)
-            }
+            true -> nullstillEgenmeldingsdagerIArbeidsgiverperiode(påminnelse, aktivitetslogg, null).tidligsteEventyr()
             false -> påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
         }
 
