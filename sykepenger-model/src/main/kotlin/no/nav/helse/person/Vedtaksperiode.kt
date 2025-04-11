@@ -1405,6 +1405,23 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    private fun håndterEgenmeldsingsdager(hendelse: Hendelse, dokumentsporing: Dokumentsporing?, aktivitetslogg: IAktivitetslogg, egenmeldingsdager: List<Periode>) = behandlinger.håndterEgenmeldingsdager(
+        person = person,
+        arbeidsgiver = arbeidsgiver,
+        behandlingkilde = hendelse.metadata.behandlingkilde,
+        dokumentsporing = dokumentsporing,
+        aktivitetslogg = aktivitetslogg,
+        beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
+        beregnArbeidsgiverperiode = arbeidsgiver.beregnArbeidsgiverperiode(),
+        egenmeldingsdager = egenmeldingsdager
+    )
+
+    private fun nullstillEgenmeldingsdagerIArbeidsgiverperiode(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing?): List<Vedtaksperiode> {
+        val agp = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode() ?: return emptyList()
+        val perioder = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(agp).takeUnless { it.isEmpty() } ?: return emptyList()
+        return perioder.filter { it.håndterEgenmeldsingsdager(hendelse, dokumentsporing, it.registrerKontekst(aktivitetslogg), emptyList()) }
+    }
+
     private fun håndterSøknad(
         søknad: Søknad,
         aktivitetslogg: IAktivitetslogg,
@@ -1871,7 +1888,14 @@ internal class Vedtaksperiode private constructor(
             håndterMakstid(vedtaksperiode, påminnelse, aktivitetslogg)
             return null
         }
-        val overstyring = påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+
+        val overstyring = when (påminnelse.når(Flagg("nullstillEgenmeldingsdager"))) {
+            true -> nullstillEgenmeldingsdagerIArbeidsgiverperiode(påminnelse, aktivitetslogg, null).takeUnless { it.isEmpty() }?.let { perioder ->
+                Revurderingseventyr.reberegning(påminnelse, perioder.first().skjæringstidspunkt, perioder.first().periode.start til perioder.last().periode.endInclusive)
+            }
+            false -> påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+        }
+
         if (overstyring != null) {
             aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
             return overstyring

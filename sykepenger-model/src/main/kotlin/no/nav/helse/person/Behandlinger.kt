@@ -26,6 +26,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.erUtbetaltPåForskjelligeUtbetalinger
+import no.nav.helse.person.Behandlinger.Behandling.Companion.forrigeDokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
 import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbarInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbarInntekt
@@ -262,12 +263,40 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         refusjonstidslinje: Beløpstidslinje
     ): Boolean {
         val refusjonstidslinjeFør = behandlinger.last().refusjonstidslinje
-        behandlinger.last().håndterRefusjonsopplysninger(arbeidsgiver, behandlingkilde, dokumentsporing, aktivitetslogg, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, refusjonstidslinje)?.also {
+        behandlinger.last().håndterRefusjonsopplysninger(arbeidsgiver, behandlingkilde, dokumentsporing ?: behandlinger.forrigeDokumentsporing, aktivitetslogg, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, refusjonstidslinje)?.also {
             leggTilNyBehandling(it)
         }
         val refusjonstidslinjeEtter = behandlinger.last().refusjonstidslinje
         val endret = refusjonstidslinjeFør != refusjonstidslinjeEtter
         return endret
+    }
+
+    internal fun håndterEgenmeldingsdager(
+        person: Person,
+        arbeidsgiver: Arbeidsgiver,
+        behandlingkilde: Behandlingkilde,
+        dokumentsporing: Dokumentsporing?,
+        aktivitetslogg: IAktivitetslogg,
+        beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+        beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
+        egenmeldingsdager: List<Periode>
+    ): Boolean {
+        if (egenmeldingsdager == egenmeldingsdager()) return false
+
+        håndterEndring(
+            person = person,
+            arbeidsgiver = arbeidsgiver,
+            behandlingkilde = behandlingkilde,
+            dokumentsporing = dokumentsporing ?: behandlinger.forrigeDokumentsporing,
+            hendelseSykdomstidslinje = Sykdomstidslinje(),
+            aktivitetslogg = aktivitetslogg,
+            beregnSkjæringstidspunkt = beregnSkjæringstidspunkt,
+            beregnArbeidsgiverperiode = beregnArbeidsgiverperiode,
+            egenmeldingsdager = egenmeldingsdager,
+            dagerNavOvertarAnsvar = null,
+            validering = { /* nei takk */ }
+        )
+        return true
     }
 
     fun håndterEndring(
@@ -421,7 +450,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal fun håndterRefusjonsopplysninger(
             arbeidsgiver: Arbeidsgiver,
             behandlingkilde: Behandlingkilde,
-            dokumentsporing: Dokumentsporing?,
+            dokumentsporing: Dokumentsporing,
             aktivitetslogg: IAktivitetslogg,
             beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
             beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
@@ -957,7 +986,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return endringer.last().kopierMedEndring(oppdatertPeriode, dokumentsporing, sykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
         }
 
-        private fun oppdaterMedRefusjonstidslinje(dokumentsporing: Dokumentsporing?, nyeRefusjonsopplysninger: Beløpstidslinje) {
+        private fun oppdaterMedRefusjonstidslinje(dokumentsporing: Dokumentsporing, nyeRefusjonsopplysninger: Beløpstidslinje) {
             val endring = endringer.last().kopierMedRefusjonstidslinje(dokumentsporing ?: this.gjeldende.dokumentsporing, nyeRefusjonsopplysninger)
             nyEndring(endring)
         }
@@ -1022,7 +1051,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         private fun nyBehandlingMedRefusjonstidslinje(
             arbeidsgiver: Arbeidsgiver,
             behandlingkilde: Behandlingkilde,
-            dokumentsporing: Dokumentsporing?,
+            dokumentsporing: Dokumentsporing,
             beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
             beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
             nyRefusjonstidslinje: Beløpstidslinje,
@@ -1034,7 +1063,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 tilstand = starttilstand,
                 endringer = listOf(
                     endringer.last().kopierMedRefusjonstidslinje(
-                        dokumentsporing ?: this.gjeldende.dokumentsporing,
+                        dokumentsporing,
                         nyRefusjonstidslinje,
                         beregnSkjæringstidspunkt,
                         beregnArbeidsgiverperiode
@@ -1220,6 +1249,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal companion object {
             val List<Behandling>.sykmeldingsperiode get() = first().periode
             val List<Behandling>.dokumentsporing get() = map { it.dokumentsporing }.takeUnless { it.isEmpty() }?.reduce(Set<Dokumentsporing>::plus) ?: emptySet()
+            val List<Behandling>.forrigeDokumentsporing get() = last().gjeldende.dokumentsporing
             fun nyBehandling(observatører: List<BehandlingObserver>, sykdomstidslinje: Sykdomstidslinje, egenmeldingsdager: List<Periode>, inntektsendringer: Beløpstidslinje, dokumentsporing: Dokumentsporing, sykmeldingsperiode: Periode, behandlingkilde: Behandlingkilde) =
                 Behandling(
                     observatører = observatører,
@@ -1347,7 +1377,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 arbeidsgiver: Arbeidsgiver,
                 behandling: Behandling,
                 behandlingkilde: Behandlingkilde,
-                dokumentsporing: Dokumentsporing?,
+                dokumentsporing: Dokumentsporing,
                 aktivitetslogg: IAktivitetslogg,
                 beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                 beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
@@ -1436,7 +1466,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     arbeidsgiver: Arbeidsgiver,
                     behandling: Behandling,
                     behandlingkilde: Behandlingkilde,
-                    dokumentsporing: Dokumentsporing?,
+                    dokumentsporing: Dokumentsporing,
                     aktivitetslogg: IAktivitetslogg,
                     beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
@@ -1528,7 +1558,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     arbeidsgiver: Arbeidsgiver,
                     behandling: Behandling,
                     behandlingkilde: Behandlingkilde,
-                    dokumentsporing: Dokumentsporing?,
+                    dokumentsporing: Dokumentsporing,
                     aktivitetslogg: IAktivitetslogg,
                     beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
@@ -1578,7 +1608,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     arbeidsgiver: Arbeidsgiver,
                     behandling: Behandling,
                     behandlingkilde: Behandlingkilde,
-                    dokumentsporing: Dokumentsporing?,
+                    dokumentsporing: Dokumentsporing,
                     aktivitetslogg: IAktivitetslogg,
                     beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
@@ -1641,7 +1671,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     arbeidsgiver: Arbeidsgiver,
                     behandling: Behandling,
                     behandlingkilde: Behandlingkilde,
-                    dokumentsporing: Dokumentsporing?,
+                    dokumentsporing: Dokumentsporing,
                     aktivitetslogg: IAktivitetslogg,
                     beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
@@ -1703,7 +1733,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     arbeidsgiver: Arbeidsgiver,
                     behandling: Behandling,
                     behandlingkilde: Behandlingkilde,
-                    dokumentsporing: Dokumentsporing?,
+                    dokumentsporing: Dokumentsporing,
                     aktivitetslogg: IAktivitetslogg,
                     beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
@@ -1750,7 +1780,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     arbeidsgiver: Arbeidsgiver,
                     behandling: Behandling,
                     behandlingkilde: Behandlingkilde,
-                    dokumentsporing: Dokumentsporing?,
+                    dokumentsporing: Dokumentsporing,
                     aktivitetslogg: IAktivitetslogg,
                     beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
@@ -1821,7 +1851,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     arbeidsgiver: Arbeidsgiver,
                     behandling: Behandling,
                     behandlingkilde: Behandlingkilde,
-                    dokumentsporing: Dokumentsporing?,
+                    dokumentsporing: Dokumentsporing,
                     aktivitetslogg: IAktivitetslogg,
                     beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
                     beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
