@@ -91,25 +91,17 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
         }
 
         fun <R> Collection<R>.mursteinsperioder(utgangspunkt: Periode, periodeFun: (R) -> Periode): List<R> {
-            val muligeOverlapp = this
-                .toMutableList()
-
-            var omsluttendePeriode = utgangspunkt
+            val muligeOverlapp = toMutableList()
             val resultat = mutableListOf<R>()
-            var fantOverlapp = false
-            do {
-                fantOverlapp = muligeOverlapp.removeAll { elem ->
-                    val periode = periodeFun(elem)
-                    periode.overlapperMed(omsluttendePeriode).also { overlapp ->
-                        if (overlapp) {
-                            omsluttendePeriode = omsluttendePeriode.oppdaterFom(periode).oppdaterTom(periode)
-                            resultat.insertSorted(elem, periodeFun)
-                        }
-                    }
-                }
-            } while (fantOverlapp)
-
-            return resultat.toList()
+            val kø = mutableListOf(utgangspunkt)
+            while (kø.isNotEmpty()) {
+                val periode = kø.removeAt(0)
+                val overlappende = muligeOverlapp.filter { periodeFun(it).overlapperMed(periode) }
+                muligeOverlapp.removeAll(overlappende)
+                overlappende.forEach { resultat.insertSorted(it, periodeFun) }
+                kø.addAll(overlappende.map { periodeFun(it) })
+            }
+            return resultat
         }
 
         private fun <R> MutableList<R>.insertSorted(elementToBeInserted: R, periodeFun: (R) -> Periode) {
