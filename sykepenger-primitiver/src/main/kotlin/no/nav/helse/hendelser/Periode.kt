@@ -103,15 +103,19 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
                     periode.overlapperMed(omsluttendePeriode).also { overlapp ->
                         if (overlapp) {
                             omsluttendePeriode = omsluttendePeriode.oppdaterFom(periode).oppdaterTom(periode)
-                            val insertIndex = resultat.indexOfFirst { periode.start <= periodeFun(it).start }
-                            if (insertIndex == -1) resultat.add(elem)
-                            else resultat.add(insertIndex, elem)
+                            resultat.insertSorted(elem, periodeFun)
                         }
                     }
                 }
             } while (fantOverlapp)
 
             return resultat.toList()
+        }
+
+        private fun <R> MutableList<R>.insertSorted(elementToBeInserted: R, periodeFun: (R) -> Periode) {
+            val insertIndex = indexOfFirst { periodeFun(elementToBeInserted).start <= periodeFun(it).start }
+            if (insertIndex == -1) add(elementToBeInserted)
+            else add(insertIndex, elementToBeInserted)
         }
 
         fun mellom(a: Periode, b: Periode) =
