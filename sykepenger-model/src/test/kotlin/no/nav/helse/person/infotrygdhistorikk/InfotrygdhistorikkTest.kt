@@ -6,7 +6,6 @@ import java.util.*
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.MeldingsreferanseId
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -20,9 +19,6 @@ import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.resetSeed
-import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingsak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -276,117 +272,6 @@ internal class InfotrygdhistorikkTest {
         assertEquals(5.januar, historikk.skjæringstidspunkt(emptyList()).sisteOrNull(5.januar til 31.januar))
         assertEquals(1.januar, historikk.skjæringstidspunkt(listOf(2.S, 3.S)).sisteOrNull(januar))
     }
-
-    @Test
-    fun `har endret historikk når historikk er tom`() {
-        assertFalse(historikk.harEndretHistorikk(lagUtbetaling()))
-    }
-
-    @Test
-    fun `har endret historikk dersom utbetaling er eldre enn siste element`() {
-        val utbetaling = lagUtbetaling()
-        historikk.oppdaterHistorikk(historikkelement())
-        assertTrue(historikk.harEndretHistorikk(utbetaling))
-    }
-
-    @Test
-    fun `har ikke endret historikk dersom utbetaling er nyere enn siste element`() {
-        historikk.oppdaterHistorikk(historikkelement())
-        val utbetaling = lagUtbetaling()
-        assertFalse(historikk.harEndretHistorikk(utbetaling))
-    }
-
-    @Test
-    fun `Infotrygdutbetaling før spleisutbetaling`() {
-        historikk.oppdaterHistorikk(
-            historikkelement(
-                listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar),
-                    Friperiode(26.januar, 31.januar),
-                )
-            )
-        )
-        assertFalse(historikk.harEndretHistorikk(lagUtbetaling()))
-    }
-
-    @Test
-    fun `Infotrygdutbetaling etter spleisutbetaling`() {
-        val utbetaling = lagUtbetaling()
-        historikk.oppdaterHistorikk(
-            historikkelement(
-                listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar),
-                    Friperiode(26.januar, 31.januar),
-                )
-            )
-        )
-        assertTrue(historikk.harEndretHistorikk(utbetaling))
-    }
-
-    @Test
-    fun `Ny inntekt registrert i infotrygd`() {
-        historikk.oppdaterHistorikk(
-            historikkelement(
-                listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar)
-                )
-            )
-        )
-        val utbetaling = lagUtbetaling()
-        historikk.oppdaterHistorikk(
-            historikkelement(
-                listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar)
-                )
-            )
-        )
-        assertFalse(historikk.harEndretHistorikk(utbetaling))
-        historikk.oppdaterHistorikk(
-            historikkelement(
-                perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar))
-            )
-        )
-        assertFalse(historikk.harEndretHistorikk(utbetaling))
-    }
-
-    @Test
-    fun `Nye arbeidskategorikoder registrert i infotrygd`() {
-        historikk.oppdaterHistorikk(
-            historikkelement(
-                listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar)
-                )
-            )
-        )
-        val utbetaling = lagUtbetaling()
-        historikk.oppdaterHistorikk(
-            historikkelement(
-                listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar)
-                )
-            )
-        )
-        assertFalse(historikk.harEndretHistorikk(utbetaling))
-        historikk.oppdaterHistorikk(
-            historikkelement(
-                perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar))
-            )
-        )
-        assertFalse(historikk.harEndretHistorikk(utbetaling))
-    }
-
-    private fun lagUtbetaling() = Utbetaling.lagUtbetaling(
-        utbetalinger = emptyList(),
-        fødselsnummer = "",
-        organisasjonsnummer = "",
-        utbetalingstidslinje = tidslinjeOf(),
-        periode = 1.januar.somPeriode(),
-        utbetalingsaker = listOf(Utbetalingsak(1.januar, listOf(1.januar.somPeriode()))),
-        aktivitetslogg = Aktivitetslogg(),
-        maksdato = 1.januar,
-        forbrukteSykedager = 0,
-        gjenståendeSykedager = 0
-    ).first
 
     private fun historikkelement(
         perioder: List<Infotrygdperiode> = emptyList(),

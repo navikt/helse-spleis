@@ -9,7 +9,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingsh
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class Infotrygdhistorikk private constructor(
@@ -93,14 +92,6 @@ internal class Infotrygdhistorikk private constructor(
         val forrige = _elementer.firstOrNull()
         _elementer.add(0, element)
         return element.tidligsteEndringMellom(forrige)
-    }
-
-    internal fun harEndretHistorikk(utbetaling: Utbetaling): Boolean {
-        if (!harHistorikk()) return false
-        val sisteElementSomFantesFørUtbetaling = _elementer.firstOrNull {
-            it.erEldreEnn(utbetaling)
-        } ?: return siste.erNyopprettet()
-        return siste.erEndretUtbetaling(sisteElementSomFantesFørUtbetaling)
     }
 
     internal fun tøm() {
