@@ -40,7 +40,6 @@ internal class ArbeidsgiverBuilder(
                         pølseFinnesIRad(forrige, pølse) || pølseFinnesIRad(neste, pølse)
                     }) {
                     // raden er unyttig
-                    println("unyttige rad $radnummer fra bunnen!! $nåværende er unyttig")
                 } else {
                     result.add(0, nåværende)
                 }
