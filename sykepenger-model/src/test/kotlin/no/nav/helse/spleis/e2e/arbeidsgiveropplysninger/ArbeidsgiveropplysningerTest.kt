@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -63,6 +62,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpsti
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -119,30 +119,28 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `tøysete egenmeldingsdag skaper loop av forespørsler`() {
+    fun `tøysete egenmeldingsdag skaper _ikke_ loop av forespørsler`() {
         a1 {
             nyttVedtak(1.januar til fredag(19.januar))
             håndterSøknad(Sykdom(15.februar, 20.februar, 100.prosent), egenmeldinger = listOf(mandag(5.februar).somPeriode()))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+            assertEquals(listOf(5.februar.somPeriode()), inspektør.egenmeldingsdager(2.vedtaksperiode))
+
             val forespørselPgaEgenmeldingsdager = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 2.vedtaksperiode }
             assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsdager)
             assertEquals(setOf(Inntekt, Refusjon), forespørselPgaEgenmeldingsdager.forespurteOpplysninger)
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.clear()
+
             håndterArbeidsgiveropplysninger(2.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()), OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)))
+            assertEquals(listOf(15.februar til 20.februar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+            assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(2.vedtaksperiode))
+            assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
-            assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-            assertForventetFeil(
-                forklaring = "Vi kvitterer ikke ut egenmeldingsperioden 5. februar og skaper en loop der februarperioden alltid sender ut en forespørsel",
-                nå = {
-                    assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsdager)
-                },
-                ønsket = {
-                    assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsdager)
-                }
-            )
         }
     }
 
@@ -297,11 +295,18 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(3.januar, 18.januar, 50.prosent), egenmeldinger = listOf(1.januar til 2.januar))
             assertEquals("SSSHH SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+            assertEquals(listOf(1.januar til 2.januar), inspektør.egenmeldingsdager(1.vedtaksperiode))
+            assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+
             håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()), IkkeNyArbeidsgiverperiode)
             assertEquals("SSSHH SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertEquals(emptyList<Nothing>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(listOf(3.januar til 18.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+            assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(1.vedtaksperiode))
+            assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+
             assertEquals(50.prosent, (inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje[3.januar] as Dag.Sykedag).grad)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertVarsler(listOf(RV_IM_25), 1.vedtaksperiode.filter())
         }
     }
@@ -323,11 +328,19 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `oppgir at de ikke har utbetalt arbeidsgiverperioden på kort periode`() {
         a1 {
             håndterSøknad(Sykdom(3.januar, 18.januar, 69.prosent), egenmeldinger = listOf(1.januar til 2.januar))
+            observatør.assertEtterspurt(1.vedtaksperiode, Inntekt::class, Refusjon::class, Arbeidsgiverperiode::class)
             assertEquals("SSSHH SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+            assertEquals(listOf(1.januar til 2.januar), inspektør.egenmeldingsdager(1.vedtaksperiode))
+            assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+
             håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()), IkkeUtbetaltArbeidsgiverperiode(ManglerOpptjening))
             assertEquals("SSSHH SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertEquals(listOf(3.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(listOf(3.januar til 18.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+            assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(1.vedtaksperiode))
+            assertEquals(listOf(3.januar til 18.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
             assertTrue(inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.filterIsInstance<Dag.Sykedag>().all { it.grad == 69.prosent })
+
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
         }

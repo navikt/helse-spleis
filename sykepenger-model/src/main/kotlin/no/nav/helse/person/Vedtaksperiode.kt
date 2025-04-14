@@ -529,6 +529,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         val eventyr = listOf(
+            nullstillEgenmeldingsdagerIArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst, inntektsmeldingDager(arbeidsgiveropplysninger.metadata.meldingsreferanseId)),
             håndterOppgittArbeidsgiverperiode(arbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst),
             håndterOppgittRefusjon(arbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst, ubrukteRefusjonsopplysninger),
             håndterOppgittInntekt(arbeidsgiveropplysninger, inntektshistorikk),
