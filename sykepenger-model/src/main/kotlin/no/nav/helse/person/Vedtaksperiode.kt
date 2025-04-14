@@ -1632,24 +1632,17 @@ internal class Vedtaksperiode private constructor(
         if (arbeidsgiver.finnVedtaksperiodeRettFør(this)?.skalBehandlesISpeil() == true) return emptySet() // Da har perioden foran oss spurt for oss/ vi har det vi trenger ✋
 
         val opplysninger = mutableSetOf<PersonObserver.ForespurtOpplysning>().apply {
-            if (!harEksisterendeInntekt()) {
-                add(PersonObserver.Inntekt)
-                add(PersonObserver.Refusjon) // TODO: Et lite hack for vi undersøker om HAG tåler at vi ikke spør om refusjon
-            }
-            if (refusjonstidslinje.isEmpty()) add(PersonObserver.Refusjon)
+            if (!harEksisterendeInntekt()) addAll(setOf(PersonObserver.Inntekt, PersonObserver.Refusjon)) // HAG støtter ikke skjema uten refusjon, så når vi først spør om inntekt _må_ vi også spørre om refusjon
+            if (refusjonstidslinje.isEmpty()) add(PersonObserver.Refusjon) // For de tilfellene vi faktiske trenger refusjon
         }
         if (opplysninger.isEmpty()) return emptySet() // Om vi har inntekt og refusjon så er saken biff 🥩
 
+        if (behandlinger.dagerNavOvertarAnsvar.isNotEmpty()) return opplysninger // Trenger hvert fall ikke opplysninger om arbeidsgiverperiode dersom Nav har overtatt ansvar for den ✋
+
         return opplysninger.apply {
             val sisteDelAvAgp = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.lastOrNull()
-
-            // Trenger ikke opplysninger om arbeidsgiverperiode dersom Nav har overtatt ansvar for den
-            val arbeidsgiverEierArbeidsgiverperiode = behandlinger.dagerNavOvertarAnsvar.isEmpty()
-
             // Vi "trenger" jo aldri AGP, men spør om vi perioden overlapper/er rett etter beregnet AGP
-            val trengerArbeidsgiverperiode = sisteDelAvAgp?.overlapperMed(periode) == true || sisteDelAvAgp?.erRettFør(periode) == true
-
-            if (arbeidsgiverEierArbeidsgiverperiode && trengerArbeidsgiverperiode) {
+            if (sisteDelAvAgp?.overlapperMed(periode) == true || sisteDelAvAgp?.erRettFør(periode) == true) {
                 add(PersonObserver.Arbeidsgiverperiode)
             }
         }
