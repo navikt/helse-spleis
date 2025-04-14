@@ -2,6 +2,7 @@ package no.nav.helse.spleis.speil.builders
 
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.spleis.speil.SpekematDTO
+import no.nav.helse.spleis.speil.builders.ArbeidsgiverBuilder.Companion.fjernUnødvendigeRader
 import no.nav.helse.spleis.speil.dto.AlderDTO
 import no.nav.helse.spleis.speil.dto.ArbeidsgiverDTO
 
@@ -19,39 +20,22 @@ internal class ArbeidsgiverBuilder(
     }
 
     internal companion object {
-        fun List<SpekematDTO.PølsepakkeDTO.PølseradDTO>.fjernUnødvendigeRader(): List<SpekematDTO.PølsepakkeDTO.PølseradDTO> {
-            // rader hvor alle pølser er kopiert fra forrige rad - eller blir kopiert til neste rad - kan i praksis fjernes
-            // det betyr at vi bare behøver vurdere pølsepakker med minst tre rader siden den vi skal vurdere én rad mot to andre
-            if (size <= 2) return this
-            val pølseFinnesIRad = { rad: SpekematDTO.PølsepakkeDTO.PølseradDTO, pølse: SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO ->
-                rad.pølser.any { it.behandlingId == pølse.behandlingId }
+        fun List<SpekematDTO.PølsepakkeDTO.PølseradDTO>.fjernUnødvendigeRader(): List<SpekematDTO.PølsepakkeDTO.PølseradDTO> = if (size <= 2) this
+        else foldIndexed(emptyList()) { index, acc, rad ->
+            when {
+                pølsaSkalMed(index) -> acc + rad
+                else -> acc
             }
+        }
 
-            val iterator = this.asReversed().iterator()
-            var forrige = iterator.next()
-            // første rad bevares uansett
-            val result = mutableListOf(forrige)
-            var nåværende = iterator.next()
-            var radnummer = 2
-            while (iterator.hasNext()) {
-                val neste = iterator.next()
-
-                if (nåværende.pølser.all { pølse ->
-                        pølseFinnesIRad(forrige, pølse) || pølseFinnesIRad(neste, pølse)
-                    }) {
-                    // raden er unyttig
-                } else {
-                    result.add(0, nåværende)
-                }
-
-                radnummer += 1
-                forrige = nåværende
-                nåværende = neste
-            }
-
-            // siste/øverste rad bevares uansett
-            result.add(0, nåværende)
-            return result
+        private fun List<SpekematDTO.PølsepakkeDTO.PølseradDTO>.pølsaSkalMed(pølseIndex: Int): Boolean {
+            if (pølseIndex == 0) return true
+            if (pølseIndex == size - 1) return true
+            val forrige = this[pølseIndex - 1].pølser
+            val denne = this[pølseIndex].pølser
+            val neste = this[pølseIndex + 1].pølser
+            val behandlinger = (forrige + neste).map { it.behandlingId }
+            return denne.any { pølse -> !behandlinger.contains(pølse.behandlingId) }
         }
     }
 }
