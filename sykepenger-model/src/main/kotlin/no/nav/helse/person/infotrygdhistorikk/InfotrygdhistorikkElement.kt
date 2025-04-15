@@ -12,7 +12,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.utbetalingsperioder
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 class InfotrygdhistorikkElement private constructor(
@@ -20,17 +19,12 @@ class InfotrygdhistorikkElement private constructor(
     val tidsstempel: LocalDateTime,
     val hendelseId: MeldingsreferanseId,
     perioder: List<Infotrygdperiode>,
-    oppdatert: LocalDateTime,
-    private var nyOpprettet: Boolean = false
+    oppdatert: LocalDateTime
 ) {
     var oppdatert = oppdatert
         private set
     val perioder = Infotrygdperiode.sorter(perioder)
     private val kilde = Hendelseskilde("Infotrygdhistorikk", hendelseId, tidsstempel)
-
-    init {
-        if (!erTom()) requireNotNull(hendelseId) { "HendelseID må være satt når elementet inneholder data" }
-    }
 
     companion object {
         fun opprett(
@@ -43,8 +37,7 @@ class InfotrygdhistorikkElement private constructor(
                 tidsstempel = LocalDateTime.now(),
                 hendelseId = hendelseId,
                 perioder = perioder,
-                oppdatert = oppdatert,
-                nyOpprettet = true
+                oppdatert = oppdatert
             )
 
         internal fun gjenopprett(dto: InfotrygdhistorikkelementInnDto): InfotrygdhistorikkElement {
@@ -75,8 +68,6 @@ class InfotrygdhistorikkElement private constructor(
             result.merge(periode.sykdomstidslinje(kilde), sammenhengendeSykdom)
         }
     }
-
-    private fun erTom() = perioder.isEmpty()
 
     internal fun validerMedFunksjonellFeil(aktivitetslogg: IAktivitetslogg, periode: Periode): Boolean {
         aktivitetslogg.info("Sjekker utbetalte perioder")
@@ -130,17 +121,6 @@ class InfotrygdhistorikkElement private constructor(
     private fun førsteUlikePeriode(other: InfotrygdhistorikkElement): Infotrygdperiode? {
         return this.perioder.firstOrNull { other.perioder.none { otherIt -> it.funksjoneltLik(otherIt) } }
     }
-
-    internal fun erEldreEnn(utbetaling: Utbetaling): Boolean {
-        return utbetaling.erNyereEnn(this.tidsstempel)
-    }
-
-    internal fun erEndretUtbetaling(sisteElementSomFantesFørUtbetaling: InfotrygdhistorikkElement): Boolean {
-        if (this === sisteElementSomFantesFørUtbetaling) return false
-        return !harLikePerioder(sisteElementSomFantesFørUtbetaling)
-    }
-
-    internal fun erNyopprettet() = nyOpprettet
 
     internal fun harUtbetaltI(periode: Periode) = betaltePerioder().any { it.overlapperMed(periode) }
 
