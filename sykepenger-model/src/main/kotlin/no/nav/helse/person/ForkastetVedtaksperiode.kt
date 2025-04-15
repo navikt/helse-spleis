@@ -5,7 +5,6 @@ import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
@@ -76,7 +75,7 @@ internal class ForkastetVedtaksperiode(
             }
             .isNotEmpty()
 
-        /** Stopper eventuell behandling av nye søknader som er nærmere andre søknader vi har forkastet */
+        /** Stopper eventuell behandling av nye søknader som er nærmere andre søknader vi allerede har forkastet */
         internal fun List<ForkastetVedtaksperiode>.blokkererBehandlingAv(nyPeriode: Periode, arbeidsgiver: String, aktivitetslogg: IAktivitetslogg): Boolean {
             if (forlenger(nyPeriode, arbeidsgiver, aktivitetslogg)) return true
             if (overlapper(nyPeriode, arbeidsgiver, aktivitetslogg)) return true
@@ -85,25 +84,22 @@ internal class ForkastetVedtaksperiode(
             return false
         }
 
-
-        /** Setter et flagg slik at vi lager HAG-forespørsler for perioder som skal behandles i Inforygd (via sparkel-arbeidsgiver) */
+        /** Setter et flagg i 'vedtaksperiode_forkastet' slik at vi lager HAG-forespørsler for perioder som skal behandles i Inforygd (TRENGER_OPPLYSNINGER_FRA_ARBEIDSGIVER_BEGRENSET via sparkel-arbeidsgiver) */
         internal fun List<ForkastetVedtaksperiode>.trengerArbeidsgiveropplysninger(periode: Periode, aktive: List<Periode>, trengerArbeidsgiveropplysninger: (historiskeSykmeldingsperioder: List<Periode>) -> Unit) {
-            val allePerioderFør = (aktive + perioder()).sortedBy { it.start }.filter { it.start < periode.start }
-
-            val perioderKnyttetTilSammeArbeidsgiverperiode = allePerioderFør
-                .reversed() // Går motsatt vei slik at vi kan stoppe så fort vi finner et for langt gap
+            val perioderKnyttetTilSammeArbeidsgiverperiode = (aktive + perioder()) // Slår sammen aktive og forkastede perioder
+                .filter { it.start < periode.start } // Tar kun perioder før den som skal forkastes
+                .sortedByDescending { it.start } // Går motsatt vei slik at vi kan stoppe så fort vi finner et for langt gap
                 .fold(listOf(periode)) { knyttetTilSammeArbeidsgiverperiode, forrigePeriode ->
                     val eldsteRelevantePeriode = knyttetTilSammeArbeidsgiverperiode.minBy { it.start }
                     val forStortGapTilÅVæreInteressant = (forrigePeriode.periodeMellom(eldsteRelevantePeriode.start)?.count() ?: 0) >= 16
-                    if (forStortGapTilÅVæreInteressant) {
-                        return@fold knyttetTilSammeArbeidsgiverperiode
-                    }
+                    if (forStortGapTilÅVæreInteressant) return@fold knyttetTilSammeArbeidsgiverperiode
                     knyttetTilSammeArbeidsgiverperiode + listOf(forrigePeriode)
                 }
-                .reversed() // Snur lista igjen slik at de sendes ut i rett rekkefølge
+                .sortedBy { it.start } // Snur lista igjen slik at de sendes ut i rett rekkefølge
 
             // Alle relevante perioder er innenfor AGP
-            val antallDagerMedPerioden = perioderKnyttetTilSammeArbeidsgiverperiode.grupperSammenhengendePerioder().sumOf { it.count() }
+            // toSet() for å håndtere overlappende perioder, så vi ikke teller samme dag flere ganger
+            val antallDagerMedPerioden = perioderKnyttetTilSammeArbeidsgiverperiode.flatten().toSet().size
             if (antallDagerMedPerioden <= 16) return
 
             // Den forkastede vedtaksperioden er den første som strekker seg utover AGP
@@ -116,7 +112,7 @@ internal class ForkastetVedtaksperiode(
                 .any { it.erRettFør(periode) || it.overlapperMed(periode) }
 
             if (erForlengelse) return
-            return trengerArbeidsgiveropplysninger(perioderKnyttetTilSammeArbeidsgiverperiode)
+            trengerArbeidsgiveropplysninger(perioderKnyttetTilSammeArbeidsgiverperiode)
         }
 
         internal fun gjenopprett(
