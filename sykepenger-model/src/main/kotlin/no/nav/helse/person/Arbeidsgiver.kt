@@ -526,7 +526,7 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg: IAktivitetslogg,
         arbeidsgivere: List<Arbeidsgiver>,
         infotrygdhistorikk: Infotrygdhistorikk
-    ): Revurderingseventyr? {
+    ): Revurderingseventyr {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         søknad.slettSykmeldingsperioderSomDekkes(sykmeldingsperioder)
         return behandleSøknad(søknad, aktivitetsloggMedArbeidsgiverkontekst, arbeidsgivere, infotrygdhistorikk)
@@ -537,7 +537,7 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg: IAktivitetslogg,
         arbeidsgivere: List<Arbeidsgiver>,
         infotrygdhistorikk: Infotrygdhistorikk
-    ): Revurderingseventyr? {
+    ): Revurderingseventyr {
         return behandleSøknadSomKorrigering(søknad, aktivitetslogg)
             ?: behandleSøknadSomFørstegangs(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)
     }
@@ -563,7 +563,7 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg: IAktivitetslogg,
         arbeidsgivere: List<Arbeidsgiver>,
         infotrygdhistorikk: Infotrygdhistorikk
-    ): Revurderingseventyr? {
+    ): Revurderingseventyr {
         val vedtaksperiode = søknad.lagVedtaksperiode(aktivitetslogg, person, this, regelverkslogg)
         registrerNyVedtaksperiode(vedtaksperiode)
         return vedtaksperiode.håndterSøknadFørsteGang(søknad, aktivitetslogg, arbeidsgivere, infotrygdhistorikk)

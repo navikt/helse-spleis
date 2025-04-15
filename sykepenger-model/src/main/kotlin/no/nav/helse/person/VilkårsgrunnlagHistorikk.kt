@@ -14,7 +14,6 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.forrigeDag
-import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -179,7 +178,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         ): VilkårsgrunnlagElement
 
         internal fun grunnbeløpsregulering(
-            hendelse: Grunnbeløpsregulering,
             subsumsjonslogg: Subsumsjonslogg
         ): VilkårsgrunnlagElement? {
             val nyttSykepengegrunnlag = inntektsgrunnlag.grunnbeløpsregulering() ?: return null

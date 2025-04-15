@@ -1143,7 +1143,7 @@ internal class Vedtaksperiode private constructor(
         // i praksis double-dispatch, kotlin-style
         val (nyttGrunnlag, revurderingseventyr) = when (overstyrInntektsgrunnlag) {
             is Grunnbeløpsregulering -> {
-                val nyttGrunnlag = grunnlag.grunnbeløpsregulering(overstyrInntektsgrunnlag, subsumsjonslogg)
+                val nyttGrunnlag = grunnlag.grunnbeløpsregulering(subsumsjonslogg)
                 if (nyttGrunnlag == null) {
                     aktivitetsloggMedVedtaksperiodekontekst.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt er allerede korrekt.")
                 } else {

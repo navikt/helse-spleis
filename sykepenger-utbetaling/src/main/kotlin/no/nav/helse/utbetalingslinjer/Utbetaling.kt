@@ -557,14 +557,14 @@ class Utbetaling private constructor(
         fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {}
     }
 
-    internal object Ny : Tilstand {
+    internal data object Ny : Tilstand {
         override val status = Utbetalingstatus.NY
         override fun opprett(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
             utbetaling.tilstand(Ubetalt, aktivitetslogg)
         }
     }
 
-    internal object Ubetalt : Tilstand {
+    internal data object Ubetalt : Tilstand {
         override val status = Utbetalingstatus.IKKE_UTBETALT
         override fun forkast(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
             utbetaling.annulleringer.forEach { it.forkast(aktivitetslogg) }
@@ -586,7 +586,7 @@ class Utbetaling private constructor(
         }
     }
 
-    internal object Godkjent : Tilstand {
+    internal data object Godkjent : Tilstand {
         override val status = Utbetalingstatus.GODKJENT
 
         override fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
@@ -612,7 +612,7 @@ class Utbetaling private constructor(
         }
     }
 
-    internal object GodkjentUtenUtbetaling : Tilstand {
+    internal data object GodkjentUtenUtbetaling : Tilstand {
         override val status = Utbetalingstatus.GODKJENT_UTEN_UTBETALING
         override fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
             check(!utbetaling.harOppdragMedUtbetalinger())
@@ -633,7 +633,7 @@ class Utbetaling private constructor(
         ).also { aktivitetslogg.info("Oppretter annullering med id ${it.id}") }
     }
 
-    internal object Overført : Tilstand {
+    internal data object Overført : Tilstand {
         override val status = Utbetalingstatus.OVERFØRT
         override fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
             utbetaling.overførBegge(aktivitetslogg)
@@ -651,7 +651,7 @@ class Utbetaling private constructor(
         }
     }
 
-    internal object Annullert : Tilstand {
+    internal data object Annullert : Tilstand {
         override val status = Utbetalingstatus.ANNULLERT
         override fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
             utbetaling.vurdering?.annullert(utbetaling)
@@ -659,7 +659,7 @@ class Utbetaling private constructor(
         }
     }
 
-    internal object Utbetalt : Tilstand {
+    internal data object Utbetalt : Tilstand {
         override val status = Utbetalingstatus.UTBETALT
         override fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
             utbetaling.vurdering?.utbetalt(utbetaling)
@@ -680,11 +680,11 @@ class Utbetaling private constructor(
             ).also { aktivitetslogg.info("Oppretter annullering med id ${it.id}") }
     }
 
-    internal object IkkeGodkjent : Tilstand {
+    internal data object IkkeGodkjent : Tilstand {
         override val status = Utbetalingstatus.IKKE_GODKJENT
     }
 
-    internal object Forkastet : Tilstand {
+    internal data object Forkastet : Tilstand {
         override val status = Utbetalingstatus.FORKASTET
     }
 
@@ -836,18 +836,6 @@ enum class Utbetalingstatus {
     GODKJENT_UTEN_UTBETALING,
     ANNULLERT,
     FORKASTET;
-
-    internal fun tilTilstand() = when (this) {
-        NY -> Utbetaling.Ny
-        IKKE_UTBETALT -> Utbetaling.Ubetalt
-        IKKE_GODKJENT -> Utbetaling.IkkeGodkjent
-        GODKJENT -> Utbetaling.Godkjent
-        OVERFØRT -> Utbetaling.Overført
-        UTBETALT -> Utbetaling.Utbetalt
-        GODKJENT_UTEN_UTBETALING -> Utbetaling.GodkjentUtenUtbetaling
-        ANNULLERT -> Utbetaling.Annullert
-        FORKASTET -> Utbetaling.Forkastet
-    }
 }
 
 enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }

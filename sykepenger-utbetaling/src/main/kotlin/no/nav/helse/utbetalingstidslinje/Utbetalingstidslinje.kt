@@ -70,7 +70,7 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
             val samletPeriode = periode(tidslinjer) ?: return emptyList()
 
             // lager kopi for ikke å modifisere på input-tidslinjene
-            var result = tidslinjer.map { it.utbetalingsdager.toSortedMap() }
+            val result = tidslinjer.map { it.utbetalingsdager.toSortedMap() }
             samletPeriode.forEach { dato ->
                 val uberegnet = tidslinjer.map { it[dato].økonomi }
                 val beregnet = operasjon(uberegnet)
@@ -215,19 +215,6 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
     fun dto() = UtbetalingstidslinjeUtDto(
         dager = this.map { it.dto() }
     )
-
-    private val Utbetalingsdag.avslag get() = this is AvvistDag || this is ForeldetDag
-    fun behandlingsresultat(periode: Periode): String {
-        val relevantUtbetalingstidslinje = this.subset(periode)
-        val relevanteDager = relevantUtbetalingstidslinje.utbetalingsdager.values.filter { it is NavDag || it.avslag }
-        return when {
-            relevanteDager.isEmpty() -> "Avslag"
-            relevanteDager.all { it.avslag } -> "Avslag"
-            relevanteDager.all { it is NavDag } -> "Innvilget"
-            relevanteDager.any { it is NavDag } && relevanteDager.any { it.avslag } -> "DelvisInnvilget"
-            else -> throw IllegalStateException("Klarte ikke å utlede behandlingsresultat fra utbetalingstidslinjen $relevantUtbetalingstidslinje")
-        }
-    }
 }
 
 sealed class Begrunnelse {
@@ -255,27 +242,27 @@ sealed class Begrunnelse {
         SykepengedagerOppbruktOver67 -> BegrunnelseDto.SykepengedagerOppbruktOver67
     }
 
-    object SykepengedagerOppbrukt : Begrunnelse()
-    object SykepengedagerOppbruktOver67 : Begrunnelse()
-    object MinimumInntekt : Begrunnelse()
-    object MinimumInntektOver67 : Begrunnelse()
-    object EgenmeldingUtenforArbeidsgiverperiode : Begrunnelse()
-    object AndreYtelserForeldrepenger : Begrunnelse()
-    object AndreYtelserAap : Begrunnelse()
-    object AndreYtelserOmsorgspenger : Begrunnelse()
-    object AndreYtelserPleiepenger : Begrunnelse()
-    object AndreYtelserSvangerskapspenger : Begrunnelse()
-    object AndreYtelserOpplaringspenger : Begrunnelse()
-    object AndreYtelserDagpenger : Begrunnelse()
-    object MinimumSykdomsgrad : Begrunnelse() {
+    data object SykepengedagerOppbrukt : Begrunnelse()
+    data object SykepengedagerOppbruktOver67 : Begrunnelse()
+    data object MinimumInntekt : Begrunnelse()
+    data object MinimumInntektOver67 : Begrunnelse()
+    data object EgenmeldingUtenforArbeidsgiverperiode : Begrunnelse()
+    data object AndreYtelserForeldrepenger : Begrunnelse()
+    data object AndreYtelserAap : Begrunnelse()
+    data object AndreYtelserOmsorgspenger : Begrunnelse()
+    data object AndreYtelserPleiepenger : Begrunnelse()
+    data object AndreYtelserSvangerskapspenger : Begrunnelse()
+    data object AndreYtelserOpplaringspenger : Begrunnelse()
+    data object AndreYtelserDagpenger : Begrunnelse()
+    data object MinimumSykdomsgrad : Begrunnelse() {
         override fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is NavDag || utbetalingsdag is ArbeidsgiverperiodedagNav
     }
 
-    object EtterDødsdato : Begrunnelse()
-    object Over70 : Begrunnelse()
-    object ManglerOpptjening : Begrunnelse()
-    object ManglerMedlemskap : Begrunnelse()
-    object NyVilkårsprøvingNødvendig : Begrunnelse()
+    data object EtterDødsdato : Begrunnelse()
+    data object Over70 : Begrunnelse()
+    data object ManglerOpptjening : Begrunnelse()
+    data object ManglerMedlemskap : Begrunnelse()
+    data object NyVilkårsprøvingNødvendig : Begrunnelse()
 
     companion object {
         internal fun gjenopprett(dto: BegrunnelseDto): Begrunnelse {

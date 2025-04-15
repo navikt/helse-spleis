@@ -194,7 +194,7 @@ class Person private constructor(
         tidligereBehandlinger(søknad.behandlingsporing, aktivitetsloggMedPersonkontekst, søknad.sykdomstidslinje.periode()!!)
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(søknad.behandlingsporing, aktivitetsloggMedPersonkontekst)
         val revurderingseventyr = arbeidsgiver.håndter(søknad, aktivitetsloggMedPersonkontekst, arbeidsgivere.toList(), infotrygdhistorikk)
-        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(søknad, aktivitetsloggMedPersonkontekst)
     }
 
@@ -449,8 +449,7 @@ class Person private constructor(
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler Overstyring av arbeidsgiveropplysninger")
         val inntektseventyr = arbeidsgivere.håndterOverstyringAvInntekt(hendelse, aktivitetsloggMedPersonkontekst)
         val refusjonseventyr = arbeidsgivere.håndterOverstyringAvRefusjon(hendelse, aktivitetsloggMedPersonkontekst)
-        val tidligsteEventyr = tidligsteEventyr(inntektseventyr, refusjonseventyr)
-        if (tidligsteEventyr == null) return aktivitetsloggMedPersonkontekst.info("Ingen vedtaksperioder håndterte overstyringen av arbeidsgiveropplysninger fordi overstyringen ikke har endret noe.")
+        val tidligsteEventyr = tidligsteEventyr(inntektseventyr, refusjonseventyr) ?: return aktivitetsloggMedPersonkontekst.info("Ingen vedtaksperioder håndterte overstyringen av arbeidsgiveropplysninger fordi overstyringen ikke har endret noe.")
         igangsettOverstyring(tidligsteEventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(hendelse, aktivitetsloggMedPersonkontekst)
     }
