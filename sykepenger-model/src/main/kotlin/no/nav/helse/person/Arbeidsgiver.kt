@@ -602,26 +602,30 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, skalBehandleRefusjonsopplysningene: Boolean = true): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
+        val dager = inntektsmelding.dager()
 
-        // 1. starter håndtering av inntektsmelding på vegne av alle mulige perioder
-        val dagoverstyring = håndterDagerFraInntektsmelding(inntektsmelding.dager(), aktivitetsloggMedArbeidsgiverkontekst)
+        // 1. nullstille egenmeldingsdager fra søknader som tilhører samme arbeidsgiverperid
+        val egenmeldingsoverstyring = dager.førsteOverlappendeVedtaksperiode(vedtaksperioder)?.nullstillEgenmeldingsdagerIArbeidsgiverperiode(inntektsmelding, aktivitetslogg, null)?.tidligsteEventyr()
 
-        // 2. starter håndtering av refusjonsopplysninger på vegne av alle mulige perioder
+        // 2. starter håndtering av inntektsmelding på vegne av alle mulige perioder
+        val dagoverstyring = håndterDagerFraInntektsmelding(dager, aktivitetsloggMedArbeidsgiverkontekst)
+
+        // 3. starter håndtering av refusjonsopplysninger på vegne av alle mulige perioder
         val refusjonsoverstyring = if (skalBehandleRefusjonsopplysningene)
             håndterRefusjonsopplysninger(inntektsmelding, inntektsmeldingRefusjon(inntektsmelding.metadata.meldingsreferanseId), aktivitetsloggMedArbeidsgiverkontekst, inntektsmelding.refusjonsservitør)
         else null
 
-        // 3. håndterer inntekten fra inntektsmeldingen
+        // 4. håndterer inntekten fra inntektsmeldingen
         val inntektoverstyring = vedtaksperioder.firstNotNullOfOrNull {
             it.håndterInntektFraInntektsmelding(inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst, inntektshistorikk)
         }
 
-        // 4. ferdigstiller håndtering av inntektsmelding
+        // 5. ferdigstiller håndtering av inntektsmelding
         inntektsmelding.ferdigstill(aktivitetsloggMedArbeidsgiverkontekst, person, vedtaksperioder, forkastede.perioder(), sykmeldingsperioder)
 
-        // 5. igangsetter
-        val tidligsteOverstyring = listOfNotNull(inntektoverstyring, dagoverstyring, refusjonsoverstyring).tidligsteEventyr()
-        // hvis tidligsteOverstyring er null så er verken dager, refusjon eller inntekt håndtert
+        // 6. igangsetter
+        val tidligsteOverstyring = listOfNotNull(egenmeldingsoverstyring, inntektoverstyring, dagoverstyring, refusjonsoverstyring).tidligsteEventyr()
+        // hvis tidligsteOverstyring er null så er verken egenmeldingsdager, dager, refusjon eller inntekt håndtert
         return tidligsteOverstyring
     }
 

@@ -166,11 +166,13 @@ internal class TestPerson(
         internal fun håndterSøknad(
             periode: Periode,
             inntekterFraNyeArbeidsforhold: Boolean = false,
-            sendTilGosys: Boolean = false
+            sendTilGosys: Boolean = false,
+            egenmeldinger: List<Periode> = emptyList()
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, 100.prosent),
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
-            sendTilGosys = sendTilGosys
+            sendTilGosys = sendTilGosys,
+            egenmeldinger = egenmeldinger
         )
 
         internal fun håndterArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning): UUID {

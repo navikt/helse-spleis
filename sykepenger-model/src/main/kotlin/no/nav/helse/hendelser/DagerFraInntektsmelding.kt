@@ -287,6 +287,10 @@ internal class DagerFraInntektsmelding(
         return Revurderingseventyr.arbeidsgiverperiode(hendelse, dagene.start, dagene)
     }
 
+    internal fun førsteOverlappendeVedtaksperiode(vedtaksperioder: List<Vedtaksperiode>): Vedtaksperiode? {
+        return vedtaksperioder.firstOrNull { it.periode.overlapperMed(arbeidsgiverperiode ?: førsteFraværsdag!!.somPeriode()) }
+    }
+
     private companion object {
         private const val MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER = 10
         private const val MAKS_ANTALL_DAGER_MELLOM_FØRSTE_FRAVÆRSDAG_OG_AGP_FOR_HÅNDTERING_AV_DAGER = 20

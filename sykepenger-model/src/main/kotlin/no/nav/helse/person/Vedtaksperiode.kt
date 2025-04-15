@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -858,16 +858,12 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg,
         validering: () -> Unit
     ) {
-        if (behandlinger.egenmeldingsdager().isNotEmpty()) {
-            aktivitetslogg.info("Forkaster egenmeldinger oppgitt i sykmelding etter at arbeidsgiverperiode fra inntektsmeldingen er håndtert: ${behandlinger.egenmeldingsdager()}")
-        }
         oppdaterHistorikk(
             behandlingkilde = hendelse.metadata.behandlingkilde,
             dokumentsporing = inntektsmeldingDager(hendelse.metadata.meldingsreferanseId),
             hendelseSykdomstidslinje = bit.sykdomstidslinje,
             aktivitetslogg = aktivitetslogg,
             dagerNavOvertarAnsvar = bit.dagerNavOvertarAnsvar,
-            egenmeldingsdager = emptyList(),
             validering = validering
         )
     }
@@ -1390,7 +1386,7 @@ internal class Vedtaksperiode private constructor(
         egenmeldingsdager = egenmeldingsdager
     )
 
-    private fun nullstillEgenmeldingsdagerIArbeidsgiverperiode(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing?): List<Revurderingseventyr> {
+    internal fun nullstillEgenmeldingsdagerIArbeidsgiverperiode(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing?): List<Revurderingseventyr> {
         val arbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode() ?: return emptyList()
         return arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
             .filter { it.håndterEgenmeldsingsdager(hendelse, dokumentsporing, it.registrerKontekst(aktivitetslogg), emptyList()) }
