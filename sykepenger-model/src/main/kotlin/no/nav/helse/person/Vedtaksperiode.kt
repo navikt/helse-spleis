@@ -1308,12 +1308,8 @@ internal class Vedtaksperiode private constructor(
                     fom = periode.start,
                     tom = periode.endInclusive,
                     behandletIInfotrygd = person.erBehandletIInfotrygd(periode),
-                    forlengerPeriode = person.nåværendeVedtaksperioder {
-                        (it.periode.overlapperMed(periode) || it.periode.erRettFør(periode))
-                    }.isNotEmpty(),
-                    harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder {
-                        påvirkerArbeidsgiverperioden(it) }
-                        .isNotEmpty(),
+                    forlengerPeriode = person.nåværendeVedtaksperioder { (it.periode.overlapperMed(periode) || it.periode.erRettFør(periode)) }.isNotEmpty(),
+                    harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { påvirkerArbeidsgiverperioden(it) }.isNotEmpty(),
                     trengerArbeidsgiveropplysninger = trengerArbeidsgiveropplysninger,
                     sykmeldingsperioder = sykmeldingsperioder
                 )
@@ -1880,7 +1876,7 @@ internal class Vedtaksperiode private constructor(
             kanForkastes = arbeidsgiver.kanForkastes(this, Aktivitetslogg()),
             erForlengelse = erForlengelse(),
             harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null,
-            overlapperMedInfotrygd = person.infotrygdhistorikk.overlapperMed(periode)
+            overlapperMedInfotrygd = person.erBehandletIInfotrygd(periode)
         )
         person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .sorted()

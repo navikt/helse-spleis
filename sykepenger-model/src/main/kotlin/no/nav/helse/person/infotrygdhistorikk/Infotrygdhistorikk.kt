@@ -27,8 +27,6 @@ internal class Infotrygdhistorikk private constructor(
         }
     }
 
-    internal fun overlapperMed(periode: Periode): Boolean = siste.perioder.any { it.overlapperMed(periode) }
-
     internal fun validerMedFunksjonellFeil(
         aktivitetslogg: IAktivitetslogg,
         periode: Periode
