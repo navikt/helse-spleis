@@ -266,7 +266,6 @@ internal fun påminnelse(
     nå: LocalDateTime = LocalDateTime.now(),
     orgnummer: String = a1,
     antallGangerPåminnet: Int = 1,
-    skalReberegnes: Boolean = false,
     flagg: Set<String> = emptySet()
 ): Påminnelse {
     return Påminnelse(
@@ -279,9 +278,7 @@ internal fun påminnelse(
         nå = nå,
         påminnelsestidspunkt = LocalDateTime.now(),
         nestePåminnelsestidspunkt = LocalDateTime.now(),
-        flagg = flagg.toMutableSet().apply {
-            if (skalReberegnes) add("ønskerReberegning")
-        },
+        flagg = flagg,
         opprettet = LocalDateTime.now()
     )
 }

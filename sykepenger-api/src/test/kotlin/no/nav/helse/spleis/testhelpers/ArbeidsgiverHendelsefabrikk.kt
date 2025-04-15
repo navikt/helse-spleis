@@ -402,7 +402,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())
         )
 
-    internal fun lagPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime, reberegning: Boolean = false) =
+    internal fun lagPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime, flagg: Set<String> = emptySet()) =
         Påminnelse(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             organisasjonsnummer = organisasjonsnummer,
@@ -413,9 +413,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             påminnelsestidspunkt = LocalDateTime.now(),
             nestePåminnelsestidspunkt = LocalDateTime.now(),
             opprettet = LocalDateTime.now(),
-            flagg = mutableSetOf<String>().apply {
-                if (reberegning) add("ønskerReberegning")
-            }
+            flagg = flagg
         )
 
     internal fun lagGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) =

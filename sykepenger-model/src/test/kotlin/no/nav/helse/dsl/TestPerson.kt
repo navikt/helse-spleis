@@ -552,10 +552,9 @@ internal class TestPerson(
             tilstand: TilstandType,
             tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now(),
             nåtidspunkt: LocalDateTime = LocalDateTime.now(),
-            reberegning: Boolean = false,
             flagg: Set<String> = emptySet()
         ) {
-            arbeidsgiverHendelsefabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt, nåtidspunkt, reberegning = reberegning, flagg = flagg)
+            arbeidsgiverHendelsefabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt, nåtidspunkt, flagg = flagg)
                 .håndter(Person::håndter)
         }
 

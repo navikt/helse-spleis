@@ -207,7 +207,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         håndterYtelser(2.vedtaksperiode)
         assertVarsler(listOf(Varselkode.RV_UT_21), 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
-        håndterPåminnelse(2.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING, reberegning = true)
+        håndterPåminnelse(2.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING, flagg = setOf("ønskerReberegning"))
         håndterYtelser(2.vedtaksperiode)
 
         assertEquals(6, inspektør.antallUtbetalinger)

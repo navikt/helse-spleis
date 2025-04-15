@@ -820,7 +820,6 @@ internal fun AbstractEndToEndTest.håndterPåminnelse(
     nå: LocalDateTime = LocalDateTime.now(),
     orgnummer: String = a1,
     antallGangerPåminnet: Int = 1,
-    skalReberegnes: Boolean = false,
     flagg: Set<String> = emptySet()
 ) {
     påminnelse(
@@ -830,7 +829,6 @@ internal fun AbstractEndToEndTest.håndterPåminnelse(
         nå = nå,
         orgnummer = orgnummer,
         antallGangerPåminnet = antallGangerPåminnet,
-        skalReberegnes = skalReberegnes,
         flagg = flagg
     ).håndter(Person::håndter)
 }

@@ -62,7 +62,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
             besvart = LocalDate.EPOCH.atStartOfDay()
         )
 
-        håndterPåminnelse(1.vedtaksperiode, AVSLUTTET, skalReberegnes = true)
+        håndterPåminnelse(1.vedtaksperiode, AVSLUTTET, flagg = setOf("ønskerReberegning"))
         håndterYtelser(1.vedtaksperiode)
 
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())

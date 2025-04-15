@@ -336,7 +336,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
             }
             assertVarsler(listOf(Varselkode.RV_UT_23, Varselkode.RV_UT_24), 1.vedtaksperiode.filter())
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, reberegning = true)
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, flagg = setOf("ønskerReberegning"))
             assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetaling(1).tilstand)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(3, behandlinger.size)
@@ -351,7 +351,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     fun `Reberegner en periode`() {
         a1 {
             nyttVedtak(januar)
-            håndterPåminnelse(1.vedtaksperiode, AVSLUTTET, reberegning = true)
+            håndterPåminnelse(1.vedtaksperiode, AVSLUTTET, flagg = setOf("ønskerReberegning"))
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 assertEquals(Avsender.SYKMELDT, behandlinger.first().kilde.avsender)

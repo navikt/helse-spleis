@@ -147,7 +147,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         forlengVedtak(mars)
         håndterSøknad(27.februar til 28.februar)
         nullstillTilstandsendringer()
-        håndterPåminnelse(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, skalReberegnes = true)
+        håndterPåminnelse(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, flagg = setOf("ønskerReberegning"))
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING)

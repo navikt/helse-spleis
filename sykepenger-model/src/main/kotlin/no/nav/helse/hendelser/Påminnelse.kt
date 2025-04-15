@@ -49,7 +49,6 @@ class Påminnelse(
         check(predikat.isNotEmpty()) { "Nå må sende med minst et predikat da.." }
         return predikat.all { it.evaluer(this) }
     }
-    internal fun skalReberegnes() = når(Predikat.Flagg("ønskerReberegning"))
 
     internal fun gjelderTilstand(aktivitetslogg: IAktivitetslogg, tilstandType: TilstandType) = (tilstandType == tilstand).also {
         if (!it) {
@@ -68,7 +67,7 @@ class Påminnelse(
     )
 
     fun eventyr(skjæringstidspunkt: LocalDate, periode: Periode): Revurderingseventyr? {
-        if (!skalReberegnes()) return null
+        if (!når(Predikat.Flagg("ønskerReberegning"))) return null
         return Revurderingseventyr.reberegning(this, skjæringstidspunkt, periode)
     }
 

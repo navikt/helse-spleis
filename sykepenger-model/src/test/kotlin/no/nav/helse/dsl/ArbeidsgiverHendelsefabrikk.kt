@@ -447,7 +447,6 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         tilstand: TilstandType,
         tilstandsendringstidspunkt: LocalDateTime,
         nåtidspunkt: LocalDateTime = LocalDateTime.now(),
-        reberegning: Boolean = false,
         flagg: Set<String> = emptySet()
     ) =
         Påminnelse(
@@ -461,9 +460,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             påminnelsestidspunkt = nåtidspunkt,
             nestePåminnelsestidspunkt = nåtidspunkt,
             opprettet = nåtidspunkt,
-            flagg = flagg.toMutableSet().apply {
-                if (reberegning) add("ønskerReberegning")
-            }
+            flagg = flagg
         )
 
     internal fun lagGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) =
