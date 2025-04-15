@@ -8,11 +8,9 @@ import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
-import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.erHelg
 import no.nav.helse.februar
-import no.nav.helse.fredag
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -61,8 +59,6 @@ import no.nav.helse.spleis.speil.dto.Utbetalingtype.ANNULLERING
 import no.nav.helse.spleis.speil.dto.Utbetalingtype.REVURDERING
 import no.nav.helse.spleis.speil.dto.Utbetalingtype.UTBETALING
 import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.søndag
-import no.nav.helse.til
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig

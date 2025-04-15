@@ -147,7 +147,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         return inntektsmeldinggenerator()
     }
 
-    internal fun lagSykepengegrunnlagForArbeidsgiver(vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, inntekter: List<ArbeidsgiverInntekt.MånedligInntekt>): SykepengegrunnlagForArbeidsgiver {
+    internal fun lagSykepengegrunnlagForArbeidsgiver(skjæringstidspunkt: LocalDate, inntekter: List<ArbeidsgiverInntekt.MånedligInntekt>): SykepengegrunnlagForArbeidsgiver {
         return SykepengegrunnlagForArbeidsgiver(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             skjæringstidspunkt = skjæringstidspunkt,
