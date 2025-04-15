@@ -1089,7 +1089,7 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk.sykdomstidslinje().bekreftErÅpen(periode)
     }
 
-    internal fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
+    private fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
         return vedtaksperioder
             .filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .asReversed()

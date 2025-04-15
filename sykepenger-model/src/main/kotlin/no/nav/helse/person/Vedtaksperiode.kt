@@ -1249,13 +1249,12 @@ internal class Vedtaksperiode private constructor(
             AvventerVilkårsprøvingRevurdering,
             RevurderingFeilet,
             TilInfotrygd,
-            TilUtbetaling -> VedtaksperiodeForkastetEventBuilder(tilstand.type, false, emptyList())
+            TilUtbetaling -> VedtaksperiodeForkastetEventBuilder()
 
             AvventerInfotrygdHistorikk,
             Start -> {
-                val (trengerArbeidsgiveropplysninger, sykmeldingsperioder) = trengerArbeidsgiveropplysningerForForkastetPeriode()
-
-                VedtaksperiodeForkastetEventBuilder(tilstand.type, trengerArbeidsgiveropplysninger, sykmeldingsperioder)
+                val (_, sykmeldingsperioder) = trengerArbeidsgiveropplysningerForForkastetPeriode()
+                VedtaksperiodeForkastetEventBuilder().trengerArbeidsgiveropplysninger(sykmeldingsperioder)
             }
         }
         tilstand(aktivitetsloggMedVedtaksperiodekontekst, TilInfotrygd)
@@ -1293,11 +1292,13 @@ internal class Vedtaksperiode private constructor(
         return Pair(true, perioderKnyttetTilSammeArbeidsgiverperiode.reversed())
     }
 
-    internal inner class VedtaksperiodeForkastetEventBuilder(
-        private val gjeldendeTilstand: TilstandType,
-        private val trengerArbeidsgiveropplysninger: Boolean,
-        private val sykmeldingsperioder: List<Periode>
-    ) {
+    internal inner class VedtaksperiodeForkastetEventBuilder {
+        private val gjeldendeTilstand = tilstand.type
+        private var sykmeldingsperioder: List<Periode> = emptyList()
+        internal fun trengerArbeidsgiveropplysninger(sykmeldingsperioder: List<Periode>) = apply {
+            this.sykmeldingsperioder = sykmeldingsperioder
+        }
+
         internal fun buildAndEmit() {
             person.vedtaksperiodeForkastet(
                 PersonObserver.VedtaksperiodeForkastetEvent(
@@ -1310,7 +1311,6 @@ internal class Vedtaksperiode private constructor(
                     behandletIInfotrygd = person.erBehandletIInfotrygd(periode),
                     forlengerPeriode = person.nåværendeVedtaksperioder { (it.periode.overlapperMed(periode) || it.periode.erRettFør(periode)) }.isNotEmpty(),
                     harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { påvirkerArbeidsgiverperioden(it) }.isNotEmpty(),
-                    trengerArbeidsgiveropplysninger = trengerArbeidsgiveropplysninger,
                     sykmeldingsperioder = sykmeldingsperioder
                 )
             )

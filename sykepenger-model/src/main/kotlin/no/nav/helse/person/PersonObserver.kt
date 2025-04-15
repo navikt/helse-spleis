@@ -63,9 +63,9 @@ interface PersonObserver {
         val behandletIInfotrygd: Boolean,
         val forlengerPeriode: Boolean,
         val harPeriodeInnenfor16Dager: Boolean,
-        val trengerArbeidsgiveropplysninger: Boolean,
         val sykmeldingsperioder: List<Periode>
     ) {
+        val trengerArbeidsgiveropplysninger = sykmeldingsperioder.isNotEmpty()
         fun toJsonMap(): Map<String, Any> =
             mapOf(
                 "organisasjonsnummer" to organisasjonsnummer,
