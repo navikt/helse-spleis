@@ -5,6 +5,7 @@ import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
@@ -75,12 +76,47 @@ internal class ForkastetVedtaksperiode(
             }
             .isNotEmpty()
 
+        /** Stopper eventuell behandling av nye søknader som er nærmere andre søknader vi har forkastet */
         internal fun List<ForkastetVedtaksperiode>.blokkererBehandlingAv(nyPeriode: Periode, arbeidsgiver: String, aktivitetslogg: IAktivitetslogg): Boolean {
             if (forlenger(nyPeriode, arbeidsgiver, aktivitetslogg)) return true
             if (overlapper(nyPeriode, arbeidsgiver, aktivitetslogg)) return true
             if (nyere(nyPeriode, arbeidsgiver, aktivitetslogg)) return true
             if (kortGap(nyPeriode, arbeidsgiver, aktivitetslogg)) return true
             return false
+        }
+
+
+        /** Setter et flagg slik at vi lager HAG-forespørsler for perioder som skal behandles i Inforygd (via sparkel-arbeidsgiver) */
+        internal fun List<ForkastetVedtaksperiode>.trengerArbeidsgiveropplysninger(periode: Periode, aktive: List<Periode>, trengerArbeidsgiveropplysninger: (historiskeSykmeldingsperioder: List<Periode>) -> Unit) {
+            val allePerioderFør = (aktive + perioder()).sortedBy { it.start }.filter { it.start < periode.start }
+
+            val perioderKnyttetTilSammeArbeidsgiverperiode = allePerioderFør
+                .reversed() // Går motsatt vei slik at vi kan stoppe så fort vi finner et for langt gap
+                .fold(listOf(periode)) { knyttetTilSammeArbeidsgiverperiode, forrigePeriode ->
+                    val eldsteRelevantePeriode = knyttetTilSammeArbeidsgiverperiode.minBy { it.start }
+                    val forStortGapTilÅVæreInteressant = (forrigePeriode.periodeMellom(eldsteRelevantePeriode.start)?.count() ?: 0) >= 16
+                    if (forStortGapTilÅVæreInteressant) {
+                        return@fold knyttetTilSammeArbeidsgiverperiode
+                    }
+                    knyttetTilSammeArbeidsgiverperiode + listOf(forrigePeriode)
+                }
+                .reversed() // Snur lista igjen slik at de sendes ut i rett rekkefølge
+
+            // Alle relevante perioder er innenfor AGP
+            val antallDagerMedPerioden = perioderKnyttetTilSammeArbeidsgiverperiode.grupperSammenhengendePerioder().sumOf { it.count() }
+            if (antallDagerMedPerioden <= 16) return
+
+            // Den forkastede vedtaksperioden er den første som strekker seg utover AGP
+            val antallDagerUtenPerioden = antallDagerMedPerioden - periode.count()
+            if (antallDagerUtenPerioden <= 16) return trengerArbeidsgiveropplysninger(perioderKnyttetTilSammeArbeidsgiverperiode)
+
+            // Tidligere perioder har strukket seg forbi AGP, denne perioden trenger kun opplysninger dersom det er gap til forrige periode
+            val erForlengelse = perioderKnyttetTilSammeArbeidsgiverperiode
+                .filterNot { it == periode }
+                .any { it.erRettFør(periode) || it.overlapperMed(periode) }
+
+            if (erForlengelse) return
+            return trengerArbeidsgiveropplysninger(perioderKnyttetTilSammeArbeidsgiverperiode)
         }
 
         internal fun gjenopprett(

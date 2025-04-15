@@ -45,7 +45,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
@@ -1253,49 +1252,19 @@ internal class Vedtaksperiode private constructor(
 
             AvventerInfotrygdHistorikk,
             Start -> {
-                val (_, sykmeldingsperioder) = trengerArbeidsgiveropplysningerForForkastetPeriode()
-                VedtaksperiodeForkastetEventBuilder().trengerArbeidsgiveropplysninger(sykmeldingsperioder)
+                VedtaksperiodeForkastetEventBuilder().apply {
+                    arbeidsgiver.trengerArbeidsgiveropplysninger(periode, ::trengerArbeidsgiveropplysninger)
+                }
             }
         }
         tilstand(aktivitetsloggMedVedtaksperiodekontekst, TilInfotrygd)
         return vedtaksperiodeForkastetEventBuilder
     }
 
-    private fun trengerArbeidsgiveropplysningerForForkastetPeriode(): Pair<Boolean, List<Periode>> {
-        val alleVedtaksperioderFørMeg = arbeidsgiver.alleVedtaksperider()
-            .filter { it.start < periode.start }
-
-        val perioderKnyttetTilSammeArbeidsgiverperiode = alleVedtaksperioderFørMeg
-            .reversed()
-            .fold(listOf(periode)) { relevantePerioder, nestePeriode ->
-                val eldsteRelevantePeriode = relevantePerioder.minBy { it.start }
-                val forStortGapTilÅVæreInteressant = (nestePeriode.periodeMellom(eldsteRelevantePeriode.start)?.count() ?: 0) >= 16
-                if (forStortGapTilÅVæreInteressant) {
-                    return@fold relevantePerioder
-                }
-                relevantePerioder + listOf(nestePeriode)
-            }
-
-        // Alle relevante perioder er innenfor AGP
-        val antallDagerMedMeg = perioderKnyttetTilSammeArbeidsgiverperiode.grupperSammenhengendePerioder().sumOf { it.count() }
-        if (antallDagerMedMeg <= 16) return Pair(false, emptyList())
-
-        // Den forkastede vedtaksperioden er den første som strekker seg utover AGP
-        val antallDagerUtenMeg = antallDagerMedMeg - periode.count()
-        if (antallDagerUtenMeg <= 16) return Pair(true, perioderKnyttetTilSammeArbeidsgiverperiode.reversed())
-
-        // Tidligere perioder har strukket seg forbi AGP, denne perioden trenger kun opplysninger dersom det er gap til forrige periode
-        val erForlengelse = perioderKnyttetTilSammeArbeidsgiverperiode
-            .filterNot { it == periode }
-            .any { it.erRettFør(periode) || it.overlapperMed(periode) }
-        if (erForlengelse) return Pair(false, emptyList())
-        return Pair(true, perioderKnyttetTilSammeArbeidsgiverperiode.reversed())
-    }
-
     internal inner class VedtaksperiodeForkastetEventBuilder {
         private val gjeldendeTilstand = tilstand.type
         private var sykmeldingsperioder: List<Periode> = emptyList()
-        internal fun trengerArbeidsgiveropplysninger(sykmeldingsperioder: List<Periode>) = apply {
+        internal fun trengerArbeidsgiveropplysninger(sykmeldingsperioder: List<Periode>) {
             this.sykmeldingsperioder = sykmeldingsperioder
         }
 

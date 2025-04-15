@@ -52,6 +52,7 @@ import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrArbeidsgiveropplysninger
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.blokkererBehandlingAv
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.perioder
+import no.nav.helse.person.ForkastetVedtaksperiode.Companion.trengerArbeidsgiveropplysninger
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
@@ -68,6 +69,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
 import no.nav.helse.person.Vedtaksperiode.Companion.startdatoerPåSammenhengendeVedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.validerTilstand
 import no.nav.helse.person.Vedtaksperiode.Companion.venter
+import no.nav.helse.person.Vedtaksperiode.VedtaksperiodeForkastetEventBuilder
 import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -1024,9 +1026,9 @@ internal class Arbeidsgiver private constructor(
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg,
         filter: VedtaksperiodeFilter
-    ): List<Vedtaksperiode.VedtaksperiodeForkastetEventBuilder> {
+    ): List<VedtaksperiodeForkastetEventBuilder> {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        val perioder: List<Pair<Vedtaksperiode, Vedtaksperiode.VedtaksperiodeForkastetEventBuilder>> = vedtaksperioder
+        val perioder: List<Pair<Vedtaksperiode, VedtaksperiodeForkastetEventBuilder>> = vedtaksperioder
             .filter(filter)
             .mapNotNull { vedtaksperiode ->
                 vedtaksperiode.forkast(hendelse, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList())?.let { vedtaksperiode to it }
@@ -1171,9 +1173,7 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
-    internal fun alleVedtaksperider(): List<Periode> {
-        val forkastedePerioder = forkastede.perioder()
-        val aktivePeriode = vedtaksperioder.map { it.periode }
-        return (forkastedePerioder + aktivePeriode).sortedBy { it.start }
+    internal fun trengerArbeidsgiveropplysninger(periode: Periode, trengerArbeidsgiveropplysninger: (historiskeSykmeldingsperioder: List<Periode>) -> Unit) {
+        forkastede.trengerArbeidsgiveropplysninger(periode, vedtaksperioder.map { it.periode }, trengerArbeidsgiveropplysninger)
     }
 }
