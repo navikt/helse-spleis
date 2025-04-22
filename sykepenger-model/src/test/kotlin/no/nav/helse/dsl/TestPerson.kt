@@ -429,6 +429,7 @@ internal class TestPerson(
                 vedtaksperiodeId = vedtaksperiodeId,
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(skatteinntekter, skjæringstidspunkt),
+                inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(skatteinntekter, skjæringstidspunkt),
                 arbeidsforhold = arbeidsforhold,
                 skjæringstidspunkt = skjæringstidspunkt
             )
