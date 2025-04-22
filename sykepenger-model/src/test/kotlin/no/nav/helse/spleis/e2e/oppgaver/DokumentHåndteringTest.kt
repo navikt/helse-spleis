@@ -369,7 +369,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 behandletIInfotrygd = false,
                 forlengerPeriode = true,
                 harPeriodeInnenfor16Dager = false,
-                sykmeldingsperioder = listOf(28.januar til 28.februar)
+                sykmeldingsperioder = listOf(28.januar til 28.februar),
+                speilrelatert = true
             ), observatør.forkastet(1.vedtaksperiode.id(a1))
         )
     }
@@ -398,7 +399,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 behandletIInfotrygd = false,
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
-                sykmeldingsperioder = emptyList()
+                sykmeldingsperioder = emptyList(),
+                speilrelatert = false
             ), observatør.forkastet(2.vedtaksperiode.id(a1))
         )
         assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
@@ -419,7 +421,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 behandletIInfotrygd = false,
                 forlengerPeriode = true,
                 harPeriodeInnenfor16Dager = false,
-                sykmeldingsperioder = listOf(februar)
+                sykmeldingsperioder = listOf(februar),
+                speilrelatert = true
             ), observatør.forkastet(1.vedtaksperiode.id(a1))
         )
     }
@@ -428,6 +431,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     fun `har ikke overlappende vedtaksperioder`() {
         tilGodkjenning(januar, a1)
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+
         val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent))
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
@@ -440,7 +445,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 behandletIInfotrygd = false,
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
-                sykmeldingsperioder = emptyList()
+                sykmeldingsperioder = emptyList(),
+                speilrelatert = false
             ), observatør.forkastet(2.vedtaksperiode.id(a1))
         )
     }
@@ -448,9 +454,11 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     @Test
     fun `har vedtaksperiode som påvirker arbeidsgiverperioden`() {
         tilGodkjenning(januar, a1)
-
         val søknad2 = håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
-        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
                 organisasjonsnummer = a1,
@@ -462,7 +470,9 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 behandletIInfotrygd = false,
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
-                sykmeldingsperioder = emptyList()
+                sykmeldingsperioder = emptyList(),
+                speilrelatert = false
+
             ), observatør.forkastet(2.vedtaksperiode.id(a1))
         )
     }
@@ -471,6 +481,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     fun `har ikke overlappende vedtaksperiode`() {
         tilGodkjenning(januar, a1)
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
 
         val søknad2 = håndterSøknad(Sykdom(15.februar, 28.februar, 100.prosent))
         assertEquals(
@@ -484,7 +495,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 behandletIInfotrygd = false,
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
-                sykmeldingsperioder = listOf(januar, 15.februar til 28.februar)
+                sykmeldingsperioder = listOf(januar, 15.februar til 28.februar),
+                speilrelatert = false
             ), observatør.forkastet(2.vedtaksperiode.id(a1))
         )
     }
@@ -515,7 +527,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 behandletIInfotrygd = false,
                 forlengerPeriode = true,
                 harPeriodeInnenfor16Dager = false,
-                sykmeldingsperioder = emptyList()
+                sykmeldingsperioder = emptyList(),
+                speilrelatert = false
             ), observatør.forkastet(2.vedtaksperiode.id(a1))
         )
     }

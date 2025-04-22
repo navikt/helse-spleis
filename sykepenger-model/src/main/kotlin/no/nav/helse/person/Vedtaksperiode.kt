@@ -1244,7 +1244,8 @@ internal class Vedtaksperiode private constructor(
                     behandletIInfotrygd = person.erBehandletIInfotrygd(periode),
                     forlengerPeriode = person.nåværendeVedtaksperioder { (it.periode.overlapperMed(periode) || it.periode.erRettFør(periode)) }.isNotEmpty(),
                     harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { påvirkerArbeidsgiverperioden(it) }.isNotEmpty(),
-                    sykmeldingsperioder = sykmeldingsperioder
+                    sykmeldingsperioder = sykmeldingsperioder,
+                    speilrelatert = person.nåværendeVedtaksperioder(SPEILRELATERT(periode)).isNotEmpty()
                 )
             )
         }
@@ -2275,6 +2276,13 @@ internal class Vedtaksperiode private constructor(
 
         internal val AUU_SOM_VIL_UTBETALES: VedtaksperiodeFilter = {
             it.tilstand == AvsluttetUtenUtbetaling && it.skalOmgjøres()
+        }
+
+        internal fun SPEILRELATERT(periode: Periode): VedtaksperiodeFilter {
+            return fun (vedtaksperiode: Vedtaksperiode): Boolean {
+                if (!vedtaksperiode.skalBehandlesISpeil()) return false // Om vedtaksperioden er en AUU skal den ikke hensyntas ved vurdering på avstand mellom periode & vedtaksperiode
+                return (Periode.mellom(periode, vedtaksperiode.periode)?.count() ?: 0) < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD // Om avstand mellom vedtaksperiodene er mindre enn 18 dager er den speilrelatert
+            }
         }
 
         private fun sykmeldingsperioder(vedtaksperioder: List<Vedtaksperiode>): List<Periode> {

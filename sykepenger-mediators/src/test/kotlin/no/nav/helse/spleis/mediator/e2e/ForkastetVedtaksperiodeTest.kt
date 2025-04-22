@@ -45,7 +45,8 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "trengerArbeidsgiveropplysninger": false,
               "hendelser": ["$søknadId"],
               "sykmeldingsperioder": [],
-              "vedtaksperiodeId": "<uuid>"
+              "vedtaksperiodeId": "<uuid>",
+              "speilrelatert": false
             }
         """
         assertVedtaksperiodeForkastet(forventet1, 0)
@@ -64,7 +65,8 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "trengerArbeidsgiveropplysninger": true,
               "hendelser": ["$søknadId2"],
               "sykmeldingsperioder": [{"fom": "2018-01-03", "tom": "2018-01-27"}],
-              "vedtaksperiodeId": "<uuid>"
+              "vedtaksperiodeId": "<uuid>",
+              "speilrelatert": false
             }
         """
         assertVedtaksperiodeForkastet(forventet2, 1)
@@ -105,7 +107,8 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "trengerArbeidsgiveropplysninger": true,  
               "hendelser": ["$søknadId2"],
               "sykmeldingsperioder": [{"fom": "2018-03-01", "tom": "2018-03-31"}],
-              "vedtaksperiodeId": "<uuid>"
+              "vedtaksperiodeId": "<uuid>",
+              "speilrelatert": false
             }
         """
         assertVedtaksperiodeForkastet(forventet, 0)
@@ -160,7 +163,8 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "trengerArbeidsgiveropplysninger": $trengerArbeidsgiveropplysninger, 
               "hendelser": ["$søknadId"], 
               "sykmeldingsperioder": [${sykmeldingsperioder.joinToString(transform = Periode::hardcodedJson)}],
-              "vedtaksperiodeId": "<uuid>"
+              "vedtaksperiodeId": "<uuid>",
+              "speilrelatert": false
             }
         """
 

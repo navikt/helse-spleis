@@ -63,7 +63,8 @@ interface PersonObserver {
         val behandletIInfotrygd: Boolean,
         val forlengerPeriode: Boolean,
         val harPeriodeInnenfor16Dager: Boolean,
-        val sykmeldingsperioder: List<Periode>
+        val sykmeldingsperioder: List<Periode>,
+        val speilrelatert: Boolean
     ) {
         val trengerArbeidsgiveropplysninger = sykmeldingsperioder.isNotEmpty()
         fun toJsonMap(): Map<String, Any> =
@@ -78,6 +79,7 @@ interface PersonObserver {
                 "forlengerPeriode" to forlengerPeriode,
                 "harPeriodeInnenfor16Dager" to harPeriodeInnenfor16Dager,
                 "trengerArbeidsgiveropplysninger" to trengerArbeidsgiveropplysninger,
+                "speilrelatert" to speilrelatert,
                 "sykmeldingsperioder" to sykmeldingsperioder.map {
                     mapOf(
                         "fom" to it.start,
