@@ -70,6 +70,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
 import no.nav.helse.person.Arbeidsgiver.Companion.validerTilstand
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.venter
+import no.nav.helse.person.Vedtaksperiode.Companion.SPEILRELATERT
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -599,6 +600,7 @@ class Person private constructor(
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
         arbeidsgivere.nåværendeVedtaksperioder(filter)
 
+    internal fun speilrelatert(vararg perioder: Periode) = arbeidsgivere.nåværendeVedtaksperioder(SPEILRELATERT(*perioder)).isNotEmpty()
     internal fun avventerSøknad(periode: Periode) = arbeidsgivere.avventerSøknad(periode)
     internal fun fjernSykmeldingsperiode(periode: Periode) = arbeidsgivere.fjernSykmeldingsperiode(periode)
     internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter)

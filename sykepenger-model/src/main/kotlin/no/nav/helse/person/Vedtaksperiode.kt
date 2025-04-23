@@ -1245,7 +1245,7 @@ internal class Vedtaksperiode private constructor(
                     forlengerPeriode = person.nåværendeVedtaksperioder { (it.periode.overlapperMed(periode) || it.periode.erRettFør(periode)) }.isNotEmpty(),
                     harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { påvirkerArbeidsgiverperioden(it) }.isNotEmpty(),
                     sykmeldingsperioder = sykmeldingsperioder,
-                    speilrelatert = person.nåværendeVedtaksperioder(SPEILRELATERT(periode)).isNotEmpty()
+                    speilrelatert = person.speilrelatert(periode)
                 )
             )
         }
@@ -2278,10 +2278,14 @@ internal class Vedtaksperiode private constructor(
             it.tilstand == AvsluttetUtenUtbetaling && it.skalOmgjøres()
         }
 
-        internal fun SPEILRELATERT(periode: Periode): VedtaksperiodeFilter {
+        internal fun SPEILRELATERT(vararg perioder: Periode): VedtaksperiodeFilter {
             return fun (vedtaksperiode: Vedtaksperiode): Boolean {
-                if (!vedtaksperiode.skalBehandlesISpeil()) return false // Om vedtaksperioden er en AUU skal den ikke hensyntas ved vurdering på avstand mellom periode & vedtaksperiode
-                return (Periode.mellom(periode, vedtaksperiode.periode)?.count() ?: 0) < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD // Om avstand mellom vedtaksperiodene er mindre enn 18 dager er den speilrelatert
+                if (!vedtaksperiode.skalBehandlesISpeil()) return false // Om vedtaksperioden er en AUU skal den ikke hensyntas ved vurdering på avstand mellom perioder & vedtaksperiode
+                return perioder.any { periode ->
+                    // Om avstand mellom vedtaksperioden og en av periodene er mindre enn 18 dager er det speilrelatert.
+                    // Når det ikke er noen periode mellom (?: 0) så er det kant-i-kant/overlapp som også er speilrelatert
+                    (Periode.mellom(periode, vedtaksperiode.periode)?.count() ?: 0) < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
+                }
             }
         }
 
