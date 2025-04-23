@@ -60,9 +60,6 @@ interface PersonObserver {
         val hendelser: Set<UUID>,
         val fom: LocalDate,
         val tom: LocalDate,
-        val behandletIInfotrygd: Boolean,
-        val forlengerPeriode: Boolean,
-        val harPeriodeInnenfor16Dager: Boolean,
         val sykmeldingsperioder: List<Periode>,
         val speilrelatert: Boolean
     ) {
@@ -75,9 +72,6 @@ interface PersonObserver {
                 "hendelser" to hendelser,
                 "fom" to fom,
                 "tom" to tom,
-                "behandletIInfotrygd" to behandletIInfotrygd,
-                "forlengerPeriode" to forlengerPeriode,
-                "harPeriodeInnenfor16Dager" to harPeriodeInnenfor16Dager,
                 "trengerArbeidsgiveropplysninger" to trengerArbeidsgiveropplysninger,
                 "speilrelatert" to speilrelatert,
                 "sykmeldingsperioder" to sykmeldingsperioder.map {

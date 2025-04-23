@@ -357,9 +357,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2),
                 fom = 28.januar,
                 tom = 28.februar,
-                behandletIInfotrygd = false,
-                forlengerPeriode = true,
-                harPeriodeInnenfor16Dager = false,
                 sykmeldingsperioder = listOf(28.januar til 28.februar),
                 speilrelatert = true
             ), observatør.forkastet(1.vedtaksperiode.id(a1))
@@ -387,9 +384,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2),
                 fom = 17.januar,
                 tom = 31.januar,
-                behandletIInfotrygd = false,
-                forlengerPeriode = false,
-                harPeriodeInnenfor16Dager = false,
                 sykmeldingsperioder = emptyList(),
                 speilrelatert = false
             ), observatør.forkastet(2.vedtaksperiode.id(a1))
@@ -409,9 +403,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2),
                 fom = 1.februar,
                 tom = 28.februar,
-                behandletIInfotrygd = false,
-                forlengerPeriode = true,
-                harPeriodeInnenfor16Dager = false,
                 sykmeldingsperioder = listOf(februar),
                 speilrelatert = true
             ), observatør.forkastet(1.vedtaksperiode.id(a1))
@@ -433,9 +424,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2),
                 fom = 28.januar,
                 tom = 28.februar,
-                behandletIInfotrygd = false,
-                forlengerPeriode = false,
-                harPeriodeInnenfor16Dager = false,
                 sykmeldingsperioder = emptyList(),
                 speilrelatert = false
             ), observatør.forkastet(2.vedtaksperiode.id(a1))
@@ -458,9 +446,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2),
                 fom = 10.februar,
                 tom = 28.februar,
-                behandletIInfotrygd = false,
-                forlengerPeriode = false,
-                harPeriodeInnenfor16Dager = false,
                 sykmeldingsperioder = emptyList(),
                 speilrelatert = false
 
@@ -483,9 +468,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2),
                 fom = 15.februar,
                 tom = 28.februar,
-                behandletIInfotrygd = false,
-                forlengerPeriode = false,
-                harPeriodeInnenfor16Dager = false,
                 sykmeldingsperioder = listOf(januar, 15.februar til 28.februar),
                 speilrelatert = false
             ), observatør.forkastet(2.vedtaksperiode.id(a1))
@@ -515,9 +497,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2),
                 fom = 10.januar,
                 tom = 15.januar,
-                behandletIInfotrygd = false,
-                forlengerPeriode = true,
-                harPeriodeInnenfor16Dager = false,
                 sykmeldingsperioder = emptyList(),
                 speilrelatert = false
             ), observatør.forkastet(2.vedtaksperiode.id(a1))

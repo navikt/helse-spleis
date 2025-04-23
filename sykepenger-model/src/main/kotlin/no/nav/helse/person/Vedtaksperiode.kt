@@ -1148,11 +1148,6 @@ internal class Vedtaksperiode private constructor(
         return Revurderingseventyr.refusjonsopplysninger(hendelse, skjæringstidspunkt, periode)
     }
 
-    private fun påvirkerArbeidsgiverperioden(ny: Vedtaksperiode): Boolean {
-        val dagerMellom = ny.periode.periodeMellom(this.periode.start)?.count() ?: return false
-        return dagerMellom < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
-    }
-
     override fun compareTo(other: Vedtaksperiode): Int {
         val delta = this.periode.start.compareTo(other.periode.start)
         if (delta != 0) return delta
@@ -1241,9 +1236,6 @@ internal class Vedtaksperiode private constructor(
                     hendelser = eksterneIderSet,
                     fom = periode.start,
                     tom = periode.endInclusive,
-                    behandletIInfotrygd = person.erBehandletIInfotrygd(periode),
-                    forlengerPeriode = person.nåværendeVedtaksperioder { (it.periode.overlapperMed(periode) || it.periode.erRettFør(periode)) }.isNotEmpty(),
-                    harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { påvirkerArbeidsgiverperioden(it) }.isNotEmpty(),
                     sykmeldingsperioder = sykmeldingsperioder,
                     speilrelatert = person.speilrelatert(periode)
                 )
@@ -2333,13 +2325,6 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) =
             forEach { it.validerTilstand(hendelse, aktivitetslogg) }
-
-        internal fun List<Vedtaksperiode>.påvirkerArbeidsgiverperiode(periode: Periode): Boolean {
-            return any { vedtaksperiode ->
-                val dagerMellom = periode.periodeMellom(vedtaksperiode.periode.start)?.count() ?: return@any false
-                return dagerMellom < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
-            }
-        }
 
         internal fun gjenopprett(
             person: Person,
