@@ -16,6 +16,8 @@ import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.Person
+import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
 import no.nav.helse.person.Vedtaksperiode.Companion.påvirkerArbeidsgiverperiode
@@ -289,6 +291,47 @@ internal class DagerFraInntektsmelding(
 
     internal fun førsteOverlappendeVedtaksperiode(vedtaksperioder: List<Vedtaksperiode>): Vedtaksperiode? {
         return vedtaksperioder.firstOrNull { it.periode.overlapperMed(arbeidsgiverperiode ?: førsteFraværsdag!!.somPeriode()) }
+    }
+
+    internal fun inntektsmeldingIkkeHåndtert(aktivitetslogg: IAktivitetslogg, person: Person, forkastede: List<Periode>, sykmeldingsperioder: Sykmeldingsperioder) =
+        InntektsmeldingIkkeHåndtert().emit(aktivitetslogg, person, forkastede, sykmeldingsperioder)
+
+    private inner class InntektsmeldingIkkeHåndtert {
+        private val meldingsreferanseId = hendelse.metadata.meldingsreferanseId
+        private val organisasjonsnummer = when (val bs = hendelse.behandlingsporing) {
+            is Behandlingsporing.Arbeidsgiver -> bs.organisasjonsnummer
+            Behandlingsporing.IngenArbeidsgiver -> error("Inntektsmelding uten arbeidsgiver?!?! Det blir litt vel tøysete spør du meg")
+        }
+        private val perioderViTrorInntektsmeldingenPrøverÅSiNoeOm = listOfNotNull(
+            førsteFraværsdag?.somPeriode(),
+            opprinneligPeriode,
+            overlappsperiode
+        ).plus(arbeidsgiverperioder).grupperSammenhengendePerioder()
+
+        private fun relevanteSykmeldingsperioder(sykmeldingsperioder: List<Periode>) = sykmeldingsperioder.filter { sykmeldingsperiode ->
+            perioderViTrorInntektsmeldingenPrøverÅSiNoeOm.any { periodeViTrorInntektsmeldingenPrøverÅSiNoeOm ->
+                (Periode.mellom(sykmeldingsperiode, periodeViTrorInntektsmeldingenPrøverÅSiNoeOm)?.count() ?: 0) < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
+            }
+        }
+
+        private fun overlapperMed(forkastedePerioder: List<Periode>) = forkastedePerioder.any { forkastetPeriode ->
+            perioderViTrorInntektsmeldingenPrøverÅSiNoeOm.any { periodeViTrorInntektsmeldingenPrøverÅSiNoeOm ->
+                forkastetPeriode.overlapperMed(periodeViTrorInntektsmeldingenPrøverÅSiNoeOm)
+            }
+        }
+
+        private fun speilrelatert(person: Person) = person.speilrelatert(*perioderViTrorInntektsmeldingenPrøverÅSiNoeOm.toTypedArray())
+
+        fun emit(aktivitetslogg: IAktivitetslogg, person: Person, forkastede: List<Periode>, sykmeldingsperioder: Sykmeldingsperioder) {
+            val relevanteSykmeldingsperioder = relevanteSykmeldingsperioder(sykmeldingsperioder.perioder())
+            val overlapperMedForkastet = overlapperMed(forkastede)
+            if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
+                person.emitInntektsmeldingFørSøknadEvent(meldingsreferanseId.id, relevanteSykmeldingsperioder, organisasjonsnummer)
+                return aktivitetslogg.info("Inntektsmelding før søknad - er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
+            }
+            aktivitetslogg.info("Inntektsmelding ikke håndtert")
+            person.emitInntektsmeldingIkkeHåndtert(meldingsreferanseId, organisasjonsnummer, harPeriodeInnenfor16Dager = speilrelatert(person)) // TODO: Nytt flagg
+        }
     }
 
     private companion object {

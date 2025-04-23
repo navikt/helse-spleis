@@ -27,6 +27,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -639,11 +640,14 @@ class Person private constructor(
         }
     }
 
-    internal fun emitInntektsmeldingIkkeHåndtert(hendelse: Hendelse, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) {
+    internal fun emitInntektsmeldingIkkeHåndtert(meldingsreferanseId: MeldingsreferanseId, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) {
         observers.forEach {
-            it.inntektsmeldingIkkeHåndtert(hendelse.metadata.meldingsreferanseId.id, organisasjonsnummer, harPeriodeInnenfor16Dager)
+            it.inntektsmeldingIkkeHåndtert(meldingsreferanseId.id, organisasjonsnummer, harPeriodeInnenfor16Dager)
         }
     }
+
+    internal fun emitInntektsmeldingIkkeHåndtert(hendelse: Hendelse, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) =
+        emitInntektsmeldingIkkeHåndtert(hendelse.metadata.meldingsreferanseId, organisasjonsnummer, harPeriodeInnenfor16Dager)
 
     internal fun emitInntektsmeldingHåndtert(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
         observers.forEach {

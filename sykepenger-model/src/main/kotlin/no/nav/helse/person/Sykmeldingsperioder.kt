@@ -12,6 +12,7 @@ internal class Sykmeldingsperioder(
 ) {
 
     fun view() = SykmeldingsperioderView(perioder)
+    internal fun perioder() = perioder.toList()
 
     internal fun lagre(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg) {
         perioder = sykmelding.oppdaterSykmeldingsperioder(aktivitetslogg, perioder)
