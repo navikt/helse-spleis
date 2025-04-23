@@ -632,11 +632,10 @@ class Person private constructor(
 
     internal fun emitInntektsmeldingFørSøknadEvent(
         meldingsreferanseId: UUID,
-        relevanteSykmeldingsperioder: List<Periode>,
         organisasjonsnummer: String
     ) {
         observers.forEach {
-            it.inntektsmeldingFørSøknad(PersonObserver.InntektsmeldingFørSøknadEvent(meldingsreferanseId, relevanteSykmeldingsperioder, organisasjonsnummer))
+            it.inntektsmeldingFørSøknad(PersonObserver.InntektsmeldingFørSøknadEvent(meldingsreferanseId, organisasjonsnummer))
         }
     }
 

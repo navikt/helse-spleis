@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.forrigeDag
 import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
@@ -192,7 +192,7 @@ class Inntektsmelding(
         val overlapperMedForkastet = dager.overlapperMed(forkastede)
         val harPeriodeInnenfor16Dager = dager.harPeriodeInnenfor16Dager(vedtaksperioder)
         if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
-            person.emitInntektsmeldingFørSøknadEvent(metadata.meldingsreferanseId.id, relevanteSykmeldingsperioder, behandlingsporing.organisasjonsnummer)
+            person.emitInntektsmeldingFørSøknadEvent(metadata.meldingsreferanseId.id, behandlingsporing.organisasjonsnummer)
             return aktivitetslogg.info("Inntektsmelding før søknad - er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
         }
         aktivitetslogg.info("Inntektsmelding ikke håndtert")

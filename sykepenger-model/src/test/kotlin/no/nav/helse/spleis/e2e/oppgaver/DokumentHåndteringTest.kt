@@ -151,10 +151,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar)
         )
         val inntektsmeldingFørSøknadEvent = observatør.inntektsmeldingFørSøknad.single()
-        inntektsmeldingFørSøknadEvent.let {
-            assertEquals(id, it.inntektsmeldingId)
-            assertEquals(listOf(1.januar til 16.januar), it.relevanteSykmeldingsperioder)
-        }
+        assertEquals(id, inntektsmeldingFørSøknadEvent.inntektsmeldingId)
     }
 
     @Test
@@ -167,10 +164,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             førsteFraværsdag = 20.januar
         )
         val inntektsmeldingFørSøknadEvent = observatør.inntektsmeldingFørSøknad.single()
-        inntektsmeldingFørSøknadEvent.let {
-            assertEquals(id, it.inntektsmeldingId)
-            assertEquals(listOf(20.januar til 20.januar), it.relevanteSykmeldingsperioder)
-        }
+        assertEquals(id, inntektsmeldingFørSøknadEvent.inntektsmeldingId)
     }
 
     @Test
@@ -191,10 +185,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar))
         val id = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
         val inntektsmeldingFørSøknadEvent = observatør.inntektsmeldingFørSøknad.single()
-        inntektsmeldingFørSøknadEvent.let {
-            assertEquals(id, it.inntektsmeldingId)
-            assertEquals(listOf(17.januar til 31.januar), it.relevanteSykmeldingsperioder)
-        }
+        assertEquals(id, inntektsmeldingFørSøknadEvent.inntektsmeldingId)
     }
 
     @Test

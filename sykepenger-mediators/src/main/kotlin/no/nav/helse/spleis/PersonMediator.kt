@@ -5,7 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import java.util.*
+import java.util.UUID
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
@@ -46,16 +46,11 @@ internal class PersonMediator(
     override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) {
         queueMessage(
             JsonMessage.newMessage(
-                "inntektsmelding_før_søknad", mapOf(
-                "inntektsmeldingId" to event.inntektsmeldingId,
-                "relevante_sykmeldingsperioder" to event.relevanteSykmeldingsperioder.map { periode ->
-                    mapOf(
-                        "fom" to periode.start,
-                        "tom" to periode.endInclusive
-                    )
-                },
-                "organisasjonsnummer" to event.organisasjonsnummer
-            )
+                "inntektsmelding_før_søknad",
+                mapOf(
+                    "inntektsmeldingId" to event.inntektsmeldingId,
+                    "organisasjonsnummer" to event.organisasjonsnummer
+                )
             )
         )
     }

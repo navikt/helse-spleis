@@ -326,7 +326,7 @@ internal class DagerFraInntektsmelding(
             val relevanteSykmeldingsperioder = relevanteSykmeldingsperioder(sykmeldingsperioder.perioder())
             val overlapperMedForkastet = overlapperMed(forkastede)
             if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
-                person.emitInntektsmeldingFørSøknadEvent(meldingsreferanseId.id, relevanteSykmeldingsperioder, organisasjonsnummer)
+                person.emitInntektsmeldingFørSøknadEvent(meldingsreferanseId.id, organisasjonsnummer)
                 return aktivitetslogg.info("Inntektsmelding før søknad - er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
             }
             aktivitetslogg.info("Inntektsmelding ikke håndtert")
