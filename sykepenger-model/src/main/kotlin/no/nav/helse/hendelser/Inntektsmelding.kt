@@ -12,7 +12,6 @@ import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
@@ -183,20 +182,11 @@ class Inntektsmelding(
     internal fun ferdigstill(
         aktivitetslogg: IAktivitetslogg,
         person: Person,
-        vedtaksperioder: List<Vedtaksperiode>,
         forkastede: List<Periode>,
         sykmeldingsperioder: Sykmeldingsperioder
     ) {
         if (håndtertInntekt) return // Definisjonen av om en inntektsmelding er håndtert eller ikke er at vi har håndtert inntekten i den... 🤡
-        val relevanteSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(dager) + sykmeldingsperioder.perioderInnenfor16Dager(dager)
-        val overlapperMedForkastet = dager.overlapperMed(forkastede)
-        val harPeriodeInnenfor16Dager = dager.harPeriodeInnenfor16Dager(vedtaksperioder)
-        if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
-            person.emitInntektsmeldingFørSøknadEvent(metadata.meldingsreferanseId.id, behandlingsporing.organisasjonsnummer)
-            return aktivitetslogg.info("Inntektsmelding før søknad - er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
-        }
-        aktivitetslogg.info("Inntektsmelding ikke håndtert")
-        person.emitInntektsmeldingIkkeHåndtert(this, behandlingsporing.organisasjonsnummer, harPeriodeInnenfor16Dager)
+        dager.inntektsmeldingIkkeHåndtert(aktivitetslogg, person, forkastede, sykmeldingsperioder)
     }
 
 }

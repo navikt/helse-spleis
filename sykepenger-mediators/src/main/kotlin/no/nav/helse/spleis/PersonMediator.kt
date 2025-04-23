@@ -55,14 +55,15 @@ internal class PersonMediator(
         )
     }
 
-    override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) {
+    override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String, speilrelatert: Boolean) {
         queueMessage(
             JsonMessage.newMessage(
-                "inntektsmelding_ikke_håndtert", mapOf(
-                "inntektsmeldingId" to inntektsmeldingId,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "harPeriodeInnenfor16Dager" to harPeriodeInnenfor16Dager
-            )
+                "inntektsmelding_ikke_håndtert",
+                mapOf(
+                    "inntektsmeldingId" to inntektsmeldingId,
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "speilrelatert" to speilrelatert
+                )
             )
         )
     }

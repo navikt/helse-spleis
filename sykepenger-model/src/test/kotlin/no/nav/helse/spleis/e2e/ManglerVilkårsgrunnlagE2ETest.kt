@@ -168,7 +168,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(16.desember(2017) til 31.desember(2017)),
             førsteFraværsdag = 5.mars
         )
-        assertInfo("Inntektsmelding før søknad - er relevant for sykmeldingsperioder [05-03-2018 til 05-03-2018]")
+        assertInfo("Inntektsmelding før søknad - er relevant for sykmeldingsperioder [05-03-2018 til 31-03-2018]")
         assertTilstandFørInntektsmeldingHensyntas()
 
         // Når søknaden kommer replayes Inntektsmelding og nå puttes plutselig info fra Inntektsmlding på

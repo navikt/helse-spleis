@@ -20,7 +20,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
-import no.nav.helse.person.Vedtaksperiode.Companion.påvirkerArbeidsgiverperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
@@ -279,11 +278,6 @@ internal class DagerFraInntektsmelding(
         return false
     }
 
-    internal fun harPeriodeInnenfor16Dager(vedtaksperioder: List<Vedtaksperiode>): Boolean {
-        val periode = sykdomstidslinje.periode() ?: return false
-        return vedtaksperioder.påvirkerArbeidsgiverperiode(periode)
-    }
-
     internal fun revurderingseventyr(): Revurderingseventyr? {
         val dagene = håndterteDager.omsluttendePeriode ?: harValidert ?: return null
         return Revurderingseventyr.arbeidsgiverperiode(hendelse, dagene.start, dagene)
@@ -330,7 +324,7 @@ internal class DagerFraInntektsmelding(
                 return aktivitetslogg.info("Inntektsmelding før søknad - er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
             }
             aktivitetslogg.info("Inntektsmelding ikke håndtert")
-            person.emitInntektsmeldingIkkeHåndtert(meldingsreferanseId, organisasjonsnummer, harPeriodeInnenfor16Dager = speilrelatert(person)) // TODO: Nytt flagg
+            person.emitInntektsmeldingIkkeHåndtert(meldingsreferanseId, organisasjonsnummer, speilrelatert = speilrelatert(person))
         }
     }
 
