@@ -4,14 +4,12 @@ import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -179,54 +177,4 @@ internal class SykmeldingsperioderTest {
         sykmeldingsperioder.fjern(januar)
         assertEquals(listOf(februar), sykmeldingsperioder.perioder())
     }
-
-    @Test
-    fun `sykmeldingsperioder som overlapper med inntektsmelding`() {
-        val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(1.januar til 15.januar)
-        sykmeldingsperioder.lagre(1.mars til 28.mars)
-
-        assertEquals(listOf(1.januar til 15.januar), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.januar til 16.januar), 1.januar).dager()))
-        assertEquals(emptyList<Periode>(), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.februar til 16.februar), 1.februar).dager()))
-        assertEquals(listOf(1.mars til 16.mars), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.mars til 16.mars), 1.mars).dager()))
-    }
-
-    @Test
-    fun `AGP treffer sykmeldingsperiode, men første fraværsdag er senere`() {
-        val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(januar)
-
-        assertEquals(emptyList<Periode>(), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar).dager()))
-    }
-
-    @Test
-    fun `AGP treffer ikke sykmeldingsperiode, men første fraværsdag treffer`() {
-        val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(januar)
-        sykmeldingsperioder.lagre(10.februar til 28.februar)
-
-        assertEquals(
-            listOf(10.februar til 10.februar),
-            sykmeldingsperioder.overlappendePerioder(
-                inntektsmelding(
-                    listOf(1.januar til 16.januar),
-                    førsteFraværsdag = 10.februar
-                ).dager()
-            )
-        )
-    }
-
-    private fun inntektsmelding(
-        arbeidsgiverperioder: List<Periode>,
-        førsteFraværsdag: LocalDate
-    ): Inntektsmelding = hendelsefabrikk.lagInntektsmelding(
-        arbeidsgiverperioder = arbeidsgiverperioder,
-        beregnetInntekt = Inntekt.INGEN,
-        førsteFraværsdag = førsteFraværsdag,
-        refusjon = Inntektsmelding.Refusjon(null, null),
-        opphørAvNaturalytelser = emptyList(),
-        begrunnelseForReduksjonEllerIkkeUtbetalt = null
-    )
-
-    fun Sykmeldingsperioder.perioder() = view().perioder
 }

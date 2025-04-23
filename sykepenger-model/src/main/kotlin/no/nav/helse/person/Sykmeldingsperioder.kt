@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import no.nav.helse.dto.SykmeldingsperioderDto
-import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -25,12 +24,6 @@ internal class Sykmeldingsperioder(
     internal fun fjern(periode: Periode) {
         perioder = perioder.flatMap { it.uten(periode.oppdaterFom(LocalDate.MIN)) }
     }
-
-    internal fun overlappendePerioder(dager: DagerFraInntektsmelding) =
-        dager.overlappendeSykmeldingsperioder(perioder)
-
-    internal fun perioderInnenfor16Dager(dager: DagerFraInntektsmelding) =
-        dager.perioderInnenfor16Dager(perioder)
 
     internal fun dto() = SykmeldingsperioderDto(perioder = this.perioder.map { it.dto() })
 

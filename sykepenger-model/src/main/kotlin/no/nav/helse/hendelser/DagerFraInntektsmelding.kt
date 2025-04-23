@@ -193,7 +193,7 @@ internal class DagerFraInntektsmelding(
         return arbeidsgiverperiode.overlapperMed(periode)
     }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, gammelAgp: List<Periode>? = null, vedtaksperiodeId: UUID) {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, gammelAgp: List<Periode>? = null, vedtaksperiodeId: UUID) {
         if (opphørAvNaturalytelser.isNotEmpty()) {
             if (opphørAvNaturalytelser.any { it.fom != førsteFraværsdag }) {
                 sikkerLogg.info(
@@ -237,26 +237,6 @@ internal class DagerFraInntektsmelding(
         val thisSiste = this.arbeidsgiverperiode?.endInclusive ?: return false
         val otherSiste = beregnetArbeidsgiverperiode.periode()?.endInclusive ?: return false
         return otherSiste == thisSiste || (thisSiste.erHelg() && otherSiste.erRettFør(thisSiste)) || (otherSiste.erHelg() && thisSiste.erRettFør(otherSiste))
-    }
-
-    internal fun overlappendeSykmeldingsperioder(sykmeldingsperioder: List<Periode>): List<Periode> {
-        if (overlappsperiode == null) return emptyList()
-        return sykmeldingsperioder.mapNotNull { it.overlappendePeriode(overlappsperiode) }
-    }
-
-    internal fun perioderInnenfor16Dager(sykmeldingsperioder: List<Periode>): List<Periode> {
-        if (overlappsperiode == null) return emptyList()
-        return sykmeldingsperioder.mapNotNull { sykmeldingsperiode ->
-            val erRettFør = overlappsperiode.erRettFør(sykmeldingsperiode)
-            if (erRettFør) return@mapNotNull sykmeldingsperiode
-            val dagerMellom = overlappsperiode.periodeMellom(sykmeldingsperiode.start)?.count() ?: return@mapNotNull null
-            if (dagerMellom < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD) sykmeldingsperiode else null
-        }
-    }
-
-    internal fun overlapperMed(perioder: List<Periode>): Boolean {
-        if (overlappsperiode == null) return false
-        return perioder.any { it.overlapperMed(overlappsperiode) }
     }
 
     private fun validerOverstigerMaksimaltTillatAvstandMellomTidligereAGP(aktivitetslogg: IAktivitetslogg, gammelAgp: List<Periode>?) {

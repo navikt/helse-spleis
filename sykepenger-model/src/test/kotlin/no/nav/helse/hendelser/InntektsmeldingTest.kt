@@ -233,7 +233,7 @@ internal class InntektsmeldingTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
         val bit = dager.bitAvInntektsmelding(Aktivitetslogg(), januar)
-        dager.valider(aktivitetslogg, januar, vedtaksperiodeId = UUID.randomUUID())
+        dager.valider(aktivitetslogg, vedtaksperiodeId = UUID.randomUUID())
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
         aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IM_8)
         assertEquals(0, bit?.sykdomstidslinje?.count())
@@ -318,7 +318,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
-        dager.valider(aktivitetslogg, 1.januar til 12.januar, vedtaksperiodeId = UUID.randomUUID())
+        dager.valider(aktivitetslogg, vedtaksperiodeId = UUID.randomUUID())
         aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IM_8)
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
     }
