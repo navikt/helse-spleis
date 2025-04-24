@@ -437,7 +437,8 @@ internal class PersonMediator(
 
                 is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> mapOf(
                     "fastsatt" to fakta.fastsatt,
-                    "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt
+                    "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
+                    "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt
                 )
             }
         )
