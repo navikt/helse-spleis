@@ -48,6 +48,8 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "sykepengegrunnlagsfakta": {
               "fastsatt": "EtterHovedregel",
               "omregnetÅrsinntekt": 372000.0,
+              "omregnetÅrsinntektTotal": 372000.0,
+              "sykepengegrunnlag": 372000.0,
               "6G": 561804.0,
               "arbeidsgivere": [
                 {
@@ -74,7 +76,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             beregnetInntekt = 45000.00
         )
         sendVilkårsgrunnlag(0)
-        val (skjønnsmessigFastsettelseId, _) = sendSkjønnsmessigFastsettelse(3.januar, listOf(TestMessageFactory.SkjønnsmessigFastsatt(ORGNUMMER, 47500.00 * 12)))
+        sendSkjønnsmessigFastsettelse(3.januar, listOf(TestMessageFactory.SkjønnsmessigFastsatt(ORGNUMMER, 47500.00 * 12)))
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK, forventedeFagområder = setOf("SP", "SPREF"))
         sendUtbetalingsgodkjenning(0)
@@ -97,13 +99,15 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "sykepengegrunnlagsfakta": {
                 "fastsatt": "EtterSkjønn",
                 "omregnetÅrsinntekt": 540000.0,
+                "omregnetÅrsinntektTotal": 540000.0,
                 "skjønnsfastsatt": 570000.0,
                 "6G": 561804.0,
                 "arbeidsgivere": [
                   {
                     "arbeidsgiver": "987654321",
                     "omregnetÅrsinntekt": 540000.0,
-                    "skjønnsfastsatt": 570000.0
+                    "skjønnsfastsatt": 570000.0,
+                    "inntektskilde": "Saksbehandler"
                   }
                 ]
             }
@@ -180,6 +184,8 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "sykepengegrunnlagsfakta": {
               "fastsatt": "EtterHovedregel",
               "omregnetÅrsinntekt": 372000.0,
+              "omregnetÅrsinntektTotal": 372000.0,
+              "sykepengegrunnlag": 372000.0,
               "6G": 561804.0,
               "arbeidsgivere": [
                 {

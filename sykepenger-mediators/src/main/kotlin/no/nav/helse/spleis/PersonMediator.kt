@@ -407,6 +407,8 @@ internal class PersonMediator(
                 is PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel -> mapOf(
                     "fastsatt" to fakta.fastsatt,
                     "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
+                    "omregnetÅrsinntektTotal" to fakta.omregnetÅrsinntekt,
+                    "sykepengegrunnlag" to fakta.sykepengegrunnlag,
                     "6G" to fakta.`6G`,
                     "arbeidsgivere" to fakta.arbeidsgivere.map { arbeidsgiver ->
                         mapOf(
@@ -420,12 +422,14 @@ internal class PersonMediator(
                 is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> mutableMapOf(
                     "fastsatt" to fakta.fastsatt,
                     "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
+                    "omregnetÅrsinntektTotal" to fakta.omregnetÅrsinntekt,
                     "6G" to fakta.`6G`,
                     "arbeidsgivere" to fakta.arbeidsgivere.map { arbeidsgiver ->
                         mapOf(
                             "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
                             "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
-                            "skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt
+                            "skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt,
+                            "inntektskilde" to arbeidsgiver.inntektskilde
                         )
                     },
                     "skjønnsfastsatt" to fakta.skjønnsfastsatt
