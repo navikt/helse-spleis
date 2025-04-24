@@ -48,7 +48,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "sykepengegrunnlagsfakta": {
               "fastsatt": "EtterHovedregel",
               "omregnetÅrsinntekt": 372000.0,
-              "omregnetÅrsinntektTotal": 372000.0,
+              "omregnetÅrsinntektTotalt": 372000.0,
               "sykepengegrunnlag": 372000.0,
               "6G": 561804.0,
               "arbeidsgivere": [
@@ -99,7 +99,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "sykepengegrunnlagsfakta": {
                 "fastsatt": "EtterSkjønn",
                 "omregnetÅrsinntekt": 540000.0,
-                "omregnetÅrsinntektTotal": 540000.0,
+                "omregnetÅrsinntektTotalt": 540000.0,
                 "skjønnsfastsatt": 570000.0,
                 "6G": 561804.0,
                 "arbeidsgivere": [
@@ -184,7 +184,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "sykepengegrunnlagsfakta": {
               "fastsatt": "EtterHovedregel",
               "omregnetÅrsinntekt": 372000.0,
-              "omregnetÅrsinntektTotal": 372000.0,
+              "omregnetÅrsinntektTotalt": 372000.0,
               "sykepengegrunnlag": 372000.0,
               "6G": 561804.0,
               "arbeidsgivere": [
