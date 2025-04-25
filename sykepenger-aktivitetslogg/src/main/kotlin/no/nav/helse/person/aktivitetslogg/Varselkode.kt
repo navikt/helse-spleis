@@ -238,7 +238,7 @@ enum class Varselkode(
     RV_UT_18("Utbetaling markert som ikke godkjent automatisk"),
     RV_UT_19("Utbetaling markert som ikke godkjent av saksbehandler"),
     RV_UT_20("Utbetaling fra og med dato er endret. Kontroller simuleringen", avviklet = true),
-    RV_UT_21("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen"),
+    RV_UT_21("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen", avviklet = true),
     RV_UT_22("Annullering ble ikke gjennomført", avviklet = true),
     RV_UT_23("Den nye beregningen vil trekke penger i sykefraværstilfellet"),
     RV_UT_24("Utbetalingen er avvist, men perioden kan ikke forkastes. Overstyr perioden, eller annuller sykefraværstilfellet om nødvendig"),

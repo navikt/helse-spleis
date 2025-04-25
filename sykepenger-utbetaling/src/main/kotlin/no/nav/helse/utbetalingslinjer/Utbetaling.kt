@@ -26,7 +26,6 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_12
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_21
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
@@ -339,7 +338,7 @@ class Utbetaling private constructor(
             forbrukteSykedager: Int,
             gjenståendeSykedager: Int,
             type: Utbetalingtype = UTBETALING
-        ): Pair<Utbetaling, List<Utbetaling>> {
+        ): Utbetaling {
             val vedtaksperiodekladd = UtbetalingkladdBuilder(periode, utbetalingstidslinje.subset(periode), organisasjonsnummer, fødselsnummer).build()
 
             val forrigeUtbetalte = utbetalinger.aktive(periode)
@@ -348,7 +347,7 @@ class Utbetaling private constructor(
                 .filterNot { it === korrelerendeUtbetaling }
                 .mapNotNull { it.opphør(aktivitetslogg) }
 
-            if (annulleringer.isNotEmpty()) aktivitetslogg.varsel(RV_UT_21)
+            check(annulleringer.isEmpty()) { "det foreslås å annullere andre utbetalinger!" }
 
             val utbetalingen = korrelerendeUtbetaling?.nyUtbetaling(
                 aktivitetslogg = aktivitetslogg,
@@ -358,7 +357,7 @@ class Utbetaling private constructor(
                 maksdato = maksdato,
                 forbrukteSykedager = forbrukteSykedager,
                 gjenståendeSykedager = gjenståendeSykedager,
-                annulleringer = annulleringer
+                annulleringer = emptyList()
             ) ?: Utbetaling(
                 korrelerendeUtbetaling = null,
                 periode = vedtaksperiodekladd.utbetalingsperiode,
@@ -369,10 +368,10 @@ class Utbetaling private constructor(
                 maksdato = maksdato,
                 forbrukteSykedager = forbrukteSykedager,
                 gjenståendeSykedager = gjenståendeSykedager,
-                annulleringer = annulleringer
+                annulleringer = emptyList()
             )
             listOf(utbetalingen.arbeidsgiverOppdrag, utbetalingen.personOppdrag).valider(aktivitetslogg)
-            return utbetalingen to annulleringer
+            return utbetalingen
         }
 
         fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv).filterNot { it.tilstand is Annullert  }

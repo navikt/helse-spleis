@@ -441,7 +441,7 @@ internal class UtbetalingTest {
             LocalDate.MAX,
             100,
             148
-        ).first
+        )
         assertEquals(Utbetalingstatus.NY, utbetaling.inspektør.tilstand)
         utbetaling.opprett(aktivitetslogg)
         assertEquals(IKKE_UTBETALT, utbetaling.inspektør.tilstand)
@@ -462,7 +462,7 @@ internal class UtbetalingTest {
             LocalDate.MAX,
             100,
             148
-        ).first.also { it.opprett(aktivitetslogg) }
+        ).also { it.opprett(aktivitetslogg) }
         assertEquals(1.januar til sisteDato, utbetaling.inspektør.periode)
     }
 
@@ -793,7 +793,7 @@ internal class UtbetalingTest {
         LocalDate.MAX,
         100,
         148
-    ).first.also { it.opprett(aktivitetslogg) }
+    ).also { it.opprett(aktivitetslogg) }
 
     private fun opprettUtbetaling(
         tidslinje: Utbetalingstidslinje,

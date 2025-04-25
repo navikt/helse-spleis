@@ -427,7 +427,7 @@ internal class Arbeidsgiver private constructor(
         periode: Periode,
         type: Utbetalingtype
     ): Utbetaling {
-        val (utbetalingen, annulleringer) = Utbetaling.lagUtbetaling(
+        val utbetalingen = Utbetaling.lagUtbetaling(
             utbetalinger = utbetalinger,
             fødselsnummer = person.fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
@@ -439,22 +439,19 @@ internal class Arbeidsgiver private constructor(
             gjenståendeSykedager = gjenståendeSykedager,
             type = type
         )
-        nyUtbetaling(aktivitetslogg, utbetalingen, annulleringer)
+        nyUtbetaling(aktivitetslogg, utbetalingen)
         return utbetalingen
     }
 
     private fun nyUtbetaling(
         aktivitetslogg: IAktivitetslogg,
-        utbetalingen: Utbetaling,
-        annulleringer: List<Utbetaling> = emptyList()
+        utbetaling: Utbetaling
     ) {
         utbetalinger.lastOrNull()?.forkast(aktivitetslogg)
-        annulleringer.plus(utbetalingen).forEach { utbetaling ->
-            check(utbetalinger.tillaterOpprettelseAvUtbetaling(utbetaling)) { "Har laget en overlappende utbetaling" }
-            utbetalinger.add(utbetaling)
-            utbetaling.registrer(this)
-            utbetaling.opprett(aktivitetslogg)
-        }
+        check(utbetalinger.tillaterOpprettelseAvUtbetaling(utbetaling)) { "Har laget en overlappende utbetaling" }
+        utbetalinger.add(utbetaling)
+        utbetaling.registrer(this)
+        utbetaling.opprett(aktivitetslogg)
     }
 
     internal fun utbetalFeriepenger(
