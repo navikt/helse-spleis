@@ -26,7 +26,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_9
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_5
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -86,7 +85,7 @@ internal class VarselE2ETest : AbstractDslTest() {
 
             håndterOverstyrTidslinje((23.januar til 23.januar).map { manuellFeriedag(it) })
             håndterYtelser(1.vedtaksperiode)
-            assertVarsler(listOf(RV_OS_3, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         }
     }
 

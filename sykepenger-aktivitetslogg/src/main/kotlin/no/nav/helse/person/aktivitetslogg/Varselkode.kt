@@ -245,8 +245,8 @@ enum class Varselkode(
 
     // OS: Oppdragsystemet
     RV_OS_1("Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen.", avviklet = true),
-    RV_OS_2("Utbetalingens fra og med-dato er endret. Kontroller simuleringen"),
-    RV_OS_3("Endrer tidligere oppdrag. Kontroller simuleringen."),
+    RV_OS_2("Utbetalingens fra og med-dato er endret. Kontroller simuleringen", avviklet = true),
+    RV_OS_3("Endrer tidligere oppdrag. Kontroller simuleringen.", avviklet = true),
 
     // RV: Revurdering
     RV_RV_1("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", avviklet = true),

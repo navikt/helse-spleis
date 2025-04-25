@@ -38,7 +38,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.VedtaksperiodeVenter
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning

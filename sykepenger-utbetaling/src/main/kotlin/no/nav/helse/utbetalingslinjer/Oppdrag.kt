@@ -17,7 +17,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT_MED_FEIL
@@ -391,7 +390,6 @@ class Oppdrag private constructor(
         private fun opphørTidligereLinjeOgOpprettNy(
             nåværende: Utbetalingslinje,
             tidligere: Utbetalingslinje,
-            aktivitetslogg: IAktivitetslogg,
             datoStatusFom: LocalDate = tidligere.fom
         ): List<Utbetalingslinje> {
             linkTo = tidligere
@@ -399,7 +397,6 @@ class Oppdrag private constructor(
             val linketTilForrige = nåværende.kobleTil(linkTo)
             linkTo = linketTilForrige
             tilstand = Ny()
-            aktivitetslogg.varsel(RV_OS_3)
             return listOf(opphørslinje, linketTilForrige)
         }
 
@@ -412,11 +409,11 @@ class Oppdrag private constructor(
             return nytt.kopierMed(linjer + kjedeSammenLinjer(nyeLinjer, linjer.last()))
         }
 
-        private fun håndterUlikhet(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Utbetalingslinje> {
+        private fun håndterUlikhet(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje): List<Utbetalingslinje> {
             return when {
                 nåværende.kanEndreEksisterendeLinje(tidligere, sisteLinjeITidligereOppdrag) -> listOf(nåværende.endreEksisterendeLinje(tidligere))
-                nåværende.skalOpphøreOgErstatte(tidligere, sisteLinjeITidligereOppdrag) -> opphørTidligereLinjeOgOpprettNy(nåværende, tidligere, aktivitetslogg)
-                nåværende.fom > tidligere.fom -> opphørTidligereLinjeOgOpprettNy(nåværende, sisteLinjeITidligereOppdrag, aktivitetslogg, tidligere.fom)
+                nåværende.skalOpphøreOgErstatte(tidligere, sisteLinjeITidligereOppdrag) -> opphørTidligereLinjeOgOpprettNy(nåværende, tidligere)
+                nåværende.fom > tidligere.fom -> opphørTidligereLinjeOgOpprettNy(nåværende, sisteLinjeITidligereOppdrag, tidligere.fom)
                 else -> listOf(opprettNyLinje(nåværende))
             }
         }
@@ -436,7 +433,7 @@ class Oppdrag private constructor(
         private inner class Identisk : Tilstand {
             override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Utbetalingslinje> {
                 if (nåværende == tidligere) return listOf(nåværende.markerUendret(tidligere))
-                return håndterUlikhet(nåværende, tidligere, aktivitetslogg)
+                return håndterUlikhet(nåværende, tidligere)
             }
         }
 
@@ -446,7 +443,7 @@ class Oppdrag private constructor(
                     if (nåværende == sisteLinjeINyttOppdrag) return listOf(nåværende.kobleTil(linkTo))
                     return listOf(nåværende.markerUendret(tidligere))
                 }
-                return håndterUlikhet(nåværende, tidligere, aktivitetslogg)
+                return håndterUlikhet(nåværende, tidligere)
             }
         }
 
