@@ -25,7 +25,6 @@ import no.nav.helse.hendelser.avvist
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
-import no.nav.helse.person.Behandlinger.Behandling.Companion.erUtbetaltPåForskjelligeUtbetalinger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.forrigeDokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
 import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbarInntekt
@@ -69,7 +68,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         )
     }
 
-    private val utbetalingene get() = behandlinger.mapNotNull(Behandling::utbetaling)
     private val behandlinger = behandlinger.toMutableList()
     private val siste get() = behandlinger.lastOrNull()?.utbetaling()
 
@@ -327,10 +325,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     fun beregnSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>) {
         behandlinger.last().beregnSkjæringstidspunkt(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
-    }
-
-    fun erUtbetaltPåForskjelligeUtbetalinger(other: Behandlinger): Boolean {
-        return this.behandlinger.erUtbetaltPåForskjelligeUtbetalinger(other.behandlinger)
     }
 
     internal class Behandlingkilde(
@@ -1285,19 +1279,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             private fun List<Behandling>.forrigeEndringMedGjenbrukbarInntekt(organisasjonsnummer: String): Pair<Endring, VilkårsgrunnlagElement>? =
                 forrigeEndringMed { it.grunnlagsdata?.harGjenbrukbarInntekt(organisasjonsnummer) == true }?.let { it to it.grunnlagsdata!! }
 
-            // hvorvidt man delte samme utbetaling før
-            fun List<Behandling>.erUtbetaltPåForskjelligeUtbetalinger(other: List<Behandling>): Boolean {
-                val forrigeIverksatteThis = forrigeIverksatte ?: return true
-                val forrigeIverksatteOther = other.forrigeIverksatte ?: return true
-                // hvis forrige iverksatte på *this* har ulik korrelasjonsId som siste iverksatte på *other* -> return true
-                val utbetalingThis = checkNotNull(forrigeIverksatteThis.utbetaling()) {
-                    "forventer at det skal være en utbetaling på en behandling som er iverksatt"
-                }
-                val utbetalingOther = forrigeIverksatteOther.utbetaling() ?: return true // forrige periode kan være AUU
-                return !utbetalingOther.hørerSammen(utbetalingThis)
-            }
-
-            private val List<Behandling>.forrigeIverksatte get() = lastOrNull { it.vedtakFattet != null }
             private fun List<Behandling>.gjeldendeEndring() = this.last().gjeldende
             private fun List<Behandling>.forrigeEndringMed(predikat: (endring: Endring) -> Boolean) =
                 this.asReversed().firstNotNullOfOrNull { behandling ->

@@ -279,7 +279,6 @@ class Utbetaling private constructor(
     private fun nyUtbetaling(
         aktivitetslogg: IAktivitetslogg,
         type: Utbetalingtype,
-        utbetalingsaken: Utbetalingsak,
         vedtaksperiode: Periode,
         kladd: Utbetalingkladd,
         maksdato: LocalDate,
@@ -287,8 +286,8 @@ class Utbetaling private constructor(
         gjenståendeSykedager: Int,
         annulleringer: List<Utbetaling>
     ): Utbetaling {
-        val nyttArbeidsgiveroppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, utbetalingsaken, this.arbeidsgiverOppdrag, kladd.arbeidsgiveroppdrag)
-        val nyttPersonoppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, utbetalingsaken, this.personOppdrag, kladd.personoppdrag)
+        val nyttArbeidsgiveroppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, this.arbeidsgiverOppdrag, kladd.arbeidsgiveroppdrag)
+        val nyttPersonoppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, this.personOppdrag, kladd.personoppdrag)
 
         val nyereUtbetalingstidslinje = this.utbetalingstidslinje.subset(kladd.utbetalingsperiode)
         val tidligereUtbetalingstidslinje = nyereUtbetalingstidslinje.fremTilOgMed(vedtaksperiode.start.forrigeDag)
@@ -308,9 +307,9 @@ class Utbetaling private constructor(
         )
     }
 
-    private fun byggViderePåOppdrag(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, utbetalingsaken: Utbetalingsak, historiskOppdrag: Oppdrag, nyttOppdrag: Oppdrag): Oppdrag {
+    private fun byggViderePåOppdrag(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, historiskOppdrag: Oppdrag, nyttOppdrag: Oppdrag): Oppdrag {
         /* ta bort eventuell hale som er avkortet */
-        val linjerFremTilOgMedUtbetalingsaken = historiskOppdrag.begrensTil(utbetalingsaken.omsluttendePeriode.endInclusive)
+        val linjerFremTilOgMedUtbetalingsaken = historiskOppdrag.begrensTil(vedtaksperiode.endInclusive)
 
         /* linjer forut før perioden */
         val linjerFørVedtaksperioden = linjerFremTilOgMedUtbetalingsaken.begrensTil(vedtaksperiode.start.forrigeDag)
@@ -335,19 +334,15 @@ class Utbetaling private constructor(
             organisasjonsnummer: String,
             utbetalingstidslinje: Utbetalingstidslinje,
             periode: Periode,
-            utbetalingsaker: List<Utbetalingsak>,
             aktivitetslogg: IAktivitetslogg,
             maksdato: LocalDate,
             forbrukteSykedager: Int,
             gjenståendeSykedager: Int,
             type: Utbetalingtype = UTBETALING
         ): Pair<Utbetaling, List<Utbetaling>> {
-            val utbetalingsaken = utbetalingsaker.first { periode in it.vedtaksperioder }
-            val utbetalingsperiode = periode.oppdaterFom(utbetalingsaken.omsluttendePeriode)
+            val vedtaksperiodekladd = UtbetalingkladdBuilder(periode, utbetalingstidslinje.subset(periode), organisasjonsnummer, fødselsnummer).build()
 
-            val vedtaksperiodekladd = UtbetalingkladdBuilder(utbetalingsperiode, utbetalingstidslinje.subset(periode), organisasjonsnummer, fødselsnummer).build()
-
-            val forrigeUtbetalte = utbetalinger.aktive(utbetalingsaken.omsluttendePeriode)
+            val forrigeUtbetalte = utbetalinger.aktive(periode)
             val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull()
             val annulleringer = forrigeUtbetalte
                 .filterNot { it === korrelerendeUtbetaling }
@@ -358,7 +353,6 @@ class Utbetaling private constructor(
             val utbetalingen = korrelerendeUtbetaling?.nyUtbetaling(
                 aktivitetslogg = aktivitetslogg,
                 type = type,
-                utbetalingsaken = utbetalingsaken,
                 vedtaksperiode = periode,
                 kladd = vedtaksperiodekladd,
                 maksdato = maksdato,
@@ -496,10 +490,6 @@ class Utbetaling private constructor(
 
     fun overlapperMed(other: Utbetaling): Boolean {
         return this.periode.overlapperMed(other.periode)
-    }
-
-    fun erNyereEnn(other: LocalDateTime): Boolean {
-        return other <= tidsstempel
     }
 
     private fun lagreOverføringsinformasjon(aktivitetslogg: IAktivitetslogg, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {

@@ -59,7 +59,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SAMME_ARBEIDSGIVERPERIODE
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiv
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
-import no.nav.helse.person.Vedtaksperiode.Companion.arbeidsgiverperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
@@ -428,18 +427,12 @@ internal class Arbeidsgiver private constructor(
         periode: Periode,
         type: Utbetalingtype
     ): Utbetaling {
-        val utbetalingsaker = UtbetalingsakerBuilder(
-            vedtaksperioder.arbeidsgiverperioder(),
-            person.infotrygdhistorikk.betaltePerioder()
-        ).lagUtbetalingsaker()
-
         val (utbetalingen, annulleringer) = Utbetaling.lagUtbetaling(
             utbetalinger = utbetalinger,
             fødselsnummer = person.fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             utbetalingstidslinje = utbetalingstidslinje,
             periode = periode,
-            utbetalingsaker = utbetalingsaker,
             aktivitetslogg = aktivitetslogg,
             maksdato = maksdato,
             forbrukteSykedager = forbrukteSykedager,
@@ -1060,11 +1053,6 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.firstOrNull { other ->
             other.erVedtaksperiodeRettFør(vedtaksperiode)
         }
-
-    internal fun finnVedtaksperiodeFør(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.indexOf(vedtaksperiode)
-            .takeUnless { index -> index == 0 }
-            ?.let { vedtaksperioder[it - 1] }
 
     internal fun finnVedtaksperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other ->

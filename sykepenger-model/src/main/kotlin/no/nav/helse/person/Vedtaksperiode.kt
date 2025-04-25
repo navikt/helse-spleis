@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
@@ -317,15 +316,8 @@ internal class Vedtaksperiode private constructor(
                     // ingen validering å gjøre :(
                 }
                 aktivitetsloggMedVedtaksperiodekontekst.info("Igangsetter overstyring av tidslinje")
-                val vedtaksperiodeTilRevurdering = arbeidsgiver.finnVedtaksperiodeFør(this)?.takeIf {
-                    nyArbeidsgiverperiodeEtterEndring(it)
-                } ?: this
 
-                Revurderingseventyr.sykdomstidslinje(
-                    hendelse = hendelse,
-                    skjæringstidspunkt = vedtaksperiodeTilRevurdering.skjæringstidspunkt,
-                    periodeForEndring = vedtaksperiodeTilRevurdering.periode
-                )
+                Revurderingseventyr.sykdomstidslinje(hendelse, this.skjæringstidspunkt, this.periode)
             }
 
             RevurderingFeilet,
@@ -335,15 +327,6 @@ internal class Vedtaksperiode private constructor(
 
         hendelse.vurdertTilOgMed(periode.endInclusive)
         return overstyring
-    }
-
-    private fun nyArbeidsgiverperiodeEtterEndring(other: Vedtaksperiode): Boolean {
-        if (Toggle.EgenFagsystemIdPerVedtaksperiode.enabled) return false
-        if (this.behandlinger.erUtbetaltPåForskjelligeUtbetalinger(other.behandlinger)) return false
-        val arbeidsgiverperiodeOther = other.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode()
-        val arbeidsgiverperiodeThis = this.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode()
-        // ingen overlapp i arbeidsgiverperiodene => ny arbeidsgiverperiode
-        return arbeidsgiverperiodeOther != null && arbeidsgiverperiodeThis != null && !arbeidsgiverperiodeOther.overlapperMed(arbeidsgiverperiodeThis)
     }
 
     internal fun håndter(anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg) {
@@ -2223,7 +2206,6 @@ internal class Vedtaksperiode private constructor(
         // Derfor bruker vi tallet 18 fremfor kanskje det forventende 16…
         internal const val MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD = 18L
         internal fun List<Vedtaksperiode>.egenmeldingsperioder(): List<Periode> = flatMap { it.behandlinger.egenmeldingsdager() }
-        internal fun List<Vedtaksperiode>.arbeidsgiverperioder() = map { it.behandlinger.arbeidsgiverperiode() }
         internal fun List<Vedtaksperiode>.refusjonstidslinje() =
             fold(Beløpstidslinje()) { beløpstidslinje, vedtaksperiode ->
                 beløpstidslinje + vedtaksperiode.refusjonstidslinje

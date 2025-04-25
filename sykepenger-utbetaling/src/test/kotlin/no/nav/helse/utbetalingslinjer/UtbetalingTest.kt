@@ -437,7 +437,6 @@ internal class UtbetalingTest {
             ORGNUMMER,
             tidslinje,
             sisteDato.somPeriode(),
-            listOf(Utbetalingsak(1.januar, listOf(sisteDato.somPeriode()))),
             aktivitetslogg,
             LocalDate.MAX,
             100,
@@ -458,8 +457,7 @@ internal class UtbetalingTest {
             UNG_PERSON_FNR_2018,
             ORGNUMMER,
             tidslinje,
-            sisteDato.somPeriode(),
-            listOf(Utbetalingsak(1.januar, listOf(sisteDato.somPeriode()))),
+            tidslinje.periode().start til sisteDato,
             aktivitetslogg,
             LocalDate.MAX,
             100,
@@ -767,16 +765,15 @@ internal class UtbetalingTest {
         )
 
     private fun Utbetalingstidslinje.betale(sykepengegrunnlag: Inntekt = 1200.daglig) = beregnUtbetalinger(this, sykepengegrunnlag)
-    private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje, sykepengegrunnlag: Inntekt = 1200.daglig, ) = Utbetalingstidslinje.betale(sykepengegrunnlag, listOf(tidslinje)).single()
+    private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje, sykepengegrunnlag: Inntekt = 1200.daglig) = Utbetalingstidslinje.betale(sykepengegrunnlag, listOf(tidslinje)).single()
 
     private fun opprettGodkjentUtbetaling(
         tidslinje: Utbetalingstidslinje,
         periode: Periode = tidslinje.periode(),
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         orgnummer: String = ORGNUMMER,
-        utbetalingsaker: List<Utbetalingsak> = listOf(Utbetalingsak(tidslinje.periode().start, listOf(periode))),
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
-    ) = opprettUbetaltUtbetaling(tidslinje, null, periode, fødselsnummer, orgnummer, utbetalingsaker, aktivitetslogg)
+    ) = opprettUbetaltUtbetaling(tidslinje, null, periode, fødselsnummer, orgnummer, aktivitetslogg)
         .also { godkjenn(it) }
 
     private fun opprettUbetaltUtbetaling(
@@ -785,7 +782,6 @@ internal class UtbetalingTest {
         periode: Periode = tidslinje.periode(),
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         orgnummer: String = ORGNUMMER,
-        utbetalingsaker: List<Utbetalingsak> = listOf(Utbetalingsak(tidslinje.periode().start, listOf(periode))),
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
     ) = Utbetaling.lagUtbetaling(
         tidligere?.let { listOf(tidligere) } ?: emptyList(),
@@ -793,7 +789,6 @@ internal class UtbetalingTest {
         orgnummer,
         tidslinje,
         periode,
-        utbetalingsaker,
         aktivitetslogg,
         LocalDate.MAX,
         100,
@@ -806,9 +801,8 @@ internal class UtbetalingTest {
         periode: Periode = tidslinje.periode(),
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         orgnummer: String = ORGNUMMER,
-        utbetalingsaker: List<Utbetalingsak> = listOf(Utbetalingsak(tidslinje.periode().start, listOf(periode))),
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
-    ) = opprettUbetaltUtbetaling(tidslinje, tidligere, periode, fødselsnummer, orgnummer, utbetalingsaker, aktivitetslogg).also { utbetaling ->
+    ) = opprettUbetaltUtbetaling(tidslinje, tidligere, periode, fødselsnummer, orgnummer, aktivitetslogg).also { utbetaling ->
         godkjenn(utbetaling)
         listOf(utbetaling.inspektør.arbeidsgiverOppdrag, utbetaling.inspektør.personOppdrag)
             .filter { it.harUtbetalinger() }
