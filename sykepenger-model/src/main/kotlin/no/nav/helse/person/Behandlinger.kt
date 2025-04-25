@@ -858,7 +858,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             beregning: BeregnetPeriode
         ) {
             val strategi = Arbeidsgiver::lagUtbetaling
-            // TODO: bør sende med beregnet AGP slik at utbetalingskoden vet hvilket oppdrag som skal bygges videre på
             return lagUtbetaling(
                 vedtaksperiodeSomLagerUtbetaling,
                 arbeidsgiver,
