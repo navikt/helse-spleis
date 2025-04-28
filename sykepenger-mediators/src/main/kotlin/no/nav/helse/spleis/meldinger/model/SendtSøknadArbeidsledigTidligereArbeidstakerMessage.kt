@@ -6,12 +6,16 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.Personidentifikator
-import no.nav.helse.person.Arbeidsledigtype
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
 
-internal class SendtSøknadArbeidsledigMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, private val builder: SendtSøknadBuilder = SendtSøknadBuilder()) : SøknadMessage(packet, builder, Arbeidsledigtype) {
+internal class SendtSøknadArbeidsledigTidligereArbeidstakerMessage(
+    packet: JsonMessage,
+    orgnummer: String,
+    override val meldingsporing: Meldingsporing,
+    private val builder: SendtSøknadBuilder = SendtSøknadBuilder()
+) : SøknadMessage(packet, builder, orgnummer) {
     override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: MessageContext) {
         builder.sendt(packet["sendtNav"].asLocalDateTime())
         builder.arbeidsledigsøknad()

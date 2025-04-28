@@ -36,6 +36,7 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSGIV
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRTIDSLINJE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSGIVER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSLEDIG
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_FRILANS
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_NAV
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_SELVSTENDIG
@@ -81,6 +82,7 @@ import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigTidligereArbeidstakerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
@@ -151,6 +153,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
         is SendtSøknadFrilansMessage -> SENDT_SØKNAD_FRILANS
         is SendtSøknadSelvstendigMessage -> SENDT_SØKNAD_SELVSTENDIG
+        is SendtSøknadArbeidsledigTidligereArbeidstakerMessage -> SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER
         is SendtSøknadArbeidsledigMessage -> SENDT_SØKNAD_ARBEIDSLEDIG
         is NavNoSelvbestemtInntektsmeldingMessage -> NAV_NO_SELVBESTEMT_INNTEKTSMELDING
         is NavNoKorrigertInntektsmeldingMessage -> NAV_NO_KORRIGERT_INNTEKTSMELDING
@@ -217,6 +220,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         SENDT_SØKNAD_FRILANS,
         SENDT_SØKNAD_SELVSTENDIG,
         SENDT_SØKNAD_ARBEIDSLEDIG,
+        SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER,
         INNTEKTSMELDING,
         NAV_NO_SELVBESTEMT_INNTEKTSMELDING,
         NAV_NO_KORRIGERT_INNTEKTSMELDING,

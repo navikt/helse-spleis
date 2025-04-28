@@ -88,6 +88,7 @@ import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigTidligereArbeidstakerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
@@ -256,6 +257,7 @@ internal class MessageMediator(
         is NySøknadMessage,
         is SendtSøknadArbeidsgiverMessage,
         is SendtSøknadArbeidsledigMessage,
+        is SendtSøknadArbeidsledigTidligereArbeidstakerMessage,
         is SendtSøknadFrilansMessage,
         is SendtSøknadNavMessage,
         is SendtSøknadSelvstendigMessage -> true

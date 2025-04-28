@@ -74,6 +74,7 @@ import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigTidligereArbeidstakerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
@@ -233,6 +234,19 @@ internal class HendelseMediator(
     override fun behandle(
         personopplysninger: Personopplysninger,
         message: SendtSøknadArbeidsledigMessage,
+        søknad: Søknad,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
+    ) {
+        opprettPersonOgHåndter(personopplysninger, message, context, historiskeFolkeregisteridenter) { person, aktivitetslogg ->
+            HendelseProbe.onSøknadFrilans()
+            person.håndter(søknad, aktivitetslogg)
+        }
+    }
+
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: SendtSøknadArbeidsledigTidligereArbeidstakerMessage,
         søknad: Søknad,
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
@@ -682,6 +696,14 @@ internal interface IHendelseMediator {
     fun behandle(
         personopplysninger: Personopplysninger,
         message: SendtSøknadArbeidsledigMessage,
+        søknad: Søknad,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
+    )
+
+    fun behandle(
+        personopplysninger: Personopplysninger,
+        message: SendtSøknadArbeidsledigTidligereArbeidstakerMessage,
         søknad: Søknad,
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>

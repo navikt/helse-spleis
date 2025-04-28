@@ -115,6 +115,7 @@ private val HendelseMessage.kontekstnavn
 
         is SendtSøknadArbeidsgiverMessage,
         is SendtSøknadArbeidsledigMessage,
+        is SendtSøknadArbeidsledigTidligereArbeidstakerMessage,
         is SendtSøknadFrilansMessage,
         is SendtSøknadNavMessage,
         is SendtSøknadSelvstendigMessage -> "Søknad"

@@ -8,6 +8,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigTidligereArbeidstakerMessage
+import no.nav.helse.spleis.meldinger.model.SøknadMessage
 
 internal class SendtArbeidsledigSøknaderRiver(
     rapidsConnection: RapidsConnection,
@@ -24,10 +26,14 @@ internal class SendtArbeidsledigSøknaderRiver(
         message.interestedIn("tidligereArbeidsgiverOrgnummer", "sporsmal", "arbeidGjenopptatt", "friskmeldt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys", "fravar", "papirsykmeldinger", "inntektFraNyttArbeidsforhold")
     }
 
-    override fun createMessage(packet: JsonMessage) = SendtSøknadArbeidsledigMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fnr"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage): SøknadMessage {
+        val meldingsporing = Meldingsporing(
+            id = packet.meldingsreferanseId(),
+            fødselsnummer = packet["fnr"].asText()
+        )
+        val tidligereArbeidsgiver = packet["tidligereArbeidsgiverOrgnummer"]
+            .takeIf(JsonNode::isTextual)
+            ?.asText() ?: return SendtSøknadArbeidsledigMessage(packet, meldingsporing)
+        return SendtSøknadArbeidsledigTidligereArbeidstakerMessage(packet, tidligereArbeidsgiver, meldingsporing)
+    }
 }

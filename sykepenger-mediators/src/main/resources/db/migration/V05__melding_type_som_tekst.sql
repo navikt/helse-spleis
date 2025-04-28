@@ -1,0 +1,1 @@
+alter table melding alter column melding_type type text;
