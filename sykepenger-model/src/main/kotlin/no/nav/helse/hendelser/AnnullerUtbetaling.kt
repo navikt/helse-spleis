@@ -13,7 +13,7 @@ class AnnullerUtbetaling(
     saksbehandlerEpost: String,
     internal val opprettet: LocalDateTime
 ) : Hendelse, AnnullerUtbetalingHendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidstaker(
+    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = HendelseMetadata(

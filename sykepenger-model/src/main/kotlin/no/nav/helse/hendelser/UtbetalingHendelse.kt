@@ -15,7 +15,7 @@ class UtbetalingHendelse(
     override val avstemmingsnøkkel: Long,
     override val overføringstidspunkt: LocalDateTime
 ) : Hendelse, UtbetalingmodulHendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidstaker(
+    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
         organisasjonsnummer = orgnummer
     )
     override val metadata = LocalDateTime.now().let { nå ->

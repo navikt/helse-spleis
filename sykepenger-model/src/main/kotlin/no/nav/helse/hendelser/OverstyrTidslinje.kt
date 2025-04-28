@@ -43,7 +43,7 @@ class OverstyrTidslinje(
     private val dager: List<ManuellOverskrivingDag>,
     opprettet: LocalDateTime,
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidstaker(
+    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = HendelseMetadata(

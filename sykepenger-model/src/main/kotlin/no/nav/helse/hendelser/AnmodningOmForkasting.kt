@@ -10,7 +10,7 @@ class AnmodningOmForkasting(
     private val vedtaksperiodeId: UUID,
     internal val force: Boolean
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidstaker(
+    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = LocalDateTime.now().let { nå ->

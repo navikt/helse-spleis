@@ -38,7 +38,7 @@ class Inntektsmelding(
     mottatt: LocalDateTime
 ) : Hendelse {
 
-    override val behandlingsporing = Behandlingsporing.Arbeidstaker(
+    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
         organisasjonsnummer = orgnummer
     )
     override val metadata = HendelseMetadata(

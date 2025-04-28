@@ -52,7 +52,7 @@ import no.nav.helse.økonomi.Prosentdel
 
 class Søknad(
     meldingsreferanseId: MeldingsreferanseId,
-    override val behandlingsporing: Behandlingsporing.Arbeidstaker,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     private val perioder: List<Søknadsperiode>,
     private val andreInntektskilder: Boolean,
     private val ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean,
@@ -91,7 +91,7 @@ class Søknad(
         inntekterFraNyeArbeidsforhold: Boolean
     ) : this(
         meldingsreferanseId,
-        Behandlingsporing.Arbeidstaker(
+        Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
             organisasjonsnummer = orgnummer
         ),
         perioder,

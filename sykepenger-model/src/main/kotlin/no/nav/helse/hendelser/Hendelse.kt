@@ -34,7 +34,10 @@ sealed interface Hendelse {
 
 sealed interface Behandlingsporing {
     data object IngenArbeidsgiver : Behandlingsporing
-    data class Arbeidstaker(val organisasjonsnummer: String) : Behandlingsporing
+
+    sealed interface Yrkesaktivitet : Behandlingsporing {
+        data class Arbeidstaker(val organisasjonsnummer: String) : Yrkesaktivitet
+    }
 }
 
 // en value-class for uuid-er som representerer @id til en melding fra kafka

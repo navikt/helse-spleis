@@ -15,7 +15,7 @@ class Utbetalingsgodkjenning(
     godkjenttidspunkt: LocalDateTime,
     automatiskBehandling: Boolean
 ) : Behandlingsavgjørelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidstaker(
+    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = HendelseMetadata(

@@ -14,7 +14,7 @@ class Utbetalingpåminnelse(
     private val endringstidspunkt: LocalDateTime,
     påminnelsestidspunkt: LocalDateTime
 ) : Hendelse, UtbetalingpåminnelseHendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidstaker(
+    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = HendelseMetadata(
