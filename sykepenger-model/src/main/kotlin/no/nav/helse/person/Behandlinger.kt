@@ -925,7 +925,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             gjenståendeSykedager: Int,
             type: Utbetalingtype
         ): Utbetaling {
-            val vedtaksperiodekladd = UtbetalingkladdBuilder(periode, utbetalingstidslinje.subset(periode), organisasjonsnummer, fødselsnummer).build()
+            val vedtaksperiodekladd = UtbetalingkladdBuilder(utbetalingstidslinje, organisasjonsnummer, fødselsnummer).build()
 
             val forrigeUtbetalte = arbeidsgiver.utbetalingerForVedtaksperiode(periode)
             val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull()
@@ -933,26 +933,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             check(annulleringer.isEmpty()) { "det foreslås å annullere andre utbetalinger!" }
 
-            val utbetalingen = korrelerendeUtbetaling?.nyUtbetaling(
+            val utbetalingen = Utbetaling.lagUtbetaling(
+                vedtaksperiodekladd = vedtaksperiodekladd,
+                utbetalingstidslinje = utbetalingstidslinje,
+                periode = periode,
                 aktivitetslogg = aktivitetslogg,
-                type = type,
-                vedtaksperiode = periode,
-                kladd = vedtaksperiodekladd,
                 maksdato = maksdato,
                 forbrukteSykedager = forbrukteSykedager,
                 gjenståendeSykedager = gjenståendeSykedager,
-                annulleringer = emptyList()
-            ) ?: Utbetaling(
-                korrelerendeUtbetaling = null,
-                periode = vedtaksperiodekladd.utbetalingsperiode,
-                utbetalingstidslinje = utbetalingstidslinje.subset(vedtaksperiodekladd.utbetalingsperiode),
-                arbeidsgiverOppdrag = vedtaksperiodekladd.arbeidsgiveroppdrag,
-                personOppdrag = vedtaksperiodekladd.personoppdrag,
                 type = type,
-                maksdato = maksdato,
-                forbrukteSykedager = forbrukteSykedager,
-                gjenståendeSykedager = gjenståendeSykedager,
-                annulleringer = emptyList()
+                korrelerendeUtbetaling = korrelerendeUtbetaling
             )
             listOf(utbetalingen.arbeidsgiverOppdrag, utbetalingen.personOppdrag)
                 .filter { oppdrag -> oppdrag.nettoBeløp < 0 }

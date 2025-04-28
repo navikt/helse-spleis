@@ -279,6 +279,7 @@ class Utbetaling private constructor(
         type: Utbetalingtype,
         vedtaksperiode: Periode,
         kladd: Utbetalingkladd,
+        utbetalingstidslinje: Utbetalingstidslinje,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
@@ -287,13 +288,13 @@ class Utbetaling private constructor(
         val nyttArbeidsgiveroppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, this.arbeidsgiverOppdrag, kladd.arbeidsgiveroppdrag)
         val nyttPersonoppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, this.personOppdrag, kladd.personoppdrag)
 
-        val nyereUtbetalingstidslinje = this.utbetalingstidslinje.subset(kladd.utbetalingsperiode)
+        val nyereUtbetalingstidslinje = this.utbetalingstidslinje.subset(vedtaksperiode)
         val tidligereUtbetalingstidslinje = nyereUtbetalingstidslinje.fremTilOgMed(vedtaksperiode.start.forrigeDag)
-        val nyUtbetalingstidslinje = tidligereUtbetalingstidslinje + kladd.utbetalingstidslinje + nyereUtbetalingstidslinje.fraOgMed(vedtaksperiode.endInclusive.nesteDag)
+        val nyUtbetalingstidslinje = tidligereUtbetalingstidslinje + utbetalingstidslinje
 
         return Utbetaling(
             korrelerendeUtbetaling = this,
-            periode = kladd.utbetalingsperiode,
+            periode = periode,
             utbetalingstidslinje = nyUtbetalingstidslinje,
             arbeidsgiverOppdrag = nyttArbeidsgiveroppdrag,
             personOppdrag = nyttPersonoppdrag,
@@ -343,6 +344,44 @@ class Utbetaling private constructor(
                 .sortedBy { it.periode.endInclusive }
                 .filterNot(Utbetaling::erAnnullering)
                 .toList()
+
+        fun lagUtbetaling(
+            vedtaksperiodekladd: Utbetalingkladd,
+            utbetalingstidslinje: Utbetalingstidslinje,
+            periode: Periode,
+            aktivitetslogg: IAktivitetslogg,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int,
+            gjenståendeSykedager: Int,
+            type: Utbetalingtype,
+            korrelerendeUtbetaling: Utbetaling?
+        ): Utbetaling {
+            if (korrelerendeUtbetaling != null) {
+                return korrelerendeUtbetaling.nyUtbetaling(
+                    aktivitetslogg = aktivitetslogg,
+                    type = type,
+                    vedtaksperiode = periode,
+                    kladd = vedtaksperiodekladd,
+                    utbetalingstidslinje = utbetalingstidslinje,
+                    maksdato = maksdato,
+                    forbrukteSykedager = forbrukteSykedager,
+                    gjenståendeSykedager = gjenståendeSykedager,
+                    annulleringer = emptyList()
+                )
+            }
+            return Utbetaling(
+                korrelerendeUtbetaling = null,
+                periode = periode,
+                utbetalingstidslinje = utbetalingstidslinje,
+                arbeidsgiverOppdrag = vedtaksperiodekladd.arbeidsgiveroppdrag,
+                personOppdrag = vedtaksperiodekladd.personoppdrag,
+                type = type,
+                maksdato = maksdato,
+                forbrukteSykedager = forbrukteSykedager,
+                gjenståendeSykedager = gjenståendeSykedager,
+                annulleringer = emptyList()
+            )
+        }
 
         fun List<Utbetaling>.tillaterOpprettelseAvUtbetaling(other: Utbetaling): Boolean {
             if (other.erAnnullering()) return true // må godta annulleringer ettersom de vil rydde opp i nettopp overlappende utbetalinger

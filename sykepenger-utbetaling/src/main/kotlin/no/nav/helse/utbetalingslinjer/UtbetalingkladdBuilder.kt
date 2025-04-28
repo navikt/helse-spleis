@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -14,8 +13,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 class UtbetalingkladdBuilder(
-    private val periode: Periode,
-    private val tidslinje: Utbetalingstidslinje,
+    tidslinje: Utbetalingstidslinje,
     mottakerRefusjon: String,
     mottakerBruker: String
 ) {
@@ -61,5 +59,5 @@ class UtbetalingkladdBuilder(
         }
     }
 
-    fun build() = Utbetalingkladd(periode, arbeidsgiveroppdragBuilder.build(), personoppdragBuilder.build(), tidslinje)
+    fun build() = Utbetalingkladd(arbeidsgiveroppdragBuilder.build(), personoppdragBuilder.build())
 }

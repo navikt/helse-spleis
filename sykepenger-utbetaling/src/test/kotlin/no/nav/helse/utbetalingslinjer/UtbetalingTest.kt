@@ -784,7 +784,7 @@ internal class UtbetalingTest {
         orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
     ) = Utbetaling.lagUtbetaling(
-        tidligere?.let { listOf(tidligere) } ?: emptyList(),
+        tidligere,
         fødselsnummer,
         orgnummer,
         tidslinje,
@@ -792,7 +792,8 @@ internal class UtbetalingTest {
         aktivitetslogg,
         LocalDate.MAX,
         100,
-        148
+        148,
+            tidligere
     ).also { it.opprett(aktivitetslogg) }
 
     private fun opprettUtbetaling(
