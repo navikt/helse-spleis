@@ -17,6 +17,7 @@ import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.gjenopprettFraJSONtekst
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -41,7 +42,8 @@ import org.junit.jupiter.api.Tag
 internal abstract class AbstractEndToEndTest {
     internal companion object {
         val a1Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = a1
+            organisasjonsnummer = a1,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1)
         )
 
         private fun overgangFraInfotrygdPerson(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", regelverkslogg)

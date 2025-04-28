@@ -22,7 +22,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `Sender § 8-15 ved deaktivering av ghostarbeidsforhold`() {
-        val a2 = "ag2"
+        val a2 = "a2"
 
         tilGodkjenningMedGhost(a2 = a2)
         sendOverstyringArbeidsforhold(
@@ -39,7 +39,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
             .map { it["subsumsjon"] }
             .first { it["paragraf"].asText() == "8-15" }
 
-        assertEquals("ag2", subsumsjon["input"]["organisasjonsnummer"].asText())
+        assertEquals("a2", subsumsjon["input"]["organisasjonsnummer"].asText())
         assertEquals(1.januar, subsumsjon["input"]["skjæringstidspunkt"].asLocalDate())
         val actualInntekterSisteTreMåneder = subsumsjon["input"]["inntekterSisteTreMåneder"].toList()
 
@@ -59,7 +59,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `Sender § 8-15 ved reaktivering av ghostarbeidsforhold`() {
-        val a2 = "ag2"
+        val a2 = "a2"
 
         tilGodkjenningMedGhost(a2 = a2)
         sendOverstyringArbeidsforhold(
@@ -71,8 +71,8 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
             )
         )
         )
-        sendYtelser(0, orgnummer = "ag1")
-        sendSimulering(0, orgnummer = "ag1", status = OK)
+        sendYtelser(0, orgnummer = "a1")
+        sendSimulering(0, orgnummer = "a1", status = OK)
         sendOverstyringArbeidsforhold(
             1.januar, listOf(
             TestMessageFactory.ArbeidsforholdOverstyrt(
@@ -87,7 +87,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
             .map { it["subsumsjon"] }
             .last { it["paragraf"].asText() == "8-15" }
 
-        assertEquals("ag2", subsumsjon["input"]["organisasjonsnummer"].asText())
+        assertEquals("a2", subsumsjon["input"]["organisasjonsnummer"].asText())
         assertEquals(1.januar, subsumsjon["input"]["skjæringstidspunkt"].asLocalDate())
         val actualInntekterSisteTreMåneder = subsumsjon["input"]["inntekterSisteTreMåneder"].toList()
 
@@ -125,7 +125,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `Sender § 8-28 (3) b ved overstyring av ghost-inntekt`() {
-        val a2 = "ag2"
+        val a2 = "a2"
 
         tilGodkjenningMedGhost(a2 = a2)
         sendOverstyrArbeidsgiveropplysninger(
@@ -152,7 +152,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
             .first { it["paragraf"].asText() == "8-28" && it["bokstav"].asText() == "b" }
 
         assertEquals(3, subsumsjon["ledd"].asInt())
-        assertEquals("ag2", subsumsjon["input"]["organisasjonsnummer"].asText())
+        assertEquals("a2", subsumsjon["input"]["organisasjonsnummer"].asText())
         assertEquals(1.januar, subsumsjon["input"]["skjæringstidspunkt"].asLocalDate())
         assertEquals(1.desember(2017), subsumsjon["input"]["startdatoArbeidsforhold"].asLocalDate())
         assertEquals(1.januar, subsumsjon["input"]["overstyrtInntektFraSaksbehandler"]["dato"].asLocalDate())
@@ -166,7 +166,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Sender § 8-28 (3) c ved overstyring av ghost-inntekt`() {
 
-        val a2 = "ag2"
+        val a2 = "a2"
 
         tilGodkjenningMedGhost(a2 = a2)
         sendOverstyrArbeidsgiveropplysninger(
@@ -192,7 +192,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
             .first { it["paragraf"].asText() == "8-28" && it["bokstav"].asText() == "c" }
 
         assertEquals(3, subsumsjon["ledd"].asInt())
-        assertEquals("ag2", subsumsjon["input"]["organisasjonsnummer"].asText())
+        assertEquals("a2", subsumsjon["input"]["organisasjonsnummer"].asText())
         assertEquals(1.januar, subsumsjon["input"]["skjæringstidspunkt"].asLocalDate())
         assertEquals(1.januar, subsumsjon["input"]["overstyrtInntektFraSaksbehandler"]["dato"].asLocalDate())
         assertEquals(1100.0, subsumsjon["input"]["overstyrtInntektFraSaksbehandler"]["beløp"].asDouble())
@@ -206,7 +206,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Sender § 8-28 (5) ved overstyring av ghost-inntekt`() {
 
-        val a2 = "ag2"
+        val a2 = "a2"
 
         tilGodkjenningMedGhost(a2 = a2)
         sendOverstyrArbeidsgiveropplysninger(
@@ -233,7 +233,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
             .first { it["paragraf"].asText() == "8-28" && it["ledd"].asText() == "5" }
 
         assertNull(subsumsjon["bokstav"])
-        assertEquals("ag2", subsumsjon["input"]["organisasjonsnummer"].asText())
+        assertEquals("a2", subsumsjon["input"]["organisasjonsnummer"].asText())
         assertEquals(1.januar, subsumsjon["input"]["skjæringstidspunkt"].asLocalDate())
         assertEquals(1.januar, subsumsjon["input"]["overstyrtInntektFraSaksbehandler"]["dato"].asLocalDate())
         assertEquals(1100.0, subsumsjon["input"]["overstyrtInntektFraSaksbehandler"]["beløp"].asDouble())
@@ -243,8 +243,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         assertEquals(1100.0, subsumsjon["output"]["beregnetGrunnlagForSykepengegrunnlagPrMåned"].asDouble())
     }
 
-
-    private fun tilGodkjenningMedGhost(a1: String = "ag1", a2: String = "ag2", fom: LocalDate = 1.januar, tom: LocalDate = 31.januar) {
+    private fun tilGodkjenningMedGhost(a1: String = "a1", a2: String = "a2", fom: LocalDate = 1.januar, tom: LocalDate = 31.januar) {
         sendNySøknad(SoknadsperiodeDTO(fom = fom, tom = tom, sykmeldingsgrad = 100), orgnummer = a1)
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = fom, tom = tom, sykmeldingsgrad = 100)),

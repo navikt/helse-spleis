@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.hendelser.AvbruttSøknad
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.til
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -16,7 +17,9 @@ internal class AvbruttSøknadMessage(packet: JsonMessage, override val meldingsp
     private val avbruttSøknad
         get() = AvbruttSøknad(
             meldingsreferanseId = meldingsporing.id,
-            orgnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                organisasjonsnummer = organisasjonsnummer
+            ),
             periode = periode
         )
 

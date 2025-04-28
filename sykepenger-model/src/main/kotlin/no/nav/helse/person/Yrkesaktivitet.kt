@@ -5,21 +5,13 @@ import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 
-const val Frilanstype = "FRILANS"
-const val Selvstendigtype = "SELVSTENDIG"
-const val Arbeidsledigtype = "ARBEIDSLEDIG"
-
 internal sealed interface Yrkesaktivitet {
     companion object {
-        fun String.tilYrkesaktivitet() = when (this) {
-            Selvstendigtype -> Selvstendig
-            Frilanstype -> Frilans
-            Arbeidsledigtype -> Arbeidsledig
-            else -> Arbeidstaker(this)
-        }
-
         fun Behandlingsporing.Yrkesaktivitet.tilYrkesaktivitet() = when (this) {
-            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> organisasjonsnummer.tilYrkesaktivitet()
+            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> Arbeidstaker(organisasjonsnummer)
+            is Behandlingsporing.Yrkesaktivitet.Selvstendig -> Selvstendig
+            is Behandlingsporing.Yrkesaktivitet.Frilans -> Frilans
+            is Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> Arbeidsledig
         }
     }
 
@@ -43,7 +35,7 @@ internal sealed interface Yrkesaktivitet {
             return true
         }
 
-        override fun identifikator() = Frilanstype
+        override fun identifikator() = "FRILANS"
         override fun toString() = identifikator()
     }
 
@@ -53,7 +45,7 @@ internal sealed interface Yrkesaktivitet {
             return true
         }
 
-        override fun identifikator() = Selvstendigtype
+        override fun identifikator() = "SELVSTENDIG"
         override fun toString() = identifikator()
     }
 
@@ -67,7 +59,7 @@ internal sealed interface Yrkesaktivitet {
             aktivitetslogg.info("Lagrer _ikke_ sykmeldingsperiode ${sykmelding.periode()} ettersom det er en sykmelding som arbeidsledig.")
         }
 
-        override fun identifikator() = Arbeidsledigtype
+        override fun identifikator() = "ARBEIDSLEDIG"
         override fun toString() = identifikator()
     }
 }

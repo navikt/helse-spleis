@@ -37,6 +37,9 @@ sealed interface Behandlingsporing {
 
     sealed interface Yrkesaktivitet : Behandlingsporing {
         data class Arbeidstaker(val organisasjonsnummer: String) : Yrkesaktivitet
+        data object Selvstendig : Yrkesaktivitet
+        data object Frilans : Yrkesaktivitet
+        data object Arbeidsledig : Yrkesaktivitet
     }
 }
 

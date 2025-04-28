@@ -13,8 +13,8 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `overstyring av arbeidsforhold fører til tilstandsendring`() {
-        val a1 = "ag1"
-        val a2 = "ag2"
+        val a1 = "a1"
+        val a2 = "a2"
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a1)
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),

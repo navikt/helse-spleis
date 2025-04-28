@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
@@ -18,7 +19,8 @@ import org.junit.jupiter.api.Test
 internal class SykmeldingsperioderTest {
 
     private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-        organisasjonsnummer = "ORGNUMMER"
+        organisasjonsnummer = "ORGNUMMER",
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER")
     )
 
     private fun Sykmeldingsperioder.lagre(periode: Periode) =

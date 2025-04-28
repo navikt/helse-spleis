@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Infotrygdendring
@@ -51,7 +52,6 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.Arbeidsledigtype
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -104,7 +104,7 @@ internal fun AbstractEndToEndTest.håndterAvbrytSøknad(
     AvbruttSøknad(
         periode,
         MeldingsreferanseId(meldingsreferanseId),
-        orgnummer
+        Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer)
     ).håndter(Person::håndter)
 }
 
@@ -116,7 +116,7 @@ internal fun AbstractEndToEndTest.håndterAvbrytArbeidsledigSøknad(
     AvbruttSøknad(
         periode,
         MeldingsreferanseId(meldingsreferanseId),
-        Arbeidsledigtype
+        Behandlingsporing.Yrkesaktivitet.Arbeidsledig
     ).håndter(Person::håndter)
 }
 

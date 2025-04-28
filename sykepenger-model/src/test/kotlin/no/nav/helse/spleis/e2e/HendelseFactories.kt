@@ -13,6 +13,7 @@ import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Foreldrepenger
@@ -107,7 +108,7 @@ internal fun AbstractEndToEndTest.sykmelding(
     sykmeldingSkrevet: LocalDateTime? = null,
     mottatt: LocalDateTime? = null,
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
-) = ArbeidsgiverHendelsefabrikk(orgnummer).lagSykmelding(
+) = ArbeidsgiverHendelsefabrikk(orgnummer, behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer)).lagSykmelding(
     sykeperioder = sykeperioder,
     id = id
 )
@@ -127,7 +128,7 @@ internal fun AbstractEndToEndTest.søknad(
     permittert: Boolean = false,
     egenmeldinger: List<Periode> = emptyList(),
     inntekterFraNyeArbeidsforhold: Boolean = false
-) = ArbeidsgiverHendelsefabrikk(orgnummer).lagSøknad(
+) = ArbeidsgiverHendelsefabrikk(orgnummer, behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer)).lagSøknad(
     perioder = perioder,
     andreInntektskilder = andreInntektskilder,
     sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
@@ -156,7 +157,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     mottatt: LocalDateTime? = null
 ): Inntektsmelding {
     val inntektsmeldinggenerator = {
-        ArbeidsgiverHendelsefabrikk(orgnummer).lagInntektsmelding(
+        ArbeidsgiverHendelsefabrikk(orgnummer, behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer)).lagInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,
             førsteFraværsdag = førsteFraværsdag,

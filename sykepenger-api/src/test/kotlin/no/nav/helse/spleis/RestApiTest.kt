@@ -7,15 +7,16 @@ import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.sql_dsl.single
 import com.github.navikt.tbd_libs.sql_dsl.transaction
 import com.github.navikt.tbd_libs.test_support.TestDataSource
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
@@ -97,7 +98,7 @@ internal class RestApiTest {
         val sykeperioder = listOf(Sykmeldingsperiode(fom, tom))
         val sykmelding = Sykmelding(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            orgnummer = ORGNUMMER,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ORGNUMMER),
             sykeperioder = sykeperioder
         )
         val inntektsmelding = Inntektsmelding(

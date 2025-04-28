@@ -45,11 +45,13 @@ internal class SøknadTest {
 
     private companion object {
         private val ungPersonFnr2018Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = "987654321"
+            organisasjonsnummer = "987654321",
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("987654321")
         )
         private val november2 = 2.november(2000)
         private val fyller18År2NovemberHendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = "987654321"
+            organisasjonsnummer = "987654321",
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("987654321")
         )
     }
 

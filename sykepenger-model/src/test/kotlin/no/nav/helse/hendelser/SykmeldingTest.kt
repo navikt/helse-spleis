@@ -11,7 +11,8 @@ internal class SykmeldingTest {
 
     private companion object {
         val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = "987654321"
+            organisasjonsnummer = "987654321",
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("987654321")
         )
     }
 

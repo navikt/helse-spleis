@@ -274,6 +274,9 @@ internal class DagerFraInntektsmelding(
         private val meldingsreferanseId = hendelse.metadata.meldingsreferanseId
         private val organisasjonsnummer = when (val bs = hendelse.behandlingsporing) {
             is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> bs.organisasjonsnummer
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.Frilans,
+            Behandlingsporing.Yrkesaktivitet.Selvstendig,
             Behandlingsporing.IngenArbeidsgiver -> error("Inntektsmelding uten arbeidsgiver?!?! Det blir litt vel tøysete spør du meg")
         }
         private val perioderViTrorInntektsmeldingenPrøverÅSiNoeOm = listOfNotNull(

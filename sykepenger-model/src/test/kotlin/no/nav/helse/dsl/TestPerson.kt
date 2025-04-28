@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -93,14 +94,21 @@ internal class TestPerson(
     internal fun <INSPEKTØR> inspiser(inspektør: (Person) -> INSPEKTØR) = inspektør(person)
     internal fun view() = person.view()
 
-    internal fun arbeidsgiver(orgnummer: String) =
-        arbeidsgivere.getOrPut(orgnummer) { TestArbeidsgiver(orgnummer) }
+    internal fun arbeidsgiver(orgnummer: String, behandlingsporing: Behandlingsporing.Yrkesaktivitet = orgnummer.tilYrkesaktivitet()) =
+        arbeidsgivere.getOrPut(orgnummer) { TestArbeidsgiver(orgnummer, behandlingsporing) }
 
     internal fun <R> arbeidsgiver(orgnummer: String, block: TestArbeidsgiver.() -> R) =
         arbeidsgiver(orgnummer)(block)
 
     internal operator fun <R> String.invoke(testblokk: TestArbeidsgiver.() -> R) =
         arbeidsgiver(this, testblokk)
+
+    private fun String.tilYrkesaktivitet(): Behandlingsporing.Yrkesaktivitet = when (this) {
+        selvstendig -> Behandlingsporing.Yrkesaktivitet.Selvstendig
+        frilans -> Behandlingsporing.Yrkesaktivitet.Frilans
+        arbeidsledig -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+        else -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(this)
+    }
 
     private fun <T : Hendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit): T {
         forrigeAktivitetslogg = Aktivitetslogg(personlogg)
@@ -146,8 +154,11 @@ internal class TestPerson(
         return person.dto()
     }
 
-    inner class TestArbeidsgiver(internal val orgnummer: String) {
-        private val arbeidsgiverHendelsefabrikk = ArbeidsgiverHendelsefabrikk(orgnummer)
+    inner class TestArbeidsgiver(
+        internal val orgnummer: String,
+        private val behandlingsporing: Behandlingsporing.Yrkesaktivitet
+    ) {
+        private val arbeidsgiverHendelsefabrikk = ArbeidsgiverHendelsefabrikk(orgnummer, behandlingsporing)
 
         internal val inspektør get() = TestArbeidsgiverInspektør(person, orgnummer)
 

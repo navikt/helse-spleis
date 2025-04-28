@@ -587,10 +587,8 @@ class Person private constructor(
     private fun finnEllerOpprettArbeidsgiver(yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
         _arbeidsgivere.finnEllerOpprett(yrkesaktivitet, aktivitetslogg)
 
-    private fun finnArbeidsgiver(behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker, aktivitetslogg: IAktivitetslogg) =
-        behandlingsporing.organisasjonsnummer.tilYrkesaktivitet().let { yrkesaktivitet ->
-            arbeidsgivere.finn(yrkesaktivitet) ?: aktivitetslogg.logiskFeil("Finner ikke arbeidsgiver")
-        }
+    private fun finnArbeidsgiver(behandlingsporing: Behandlingsporing.Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
+        arbeidsgivere.finn(behandlingsporing.tilYrkesaktivitet()) ?: aktivitetslogg.logiskFeil("Finner ikke arbeidsgiver")
 
     private fun MutableList<Arbeidsgiver>.finnEllerOpprett(yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
         finn(yrkesaktivitet) ?: Arbeidsgiver(this@Person, yrkesaktivitet, regelverkslogg).also { arbeidsgiver ->

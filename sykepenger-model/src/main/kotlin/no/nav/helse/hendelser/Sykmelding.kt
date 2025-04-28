@@ -8,12 +8,9 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Sykmelding(
     meldingsreferanseId: MeldingsreferanseId,
-    orgnummer: String,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     sykeperioder: List<Sykmeldingsperiode>
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-        organisasjonsnummer = orgnummer
-    )
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

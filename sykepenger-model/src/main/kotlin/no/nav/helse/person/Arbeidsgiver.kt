@@ -367,7 +367,7 @@ internal class Arbeidsgiver private constructor(
     internal fun organisasjonsnummer() = organisasjonsnummer
     internal fun utbetaling() = utbetalinger.lastOrNull()
     internal fun grunnlagForFeriepenger(): Arbeidsgiverferiepengegrunnlag {
-        val utbetalteDager = fun (oppdrag: Oppdrag): List<UtbetaltDag> {
+        val utbetalteDager = fun(oppdrag: Oppdrag): List<UtbetaltDag> {
             return oppdrag
                 .flatMap { linje ->
                     linje

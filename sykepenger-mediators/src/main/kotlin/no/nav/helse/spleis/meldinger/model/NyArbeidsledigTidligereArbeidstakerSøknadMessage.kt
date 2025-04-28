@@ -13,7 +13,7 @@ internal class NyArbeidsledigTidligereArbeidstakerSøknadMessage(
     override val meldingsporing: Meldingsporing,
     orgnummer: String,
     private val builder: NySøknadBuilder = NySøknadBuilder()
-) : SøknadMessage(packet, builder, orgnummer) {
+) : SøknadMessage(packet, builder.arbeidstaker(orgnummer)) {
     override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: MessageContext) {
         builder.fremtidigSøknad(packet["fremtidig_søknad"].asBoolean())
         mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())

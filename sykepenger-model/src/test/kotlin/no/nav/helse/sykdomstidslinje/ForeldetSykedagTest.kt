@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
@@ -24,7 +25,8 @@ internal class ForeldetSykedagTest {
     companion object {
         private const val ORGNUMMER = "987654321"
         private val hendelefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = ORGNUMMER
+            organisasjonsnummer = ORGNUMMER,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ORGNUMMER)
         )
     }
 

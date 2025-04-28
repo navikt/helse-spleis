@@ -52,7 +52,7 @@ import no.nav.helse.økonomi.Prosentdel
 
 class Søknad(
     meldingsreferanseId: MeldingsreferanseId,
-    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     private val perioder: List<Søknadsperiode>,
     private val andreInntektskilder: Boolean,
     private val ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean,
@@ -70,47 +70,6 @@ class Søknad(
     registrert: LocalDateTime,
     private val inntekterFraNyeArbeidsforhold: Boolean
 ) : Hendelse {
-    constructor(
-        meldingsreferanseId: MeldingsreferanseId,
-        orgnummer: String,
-        perioder: List<Søknadsperiode>,
-        andreInntektskilder: Boolean,
-        ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean,
-        sendtTilNAVEllerArbeidsgiver: LocalDateTime,
-        permittert: Boolean,
-        merknaderFraSykmelding: List<Merknad>,
-        sykmeldingSkrevet: LocalDateTime,
-        opprinneligSendt: LocalDateTime?,
-        utenlandskSykmelding: Boolean,
-        arbeidUtenforNorge: Boolean,
-        sendTilGosys: Boolean,
-        yrkesskade: Boolean,
-        egenmeldinger: List<Periode>,
-        søknadstype: Søknadstype,
-        registrert: LocalDateTime,
-        inntekterFraNyeArbeidsforhold: Boolean
-    ) : this(
-        meldingsreferanseId,
-        Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-            organisasjonsnummer = orgnummer
-        ),
-        perioder,
-        andreInntektskilder,
-        ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
-        sendtTilNAVEllerArbeidsgiver,
-        permittert,
-        merknaderFraSykmelding,
-        sykmeldingSkrevet,
-        opprinneligSendt,
-        utenlandskSykmelding,
-        arbeidUtenforNorge,
-        sendTilGosys,
-        yrkesskade,
-        egenmeldinger,
-        søknadstype,
-        registrert,
-        inntekterFraNyeArbeidsforhold
-    )
 
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,

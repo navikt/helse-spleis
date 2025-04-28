@@ -47,8 +47,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `sender ut forventet event TrengerArbeidsgiveropplysninger ved to arbeidsgivere og gap kun hos den ene`() {
-        val a1 = "ag1"
-        val a2 = "ag2"
+        val a1 = "a1"
+        val a2 = "a2"
         nyeVedtakForJanuar(a1, a2)
         forlengMedFebruar(a1)
 
@@ -203,7 +203,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
     val forventetResultatUtenForespurtInntekt = """
         {
           "@event_name": "trenger_opplysninger_fra_arbeidsgiver",
-          "organisasjonsnummer": "ag2",
+          "organisasjonsnummer": "a2",
           "skjæringstidspunkt": "2018-01-01",
           "sykmeldingsperioder": [
             {
@@ -214,11 +214,11 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           "egenmeldingsperioder": [],
           "førsteFraværsdager": [
             { 
-                "organisasjonsnummer": "ag1",
+                "organisasjonsnummer": "a1",
                 "førsteFraværsdag": "2018-01-01"
             },
             { 
-                "organisasjonsnummer": "ag2",
+                "organisasjonsnummer": "a2",
                 "førsteFraværsdag": "2018-03-01"
             }
           ],

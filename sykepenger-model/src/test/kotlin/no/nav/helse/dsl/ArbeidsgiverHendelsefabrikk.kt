@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
@@ -63,7 +64,10 @@ import no.nav.inntektsmeldingkontrakt.AvsenderSystem
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
 
-internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: String) {
+internal class ArbeidsgiverHendelsefabrikk(
+    private val organisasjonsnummer: String,
+    private val behandlingsporing: Behandlingsporing.Yrkesaktivitet
+) {
 
     private val sykmeldinger = mutableListOf<Sykmelding>()
     private val søknader = mutableListOf<Søknad>()
@@ -75,7 +79,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     ): Sykmelding {
         return Sykmelding(
             meldingsreferanseId = MeldingsreferanseId(id),
-            orgnummer = organisasjonsnummer,
+            behandlingsporing = behandlingsporing,
             sykeperioder = listOf(*sykeperioder)
         ).apply {
             sykmeldinger.add(this)
@@ -111,7 +115,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         }
         return Søknad(
             meldingsreferanseId = MeldingsreferanseId(id),
-            orgnummer = organisasjonsnummer,
+            behandlingsporing = behandlingsporing,
             perioder = listOf(*perioder),
             andreInntektskilder = andreInntektskilder,
             ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
@@ -134,7 +138,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     }
 
     fun lagAvbruttSøknad(sykmeldingsperiode: Periode): AvbruttSøknad =
-        AvbruttSøknad(sykmeldingsperiode, MeldingsreferanseId(UUID.randomUUID()), organisasjonsnummer)
+        AvbruttSøknad(sykmeldingsperiode, MeldingsreferanseId(UUID.randomUUID()), behandlingsporing)
 
     internal fun lagInntektsmelding(
         arbeidsgiverperioder: List<Periode>,

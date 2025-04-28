@@ -8,12 +8,13 @@ import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntekterForBeregning
-import no.nav.helse.hendelser.InntekterForBeregning.*
+import no.nav.helse.hendelser.InntekterForBeregning.Inntektsperiode
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
@@ -71,7 +72,7 @@ internal abstract class AbstractObservableTest {
         orgnummer: String = ORGNUMMER
     ): Sykmelding = Sykmelding(
         meldingsreferanseId = MeldingsreferanseId(id),
-        orgnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         sykeperioder = sykeperioder
     )
 
@@ -85,7 +86,7 @@ internal abstract class AbstractObservableTest {
         egenmeldinger: List<Periode> = emptyList()
     ): Søknad = Søknad(
         meldingsreferanseId = MeldingsreferanseId(id),
-        orgnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         perioder = listOf(*perioder),
         andreInntektskilder = andreInntektskilder,
         ikkeJobbetIDetSisteFraAnnetArbeidsforhold = false,

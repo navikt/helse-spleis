@@ -5,6 +5,7 @@ import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.gjenopprettFraJSONtekst
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -92,7 +93,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     }
 
     private fun håndterGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) {
-        ArbeidsgiverHendelsefabrikk(a1).lagGrunnbeløpsregulering(skjæringstidspunkt).håndter(Person::håndter)
+        ArbeidsgiverHendelsefabrikk(a1, behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1)).lagGrunnbeløpsregulering(skjæringstidspunkt).håndter(Person::håndter)
     }
 
     private fun hackGrunnbeløp(fra: Int, til: Int) {

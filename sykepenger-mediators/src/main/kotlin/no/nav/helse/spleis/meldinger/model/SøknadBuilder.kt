@@ -3,12 +3,13 @@ package no.nav.helse.spleis.meldinger.model
 import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.properties.Delegates
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
 
 internal abstract class SøknadBuilder {
     protected lateinit var sykmeldingSkrevet: LocalDateTime
     protected lateinit var fødselsdato: LocalDate
-    protected lateinit var organisasjonsnummer: String
+    protected lateinit var behandlingsporing: Behandlingsporing.Yrkesaktivitet
     protected var registrert: LocalDateTime = LocalDateTime.now()
     protected lateinit var egenmeldinger: List<Periode>
     private lateinit var fom: LocalDate
@@ -20,7 +21,10 @@ internal abstract class SøknadBuilder {
 
     internal fun sykmeldingSkrevet(sykmeldingSkrevet: LocalDateTime) = apply { this.sykmeldingSkrevet = sykmeldingSkrevet }
     internal fun fødselsdato(fødselsdato: LocalDate) = apply { this.fødselsdato = fødselsdato }
-    internal fun organisasjonsnummer(organisasjonsnummer: String) = apply { this.organisasjonsnummer = organisasjonsnummer }
+    internal fun arbeidstaker(organisasjonsnummer: String) = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer) }
+    internal fun arbeidsledig() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidsledig }
+    internal fun selvstendig() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Selvstendig }
+    internal fun frilans() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Frilans }
     internal fun fom(fom: LocalDate) = apply { this.fom = fom }
     internal fun tom(tom: LocalDate) = apply { this.tom = tom }
     internal fun sendt(tidspunkt: LocalDateTime) = apply { this.innsendt = tidspunkt }

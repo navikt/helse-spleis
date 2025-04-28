@@ -9,7 +9,7 @@ import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
 
 // Understands a JSON message representing a Ny Søknad
-internal class NySøknadMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, private val builder: NySøknadBuilder = NySøknadBuilder()) : SøknadMessage(packet, builder) {
+internal class NySøknadMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, private val builder: NySøknadBuilder = NySøknadBuilder()) : SøknadMessage(packet, builder.arbeidstaker(packet["arbeidsgiver.orgnummer"].asText())) {
 
     override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: MessageContext) {
         builder.fremtidigSøknad(packet["fremtidig_søknad"].asBoolean())

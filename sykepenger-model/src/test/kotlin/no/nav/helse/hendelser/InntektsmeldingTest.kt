@@ -34,7 +34,8 @@ import org.junit.jupiter.api.fail
 internal class InntektsmeldingTest {
 
     private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-        organisasjonsnummer = "88888888"
+        organisasjonsnummer = "88888888",
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("88888888")
     )
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var inntektsmelding: Inntektsmelding

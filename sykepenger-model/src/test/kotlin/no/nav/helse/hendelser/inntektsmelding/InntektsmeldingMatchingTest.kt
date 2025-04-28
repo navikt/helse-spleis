@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
@@ -249,7 +250,7 @@ internal class InntektsmeldingMatchingTest {
     }
 
     private companion object {
-        private val fabrikk = ArbeidsgiverHendelsefabrikk("a1")
+        private val fabrikk = ArbeidsgiverHendelsefabrikk("a1", behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a1"))
         private fun inntektsmelding(
             førsteFraværsdag: LocalDate?,
             vararg arbeidsgiverperiode: Periode

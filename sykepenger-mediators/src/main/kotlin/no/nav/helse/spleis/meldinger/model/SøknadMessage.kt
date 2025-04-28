@@ -13,10 +13,8 @@ import no.nav.helse.spleis.Personopplysninger
 // Understands a JSON message representing a Søknad
 internal sealed class SøknadMessage(
     private val packet: JsonMessage,
-    private val builder: SøknadBuilder,
-    private val organisasjonsnummer: String = packet["arbeidsgiver.orgnummer"].asText()
-) :
-    HendelseMessage(packet) {
+    private val builder: SøknadBuilder
+) : HendelseMessage(packet) {
 
     private val sykmeldingSkrevet = packet["sykmeldingSkrevet"].asLocalDateTime()
 
@@ -35,7 +33,6 @@ internal sealed class SøknadMessage(
     private fun bygg() {
         builder.fødselsdato(packet["fødselsdato"].asLocalDate())
             .sykmeldingSkrevet(sykmeldingSkrevet)
-            .organisasjonsnummer(organisasjonsnummer)
             .fom(packet["fom"].asLocalDate())
             .tom(packet["tom"].asLocalDate())
             .arbeidUtenforNorge(packet["arbeidUtenforNorge"].asBoolean())

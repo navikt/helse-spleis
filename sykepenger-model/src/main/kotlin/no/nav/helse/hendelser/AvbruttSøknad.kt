@@ -6,11 +6,8 @@ import no.nav.helse.person.Sykmeldingsperioder
 class AvbruttSøknad(
     private val periode: Periode,
     meldingsreferanseId: MeldingsreferanseId,
-    orgnummer: String,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-        organisasjonsnummer = orgnummer
-    )
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,
