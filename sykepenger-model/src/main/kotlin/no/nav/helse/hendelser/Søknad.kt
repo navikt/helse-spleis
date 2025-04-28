@@ -52,7 +52,7 @@ import no.nav.helse.økonomi.Prosentdel
 
 class Søknad(
     meldingsreferanseId: MeldingsreferanseId,
-    orgnummer: String,
+    override val behandlingsporing: Behandlingsporing.Arbeidsgiver,
     private val perioder: List<Søknadsperiode>,
     private val andreInntektskilder: Boolean,
     private val ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean,
@@ -70,9 +70,48 @@ class Søknad(
     registrert: LocalDateTime,
     private val inntekterFraNyeArbeidsforhold: Boolean
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
-        organisasjonsnummer = orgnummer
+    constructor(
+        meldingsreferanseId: MeldingsreferanseId,
+        orgnummer: String,
+        perioder: List<Søknadsperiode>,
+        andreInntektskilder: Boolean,
+        ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean,
+        sendtTilNAVEllerArbeidsgiver: LocalDateTime,
+        permittert: Boolean,
+        merknaderFraSykmelding: List<Merknad>,
+        sykmeldingSkrevet: LocalDateTime,
+        opprinneligSendt: LocalDateTime?,
+        utenlandskSykmelding: Boolean,
+        arbeidUtenforNorge: Boolean,
+        sendTilGosys: Boolean,
+        yrkesskade: Boolean,
+        egenmeldinger: List<Periode>,
+        søknadstype: Søknadstype,
+        registrert: LocalDateTime,
+        inntekterFraNyeArbeidsforhold: Boolean
+    ) : this(
+        meldingsreferanseId,
+        Behandlingsporing.Arbeidsgiver(
+            organisasjonsnummer = orgnummer
+        ),
+        perioder,
+        andreInntektskilder,
+        ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
+        sendtTilNAVEllerArbeidsgiver,
+        permittert,
+        merknaderFraSykmelding,
+        sykmeldingSkrevet,
+        opprinneligSendt,
+        utenlandskSykmelding,
+        arbeidUtenforNorge,
+        sendTilGosys,
+        yrkesskade,
+        egenmeldinger,
+        søknadstype,
+        registrert,
+        inntekterFraNyeArbeidsforhold
     )
+
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = SYKMELDT,
