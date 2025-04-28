@@ -402,17 +402,16 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         }
 
         if (påminnelse.når(Flagg("trengerReplay"))) return vedtaksperiode.trengerInntektsmeldingReplay()
-        if (vurderOmInntektsmeldingAldriKommer(vedtaksperiode, påminnelse)) {
+        if (vurderOmInntektsmeldingAldriKommer(påminnelse)) {
             aktivitetslogg.info("Nå henter vi inntekt fra skatt!")
             return vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
         }
         vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
     }
 
-    private fun vurderOmInntektsmeldingAldriKommer(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse): Boolean {
+    private fun vurderOmInntektsmeldingAldriKommer(påminnelse: Påminnelse): Boolean {
         if (påminnelse.når(Flagg("ønskerInntektFraAOrdningen"))) return true
         if (Toggle.InntektsmeldingSomIkkeKommer.disabled) return false
-        if (vedtaksperiode.person.alder.fødselsdato.dayOfMonth !in 15..31) return false
         val ventetMinst3Måneder = påminnelse.når(VentetMinst(Period.ofMonths(3)))
         val ikkeForGammel = !påminnelse.når(Påminnelse.Predikat.VentetFørCutoff)
         return ventetMinst3Måneder && ikkeForGammel

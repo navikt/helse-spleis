@@ -36,12 +36,8 @@ import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
-    private val fødselsdatoSomSkalSlippeGjennom = 30.januar(1990)
-    private val fødselsdatoSomIkkeSkalSlippeGjennom = 12.januar(1990)
-
     @Test
     fun `legger varsel på riktig periode når det er en senere periode som blir påminnet -- helgegap og out of order`() {
-        medFødselsdato(fødselsdatoSomSkalSlippeGjennom)
         val inntektFraSkatt = 10000.månedlig
         a1 {
             håndterSøknad(29.januar til 10.februar)
@@ -72,7 +68,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
     @Test
     fun `legger varsel på riktig periode når det er en senere periode som blir påminnet -- helgegap`() {
-        medFødselsdato(fødselsdatoSomSkalSlippeGjennom)
         val inntektFraSkatt = 10000.månedlig
         a1 {
             håndterSøknad(1.januar til 26.januar)
@@ -103,7 +98,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
     @Test
     fun `event om at vi bruker skatteopplysninger`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
-        medFødselsdato(fødselsdatoSomSkalSlippeGjennom)
         val inntektFraSkatt = 10000.månedlig
         a1 {
             håndterSøknad(januar)
@@ -144,7 +138,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
     @Test
     fun `event om at vi bruker skatteopplysninger med sprø minus`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
-        medFødselsdato(fødselsdatoSomSkalSlippeGjennom)
         val inntektFraSkatt = 10000.månedlig
         val sprøInntektFraSkatt = 30000.månedlig * -1
         a1 {
@@ -185,22 +178,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `lar vedtaksperiode time ut på vanlig måte dersom fødselsnummer som ikke passerer inngangsfilter`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
-        medFødselsdato(fødselsdatoSomIkkeSkalSlippeGjennom)
-        a1 {
-            håndterSøknad(januar)
-            håndterPåminnelse(
-                1.vedtaksperiode,
-                AVVENTER_INNTEKTSMELDING,
-                tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
-                nåtidspunkt = 10.februar(2025).atStartOfDay()
-            )
-            assertIngenBehov(1.vedtaksperiode, Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlagForArbeidsgiver)
-            assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        }
-    }
-
-    @Test
     fun `lager ikke påminnelse om vedtaksperioden har ventet mindre enn tre måneder`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         val nå = LocalDateTime.now()
         val tilstandsendringstidspunkt = nå.minusMonths(3).plusDays(1)
@@ -213,8 +190,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
     @Test
     fun `lager påminnelse om vedtaksperioden har ventet mer enn tre måneder`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
-        medFødselsdato(30.januar(1990))
-
         val nå = 10.februar(2025).atStartOfDay()
         val tilstandsendringstidspunkt = 10.november(2024).atStartOfDay()
         a1 {
