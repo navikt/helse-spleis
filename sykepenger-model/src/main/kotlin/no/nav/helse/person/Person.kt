@@ -239,7 +239,7 @@ class Person private constructor(
         håndterGjenoppta(melding, aktivitetsloggMedPersonkontekst)
     }
 
-    private fun tidligereBehandlinger(behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker, aktivitetslogg: IAktivitetslogg, periode: Periode) {
+    private fun tidligereBehandlinger(behandlingsporing: Behandlingsporing.Yrkesaktivitet, aktivitetslogg: IAktivitetslogg, periode: Periode) {
         val cutoff = periode.start.minusMonths(6)
         val andreBehandledeVedtaksperioder = tidligereBehandlinger.flatMap { it.vedtaksperioderEtter(cutoff) }
         if (andreBehandledeVedtaksperioder.isNotEmpty()) {
@@ -581,8 +581,8 @@ class Person private constructor(
         }
     }
 
-    private fun finnEllerOpprettArbeidsgiver(behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker, aktivitetslogg: IAktivitetslogg) =
-        finnEllerOpprettArbeidsgiver(behandlingsporing.organisasjonsnummer.tilYrkesaktivitet(), aktivitetslogg)
+    private fun finnEllerOpprettArbeidsgiver(behandlingsporing: Behandlingsporing.Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
+        finnEllerOpprettArbeidsgiver(behandlingsporing.tilYrkesaktivitet(), aktivitetslogg)
 
     private fun finnEllerOpprettArbeidsgiver(yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
         _arbeidsgivere.finnEllerOpprett(yrkesaktivitet, aktivitetslogg)

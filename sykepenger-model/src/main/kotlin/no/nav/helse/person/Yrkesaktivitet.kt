@@ -1,20 +1,25 @@
 package no.nav.helse.person
 
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 
-const val Frilans = "FRILANS"
-const val Selvstendig = "SELVSTENDIG"
-const val Arbeidsledig = "ARBEIDSLEDIG"
+const val Frilanstype = "FRILANS"
+const val Selvstendigtype = "SELVSTENDIG"
+const val Arbeidsledigtype = "ARBEIDSLEDIG"
 
 internal sealed interface Yrkesaktivitet {
     companion object {
         fun String.tilYrkesaktivitet() = when (this) {
-            Selvstendig -> Selvstendig()
-            Frilans -> Frilans()
-            Arbeidsledig -> Arbeidsledig()
+            Selvstendigtype -> Selvstendig
+            Frilanstype -> Frilans
+            Arbeidsledigtype -> Arbeidsledig
             else -> Arbeidstaker(this)
+        }
+
+        fun Behandlingsporing.Yrkesaktivitet.tilYrkesaktivitet() = when (this) {
+            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> organisasjonsnummer.tilYrkesaktivitet()
         }
     }
 
@@ -25,61 +30,34 @@ internal sealed interface Yrkesaktivitet {
         sykmeldingsperioder.lagre(sykmelding, aktivitetslogg)
     }
 
-    class Arbeidstaker(private val organisasjonsnummer: String) : Yrkesaktivitet {
+    data class Arbeidstaker(val organisasjonsnummer: String) : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg) = false
-        override fun hashCode(): Int {
-            throw NotImplementedError()
-        }
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (other !is Arbeidstaker) return false
-            return this.organisasjonsnummer == other.organisasjonsnummer
-        }
 
         override fun identifikator() = organisasjonsnummer
         override fun toString() = identifikator()
     }
 
-    class Frilans : Yrkesaktivitet {
+    data object Frilans : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
             return true
         }
 
-        override fun hashCode(): Int {
-            throw NotImplementedError()
-        }
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            return other is Frilans
-        }
-
-        override fun identifikator() = Frilans
+        override fun identifikator() = Frilanstype
         override fun toString() = identifikator()
     }
 
-    class Selvstendig : Yrkesaktivitet {
+    data object Selvstendig : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
             return true
         }
 
-        override fun hashCode(): Int {
-            throw NotImplementedError()
-        }
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            return other is Selvstendig
-        }
-
-        override fun identifikator() = Selvstendig
+        override fun identifikator() = Selvstendigtype
         override fun toString() = identifikator()
     }
 
-    class Arbeidsledig : Yrkesaktivitet {
+    data object Arbeidsledig : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
             return true
@@ -89,16 +67,15 @@ internal sealed interface Yrkesaktivitet {
             aktivitetslogg.info("Lagrer _ikke_ sykmeldingsperiode ${sykmelding.periode()} ettersom det er en sykmelding som arbeidsledig.")
         }
 
-        override fun hashCode(): Int {
-            throw NotImplementedError()
-        }
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            return other is Arbeidsledig
-        }
-
-        override fun identifikator() = Arbeidsledig
+        override fun identifikator() = Arbeidsledigtype
         override fun toString() = identifikator()
     }
+}
+
+internal fun Yrkesaktivitet.erLik(other: Yrkesaktivitet) = when (this) {
+    is Yrkesaktivitet.Arbeidstaker -> other is Yrkesaktivitet.Arbeidstaker && this.organisasjonsnummer == other.organisasjonsnummer
+
+    is Yrkesaktivitet.Arbeidsledig -> other is Yrkesaktivitet.Arbeidsledig
+    is Yrkesaktivitet.Frilans -> other is Yrkesaktivitet.Frilans
+    is Yrkesaktivitet.Selvstendig -> other is Yrkesaktivitet.Selvstendig
 }

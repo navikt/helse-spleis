@@ -313,10 +313,10 @@ internal class Arbeidsgiver private constructor(
                     .toMutableList(),
                 ubrukteRefusjonsopplysninger = Refusjonsservitør.gjenopprett(dto.ubrukteRefusjonsopplysninger),
                 yrkesaktivitet = when (dto.yrkesaktivitetstype) {
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSLEDIG -> Yrkesaktivitet.Arbeidsledig()
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSLEDIG -> Yrkesaktivitet.Arbeidsledig
                     ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSTAKER -> Yrkesaktivitet.Arbeidstaker(dto.organisasjonsnummer)
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.FRILANS -> Yrkesaktivitet.Frilans()
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG -> Yrkesaktivitet.Selvstendig()
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.FRILANS -> Yrkesaktivitet.Frilans
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG -> Yrkesaktivitet.Selvstendig
                 },
                 regelverkslogg = regelverkslogg
             )
@@ -345,7 +345,7 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    private fun erSammeYrkesaktivitet(yrkesaktivitet: Yrkesaktivitet) = this.yrkesaktivitet == yrkesaktivitet
+    private fun erSammeYrkesaktivitet(yrkesaktivitet: Yrkesaktivitet) = this.yrkesaktivitet.erLik(yrkesaktivitet)
 
     internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): Boolean {
         return avklarInntekt(skjæringstidspunkt, vedtaksperioder) != null

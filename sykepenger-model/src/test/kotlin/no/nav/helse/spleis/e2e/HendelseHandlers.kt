@@ -51,7 +51,7 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.Arbeidsledig
+import no.nav.helse.person.Arbeidsledigtype
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -116,7 +116,7 @@ internal fun AbstractEndToEndTest.håndterAvbrytArbeidsledigSøknad(
     AvbruttSøknad(
         periode,
         MeldingsreferanseId(meldingsreferanseId),
-        Arbeidsledig
+        Arbeidsledigtype
     ).håndter(Person::håndter)
 }
 
