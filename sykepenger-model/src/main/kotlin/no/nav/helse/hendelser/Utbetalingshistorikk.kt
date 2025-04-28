@@ -12,7 +12,7 @@ class Utbetalingshistorikk(
     val element: InfotrygdhistorikkElement,
     besvart: LocalDateTime
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+    override val behandlingsporing = Behandlingsporing.Arbeidstaker(
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = HendelseMetadata(

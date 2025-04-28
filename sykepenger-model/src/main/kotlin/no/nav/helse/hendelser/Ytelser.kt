@@ -24,7 +24,7 @@ class Ytelser(
     private val dagpenger: Dagpenger,
     private val inntekterForBeregning: InntekterForBeregning
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+    override val behandlingsporing = Behandlingsporing.Arbeidstaker(
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = LocalDateTime.now().let { nå ->

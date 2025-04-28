@@ -15,7 +15,7 @@ class VedtakFattet(
     vedtakFattetTidspunkt: LocalDateTime,
     override val automatisert: Boolean
 ) : Behandlingsavgjørelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+    override val behandlingsporing = Behandlingsporing.Arbeidstaker(
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = HendelseMetadata(

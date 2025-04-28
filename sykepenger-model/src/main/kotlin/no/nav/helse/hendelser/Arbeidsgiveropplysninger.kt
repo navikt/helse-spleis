@@ -175,7 +175,7 @@ class Arbeidsgiveropplysninger(
         opplysninger.valider()
     }
 
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(organisasjonsnummer)
+    override val behandlingsporing = Behandlingsporing.Arbeidstaker(organisasjonsnummer)
 
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
@@ -199,7 +199,7 @@ class KorrigerteArbeidsgiveropplysninger(
         opplysninger.valider()
     }
 
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(organisasjonsnummer)
+    override val behandlingsporing = Behandlingsporing.Arbeidstaker(organisasjonsnummer)
 
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,

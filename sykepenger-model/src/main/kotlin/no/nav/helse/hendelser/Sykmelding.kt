@@ -11,7 +11,7 @@ class Sykmelding(
     orgnummer: String,
     sykeperioder: List<Sykmeldingsperiode>
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+    override val behandlingsporing = Behandlingsporing.Arbeidstaker(
         organisasjonsnummer = orgnummer
     )
     override val metadata = LocalDateTime.now().let { nå ->

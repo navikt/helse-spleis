@@ -11,7 +11,7 @@ class SykepengegrunnlagForArbeidsgiver(
     orgnummer: String,
     private val inntekter: ArbeidsgiverInntekt
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+    override val behandlingsporing = Behandlingsporing.Arbeidstaker(
         organisasjonsnummer = orgnummer
     )
     override val metadata = LocalDateTime.now().let { nå ->

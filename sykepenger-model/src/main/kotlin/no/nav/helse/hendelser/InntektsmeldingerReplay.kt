@@ -10,7 +10,7 @@ class InntektsmeldingerReplay(
     val vedtaksperiodeId: UUID,
     val inntektsmeldinger: List<Inntektsmelding>
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Arbeidsgiver(
+    override val behandlingsporing = Behandlingsporing.Arbeidstaker(
         organisasjonsnummer = organisasjonsnummer
     )
     override val metadata = LocalDateTime.now().let { nå ->

@@ -239,7 +239,7 @@ class Person private constructor(
         håndterGjenoppta(melding, aktivitetsloggMedPersonkontekst)
     }
 
-    private fun tidligereBehandlinger(behandlingsporing: Behandlingsporing.Arbeidsgiver, aktivitetslogg: IAktivitetslogg, periode: Periode) {
+    private fun tidligereBehandlinger(behandlingsporing: Behandlingsporing.Arbeidstaker, aktivitetslogg: IAktivitetslogg, periode: Periode) {
         val cutoff = periode.start.minusMonths(6)
         val andreBehandledeVedtaksperioder = tidligereBehandlinger.flatMap { it.vedtaksperioderEtter(cutoff) }
         if (andreBehandledeVedtaksperioder.isNotEmpty()) {
@@ -581,13 +581,13 @@ class Person private constructor(
         }
     }
 
-    private fun finnEllerOpprettArbeidsgiver(behandlingsporing: Behandlingsporing.Arbeidsgiver, aktivitetslogg: IAktivitetslogg) =
+    private fun finnEllerOpprettArbeidsgiver(behandlingsporing: Behandlingsporing.Arbeidstaker, aktivitetslogg: IAktivitetslogg) =
         finnEllerOpprettArbeidsgiver(behandlingsporing.organisasjonsnummer.tilYrkesaktivitet(), aktivitetslogg)
 
     private fun finnEllerOpprettArbeidsgiver(yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
         _arbeidsgivere.finnEllerOpprett(yrkesaktivitet, aktivitetslogg)
 
-    private fun finnArbeidsgiver(behandlingsporing: Behandlingsporing.Arbeidsgiver, aktivitetslogg: IAktivitetslogg) =
+    private fun finnArbeidsgiver(behandlingsporing: Behandlingsporing.Arbeidstaker, aktivitetslogg: IAktivitetslogg) =
         behandlingsporing.organisasjonsnummer.tilYrkesaktivitet().let { yrkesaktivitet ->
             arbeidsgivere.finn(yrkesaktivitet) ?: aktivitetslogg.logiskFeil("Finner ikke arbeidsgiver")
         }
