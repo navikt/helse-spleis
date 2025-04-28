@@ -56,12 +56,13 @@ import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsendringerMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
-import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
 import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NavNoSelvbestemtInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
+import no.nav.helse.spleis.meldinger.model.NyArbeidsledigTidligereArbeidstakerSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
@@ -153,6 +154,19 @@ internal class HendelseMediator(
     override fun behandle(
         personopplysninger: Personopplysninger,
         message: NyArbeidsledigSøknadMessage,
+        sykmelding: Sykmelding,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
+    ) {
+        opprettPersonOgHåndter(personopplysninger, message, context, historiskeFolkeregisteridenter) { person, aktivitetslogg ->
+            HendelseProbe.onSykmelding()
+            person.håndter(sykmelding, aktivitetslogg)
+        }
+    }
+
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: NyArbeidsledigTidligereArbeidstakerSøknadMessage,
         sykmelding: Sykmelding,
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
@@ -616,6 +630,14 @@ internal interface IHendelseMediator {
     fun behandle(
         personopplysninger: Personopplysninger,
         message: NyArbeidsledigSøknadMessage,
+        sykmelding: Sykmelding,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
+    )
+
+    fun behandle(
+        personopplysninger: Personopplysninger,
+        message: NyArbeidsledigTidligereArbeidstakerSøknadMessage,
         sykmelding: Sykmelding,
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>

@@ -57,6 +57,7 @@ import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NavNoSelvbestemtInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
+import no.nav.helse.spleis.meldinger.model.NyArbeidsledigTidligereArbeidstakerSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
@@ -233,6 +234,16 @@ internal class TestHendelseMediator : IHendelseMediator {
     override fun behandle(
         personopplysninger: Personopplysninger,
         message: NyArbeidsledigSøknadMessage,
+        sykmelding: Sykmelding,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
+    ) {
+        lestNySøknadArbeidsledigVerdi.set(true)
+    }
+
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: NyArbeidsledigTidligereArbeidstakerSøknadMessage,
         sykmelding: Sykmelding,
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>

@@ -30,6 +30,7 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_ARBEIDSLEDIG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_FRILANS
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_SELVSTENDIG
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_TIDLIGERE_ARBEIDSTAKER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSFORHOLD
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSGIVEROPPLYSNINGER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRTIDSLINJE
@@ -68,6 +69,7 @@ import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NavNoSelvbestemtInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
+import no.nav.helse.spleis.meldinger.model.NyArbeidsledigTidligereArbeidstakerSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
@@ -143,6 +145,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is NyFrilansSøknadMessage -> NY_SØKNAD_FRILANS
         is NySelvstendigSøknadMessage -> NY_SØKNAD_SELVSTENDIG
         is NyArbeidsledigSøknadMessage -> NY_SØKNAD_ARBEIDSLEDIG
+        is NyArbeidsledigTidligereArbeidstakerSøknadMessage -> NY_SØKNAD_TIDLIGERE_ARBEIDSTAKER
         is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
         is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
         is SendtSøknadFrilansMessage -> SENDT_SØKNAD_FRILANS
@@ -206,6 +209,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         NY_SØKNAD_FRILANS,
         NY_SØKNAD_SELVSTENDIG,
         NY_SØKNAD_ARBEIDSLEDIG,
+        NY_SØKNAD_TIDLIGERE_ARBEIDSTAKER,
         SENDT_SØKNAD_ARBEIDSGIVER,
         SENDT_SØKNAD_NAV,
         SENDT_SØKNAD_FRILANS,

@@ -75,6 +75,7 @@ import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NavNoSelvbestemtInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
+import no.nav.helse.spleis.meldinger.model.NyArbeidsledigTidligereArbeidstakerSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
@@ -245,6 +246,7 @@ internal class MessageMediator(
         is NavNoKorrigertInntektsmeldingMessage,
         is NavNoSelvbestemtInntektsmeldingMessage,
         is NyArbeidsledigSøknadMessage,
+        is NyArbeidsledigTidligereArbeidstakerSøknadMessage,
         is NyFrilansSøknadMessage,
         is NySelvstendigSøknadMessage,
         is NySøknadMessage,
