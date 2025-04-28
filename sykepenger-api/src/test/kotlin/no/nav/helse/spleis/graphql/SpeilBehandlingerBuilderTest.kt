@@ -5,7 +5,6 @@ import java.time.LocalDate.EPOCH
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.halvG
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -82,7 +81,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `im som aldri kom`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+    fun `im som aldri kom`() {
         val inntektFraSkatt = 10000.månedlig
         val søknadId = håndterSøknad(1.januar til 31.januar, orgnummer = a1)
         val inntektFraSkattId = håndterSykepengegrunnlagForArbeidsgiver(

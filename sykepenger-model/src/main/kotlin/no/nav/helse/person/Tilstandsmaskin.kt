@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import java.time.LocalDateTime
 import java.time.Period
-import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.`fvl § 35 ledd 1`
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
@@ -411,7 +410,6 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
 
     private fun vurderOmInntektsmeldingAldriKommer(påminnelse: Påminnelse): Boolean {
         if (påminnelse.når(Flagg("ønskerInntektFraAOrdningen"))) return true
-        if (Toggle.InntektsmeldingSomIkkeKommer.disabled) return false
         val ventetMinst3Måneder = påminnelse.når(VentetMinst(Period.ofMonths(3)))
         val ikkeForGammel = !påminnelse.når(Påminnelse.Predikat.VentetFørCutoff)
         return ventetMinst3Måneder && ikkeForGammel

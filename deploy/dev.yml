@@ -60,8 +60,6 @@ spec:
       value: EARLIEST
     - name: IDENTBYTTE
       value: "true"
-    - name: INNTEKTSMELDING_SOM_IKKE_KOMMER
-      value: "true"
     - name: TILKOMMEN_INNTEKT_V4
       value: "true"
     - name: JAVA_TOOL_OPTIONS

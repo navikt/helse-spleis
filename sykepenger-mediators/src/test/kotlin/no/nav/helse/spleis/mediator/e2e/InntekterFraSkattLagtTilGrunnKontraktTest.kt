@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.spleis.mediator.TestMessageFactory
@@ -11,7 +10,7 @@ import org.junit.jupiter.api.Test
 internal class InntekterFraSkattLagtTilGrunnKontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `skatteinntekter lagt til grunn`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+    fun `skatteinntekter lagt til grunn`() {
         @Language("JSON")
         val forventet = """
         {

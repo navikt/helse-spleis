@@ -1,10 +1,9 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Personidentifikator
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
@@ -342,30 +341,29 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `markerer godkjenningsbehov som har brukt skatteinntekter istedenfor inntektsmelding med riktig tag`() =
-        Toggle.InntektsmeldingSomIkkeKommer.enable {
-            createTestPerson(IDENTIFIKATOR_SOM_KAN_BEHANDLES_UTEN_IM, FØDSELSDATO_SOM_KAN_BEHANDLES_UTEN_IM)
-            nyPeriode(januar)
-            håndterPåminnelse(
-                1.vedtaksperiode,
-                AVVENTER_INNTEKTSMELDING,
-                tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
-                nå = 10.februar(2025).atStartOfDay()
-            )
-            håndterSykepengegrunnlagForArbeidsgiver()
-            assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            hendelselogg.assertHarTag(
-                vedtaksperiode = 1.vedtaksperiode,
-                forventetTag = "InntektFraAOrdningenLagtTilGrunn"
-            )
-        }
+    fun `markerer godkjenningsbehov som har brukt skatteinntekter istedenfor inntektsmelding med riktig tag`() {
+        createTestPerson(IDENTIFIKATOR_SOM_KAN_BEHANDLES_UTEN_IM, FØDSELSDATO_SOM_KAN_BEHANDLES_UTEN_IM)
+        nyPeriode(januar)
+        håndterPåminnelse(
+            1.vedtaksperiode,
+            AVVENTER_INNTEKTSMELDING,
+            tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
+            nå = 10.februar(2025).atStartOfDay()
+        )
+        håndterSykepengegrunnlagForArbeidsgiver()
+        assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        hendelselogg.assertHarTag(
+            vedtaksperiode = 1.vedtaksperiode,
+            forventetTag = "InntektFraAOrdningenLagtTilGrunn"
+        )
+    }
 
     @Test
-    fun `markerer godkjenningsbehov som har brukt skatteinntekter istedenfor inntektsmelding med riktig tag for flere arbeidsgivere med ulik start`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+    fun `markerer godkjenningsbehov som har brukt skatteinntekter istedenfor inntektsmelding med riktig tag for flere arbeidsgivere med ulik start`() {
         nyPeriode(januar, a1)
         nyPeriode(februar, a2)
         håndterArbeidsgiveropplysninger(

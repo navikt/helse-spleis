@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime
 import java.time.YearMonth
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -97,7 +96,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `event om at vi bruker skatteopplysninger`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+    fun `event om at vi bruker skatteopplysninger`() {
         val inntektFraSkatt = 10000.månedlig
         a1 {
             håndterSøknad(januar)
@@ -137,7 +136,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `event om at vi bruker skatteopplysninger med sprø minus`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+    fun `event om at vi bruker skatteopplysninger med sprø minus`() {
         val inntektFraSkatt = 10000.månedlig
         val sprøInntektFraSkatt = 30000.månedlig * -1
         a1 {
@@ -178,7 +177,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `lager ikke påminnelse om vedtaksperioden har ventet mindre enn tre måneder`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+    fun `lager ikke påminnelse om vedtaksperioden har ventet mindre enn tre måneder`() {
         val nå = LocalDateTime.now()
         val tilstandsendringstidspunkt = nå.minusMonths(3).plusDays(1)
         a1 {
@@ -189,7 +188,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `lager påminnelse om vedtaksperioden har ventet mer enn tre måneder`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+    fun `lager påminnelse om vedtaksperioden har ventet mer enn tre måneder`() {
         val nå = 10.februar(2025).atStartOfDay()
         val tilstandsendringstidspunkt = 10.november(2024).atStartOfDay()
         a1 {
@@ -200,7 +199,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `lagrer skatteinntektene som inntektsmelding og går videre`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+    fun `lagrer skatteinntektene som inntektsmelding og går videre`() {
         val inntektFraSkatt = 10000.månedlig
         a1 {
             håndterSøknad(januar)
@@ -232,7 +231,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `Tar med inntekter når det er rapportert 0 kr i AOrdningen`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+    fun `Tar med inntekter når det er rapportert 0 kr i AOrdningen`() {
         val inntektFraSkatt = INGEN
         a1 {
             håndterSøknad(januar)
@@ -271,7 +270,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `skal ikke slippe gjennom ting som har ventet veldig lenge`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+    fun `skal ikke slippe gjennom ting som har ventet veldig lenge`() {
         val cutoff = 10.februar(2025)
         a1 {
             håndterSøknad(januar)
@@ -281,7 +280,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `Tar ikke med inntekter når det ikke er rapportert inntekt i AOrdningen`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+    fun `Tar ikke med inntekter når det ikke er rapportert inntekt i AOrdningen`() {
         a1 {
             håndterSøknad(januar)
             håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, 1.januar, emptyList())
