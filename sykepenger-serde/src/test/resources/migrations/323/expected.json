@@ -1,0 +1,63 @@
+{
+  "arbeidsgivere": [
+    {
+      "utbetalinger": [
+        {
+          "id": "732cf262-2e8e-4d5e-abc4-dc984312d8c8",
+          "korrelasjonsId": "d8fe9d47-988a-4688-9d53-4a44936c27d5",
+          "fom": "2018-01-03",
+          "tom": "2018-01-26",
+          "arbeidsgiverOppdrag": {
+            "linjer": [
+              {
+                "fom": "2018-01-19",
+                "tom": "2018-01-26"
+              }
+            ]
+          },
+          "personOppdrag": {
+            "linjer": []
+          },
+          "tidsstempel": "2025-04-04T07:24:14.197684"
+        },
+        {
+          "id": "a101d436-7dc8-447f-afc3-24537d9dab1c",
+          "korrelasjonsId": "d8fe9d47-988a-4688-9d53-4a44936c27d5",
+          "fom": "2018-01-03",
+          "tom": "2018-02-20",
+          "arbeidsgiverOppdrag": {
+            "linjer": [
+              {
+                "fom": "2018-01-19",
+                "tom": "2018-02-20"
+              }
+            ]
+          },
+          "personOppdrag": {
+            "linjer": []
+          },
+          "tidsstempel": "2025-04-04T07:24:14.237928"
+        },
+        {
+          "id": "f961dcd0-2bea-4542-b5c4-2276bbb54eb2",
+          "korrelasjonsId": "d8fe9d47-988a-4688-9d53-4a44936c27d5",
+          "fom": "2018-01-03",
+          "tom": "2018-02-20",
+          "arbeidsgiverOppdrag": {
+            "linjer": [
+              {
+                "fom": "2018-01-19",
+                "tom": "2018-02-20"
+              }
+            ]
+          },
+          "personOppdrag": {
+            "linjer": []
+          },
+          "tidsstempel": "2025-04-25T07:24:14.237928"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 323
+}
