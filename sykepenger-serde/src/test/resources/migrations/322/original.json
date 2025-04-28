@@ -1,0 +1,18 @@
+{
+  "fødselsnummer": "11111111111",
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1"
+    },
+    {
+      "organisasjonsnummer": "SELVSTENDIG"
+    },
+    {
+      "organisasjonsnummer": "ARBEIDSLEDIG"
+    },
+    {
+      "organisasjonsnummer": "FRILANS"
+    }
+  ],
+  "skjemaVersjon": 321
+}

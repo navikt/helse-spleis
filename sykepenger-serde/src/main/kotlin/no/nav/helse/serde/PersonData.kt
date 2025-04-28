@@ -310,6 +310,7 @@ data class PersonData(
                                     InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> ArbeidstakerinntektskildeInnDto.AOrdningenDto(
                                         inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
                                     )
+
                                     InntektsopplysningskildeData.INFOTRYGD -> ArbeidstakerinntektskildeInnDto.InfotrygdDto
                                     InntektsopplysningskildeData.INNTEKTSMELDING -> ArbeidstakerinntektskildeInnDto.ArbeidsgiverDto
                                 }
@@ -318,6 +319,7 @@ data class PersonData(
                     )
                 }
             }
+
             data class KorrigertInntektsopplysningData(
                 val id: UUID,
                 val dato: LocalDate,
@@ -335,6 +337,7 @@ data class PersonData(
                     )
                 )
             }
+
             data class SkjønnsmessigFastsattData(
                 val id: UUID,
                 val dato: LocalDate,
@@ -388,6 +391,7 @@ data class PersonData(
 
     data class ArbeidsgiverData(
         val organisasjonsnummer: String,
+        val yrkesaktivitetstype: YrkesaktivitetTypeData,
         val id: UUID,
         val inntektshistorikk: List<InntektsmeldingData>,
         val sykdomshistorikk: List<SykdomshistorikkData>,
@@ -401,6 +405,12 @@ data class PersonData(
         fun tilDto() = ArbeidsgiverInnDto(
             id = this.id,
             organisasjonsnummer = this.organisasjonsnummer,
+            yrkesaktivitetstype = when (this.yrkesaktivitetstype) {
+                YrkesaktivitetTypeData.ARBEIDSTAKER -> ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSTAKER
+                YrkesaktivitetTypeData.ARBEIDSLEDIG -> ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSLEDIG
+                YrkesaktivitetTypeData.FRILANS -> ArbeidsgiverInnDto.Yrkesaktivitetstype.FRILANS
+                YrkesaktivitetTypeData.SELVSTENDIG -> ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG
+            },
             inntektshistorikk = InntektshistorikkInnDto(this.inntektshistorikk.map { it.tilDto() }),
             sykdomshistorikk = SykdomshistorikkDto(this.sykdomshistorikk.map { it.tilDto() }),
             sykmeldingsperioder = SykmeldingsperioderDto(this.sykmeldingsperioder.map { it.tilDto() }),
@@ -956,6 +966,12 @@ data class PersonData(
             }
         }
 
+        enum class YrkesaktivitetTypeData {
+            ARBEIDSTAKER,
+            ARBEIDSLEDIG,
+            FRILANS,
+            SELVSTENDIG,
+        }
     }
 
     data class SykdomshistorikkData(

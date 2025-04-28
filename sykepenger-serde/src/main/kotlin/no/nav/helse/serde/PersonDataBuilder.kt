@@ -87,6 +87,12 @@ fun PersonUtDto.tilPersonData() = PersonData(
 private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
     id = this.id,
     organisasjonsnummer = this.organisasjonsnummer,
+    yrkesaktivitetstype = when (this.yrkesaktivitetstype) {
+        ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSTAKER -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.ARBEIDSTAKER
+        ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSLEDIG -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.ARBEIDSLEDIG
+        ArbeidsgiverUtDto.Yrkesaktivitetstype.FRILANS -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.FRILANS
+        ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.SELVSTENDIG
+    },
     inntektshistorikk = this.inntektshistorikk.historikk.map { it.tilPersonData() },
     sykdomshistorikk = this.sykdomshistorikk.elementer.map { it.tilPersonData() },
     sykmeldingsperioder = this.sykmeldingsperioder.tilPersonData(),
@@ -811,6 +817,7 @@ private fun SaksbehandlerUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElem
     beløp = this.inntektsdata.beløp.månedligDouble.beløp,
     tidsstempel = this.inntektsdata.tidsstempel
 )
+
 private fun SkjønnsmessigFastsattUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkjønnsmessigFastsattData(
     id = this.id,
     dato = this.inntektsdata.dato,

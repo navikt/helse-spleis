@@ -1,0 +1,22 @@
+{
+  "fødselsnummer": "11111111111",
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1",
+      "yrkesaktivitetstype": "ARBEIDSTAKER"
+    },
+    {
+      "organisasjonsnummer": "SELVSTENDIG",
+      "yrkesaktivitetstype": "SELVSTENDIG"
+    },
+    {
+      "organisasjonsnummer": "ARBEIDSLEDIG",
+      "yrkesaktivitetstype": "ARBEIDSLEDIG"
+    },
+    {
+      "organisasjonsnummer": "FRILANS",
+      "yrkesaktivitetstype": "FRILANS"
+    }
+  ],
+  "skjemaVersjon": 322
+}

@@ -69,7 +69,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.startdatoerPåSammenhengende
 import no.nav.helse.person.Vedtaksperiode.Companion.validerTilstand
 import no.nav.helse.person.Vedtaksperiode.Companion.venter
 import no.nav.helse.person.Vedtaksperiode.VedtaksperiodeForkastetEventBuilder
-import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -313,7 +312,12 @@ internal class Arbeidsgiver private constructor(
                 feriepengeutbetalinger = dto.feriepengeutbetalinger.map { Feriepengeutbetaling.gjenopprett(it) }
                     .toMutableList(),
                 ubrukteRefusjonsopplysninger = Refusjonsservitør.gjenopprett(dto.ubrukteRefusjonsopplysninger),
-                yrkesaktivitet = dto.organisasjonsnummer.tilYrkesaktivitet(),
+                yrkesaktivitet = when (dto.yrkesaktivitetstype) {
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSLEDIG -> Yrkesaktivitet.Arbeidsledig()
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSTAKER -> Yrkesaktivitet.Arbeidstaker(dto.organisasjonsnummer)
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.FRILANS -> Yrkesaktivitet.Frilans()
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG -> Yrkesaktivitet.Selvstendig()
+                },
                 regelverkslogg = regelverkslogg
             )
             val utbetalingerMap = utbetalinger.associateBy(Utbetaling::id)
@@ -1143,6 +1147,12 @@ internal class Arbeidsgiver private constructor(
         return ArbeidsgiverUtDto(
             id = id,
             organisasjonsnummer = organisasjonsnummer,
+            yrkesaktivitetstype = when (yrkesaktivitet) {
+                is Yrkesaktivitet.Arbeidsledig -> ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSLEDIG
+                is Yrkesaktivitet.Arbeidstaker -> ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSTAKER
+                is Yrkesaktivitet.Frilans -> ArbeidsgiverUtDto.Yrkesaktivitetstype.FRILANS
+                is Yrkesaktivitet.Selvstendig -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG
+            },
             inntektshistorikk = inntektshistorikk.dto(),
             sykdomshistorikk = sykdomshistorikk.dto(),
             sykmeldingsperioder = sykmeldingsperioder.dto(),
