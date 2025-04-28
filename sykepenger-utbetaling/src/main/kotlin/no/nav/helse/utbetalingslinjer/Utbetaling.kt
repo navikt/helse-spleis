@@ -17,9 +17,9 @@ import no.nav.helse.hendelser.SimuleringHendelse
 import no.nav.helse.hendelser.UtbetalingmodulHendelse
 import no.nav.helse.hendelser.UtbetalingpåminnelseHendelse
 import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
+import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.valider
 import no.nav.helse.hendelser.vurdering
-import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -288,13 +288,12 @@ class Utbetaling private constructor(
         val nyttArbeidsgiveroppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, this.arbeidsgiverOppdrag, kladd.arbeidsgiveroppdrag)
         val nyttPersonoppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, this.personOppdrag, kladd.personoppdrag)
 
-        val nyereUtbetalingstidslinje = this.utbetalingstidslinje.subset(kladd.utbetalingsperiode)
-        val tidligereUtbetalingstidslinje = nyereUtbetalingstidslinje.fremTilOgMed(vedtaksperiode.start.forrigeDag)
-        val nyUtbetalingstidslinje = tidligereUtbetalingstidslinje + kladd.utbetalingstidslinje + nyereUtbetalingstidslinje.fraOgMed(vedtaksperiode.endInclusive.nesteDag)
+        val tidligereUtbetalingstidslinje = this.utbetalingstidslinje.fremTilOgMed(vedtaksperiode.start.forrigeDag)
+        val nyUtbetalingstidslinje = tidligereUtbetalingstidslinje + kladd.utbetalingstidslinje
 
         return Utbetaling(
             korrelerendeUtbetaling = this,
-            periode = kladd.utbetalingsperiode,
+            periode = this.periode.start til vedtaksperiode.endInclusive,
             utbetalingstidslinje = nyUtbetalingstidslinje,
             arbeidsgiverOppdrag = nyttArbeidsgiveroppdrag,
             personOppdrag = nyttPersonoppdrag,
@@ -312,10 +311,9 @@ class Utbetaling private constructor(
 
         /* linjer forut før perioden */
         val linjerFørVedtaksperioden = linjerFremTilOgMedUtbetalingsaken.begrensTil(vedtaksperiode.start.forrigeDag)
-        val linjerEtterVedtaksperioden = linjerFremTilOgMedUtbetalingsaken.begrensFra(vedtaksperiode.endInclusive.nesteDag)
 
         /* legg inn endringer fra perioden og sy sammen */
-        val nyeArbeidsgiverlinjer = linjerFørVedtaksperioden + nyttOppdrag + linjerEtterVedtaksperioden
+        val nyeArbeidsgiverlinjer = linjerFørVedtaksperioden + nyttOppdrag
 
         return Oppdrag(historiskOppdrag.mottaker, historiskOppdrag.fagområde, nyeArbeidsgiverlinjer).minus(historiskOppdrag, aktivitetslogg)
     }

@@ -43,6 +43,18 @@ import org.junit.jupiter.api.Test
 internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
     @Test
+    fun `utbetaling hopper ut av fagsystemid`() {
+        createPersonMedToVedtakPåSammeFagsystemId()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.februar, Dagtype.Feriedag)))
+        håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
+        val utbetaling = inspektør.utbetaling(2)
+        assertEquals(1, utbetaling.arbeidsgiverOppdrag.size)
+        assertEquals(19.januar til 19.februar, utbetaling.arbeidsgiverOppdrag[0].periode)
+        assertEquals(3.januar til 20.februar, utbetaling.periode)
+    }
+
+    @Test
     fun `annullere senere periode enn perioden til godkjenning`() {
         nyttVedtak(mars)
         tilGodkjenning(januar, a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
