@@ -105,7 +105,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class Arbeidsgiver private constructor(
-    private val person: Person,
+    val person: Person,
     val organisasjonsnummer: String,
     private val id: UUID,
     private val inntektshistorikk: Inntektshistorikk,
@@ -386,68 +386,11 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
-    internal fun lagUtbetaling(
-        aktivitetslogg: IAktivitetslogg,
-        utbetalingstidslinje: Utbetalingstidslinje,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int,
-        gjenståendeSykedager: Int,
-        periode: Periode
-    ) = lagNyUtbetaling(
-        aktivitetslogg,
-        utbetalingstidslinje,
-        maksdato,
-        forbrukteSykedager,
-        gjenståendeSykedager,
-        periode,
-        Utbetalingtype.UTBETALING
-    )
-
-    internal fun lagRevurdering(
-        aktivitetslogg: IAktivitetslogg,
-        utbetalingstidslinje: Utbetalingstidslinje,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int,
-        gjenståendeSykedager: Int,
-        periode: Periode
-    ): Utbetaling {
-        return lagNyUtbetaling(
-            aktivitetslogg,
-            utbetalingstidslinje,
-            maksdato,
-            forbrukteSykedager,
-            gjenståendeSykedager,
-            periode,
-            Utbetalingtype.REVURDERING
-        )
+    internal fun utbetalingerForVedtaksperiode(vedtaksperiode: Periode): List<Utbetaling> {
+        return utbetalinger.aktive(vedtaksperiode)
     }
 
-    private fun lagNyUtbetaling(
-        aktivitetslogg: IAktivitetslogg,
-        utbetalingstidslinje: Utbetalingstidslinje,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int,
-        gjenståendeSykedager: Int,
-        periode: Periode,
-        type: Utbetalingtype
-    ): Utbetaling {
-        val utbetalingen = Utbetaling.lagUtbetaling(
-            utbetalinger = utbetalinger,
-            fødselsnummer = person.fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            utbetalingstidslinje = utbetalingstidslinje,
-            periode = periode,
-            aktivitetslogg = aktivitetslogg,
-            maksdato = maksdato,
-            forbrukteSykedager = forbrukteSykedager,
-            gjenståendeSykedager = gjenståendeSykedager,
-            type = type
-        )
-        nyUtbetaling(aktivitetslogg, utbetalingen)
-        return utbetalingen
-    }
-
-    private fun nyUtbetaling(
+    internal fun registrerNyUtbetaling(
         aktivitetslogg: IAktivitetslogg,
         utbetaling: Utbetaling
     ) {
@@ -740,9 +683,8 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg: IAktivitetslogg,
         utbetalingSomSkalAnnulleres: Utbetaling
     ): Utbetaling? {
-        val annullering =
-            utbetalingSomSkalAnnulleres.annuller(hendelse, aktivitetslogg, utbetalinger.toList()) ?: return null
-        nyUtbetaling(aktivitetslogg, annullering)
+        val annullering = utbetalingSomSkalAnnulleres.annuller(hendelse, aktivitetslogg, utbetalinger.toList()) ?: return null
+        registrerNyUtbetaling(aktivitetslogg, annullering)
         annullering.håndter(hendelse, aktivitetslogg)
         looper { vedtaksperiode -> vedtaksperiode.nyAnnullering(aktivitetslogg) }
         return annullering
@@ -871,10 +813,6 @@ internal class Arbeidsgiver private constructor(
                 korrelasjonsId = korrelasjonsId
             )
         )
-    }
-
-    override fun nyVedtaksperiodeUtbetaling(utbetalingId: UUID, vedtaksperiodeId: UUID) {
-        person.nyVedtaksperiodeUtbetaling(organisasjonsnummer, utbetalingId, vedtaksperiodeId)
     }
 
     override fun utbetalingAnnullert(

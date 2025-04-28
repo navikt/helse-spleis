@@ -66,6 +66,4 @@ interface UtbetalingObserver {
         korrelasjonsId: UUID
     ) {
     }
-
-    fun nyVedtaksperiodeUtbetaling(utbetalingId: UUID, vedtaksperiodeId: UUID) {}
 }

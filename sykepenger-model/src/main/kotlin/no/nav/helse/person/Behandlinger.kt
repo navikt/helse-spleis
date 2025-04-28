@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.collections.all
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
@@ -38,6 +39,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.InntekterForBeregning
@@ -51,6 +53,8 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.UtbetalingkladdBuilder
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
@@ -840,13 +844,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             aktivitetslogg: IAktivitetslogg,
             beregning: BeregnetPeriode
         ) {
-            val strategi = Arbeidsgiver::lagUtbetaling
             lagUtbetaling(
                 vedtaksperiodeSomLagerUtbetaling,
                 arbeidsgiver,
                 aktivitetslogg,
                 beregning,
-                strategi,
+                Utbetalingtype.UTBETALING,
                 Tilstand.BeregnetOmgjøring
             )
         }
@@ -857,13 +860,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             aktivitetslogg: IAktivitetslogg,
             beregning: BeregnetPeriode
         ) {
-            val strategi = Arbeidsgiver::lagUtbetaling
             return lagUtbetaling(
                 vedtaksperiodeSomLagerUtbetaling,
                 arbeidsgiver,
                 aktivitetslogg,
                 beregning,
-                strategi,
+                Utbetalingtype.UTBETALING,
                 Tilstand.Beregnet
             )
         }
@@ -874,13 +876,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             aktivitetslogg: IAktivitetslogg,
             beregning: BeregnetPeriode
         ) {
-            val strategi = Arbeidsgiver::lagRevurdering
             lagUtbetaling(
                 vedtaksperiodeSomLagerUtbetaling,
                 arbeidsgiver,
                 aktivitetslogg,
                 beregning,
-                strategi,
+                Utbetalingtype.REVURDERING,
                 Tilstand.BeregnetRevurdering
             )
         }
@@ -890,13 +891,77 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             arbeidsgiver: Arbeidsgiver,
             aktivitetslogg: IAktivitetslogg,
             beregning: BeregnetPeriode,
-            strategi: (Arbeidsgiver, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate, forbrukteSykedager: Int, gjenståendeSykedager: Int, periode: Periode) -> Utbetaling,
+            type: Utbetalingtype,
             nyTilstand: Tilstand
         ) {
-            val denNyeUtbetalingen = strategi(arbeidsgiver, aktivitetslogg, beregning.utbetalingstidslinje, beregning.maksdatovurdering.resultat.maksdato, beregning.maksdatovurdering.resultat.antallForbrukteDager, beregning.maksdatovurdering.resultat.gjenståendeDager, periode)
-            denNyeUtbetalingen.nyVedtaksperiodeUtbetaling(vedtaksperiodeSomLagerUtbetaling)
+            val denNyeUtbetalingen = lagUtbetaling(
+                arbeidsgiver,
+                arbeidsgiver.person.fødselsnummer,
+                arbeidsgiver.organisasjonsnummer,
+                beregning.utbetalingstidslinje,
+                periode,
+                aktivitetslogg,
+                beregning.maksdatovurdering.resultat.maksdato,
+                beregning.maksdatovurdering.resultat.antallForbrukteDager,
+                beregning.maksdatovurdering.resultat.gjenståendeDager,
+                type
+            )
+
+            arbeidsgiver.registrerNyUtbetaling(aktivitetslogg, denNyeUtbetalingen)
+            arbeidsgiver.person.nyVedtaksperiodeUtbetaling(arbeidsgiver.organisasjonsnummer, denNyeUtbetalingen.id, vedtaksperiodeSomLagerUtbetaling)
             nyEndring(gjeldende.kopierMedUtbetaling(beregning, denNyeUtbetalingen))
             tilstand(nyTilstand, aktivitetslogg)
+        }
+
+        fun lagUtbetaling(
+            arbeidsgiver: Arbeidsgiver,
+            fødselsnummer: String,
+            organisasjonsnummer: String,
+            utbetalingstidslinje: Utbetalingstidslinje,
+            periode: Periode,
+            aktivitetslogg: IAktivitetslogg,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int,
+            gjenståendeSykedager: Int,
+            type: Utbetalingtype
+        ): Utbetaling {
+            val vedtaksperiodekladd = UtbetalingkladdBuilder(periode, utbetalingstidslinje.subset(periode), organisasjonsnummer, fødselsnummer).build()
+
+            val forrigeUtbetalte = arbeidsgiver.utbetalingerForVedtaksperiode(periode)
+            val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull()
+            val annulleringer = forrigeUtbetalte.drop(1)
+
+            check(annulleringer.isEmpty()) { "det foreslås å annullere andre utbetalinger!" }
+
+            val utbetalingen = korrelerendeUtbetaling?.nyUtbetaling(
+                aktivitetslogg = aktivitetslogg,
+                type = type,
+                vedtaksperiode = periode,
+                kladd = vedtaksperiodekladd,
+                maksdato = maksdato,
+                forbrukteSykedager = forbrukteSykedager,
+                gjenståendeSykedager = gjenståendeSykedager,
+                annulleringer = emptyList()
+            ) ?: Utbetaling(
+                korrelerendeUtbetaling = null,
+                periode = vedtaksperiodekladd.utbetalingsperiode,
+                utbetalingstidslinje = utbetalingstidslinje.subset(vedtaksperiodekladd.utbetalingsperiode),
+                arbeidsgiverOppdrag = vedtaksperiodekladd.arbeidsgiveroppdrag,
+                personOppdrag = vedtaksperiodekladd.personoppdrag,
+                type = type,
+                maksdato = maksdato,
+                forbrukteSykedager = forbrukteSykedager,
+                gjenståendeSykedager = gjenståendeSykedager,
+                annulleringer = emptyList()
+            )
+            listOf(utbetalingen.arbeidsgiverOppdrag, utbetalingen.personOppdrag)
+                .filter { oppdrag -> oppdrag.nettoBeløp < 0 }
+                .takeIf { it.isNotEmpty() }
+                ?.also {
+                    aktivitetslogg.varsel(RV_UT_23)
+                }
+
+            return utbetalingen
         }
 
         fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =

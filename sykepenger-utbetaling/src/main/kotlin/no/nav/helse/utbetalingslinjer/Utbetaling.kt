@@ -30,7 +30,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
-import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.valider
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -275,7 +274,7 @@ class Utbetaling private constructor(
         tilstand.entering(this, aktivitetslogg)
     }
 
-    private fun nyUtbetaling(
+    fun nyUtbetaling(
         aktivitetslogg: IAktivitetslogg,
         type: Utbetalingtype,
         vedtaksperiode: Periode,
@@ -326,53 +325,6 @@ class Utbetaling private constructor(
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         private const val systemident = "SPLEIS"
-
-        fun lagUtbetaling(
-            utbetalinger: List<Utbetaling>,
-            fødselsnummer: String,
-            organisasjonsnummer: String,
-            utbetalingstidslinje: Utbetalingstidslinje,
-            periode: Periode,
-            aktivitetslogg: IAktivitetslogg,
-            maksdato: LocalDate,
-            forbrukteSykedager: Int,
-            gjenståendeSykedager: Int,
-            type: Utbetalingtype = UTBETALING
-        ): Utbetaling {
-            val vedtaksperiodekladd = UtbetalingkladdBuilder(periode, utbetalingstidslinje.subset(periode), organisasjonsnummer, fødselsnummer).build()
-
-            val forrigeUtbetalte = utbetalinger.aktive(periode)
-            val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull()
-            val annulleringer = forrigeUtbetalte
-                .filterNot { it === korrelerendeUtbetaling }
-                .mapNotNull { it.opphør(aktivitetslogg) }
-
-            check(annulleringer.isEmpty()) { "det foreslås å annullere andre utbetalinger!" }
-
-            val utbetalingen = korrelerendeUtbetaling?.nyUtbetaling(
-                aktivitetslogg = aktivitetslogg,
-                type = type,
-                vedtaksperiode = periode,
-                kladd = vedtaksperiodekladd,
-                maksdato = maksdato,
-                forbrukteSykedager = forbrukteSykedager,
-                gjenståendeSykedager = gjenståendeSykedager,
-                annulleringer = emptyList()
-            ) ?: Utbetaling(
-                korrelerendeUtbetaling = null,
-                periode = vedtaksperiodekladd.utbetalingsperiode,
-                utbetalingstidslinje = utbetalingstidslinje.subset(vedtaksperiodekladd.utbetalingsperiode),
-                arbeidsgiverOppdrag = vedtaksperiodekladd.arbeidsgiveroppdrag,
-                personOppdrag = vedtaksperiodekladd.personoppdrag,
-                type = type,
-                maksdato = maksdato,
-                forbrukteSykedager = forbrukteSykedager,
-                gjenståendeSykedager = gjenståendeSykedager,
-                annulleringer = emptyList()
-            )
-            listOf(utbetalingen.arbeidsgiverOppdrag, utbetalingen.personOppdrag).valider(aktivitetslogg)
-            return utbetalingen
-        }
 
         fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv).filterNot { it.tilstand is Annullert  }
         private fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
@@ -477,10 +429,6 @@ class Utbetaling private constructor(
             else -> Utbetalt
         }
         tilstand(nesteTilstand, aktivitetslogg)
-    }
-
-    fun nyVedtaksperiodeUtbetaling(vedtaksperiodeId: UUID) {
-        observers.forEach { it.nyVedtaksperiodeUtbetaling(this.id, vedtaksperiodeId) }
     }
 
     fun overlapperMed(other: Periode): Boolean {
