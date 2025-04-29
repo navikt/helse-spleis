@@ -30,5 +30,9 @@ class Simulering(
         )
     }
 
-    override val fagområde = Fagområde.from(fagområde)
+    override val fagområde = when (fagområde) {
+        "SPREF" -> Fagområde.SykepengerRefusjon
+        "SP" -> Fagområde.Sykepenger
+        else -> error("Kjenner ikke til fagområdet $fagområde")
+    }
 }

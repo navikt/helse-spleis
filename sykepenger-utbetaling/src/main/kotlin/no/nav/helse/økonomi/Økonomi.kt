@@ -2,7 +2,6 @@ package no.nav.helse.økonomi
 
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.dto.serialisering.ØkonomiUtDto
-import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -185,11 +184,6 @@ data class Økonomi(
     }
 
     fun ikkeBetalt() = copy(utbetalingsgrad = 0.prosent)
-
-    internal fun dagligBeløpForFagområde(område: Fagområde): Int? = when (område) {
-        Fagområde.SykepengerRefusjon -> arbeidsgiverbeløp?.daglig?.toInt()
-        Fagområde.Sykepenger -> personbeløp?.daglig?.toInt()
-    }
 
     fun dto() = ØkonomiUtDto(
         grad = sykdomsgrad.dto(),

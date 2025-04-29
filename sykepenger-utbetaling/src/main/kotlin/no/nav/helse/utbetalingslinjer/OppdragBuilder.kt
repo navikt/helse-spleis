@@ -9,6 +9,12 @@ class OppdragBuilder(
     private val mottaker: String,
     private val fagområde: Fagområde
 ) {
+    private val økonomibeløp: (Økonomi) -> Int? = { økonomi ->
+        when (fagområde) {
+            Fagområde.SykepengerRefusjon -> økonomi.arbeidsgiverbeløp
+            Fagområde.Sykepenger -> økonomi.personbeløp
+        }?.daglig?.toInt()
+    }
     private val utbetalingslinjer = mutableListOf<Utbetalingslinje>()
     private var tilstand: Tilstand = MellomLinjer()
     private val linje get() = utbetalingslinjer.last()
@@ -16,10 +22,14 @@ class OppdragBuilder(
     fun build() = Oppdrag(mottaker, fagområde, utbetalingslinjer, fagsystemId)
 
     fun betalingsdag(økonomi: Økonomi, dato: LocalDate, grad: Int) {
-        if (utbetalingslinjer.isEmpty() || !fagområde.kanLinjeUtvides(linje, økonomi, grad))
+        if (utbetalingslinjer.isEmpty() || !kanLinjeUtvides(linje, økonomi, grad))
             tilstand.nyLinje(økonomi, dato, grad)
         else
             tilstand.betalingsdag(økonomi, dato, grad)
+    }
+
+    private fun kanLinjeUtvides(linje: Utbetalingslinje, økonomi: Økonomi, grad: Int): Boolean {
+        return grad == linje.grad && (linje.beløp == null || linje.beløp == økonomibeløp(økonomi))
     }
 
     fun betalingshelgedag(dato: LocalDate, grad: Int) {
@@ -34,11 +44,27 @@ class OppdragBuilder(
     }
 
     private fun addLinje(økonomi: Økonomi, dato: LocalDate, grad: Int) {
-        utbetalingslinjer.add(fagområde.linje(fagsystemId, økonomi, dato, grad))
+        utbetalingslinjer.add(Utbetalingslinje(
+            fom = dato,
+            tom = dato,
+            satstype = Satstype.Daglig,
+            beløp = økonomibeløp(økonomi),
+            grad = grad,
+            refFagsystemId = fagsystemId,
+            klassekode = fagområde.klassekode
+        ))
     }
 
     private fun addLinje(dato: LocalDate, grad: Int) {
-        utbetalingslinjer.add(fagområde.linje(fagsystemId, dato, grad))
+        utbetalingslinjer.add(Utbetalingslinje(
+            fom = dato,
+            tom = dato,
+            satstype = Satstype.Daglig,
+            beløp = null,
+            grad = grad,
+            refFagsystemId = fagsystemId,
+            klassekode = fagområde.klassekode
+        ))
     }
 
     private interface Tilstand {
@@ -140,7 +166,7 @@ class OppdragBuilder(
             dato: LocalDate,
             grad: Int
         ) {
-            utbetalingslinjer.add(fagområde.utvidLinje(utbetalingslinjer.removeLast(), dato, økonomi))
+            utbetalingslinjer.add(utbetalingslinjer.removeLast().kopier(tom = dato, beløp = økonomibeløp(økonomi)))
             tilstand = LinjeMedSats()
         }
 
