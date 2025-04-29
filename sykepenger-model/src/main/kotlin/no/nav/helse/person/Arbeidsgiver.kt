@@ -433,8 +433,8 @@ internal class Arbeidsgiver private constructor(
     ): Utbetaling {
         val utbetalingen = Utbetaling.lagUtbetaling(
             utbetalinger = utbetalinger,
-            fødselsnummer = person.fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
+            mottakerPersonoppdrag = person.fødselsnummer,
+            mottakerRefusjonoppdrag = organisasjonsnummer,
             utbetalingstidslinje = utbetalingstidslinje,
             periode = periode,
             aktivitetslogg = aktivitetslogg,
