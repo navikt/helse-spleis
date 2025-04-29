@@ -5,31 +5,18 @@ import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
-import no.nav.helse.dto.OppdragstatusDto
-import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.deserialisering.FeriepengeoppdragInnDto
 import no.nav.helse.dto.serialisering.FeriepengeoppdragUtDto
 import no.nav.helse.feriepenger.Feriepengeutbetalingslinje.Companion.kjedeSammenLinjer
 import no.nav.helse.feriepenger.Feriepengeutbetalingslinje.Companion.kobleTil
 import no.nav.helse.feriepenger.Feriepengeutbetalingslinje.Companion.normaliserLinjer
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SimuleringHendelse
-import no.nav.helse.hendelser.UtbetalingmodulHendelse
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
-import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT_MED_FEIL
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.OVERFØRT
 import no.nav.helse.utbetalingslinjer.genererUtbetalingsreferanse
 
 class Feriepengeoppdrag private constructor(
@@ -39,54 +26,12 @@ class Feriepengeoppdrag private constructor(
     val fagsystemId: String,
     val endringskode: Endringskode,
     nettoBeløp: Int = linjer.sumOf { it.totalbeløp() },
-    overføringstidspunkt: LocalDateTime? = null,
-    avstemmingsnøkkel: Long? = null,
-    status: Oppdragstatus? = null,
     val tidsstempel: LocalDateTime,
-    erSimulert: Boolean = false,
-    simuleringsResultat: SimuleringResultatDto? = null
 ) : List<Feriepengeutbetalingslinje> by linjer, Aktivitetskontekst {
     var nettoBeløp: Int = nettoBeløp
         private set
-    var overføringstidspunkt: LocalDateTime? = overføringstidspunkt
-        private set
-    var avstemmingsnøkkel: Long? = avstemmingsnøkkel
-        private set
-    var status: Oppdragstatus? = status
-        private set
-    var erSimulert: Boolean = erSimulert
-        private set
-    var simuleringsResultat: SimuleringResultatDto? = simuleringsResultat
-        private set
 
     companion object {
-        fun periode(vararg oppdrag: Feriepengeoppdrag): Periode? {
-            return oppdrag
-                .mapNotNull { it.linjeperiode }
-                .takeIf(List<*>::isNotEmpty)
-                ?.reduce(Periode::plus)
-        }
-
-        fun List<Feriepengeoppdrag>.trekkerTilbakePenger() = sumOf { it.nettoBeløp() } < 0
-
-        fun stønadsdager(vararg oppdrag: Feriepengeoppdrag): Int {
-            return Feriepengeutbetalingslinje.stønadsdager(oppdrag.toList().flatten())
-        }
-
-        fun synkronisert(vararg oppdrag: Feriepengeoppdrag): Boolean {
-            val endrede = oppdrag.filter { it.harUtbetalinger() }
-            return endrede.all { it.status == endrede.first().status }
-        }
-
-        fun ingenFeil(vararg oppdrag: Feriepengeoppdrag) = oppdrag.none { it.status in listOf(AVVIST, FEIL) }
-        fun harFeil(vararg oppdrag: Feriepengeoppdrag) = oppdrag.any { it.status in listOf(AVVIST, FEIL) }
-        fun kanIkkeForsøkesPåNy(vararg oppdrag: Feriepengeoppdrag) = oppdrag.any { it.status == AVVIST }
-
-        internal fun List<Feriepengeoppdrag>.valider(aktivitetslogg: IAktivitetslogg) {
-            if (all { it.nettoBeløp >= 0 }) return
-            aktivitetslogg.varsel(RV_UT_23)
-        }
-
         fun gjenopprett(dto: FeriepengeoppdragInnDto): Feriepengeoppdrag {
             return Feriepengeoppdrag(
                 mottaker = dto.mottaker,
@@ -98,24 +43,10 @@ class Feriepengeoppdrag private constructor(
                 fagsystemId = dto.fagsystemId,
                 endringskode = Endringskode.gjenopprett(dto.endringskode),
                 nettoBeløp = dto.nettoBeløp,
-                overføringstidspunkt = dto.overføringstidspunkt,
-                avstemmingsnøkkel = dto.avstemmingsnøkkel,
-                status = when (dto.status) {
-                    OppdragstatusDto.AKSEPTERT -> AKSEPTERT
-                    OppdragstatusDto.AKSEPTERT_MED_FEIL -> AKSEPTERT_MED_FEIL
-                    OppdragstatusDto.AVVIST -> AVVIST
-                    OppdragstatusDto.FEIL -> FEIL
-                    OppdragstatusDto.OVERFØRT -> OVERFØRT
-                    null -> null
-                },
-                tidsstempel = dto.tidsstempel,
-                erSimulert = dto.erSimulert,
-                simuleringsResultat = dto.simuleringsResultat
+                tidsstempel = dto.tidsstempel
             )
         }
     }
-
-    val linjeperiode get() = firstOrNull()?.let { (it.datoStatusFom ?: it.fom) til last().tom }
 
     constructor(
         mottaker: String,
@@ -145,41 +76,24 @@ class Feriepengeoppdrag private constructor(
         )
     }
 
-    fun overfør(
-        aktivitetslogg: IAktivitetslogg,
-        maksdato: LocalDate?,
-        saksbehandler: String
-    ) {
+    fun overfør(aktivitetslogg: IAktivitetslogg, saksbehandler: String) {
         val aktivitetsloggMedOppdragkontekst = aktivitetslogg.kontekst(this)
-        if (status == AKSEPTERT) return aktivitetsloggMedOppdragkontekst.info("Overfører ikke oppdrag som allerede er akseptert for fagområde=$fagområde med fagsystemId=$fagsystemId")
         if (!harUtbetalinger()) return aktivitetsloggMedOppdragkontekst.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
         check(endringskode != Endringskode.UEND)
-        aktivitetsloggMedOppdragkontekst.behov(Behovtype.Utbetaling, "Trenger å sende utbetaling til Oppdrag", behovdetaljer(saksbehandler, maksdato))
-    }
-
-    fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String) {
-        val aktivitetsloggMedOppdragkontekst = aktivitetslogg.kontekst(this)
-        if (!harUtbetalinger()) return aktivitetsloggMedOppdragkontekst.info("Simulerer ikke oppdrag uten endring fagområde=$fagområde med fagsystemId=$fagsystemId")
-        check(endringskode != Endringskode.UEND)
-        check(status == null)
-        aktivitetsloggMedOppdragkontekst.behov(Behovtype.Simulering, "Trenger simulering fra Oppdragssystemet", behovdetaljer(saksbehandler, maksdato))
+        aktivitetsloggMedOppdragkontekst.behov(Behovtype.Utbetaling, "Trenger å sende utbetaling til Oppdrag", behovdetaljer(saksbehandler))
     }
 
     override fun toSpesifikkKontekst() = SpesifikkKontekst("Oppdrag", mapOf("fagsystemId" to fagsystemId))
 
-    private fun behovdetaljer(saksbehandler: String, maksdato: LocalDate?): MutableMap<String, Any> {
-        return mutableMapOf(
+    private fun behovdetaljer(saksbehandler: String): Map<String, Any> {
+        return mapOf(
             "mottaker" to mottaker,
             "fagområde" to "$fagområde",
             "linjer" to kopierKunLinjerMedEndring().map(Feriepengeutbetalingslinje::behovdetaljer),
             "fagsystemId" to fagsystemId,
             "endringskode" to "$endringskode",
             "saksbehandler" to saksbehandler
-        ).apply {
-            maksdato?.let {
-                put("maksdato", maksdato.toString())
-            }
-        }
+        )
     }
 
     fun totalbeløp() = linjerUtenOpphør().sumOf { it.totalbeløp() }
@@ -212,29 +126,6 @@ class Feriepengeoppdrag private constructor(
             fagområde = fagområde,
             fagsystemId = fagsystemId
         )
-
-    fun begrensFra(førsteDag: LocalDate): Feriepengeoppdrag {
-        val (senereLinjer, tidligereLinjer) = this.linjer
-            .filterNot { it.erOpphør() }
-            .partition { it.fom >= førsteDag }
-        val delvisOverlappendeFørsteLinje = tidligereLinjer
-            .lastOrNull()
-            ?.takeIf { it.tom >= førsteDag }
-            ?.begrensFra(førsteDag)
-        return kopierMed(listOfNotNull(delvisOverlappendeFørsteLinje) + senereLinjer)
-    }
-
-    fun begrensTil(sisteDato: LocalDate, other: Feriepengeoppdrag? = null): Feriepengeoppdrag {
-        val (tidligereLinjer, senereLinjer) = this.linjer
-            .filterNot { it.erOpphør() }
-            .partition { it.tom <= sisteDato }
-        val delvisOverlappendeSisteLinje = senereLinjer
-            .firstOrNull()
-            ?.takeIf { it.fom <= sisteDato }
-            ?.begrensTil(sisteDato)
-        other?.also { kobleTil(it) }
-        return kopierMed(tidligereLinjer + listOfNotNull(delvisOverlappendeSisteLinje))
-    }
 
     operator fun plus(other: Feriepengeoppdrag): Feriepengeoppdrag {
         check(none { linje -> other.any { it.periode.overlapperMed(linje.periode) } }) {
@@ -336,12 +227,7 @@ class Feriepengeoppdrag private constructor(
         linjer = linjer.map { it.kopier() }.toMutableList(),
         fagsystemId = fagsystemId,
         endringskode = endringskode,
-        overføringstidspunkt = overføringstidspunkt,
-        avstemmingsnøkkel = avstemmingsnøkkel,
-        status = status,
-        tidsstempel = tidsstempel,
-        erSimulert = erSimulert,
-        simuleringsResultat = simuleringsResultat
+        tidsstempel = tidsstempel
     )
 
     private fun kobleTil(tidligere: Feriepengeoppdrag) = kopierMed(
@@ -349,21 +235,6 @@ class Feriepengeoppdrag private constructor(
         tidligere.fagsystemId,
         Endringskode.ENDR
     )
-
-    fun lagreOverføringsinformasjon(hendelse: UtbetalingmodulHendelse) {
-        if (hendelse.fagsystemId != this.fagsystemId) return
-        if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
-        if (this.overføringstidspunkt == null) this.overføringstidspunkt = hendelse.overføringstidspunkt
-        this.status = hendelse.status
-    }
-
-    fun håndter(simulering: SimuleringHendelse) {
-        if (simulering.fagsystemId != this.fagsystemId || simulering.fagområde != this.fagområde || !simulering.simuleringOK) return
-        this.erSimulert = true
-        this.simuleringsResultat = simulering.simuleringsResultat
-    }
-
-    fun erKlarForGodkjenning() = !harUtbetalinger() || erSimulert
 
     private class DifferanseBuilder(
         private val påtroppendeOppdrag: Feriepengeoppdrag
@@ -471,19 +342,7 @@ class Feriepengeoppdrag private constructor(
         nettoBeløp = nettoBeløp,
         totalbeløp = this.totalbeløp(),
         stønadsdager = this.stønadsdager(),
-        overføringstidspunkt = overføringstidspunkt,
-        avstemmingsnøkkel = avstemmingsnøkkel,
-        status = when (status) {
-            OVERFØRT -> OppdragstatusDto.OVERFØRT
-            AKSEPTERT -> OppdragstatusDto.AKSEPTERT
-            AKSEPTERT_MED_FEIL -> OppdragstatusDto.AKSEPTERT_MED_FEIL
-            AVVIST -> OppdragstatusDto.AVVIST
-            FEIL -> OppdragstatusDto.FEIL
-            null -> null
-        },
-        tidsstempel = tidsstempel,
-        erSimulert = erSimulert,
-        simuleringsResultat = simuleringsResultat
+        tidsstempel = tidsstempel
     )
 }
 

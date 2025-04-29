@@ -303,21 +303,12 @@ data class SpannerPersonDto(
                 val tidsstempel: LocalDateTime,
                 val nettoBeløp: Int,
                 val stønadsdager: Int,
-                val totalbeløp: Int,
-                val avstemmingsnøkkel: Long?,
-                val status: OppdragstatusData?,
-                val overføringstidspunkt: LocalDateTime?,
-                val erSimulert: Boolean,
-                val simuleringsResultat: VedtaksperiodeData.DataForSimuleringData?
+                val totalbeløp: Int
             ) {
-                enum class OppdragstatusData { OVERFØRT, AKSEPTERT, AKSEPTERT_MED_FEIL, AVVIST, FEIL }
-
                 data class UtbetalingslinjeData(
                     val fom: LocalDate,
                     val tom: LocalDate,
-                    val satstype: String,
                     val sats: Int,
-                    val grad: Int?,
                     val stønadsdager: Int,
                     val totalbeløp: Int,
                     val refFagsystemId: String?,
@@ -1440,30 +1431,13 @@ private fun FeriepengeoppdragUtDto.tilPersonData() = SpannerPersonDto.Arbeidsgiv
     tidsstempel = this.tidsstempel,
     nettoBeløp = this.nettoBeløp,
     totalbeløp = this.totalbeløp,
-    stønadsdager = this.stønadsdager,
-    avstemmingsnøkkel = this.avstemmingsnøkkel,
-    status = when (this.status) {
-        OppdragstatusDto.AKSEPTERT -> SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.OppdragstatusData.AKSEPTERT
-        OppdragstatusDto.AKSEPTERT_MED_FEIL -> SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.OppdragstatusData.AKSEPTERT_MED_FEIL
-        OppdragstatusDto.AVVIST -> SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.OppdragstatusData.AVVIST
-        OppdragstatusDto.FEIL -> SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.OppdragstatusData.FEIL
-        OppdragstatusDto.OVERFØRT -> SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.OppdragstatusData.OVERFØRT
-        null -> null
-    },
-    overføringstidspunkt = this.overføringstidspunkt,
-    erSimulert = this.erSimulert,
-    simuleringsResultat = this.simuleringsResultat?.tilPersonData()
+    stønadsdager = this.stønadsdager
 )
 
 private fun FeriepengeutbetalingslinjeUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.UtbetalingslinjeData(
     fom = this.fom,
     tom = this.tom,
-    satstype = when (this.satstype) {
-        SatstypeDto.Daglig -> "DAG"
-        SatstypeDto.Engang -> "ENG"
-    },
     sats = this.beløp,
-    grad = this.grad,
     totalbeløp = this.totalbeløp,
     stønadsdager = this.stønadsdager,
     refFagsystemId = this.refFagsystemId,

@@ -3,8 +3,6 @@ package no.nav.helse.dto.serialisering
 import java.time.LocalDateTime
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
-import no.nav.helse.dto.OppdragstatusDto
-import no.nav.helse.dto.SimuleringResultatDto
 
 data class FeriepengeoppdragUtDto(
     val mottaker: String,
@@ -15,10 +13,5 @@ data class FeriepengeoppdragUtDto(
     val nettoBeløp: Int,
     val stønadsdager: Int,
     val totalbeløp: Int,
-    val overføringstidspunkt: LocalDateTime?,
-    val avstemmingsnøkkel: Long?,
-    val status: OppdragstatusDto?,
-    val tidsstempel: LocalDateTime,
-    val erSimulert: Boolean,
-    val simuleringsResultat: SimuleringResultatDto?
+    val tidsstempel: LocalDateTime
 )

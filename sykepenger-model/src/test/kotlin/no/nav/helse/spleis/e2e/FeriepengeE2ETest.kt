@@ -30,7 +30,6 @@ import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Klassekode
-import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -141,17 +140,13 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             Feriepengeutbetalingslinje(
                 fom = 1.mai(2023),
                 tom = 31.mai(2023),
-                satstype = Satstype.Engang,
                 beløp = -267,
-                grad = null,
                 klassekode = Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
                 endringskode = Endringskode.NY
             ), Feriepengeutbetalingslinje(
             fom = 1.mai(2023),
             tom = 31.mai(2023),
-            satstype = Satstype.Engang,
             beløp = 268,
-            grad = null,
             klassekode = Klassekode.SykepengerArbeidstakerFeriepenger,
             endringskode = Endringskode.NY
         )
@@ -179,9 +174,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             Feriepengeutbetalingslinje(
                 fom = 1.mai(2023),
                 tom = 31.mai(2023),
-                satstype = Satstype.Engang,
                 beløp = -700,
-                grad = null,
                 klassekode = Klassekode.SykepengerArbeidstakerFeriepenger,
                 endringskode = Endringskode.NY
             )
@@ -210,9 +203,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             Feriepengeutbetalingslinje(
                 fom = 1.mai(2023),
                 tom = 31.mai(2023),
-                satstype = Satstype.Engang,
                 beløp = -700,
-                grad = null,
                 klassekode = Klassekode.SykepengerArbeidstakerFeriepenger,
                 endringskode = Endringskode.NY
             )
@@ -236,9 +227,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             Feriepengeutbetalingslinje(
                 fom = 1.mai(2023),
                 tom = 31.mai(2023),
-                satstype = Satstype.Engang,
                 beløp = -700,
-                grad = null,
                 klassekode = Klassekode.SykepengerArbeidstakerFeriepenger,
                 endringskode = Endringskode.ENDR,
                 statuskode = "OPPH"
@@ -283,9 +272,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         val utbetalingslinje = Feriepengeutbetalingslinje(
             1.mai(2021),
             31.mai(2021),
-            Satstype.Engang,
             1460,
-            null,
             Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
             Endringskode.NY
         )
@@ -327,9 +314,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         val utbetalingslinje = Feriepengeutbetalingslinje(
             1.mai(2021),
             31.mai(2021),
-            Satstype.Engang,
             1460,
-            null,
             Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
             Endringskode.NY
         )
@@ -374,9 +359,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         val utbetalingslinje = Feriepengeutbetalingslinje(
             1.mai(2021),
             31.mai(2021),
-            Satstype.Engang,
             1460,
-            null,
             Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
             Endringskode.NY
         )

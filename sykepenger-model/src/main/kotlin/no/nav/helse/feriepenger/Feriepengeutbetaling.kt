@@ -22,7 +22,6 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.genererUtbetalingsreferanse
@@ -130,8 +129,8 @@ internal class Feriepengeutbetaling private constructor(
 
     internal fun overfør(aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        if (sendTilOppdrag) oppdrag.overfør(aktivitetsloggMedUtbetalingkontekst, null, "SPLEIS")
-        if (sendPersonoppdragTilOS) personoppdrag.overfør(aktivitetsloggMedUtbetalingkontekst, null, "SPLEIS")
+        if (sendTilOppdrag) oppdrag.overfør(aktivitetsloggMedUtbetalingkontekst, "SPLEIS")
+        if (sendPersonoppdragTilOS) personoppdrag.overfør(aktivitetsloggMedUtbetalingkontekst, "SPLEIS")
     }
 
     internal fun gjelderForÅr(år: Year) = feriepengegrunnlag.opptjeningsår == år
@@ -157,9 +156,7 @@ internal class Feriepengeutbetaling private constructor(
                     Feriepengeutbetalingslinje(
                         fom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atDay(1),
                         tom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atEndOfMonth(),
-                        satstype = Satstype.Engang,
                         beløp = beløp,
-                        grad = null,
                         klassekode = klassekode,
                     )
                 ),

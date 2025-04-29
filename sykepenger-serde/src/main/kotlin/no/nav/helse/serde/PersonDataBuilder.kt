@@ -29,7 +29,6 @@ import no.nav.helse.dto.SykmeldingsperioderDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingVurderingDto
 import no.nav.helse.dto.UtbetalingtypeDto
-import no.nav.helse.dto.serialisering.UtbetaltDagUtDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
@@ -57,6 +56,7 @@ import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
 import no.nav.helse.dto.serialisering.UtbetalingstidslinjeUtDto
+import no.nav.helse.dto.serialisering.UtbetaltDagUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
@@ -690,30 +690,13 @@ private fun FeriepengeoppdragUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     fagsystemId = this.fagsystemId,
     endringskode = this.endringskode.tilPersonData(),
     tidsstempel = this.tidsstempel,
-    nettoBeløp = this.nettoBeløp,
-    avstemmingsnøkkel = this.avstemmingsnøkkel,
-    status = when (this.status) {
-        OppdragstatusDto.AKSEPTERT -> PersonData.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.OppdragstatusData.AKSEPTERT
-        OppdragstatusDto.AKSEPTERT_MED_FEIL -> PersonData.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.OppdragstatusData.AKSEPTERT_MED_FEIL
-        OppdragstatusDto.AVVIST -> PersonData.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.OppdragstatusData.AVVIST
-        OppdragstatusDto.FEIL -> PersonData.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.OppdragstatusData.FEIL
-        OppdragstatusDto.OVERFØRT -> PersonData.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.OppdragstatusData.OVERFØRT
-        null -> null
-    },
-    overføringstidspunkt = this.overføringstidspunkt,
-    erSimulert = this.erSimulert,
-    simuleringsResultat = this.simuleringsResultat?.tilPersonData()
+    nettoBeløp = this.nettoBeløp
 )
 
 private fun FeriepengeutbetalingslinjeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.UtbetalingslinjeData(
     fom = this.fom,
     tom = this.tom,
-    satstype = when (this.satstype) {
-        SatstypeDto.Daglig -> "DAG"
-        SatstypeDto.Engang -> "ENG"
-    },
     sats = this.beløp,
-    grad = this.grad,
     refFagsystemId = this.refFagsystemId,
     delytelseId = this.delytelseId,
     refDelytelseId = this.refDelytelseId,

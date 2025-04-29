@@ -4,7 +4,6 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.KlassekodeDto
-import no.nav.helse.dto.SatstypeDto
 import no.nav.helse.dto.deserialisering.FeriepengeutbetalingslinjeInnDto
 import no.nav.helse.dto.serialisering.FeriepengeutbetalingslinjeUtDto
 import no.nav.helse.erHelg
@@ -23,27 +22,18 @@ import no.nav.helse.utbetalingslinjer.Satstype
 class Feriepengeutbetalingslinje(
     val fom: LocalDate,
     val tom: LocalDate,
-    val satstype: Satstype = Satstype.Companion.Daglig,
     val beløp: Int,
-    val grad: Int?,
     val refFagsystemId: String? = null,
     val delytelseId: Int = 1,
     val refDelytelseId: Int? = null,
     val endringskode: Endringskode = NY,
-    val klassekode: Klassekode = RefusjonIkkeOpplysningspliktig,
+    val klassekode: Klassekode,
     val datoStatusFom: LocalDate? = null
 ) : Iterable<LocalDate> {
 
-    companion object {
-        fun stønadsdager(linjer: List<Feriepengeutbetalingslinje>): Int {
-            return linjer
-                .filterNot { it.erOpphør() }
-                .flatten()
-                .distinct()
-                .filterNot { it.erHelg() }
-                .size
-        }
+    val satstype = Satstype.Companion.Engang
 
+    companion object {
         fun List<Feriepengeutbetalingslinje>.kobleTil(fagsystemId: String) = map { linje ->
             linje.kopier(refFagsystemId = fagsystemId)
         }
@@ -86,12 +76,7 @@ class Feriepengeutbetalingslinje(
             return Feriepengeutbetalingslinje(
                 fom = dto.fom,
                 tom = dto.tom,
-                satstype = when (dto.satstype) {
-                    SatstypeDto.Daglig -> Satstype.Companion.Daglig
-                    SatstypeDto.Engang -> Satstype.Companion.Engang
-                },
                 beløp = dto.beløp,
-                grad = dto.grad,
                 refFagsystemId = dto.refFagsystemId,
                 delytelseId = dto.delytelseId,
                 refDelytelseId = dto.refDelytelseId,
@@ -108,14 +93,14 @@ class Feriepengeutbetalingslinje(
 
     override operator fun iterator() = periode.iterator()
 
-    override fun toString() = "$fom til $tom $endringskode $grad ${datoStatusFom?.let { "opphører fom $it" }}"
+    override fun toString() = "$fom til $tom $endringskode ${datoStatusFom?.let { "opphører fom $it" }}"
 
     internal fun detaljer() =
         OppdragDetaljer.LinjeDetaljer(
             fom = fom,
             tom = tom,
             sats = beløp,
-            grad = grad?.toDouble(),
+            grad = null,
             stønadsdager = stønadsdager(),
             totalbeløp = totalbeløp(),
             statuskode = statuskode
@@ -150,9 +135,7 @@ class Feriepengeutbetalingslinje(
         Feriepengeutbetalingslinje(
             fom = fom,
             tom = tom,
-            satstype = satstype,
             beløp = beløp,
-            grad = grad,
             refFagsystemId = refFagsystemId,
             delytelseId = delytelseId,
             refDelytelseId = refDelytelseId,
@@ -176,14 +159,12 @@ class Feriepengeutbetalingslinje(
         this.fom == other.fom &&
             this.tom == other.tom &&
             this.beløp == other.beløp &&
-            this.grad == other.grad &&
             this.datoStatusFom == other.datoStatusFom
 
     fun kanEndreEksisterendeLinje(other: Feriepengeutbetalingslinje, sisteLinjeITidligereOppdrag: Feriepengeutbetalingslinje) =
         other == sisteLinjeITidligereOppdrag &&
             this.fom == other.fom &&
             this.beløp == other.beløp &&
-            this.grad == other.grad &&
             this.datoStatusFom == other.datoStatusFom
 
     fun skalOpphøreOgErstatte(other: Feriepengeutbetalingslinje, sisteLinjeITidligereOppdrag: Feriepengeutbetalingslinje) =
@@ -193,7 +174,6 @@ class Feriepengeutbetalingslinje(
         return fom.hashCode() * 37 +
             tom.hashCode() * 17 +
             beløp.hashCode() * 41 +
-            grad.hashCode() * 61 +
             endringskode.name.hashCode() * 59 +
             datoStatusFom.hashCode() * 23
     }
@@ -216,11 +196,8 @@ class Feriepengeutbetalingslinje(
         datoStatusFom = tidligere.datoStatusFom
     )
 
-    internal fun begrensFra(førsteDag: LocalDate) = kopier(fom = førsteDag)
-    internal fun begrensTil(sisteDato: LocalDate) = kopier(tom = sisteDato).kuttHelg()
-
     fun slåSammenLinje(førsteLinjeIForrige: Feriepengeutbetalingslinje): Feriepengeutbetalingslinje? {
-        if (this.beløp != førsteLinjeIForrige.beløp || this.grad != førsteLinjeIForrige.grad || !this.tom.erRettFør(førsteLinjeIForrige.fom)) return null
+        if (this.beløp != førsteLinjeIForrige.beløp || !this.tom.erRettFør(førsteLinjeIForrige.fom)) return null
         return kopier(tom = førsteLinjeIForrige.tom)
     }
 
@@ -241,7 +218,7 @@ class Feriepengeutbetalingslinje(
         "tom" to tom.toString(),
         "satstype" to "$satstype",
         "sats" to beløp,
-        "grad" to grad?.toDouble(), // backwards-compatibility mot andre systemer som forventer double: må gjennomgås
+        "grad" to null,
         "stønadsdager" to stønadsdager(),
         "totalbeløp" to totalbeløp(),
         "endringskode" to endringskode.toString(),
@@ -256,13 +233,7 @@ class Feriepengeutbetalingslinje(
     fun dto() = FeriepengeutbetalingslinjeUtDto(
         fom = this.fom,
         tom = this.tom,
-        satstype = when {
-            satstype === Satstype.Companion.Daglig -> SatstypeDto.Daglig
-            satstype === Satstype.Companion.Engang -> SatstypeDto.Engang
-            else -> error("ukjent statype: $satstype")
-        },
         beløp = this.beløp,
-        grad = this.grad,
         stønadsdager = stønadsdager(),
         totalbeløp = this.totalbeløp(),
         refFagsystemId = this.refFagsystemId,

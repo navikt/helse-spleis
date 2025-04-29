@@ -633,15 +633,8 @@ data class PersonData(
                 val fagsystemId: String,
                 val endringskode: String,
                 val tidsstempel: LocalDateTime,
-                val nettoBeløp: Int,
-                val avstemmingsnøkkel: Long?,
-                val status: OppdragstatusData?,
-                val overføringstidspunkt: LocalDateTime?,
-                val erSimulert: Boolean,
-                val simuleringsResultat: VedtaksperiodeData.DataForSimuleringData?
+                val nettoBeløp: Int
             ) {
-                enum class OppdragstatusData { OVERFØRT, AKSEPTERT, AKSEPTERT_MED_FEIL, AVVIST, FEIL }
-
                 fun tilDto() = FeriepengeoppdragInnDto(
                     mottaker = this.mottaker,
                     fagområde = when (fagområde) {
@@ -658,27 +651,13 @@ data class PersonData(
                         else -> error("Ukjent endringskode: $endringskode")
                     },
                     nettoBeløp = this.nettoBeløp,
-                    overføringstidspunkt = this.overføringstidspunkt,
-                    avstemmingsnøkkel = this.avstemmingsnøkkel,
-                    status = when (status) {
-                        OppdragstatusData.OVERFØRT -> OppdragstatusDto.OVERFØRT
-                        OppdragstatusData.AKSEPTERT -> OppdragstatusDto.AKSEPTERT
-                        OppdragstatusData.AKSEPTERT_MED_FEIL -> OppdragstatusDto.AKSEPTERT_MED_FEIL
-                        OppdragstatusData.AVVIST -> OppdragstatusDto.AVVIST
-                        OppdragstatusData.FEIL -> OppdragstatusDto.FEIL
-                        null -> null
-                    },
-                    tidsstempel = this.tidsstempel,
-                    erSimulert = this.erSimulert,
-                    simuleringsResultat = this.simuleringsResultat?.tilDto()
+                    tidsstempel = this.tidsstempel
                 )
 
                 data class UtbetalingslinjeData(
                     val fom: LocalDate,
                     val tom: LocalDate,
-                    val satstype: String,
                     val sats: Int,
-                    val grad: Int?,
                     val refFagsystemId: String?,
                     val delytelseId: Int,
                     val refDelytelseId: Int?,
@@ -689,13 +668,7 @@ data class PersonData(
                     fun tilDto() = FeriepengeutbetalingslinjeInnDto(
                         fom = this.fom,
                         tom = this.tom,
-                        satstype = when (this.satstype) {
-                            "ENG" -> SatstypeDto.Engang
-                            "DAG" -> SatstypeDto.Daglig
-                            else -> error("Ukjent satstype: $satstype")
-                        },
                         beløp = this.sats,
-                        grad = this.grad,
                         refFagsystemId = this.refFagsystemId,
                         delytelseId = this.delytelseId,
                         refDelytelseId = this.refDelytelseId,

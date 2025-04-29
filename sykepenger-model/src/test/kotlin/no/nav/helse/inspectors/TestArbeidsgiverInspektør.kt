@@ -9,7 +9,6 @@ import no.nav.helse.spleis.e2e.IdInnhenter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Klassekode
-import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import org.junit.jupiter.api.fail
 
@@ -50,9 +49,12 @@ internal class TestArbeidsgiverInspektør(
     internal val feriepengeoppdrag = view.feriepengeutbetalinger
         .flatMap { listOf(it.oppdrag, it.personoppdrag) }
         .map {
-            Feriepengeoppdrag(it.fagsystemId, feriepengeutbetalingslinjer = it.map { linje ->
-                Feriepengeutbetalingslinje(linje.fom, linje.tom, linje.satstype, linje.beløp, linje.grad, linje.klassekode, linje.endringskode, linje.statuskode)
-            })
+            Feriepengeoppdrag(
+                fagsystemId = it.fagsystemId,
+                feriepengeutbetalingslinjer = it.map { linje ->
+                    Feriepengeutbetalingslinje(linje.fom, linje.tom, linje.beløp, linje.klassekode, linje.endringskode, linje.statuskode)
+                }
+            )
         }
     internal val infotrygdFeriepengebeløpPerson = view.feriepengeutbetalinger.map { it.infotrygdFeriepengebeløpPerson }
     internal val infotrygdFeriepengebeløpArbeidsgiver = view.feriepengeutbetalinger.map { it.infotrygdFeriepengebeløpArbeidsgiver }
@@ -80,9 +82,7 @@ internal class TestArbeidsgiverInspektør(
     internal data class Feriepengeutbetalingslinje(
         val fom: LocalDate,
         val tom: LocalDate,
-        val satstype: Satstype,
         val beløp: Int?,
-        val grad: Int?,
         val klassekode: Klassekode,
         val endringskode: Endringskode,
         val statuskode: String? = null
