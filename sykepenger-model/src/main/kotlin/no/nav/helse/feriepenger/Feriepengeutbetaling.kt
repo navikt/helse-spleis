@@ -3,7 +3,7 @@ package no.nav.helse.feriepenger
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.Year
-import java.util.UUID
+import java.util.*
 import kotlin.math.roundToInt
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.deserialisering.FeriepengeInnDto
@@ -21,10 +21,8 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Klassekode
-import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.genererUtbetalingsreferanse
@@ -35,8 +33,8 @@ internal class Feriepengeutbetaling private constructor(
     private val infotrygdFeriepengebeløpArbeidsgiver: Double,
     private val spleisFeriepengebeløpArbeidsgiver: Double,
     private val spleisFeriepengebeløpPerson: Double,
-    private val oppdrag: Oppdrag,
-    private val personoppdrag: Oppdrag,
+    private val oppdrag: Feriepengeoppdrag,
+    private val personoppdrag: Feriepengeoppdrag,
     private val utbetalingId: UUID,
     private val sendTilOppdrag: Boolean,
     private val sendPersonoppdragTilOS: Boolean,
@@ -62,8 +60,8 @@ internal class Feriepengeutbetaling private constructor(
                 infotrygdFeriepengebeløpArbeidsgiver = dto.infotrygdFeriepengebeløpArbeidsgiver,
                 spleisFeriepengebeløpArbeidsgiver = dto.spleisFeriepengebeløpArbeidsgiver,
                 spleisFeriepengebeløpPerson = dto.spleisFeriepengebeløpPerson,
-                oppdrag = Oppdrag.gjenopprett(dto.oppdrag),
-                personoppdrag = Oppdrag.gjenopprett(dto.personoppdrag),
+                oppdrag = Feriepengeoppdrag.gjenopprett(dto.oppdrag),
+                personoppdrag = Feriepengeoppdrag.gjenopprett(dto.personoppdrag),
                 utbetalingId = dto.utbetalingId,
                 sendTilOppdrag = dto.sendTilOppdrag,
                 sendPersonoppdragTilOS = dto.sendPersonoppdragTilOS
@@ -145,18 +143,18 @@ internal class Feriepengeutbetaling private constructor(
         private val utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
         private val tidligereFeriepengeutbetalinger: List<Feriepengeutbetaling>
     ) {
-        private fun oppdrag(aktivitetslogg: IAktivitetslogg, fagområde: Fagområde, forrigeOppdrag: Oppdrag?, beløp: Int): Oppdrag {
+        private fun oppdrag(aktivitetslogg: IAktivitetslogg, fagområde: Fagområde, forrigeOppdrag: Feriepengeoppdrag?, beløp: Int): Feriepengeoppdrag {
             val (klassekode, mottaker) = when (fagområde) {
                 Fagområde.SykepengerRefusjon -> Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig to orgnummer
                 Fagområde.Sykepenger -> Klassekode.SykepengerArbeidstakerFeriepenger to personidentifikator.toString()
             }
             val fagsystemId = forrigeOppdrag?.fagsystemId ?: genererUtbetalingsreferanse(UUID.randomUUID())
 
-            val nyttOppdrag = Oppdrag(
+            val nyttOppdrag = Feriepengeoppdrag(
                 mottaker = mottaker,
                 fagområde = fagområde,
                 linjer = listOf(
-                    Utbetalingslinje(
+                    Feriepengeutbetalingslinje(
                         fom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atDay(1),
                         tom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atEndOfMonth(),
                         satstype = Satstype.Engang,
@@ -173,7 +171,7 @@ internal class Feriepengeutbetaling private constructor(
             return nyttOppdrag.minus(forrigeOppdrag, aktivitetslogg)
         }
 
-        private fun skalSendeOppdrag(forrigeOppdrag: Oppdrag?, beløp: Int): Boolean {
+        private fun skalSendeOppdrag(forrigeOppdrag: Feriepengeoppdrag?, beløp: Int): Boolean {
             if (forrigeOppdrag == null) return beløp != 0
             return beløp != forrigeOppdrag.totalbeløp() || beløp == 0
         }
@@ -334,6 +332,6 @@ internal data class FeriepengeutbetalingView(
     val infotrygdFeriepengebeløpArbeidsgiver: Double,
     val spleisFeriepengebeløpArbeidsgiver: Double,
     val spleisFeriepengebeløpPerson: Double,
-    val oppdrag: Oppdrag,
-    val personoppdrag: Oppdrag
+    val oppdrag: Feriepengeoppdrag,
+    val personoppdrag: Feriepengeoppdrag
 )

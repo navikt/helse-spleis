@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.feriepenger.Feriepengeoppdrag
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
@@ -150,6 +151,17 @@ interface PersonObserver {
 
             companion object {
                 fun mapOppdrag(oppdrag: Oppdrag) = OppdragEventDetaljer(
+                    fagsystemId = oppdrag.fagsystemId,
+                    mottaker = oppdrag.mottaker,
+                    nettoBeløp = oppdrag.nettoBeløp(),
+                    linjer = oppdrag.map { linje ->
+                        OppdragEventLinjeDetaljer(
+                            fom = linje.fom,
+                            tom = linje.tom,
+                            totalbeløp = linje.totalbeløp()
+                        )
+                    })
+                fun mapOppdrag(oppdrag: Feriepengeoppdrag) = OppdragEventDetaljer(
                     fagsystemId = oppdrag.fagsystemId,
                     mottaker = oppdrag.mottaker,
                     nettoBeløp = oppdrag.nettoBeløp(),
@@ -315,7 +327,7 @@ interface PersonObserver {
             )
 
             companion object {
-                fun mapOppdrag(oppdrag: Oppdrag) = mapDetaljer(oppdrag.detaljer())
+                fun mapOppdrag(oppdrag: Feriepengeoppdrag) = mapDetaljer(oppdrag.detaljer())
                 private fun mapDetaljer(detaljer: OppdragDetaljer) =
                     OppdragEventDetaljer(
                         fagsystemId = detaljer.fagsystemId,

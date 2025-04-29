@@ -21,6 +21,8 @@ import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.BehandlingendringUtDto
 import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.FeriepengeUtDto
+import no.nav.helse.dto.serialisering.FeriepengeoppdragUtDto
+import no.nav.helse.dto.serialisering.FeriepengeutbetalingslinjeUtDto
 import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdArbeidsgiverutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
@@ -38,6 +40,7 @@ import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
 import no.nav.helse.dto.serialisering.UtbetalingstidslinjeUtDto
+import no.nav.helse.dto.serialisering.UtbetaltDagUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
@@ -290,6 +293,42 @@ data class SpannerPersonDto(
                 val dato: LocalDate,
                 val beløp: Int,
             )
+
+            data class OppdragData(
+                val mottaker: String,
+                val fagområde: String,
+                val linjer: List<UtbetalingslinjeData>,
+                val fagsystemId: String,
+                val endringskode: String,
+                val tidsstempel: LocalDateTime,
+                val nettoBeløp: Int,
+                val stønadsdager: Int,
+                val totalbeløp: Int,
+                val avstemmingsnøkkel: Long?,
+                val status: OppdragstatusData?,
+                val overføringstidspunkt: LocalDateTime?,
+                val erSimulert: Boolean,
+                val simuleringsResultat: VedtaksperiodeData.DataForSimuleringData?
+            ) {
+                enum class OppdragstatusData { OVERFØRT, AKSEPTERT, AKSEPTERT_MED_FEIL, AVVIST, FEIL }
+
+                data class UtbetalingslinjeData(
+                    val fom: LocalDate,
+                    val tom: LocalDate,
+                    val satstype: String,
+                    val sats: Int,
+                    val grad: Int?,
+                    val stønadsdager: Int,
+                    val totalbeløp: Int,
+                    val refFagsystemId: String?,
+                    val delytelseId: Int,
+                    val refDelytelseId: Int?,
+                    val endringskode: String,
+                    val klassekode: String,
+                    val datoStatusFom: LocalDate?,
+                    val statuskode: String?
+                )
+            }
         }
 
         data class SykmeldingsperiodeData(
@@ -1388,6 +1427,53 @@ private fun FeriepengeUtDto.tilPersonData() =
         sendTilOppdrag = sendTilOppdrag,
         sendPersonoppdragTilOS = sendPersonoppdragTilOS
     )
+
+private fun FeriepengeoppdragUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData(
+    mottaker = this.mottaker,
+    fagområde = when (this.fagområde) {
+        FagområdeDto.SP -> "SP"
+        FagområdeDto.SPREF -> "SPREF"
+    },
+    linjer = this.linjer.map { it.tilPersonData() },
+    fagsystemId = this.fagsystemId,
+    endringskode = this.endringskode.tilPersonData(),
+    tidsstempel = this.tidsstempel,
+    nettoBeløp = this.nettoBeløp,
+    totalbeløp = this.totalbeløp,
+    stønadsdager = this.stønadsdager,
+    avstemmingsnøkkel = this.avstemmingsnøkkel,
+    status = when (this.status) {
+        OppdragstatusDto.AKSEPTERT -> SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.OppdragstatusData.AKSEPTERT
+        OppdragstatusDto.AKSEPTERT_MED_FEIL -> SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.OppdragstatusData.AKSEPTERT_MED_FEIL
+        OppdragstatusDto.AVVIST -> SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.OppdragstatusData.AVVIST
+        OppdragstatusDto.FEIL -> SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.OppdragstatusData.FEIL
+        OppdragstatusDto.OVERFØRT -> SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.OppdragstatusData.OVERFØRT
+        null -> null
+    },
+    overføringstidspunkt = this.overføringstidspunkt,
+    erSimulert = this.erSimulert,
+    simuleringsResultat = this.simuleringsResultat?.tilPersonData()
+)
+
+private fun FeriepengeutbetalingslinjeUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.UtbetalingslinjeData(
+    fom = this.fom,
+    tom = this.tom,
+    satstype = when (this.satstype) {
+        SatstypeDto.Daglig -> "DAG"
+        SatstypeDto.Engang -> "ENG"
+    },
+    sats = this.beløp,
+    grad = this.grad,
+    totalbeløp = this.totalbeløp,
+    stønadsdager = this.stønadsdager,
+    refFagsystemId = this.refFagsystemId,
+    delytelseId = this.delytelseId,
+    refDelytelseId = this.refDelytelseId,
+    endringskode = this.endringskode.tilPersonData(),
+    klassekode = this.klassekode.tilPersonData(),
+    datoStatusFom = this.datoStatusFom,
+    statuskode = this.statuskode
+)
 
 private fun UtbetaltDagUtDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.UtbetaltDagData(

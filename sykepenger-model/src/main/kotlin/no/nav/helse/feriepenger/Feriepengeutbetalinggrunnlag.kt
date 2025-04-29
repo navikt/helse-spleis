@@ -1,7 +1,7 @@
 package no.nav.helse.feriepenger
 
-import no.nav.helse.dto.FeriepengeutbetalinggrunnlagUtDto
-import no.nav.helse.dto.UtbetaltDagUtDto
+import no.nav.helse.dto.serialisering.FeriepengeutbetalinggrunnlagUtDto
+import no.nav.helse.dto.serialisering.UtbetaltDagUtDto
 import no.nav.helse.dto.deserialisering.FeriepengeutbetalinggrunnlagInnDto
 import java.time.LocalDate
 import java.time.Year

@@ -2,7 +2,6 @@ package no.nav.helse.dto
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Year
 import java.time.YearMonth
 import java.util.*
 
@@ -162,41 +161,5 @@ data class ArbeidsforholdDto(
     val ansattTom: LocalDate?,
     val deaktivert: Boolean
 )
-
-data class FeriepengeutbetalinggrunnlagUtDto(
-    val opptjeningsår: Year,
-    val utbetalteDager: List<UtbetaltDagUtDto>,
-    val feriepengedager: List<UtbetaltDagUtDto>
-)
-
-sealed class UtbetaltDagUtDto {
-    abstract val orgnummer: String
-    abstract val dato: LocalDate
-    abstract val beløp: Int
-
-    data class InfotrygdArbeidsgiver(
-        override val orgnummer: String,
-        override val dato: LocalDate,
-        override val beløp: Int
-    ) : UtbetaltDagUtDto()
-
-    data class InfotrygdPerson(
-        override val orgnummer: String,
-        override val dato: LocalDate,
-        override val beløp: Int
-    ) : UtbetaltDagUtDto()
-
-    data class SpleisArbeidsgiver(
-        override val orgnummer: String,
-        override val dato: LocalDate,
-        override val beløp: Int
-    ) : UtbetaltDagUtDto()
-
-    data class SpleisPerson(
-        override val orgnummer: String,
-        override val dato: LocalDate,
-        override val beløp: Int
-    ) : UtbetaltDagUtDto()
-}
 
 data class InfotrygdFerieperiodeDto(val periode: PeriodeDto)

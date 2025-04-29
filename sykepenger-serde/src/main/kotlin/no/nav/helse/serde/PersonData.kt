@@ -51,8 +51,10 @@ import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
 import no.nav.helse.dto.deserialisering.BehandlingerInnDto
 import no.nav.helse.dto.deserialisering.FaktaavklartInntektInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeInnDto
+import no.nav.helse.dto.deserialisering.FeriepengeoppdragInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeutbetalinggrunnlagInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeutbetalinggrunnlagInnDto.UtbetaltDagInnDto
+import no.nav.helse.dto.deserialisering.FeriepengeutbetalingslinjeInnDto
 import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdArbeidsgiverutbetalingsperiodeInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdPersonutbetalingsperiodeInnDto
@@ -621,6 +623,97 @@ data class PersonData(
                     )
 
                     else -> error("Ukjent utbetaltdag-type: $type")
+                }
+            }
+
+            data class OppdragData(
+                val mottaker: String,
+                val fagområde: String,
+                val linjer: List<UtbetalingslinjeData>,
+                val fagsystemId: String,
+                val endringskode: String,
+                val tidsstempel: LocalDateTime,
+                val nettoBeløp: Int,
+                val avstemmingsnøkkel: Long?,
+                val status: OppdragstatusData?,
+                val overføringstidspunkt: LocalDateTime?,
+                val erSimulert: Boolean,
+                val simuleringsResultat: VedtaksperiodeData.DataForSimuleringData?
+            ) {
+                enum class OppdragstatusData { OVERFØRT, AKSEPTERT, AKSEPTERT_MED_FEIL, AVVIST, FEIL }
+
+                fun tilDto() = FeriepengeoppdragInnDto(
+                    mottaker = this.mottaker,
+                    fagområde = when (fagområde) {
+                        "SPREF" -> FagområdeDto.SPREF
+                        "SP" -> FagområdeDto.SP
+                        else -> error("Ukjent fagområde: $fagområde")
+                    },
+                    linjer = this.linjer.map { it.tilDto() },
+                    fagsystemId = this.fagsystemId,
+                    endringskode = when (endringskode) {
+                        "NY" -> EndringskodeDto.NY
+                        "ENDR" -> EndringskodeDto.ENDR
+                        "UEND" -> EndringskodeDto.UEND
+                        else -> error("Ukjent endringskode: $endringskode")
+                    },
+                    nettoBeløp = this.nettoBeløp,
+                    overføringstidspunkt = this.overføringstidspunkt,
+                    avstemmingsnøkkel = this.avstemmingsnøkkel,
+                    status = when (status) {
+                        OppdragstatusData.OVERFØRT -> OppdragstatusDto.OVERFØRT
+                        OppdragstatusData.AKSEPTERT -> OppdragstatusDto.AKSEPTERT
+                        OppdragstatusData.AKSEPTERT_MED_FEIL -> OppdragstatusDto.AKSEPTERT_MED_FEIL
+                        OppdragstatusData.AVVIST -> OppdragstatusDto.AVVIST
+                        OppdragstatusData.FEIL -> OppdragstatusDto.FEIL
+                        null -> null
+                    },
+                    tidsstempel = this.tidsstempel,
+                    erSimulert = this.erSimulert,
+                    simuleringsResultat = this.simuleringsResultat?.tilDto()
+                )
+
+                data class UtbetalingslinjeData(
+                    val fom: LocalDate,
+                    val tom: LocalDate,
+                    val satstype: String,
+                    val sats: Int,
+                    val grad: Int?,
+                    val refFagsystemId: String?,
+                    val delytelseId: Int,
+                    val refDelytelseId: Int?,
+                    val endringskode: String,
+                    val klassekode: String,
+                    val datoStatusFom: LocalDate?
+                ) {
+                    fun tilDto() = FeriepengeutbetalingslinjeInnDto(
+                        fom = this.fom,
+                        tom = this.tom,
+                        satstype = when (this.satstype) {
+                            "ENG" -> SatstypeDto.Engang
+                            "DAG" -> SatstypeDto.Daglig
+                            else -> error("Ukjent satstype: $satstype")
+                        },
+                        beløp = this.sats,
+                        grad = this.grad,
+                        refFagsystemId = this.refFagsystemId,
+                        delytelseId = this.delytelseId,
+                        refDelytelseId = this.refDelytelseId,
+                        endringskode = when (this.endringskode) {
+                            "NY" -> EndringskodeDto.NY
+                            "ENDR" -> EndringskodeDto.ENDR
+                            "UEND" -> EndringskodeDto.UEND
+                            else -> error("Ukjent endringskode: $endringskode")
+                        },
+                        klassekode = when (this.klassekode) {
+                            "SPREFAG-IOP" -> KlassekodeDto.RefusjonIkkeOpplysningspliktig
+                            "SPREFAGFER-IOP" -> KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig
+                            "SPATORD" -> KlassekodeDto.SykepengerArbeidstakerOrdinær
+                            "SPATFER" -> KlassekodeDto.SykepengerArbeidstakerFeriepenger
+                            else -> error("Ukjent klassekode: ${this.klassekode}")
+                        },
+                        datoStatusFom = this.datoStatusFom
+                    )
                 }
             }
         }
