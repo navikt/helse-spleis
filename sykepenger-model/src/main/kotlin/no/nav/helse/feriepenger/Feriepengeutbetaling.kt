@@ -142,11 +142,7 @@ internal class Feriepengeutbetaling private constructor(
         private val utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
         private val tidligereFeriepengeutbetalinger: List<Feriepengeutbetaling>
     ) {
-        private fun oppdrag(aktivitetslogg: IAktivitetslogg, fagområde: Fagområde, forrigeOppdrag: Feriepengeoppdrag?, beløp: Int): Feriepengeoppdrag {
-            val (klassekode, mottaker) = when (fagområde) {
-                Fagområde.SykepengerRefusjon -> Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig to orgnummer
-                Fagområde.Sykepenger -> Klassekode.SykepengerArbeidstakerFeriepenger to personidentifikator.toString()
-            }
+        private fun oppdrag(aktivitetslogg: IAktivitetslogg, mottaker: String, fagområde: Fagområde, klassekode: Klassekode, forrigeOppdrag: Feriepengeoppdrag?, beløp: Int): Feriepengeoppdrag {
             val fagsystemId = forrigeOppdrag?.fagsystemId ?: genererUtbetalingsreferanse(UUID.randomUUID())
 
             val nyttOppdrag = Feriepengeoppdrag(
@@ -206,7 +202,14 @@ internal class Feriepengeutbetaling private constructor(
                     ?.oppdrag
                     ?.takeIf { it.linjerUtenOpphør().isNotEmpty() }
 
-            val arbeidsgiveroppdrag = oppdrag(aktivitetslogg, Fagområde.SykepengerRefusjon, forrigeSendteArbeidsgiverOppdrag, arbeidsgiverbeløp)
+            val arbeidsgiveroppdrag = oppdrag(
+                aktivitetslogg = aktivitetslogg,
+                mottaker = orgnummer,
+                fagområde = Fagområde.SykepengerRefusjon,
+                klassekode = Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
+                forrigeOppdrag = forrigeSendteArbeidsgiverOppdrag,
+                beløp = arbeidsgiverbeløp
+            )
 
             if (arbeidsgiverbeløp != 0 && orgnummer == "0") aktivitetslogg.info("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\".")
 
@@ -241,7 +244,14 @@ internal class Feriepengeutbetaling private constructor(
                     ?.personoppdrag
                     ?.takeIf { it.linjerUtenOpphør().isNotEmpty() }
 
-            val personoppdrag = oppdrag(aktivitetslogg, Fagområde.Sykepenger, forrigeSendtePersonOppdrag, personbeløp)
+            val personoppdrag = oppdrag(
+                aktivitetslogg = aktivitetslogg,
+                mottaker = personidentifikator.toString(),
+                fagområde = Fagområde.Sykepenger,
+                klassekode = Klassekode.SykepengerArbeidstakerFeriepenger,
+                forrigeOppdrag = forrigeSendtePersonOppdrag,
+                beløp = personbeløp
+            )
 
             val sendPersonoppdrag = skalSendeOppdrag(forrigeSendtePersonOppdrag, personbeløp)
 
