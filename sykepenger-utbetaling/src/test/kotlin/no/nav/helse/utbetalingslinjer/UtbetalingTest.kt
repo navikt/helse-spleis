@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.AnnullerUtbetalingHendelse
 import no.nav.helse.hendelser.Periode
@@ -10,14 +10,12 @@ import no.nav.helse.hendelser.Saksbehandler
 import no.nav.helse.hendelser.SimuleringHendelse
 import no.nav.helse.hendelser.UtbetalingmodulHendelse
 import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.testhelpers.AP
-import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAP
 import no.nav.helse.testhelpers.NAV
@@ -328,48 +326,6 @@ internal class UtbetalingTest {
     }
 
     @Test
-    fun `ny utbetaling splitter opp tidligere utbetaling før`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV, 1.ARB, 27.NAV, 2.ARB, 29.NAV, startDato = 1.januar).betale()
-        val utbetaling1 = opprettUtbetaling(tidslinje)
-
-        val tidslinjeNy = tidslinjeOf(16.AP, 15.NAV, 18.ARB, 16.AP, 25.NAV, startDato = 1.januar).betale()
-        val utbetaling2 = opprettUtbetaling(tidslinjeNy, utbetaling1, periode = 31.januar.somPeriode())
-
-        val utbetaling1Inspektør = utbetaling1.inspektør
-        val utbetaling2Inspektør = utbetaling2.inspektør
-
-        assertEquals(3, utbetaling1Inspektør.arbeidsgiverOppdrag.size)
-        utbetaling1Inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
-            assertEquals(NY, linje.endringskode)
-            assertEquals(1, linje.delytelseId)
-            assertNull(linje.refDelytelseId)
-        }
-        utbetaling1Inspektør.arbeidsgiverOppdrag[1].inspektør.also { linje ->
-            assertEquals(2.februar til 28.februar, linje.fom til linje.tom)
-            assertEquals(NY, linje.endringskode)
-            assertEquals(2, linje.delytelseId)
-            assertEquals(1, linje.refDelytelseId)
-        }
-        utbetaling1Inspektør.arbeidsgiverOppdrag[2].inspektør.also { linje ->
-            assertEquals(3.mars til 30.mars, linje.fom til linje.tom)
-            assertEquals(NY, linje.endringskode)
-            assertEquals(3, linje.delytelseId)
-            assertEquals(2, linje.refDelytelseId)
-        }
-
-        assertEquals(utbetaling1Inspektør.korrelasjonsId, utbetaling2Inspektør.korrelasjonsId)
-        assertEquals(utbetaling1Inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetaling2Inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
-        assertEquals(1, utbetaling2Inspektør.arbeidsgiverOppdrag.size)
-        utbetaling2Inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
-            assertEquals(NY, linje.endringskode)
-            assertEquals(4, linje.delytelseId)
-            assertEquals(3, linje.refDelytelseId)
-        }
-    }
-
-    @Test
     fun `utbetalinger med ulik korrelasjonsId kan ikke overlappe`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
@@ -429,14 +385,12 @@ internal class UtbetalingTest {
     @Test
     fun `utbetaling starter i Ny`() {
         val tidslinje = tidslinjeOf(16.AP, 17.NAV).betale()
-
-        val sisteDato = 21.januar
         val utbetaling = Utbetaling.lagUtbetaling(
             emptyList(),
             UNG_PERSON_FNR_2018,
             ORGNUMMER,
             tidslinje,
-            sisteDato.somPeriode(),
+            tidslinje.periode(),
             aktivitetslogg,
             LocalDate.MAX,
             100,
@@ -445,25 +399,6 @@ internal class UtbetalingTest {
         assertEquals(Utbetalingstatus.NY, utbetaling.inspektør.tilstand)
         utbetaling.opprett(aktivitetslogg)
         assertEquals(IKKE_UTBETALT, utbetaling.inspektør.tilstand)
-    }
-
-    @Test
-    fun `utbetalinger inkluderer ikke dager etter siste dato`() {
-        val tidslinje = tidslinjeOf(16.AP, 17.NAV).betale()
-
-        val sisteDato = 21.januar
-        val utbetaling = Utbetaling.lagUtbetaling(
-            emptyList(),
-            UNG_PERSON_FNR_2018,
-            ORGNUMMER,
-            tidslinje,
-            tidslinje.periode().start til sisteDato,
-            aktivitetslogg,
-            LocalDate.MAX,
-            100,
-            148
-        ).also { it.opprett(aktivitetslogg) }
-        assertEquals(1.januar til sisteDato, utbetaling.inspektør.periode)
     }
 
     @Test

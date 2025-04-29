@@ -279,6 +279,7 @@ class Utbetaling private constructor(
         aktivitetslogg: IAktivitetslogg,
         type: Utbetalingtype,
         vedtaksperiode: Periode,
+        utbetalingstidslinje: Utbetalingstidslinje,
         kladd: Utbetalingkladd,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
@@ -289,7 +290,7 @@ class Utbetaling private constructor(
         val nyttPersonoppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, this.personOppdrag, kladd.personoppdrag)
 
         val tidligereUtbetalingstidslinje = this.utbetalingstidslinje.fremTilOgMed(vedtaksperiode.start.forrigeDag)
-        val nyUtbetalingstidslinje = tidligereUtbetalingstidslinje + kladd.utbetalingstidslinje
+        val nyUtbetalingstidslinje = tidligereUtbetalingstidslinje + utbetalingstidslinje
 
         return Utbetaling(
             korrelerendeUtbetaling = this,
@@ -337,7 +338,10 @@ class Utbetaling private constructor(
             gjenståendeSykedager: Int,
             type: Utbetalingtype = UTBETALING
         ): Utbetaling {
-            val vedtaksperiodekladd = UtbetalingkladdBuilder(periode, utbetalingstidslinje.subset(periode), organisasjonsnummer, fødselsnummer).build()
+            check(utbetalingstidslinje.periode() == periode) {
+                "forventer ikke at utbetalingstidslinje skal være forskjellig fra vedtaksperioden"
+            }
+            val vedtaksperiodekladd = UtbetalingkladdBuilder(utbetalingstidslinje, organisasjonsnummer, fødselsnummer).build()
 
             val forrigeUtbetalte = utbetalinger.aktive(periode)
             val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull()
@@ -351,6 +355,7 @@ class Utbetaling private constructor(
                 aktivitetslogg = aktivitetslogg,
                 type = type,
                 vedtaksperiode = periode,
+                utbetalingstidslinje = utbetalingstidslinje,
                 kladd = vedtaksperiodekladd,
                 maksdato = maksdato,
                 forbrukteSykedager = forbrukteSykedager,
@@ -358,8 +363,8 @@ class Utbetaling private constructor(
                 annulleringer = emptyList()
             ) ?: Utbetaling(
                 korrelerendeUtbetaling = null,
-                periode = vedtaksperiodekladd.utbetalingsperiode,
-                utbetalingstidslinje = utbetalingstidslinje.subset(vedtaksperiodekladd.utbetalingsperiode),
+                periode = periode,
+                utbetalingstidslinje = utbetalingstidslinje,
                 arbeidsgiverOppdrag = vedtaksperiodekladd.arbeidsgiveroppdrag,
                 personOppdrag = vedtaksperiodekladd.personoppdrag,
                 type = type,
