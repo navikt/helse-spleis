@@ -9,11 +9,11 @@ class OppdragBuilder(
     private val mottaker: String,
     private val fagområde: Fagområde
 ) {
-    private val økonomibeløp: (Økonomi) -> Int? = { økonomi ->
+    private val økonomibeløp: (Økonomi) -> Int = { økonomi ->
         when (fagområde) {
             Fagområde.SykepengerRefusjon -> økonomi.arbeidsgiverbeløp
             Fagområde.Sykepenger -> økonomi.personbeløp
-        }?.daglig?.toInt()
+        }?.daglig?.toInt()!!
     }
     private val utbetalingslinjer = mutableListOf<Utbetalingslinje>()
     private var tilstand: Tilstand = MellomLinjer()
