@@ -43,6 +43,14 @@ sealed interface Behandlingsporing {
     }
 }
 
+fun Behandlingsporing.erLik(other: Behandlingsporing) = when (this) {
+    Behandlingsporing.IngenArbeidsgiver -> other is Behandlingsporing.IngenArbeidsgiver
+    Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> other is Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+    is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> other is Behandlingsporing.Yrkesaktivitet.Arbeidstaker && this.organisasjonsnummer == other.organisasjonsnummer
+    Behandlingsporing.Yrkesaktivitet.Frilans -> other is Behandlingsporing.Yrkesaktivitet.Frilans
+    Behandlingsporing.Yrkesaktivitet.Selvstendig -> other is Behandlingsporing.Yrkesaktivitet.Selvstendig
+}
+
 // en value-class for uuid-er som representerer @id til en melding fra kafka
 @JvmInline
 value class MeldingsreferanseId(val id: UUID) {

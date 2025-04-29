@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
@@ -49,6 +49,7 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.erLik
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrArbeidsgiveropplysninger
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.blokkererBehandlingAv
@@ -109,8 +110,8 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class Arbeidsgiver private constructor(
     private val person: Person,
-    val organisasjonsnummer: String,
     private val id: UUID,
+    val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
     private val inntektshistorikk: Inntektshistorikk,
     private val sykdomshistorikk: Sykdomshistorikk,
     private val sykmeldingsperioder: Sykmeldingsperioder,
@@ -119,13 +120,12 @@ internal class Arbeidsgiver private constructor(
     private val utbetalinger: MutableList<Utbetaling>,
     private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
     private val ubrukteRefusjonsopplysninger: Refusjonsservitør,
-    val yrkesaktivitet: Yrkesaktivitet,
     private val regelverkslogg: Regelverkslogg
 ) : Aktivitetskontekst, UtbetalingObserver {
-    internal constructor(person: Person, yrkesaktivitet: Yrkesaktivitet, regelverkslogg: Regelverkslogg) : this(
+    internal constructor(person: Person, yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, regelverkslogg: Regelverkslogg) : this(
         person = person,
-        organisasjonsnummer = yrkesaktivitet.identifikator(),
         id = UUID.randomUUID(),
+        yrkesaktivitetssporing = yrkesaktivitetssporing,
         inntektshistorikk = Inntektshistorikk(),
         sykdomshistorikk = Sykdomshistorikk(),
         sykmeldingsperioder = Sykmeldingsperioder(),
@@ -134,15 +134,20 @@ internal class Arbeidsgiver private constructor(
         utbetalinger = mutableListOf(),
         feriepengeutbetalinger = mutableListOf(),
         ubrukteRefusjonsopplysninger = Refusjonsservitør(),
-        yrkesaktivitet = yrkesaktivitet,
         regelverkslogg = regelverkslogg
     )
 
-    val behandlingsporing = when (yrkesaktivitet) {
-        Yrkesaktivitet.Arbeidsledig -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
-        is Yrkesaktivitet.Arbeidstaker -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(yrkesaktivitet.organisasjonsnummer)
-        Yrkesaktivitet.Frilans -> Behandlingsporing.Yrkesaktivitet.Frilans
-        Yrkesaktivitet.Selvstendig -> Behandlingsporing.Yrkesaktivitet.Selvstendig
+    val organisasjonsnummer = when (yrkesaktivitetssporing) {
+        Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> "ARBEIDSLEDIG"
+        is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> yrkesaktivitetssporing.organisasjonsnummer
+        Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANS"
+        Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+    }
+    private val yrkesaktivitet = when (yrkesaktivitetssporing) {
+        Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> Yrkesaktivitet.Arbeidsledig
+        is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> Yrkesaktivitet.Arbeidstaker
+        Behandlingsporing.Yrkesaktivitet.Frilans -> Yrkesaktivitet.Frilans
+        Behandlingsporing.Yrkesaktivitet.Selvstendig -> Yrkesaktivitet.Selvstendig
     }
 
     init {
@@ -162,8 +167,8 @@ internal class Arbeidsgiver private constructor(
     )
 
     internal companion object {
-        internal fun List<Arbeidsgiver>.finn(yrkesaktivitet: Yrkesaktivitet) =
-            find { it.erSammeYrkesaktivitet(yrkesaktivitet) }
+        internal fun List<Arbeidsgiver>.finn(behandlingsporing: Behandlingsporing) =
+            find { it.yrkesaktivitetssporing.erLik(behandlingsporing) }
 
         internal fun List<Arbeidsgiver>.tidligsteDato(): LocalDate {
             return mapNotNull { it.sykdomstidslinje().periode()?.start }.minOrNull() ?: LocalDate.now()
@@ -312,7 +317,12 @@ internal class Arbeidsgiver private constructor(
             val arbeidsgiver = Arbeidsgiver(
                 person = person,
                 id = dto.id,
-                organisasjonsnummer = dto.organisasjonsnummer,
+                yrkesaktivitetssporing = when (dto.yrkesaktivitetstype) {
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSLEDIG -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSTAKER -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(dto.organisasjonsnummer)
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.FRILANS -> Behandlingsporing.Yrkesaktivitet.Frilans
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG -> Behandlingsporing.Yrkesaktivitet.Selvstendig
+                },
                 inntektshistorikk = Inntektshistorikk.gjenopprett(dto.inntektshistorikk),
                 sykdomshistorikk = Sykdomshistorikk.gjenopprett(dto.sykdomshistorikk),
                 sykmeldingsperioder = Sykmeldingsperioder.gjenopprett(dto.sykmeldingsperioder),
@@ -322,12 +332,6 @@ internal class Arbeidsgiver private constructor(
                 feriepengeutbetalinger = dto.feriepengeutbetalinger.map { Feriepengeutbetaling.gjenopprett(it) }
                     .toMutableList(),
                 ubrukteRefusjonsopplysninger = Refusjonsservitør.gjenopprett(dto.ubrukteRefusjonsopplysninger),
-                yrkesaktivitet = when (dto.yrkesaktivitetstype) {
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSLEDIG -> Yrkesaktivitet.Arbeidsledig
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSTAKER -> Yrkesaktivitet.Arbeidstaker(dto.organisasjonsnummer)
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.FRILANS -> Yrkesaktivitet.Frilans
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG -> Yrkesaktivitet.Selvstendig
-                },
                 regelverkslogg = regelverkslogg
             )
             val utbetalingerMap = utbetalinger.associateBy(Utbetaling::id)
@@ -354,8 +358,6 @@ internal class Arbeidsgiver private constructor(
             return arbeidsgiver
         }
     }
-
-    private fun erSammeYrkesaktivitet(yrkesaktivitet: Yrkesaktivitet) = this.yrkesaktivitet.erLik(yrkesaktivitet)
 
     internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): Boolean {
         return avklarInntekt(skjæringstidspunkt, vedtaksperioder) != null
@@ -765,7 +767,7 @@ internal class Arbeidsgiver private constructor(
         val builder = UtbetalingsdagerBuilder(sykdomshistorikk.sykdomstidslinje(), utbetalingstidslinje)
         person.utbetalingUtbetalt(
             PersonObserver.UtbetalingUtbetaltEvent(
-                yrkesaktivitetssporing = behandlingsporing,
+                yrkesaktivitetssporing = yrkesaktivitetssporing,
                 utbetalingId = id,
                 type = type.name,
                 korrelasjonsId = korrelasjonsId,
@@ -808,7 +810,7 @@ internal class Arbeidsgiver private constructor(
         val builder = UtbetalingsdagerBuilder(sykdomshistorikk.sykdomstidslinje(), utbetalingstidslinje)
         person.utbetalingUtenUtbetaling(
             PersonObserver.UtbetalingUtbetaltEvent(
-                yrkesaktivitetssporing = behandlingsporing,
+                yrkesaktivitetssporing = yrkesaktivitetssporing,
                 utbetalingId = id,
                 type = type.name,
                 fom = periode.start,
@@ -842,7 +844,7 @@ internal class Arbeidsgiver private constructor(
     ) {
         person.utbetalingEndret(
             PersonObserver.UtbetalingEndretEvent(
-                yrkesaktivitetssporing = behandlingsporing,
+                yrkesaktivitetssporing = yrkesaktivitetssporing,
                 utbetalingId = id,
                 type = type.name,
                 forrigeStatus = forrigeTilstand.name,
@@ -870,7 +872,7 @@ internal class Arbeidsgiver private constructor(
     ) {
         person.annullert(
             PersonObserver.UtbetalingAnnullertEvent(
-                yrkesaktivitetssporing = behandlingsporing,
+                yrkesaktivitetssporing = yrkesaktivitetssporing,
                 korrelasjonsId = korrelasjonsId,
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                 personFagsystemId = personFagsystemId,
@@ -1128,11 +1130,11 @@ internal class Arbeidsgiver private constructor(
         return ArbeidsgiverUtDto(
             id = id,
             organisasjonsnummer = organisasjonsnummer,
-            yrkesaktivitetstype = when (yrkesaktivitet) {
-                is Yrkesaktivitet.Arbeidsledig -> ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSLEDIG
-                is Yrkesaktivitet.Arbeidstaker -> ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSTAKER
-                is Yrkesaktivitet.Frilans -> ArbeidsgiverUtDto.Yrkesaktivitetstype.FRILANS
-                is Yrkesaktivitet.Selvstendig -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG
+            yrkesaktivitetstype = when (yrkesaktivitetssporing) {
+                Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSLEDIG
+                is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSTAKER
+                Behandlingsporing.Yrkesaktivitet.Frilans -> ArbeidsgiverUtDto.Yrkesaktivitetstype.FRILANS
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG
             },
             inntektshistorikk = inntektshistorikk.dto(),
             sykdomshistorikk = sykdomshistorikk.dto(),

@@ -73,7 +73,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.venter
 import no.nav.helse.person.Vedtaksperiode.Companion.SPEILRELATERT
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
-import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -360,7 +359,7 @@ class Person private constructor(
         }
 
         utbetalingshistorikk.sikreAtArbeidsgivereEksisterer {
-            _arbeidsgivere.finnEllerOpprett(Yrkesaktivitet.Arbeidstaker(it), aktivitetsloggMedPersonkontekst)
+            _arbeidsgivere.finnEllerOpprett(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(it), aktivitetsloggMedPersonkontekst)
         }
         arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(
             personidentifikator,
@@ -581,16 +580,13 @@ class Person private constructor(
         }
     }
 
-    private fun finnEllerOpprettArbeidsgiver(behandlingsporing: Behandlingsporing.Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
-        finnEllerOpprettArbeidsgiver(behandlingsporing.tilYrkesaktivitet(), aktivitetslogg)
-
-    private fun finnEllerOpprettArbeidsgiver(yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
+    private fun finnEllerOpprettArbeidsgiver(yrkesaktivitet: Behandlingsporing.Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
         _arbeidsgivere.finnEllerOpprett(yrkesaktivitet, aktivitetslogg)
 
     private fun finnArbeidsgiver(behandlingsporing: Behandlingsporing.Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
-        arbeidsgivere.finn(behandlingsporing.tilYrkesaktivitet()) ?: aktivitetslogg.logiskFeil("Finner ikke arbeidsgiver")
+        arbeidsgivere.finn(behandlingsporing) ?: aktivitetslogg.logiskFeil("Finner ikke arbeidsgiver")
 
-    private fun MutableList<Arbeidsgiver>.finnEllerOpprett(yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
+    private fun MutableList<Arbeidsgiver>.finnEllerOpprett(yrkesaktivitet: Behandlingsporing.Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
         finn(yrkesaktivitet) ?: Arbeidsgiver(this@Person, yrkesaktivitet, regelverkslogg).also { arbeidsgiver ->
             aktivitetslogg.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", yrkesaktivitet)
             add(arbeidsgiver)
