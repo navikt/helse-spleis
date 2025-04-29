@@ -374,15 +374,18 @@ internal class UtbetalingTest {
     fun `utbetaling starter i Ny`() {
         val tidslinje = tidslinjeOf(16.AP, 17.NAV).betale()
         val utbetaling = Utbetaling.lagUtbetaling(
-            emptyList(),
-            UNG_PERSON_FNR_2018,
-            ORGNUMMER,
-            tidslinje,
-            tidslinje.periode(),
-            aktivitetslogg,
-            LocalDate.MAX,
-            100,
-            148
+            utbetalinger = emptyList(),
+            vedtaksperiodekladd = UtbetalingkladdBuilder(
+                tidslinje = tidslinje,
+                mottakerRefusjon = ORGNUMMER,
+                mottakerBruker = UNG_PERSON_FNR_2018,
+            ).build(),
+            utbetalingstidslinje = tidslinje,
+            periode = tidslinje.periode(),
+            aktivitetslogg = aktivitetslogg,
+            maksdato = LocalDate.MAX,
+            forbrukteSykedager = 100,
+            gjenståendeSykedager = 148
         )
         assertEquals(Utbetalingstatus.NY, utbetaling.inspektør.tilstand)
         utbetaling.opprett(aktivitetslogg)
@@ -693,39 +696,40 @@ internal class UtbetalingTest {
     private fun opprettGodkjentUtbetaling(
         tidslinje: Utbetalingstidslinje,
         periode: Periode = tidslinje.periode(),
-        fødselsnummer: String = UNG_PERSON_FNR_2018,
-        orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
-    ) = opprettUbetaltUtbetaling(tidslinje, null, periode, fødselsnummer, orgnummer, aktivitetslogg)
+    ) = opprettUbetaltUtbetaling(tidslinje, null, periode, aktivitetslogg)
         .also { godkjenn(it) }
 
     private fun opprettUbetaltUtbetaling(
         tidslinje: Utbetalingstidslinje,
         tidligere: Utbetaling? = null,
         periode: Periode = tidslinje.periode(),
-        fødselsnummer: String = UNG_PERSON_FNR_2018,
-        orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
-    ) = Utbetaling.lagUtbetaling(
-        tidligere?.let { listOf(tidligere) } ?: emptyList(),
-        fødselsnummer,
-        orgnummer,
-        tidslinje,
-        periode,
-        aktivitetslogg,
-        LocalDate.MAX,
-        100,
-        148
-    ).also { it.opprett(aktivitetslogg) }
+    ): Utbetaling {
+        val kladd = UtbetalingkladdBuilder(
+            tidslinje = tidslinje,
+            mottakerRefusjon = ORGNUMMER,
+            mottakerBruker = UNG_PERSON_FNR_2018,
+        ).build()
+
+        return Utbetaling.lagUtbetaling(
+            utbetalinger = tidligere?.let { listOf(tidligere) } ?: emptyList(),
+            vedtaksperiodekladd = kladd,
+            utbetalingstidslinje = tidslinje,
+            periode = periode,
+            aktivitetslogg = aktivitetslogg,
+            maksdato = LocalDate.MAX,
+            forbrukteSykedager = 100,
+            gjenståendeSykedager = 148
+        ).also { it.opprett(aktivitetslogg) }
+    }
 
     private fun opprettUtbetaling(
         tidslinje: Utbetalingstidslinje,
         tidligere: Utbetaling? = null,
         periode: Periode = tidslinje.periode(),
-        fødselsnummer: String = UNG_PERSON_FNR_2018,
-        orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
-    ) = opprettUbetaltUtbetaling(tidslinje, tidligere, periode, fødselsnummer, orgnummer, aktivitetslogg).also { utbetaling ->
+    ) = opprettUbetaltUtbetaling(tidslinje, tidligere, periode, aktivitetslogg).also { utbetaling ->
         godkjenn(utbetaling)
         listOf(utbetaling.inspektør.arbeidsgiverOppdrag, utbetaling.inspektør.personOppdrag)
             .filter { it.harUtbetalinger() }

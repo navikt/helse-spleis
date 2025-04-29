@@ -93,6 +93,8 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
+import no.nav.helse.utbetalingslinjer.Utbetalingkladd
+import no.nav.helse.utbetalingslinjer.UtbetalingkladdBuilder
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -386,6 +388,14 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
+    private fun lagUtbetalingkladd(utbetalingstidslinje: Utbetalingstidslinje): Utbetalingkladd {
+        return UtbetalingkladdBuilder(
+            tidslinje = utbetalingstidslinje,
+            mottakerRefusjon = organisasjonsnummer,
+            mottakerBruker = person.fødselsnummer,
+        ).build()
+    }
+
     internal fun lagNyUtbetaling(
         aktivitetslogg: IAktivitetslogg,
         utbetalingstidslinje: Utbetalingstidslinje,
@@ -397,8 +407,7 @@ internal class Arbeidsgiver private constructor(
     ): Utbetaling {
         val utbetalingen = Utbetaling.lagUtbetaling(
             utbetalinger = utbetalinger,
-            mottakerPersonoppdrag = person.fødselsnummer,
-            mottakerRefusjonoppdrag = organisasjonsnummer,
+            vedtaksperiodekladd = lagUtbetalingkladd(utbetalingstidslinje),
             utbetalingstidslinje = utbetalingstidslinje,
             periode = periode,
             aktivitetslogg = aktivitetslogg,

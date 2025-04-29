@@ -328,8 +328,7 @@ class Utbetaling private constructor(
 
         fun lagUtbetaling(
             utbetalinger: List<Utbetaling>,
-            mottakerPersonoppdrag: String,
-            mottakerRefusjonoppdrag: String,
+            vedtaksperiodekladd: Utbetalingkladd,
             utbetalingstidslinje: Utbetalingstidslinje,
             periode: Periode,
             aktivitetslogg: IAktivitetslogg,
@@ -341,7 +340,6 @@ class Utbetaling private constructor(
             check(utbetalingstidslinje.periode() == periode) {
                 "forventer ikke at utbetalingstidslinje skal være forskjellig fra vedtaksperioden"
             }
-            val vedtaksperiodekladd = UtbetalingkladdBuilder(utbetalingstidslinje, mottakerRefusjonoppdrag, mottakerPersonoppdrag).build()
 
             val forrigeUtbetalte = utbetalinger.aktive(periode)
             val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull()
