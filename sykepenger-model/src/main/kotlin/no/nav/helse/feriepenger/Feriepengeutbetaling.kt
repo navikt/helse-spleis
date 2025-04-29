@@ -8,6 +8,7 @@ import kotlin.math.roundToInt
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.deserialisering.FeriepengeInnDto
 import no.nav.helse.dto.serialisering.FeriepengeUtDto
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.UtbetalingHendelse
@@ -100,7 +101,7 @@ internal class Feriepengeutbetaling private constructor(
 
         person.feriepengerUtbetalt(
             PersonObserver.FeriepengerUtbetaltEvent(
-                organisasjonsnummer = organisasjonsnummer,
+                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
                 arbeidsgiverOppdrag = PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(oppdrag),
                 personOppdrag = PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personoppdrag)
             )
@@ -108,7 +109,7 @@ internal class Feriepengeutbetaling private constructor(
 
         person.utbetalingEndret(
             PersonObserver.UtbetalingEndretEvent(
-                organisasjonsnummer = organisasjonsnummer,
+                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
                 utbetalingId = utbetalingId,
                 type = Utbetalingtype.FERIEPENGER.name,
                 forrigeStatus = Utbetalingstatus.IKKE_UTBETALT.name,

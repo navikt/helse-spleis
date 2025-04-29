@@ -4,6 +4,7 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.harBehov
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -80,7 +81,7 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         val forventet = PersonObserver.OverlappendeInfotrygdperioder(
             listOf(
                 PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
-                    organisasjonsnummer = a1,
+                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                     vedtaksperiodeId = vedtaksperiodeId,
                     vedtaksperiodeFom = 1.januar,
                     vedtaksperiodeTom = 20.januar,
@@ -97,7 +98,7 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
                 ),
 
                 PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
-                    organisasjonsnummer = a1,
+                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                     vedtaksperiodeId = inspektør.vedtaksperiodeId(2.vedtaksperiode),
                     vedtaksperiodeFom = 21.januar,
                     vedtaksperiodeTom = 31.januar,

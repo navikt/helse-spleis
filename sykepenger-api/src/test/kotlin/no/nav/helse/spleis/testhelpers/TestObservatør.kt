@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.testhelpers
 
-import java.util.*
+import java.util.UUID
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
@@ -32,12 +32,12 @@ internal class TestObservatør : PersonObserver {
     override fun inntektsmeldingReplay(
         event: PersonObserver.TrengerArbeidsgiveropplysningerEvent
     ) {
-        ventendeReplays.add(event.organisasjonsnummer to event.vedtaksperiodeId)
+        ventendeReplays.add(event.yrkesaktivitetssporing.somOrganisasjonsnummer to event.vedtaksperiodeId)
     }
 
     override fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {
         vedtaksperiodeendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(event) }.add(event)
-        vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(event.vedtaksperiodeId)
+        vedtaksperioder.getOrPut(event.yrkesaktivitetssporing.somOrganisasjonsnummer) { mutableSetOf() }.add(event.vedtaksperiodeId)
         if (event.gjeldendeTilstand != event.forrigeTilstand) {
             tilstandsendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(TilstandType.START) }.add(event.gjeldendeTilstand)
         }

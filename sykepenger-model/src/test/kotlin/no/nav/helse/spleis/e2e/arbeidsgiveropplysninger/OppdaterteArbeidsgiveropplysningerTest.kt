@@ -5,6 +5,7 @@ import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
@@ -48,14 +49,14 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
             personidentifikator = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = a1,
+            yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
             vedtaksperiodeId = 1.vedtaksperiode.id(a1),
             skjæringstidspunkt = 1.januar,
             sykmeldingsperioder = listOf(2.januar til 31.januar),
             egenmeldingsperioder = emptyList(),
             førsteFraværsdager = listOf(
-                PersonObserver.FørsteFraværsdag(a2, 1.januar),
-                PersonObserver.FørsteFraværsdag(a1, 2.januar)
+                PersonObserver.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2), 1.januar),
+                PersonObserver.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 2.januar)
             ),
             forespurteOpplysninger = setOf(
                 PersonObserver.Inntekt,
@@ -105,14 +106,14 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         arbeidsgiveropplysningerEventer.last().also { trengerArbeidsgiveropplysningerEvent ->
             val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
                 personidentifikator = UNG_PERSON_FNR_2018,
-                organisasjonsnummer = a1,
+                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                 skjæringstidspunkt = 1.januar,
                 sykmeldingsperioder = listOf(mars),
                 egenmeldingsperioder = emptyList(),
                 førsteFraværsdager = listOf(
-                    PersonObserver.FørsteFraværsdag(a2, 1.februar),
-                    PersonObserver.FørsteFraværsdag(a1, 1.mars)
+                    PersonObserver.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2), 1.februar),
+                    PersonObserver.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 1.mars)
                 ),
                 forespurteOpplysninger = setOf(
                     PersonObserver.Refusjon,
@@ -146,12 +147,12 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
             personidentifikator = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = a1,
+            yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
             vedtaksperiodeId = 2.vedtaksperiode.id(a1),
             skjæringstidspunkt = 10.februar,
             sykmeldingsperioder = listOf(10.februar til 10.mars),
             egenmeldingsperioder = emptyList(),
-            førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(a1, 10.februar)),
+            førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 10.februar)),
             forespurteOpplysninger = setOf(
                 PersonObserver.Inntekt,
                 PersonObserver.Refusjon

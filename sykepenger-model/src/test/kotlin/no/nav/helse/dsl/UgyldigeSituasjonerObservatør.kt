@@ -18,6 +18,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat.Bestemmelse.IKKE_VURDERT
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -105,7 +106,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
     override fun vedtaksperiodeEndret(
         event: PersonObserver.VedtaksperiodeEndretEvent
     ) {
-        arbeidsgivereMap.getOrPut(event.organisasjonsnummer) { person.arbeidsgiver(event.organisasjonsnummer) }
+        arbeidsgivereMap.getOrPut(event.yrkesaktivitetssporing.somOrganisasjonsnummer) { person.arbeidsgiver(event.yrkesaktivitetssporing.somOrganisasjonsnummer) }
         gjeldendeTilstander[event.vedtaksperiodeId] = event.gjeldendeTilstand
     }
 

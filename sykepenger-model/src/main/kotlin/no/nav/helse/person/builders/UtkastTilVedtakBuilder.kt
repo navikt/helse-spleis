@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.properties.Delegates
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
@@ -27,7 +28,7 @@ import no.nav.helse.økonomi.Inntekt
 
 internal class UtkastTilVedtakBuilder(
     private val vedtaksperiodeId: UUID,
-    private val arbeidsgiver: String,
+    private val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
     private val kanForkastes: Boolean,
     erForlengelse: Boolean,
     private val harPeriodeRettFør: Boolean,
@@ -167,11 +168,11 @@ internal class UtkastTilVedtakBuilder(
         init {
             check(arbeidsgiverinntekter.isNotEmpty()) { "Forventet ikke at det ikke er noen arbeidsgivere i sykepengegrunnlaget." }
             if (arbeidsgiverinntekter.size == 1) tags.add(Tag.EnArbeidsgiver) else tags.add(Tag.FlereArbeidsgivere)
-            if (arbeidsgiverinntekter.single { it.arbeidsgiver == arbeidsgiver }.inntektskilde == Inntektskilde.AOrdningen) tags.add(Tag.InntektFraAOrdningenLagtTilGrunn)
+            if (arbeidsgiverinntekter.single { it.arbeidsgiver == (yrkesaktivitetssporing as? Behandlingsporing.Yrkesaktivitet.Arbeidstaker)?.organisasjonsnummer }.inntektskilde == Inntektskilde.AOrdningen) tags.add(Tag.InntektFraAOrdningenLagtTilGrunn)
         }
 
         private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta = when {
-            tags.contains(Tag.InngangsvilkårFraInfotrygd) -> FastsattIInfotrygd(totalOmregnetÅrsinntekt)
+            tags.contains(Tag.InngangsvilkårFraInfotrygd) -> FastsattIInfotrygd(totalOmregnetÅrsinntekt, (yrkesaktivitetssporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker).organisasjonsnummer)
 
             skjønnsfastsatt -> FastsattEtterSkjønn(
                 omregnetÅrsinntekt = totalOmregnetÅrsinntekt,
@@ -203,7 +204,7 @@ internal class UtkastTilVedtakBuilder(
 
         private val periodetypeForGodkjenningsbehov = sykepengegrunnlagsfakta.periodetypeForGodkjenningsbehov(tags)
 
-        private val omregnedeÅrsinntekterForGodkjenningsbehov = sykepengegrunnlagsfakta.omregnedeÅrsinntekterForGodkjenningsbehov(arbeidsgiver)
+        private val omregnedeÅrsinntekterForGodkjenningsbehov = sykepengegrunnlagsfakta.omregnedeÅrsinntekterForGodkjenningsbehov()
 
         val godkjenningsbehov = mapOf(
             "periodeFom" to "${periode.start}",
@@ -284,7 +285,7 @@ internal class UtkastTilVedtakBuilder(
         )
 
         fun avsluttetMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<MeldingsreferanseId>) = PersonObserver.AvsluttetMedVedtakEvent(
-            organisasjonsnummer = arbeidsgiver,
+            yrkesaktivitetssporing = yrkesaktivitetssporing,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             periode = periode,
@@ -349,8 +350,8 @@ internal class UtkastTilVedtakBuilder(
             }
         }
 
-        private fun Sykepengegrunnlagsfakta.omregnedeÅrsinntekterForGodkjenningsbehov(arbeidsgiver: String): List<Map<String, Any>> = when (val fakta = this) {
-            is FastsattIInfotrygd -> listOf(mapOf("organisasjonsnummer" to arbeidsgiver, "beløp" to fakta.omregnetÅrsinntekt))
+        private fun Sykepengegrunnlagsfakta.omregnedeÅrsinntekterForGodkjenningsbehov(): List<Map<String, Any>> = when (val fakta = this) {
+            is FastsattIInfotrygd -> listOf(mapOf("organisasjonsnummer" to fakta.arbeidsgiver, "beløp" to fakta.omregnetÅrsinntekt))
             is FastsattEtterHovedregel -> fakta.arbeidsgivere.map { mapOf("organisasjonsnummer" to it.arbeidsgiver, "beløp" to it.omregnetÅrsinntekt) }
             is FastsattEtterSkjønn -> fakta.arbeidsgivere.map { mapOf("organisasjonsnummer" to it.arbeidsgiver, "beløp" to it.omregnetÅrsinntekt) } // Nei, ikke bug at det er omregnetÅrsinntekt
         }

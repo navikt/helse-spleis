@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
@@ -27,6 +27,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.OpphørAvNaturalytelser
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -103,13 +104,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             val forventet = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
                 personidentifikator = UNG_PERSON_FNR_2018,
-                organisasjonsnummer = a1,
+                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 2.vedtaksperiode,
                 skjæringstidspunkt = 17.februar,
                 sykmeldingsperioder = listOf(17.februar til 28.februar),
                 egenmeldingsperioder = listOf(10.februar.somPeriode()),
                 førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(
-                    organisasjonsnummer = a1,
+                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                     førsteFraværsdag = 17.februar
                 )),
                 forespurteOpplysninger = setOf(Inntekt, Refusjon)

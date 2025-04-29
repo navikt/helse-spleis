@@ -6,6 +6,7 @@ import no.nav.helse.spekemat.fabrikk.Pølsefabrikk
 import no.nav.helse.spekemat.fabrikk.PølseradDto
 import no.nav.helse.spekemat.fabrikk.Pølsestatus
 import no.nav.helse.spleis.speil.SpekematDTO
+import no.nav.helse.spleis.testhelpers.somOrganisasjonsnummer
 
 class Spekemat : PersonObserver {
     private val hendelser = mutableListOf<Any>()
@@ -41,7 +42,7 @@ class Spekemat : PersonObserver {
 
     override fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
         hendelser.add(event)
-        arbeidsgivere.getOrPut(event.organisasjonsnummer) { Pølsefabrikk() }
+        arbeidsgivere.getOrPut(event.yrkesaktivitetssporing.somOrganisasjonsnummer) { Pølsefabrikk() }
             .nyPølse(
                 Pølse(
                     vedtaksperiodeId = event.vedtaksperiodeId,
@@ -54,13 +55,13 @@ class Spekemat : PersonObserver {
 
     override fun behandlingLukket(event: PersonObserver.BehandlingLukketEvent) {
         hendelser.add(event)
-        arbeidsgivere.getValue(event.organisasjonsnummer)
+        arbeidsgivere.getValue(event.yrkesaktivitetssporing.somOrganisasjonsnummer)
             .oppdaterPølse(event.vedtaksperiodeId, event.behandlingId, Pølsestatus.LUKKET)
     }
 
     override fun behandlingForkastet(event: PersonObserver.BehandlingForkastetEvent) {
         hendelser.add(event)
-        arbeidsgivere.getValue(event.organisasjonsnummer)
+        arbeidsgivere.getValue(event.yrkesaktivitetssporing.somOrganisasjonsnummer)
             .oppdaterPølse(event.vedtaksperiodeId, event.behandlingId, Pølsestatus.FORKASTET)
     }
 }

@@ -2,6 +2,7 @@ package no.nav.helse.dsl
 
 import java.util.UUID
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.somOrganisasjonsnummer
 
 internal class Vedtaksperiodesamler : PersonObserver {
     private val vedtaksperioder = mutableMapOf<String, MutableSet<UUID>>()
@@ -19,6 +20,6 @@ internal class Vedtaksperiodesamler : PersonObserver {
     override fun vedtaksperiodeEndret(
         event: PersonObserver.VedtaksperiodeEndretEvent
     ) {
-        vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(event.vedtaksperiodeId)
+        vedtaksperioder.getOrPut(event.yrkesaktivitetssporing.somOrganisasjonsnummer) { mutableSetOf() }.add(event.vedtaksperiodeId)
     }
 }

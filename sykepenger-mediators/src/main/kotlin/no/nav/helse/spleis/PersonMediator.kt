@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Arbeidsgiverperiode
@@ -42,13 +43,30 @@ internal class PersonMediator(
         meldinger.add(Pakke(fødselsnummer, eventName, message))
     }
 
+    private val Behandlingsporing.Yrkesaktivitet.somOrganisasjonsnummer
+        get() = when (this) {
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> "ARBEIDSLEDIG"
+            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> organisasjonsnummer
+            Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANS"
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+        }
+
+    private val Behandlingsporing.Yrkesaktivitet.somYrkesaktivitetstype
+        get() = when (this) {
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> "ARBEIDSLEDIG"
+            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> "ARBEIDSTAKER"
+            Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANS"
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+        }
+
     override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) {
         queueMessage(
             JsonMessage.newMessage(
                 "inntektsmelding_før_søknad",
                 mapOf(
                     "inntektsmeldingId" to event.inntektsmeldingId,
-                    "organisasjonsnummer" to event.organisasjonsnummer
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype
                 )
             )
         )
@@ -94,13 +112,15 @@ internal class PersonMediator(
     override fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
         queueMessage(
             JsonMessage.newMessage(
-                "vedtaksperiode_annullert", mapOf(
-                "fom" to vedtaksperiodeAnnullertEvent.fom,
-                "tom" to vedtaksperiodeAnnullertEvent.tom,
-                "vedtaksperiodeId" to vedtaksperiodeAnnullertEvent.vedtaksperiodeId,
-                "behandlingId" to vedtaksperiodeAnnullertEvent.behandlingId,
-                "organisasjonsnummer" to vedtaksperiodeAnnullertEvent.organisasjonsnummer
-            )
+                "vedtaksperiode_annullert",
+                mapOf(
+                    "fom" to vedtaksperiodeAnnullertEvent.fom,
+                    "tom" to vedtaksperiodeAnnullertEvent.tom,
+                    "vedtaksperiodeId" to vedtaksperiodeAnnullertEvent.vedtaksperiodeId,
+                    "behandlingId" to vedtaksperiodeAnnullertEvent.behandlingId,
+                    "organisasjonsnummer" to vedtaksperiodeAnnullertEvent.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to vedtaksperiodeAnnullertEvent.yrkesaktivitetssporing.somYrkesaktivitetstype
+                )
             )
         )
     }
@@ -108,27 +128,29 @@ internal class PersonMediator(
     override fun overlappendeInfotrygdperioder(event: PersonObserver.OverlappendeInfotrygdperioder) {
         queueMessage(
             JsonMessage.newMessage(
-                "overlappende_infotrygdperioder", mutableMapOf(
-                "infotrygdhistorikkHendelseId" to event.infotrygdhistorikkHendelseId,
-                "vedtaksperioder" to event.overlappendeInfotrygdperioder.map {
-                    mapOf(
-                        "organisasjonsnummer" to it.organisasjonsnummer,
-                        "vedtaksperiodeId" to it.vedtaksperiodeId,
-                        "vedtaksperiodeFom" to it.vedtaksperiodeFom,
-                        "vedtaksperiodeTom" to it.vedtaksperiodeTom,
-                        "vedtaksperiodetilstand" to it.vedtaksperiodetilstand,
-                        "kanForkastes" to it.kanForkastes,
-                        "infotrygdperioder" to it.infotrygdperioder.map { infotrygdperiode ->
-                            mapOf(
-                                "fom" to infotrygdperiode.fom,
-                                "tom" to infotrygdperiode.tom,
-                                "type" to infotrygdperiode.type,
-                                "organisasjonsnummer" to infotrygdperiode.orgnummer
-                            )
-                        }
-                    )
-                },
-            )
+                "overlappende_infotrygdperioder",
+                mutableMapOf(
+                    "infotrygdhistorikkHendelseId" to event.infotrygdhistorikkHendelseId,
+                    "vedtaksperioder" to event.overlappendeInfotrygdperioder.map {
+                        mapOf(
+                            "organisasjonsnummer" to it.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                            "yrkesaktivitetstype" to it.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                            "vedtaksperiodeId" to it.vedtaksperiodeId,
+                            "vedtaksperiodeFom" to it.vedtaksperiodeFom,
+                            "vedtaksperiodeTom" to it.vedtaksperiodeTom,
+                            "vedtaksperiodetilstand" to it.vedtaksperiodetilstand,
+                            "kanForkastes" to it.kanForkastes,
+                            "infotrygdperioder" to it.infotrygdperioder.map { infotrygdperiode ->
+                                mapOf(
+                                    "fom" to infotrygdperiode.fom,
+                                    "tom" to infotrygdperiode.tom,
+                                    "type" to infotrygdperiode.type,
+                                    "organisasjonsnummer" to infotrygdperiode.orgnummer
+                                )
+                            }
+                        )
+                    },
+                )
             )
         )
     }
@@ -152,18 +174,20 @@ internal class PersonMediator(
     override fun annullering(event: PersonObserver.UtbetalingAnnullertEvent) {
         queueMessage(
             JsonMessage.newMessage(
-                "utbetaling_annullert", mutableMapOf(
-                "organisasjonsnummer" to event.organisasjonsnummer,
-                "utbetalingId" to event.utbetalingId,
-                "korrelasjonsId" to event.korrelasjonsId,
-                "fom" to event.fom,
-                "tom" to event.tom,
-                "tidspunkt" to event.annullertAvSaksbehandler,
-                "epost" to event.saksbehandlerEpost,
-                "ident" to event.saksbehandlerIdent,
-                "arbeidsgiverFagsystemId" to event.arbeidsgiverFagsystemId,
-                "personFagsystemId" to event.personFagsystemId
-            )
+                "utbetaling_annullert",
+                mutableMapOf(
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "utbetalingId" to event.utbetalingId,
+                    "korrelasjonsId" to event.korrelasjonsId,
+                    "fom" to event.fom,
+                    "tom" to event.tom,
+                    "tidspunkt" to event.annullertAvSaksbehandler,
+                    "epost" to event.saksbehandlerEpost,
+                    "ident" to event.saksbehandlerIdent,
+                    "arbeidsgiverFagsystemId" to event.arbeidsgiverFagsystemId,
+                    "personFagsystemId" to event.personFagsystemId
+                )
             )
         )
     }
@@ -171,16 +195,18 @@ internal class PersonMediator(
     override fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
         queueMessage(
             JsonMessage.newMessage(
-                "utbetaling_endret", mapOf(
-                "organisasjonsnummer" to event.organisasjonsnummer,
-                "utbetalingId" to event.utbetalingId,
-                "type" to event.type,
-                "forrigeStatus" to event.forrigeStatus,
-                "gjeldendeStatus" to event.gjeldendeStatus,
-                "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
-                "personOppdrag" to event.personOppdrag,
-                "korrelasjonsId" to event.korrelasjonsId
-            )
+                "utbetaling_endret",
+                mapOf(
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "utbetalingId" to event.utbetalingId,
+                    "type" to event.type,
+                    "forrigeStatus" to event.forrigeStatus,
+                    "gjeldendeStatus" to event.gjeldendeStatus,
+                    "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
+                    "personOppdrag" to event.personOppdrag,
+                    "korrelasjonsId" to event.korrelasjonsId
+                )
             )
         )
     }
@@ -233,52 +259,58 @@ internal class PersonMediator(
 
     private fun utbetalingAvsluttet(eventName: String, event: PersonObserver.UtbetalingUtbetaltEvent) =
         JsonMessage.newMessage(
-            eventName, mapOf(
-            "organisasjonsnummer" to event.organisasjonsnummer,
-            "utbetalingId" to event.utbetalingId,
-            "korrelasjonsId" to event.korrelasjonsId,
-            "type" to event.type,
-            "fom" to event.fom,
-            "tom" to event.tom,
-            "maksdato" to event.maksdato,
-            "forbrukteSykedager" to event.forbrukteSykedager,
-            "gjenståendeSykedager" to event.gjenståendeSykedager,
-            "stønadsdager" to event.stønadsdager,
-            "ident" to event.ident,
-            "epost" to event.epost,
-            "tidspunkt" to event.tidspunkt,
-            "automatiskBehandling" to event.automatiskBehandling,
-            "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
-            "personOppdrag" to event.personOppdrag,
-            "utbetalingsdager" to event.utbetalingsdager
-        )
+            eventName,
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "utbetalingId" to event.utbetalingId,
+                "korrelasjonsId" to event.korrelasjonsId,
+                "type" to event.type,
+                "fom" to event.fom,
+                "tom" to event.tom,
+                "maksdato" to event.maksdato,
+                "forbrukteSykedager" to event.forbrukteSykedager,
+                "gjenståendeSykedager" to event.gjenståendeSykedager,
+                "stønadsdager" to event.stønadsdager,
+                "ident" to event.ident,
+                "epost" to event.epost,
+                "tidspunkt" to event.tidspunkt,
+                "automatiskBehandling" to event.automatiskBehandling,
+                "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
+                "personOppdrag" to event.personOppdrag,
+                "utbetalingsdager" to event.utbetalingsdager
+            )
         )
 
     override fun feriepengerUtbetalt(event: PersonObserver.FeriepengerUtbetaltEvent) =
         queueMessage(
             JsonMessage.newMessage(
-                "feriepenger_utbetalt", mapOf(
-                "organisasjonsnummer" to event.organisasjonsnummer,
-                "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
-                "personOppdrag" to event.personOppdrag,
-            )
+                "feriepenger_utbetalt",
+                mapOf(
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
+                    "personOppdrag" to event.personOppdrag,
+                )
             )
         )
 
     override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretEvent) {
         queueMessage(
             JsonMessage.newMessage(
-                "vedtaksperiode_endret", mapOf(
-                "organisasjonsnummer" to event.organisasjonsnummer,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "gjeldendeTilstand" to event.gjeldendeTilstand,
-                "forrigeTilstand" to event.forrigeTilstand,
-                "hendelser" to event.hendelser,
-                "makstid" to event.makstid,
-                "fom" to event.fom,
-                "tom" to event.tom,
-                "skjæringstidspunkt" to event.skjæringstidspunkt
-            )
+                "vedtaksperiode_endret",
+                mapOf(
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "gjeldendeTilstand" to event.gjeldendeTilstand,
+                    "forrigeTilstand" to event.forrigeTilstand,
+                    "hendelser" to event.hendelser,
+                    "makstid" to event.makstid,
+                    "fom" to event.fom,
+                    "tom" to event.tom,
+                    "skjæringstidspunkt" to event.skjæringstidspunkt
+                )
             )
         )
     }
@@ -287,7 +319,8 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("vedtaksperioder_venter", mapOf(
             "vedtaksperioder" to eventer.map { event ->
                 mapOf(
-                    "organisasjonsnummer" to event.organisasjonsnummer,
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
                     "vedtaksperiodeId" to event.vedtaksperiodeId,
                     "behandlingId" to event.behandlingId,
                     "skjæringstidspunkt" to event.skjæringstidspunkt,
@@ -297,7 +330,8 @@ internal class PersonMediator(
                     "venterPå" to mapOf(
                         "vedtaksperiodeId" to event.venterPå.vedtaksperiodeId,
                         "skjæringstidspunkt" to event.venterPå.skjæringstidspunkt,
-                        "organisasjonsnummer" to event.venterPå.organisasjonsnummer,
+                        "organisasjonsnummer" to event.venterPå.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                        "yrkesaktivitetstype" to event.venterPå.yrkesaktivitetssporing.somYrkesaktivitetstype,
                         "venteårsak" to mapOf(
                             "hva" to event.venterPå.venteårsak.hva,
                             "hvorfor" to event.venterPå.venteårsak.hvorfor
@@ -311,13 +345,15 @@ internal class PersonMediator(
     override fun vedtaksperiodeOpprettet(event: PersonObserver.VedtaksperiodeOpprettet) {
         queueMessage(
             JsonMessage.newMessage(
-                "vedtaksperiode_opprettet", mapOf(
-                "organisasjonsnummer" to event.organisasjonsnummer,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "fom" to event.periode.start,
-                "tom" to event.periode.endInclusive
-            )
+                "vedtaksperiode_opprettet",
+                mapOf(
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "skjæringstidspunkt" to event.skjæringstidspunkt,
+                    "fom" to event.periode.start,
+                    "tom" to event.periode.endInclusive
+                )
             )
         )
     }
@@ -325,42 +361,46 @@ internal class PersonMediator(
     override fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
         queueMessage(
             JsonMessage.newMessage(
-                "vedtaksperiode_forkastet", mapOf(
-                "organisasjonsnummer" to event.organisasjonsnummer,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "tilstand" to event.gjeldendeTilstand,
-                "hendelser" to event.hendelser,
-                "fom" to event.fom,
-                "tom" to event.tom,
-                "trengerArbeidsgiveropplysninger" to event.trengerArbeidsgiveropplysninger,
-                "speilrelatert" to event.speilrelatert,
-                "sykmeldingsperioder" to event.sykmeldingsperioder.map {
-                    mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
-                    )
-                }
-            )))
+                "vedtaksperiode_forkastet",
+                mapOf(
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "tilstand" to event.gjeldendeTilstand,
+                    "hendelser" to event.hendelser,
+                    "fom" to event.fom,
+                    "tom" to event.tom,
+                    "trengerArbeidsgiveropplysninger" to event.trengerArbeidsgiveropplysninger,
+                    "speilrelatert" to event.speilrelatert,
+                    "sykmeldingsperioder" to event.sykmeldingsperioder.map {
+                        mapOf(
+                            "fom" to it.start,
+                            "tom" to it.endInclusive
+                        )
+                    }
+                )))
     }
 
     override fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
         queueMessage(
             JsonMessage.newMessage(
-                "behandling_opprettet", mutableMapOf(
-                "organisasjonsnummer" to event.organisasjonsnummer,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "behandlingId" to event.behandlingId,
-                "søknadIder" to event.søknadIder,
-                "type" to event.type,
-                "fom" to event.fom,
-                "tom" to event.tom,
-                "kilde" to mapOf(
-                    "meldingsreferanseId" to event.kilde.meldingsreferanseId,
-                    "innsendt" to event.kilde.innsendt,
-                    "registrert" to event.kilde.registert,
-                    "avsender" to event.kilde.avsender
+                "behandling_opprettet",
+                mutableMapOf(
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "behandlingId" to event.behandlingId,
+                    "søknadIder" to event.søknadIder,
+                    "type" to event.type,
+                    "fom" to event.fom,
+                    "tom" to event.tom,
+                    "kilde" to mapOf(
+                        "meldingsreferanseId" to event.kilde.meldingsreferanseId,
+                        "innsendt" to event.kilde.innsendt,
+                        "registrert" to event.kilde.registert,
+                        "avsender" to event.kilde.avsender
+                    )
                 )
-            )
             )
         )
     }
@@ -368,12 +408,14 @@ internal class PersonMediator(
     override fun behandlingForkastet(event: PersonObserver.BehandlingForkastetEvent) {
         queueMessage(
             JsonMessage.newMessage(
-                "behandling_forkastet", mapOf(
-                "organisasjonsnummer" to event.organisasjonsnummer,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "behandlingId" to event.behandlingId,
-                "automatiskBehandling" to event.automatiskBehandling
-            )
+                "behandling_forkastet",
+                mapOf(
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "behandlingId" to event.behandlingId,
+                    "automatiskBehandling" to event.automatiskBehandling
+                )
             )
         )
     }
@@ -381,11 +423,13 @@ internal class PersonMediator(
     override fun behandlingLukket(event: PersonObserver.BehandlingLukketEvent) {
         queueMessage(
             JsonMessage.newMessage(
-                "behandling_lukket", mapOf(
-                "organisasjonsnummer" to event.organisasjonsnummer,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "behandlingId" to event.behandlingId
-            )
+                "behandling_lukket",
+                mapOf(
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "behandlingId" to event.behandlingId
+                )
             )
         )
     }
@@ -393,72 +437,78 @@ internal class PersonMediator(
     override fun avsluttetUtenVedtak(event: PersonObserver.AvsluttetUtenVedtakEvent) {
         queueMessage(
             JsonMessage.newMessage(
-                "avsluttet_uten_vedtak", mapOf(
-                "organisasjonsnummer" to event.organisasjonsnummer,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "behandlingId" to event.behandlingId,
-                "fom" to event.periode.start,
-                "tom" to event.periode.endInclusive,
-                "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "hendelser" to event.hendelseIder,
-                "avsluttetTidspunkt" to event.avsluttetTidspunkt
-            )
+                "avsluttet_uten_vedtak",
+                mapOf(
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "behandlingId" to event.behandlingId,
+                    "fom" to event.periode.start,
+                    "tom" to event.periode.endInclusive,
+                    "skjæringstidspunkt" to event.skjæringstidspunkt,
+                    "hendelser" to event.hendelseIder,
+                    "avsluttetTidspunkt" to event.avsluttetTidspunkt
+                )
             )
         )
     }
 
     override fun avsluttetMedVedtak(event: PersonObserver.AvsluttetMedVedtakEvent) {
-        queueMessage(JsonMessage.newMessage("avsluttet_med_vedtak", mapOf(
-            "organisasjonsnummer" to event.organisasjonsnummer,
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "behandlingId" to event.behandlingId,
-            "fom" to event.periode.start,
-            "tom" to event.periode.endInclusive,
-            "hendelser" to event.hendelseIder,
-            "skjæringstidspunkt" to event.skjæringstidspunkt,
-            "sykepengegrunnlag" to event.sykepengegrunnlag,
-            "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt,
-            "utbetalingId" to event.utbetalingId,
-            "sykepengegrunnlagsfakta" to when (val fakta = event.sykepengegrunnlagsfakta) {
-                is PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel -> mapOf(
-                    "fastsatt" to fakta.fastsatt,
-                    "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
-                    "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt,
-                    "sykepengegrunnlag" to fakta.sykepengegrunnlag,
-                    "6G" to fakta.`6G`,
-                    "arbeidsgivere" to fakta.arbeidsgivere.map { arbeidsgiver ->
-                        mapOf(
-                            "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
-                            "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
-                            "inntektskilde" to arbeidsgiver.inntektskilde
+        queueMessage(
+            JsonMessage.newMessage(
+                "avsluttet_med_vedtak",
+                mapOf(
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "behandlingId" to event.behandlingId,
+                    "fom" to event.periode.start,
+                    "tom" to event.periode.endInclusive,
+                    "hendelser" to event.hendelseIder,
+                    "skjæringstidspunkt" to event.skjæringstidspunkt,
+                    "sykepengegrunnlag" to event.sykepengegrunnlag,
+                    "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt,
+                    "utbetalingId" to event.utbetalingId,
+                    "sykepengegrunnlagsfakta" to when (val fakta = event.sykepengegrunnlagsfakta) {
+                        is PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel -> mapOf(
+                            "fastsatt" to fakta.fastsatt,
+                            "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
+                            "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt,
+                            "sykepengegrunnlag" to fakta.sykepengegrunnlag,
+                            "6G" to fakta.`6G`,
+                            "arbeidsgivere" to fakta.arbeidsgivere.map { arbeidsgiver ->
+                                mapOf(
+                                    "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
+                                    "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
+                                    "inntektskilde" to arbeidsgiver.inntektskilde
+                                )
+                            }
+                        )
+
+                        is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> mutableMapOf(
+                            "fastsatt" to fakta.fastsatt,
+                            "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
+                            "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt,
+                            "6G" to fakta.`6G`,
+                            "arbeidsgivere" to fakta.arbeidsgivere.map { arbeidsgiver ->
+                                mapOf(
+                                    "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
+                                    "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
+                                    "skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt,
+                                    "inntektskilde" to arbeidsgiver.inntektskilde
+                                )
+                            },
+                            "skjønnsfastsatt" to fakta.skjønnsfastsatt
+                        )
+
+                        is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> mapOf(
+                            "fastsatt" to fakta.fastsatt,
+                            "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
+                            "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt
                         )
                     }
                 )
-
-                is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> mutableMapOf(
-                    "fastsatt" to fakta.fastsatt,
-                    "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
-                    "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt,
-                    "6G" to fakta.`6G`,
-                    "arbeidsgivere" to fakta.arbeidsgivere.map { arbeidsgiver ->
-                        mapOf(
-                            "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
-                            "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
-                            "skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt,
-                            "inntektskilde" to arbeidsgiver.inntektskilde
-                        )
-                    },
-                    "skjønnsfastsatt" to fakta.skjønnsfastsatt
-                )
-
-                is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> mapOf(
-                    "fastsatt" to fakta.fastsatt,
-                    "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
-                    "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt
-                )
-            }
-        )
-        )
+            )
         )
     }
 
@@ -475,19 +525,21 @@ internal class PersonMediator(
     override fun skatteinntekterLagtTilGrunn(event: PersonObserver.SkatteinntekterLagtTilGrunnEvent) {
         queueMessage(
             JsonMessage.newMessage(
-                "skatteinntekter_lagt_til_grunn", mapOf(
-                "organisasjonsnummer" to event.organisasjonsnummer,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "behandlingId" to event.behandlingId,
-                "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "omregnetÅrsinntekt" to event.omregnetÅrsinntekt,
-                "skatteinntekter" to event.skatteinntekter.map {
-                    mapOf<String, Any>(
-                        "måned" to it.måned,
-                        "beløp" to it.beløp
-                    )
-                }
-            )))
+                "skatteinntekter_lagt_til_grunn",
+                mapOf(
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "behandlingId" to event.behandlingId,
+                    "skjæringstidspunkt" to event.skjæringstidspunkt,
+                    "omregnetÅrsinntekt" to event.omregnetÅrsinntekt,
+                    "skatteinntekter" to event.skatteinntekter.map {
+                        mapOf<String, Any>(
+                            "måned" to it.måned,
+                            "beløp" to it.beløp
+                        )
+                    }
+                )))
     }
 
     override fun inntektsmeldingReplay(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
@@ -500,48 +552,51 @@ internal class PersonMediator(
 
     private fun PersonObserver.TrengerArbeidsgiveropplysningerEvent.tilJsonMessage(eventName: String) =
         JsonMessage.newMessage(
-            eventName, mapOf(
-            "organisasjonsnummer" to organisasjonsnummer,
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-            "sykmeldingsperioder" to sykmeldingsperioder.map {
-                mapOf(
-                    "fom" to it.start,
-                    "tom" to it.endInclusive
-                )
-            },
-            "egenmeldingsperioder" to egenmeldingsperioder.map {
-                mapOf(
-                    "fom" to it.start,
-                    "tom" to it.endInclusive
-                )
-            },
-            "førsteFraværsdager" to førsteFraværsdager.map {
-                mapOf<String, Any>(
-                    "organisasjonsnummer" to it.organisasjonsnummer,
-                    "førsteFraværsdag" to it.førsteFraværsdag
-                )
-            },
-            "forespurteOpplysninger" to forespurteOpplysninger.map { forespurtOpplysning ->
-                when (forespurtOpplysning) {
-                    is Arbeidsgiverperiode -> mapOf(
-                        "opplysningstype" to "Arbeidsgiverperiode"
+            eventName,
+            mapOf(
+                "organisasjonsnummer" to this.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to this.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "sykmeldingsperioder" to sykmeldingsperioder.map {
+                    mapOf(
+                        "fom" to it.start,
+                        "tom" to it.endInclusive
                     )
-
-                    is Inntekt -> mapOf(
-                        "opplysningstype" to "Inntekt",
-                        "forslag" to mapOf(
-                            "forrigeInntekt" to null
+                },
+                "egenmeldingsperioder" to egenmeldingsperioder.map {
+                    mapOf(
+                        "fom" to it.start,
+                        "tom" to it.endInclusive
+                    )
+                },
+                "førsteFraværsdager" to førsteFraværsdager.map {
+                    mapOf<String, Any>(
+                        "organisasjonsnummer" to it.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                        "yrkesaktivitetstype" to it.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                        "førsteFraværsdag" to it.førsteFraværsdag
+                    )
+                },
+                "forespurteOpplysninger" to forespurteOpplysninger.map { forespurtOpplysning ->
+                    when (forespurtOpplysning) {
+                        is Arbeidsgiverperiode -> mapOf(
+                            "opplysningstype" to "Arbeidsgiverperiode"
                         )
-                    )
 
-                    is Refusjon -> mapOf(
-                        "opplysningstype" to "Refusjon",
-                        "forslag" to emptyList<Nothing>()
-                    )
+                        is Inntekt -> mapOf(
+                            "opplysningstype" to "Inntekt",
+                            "forslag" to mapOf(
+                                "forrigeInntekt" to null
+                            )
+                        )
+
+                        is Refusjon -> mapOf(
+                            "opplysningstype" to "Refusjon",
+                            "forslag" to emptyList<Nothing>()
+                        )
+                    }
                 }
-            }
-        )
+            )
         )
 
     override fun trengerIkkeArbeidsgiveropplysninger(event: PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent) {
@@ -549,7 +604,8 @@ internal class PersonMediator(
             JsonMessage.newMessage(
                 "trenger_ikke_opplysninger_fra_arbeidsgiver",
                 mapOf<String, Any>(
-                    "organisasjonsnummer" to event.organisasjonsnummer,
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
                     "vedtaksperiodeId" to event.vedtaksperiodeId
                 )
             )

@@ -22,6 +22,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -133,8 +134,8 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
-        val a1Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a1 }.sykepengegrunnlagsfakta
-        val a2Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a2 }.sykepengegrunnlagsfakta
+        val a1Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a1 }.sykepengegrunnlagsfakta
+        val a2Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a2 }.sykepengegrunnlagsfakta
         assertEquals(a1Sykepengegrunnlagsfakta, a2Sykepengegrunnlagsfakta)
 
         val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
@@ -181,8 +182,8 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
-        val a1Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a1 }.sykepengegrunnlagsfakta
-        val a2Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.organisasjonsnummer == a2 }.sykepengegrunnlagsfakta
+        val a1Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a1 }.sykepengegrunnlagsfakta
+        val a2Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a2 }.sykepengegrunnlagsfakta
         assertEquals(a1Sykepengegrunnlagsfakta, a2Sykepengegrunnlagsfakta)
 
         val forventetSykepengegrunnlagsfakta = FastsattEtterSkjønn(
@@ -205,7 +206,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         assertVarsel(Varselkode.RV_IT_14, 1.vedtaksperiode.filter())
         assertEquals(1, observatør.avsluttetMedVedtakEvent.size)
         val event = observatør.avsluttetMedVedtakEvent.values.single()
-        val forventetSykepengegrunnlagsfakta = FastsattIInfotrygd(372000.0)
+        val forventetSykepengegrunnlagsfakta = FastsattIInfotrygd(372000.0, "a1")
         assertEquals(forventetSykepengegrunnlagsfakta, event.sykepengegrunnlagsfakta)
     }
 

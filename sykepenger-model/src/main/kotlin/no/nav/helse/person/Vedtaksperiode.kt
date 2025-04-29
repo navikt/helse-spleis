@@ -172,7 +172,7 @@ internal class Vedtaksperiode private constructor(
     ) {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         val periode = checkNotNull(sykdomstidslinje.periode()) { "sykdomstidslinjen er tom" }
-        person.vedtaksperiodeOpprettet(id, arbeidsgiver.organisasjonsnummer, periode, periode.start, opprettet)
+        person.vedtaksperiodeOpprettet(id, arbeidsgiver.behandlingsporing, periode, periode.start, opprettet)
         behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, egenmeldingsperioder, inntektsendringer, dokumentsporing, metadata.behandlingkilde)
     }
 
@@ -990,7 +990,7 @@ internal class Vedtaksperiode private constructor(
         videreførEllerIngenRefusjon(sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
 
         val event = PersonObserver.SkatteinntekterLagtTilGrunnEvent(
-            organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+            yrkesaktivitetssporing = arbeidsgiver.behandlingsporing,
             vedtaksperiodeId = id,
             behandlingId = behandlinger.sisteBehandlingId,
             skjæringstidspunkt = skjæringstidspunkt,
@@ -1215,7 +1215,7 @@ internal class Vedtaksperiode private constructor(
         internal fun buildAndEmit() {
             person.vedtaksperiodeForkastet(
                 PersonObserver.VedtaksperiodeForkastetEvent(
-                    organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                    yrkesaktivitetssporing = arbeidsgiver.behandlingsporing,
                     vedtaksperiodeId = id,
                     gjeldendeTilstand = gjeldendeTilstand,
                     hendelser = eksterneIderSet,
@@ -1571,7 +1571,7 @@ internal class Vedtaksperiode private constructor(
         }
         return PersonObserver.TrengerArbeidsgiveropplysningerEvent(
             personidentifikator = person.personidentifikator,
-            organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+            yrkesaktivitetssporing = arbeidsgiver.behandlingsporing,
             vedtaksperiodeId = id,
             skjæringstidspunkt = skjæringstidspunkt,
             sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
@@ -1590,11 +1590,11 @@ internal class Vedtaksperiode private constructor(
                     .asReversed()
                     .firstNotNullOfOrNull { it.førsteFraværsdag }
                 førsteFraværsdagForArbeidsgiver?.let {
-                    PersonObserver.FørsteFraværsdag(arbeidsgiver.organisasjonsnummer, it)
+                    PersonObserver.FørsteFraværsdag(arbeidsgiver.behandlingsporing, it)
                 }
             }
         val minEgen = førsteFraværsdag?.let {
-            PersonObserver.FørsteFraværsdag(arbeidsgiver.organisasjonsnummer, it)
+            PersonObserver.FørsteFraværsdag(arbeidsgiver.behandlingsporing, it)
         } ?: return deAndre
         return deAndre.plusElement(minEgen)
     }
@@ -1607,7 +1607,7 @@ internal class Vedtaksperiode private constructor(
     private fun trengerIkkeArbeidsgiveropplysninger() {
         person.trengerIkkeArbeidsgiveropplysninger(
             PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent(
-                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                yrkesaktivitetssporing = arbeidsgiver.behandlingsporing,
                 vedtaksperiodeId = id
             )
         )
@@ -1622,7 +1622,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun emitVedtaksperiodeEndret(previousState: Vedtaksperiodetilstand) {
         val event = PersonObserver.VedtaksperiodeEndretEvent(
-            organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+            yrkesaktivitetssporing = arbeidsgiver.behandlingsporing,
             vedtaksperiodeId = id,
             gjeldendeTilstand = tilstand.type,
             forrigeTilstand = previousState.type,
@@ -1649,7 +1649,7 @@ internal class Vedtaksperiode private constructor(
         }
         person.avsluttetUtenVedtak(
             PersonObserver.AvsluttetUtenVedtakEvent(
-                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                yrkesaktivitetssporing = arbeidsgiver.behandlingsporing,
                 vedtaksperiodeId = id,
                 behandlingId = behandlingId,
                 periode = periode,
@@ -1676,8 +1676,11 @@ internal class Vedtaksperiode private constructor(
     override fun vedtakAnnullert(aktivitetslogg: IAktivitetslogg, behandlingId: UUID) {
         person.vedtaksperiodeAnnullert(
             PersonObserver.VedtaksperiodeAnnullertEvent(
-                periode.start, periode.endInclusive, id, arbeidsgiver.organisasjonsnummer,
-                behandlingId
+                fom = periode.start,
+                tom = periode.endInclusive,
+                vedtaksperiodeId = id,
+                yrkesaktivitetssporing = arbeidsgiver.behandlingsporing,
+                behandlingId = behandlingId
             )
         )
     }
@@ -1685,7 +1688,7 @@ internal class Vedtaksperiode private constructor(
     override fun behandlingLukket(behandlingId: UUID) {
         person.behandlingLukket(
             PersonObserver.BehandlingLukketEvent(
-                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                yrkesaktivitetssporing = arbeidsgiver.behandlingsporing,
                 vedtaksperiodeId = id,
                 behandlingId = behandlingId
             )
@@ -1695,7 +1698,7 @@ internal class Vedtaksperiode private constructor(
     override fun behandlingForkastet(behandlingId: UUID, automatiskBehandling: Boolean) {
         person.behandlingForkastet(
             PersonObserver.BehandlingForkastetEvent(
-                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                yrkesaktivitetssporing = arbeidsgiver.behandlingsporing,
                 vedtaksperiodeId = id,
                 behandlingId = behandlingId,
                 automatiskBehandling = automatiskBehandling
@@ -1714,7 +1717,7 @@ internal class Vedtaksperiode private constructor(
         søknadIder: Set<MeldingsreferanseId>
     ) {
         val event = PersonObserver.BehandlingOpprettetEvent(
-            organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+            yrkesaktivitetssporing = arbeidsgiver.behandlingsporing,
             vedtaksperiodeId = this.id,
             søknadIder = (behandlinger.søknadIder() + søknadIder).map { it.id }.toSet(),
             behandlingId = id,
@@ -1782,7 +1785,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun utkastTilVedtakBuilder(): UtkastTilVedtakBuilder {
         val builder = UtkastTilVedtakBuilder(
-            arbeidsgiver = arbeidsgiver.organisasjonsnummer,
+            yrkesaktivitetssporing = arbeidsgiver.behandlingsporing,
             vedtaksperiodeId = id,
             kanForkastes = arbeidsgiver.kanForkastes(this, Aktivitetslogg()),
             erForlengelse = erForlengelse(),
@@ -1836,13 +1839,13 @@ internal class Vedtaksperiode private constructor(
         builder.venterPå(
             venterPå.id,
             venterPå.skjæringstidspunkt,
-            venterPå.arbeidsgiver.organisasjonsnummer,
+            venterPå.arbeidsgiver.behandlingsporing,
             venteårsak
         )
         builder.venter(
             vedtaksperiodeId = id,
             skjæringstidspunkt = skjæringstidspunkt,
-            orgnummer = arbeidsgiver.organisasjonsnummer,
+            yrkesaktivitetssporing = arbeidsgiver.behandlingsporing,
             ventetSiden = oppdatert,
             venterTil = venterTil(venterPå)
         )
@@ -2359,7 +2362,7 @@ internal class Vedtaksperiode private constructor(
         return result.copy(
             overlappendeInfotrygdperioder = result.overlappendeInfotrygdperioder.plusElement(
                 PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
-                    organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                    yrkesaktivitetssporing = arbeidsgiver.behandlingsporing,
                     vedtaksperiodeId = this.id,
                     kanForkastes = arbeidsgiver.kanForkastes(this, Aktivitetslogg()),
                     vedtaksperiodeFom = this.periode.start,

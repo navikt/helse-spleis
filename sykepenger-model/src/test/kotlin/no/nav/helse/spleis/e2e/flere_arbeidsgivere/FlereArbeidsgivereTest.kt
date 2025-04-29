@@ -55,6 +55,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SY_4
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
@@ -200,7 +201,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1)))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             val venterPå = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }.venterPå
-            assertEquals("a3", venterPå.organisasjonsnummer)
+            assertEquals("a3", venterPå.yrkesaktivitetssporing.somOrganisasjonsnummer)
             assertEquals("INNTEKTSMELDING", venterPå.venteårsak.hva)
             assertNull(venterPå.venteårsak.hvorfor)
         }

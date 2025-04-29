@@ -204,6 +204,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         {
           "@event_name": "trenger_opplysninger_fra_arbeidsgiver",
           "organisasjonsnummer": "a2",
+          "yrkesaktivitetstype": "ARBEIDSTAKER",
           "skjæringstidspunkt": "2018-01-01",
           "sykmeldingsperioder": [
             {
@@ -215,10 +216,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           "førsteFraværsdager": [
             { 
                 "organisasjonsnummer": "a1",
+                "yrkesaktivitetstype": "ARBEIDSTAKER",
                 "førsteFraværsdag": "2018-01-01"
             },
             { 
                 "organisasjonsnummer": "a2",
+                "yrkesaktivitetstype": "ARBEIDSTAKER",
                 "førsteFraværsdag": "2018-03-01"
             }
           ],
@@ -239,6 +242,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         {
           "@event_name": "trenger_opplysninger_fra_arbeidsgiver",
           "organisasjonsnummer": "987654321",
+          "yrkesaktivitetstype": "ARBEIDSTAKER",
           "skjæringstidspunkt": "2018-01-02",
           "sykmeldingsperioder": [
             {
@@ -255,6 +259,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           "førsteFraværsdager": [
             { 
                 "organisasjonsnummer": "987654321",
+                "yrkesaktivitetstype": "ARBEIDSTAKER",
                 "førsteFraværsdag": "2018-01-02"
             }
           ],
@@ -281,6 +286,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         {
           "@event_name": "trenger_opplysninger_fra_arbeidsgiver",
           "organisasjonsnummer": "987654321",
+          "yrkesaktivitetstype": "ARBEIDSTAKER",
           "skjæringstidspunkt": "2018-03-01",
           "sykmeldingsperioder": [
             {
@@ -292,6 +298,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           "førsteFraværsdager": [
             { 
                 "organisasjonsnummer": "987654321",
+                "yrkesaktivitetstype": "ARBEIDSTAKER",
                 "førsteFraværsdag": "2018-03-01"
             }
           ],
@@ -318,6 +325,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         {
           "@event_name": "trenger_opplysninger_fra_arbeidsgiver",
           "organisasjonsnummer": "987654321",
+          "yrkesaktivitetstype": "ARBEIDSTAKER",
           "skjæringstidspunkt": "2018-03-01",
           "sykmeldingsperioder": [
             {
@@ -329,6 +337,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           "førsteFraværsdager": [
             { 
                 "organisasjonsnummer": "987654321",
+                "yrkesaktivitetstype": "ARBEIDSTAKER",
                 "førsteFraværsdag": "2018-03-01"
             }
           ],
@@ -355,6 +364,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         {
           "@event_name": "trenger_opplysninger_fra_arbeidsgiver",
           "organisasjonsnummer": "987654321",
+          "yrkesaktivitetstype": "ARBEIDSTAKER",
           "skjæringstidspunkt": "2018-02-10",
           "sykmeldingsperioder": [
             {
@@ -367,6 +377,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           "førsteFraværsdager": [
             { 
                 "organisasjonsnummer": "987654321",
+                "yrkesaktivitetstype": "ARBEIDSTAKER",
                 "førsteFraværsdag": "2018-02-10"
             }
           ],

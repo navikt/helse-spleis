@@ -7,6 +7,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -120,7 +121,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             val event = observatør.skatteinntekterLagtTilGrunnEventer.single()
             val forventet = PersonObserver.SkatteinntekterLagtTilGrunnEvent(
-                organisasjonsnummer = a1,
+                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().id,
                 skjæringstidspunkt = 1.januar,
@@ -161,7 +162,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
             val event = observatør.skatteinntekterLagtTilGrunnEventer.single()
             val forventet = PersonObserver.SkatteinntekterLagtTilGrunnEvent(
-                organisasjonsnummer = a1,
+                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().id,
                 skjæringstidspunkt = 1.januar,

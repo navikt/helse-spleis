@@ -630,10 +630,10 @@ class Person private constructor(
 
     internal fun emitInntektsmeldingFørSøknadEvent(
         meldingsreferanseId: UUID,
-        organisasjonsnummer: String
+        yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
     ) {
         observers.forEach {
-            it.inntektsmeldingFørSøknad(PersonObserver.InntektsmeldingFørSøknadEvent(meldingsreferanseId, organisasjonsnummer))
+            it.inntektsmeldingFørSøknad(PersonObserver.InntektsmeldingFørSøknadEvent(meldingsreferanseId, yrkesaktivitetssporing))
         }
     }
 
@@ -712,8 +712,8 @@ class Person private constructor(
         observers.forEach { it.nyVedtaksperiodeUtbetaling(organisasjonsnummer, utbetalingId, vedtaksperiodeId) }
     }
 
-    internal fun vedtaksperiodeOpprettet(vedtaksperiodeId: UUID, organisasjonsnummer: String, periode: Periode, skjæringstidspunkt: LocalDate, opprettet: LocalDateTime) {
-        val event = PersonObserver.VedtaksperiodeOpprettet(vedtaksperiodeId, organisasjonsnummer, periode, skjæringstidspunkt, opprettet)
+    internal fun vedtaksperiodeOpprettet(vedtaksperiodeId: UUID, yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, periode: Periode, skjæringstidspunkt: LocalDate, opprettet: LocalDateTime) {
+        val event = PersonObserver.VedtaksperiodeOpprettet(vedtaksperiodeId, yrkesaktivitetssporing, periode, skjæringstidspunkt, opprettet)
         observers.forEach { it.vedtaksperiodeOpprettet(event) }
     }
 

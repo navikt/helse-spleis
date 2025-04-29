@@ -13,6 +13,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -38,7 +39,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         håndterSøknad(2.februar til 28.februar)
         håndterSøknad(februar)
 
-        assertEquals(a1, observatør.utbetaltEndretEventer.last().organisasjonsnummer)
+        assertEquals(a1, observatør.utbetaltEndretEventer.last().yrkesaktivitetssporing.somOrganisasjonsnummer)
     }
 
     @Test

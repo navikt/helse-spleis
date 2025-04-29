@@ -19,6 +19,7 @@ internal class InntekterFraSkattLagtTilGrunnKontraktTest : AbstractEndToEndMedia
             "behandlingId": "<uuid>",
             "skjæringstidspunkt": "2018-01-01",
             "organisasjonsnummer": "$ORGNUMMER",
+            "yrkesaktivitetstype": "ARBEIDSTAKER",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "omregnetÅrsinntekt": 372000.0,
             "skatteinntekter": [{"måned": "2017-10", "beløp": 31000.0}, {"måned": "2017-11", "beløp": 31000.0}, {"måned": "2017-12", "beløp": 31000.0}]

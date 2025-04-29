@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsavgjørelse
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Hendelse
@@ -118,7 +119,7 @@ internal class Arbeidsgiver private constructor(
     private val utbetalinger: MutableList<Utbetaling>,
     private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
     private val ubrukteRefusjonsopplysninger: Refusjonsservitør,
-    private val yrkesaktivitet: Yrkesaktivitet,
+    val yrkesaktivitet: Yrkesaktivitet,
     private val regelverkslogg: Regelverkslogg
 ) : Aktivitetskontekst, UtbetalingObserver {
     internal constructor(person: Person, yrkesaktivitet: Yrkesaktivitet, regelverkslogg: Regelverkslogg) : this(
@@ -136,6 +137,13 @@ internal class Arbeidsgiver private constructor(
         yrkesaktivitet = yrkesaktivitet,
         regelverkslogg = regelverkslogg
     )
+
+    val behandlingsporing = when (yrkesaktivitet) {
+        Yrkesaktivitet.Arbeidsledig -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+        is Yrkesaktivitet.Arbeidstaker -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(yrkesaktivitet.organisasjonsnummer)
+        Yrkesaktivitet.Frilans -> Behandlingsporing.Yrkesaktivitet.Frilans
+        Yrkesaktivitet.Selvstendig -> Behandlingsporing.Yrkesaktivitet.Selvstendig
+    }
 
     init {
         utbetalinger.forEach { it.registrer(this) }
@@ -757,7 +765,7 @@ internal class Arbeidsgiver private constructor(
         val builder = UtbetalingsdagerBuilder(sykdomshistorikk.sykdomstidslinje(), utbetalingstidslinje)
         person.utbetalingUtbetalt(
             PersonObserver.UtbetalingUtbetaltEvent(
-                organisasjonsnummer = organisasjonsnummer,
+                yrkesaktivitetssporing = behandlingsporing,
                 utbetalingId = id,
                 type = type.name,
                 korrelasjonsId = korrelasjonsId,
@@ -800,7 +808,7 @@ internal class Arbeidsgiver private constructor(
         val builder = UtbetalingsdagerBuilder(sykdomshistorikk.sykdomstidslinje(), utbetalingstidslinje)
         person.utbetalingUtenUtbetaling(
             PersonObserver.UtbetalingUtbetaltEvent(
-                organisasjonsnummer = organisasjonsnummer,
+                yrkesaktivitetssporing = behandlingsporing,
                 utbetalingId = id,
                 type = type.name,
                 fom = periode.start,
@@ -834,7 +842,7 @@ internal class Arbeidsgiver private constructor(
     ) {
         person.utbetalingEndret(
             PersonObserver.UtbetalingEndretEvent(
-                organisasjonsnummer = organisasjonsnummer,
+                yrkesaktivitetssporing = behandlingsporing,
                 utbetalingId = id,
                 type = type.name,
                 forrigeStatus = forrigeTilstand.name,
@@ -862,7 +870,7 @@ internal class Arbeidsgiver private constructor(
     ) {
         person.annullert(
             PersonObserver.UtbetalingAnnullertEvent(
-                organisasjonsnummer = organisasjonsnummer,
+                yrkesaktivitetssporing = behandlingsporing,
                 korrelasjonsId = korrelasjonsId,
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                 personFagsystemId = personFagsystemId,

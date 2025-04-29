@@ -6,6 +6,7 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -18,7 +19,7 @@ interface PersonObserver {
     )
 
     data class VedtaksperiodeEndretEvent(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
         val gjeldendeTilstand: TilstandType,
         val forrigeTilstand: TilstandType,
@@ -30,7 +31,7 @@ interface PersonObserver {
     )
 
     data class VedtaksperiodeVenterEvent(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
         val skjæringstidspunkt: LocalDate,
@@ -42,7 +43,7 @@ interface PersonObserver {
         data class VenterPå(
             val vedtaksperiodeId: UUID,
             val skjæringstidspunkt: LocalDate,
-            val organisasjonsnummer: String,
+            val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
             val venteårsak: Venteårsak
         )
 
@@ -53,7 +54,7 @@ interface PersonObserver {
     }
 
     data class VedtaksperiodeForkastetEvent(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
         val gjeldendeTilstand: TilstandType,
         val hendelser: Set<UUID>,
@@ -67,11 +68,11 @@ interface PersonObserver {
 
     data class InntektsmeldingFørSøknadEvent(
         val inntektsmeldingId: UUID,
-        val organisasjonsnummer: String
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
     )
 
     data class SkatteinntekterLagtTilGrunnEvent(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
         val skjæringstidspunkt: LocalDate,
@@ -86,7 +87,7 @@ interface PersonObserver {
 
     data class TrengerArbeidsgiveropplysningerEvent(
         val personidentifikator: Personidentifikator,
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
         val skjæringstidspunkt: LocalDate,
         val sykmeldingsperioder: List<Periode>,
@@ -96,13 +97,13 @@ interface PersonObserver {
     )
 
     class TrengerIkkeArbeidsgiveropplysningerEvent(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID
     ) {
     }
 
     data class FørsteFraværsdag(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val førsteFraværsdag: LocalDate
     )
 
@@ -113,7 +114,7 @@ interface PersonObserver {
     data object Refusjon : ForespurtOpplysning()
 
     data class UtbetalingAnnullertEvent(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val utbetalingId: UUID,
         val korrelasjonsId: UUID,
         val arbeidsgiverFagsystemId: String,
@@ -126,7 +127,7 @@ interface PersonObserver {
     )
 
     data class UtbetalingEndretEvent(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val utbetalingId: UUID,
         val type: String,
         val forrigeStatus: String,
@@ -164,7 +165,7 @@ interface PersonObserver {
     }
 
     data class UtbetalingUtbetaltEvent(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val utbetalingId: UUID,
         val korrelasjonsId: UUID,
         val type: String,
@@ -296,7 +297,7 @@ interface PersonObserver {
     }
 
     data class FeriepengerUtbetaltEvent(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val arbeidsgiverOppdrag: OppdragEventDetaljer,
         val personOppdrag: OppdragEventDetaljer
     ) {
@@ -339,7 +340,7 @@ interface PersonObserver {
     )
 
     data class OverlappendeInfotrygdperiodeEtterInfotrygdendring(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
         val kanForkastes: Boolean,
         val vedtaksperiodeFom: LocalDate,
@@ -356,7 +357,7 @@ interface PersonObserver {
     }
 
     data class AvsluttetUtenVedtakEvent(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
         val periode: Periode,
@@ -366,20 +367,20 @@ interface PersonObserver {
     )
 
     data class BehandlingLukketEvent(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID
     )
 
     data class BehandlingForkastetEvent(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
         val automatiskBehandling: Boolean
     )
 
     data class BehandlingOpprettetEvent(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
         val søknadIder: Set<UUID>,
@@ -414,7 +415,7 @@ interface PersonObserver {
             val omregnetÅrsinntekt: Double
         }
 
-        data class FastsattIInfotrygd(override val omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta {
+        data class FastsattIInfotrygd(override val omregnetÅrsinntekt: Double, val arbeidsgiver: String) : Sykepengegrunnlagsfakta {
             override val fastsatt = "IInfotrygd"
         }
 
@@ -439,7 +440,7 @@ interface PersonObserver {
     }
 
     data class AvsluttetMedVedtakEvent(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
         val periode: Periode,
@@ -471,7 +472,7 @@ interface PersonObserver {
 
     data class VedtaksperiodeOpprettet(
         val vedtaksperiodeId: UUID,
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val periode: Periode,
         val skjæringstidspunkt: LocalDate,
         val opprettet: LocalDateTime
@@ -481,7 +482,7 @@ interface PersonObserver {
         val fom: LocalDate,
         val tom: LocalDate,
         val vedtaksperiodeId: UUID,
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val behandlingId: UUID
     )
 

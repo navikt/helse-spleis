@@ -65,6 +65,7 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.IdInnhenter
@@ -589,7 +590,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyttVedtak(1.januar(2016) til 31.januar(2016), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true, orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { event -> event.organisasjonsnummer == a2 }.size)
+        assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { event -> event.yrkesaktivitetssporing.somOrganisasjonsnummer == a2 }.size)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
     }

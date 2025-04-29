@@ -9,6 +9,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -37,7 +38,7 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 val behandlingId = behandlinger.single().id
                 val forventetBehandlingEvent = PersonObserver.BehandlingOpprettetEvent(
-                    organisasjonsnummer = a1,
+                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                     vedtaksperiodeId = 1.vedtaksperiode,
                     søknadIder = setOf(søknadId),
                     behandlingId = behandlingId,

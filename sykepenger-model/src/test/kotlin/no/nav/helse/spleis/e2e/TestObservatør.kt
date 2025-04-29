@@ -7,6 +7,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spill_av_im.Forespørsel
 import org.junit.jupiter.api.fail
 
@@ -124,7 +125,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     override fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {
         sisteVedtaksperiode = event.vedtaksperiodeId
         vedtaksperiodeendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf() }.add(event)
-        vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(sisteVedtaksperiode)
+        vedtaksperioder.getOrPut(event.yrkesaktivitetssporing.somOrganisasjonsnummer) { mutableSetOf() }.add(sisteVedtaksperiode)
         tilstandsendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(event.forrigeTilstand) }.add(event.gjeldendeTilstand)
         if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)
 
@@ -174,10 +175,10 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         inntektsmeldingReplayEventer.add(
             Forespørsel(
                 fnr = event.personidentifikator.toString(),
-                orgnr = event.organisasjonsnummer,
+                orgnr = event.yrkesaktivitetssporing.somOrganisasjonsnummer,
                 vedtaksperiodeId = event.vedtaksperiodeId,
                 skjæringstidspunkt = event.skjæringstidspunkt,
-                førsteFraværsdager = event.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.organisasjonsnummer, it.førsteFraværsdag) },
+                førsteFraværsdager = event.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.yrkesaktivitetssporing.somOrganisasjonsnummer, it.førsteFraværsdag) },
                 sykmeldingsperioder = event.sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
                 egenmeldinger = event.egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
                 harForespurtArbeidsgiverperiode = PersonObserver.Arbeidsgiverperiode in event.forespurteOpplysninger

@@ -10,6 +10,7 @@ import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -33,6 +34,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
@@ -209,7 +211,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().let { event ->
             assertEquals(listOf(12.februar til 28.februar), event.sykmeldingsperioder)
             assertEquals(13.februar, event.skjæringstidspunkt)
-            assertEquals(listOf(PersonObserver.FørsteFraværsdag(a1, 13.februar)), event.førsteFraværsdager)
+            assertEquals(listOf(PersonObserver.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 13.februar)), event.førsteFraværsdager)
             assertFalse(event.forespurteOpplysninger.any { it is PersonObserver.Arbeidsgiverperiode })
         }
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -244,8 +246,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
 
         assertEquals(1, observatør.inntektsmeldingHåndtert.size)
-        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a1 })
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a2 })
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a1 })
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a2 })
 
         håndterArbeidsgiveropplysninger(
             listOf(1.februar til 16.februar),
@@ -254,8 +256,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         assertEquals(2, observatør.inntektsmeldingHåndtert.size)
-        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a1 })
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a2 })
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a1 })
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a2 })
     }
 
     @Test
@@ -461,14 +463,14 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
             personidentifikator = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = a2,
+            yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2),
             vedtaksperiodeId = 1.vedtaksperiode.id(a2),
             skjæringstidspunkt = 1.januar,
             sykmeldingsperioder = listOf(2.januar til 31.januar),
             egenmeldingsperioder = emptyList(),
             førsteFraværsdager = listOf(
-                PersonObserver.FørsteFraværsdag(a1, 1.januar),
-                PersonObserver.FørsteFraværsdag(a2, 2.januar)
+                PersonObserver.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 1.januar),
+                PersonObserver.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2), 2.januar)
             ),
             forespurteOpplysninger = setOf(
                 PersonObserver.Inntekt,

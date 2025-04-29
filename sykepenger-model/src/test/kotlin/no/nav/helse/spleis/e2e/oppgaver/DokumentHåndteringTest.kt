@@ -5,6 +5,7 @@ import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
@@ -351,7 +352,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent), utenlandskSykmelding = true)
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
-                organisasjonsnummer = a1,
+                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode.id(a1),
                 gjeldendeTilstand = START,
                 hendelser = setOf(søknad2),
@@ -378,7 +379,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
-                organisasjonsnummer = a1,
+                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                 gjeldendeTilstand = AVVENTER_INNTEKTSMELDING,
                 hendelser = setOf(søknad2),
@@ -397,7 +398,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val søknad2 = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), utenlandskSykmelding = true)
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
-                organisasjonsnummer = a1,
+                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode.id(a1),
                 gjeldendeTilstand = START,
                 hendelser = setOf(søknad2),
@@ -418,7 +419,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent))
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
-                organisasjonsnummer = a1,
+                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                 gjeldendeTilstand = START,
                 hendelser = setOf(søknad2),
@@ -440,7 +441,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
-                organisasjonsnummer = a1,
+                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                 gjeldendeTilstand = AVVENTER_INNTEKTSMELDING,
                 hendelser = setOf(søknad2),
@@ -462,7 +463,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val søknad2 = håndterSøknad(Sykdom(15.februar, 28.februar, 100.prosent))
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
-                organisasjonsnummer = a1,
+                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                 gjeldendeTilstand = START,
                 hendelser = setOf(søknad2),
@@ -491,7 +492,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertEquals(10.januar til 16.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
-                organisasjonsnummer = a1,
+                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                 gjeldendeTilstand = START,
                 hendelser = setOf(søknad2),

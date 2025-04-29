@@ -20,6 +20,7 @@ internal class FjerneGodkjenningsbehovOgVedtakFattetTest : AbstractEndToEndMedia
             "@event_name": "avsluttet_uten_vedtak",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
+            "yrkesaktivitetstype": "ARBEIDSTAKER",
             "fom" : "2018-01-01",
             "tom" : "2018-01-16",
             "skjæringstidspunkt": "2018-01-01",

@@ -39,6 +39,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.VedtaksperiodeVenter
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -588,7 +589,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, orgnummer = a1)
         val venterPå = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.venterPå
         assertEquals("INNTEKTSMELDING", venterPå.venteårsak.hva)
-        assertEquals(a2, venterPå.organisasjonsnummer)
+        assertEquals(a2, venterPå.yrkesaktivitetssporing.somOrganisasjonsnummer)
         assertEquals(2.vedtaksperiode.id(a2), venterPå.vedtaksperiodeId)
     }
 
