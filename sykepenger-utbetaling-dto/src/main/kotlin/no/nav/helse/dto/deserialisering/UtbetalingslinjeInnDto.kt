@@ -9,7 +9,7 @@ data class UtbetalingslinjeInnDto(
     val fom: LocalDate,
     val tom: LocalDate,
     val satstype: SatstypeDto,
-    val beløp: Int?,
+    val beløp: Int,
     val grad: Int?,
     val refFagsystemId: String?,
     val delytelseId: Int,

@@ -65,6 +65,48 @@ internal class OppdragBuilderTest {
         assertEquals(20.januar til 26.januar, result[0].inspektør.fom til result[0].inspektør.tom)
     }
 
+    @Test
+    fun `siste dager i arbeidsgiverperioden er lørdag og søndag`() {
+        val builder = OppdragBuilder(mottaker = "ornr", fagområde = Fagområde.Sykepenger)
+        builder.arbeidsgiverperiodedag(20.januar, 100)
+        builder.arbeidsgiverperiodedag(21.januar, 100)
+        builder.betalingsdag(femhundreKronerIBrukerutbetaling, 22.januar, 100)
+        builder.betalingsdag(femhundreKronerIBrukerutbetaling, 23.januar, 100)
+        builder.betalingsdag(femhundreKronerIBrukerutbetaling, 24.januar, 100)
+        builder.betalingsdag(femhundreKronerIBrukerutbetaling, 25.januar, 100)
+        builder.betalingsdag(femhundreKronerIBrukerutbetaling, 26.januar, 100)
+        builder.betalingshelgedag(27.januar, 100)
+        builder.betalingshelgedag(28.januar, 100)
+        val result = builder.build()
+
+        assertEquals(1, result.size)
+        assertEquals(22.januar til 26.januar, result[0].inspektør.fom til result[0].inspektør.tom)
+    }
+
+    @Test
+    fun `flekkvis utbetalingsdager i arbeidsgiverperioden`() {
+        val builder = OppdragBuilder(mottaker = "ornr", fagområde = Fagområde.Sykepenger)
+        // to SykNav-dager i arbeidsgiverperioden
+        builder.betalingsdag(femhundreKronerIBrukerutbetaling, 1.januar, 100)
+        builder.betalingsdag(femhundreKronerIBrukerutbetaling, 2.januar, 100)
+        // litt vanlig arbeidsgiverperiode
+        builder.arbeidsgiverperiodedag(3.januar, 100)
+        builder.arbeidsgiverperiodedag(4.januar, 100)
+        // litt mer SykNav
+        builder.betalingsdag(femhundreKronerIBrukerutbetaling, 5.januar, 100)
+        // litt mer vanlig arbeidsgiverperiode
+        builder.arbeidsgiverperiodedag(6.januar, 100)
+        builder.arbeidsgiverperiodedag(7.januar, 100)
+        // så over til NavDager f.eks.
+        builder.betalingsdag(femhundreKronerIBrukerutbetaling, 8.januar, 100)
+        builder.betalingsdag(femhundreKronerIBrukerutbetaling, 9.januar, 100)
+        val result = builder.build()
+
+        assertEquals(2, result.size)
+        assertEquals(1.januar til 2.januar, result[0].inspektør.fom til result[0].inspektør.tom)
+        assertEquals(5.januar til 9.januar, result[1].inspektør.fom til result[1].inspektør.tom)
+    }
+
     private val femhundreKronerIRefusjon: Økonomi = Økonomi.gjenopprett(
         ØkonomiInnDto(
             grad = ProsentdelDto(100.0),
@@ -75,6 +117,19 @@ internal class OppdragBuilderTest {
             dekningsgrunnlag = InntektbeløpDto.DagligDouble(500.0),
             arbeidsgiverbeløp = InntektbeløpDto.DagligDouble(500.0),
             personbeløp = InntektbeløpDto.DagligDouble(0.0),
+        )
+    )
+
+    private val femhundreKronerIBrukerutbetaling: Økonomi = Økonomi.gjenopprett(
+        ØkonomiInnDto(
+            grad = ProsentdelDto(100.0),
+            totalGrad = ProsentdelDto(100.0),
+            utbetalingsgrad = ProsentdelDto(100.0),
+            arbeidsgiverRefusjonsbeløp = InntektbeløpDto.DagligDouble(500.0),
+            aktuellDagsinntekt = InntektbeløpDto.DagligDouble(500.0),
+            dekningsgrunnlag = InntektbeløpDto.DagligDouble(500.0),
+            arbeidsgiverbeløp = InntektbeløpDto.DagligDouble(0.0),
+            personbeløp = InntektbeløpDto.DagligDouble(500.0),
         )
     )
 }

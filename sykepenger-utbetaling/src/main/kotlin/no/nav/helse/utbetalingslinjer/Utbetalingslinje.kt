@@ -20,7 +20,7 @@ class Utbetalingslinje(
     val fom: LocalDate,
     val tom: LocalDate,
     val satstype: Satstype = Satstype.Daglig,
-    val beløp: Int?,
+    val beløp: Int,
     val grad: Int?,
     val refFagsystemId: String? = null,
     val delytelseId: Int = 1,
@@ -63,7 +63,7 @@ class Utbetalingslinje(
 
         // linjer med beløp 0 kr er ugyldige/ikke ønsket å sende OS
         private fun fjernLinjerUtenUtbetalingsdager(linjer: List<Utbetalingslinje>) =
-            linjer.filterNot { it.beløp == null || it.beløp == 0 }
+            linjer.filterNot { it.beløp == 0 }
 
         // oppdraget utgjør på sett og vis en linket liste hvor hver linje har et nummer, og peker tilbake på forrige linje
         internal fun kjedeSammenLinjer(linjer: List<Utbetalingslinje>, koblingslinje: Utbetalingslinje? = null): List<Utbetalingslinje> {
@@ -110,7 +110,7 @@ class Utbetalingslinje(
         OppdragDetaljer.LinjeDetaljer(
             fom = fom,
             tom = tom,
-            sats = beløp ?: error("mangler beløp for linje"),
+            sats = beløp,
             grad = grad?.toDouble(),
             stønadsdager = stønadsdager(),
             totalbeløp = totalbeløp(),
@@ -141,7 +141,7 @@ class Utbetalingslinje(
         refFagsystemId: String? = this.refFagsystemId,
         klassekode: Klassekode = this.klassekode,
         datoStatusFom: LocalDate? = this.datoStatusFom,
-        beløp: Int? = this.beløp,
+        beløp: Int = this.beløp,
     ) =
         Utbetalingslinje(
             fom = fom,
@@ -158,7 +158,7 @@ class Utbetalingslinje(
         )
 
 
-    fun totalbeløp() = satstype.totalbeløp(beløp ?: 0, stønadsdager())
+    fun totalbeløp() = satstype.totalbeløp(beløp, stønadsdager())
     fun stønadsdager() = if (!erOpphør()) filterNot(LocalDate::erHelg).size else 0
 
     fun dager() = fom
@@ -257,7 +257,7 @@ class Utbetalingslinje(
             satstype === Satstype.Engang -> SatstypeDto.Engang
             else -> error("ukjent statype: $satstype")
         },
-        beløp = this.beløp!!,
+        beløp = this.beløp,
         grad = this.grad,
         stønadsdager = stønadsdager(),
         totalbeløp = this.totalbeløp(),
