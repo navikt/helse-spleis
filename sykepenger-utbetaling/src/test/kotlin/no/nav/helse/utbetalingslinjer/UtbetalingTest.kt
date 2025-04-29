@@ -64,7 +64,6 @@ internal class UtbetalingTest {
     @Test
     fun `forkaster annulleringer som utbetalingen peker på`() {
         val annullering1 = Utbetaling(
-            korrelerendeUtbetaling = null,
             periode = 1.februar til 15.februar,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
@@ -75,7 +74,6 @@ internal class UtbetalingTest {
             gjenståendeSykedager = 248
         ).also { it.opprett(Aktivitetslogg()) }
         val annullering2 = Utbetaling(
-            korrelerendeUtbetaling = null,
             periode = 3.mars til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
@@ -87,7 +85,6 @@ internal class UtbetalingTest {
         ).also { it.opprett(Aktivitetslogg()) }
 
         val utbetalingen = Utbetaling(
-            korrelerendeUtbetaling = null,
             periode = 1.januar til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
@@ -112,7 +109,6 @@ internal class UtbetalingTest {
     @Test
     fun `ny utbetaling erstatter flere uten utbetalinger`() {
         val annullering1 = Utbetaling(
-            korrelerendeUtbetaling = null,
             periode = 1.februar til 15.februar,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
@@ -123,7 +119,6 @@ internal class UtbetalingTest {
             gjenståendeSykedager = 248
         ).also { it.opprett(Aktivitetslogg()) }
         val annullering2 = Utbetaling(
-            korrelerendeUtbetaling = null,
             periode = 3.mars til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
@@ -135,7 +130,6 @@ internal class UtbetalingTest {
         ).also { it.opprett(Aktivitetslogg()) }
 
         val utbetalingen = Utbetaling(
-            korrelerendeUtbetaling = null,
             periode = 1.januar til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
@@ -160,7 +154,6 @@ internal class UtbetalingTest {
     @Test
     fun `ny utbetaling erstatter flere med utbetalinger`() {
         val annullering1 = Utbetaling(
-            korrelerendeUtbetaling = null,
             periode = 1.februar til 15.februar,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = Oppdrag(
@@ -175,7 +168,6 @@ internal class UtbetalingTest {
             gjenståendeSykedager = 248
         ).also { it.opprett(Aktivitetslogg()) }
         val annullering2 = Utbetaling(
-            korrelerendeUtbetaling = null,
             periode = 3.mars til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
@@ -187,7 +179,6 @@ internal class UtbetalingTest {
         ).also { it.opprett(Aktivitetslogg()) }
 
         val utbetalingen = Utbetaling(
-            korrelerendeUtbetaling = null,
             periode = 1.januar til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
@@ -236,7 +227,6 @@ internal class UtbetalingTest {
     @Test
     fun `ny utbetaling erstatter flere med utbetalinger - med egne utbetalinger`() {
         val annullering1 = Utbetaling(
-            korrelerendeUtbetaling = null,
             periode = 1.februar til 15.februar,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = Oppdrag(
@@ -251,7 +241,6 @@ internal class UtbetalingTest {
             gjenståendeSykedager = 248
         ).also { it.opprett(Aktivitetslogg()) }
         val annullering2 = Utbetaling(
-            korrelerendeUtbetaling = null,
             periode = 3.mars til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
@@ -263,7 +252,6 @@ internal class UtbetalingTest {
         ).also { it.opprett(Aktivitetslogg()) }
 
         val utbetalingen = Utbetaling(
-            korrelerendeUtbetaling = null,
             periode = 1.januar til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = Oppdrag(

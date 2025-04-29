@@ -72,7 +72,6 @@ class Utbetaling private constructor(
         )
 
     constructor(
-        korrelerendeUtbetaling: Utbetaling?,
         periode: Periode,
         utbetalingstidslinje: Utbetalingstidslinje,
         arbeidsgiverOppdrag: Oppdrag,
@@ -81,10 +80,11 @@ class Utbetaling private constructor(
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
+        korrelasjonsId: UUID = UUID.randomUUID(),
         annulleringer: List<Utbetaling> = emptyList()
     ) : this(
         UUID.randomUUID(),
-        korrelerendeUtbetaling?.takeIf { arbeidsgiverOppdrag.tilhører(it.arbeidsgiverOppdrag) || personOppdrag.tilhører(it.personOppdrag) }?.korrelasjonsId ?: UUID.randomUUID(),
+        korrelasjonsId,
         periode,
         utbetalingstidslinje,
         arbeidsgiverOppdrag,
@@ -293,7 +293,7 @@ class Utbetaling private constructor(
         val nyUtbetalingstidslinje = tidligereUtbetalingstidslinje + utbetalingstidslinje
 
         return Utbetaling(
-            korrelerendeUtbetaling = this,
+            korrelasjonsId = this.korrelasjonsId,
             periode = this.periode.start til vedtaksperiode.endInclusive,
             utbetalingstidslinje = nyUtbetalingstidslinje,
             arbeidsgiverOppdrag = nyttArbeidsgiveroppdrag,
@@ -362,7 +362,6 @@ class Utbetaling private constructor(
                 gjenståendeSykedager = gjenståendeSykedager,
                 annulleringer = emptyList()
             ) ?: Utbetaling(
-                korrelerendeUtbetaling = null,
                 periode = periode,
                 utbetalingstidslinje = utbetalingstidslinje,
                 arbeidsgiverOppdrag = vedtaksperiodekladd.arbeidsgiveroppdrag,
@@ -614,15 +613,15 @@ class Utbetaling private constructor(
         }
 
         override fun annuller(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) = Utbetaling(
-            utbetaling,
-            utbetaling.periode,
-            utbetaling.utbetalingstidslinje,
-            utbetaling.arbeidsgiverOppdrag.annuller(aktivitetslogg),
-            utbetaling.personOppdrag.annuller(aktivitetslogg),
-            ANNULLERING,
-            LocalDate.MAX,
-            null,
-            null
+            periode = utbetaling.periode,
+            utbetalingstidslinje = utbetaling.utbetalingstidslinje,
+            arbeidsgiverOppdrag = utbetaling.arbeidsgiverOppdrag.annuller(aktivitetslogg),
+            personOppdrag = utbetaling.personOppdrag.annuller(aktivitetslogg),
+            type = ANNULLERING,
+            maksdato = LocalDate.MAX,
+            forbrukteSykedager = null,
+            gjenståendeSykedager = null,
+            korrelasjonsId = utbetaling.korrelasjonsId
         ).also { aktivitetslogg.info("Oppretter annullering med id ${it.id}") }
     }
 
@@ -661,15 +660,15 @@ class Utbetaling private constructor(
 
         override fun annuller(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) =
             Utbetaling(
-                utbetaling,
-                utbetaling.periode,
-                utbetaling.utbetalingstidslinje,
-                utbetaling.arbeidsgiverOppdrag.annuller(aktivitetslogg),
-                utbetaling.personOppdrag.annuller(aktivitetslogg),
-                ANNULLERING,
-                LocalDate.MAX,
-                null,
-                null
+                periode = utbetaling.periode,
+                utbetalingstidslinje = utbetaling.utbetalingstidslinje,
+                arbeidsgiverOppdrag = utbetaling.arbeidsgiverOppdrag.annuller(aktivitetslogg),
+                personOppdrag = utbetaling.personOppdrag.annuller(aktivitetslogg),
+                type = ANNULLERING,
+                maksdato = LocalDate.MAX,
+                forbrukteSykedager = null,
+                gjenståendeSykedager = null,
+                korrelasjonsId = utbetaling.korrelasjonsId
             ).also { aktivitetslogg.info("Oppretter annullering med id ${it.id}") }
     }
 

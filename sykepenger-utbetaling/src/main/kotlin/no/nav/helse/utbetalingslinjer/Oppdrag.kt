@@ -140,12 +140,6 @@ class Oppdrag private constructor(
         )
     }
 
-    private operator fun contains(other: Oppdrag) = this.tilhører(other) || this.overlapperMed(other)
-
-    fun tilhører(other: Oppdrag) = this.fagsystemId == other.fagsystemId && this.fagområde == other.fagområde
-    private fun overlapperMed(other: Oppdrag) =
-        this.linjeperiode?.let { other.linjeperiode?.overlapperMed(it) } ?: false
-
     fun overfør(
         aktivitetslogg: IAktivitetslogg,
         maksdato: LocalDate?,
