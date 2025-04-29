@@ -8,6 +8,9 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.Arbeidsgiverperiode
+import no.nav.helse.person.PersonObserver.Inntekt
+import no.nav.helse.person.PersonObserver.Refusjon
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
@@ -37,10 +40,6 @@ internal class PersonMediator(
     private fun queueMessage(fødselsnummer: String, message: String) {
         val eventName = objectMapper.readTree(message).path("@event_name").asText()
         meldinger.add(Pakke(fødselsnummer, eventName, message))
-    }
-
-    override fun inntektsmeldingReplay(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
-        queueMessage(JsonMessage.newMessage("trenger_inntektsmelding_replay", event.toJsonMap()))
     }
 
     override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) {
@@ -324,7 +323,24 @@ internal class PersonMediator(
     }
 
     override fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
-        queueMessage(JsonMessage.newMessage("vedtaksperiode_forkastet", event.toJsonMap()))
+        queueMessage(
+            JsonMessage.newMessage(
+                "vedtaksperiode_forkastet", mapOf(
+                "organisasjonsnummer" to event.organisasjonsnummer,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "tilstand" to event.gjeldendeTilstand,
+                "hendelser" to event.hendelser,
+                "fom" to event.fom,
+                "tom" to event.tom,
+                "trengerArbeidsgiveropplysninger" to event.trengerArbeidsgiveropplysninger,
+                "speilrelatert" to event.speilrelatert,
+                "sykmeldingsperioder" to event.sykmeldingsperioder.map {
+                    mapOf(
+                        "fom" to it.start,
+                        "tom" to it.endInclusive
+                    )
+                }
+            )))
     }
 
     override fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
@@ -457,15 +473,87 @@ internal class PersonMediator(
     }
 
     override fun skatteinntekterLagtTilGrunn(event: PersonObserver.SkatteinntekterLagtTilGrunnEvent) {
-        queueMessage(JsonMessage.newMessage("skatteinntekter_lagt_til_grunn", event.toJsonMap()))
+        queueMessage(
+            JsonMessage.newMessage(
+                "skatteinntekter_lagt_til_grunn", mapOf(
+                "organisasjonsnummer" to event.organisasjonsnummer,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "omregnetÅrsinntekt" to event.omregnetÅrsinntekt,
+                "skatteinntekter" to event.skatteinntekter.map {
+                    mapOf<String, Any>(
+                        "måned" to it.måned,
+                        "beløp" to it.beløp
+                    )
+                }
+            )))
+    }
+
+    override fun inntektsmeldingReplay(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
+        queueMessage(event.tilJsonMessage("trenger_inntektsmelding_replay"))
     }
 
     override fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
-        queueMessage(JsonMessage.newMessage("trenger_opplysninger_fra_arbeidsgiver", event.toJsonMap()))
+        queueMessage(event.tilJsonMessage("trenger_opplysninger_fra_arbeidsgiver"))
     }
 
+    private fun PersonObserver.TrengerArbeidsgiveropplysningerEvent.tilJsonMessage(eventName: String) =
+        JsonMessage.newMessage(
+            eventName, mapOf(
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "sykmeldingsperioder" to sykmeldingsperioder.map {
+                mapOf(
+                    "fom" to it.start,
+                    "tom" to it.endInclusive
+                )
+            },
+            "egenmeldingsperioder" to egenmeldingsperioder.map {
+                mapOf(
+                    "fom" to it.start,
+                    "tom" to it.endInclusive
+                )
+            },
+            "førsteFraværsdager" to førsteFraværsdager.map {
+                mapOf<String, Any>(
+                    "organisasjonsnummer" to it.organisasjonsnummer,
+                    "førsteFraværsdag" to it.førsteFraværsdag
+                )
+            },
+            "forespurteOpplysninger" to forespurteOpplysninger.map { forespurtOpplysning ->
+                when (forespurtOpplysning) {
+                    is Arbeidsgiverperiode -> mapOf(
+                        "opplysningstype" to "Arbeidsgiverperiode"
+                    )
+
+                    is Inntekt -> mapOf(
+                        "opplysningstype" to "Inntekt",
+                        "forslag" to mapOf(
+                            "forrigeInntekt" to null
+                        )
+                    )
+
+                    is Refusjon -> mapOf(
+                        "opplysningstype" to "Refusjon",
+                        "forslag" to emptyList<Nothing>()
+                    )
+                }
+            }
+        )
+        )
+
     override fun trengerIkkeArbeidsgiveropplysninger(event: PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent) {
-        queueMessage(JsonMessage.newMessage("trenger_ikke_opplysninger_fra_arbeidsgiver", event.toJsonMap()))
+        queueMessage(
+            JsonMessage.newMessage(
+                "trenger_ikke_opplysninger_fra_arbeidsgiver",
+                mapOf<String, Any>(
+                    "organisasjonsnummer" to event.organisasjonsnummer,
+                    "vedtaksperiodeId" to event.vedtaksperiodeId
+                )
+            )
+        )
     }
 
     override fun utkastTilVedtak(event: PersonObserver.UtkastTilVedtakEvent) {

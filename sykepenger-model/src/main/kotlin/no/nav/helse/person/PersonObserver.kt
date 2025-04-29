@@ -8,7 +8,6 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -64,23 +63,6 @@ interface PersonObserver {
         val speilrelatert: Boolean
     ) {
         val trengerArbeidsgiveropplysninger = sykmeldingsperioder.isNotEmpty()
-        fun toJsonMap(): Map<String, Any> =
-            mapOf(
-                "organisasjonsnummer" to organisasjonsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "tilstand" to gjeldendeTilstand,
-                "hendelser" to hendelser,
-                "fom" to fom,
-                "tom" to tom,
-                "trengerArbeidsgiveropplysninger" to trengerArbeidsgiveropplysninger,
-                "speilrelatert" to speilrelatert,
-                "sykmeldingsperioder" to sykmeldingsperioder.map {
-                    mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
-                    )
-                }
-            )
     }
 
     data class InntektsmeldingFørSøknadEvent(
@@ -100,21 +82,6 @@ interface PersonObserver {
             val måned: YearMonth,
             val beløp: Double
         )
-
-        fun toJsonMap(): Map<String, Any> =
-            mapOf(
-                "organisasjonsnummer" to organisasjonsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "behandlingId" to behandlingId,
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "omregnetÅrsinntekt" to omregnetÅrsinntekt,
-                "skatteinntekter" to skatteinntekter.map {
-                    mapOf(
-                        "måned" to it.måned,
-                        "beløp" to it.beløp
-                    )
-                }
-            )
     }
 
     data class TrengerArbeidsgiveropplysningerEvent(
@@ -126,43 +93,12 @@ interface PersonObserver {
         val egenmeldingsperioder: List<Periode>,
         val førsteFraværsdager: List<FørsteFraværsdag>,
         val forespurteOpplysninger: Set<ForespurtOpplysning>
-    ) {
-        fun toJsonMap(): Map<String, Any> =
-            mapOf(
-                "organisasjonsnummer" to organisasjonsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "sykmeldingsperioder" to sykmeldingsperioder.map {
-                    mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
-                    )
-                },
-                "egenmeldingsperioder" to egenmeldingsperioder.map {
-                    mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
-                    )
-                },
-                "førsteFraværsdager" to førsteFraværsdager.map {
-                    mapOf(
-                        "organisasjonsnummer" to it.organisasjonsnummer,
-                        "førsteFraværsdag" to it.førsteFraværsdag
-                    )
-                },
-                "forespurteOpplysninger" to forespurteOpplysninger.toJsonMap()
-            )
-    }
+    )
 
     class TrengerIkkeArbeidsgiveropplysningerEvent(
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID
     ) {
-        fun toJsonMap(): Map<String, Any> =
-            mapOf(
-                "organisasjonsnummer" to organisasjonsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId
-            )
     }
 
     data class FørsteFraværsdag(
@@ -170,30 +106,7 @@ interface PersonObserver {
         val førsteFraværsdag: LocalDate
     )
 
-    sealed class ForespurtOpplysning {
-
-        companion object {
-            fun Set<ForespurtOpplysning>.toJsonMap() = map { forespurtOpplysning ->
-                when (forespurtOpplysning) {
-                    is Arbeidsgiverperiode -> mapOf(
-                        "opplysningstype" to "Arbeidsgiverperiode"
-                    )
-
-                    is Inntekt -> mapOf(
-                        "opplysningstype" to "Inntekt",
-                        "forslag" to mapOf(
-                            "forrigeInntekt" to null
-                        )
-                    )
-
-                    is Refusjon -> mapOf(
-                        "opplysningstype" to "Refusjon",
-                        "forslag" to emptyList<Nothing>()
-                    )
-                }
-            }
-        }
-    }
+    sealed class ForespurtOpplysning
 
     data object Inntekt : ForespurtOpplysning()
     data object Arbeidsgiverperiode : ForespurtOpplysning()
