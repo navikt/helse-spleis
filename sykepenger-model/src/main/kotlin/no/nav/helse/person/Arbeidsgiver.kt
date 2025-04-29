@@ -386,43 +386,7 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
-    internal fun lagUtbetaling(
-        aktivitetslogg: IAktivitetslogg,
-        utbetalingstidslinje: Utbetalingstidslinje,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int,
-        gjenståendeSykedager: Int,
-        periode: Periode
-    ) = lagNyUtbetaling(
-        aktivitetslogg,
-        utbetalingstidslinje,
-        maksdato,
-        forbrukteSykedager,
-        gjenståendeSykedager,
-        periode,
-        Utbetalingtype.UTBETALING
-    )
-
-    internal fun lagRevurdering(
-        aktivitetslogg: IAktivitetslogg,
-        utbetalingstidslinje: Utbetalingstidslinje,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int,
-        gjenståendeSykedager: Int,
-        periode: Periode
-    ): Utbetaling {
-        return lagNyUtbetaling(
-            aktivitetslogg,
-            utbetalingstidslinje,
-            maksdato,
-            forbrukteSykedager,
-            gjenståendeSykedager,
-            periode,
-            Utbetalingtype.REVURDERING
-        )
-    }
-
-    private fun lagNyUtbetaling(
+    internal fun lagNyUtbetaling(
         aktivitetslogg: IAktivitetslogg,
         utbetalingstidslinje: Utbetalingstidslinje,
         maksdato: LocalDate,

@@ -51,6 +51,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
@@ -840,13 +841,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             aktivitetslogg: IAktivitetslogg,
             beregning: BeregnetPeriode
         ) {
-            val strategi = Arbeidsgiver::lagUtbetaling
             lagUtbetaling(
                 vedtaksperiodeSomLagerUtbetaling,
                 arbeidsgiver,
                 aktivitetslogg,
                 beregning,
-                strategi,
+                Utbetalingtype.UTBETALING,
                 Tilstand.BeregnetOmgjøring
             )
         }
@@ -857,13 +857,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             aktivitetslogg: IAktivitetslogg,
             beregning: BeregnetPeriode
         ) {
-            val strategi = Arbeidsgiver::lagUtbetaling
             return lagUtbetaling(
                 vedtaksperiodeSomLagerUtbetaling,
                 arbeidsgiver,
                 aktivitetslogg,
                 beregning,
-                strategi,
+                Utbetalingtype.UTBETALING,
                 Tilstand.Beregnet
             )
         }
@@ -874,13 +873,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             aktivitetslogg: IAktivitetslogg,
             beregning: BeregnetPeriode
         ) {
-            val strategi = Arbeidsgiver::lagRevurdering
             lagUtbetaling(
                 vedtaksperiodeSomLagerUtbetaling,
                 arbeidsgiver,
                 aktivitetslogg,
                 beregning,
-                strategi,
+                Utbetalingtype.REVURDERING,
                 Tilstand.BeregnetRevurdering
             )
         }
@@ -890,10 +888,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             arbeidsgiver: Arbeidsgiver,
             aktivitetslogg: IAktivitetslogg,
             beregning: BeregnetPeriode,
-            strategi: (Arbeidsgiver, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate, forbrukteSykedager: Int, gjenståendeSykedager: Int, periode: Periode) -> Utbetaling,
+            utbetalingtype: Utbetalingtype,
             nyTilstand: Tilstand
         ) {
-            val denNyeUtbetalingen = strategi(arbeidsgiver, aktivitetslogg, beregning.utbetalingstidslinje, beregning.maksdatovurdering.resultat.maksdato, beregning.maksdatovurdering.resultat.antallForbrukteDager, beregning.maksdatovurdering.resultat.gjenståendeDager, periode)
+            val denNyeUtbetalingen = arbeidsgiver.lagNyUtbetaling(
+                aktivitetslogg = aktivitetslogg,
+                utbetalingstidslinje = beregning.utbetalingstidslinje,
+                maksdato = beregning.maksdatovurdering.resultat.maksdato,
+                forbrukteSykedager = beregning.maksdatovurdering.resultat.antallForbrukteDager,
+                gjenståendeSykedager = beregning.maksdatovurdering.resultat.gjenståendeDager,
+                periode = periode,
+                type = utbetalingtype
+            )
             denNyeUtbetalingen.nyVedtaksperiodeUtbetaling(vedtaksperiodeSomLagerUtbetaling)
             nyEndring(gjeldende.kopierMedUtbetaling(beregning, denNyeUtbetalingen))
             tilstand(nyTilstand, aktivitetslogg)
