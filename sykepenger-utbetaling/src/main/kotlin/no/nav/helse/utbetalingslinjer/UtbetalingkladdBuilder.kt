@@ -22,12 +22,12 @@ class UtbetalingkladdBuilder(
     // TODO: krever at Overføringer/kvitteringer inneholder fagområde, ellers
     // kan ikke meldingene mappes til riktig oppdrag
     // private val fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID())
-    private var arbeidsgiveroppdragBuilder = OppdragBuilder(
+    private val arbeidsgiveroppdragBuilder = OppdragBuilder(
         mottaker = mottakerRefusjon,
         fagområde = SykepengerRefusjon,
         klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
     )
-    private var personoppdragBuilder = OppdragBuilder(
+    private val personoppdragBuilder = OppdragBuilder(
         mottaker = mottakerBruker,
         fagområde = Sykepenger,
         klassekode = Klassekode.SykepengerArbeidstakerOrdinær
