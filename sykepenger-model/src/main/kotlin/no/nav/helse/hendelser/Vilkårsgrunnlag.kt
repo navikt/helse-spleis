@@ -23,15 +23,12 @@ class Vilkårsgrunnlag(
     meldingsreferanseId: MeldingsreferanseId,
     private val vedtaksperiodeId: String,
     private val skjæringstidspunkt: LocalDate,
-    orgnummer: String,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     private val medlemskapsvurdering: Medlemskapsvurdering,
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
     private val arbeidsforhold: List<Arbeidsforhold>
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-        organisasjonsnummer = orgnummer
-    )
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

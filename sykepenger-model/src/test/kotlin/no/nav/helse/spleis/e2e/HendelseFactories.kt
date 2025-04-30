@@ -215,7 +215,7 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         skjæringstidspunkt = skjæringstidspunkt,
-        orgnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
         inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
