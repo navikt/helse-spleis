@@ -31,7 +31,6 @@ import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.ProsentdelDto
 import no.nav.helse.dto.RefusjonsservitørDto
-import no.nav.helse.dto.SatstypeDto
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.SkatteopplysningDto
 import no.nav.helse.dto.SykdomshistorikkDto
@@ -1195,9 +1194,8 @@ data class PersonData(
     data class UtbetalingslinjeData(
         val fom: LocalDate,
         val tom: LocalDate,
-        val satstype: String,
         val sats: Int,
-        val grad: Int?,
+        val grad: Int,
         val refFagsystemId: String?,
         val delytelseId: Int,
         val refDelytelseId: Int?,
@@ -1208,11 +1206,6 @@ data class PersonData(
         fun tilDto() = UtbetalingslinjeInnDto(
             fom = this.fom,
             tom = this.tom,
-            satstype = when (this.satstype) {
-                "ENG" -> SatstypeDto.Engang
-                "DAG" -> SatstypeDto.Daglig
-                else -> error("Ukjent satstype: $satstype")
-            },
             beløp = this.sats,
             grad = this.grad,
             refFagsystemId = this.refFagsystemId,

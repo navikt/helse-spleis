@@ -19,7 +19,6 @@ import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.RefusjonsservitørDto
-import no.nav.helse.dto.SatstypeDto
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.SkatteopplysningDto
 import no.nav.helse.dto.SykdomshistorikkElementDto
@@ -602,10 +601,6 @@ private fun EndringskodeDto.tilPersonData() = when (this) {
 private fun UtbetalingslinjeUtDto.tilPersonData() = PersonData.UtbetalingslinjeData(
     fom = this.fom,
     tom = this.tom,
-    satstype = when (this.satstype) {
-        SatstypeDto.Daglig -> "DAG"
-        SatstypeDto.Engang -> "ENG"
-    },
     sats = this.beløp,
     grad = this.grad,
     refFagsystemId = this.refFagsystemId,

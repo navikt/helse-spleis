@@ -26,6 +26,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.UEND,
                 beløp = 1000,
                 grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 1,
                 refDelytelseId = null,
                 refFagsystemId = null
@@ -36,6 +37,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.ENDR,
                 beløp = 500,
                 grad = 50,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 2,
                 refDelytelseId = null,
                 refFagsystemId = null
@@ -46,6 +48,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 beløp = 1000,
                 grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 3,
                 refDelytelseId = null,
                 refFagsystemId = null
@@ -78,6 +81,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.UEND,
                 beløp = 1000,
                 grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 1,
                 refDelytelseId = null,
                 refFagsystemId = null
@@ -88,6 +92,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.ENDR,
                 beløp = 500,
                 grad = 50,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 2,
                 refDelytelseId = null,
                 refFagsystemId = null
@@ -98,6 +103,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 beløp = 1000,
                 grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 3,
                 refDelytelseId = null,
                 refFagsystemId = null
@@ -134,6 +140,7 @@ internal class OppdragTest {
                 datoStatusFom = 16.januar,
                 beløp = 1000,
                 grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 1,
                 refDelytelseId = null,
                 refFagsystemId = null
@@ -144,6 +151,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 beløp = 500,
                 grad = 50,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 2,
                 refDelytelseId = null,
                 refFagsystemId = null
@@ -177,6 +185,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.UEND,
                 beløp = 1000,
                 grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 1,
                 refDelytelseId = null,
                 refFagsystemId = null
@@ -187,6 +196,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.ENDR,
                 beløp = 500,
                 grad = 50,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 2,
                 refDelytelseId = null,
                 refFagsystemId = null
@@ -197,6 +207,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 beløp = 1000,
                 grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 3,
                 refDelytelseId = null,
                 refFagsystemId = null
@@ -210,7 +221,8 @@ internal class OppdragTest {
                 tom = 18.januar,
                 endringskode = Endringskode.NY,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
         )
         )
@@ -223,6 +235,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 beløp = 1000,
                 grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 1,
                 refDelytelseId = null,
                 refFagsystemId = null
@@ -233,6 +246,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.ENDR,
                 beløp = 500,
                 grad = 50,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 2,
                 refDelytelseId = null,
                 refFagsystemId = null
@@ -243,6 +257,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 beløp = 1000,
                 grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 3,
                 refDelytelseId = null,
                 refFagsystemId = null
@@ -261,6 +276,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 beløp = 1000,
                 grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 4,
                 refDelytelseId = 3,
                 refFagsystemId = oppdrag1.inspektør.fagsystemId()
@@ -271,6 +287,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 beløp = 500,
                 grad = 50,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 5,
                 refDelytelseId = 4,
                 refFagsystemId = oppdrag1.inspektør.fagsystemId()
@@ -281,6 +298,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 beløp = 1000,
                 grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 delytelseId = 6,
                 refDelytelseId = 5,
                 refFagsystemId = oppdrag1.inspektør.fagsystemId()
@@ -321,7 +339,8 @@ internal class OppdragTest {
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
         )
         )
@@ -339,7 +358,8 @@ internal class OppdragTest {
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
         )
         )
@@ -358,7 +378,8 @@ internal class OppdragTest {
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
         )
         )
@@ -369,7 +390,8 @@ internal class OppdragTest {
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
         )
         )
@@ -386,7 +408,8 @@ internal class OppdragTest {
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
         )
         )
@@ -397,7 +420,8 @@ internal class OppdragTest {
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
         )
         )
@@ -415,7 +439,8 @@ internal class OppdragTest {
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
         )
         )
@@ -426,7 +451,8 @@ internal class OppdragTest {
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
         )
         )
@@ -452,7 +478,8 @@ internal class OppdragTest {
                 tom = 16.januar,
                 endringskode = Endringskode.UEND,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
 
         )
@@ -470,7 +497,8 @@ internal class OppdragTest {
                 tom = 16.januar,
                 endringskode = Endringskode.UEND,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
 
         )
@@ -523,7 +551,8 @@ internal class OppdragTest {
                 tom = 31.januar,
                 endringskode = Endringskode.NY,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
 
         )
@@ -542,7 +571,8 @@ internal class OppdragTest {
                 tom = 31.januar,
                 endringskode = Endringskode.NY,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
 
         )
@@ -561,7 +591,8 @@ internal class OppdragTest {
                 tom = 31.januar,
                 endringskode = Endringskode.NY,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
 
         )
@@ -596,7 +627,8 @@ internal class OppdragTest {
                 tom = 31.januar,
                 endringskode = Endringskode.NY,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
 
         )
@@ -645,7 +677,8 @@ internal class OppdragTest {
                 tom = 31.januar,
                 endringskode = Endringskode.NY,
                 beløp = 1000,
-                grad = 100
+                grad = 100,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
             )
 
         )

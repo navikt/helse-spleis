@@ -17,7 +17,6 @@ import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
-import no.nav.helse.utbetalingslinjer.Satstype
 
 class Feriepengeutbetalingslinje(
     val fom: LocalDate,
@@ -30,8 +29,6 @@ class Feriepengeutbetalingslinje(
     val klassekode: Klassekode,
     val datoStatusFom: LocalDate? = null
 ) : Iterable<LocalDate> {
-
-    val satstype = Satstype.Companion.Engang
 
     companion object {
         fun List<Feriepengeutbetalingslinje>.kobleTil(fagsystemId: String) = map { linje ->
@@ -145,7 +142,7 @@ class Feriepengeutbetalingslinje(
         )
 
 
-    fun totalbeløp() = satstype.totalbeløp(beløp, stønadsdager())
+    fun totalbeløp() = beløp
     fun stønadsdager() = if (!erOpphør()) filterNot(LocalDate::erHelg).size else 0
 
     fun dager() = fom
@@ -216,7 +213,7 @@ class Feriepengeutbetalingslinje(
     fun behovdetaljer() = mapOf<String, Any?>(
         "fom" to fom.toString(),
         "tom" to tom.toString(),
-        "satstype" to "$satstype",
+        "satstype" to "ENG",
         "sats" to beløp,
         "grad" to null,
         "stønadsdager" to stønadsdager(),

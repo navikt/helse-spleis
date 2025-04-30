@@ -13,8 +13,9 @@ internal class UtbetalingslinjeTest {
         val linje = Utbetalingslinje(
             fom = 1.januar(2018),
             tom = 7.januar(2018),
-            grad = null,
-            beløp = 0
+            grad = 50,
+            beløp = 0,
+            klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
         )
 
         val nyLinje = linje.kuttHelg() ?: fail { "forventet linje" }
@@ -27,8 +28,9 @@ internal class UtbetalingslinjeTest {
         val linje = Utbetalingslinje(
             fom = 6.januar(2018),
             tom = 7.januar(2018),
-            grad = null,
-            beløp = 0
+            grad = 50,
+            beløp = 0,
+            klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
         )
 
         assertNull(linje.kuttHelg())

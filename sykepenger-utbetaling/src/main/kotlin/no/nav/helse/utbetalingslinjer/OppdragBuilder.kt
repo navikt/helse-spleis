@@ -96,7 +96,6 @@ class OppdragBuilder(
         return Utbetalingslinje(
             fom = dato,
             tom = dato,
-            satstype = Satstype.Daglig,
             beløp = beløp,
             grad = grad,
             refFagsystemId = fagsystemId,

@@ -4,7 +4,6 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.KlassekodeDto
-import no.nav.helse.dto.SatstypeDto
 import no.nav.helse.dto.deserialisering.UtbetalingslinjeInnDto
 import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
 import no.nav.helse.erHelg
@@ -19,14 +18,13 @@ import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
 class Utbetalingslinje(
     val fom: LocalDate,
     val tom: LocalDate,
-    val satstype: Satstype = Satstype.Daglig,
     val beløp: Int,
-    val grad: Int?,
-    val refFagsystemId: String? = null,
+    val grad: Int,
+    val klassekode: Klassekode,
+    val endringskode: Endringskode = NY,
     val delytelseId: Int = 1,
     val refDelytelseId: Int? = null,
-    val endringskode: Endringskode = NY,
-    val klassekode: Klassekode = RefusjonIkkeOpplysningspliktig,
+    val refFagsystemId: String? = null,
     val datoStatusFom: LocalDate? = null
 ) : Iterable<LocalDate> {
 
@@ -82,10 +80,6 @@ class Utbetalingslinje(
             return Utbetalingslinje(
                 fom = dto.fom,
                 tom = dto.tom,
-                satstype = when (dto.satstype) {
-                    SatstypeDto.Daglig -> Satstype.Daglig
-                    SatstypeDto.Engang -> Satstype.Engang
-                },
                 beløp = dto.beløp,
                 grad = dto.grad,
                 refFagsystemId = dto.refFagsystemId,
@@ -111,7 +105,7 @@ class Utbetalingslinje(
             fom = fom,
             tom = tom,
             sats = beløp,
-            grad = grad?.toDouble(),
+            grad = grad.toDouble(),
             stønadsdager = stønadsdager(),
             totalbeløp = totalbeløp(),
             statuskode = statuskode
@@ -146,7 +140,6 @@ class Utbetalingslinje(
         Utbetalingslinje(
             fom = fom,
             tom = tom,
-            satstype = satstype,
             beløp = beløp,
             grad = grad,
             refFagsystemId = refFagsystemId,
@@ -158,7 +151,7 @@ class Utbetalingslinje(
         )
 
 
-    fun totalbeløp() = satstype.totalbeløp(beløp, stønadsdager())
+    fun totalbeløp() = beløp * stønadsdager()
     fun stønadsdager() = if (!erOpphør()) filterNot(LocalDate::erHelg).size else 0
 
     fun dager() = fom
@@ -235,9 +228,9 @@ class Utbetalingslinje(
     fun behovdetaljer() = mapOf<String, Any?>(
         "fom" to fom.toString(),
         "tom" to tom.toString(),
-        "satstype" to "$satstype",
+        "satstype" to "DAG",
         "sats" to beløp,
-        "grad" to grad?.toDouble(), // backwards-compatibility mot andre systemer som forventer double: må gjennomgås
+        "grad" to grad.toDouble(), // backwards-compatibility mot andre systemer som forventer double: må gjennomgås
         "stønadsdager" to stønadsdager(),
         "totalbeløp" to totalbeløp(),
         "endringskode" to endringskode.toString(),
@@ -252,11 +245,6 @@ class Utbetalingslinje(
     fun dto() = UtbetalingslinjeUtDto(
         fom = this.fom,
         tom = this.tom,
-        satstype = when {
-            satstype === Satstype.Daglig -> SatstypeDto.Daglig
-            satstype === Satstype.Engang -> SatstypeDto.Engang
-            else -> error("ukjent statype: $satstype")
-        },
         beløp = this.beløp,
         grad = this.grad,
         stønadsdager = stønadsdager(),

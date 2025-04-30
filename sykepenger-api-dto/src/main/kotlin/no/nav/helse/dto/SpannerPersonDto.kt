@@ -639,9 +639,8 @@ data class SpannerPersonDto(
     data class UtbetalingslinjeData(
         val fom: LocalDate,
         val tom: LocalDate,
-        val satstype: String,
         val sats: Int,
-        val grad: Int?,
+        val grad: Int,
         val stønadsdager: Int,
         val totalbeløp: Int,
         val refFagsystemId: String?,
@@ -1336,10 +1335,6 @@ private fun EndringskodeDto.tilPersonData() = when (this) {
 private fun UtbetalingslinjeUtDto.tilPersonData() = SpannerPersonDto.UtbetalingslinjeData(
     fom = this.fom,
     tom = this.tom,
-    satstype = when (this.satstype) {
-        SatstypeDto.Daglig -> "DAG"
-        SatstypeDto.Engang -> "ENG"
-    },
     sats = this.beløp,
     grad = this.grad,
     totalbeløp = this.totalbeløp,

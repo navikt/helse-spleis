@@ -76,8 +76,3 @@ sealed class KlassekodeDto(val verdi: String) {
     data object SykepengerArbeidstakerOrdinær : KlassekodeDto("SPATORD")
     data object SykepengerArbeidstakerFeriepenger : KlassekodeDto("SPATFER")
 }
-
-sealed class SatstypeDto {
-    data object Daglig : SatstypeDto()
-    data object Engang : SatstypeDto()
-}

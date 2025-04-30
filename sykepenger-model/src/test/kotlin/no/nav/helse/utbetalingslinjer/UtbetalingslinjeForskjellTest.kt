@@ -77,12 +77,12 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun hendelsemap() {
-        (1.januar to 5.januar dagsats 500 satstype Satstype.Engang).asUtbetalingslinje().behovdetaljer().also { map ->
+        (1.januar to 5.januar dagsats 500).asUtbetalingslinje().behovdetaljer().also { map ->
             assertEquals("${1.januar}", map.getValue("fom"))
             assertEquals("${5.januar}", map.getValue("tom"))
-            assertEquals("ENG", map.getValue("satstype"))
+            assertEquals("DAG", map.getValue("satstype"))
             assertEquals(500, map.getValue("sats"))
-            assertEquals(500, map.getValue("totalbeløp"))
+            assertEquals(2500, map.getValue("totalbeløp"))
             assertEquals(100.0, map.getValue("grad"))
             assertEquals(5, map.getValue("stønadsdager"))
             assertEquals("NY", map.getValue("endringskode"))
@@ -97,10 +97,6 @@ internal class UtbetalingslinjeForskjellTest {
         (1.januar to 5.januar dagsats 500).asUtbetalingslinje().also {
             assertEquals(5, it.stønadsdager())
             assertEquals(2500, it.totalbeløp())
-        }
-        (1.januar to 5.januar dagsats 500 satstype Satstype.Engang).asUtbetalingslinje().also {
-            assertEquals(5, it.stønadsdager())
-            assertEquals(500, it.totalbeløp())
         }
         (1.januar to 7.januar dagsats 500).asUtbetalingslinje().also {
             assertEquals(5, it.stønadsdager())
@@ -1243,7 +1239,6 @@ internal class UtbetalingslinjeForskjellTest {
                 UtbetalingslinjeInnDto(
                     fom = it.fom,
                     tom = it.tom,
-                    satstype = it.satstype,
                     beløp = it.beløp,
                     grad = it.grad,
                     refFagsystemId = it.refFagsystemId,
@@ -1262,7 +1257,6 @@ internal class UtbetalingslinjeForskjellTest {
     ) {
         private var delytelseId = 1
         private var endringskode: Endringskode = NY
-        private var satstype: Satstype = Satstype.Daglig
         private var grad: Int = 100
         private var dagsats = 1200
         private var datoStatusFom: LocalDate? = null
@@ -1288,11 +1282,6 @@ internal class UtbetalingslinjeForskjellTest {
             return this
         }
 
-        infix fun satstype(satstype: Satstype): TestUtbetalingslinje {
-            this.satstype = satstype
-            return this
-        }
-
         infix fun pekerPå(other: Utbetalingslinje): TestUtbetalingslinje {
             delytelseId = other.id + 1
             refDelytelseId = other.id
@@ -1315,9 +1304,9 @@ internal class UtbetalingslinjeForskjellTest {
             Utbetalingslinje(
                 fom = fom,
                 tom = tom,
-                satstype = satstype,
                 beløp = dagsats,
                 grad = grad,
+                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
                 endringskode = endringskode,
                 datoStatusFom = datoStatusFom,
                 refDelytelseId = refDelytelseId,
