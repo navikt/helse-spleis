@@ -410,7 +410,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
 
     private fun vurderOmInntektsmeldingAldriKommer(påminnelse: Påminnelse): Boolean {
         if (påminnelse.når(Flagg("ønskerInntektFraAOrdningen"))) return true
-        val ventetMinst3Måneder = påminnelse.når(VentetMinst(Period.ofMonths(3)))
+        val ventetMinst3Måneder = påminnelse.når(VentetMinst(Period.ofDays(90)))
         val ikkeForGammel = !påminnelse.når(Påminnelse.Predikat.VentetFørCutoff)
         return ventetMinst3Måneder && ikkeForGammel
     }

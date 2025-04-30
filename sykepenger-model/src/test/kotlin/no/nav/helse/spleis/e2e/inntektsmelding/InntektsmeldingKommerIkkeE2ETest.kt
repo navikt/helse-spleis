@@ -180,7 +180,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     @Test
     fun `lager ikke påminnelse om vedtaksperioden har ventet mindre enn tre måneder`() {
         val nå = LocalDateTime.now()
-        val tilstandsendringstidspunkt = nå.minusMonths(3).plusDays(1)
+        val tilstandsendringstidspunkt = nå.minusDays(89)
         a1 {
             håndterSøknad(januar)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt, nå)
