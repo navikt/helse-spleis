@@ -9,6 +9,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.fraInnteksmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
@@ -69,7 +70,9 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
         return Inntektsmelding(
             meldingsreferanseId = internDokumentId,
             refusjon = refusjon,
-            orgnummer = orgnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                organisasjonsnummer = orgnummer
+            ),
             beregnetInntekt = beregnetInntekt.månedlig,
             arbeidsgiverperioder = arbeidsgiverperioder,
             begrunnelseForReduksjonEllerIkkeUtbetalt = fraInnteksmelding(begrunnelseForReduksjonEllerIkkeUtbetalt),

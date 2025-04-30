@@ -107,7 +107,9 @@ internal class RestApiTest {
                 beløp = 12000.månedlig,
                 opphørsdato = null
             ),
-            orgnummer = ORGNUMMER,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                organisasjonsnummer = ORGNUMMER
+            ),
             beregnetInntekt = 12000.månedlig,
             arbeidsgiverperioder = listOf(Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 25))),
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,

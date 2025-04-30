@@ -28,7 +28,7 @@ import no.nav.helse.økonomi.Inntekt
 class Inntektsmelding(
     meldingsreferanseId: MeldingsreferanseId,
     private val refusjon: Refusjon,
-    orgnummer: String,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     beregnetInntekt: Inntekt,
     arbeidsgiverperioder: List<Periode>,
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: BegrunnelseForReduksjonEllerIkkeUtbetalt?,
@@ -38,9 +38,6 @@ class Inntektsmelding(
     mottatt: LocalDateTime
 ) : Hendelse {
 
-    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-        organisasjonsnummer = orgnummer
-    )
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = ARBEIDSGIVER,

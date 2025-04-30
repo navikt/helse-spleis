@@ -127,7 +127,9 @@ internal abstract class AbstractObservableTest {
     ): Inntektsmelding = Inntektsmelding(
         meldingsreferanseId = MeldingsreferanseId(id),
         refusjon = refusjon,
-        orgnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+            organisasjonsnummer = orgnummer
+        ),
         beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,
         begrunnelseForReduksjonEllerIkkeUtbetalt = null,

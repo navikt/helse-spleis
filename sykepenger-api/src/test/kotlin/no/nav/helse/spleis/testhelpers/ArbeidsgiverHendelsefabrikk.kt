@@ -134,7 +134,9 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             Inntektsmelding(
                 meldingsreferanseId = MeldingsreferanseId(id),
                 refusjon = refusjon,
-                orgnummer = organisasjonsnummer,
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                    organisasjonsnummer = organisasjonsnummer
+                ),
                 beregnetInntekt = beregnetInntekt,
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = fraInnteksmelding(begrunnelseForReduksjonEllerIkkeUtbetalt),
