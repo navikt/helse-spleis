@@ -484,10 +484,14 @@ internal abstract class AbstractEndToEndMediatorTest {
         orgnummer: String? = null
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
+        val yrkesaktivitetstype =
+            testRapid.inspektør.etterspurteBehov(Sykepengehistorikk).path("yrkesaktivitetstype").asText()
+
         val (_, message) = meldingsfabrikk.lagUtbetalingshistorikk(
             testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            sykepengehistorikk,
-            orgnummer = orgnummer
+            yrkesaktivitetstype = yrkesaktivitetstype,
+            sykepengehistorikk = sykepengehistorikk,
+            orgnummer = orgnummer,
         )
         testRapid.sendTestMessage(message)
     }

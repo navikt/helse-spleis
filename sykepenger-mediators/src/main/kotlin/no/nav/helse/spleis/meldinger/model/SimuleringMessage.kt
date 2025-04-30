@@ -5,17 +5,17 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
-import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OK
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.valueOf
+import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
 
 internal class SimuleringMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
-    private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
+    private val behandlingsporing = packet.yrkesaktivitetssporing
     private val utbetalingId = UUID.fromString(packet["utbetalingId"].asText())
 
     private val fagsystemId = packet["Simulering.fagsystemId"].asText()
@@ -70,7 +70,7 @@ internal class SimuleringMessage(packet: JsonMessage, override val meldingsporin
         get() = Simulering(
             meldingsreferanseId = meldingsporing.id,
             vedtaksperiodeId = vedtaksperiodeId,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             fagsystemId = fagsystemId,
             fagområde = fagområde,
             simuleringOK = simuleringOK,

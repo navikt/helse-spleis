@@ -79,6 +79,7 @@ private val json = """
       "hendelse": "Ytelser",
       "fødselsnummer": "08127411111",
       "organisasjonsnummer": "orgnummer",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
       "vedtaksperiodeId": "${UUID.randomUUID()}",
       "@løsning": {
         "Foreldrepenger": {
@@ -219,6 +220,7 @@ private val ukjentPeriode = """
       "hendelse": "Ytelser",
       "fødselsnummer": "08127411111",
       "organisasjonsnummer": "orgnummer",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
       "vedtaksperiodeId": "${UUID.randomUUID()}",
       "@løsning": {
         "Foreldrepenger": {
@@ -312,6 +314,7 @@ private val ugyldigPeriode = """
       "hendelse": "Ytelser",
       "fødselsnummer": "08127411111",
       "organisasjonsnummer": "orgnummer",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
       "vedtaksperiodeId": "${UUID.randomUUID()}",
       "@løsning": {
         "Foreldrepenger": {
@@ -397,6 +400,7 @@ private val utenPleiepenger = """
       "hendelse": "Ytelser",
       "fødselsnummer": "08127411111",
       "organisasjonsnummer": "orgnummer",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
       "vedtaksperiodeId": "${UUID.randomUUID()}",
       "@løsning": {
         "Foreldrepenger": {
@@ -470,6 +474,7 @@ private val utenOmsorgspenger = """
       "hendelse": "Ytelser",
       "fødselsnummer": "08127411111",
       "organisasjonsnummer": "orgnummer",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
       "vedtaksperiodeId": "${UUID.randomUUID()}",
       "@løsning": {
         "Foreldrepenger": {
@@ -543,6 +548,7 @@ private val utenOpplæringspenger = """
       "hendelse": "Ytelser",
       "fødselsnummer": "08127411111",
       "organisasjonsnummer": "orgnummer",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
       "vedtaksperiodeId": "${UUID.randomUUID()}",
       "@løsning": {
         "Foreldrepenger": {
@@ -616,6 +622,7 @@ private val utenInstitusjonsopphold = """
       "hendelse": "Ytelser",
       "fødselsnummer": "08127411111",
       "organisasjonsnummer": "orgnummer",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
       "vedtaksperiodeId": "${UUID.randomUUID()}",
       "@løsning": {
         "Foreldrepenger": {
@@ -690,6 +697,7 @@ private val utenArbeidsavklaringspenger = """
       "hendelse": "Ytelser",
       "fødselsnummer": "08127411111",
       "organisasjonsnummer": "orgnummer",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
       "vedtaksperiodeId": "${UUID.randomUUID()}",
       "@løsning": {
         "Foreldrepenger": {
@@ -783,6 +791,7 @@ private val utenDagpenger = """
       "hendelse": "Ytelser",
       "fødselsnummer": "08127411111",
       "organisasjonsnummer": "orgnummer",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
       "vedtaksperiodeId": "${UUID.randomUUID()}",
       "@løsning": {
         "Foreldrepenger": {

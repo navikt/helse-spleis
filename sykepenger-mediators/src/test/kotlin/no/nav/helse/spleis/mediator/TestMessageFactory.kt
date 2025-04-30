@@ -26,7 +26,13 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.*
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForOpptjeningsvurdering
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata.Companion.toJson
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -584,12 +590,14 @@ internal class TestMessageFactory(
 
     fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
         sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList(),
         orgnummer: String? = null,
         besvart: LocalDateTime = LocalDateTime.now()
     ): Pair<String, String> {
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
+            yrkesaktivitetstype = yrkesaktivitetstype,
             behov = listOf("Sykepengehistorikk"),
             løsninger = sykepengehistorikk.toJson(),
             orgnummer = orgnummer ?: organisasjonsnummer,
@@ -1444,11 +1452,13 @@ internal class TestMessageFactory(
         orgnummer: String = organisasjonsnummer,
         løsninger: Map<String, Any> = emptyMap(),
         ekstraFelter: Map<String, Any> = emptyMap(),
-        besvart: LocalDateTime = LocalDateTime.now()
+        besvart: LocalDateTime = LocalDateTime.now(),
+        yrkesaktivitetstype: String = "ARBEIDSTAKER"
     ) = nyHendelse(
         "behov", ekstraFelter + mutableMapOf(
         "@behov" to behov,
         "fødselsnummer" to fødselsnummer,
+        "yrkesaktivitetstype" to yrkesaktivitetstype,
         "organisasjonsnummer" to orgnummer,
         "@løsning" to løsninger,
         "@final" to true,

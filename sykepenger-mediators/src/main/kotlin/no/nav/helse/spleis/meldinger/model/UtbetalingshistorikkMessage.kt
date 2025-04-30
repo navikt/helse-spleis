@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
@@ -17,6 +16,7 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
+import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
 
 // Understands a JSON message representing an Ytelserbehov
 internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
@@ -65,7 +65,7 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val mel
     }
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
-    private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
+    private val behandlingsporing = packet.yrkesaktivitetssporing
     private val besvart = packet["@besvart"].asLocalDateTime()
 
     private val utbetalinger = packet.utbetalinger()
@@ -80,7 +80,7 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val mel
     private fun utbetalingshistorikk() =
         Utbetalingshistorikk(
             meldingsreferanseId = meldingsporing.id,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             vedtaksperiodeId = vedtaksperiodeId.toUUID(),
             element = infotrygdhistorikk(meldingsporing.id),
             besvart = besvart

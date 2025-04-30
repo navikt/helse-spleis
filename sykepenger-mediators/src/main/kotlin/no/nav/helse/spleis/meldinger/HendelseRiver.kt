@@ -12,6 +12,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -76,10 +78,21 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
             messageMediator.onRiverError(riverName, problems, context, metadata)
         }
     }
-
-    companion object {
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-    }
 }
 
+private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+
 internal fun JsonMessage.meldingsreferanseId() = MeldingsreferanseId(this["@id"].asText().toUUID())
+internal val JsonMessage.yrkesaktivitetssporing
+    get() = when (this["yrkesaktivitetstype"].asText("arbeidstaker_default").lowercase()) {
+        "arbeidstaker" -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(this["organisasjonsnummer"].asText())
+        "frilans" -> Behandlingsporing.Yrkesaktivitet.Frilans
+        "selvstendig" -> Behandlingsporing.Yrkesaktivitet.Selvstendig
+        "arbeidsledig" -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+        "arbeidstaker_default" -> {
+            sikkerLogg.info("Yrkesaktivitetstype er ikke spesifisert, default til arbeidstaker, vi gleder oss til at vi slipper å gjøre det her igjen", kv("meldingsreferanseId", meldingsreferanseId()))
+            Behandlingsporing.Yrkesaktivitet.Arbeidstaker(this["organisasjonsnummer"].asText())
+        }
+
+        else -> error("Kan ikke gjenkjenne yrkesaktivitetstype ${this["yrkesaktivitetstype"].asText()}")
+    }

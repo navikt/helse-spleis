@@ -15,5 +15,6 @@ internal abstract class ArbeidsgiverBehovRiver(
 
     private fun validateBehov(packet: JsonMessage) {
         packet.requireKey("organisasjonsnummer")
+        packet.interestedIn("yrkesaktivitetstype")
     }
 }
