@@ -6,13 +6,10 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 
 class AnmodningOmForkasting(
     meldingsreferanseId: MeldingsreferanseId,
-    organisasjonsnummer: String,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     private val vedtaksperiodeId: UUID,
-    internal val force: Boolean
+    internal val force: Boolean,
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-        organisasjonsnummer = organisasjonsnummer
-    )
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

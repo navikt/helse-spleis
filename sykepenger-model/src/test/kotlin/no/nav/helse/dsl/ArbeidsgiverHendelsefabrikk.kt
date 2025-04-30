@@ -484,7 +484,7 @@ internal class ArbeidsgiverHendelsefabrikk(
     internal fun lagAnmodningOmForkasting(vedtaksperiodeId: UUID, force: Boolean = false) =
         AnmodningOmForkasting(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            organisasjonsnummer = organisasjonsnummer,
+            behandlingsporing = behandlingsporing,
             vedtaksperiodeId = vedtaksperiodeId,
             force = force
         )

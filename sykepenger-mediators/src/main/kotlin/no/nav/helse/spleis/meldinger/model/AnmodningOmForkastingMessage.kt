@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
 import no.nav.helse.hendelser.AnmodningOmForkasting
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
@@ -15,10 +16,10 @@ internal class AnmodningOmForkastingMessage(packet: JsonMessage, override val me
     private val force = packet["force"].takeIf { it.isBoolean }?.asBoolean() ?: false
 
     private val anmodning = AnmodningOmForkasting(
-        meldingsreferanseId = meldingsporing.id,
-        organisasjonsnummer = organisasjonsnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
-        force = force
+            meldingsreferanseId = meldingsporing.id,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer = organisasjonsnummer),
+            vedtaksperiodeId = vedtaksperiodeId,
+            force = force
     )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

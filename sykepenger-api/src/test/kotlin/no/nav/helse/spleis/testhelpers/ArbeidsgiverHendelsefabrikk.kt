@@ -434,7 +434,9 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     internal fun lagAnmodningOmForkasting(vedtaksperiodeId: UUID, force: Boolean = false) =
         AnmodningOmForkasting(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            organisasjonsnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                organisasjonsnummer = organisasjonsnummer
+            ),
             vedtaksperiodeId = vedtaksperiodeId,
             force = force
         )
