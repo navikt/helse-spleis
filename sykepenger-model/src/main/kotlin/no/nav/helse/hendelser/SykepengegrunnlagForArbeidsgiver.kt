@@ -8,12 +8,9 @@ import no.nav.helse.person.inntekt.Skatteopplysning
 class SykepengegrunnlagForArbeidsgiver(
     meldingsreferanseId: MeldingsreferanseId,
     internal val skjæringstidspunkt: LocalDate,
-    orgnummer: String,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     private val inntekter: ArbeidsgiverInntekt
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-        organisasjonsnummer = orgnummer
-    )
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

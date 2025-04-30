@@ -282,7 +282,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         return SykepengegrunnlagForArbeidsgiver(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             skjæringstidspunkt = skjæringstidspunkt,
-            orgnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             inntekter = ArbeidsgiverInntekt(organisasjonsnummer, inntekter)
         )
     }

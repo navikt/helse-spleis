@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.IHendelseMediator
@@ -21,7 +22,7 @@ internal class SykepengegrunnlagForArbeidsgiverMessage(packet: JsonMessage, over
         get() = SykepengegrunnlagForArbeidsgiver(
             meldingsreferanseId = meldingsporing.id,
             skjæringstidspunkt = skjæringstidspunkt,
-            orgnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             inntekter = if (inntekterForSykepengegrunnlag.isEmpty()) ArbeidsgiverInntekt(organisasjonsnummer, emptyList()) else inntekterForSykepengegrunnlag.single()
         )
 

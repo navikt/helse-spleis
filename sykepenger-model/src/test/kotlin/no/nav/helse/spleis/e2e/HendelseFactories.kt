@@ -247,7 +247,7 @@ internal fun sykepengegrunnlagForArbeidsgiver(
     return SykepengegrunnlagForArbeidsgiver(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         skjæringstidspunkt = skjæringstidspunkt,
-        orgnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         inntekter = ArbeidsgiverInntekt(orgnummer, (1..3).map {
             ArbeidsgiverInntekt.MånedligInntekt(
                 yearMonth = skjæringstidspunkt.yearMonth.minusMonths(it.toLong()),
