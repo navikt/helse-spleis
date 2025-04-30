@@ -258,7 +258,8 @@ internal class PersonMediator(
                         "skjæringstidspunkt" to it.skjæringstidspunkt,
                         "periodeFom" to it.periode.start,
                         "periodeTom" to it.periode.endInclusive,
-                        "orgnummer" to it.orgnummer,
+                        "orgnummer" to it.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                        "yrkesaktivitetstype" to it.yrkesaktivitetssporing.somYrkesaktivitetstype,
                         "typeEndring" to it.typeEndring,
                     )
                 }

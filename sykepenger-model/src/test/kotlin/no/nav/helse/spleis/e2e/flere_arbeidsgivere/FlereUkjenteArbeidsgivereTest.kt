@@ -6,6 +6,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -97,10 +98,10 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
                     skjæringstidspunkt = 1.januar,
                     periodeForEndring = 1.januar til 1.januar,
                     berørtePerioder = listOf(
-                        VedtaksperiodeData(a1, 1.vedtaksperiode.id(a1), 1.januar til 31.januar, 1.januar, "REVURDERING"),
-                        VedtaksperiodeData(a1, 2.vedtaksperiode.id(a1), februar, 1.januar, "REVURDERING"),
-                        VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING"),
-                        VedtaksperiodeData(a2, 1.vedtaksperiode.id(a2), 1.januar til 31.januar, 1.januar, "REVURDERING")
+                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 1.vedtaksperiode.id(a1), 1.januar til 31.januar, 1.januar, "REVURDERING"),
+                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 2.vedtaksperiode.id(a1), februar, 1.januar, "REVURDERING"),
+                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING"),
+                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2), 1.vedtaksperiode.id(a2), 1.januar til 31.januar, 1.januar, "REVURDERING")
                     ),
                     meldingsreferanseId = im1
                 ), event
@@ -114,7 +115,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
                     skjæringstidspunkt = 1.januar,
                     periodeForEndring = 1.mars til 20.mars,
                     berørtePerioder = listOf(
-                        VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
+                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
                     ),
                     meldingsreferanseId = søknad
                 ), event
@@ -128,7 +129,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
                     skjæringstidspunkt = 1.mars,
                     periodeForEndring = 1.mars til 20.mars,
                     berørtePerioder = listOf(
-                        VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
+                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
                     ),
                     meldingsreferanseId = im2
                 ), event

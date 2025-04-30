@@ -474,7 +474,7 @@ interface PersonObserver {
         val typeEndring get() = if (berørtePerioder.any { it.typeEndring == "REVURDERING" }) "REVURDERING" else "OVERSTYRING"
 
         data class VedtaksperiodeData(
-            val orgnummer: String,
+            val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
             val vedtaksperiodeId: UUID,
             val periode: Periode,
             val skjæringstidspunkt: LocalDate,

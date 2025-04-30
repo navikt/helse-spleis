@@ -6,6 +6,7 @@ import no.nav.helse.april
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.til
@@ -102,7 +103,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
             assertEquals(
                 listOf(
                     VedtaksperiodeData(
-                        orgnummer = a1,
+                        yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                         vedtaksperiodeId = 1.vedtaksperiode.id(a1),
                         periode = 1.januar til 16.januar,
                         skjæringstidspunkt = 1.januar,
@@ -187,14 +188,14 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
             assertEquals(
                 listOf(
                     VedtaksperiodeData(
-                        orgnummer = a1,
+                        yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                         vedtaksperiodeId = periodeAG1,
                         periode = januar,
                         skjæringstidspunkt = 1.januar,
                         typeEndring = "REVURDERING"
                     ),
                     VedtaksperiodeData(
-                        orgnummer = a2,
+                        yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2),
                         vedtaksperiodeId = periodeAG2,
                         periode = januar,
                         skjæringstidspunkt = 1.januar,
@@ -226,10 +227,10 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
             this medførteRevurderingAv (januar og februar og mars og april)
             assertEquals(
                 listOf(
-                    VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = januar, periode = 1.januar til 31.januar, skjæringstidspunkt = 1.januar, typeEndring = "REVURDERING"),
-                    VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = februar, periode = 1.februar til 15.februar, skjæringstidspunkt = 1.januar, typeEndring = "REVURDERING"),
-                    VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = mars, periode = 1.mars til 31.mars, skjæringstidspunkt = 1.mars, typeEndring = "REVURDERING"),
-                    VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = april, periode = 1.april til 30.april, skjæringstidspunkt = 1.mars, typeEndring = "REVURDERING")
+                    VedtaksperiodeData(yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), vedtaksperiodeId = januar, periode = 1.januar til 31.januar, skjæringstidspunkt = 1.januar, typeEndring = "REVURDERING"),
+                    VedtaksperiodeData(yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), vedtaksperiodeId = februar, periode = 1.februar til 15.februar, skjæringstidspunkt = 1.januar, typeEndring = "REVURDERING"),
+                    VedtaksperiodeData(yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), vedtaksperiodeId = mars, periode = 1.mars til 31.mars, skjæringstidspunkt = 1.mars, typeEndring = "REVURDERING"),
+                    VedtaksperiodeData(yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), vedtaksperiodeId = april, periode = 1.april til 30.april, skjæringstidspunkt = 1.mars, typeEndring = "REVURDERING")
                 ), this.berørtePerioder
             )
         }

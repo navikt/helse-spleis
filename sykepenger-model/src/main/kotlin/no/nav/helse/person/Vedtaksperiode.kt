@@ -1824,7 +1824,7 @@ internal class Vedtaksperiode private constructor(
     ) {
         vedtaksperioder.add(
             PersonObserver.OverstyringIgangsatt.VedtaksperiodeData(
-                orgnummer = arbeidsgiver.organisasjonsnummer,
+                yrkesaktivitetssporing = arbeidsgiver.yrkesaktivitetssporing,
                 vedtaksperiodeId = id,
                 skjæringstidspunkt = skjæringstidspunkt,
                 periode = periode,
