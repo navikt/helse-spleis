@@ -278,7 +278,7 @@ internal abstract class AbstractObservableTest {
         utbetalingId: UUID
     ) = Utbetalingsgodkjenning(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        organisasjonsnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         saksbehandler = "Ola Nordmann",

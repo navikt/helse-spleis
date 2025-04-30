@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.spleis.IHendelseMediator
@@ -23,7 +24,7 @@ internal class UtbetalingsgodkjenningMessage(packet: JsonMessage, override val m
     private val utbetalingsgodkjenning
         get() = Utbetalingsgodkjenning(
             meldingsreferanseId = meldingsporing.id,
-            organisasjonsnummer = organisasjonsnummer,
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             utbetalingId = UUID.fromString(utbetalingId),
             vedtaksperiodeId = vedtaksperiodeId,
             saksbehandler = saksbehandler,

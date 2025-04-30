@@ -375,7 +375,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         godkjenttidspunkt: LocalDateTime = LocalDateTime.now()
     ) = Utbetalingsgodkjenning(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        organisasjonsnummer = organisasjonsnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         saksbehandler = "Ola Nordmann",
