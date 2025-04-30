@@ -18,7 +18,7 @@ class OverstyrArbeidsgiveropplysninger(
     opprettet: LocalDateTime,
     private val refusjonstidslinjer: Map<String, Pair<Beløpstidslinje, Boolean>>
 ) : Hendelse, OverstyrInntektsgrunnlag {
-    override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
+    override val behandlingsporing = Behandlingsporing.IngenYrkesaktivitet
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = Avsender.SAKSBEHANDLER,

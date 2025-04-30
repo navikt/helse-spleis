@@ -9,7 +9,7 @@ class UtbetalingshistorikkEtterInfotrygdendring(
     val element: InfotrygdhistorikkElement,
     besvart: LocalDateTime
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
+    override val behandlingsporing = Behandlingsporing.IngenYrkesaktivitet
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = SYSTEM,

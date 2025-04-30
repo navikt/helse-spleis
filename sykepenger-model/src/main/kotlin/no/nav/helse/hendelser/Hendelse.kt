@@ -33,7 +33,7 @@ sealed interface Hendelse {
 }
 
 sealed interface Behandlingsporing {
-    data object IngenArbeidsgiver : Behandlingsporing
+    data object IngenYrkesaktivitet : Behandlingsporing
 
     sealed interface Yrkesaktivitet : Behandlingsporing {
         data class Arbeidstaker(val organisasjonsnummer: String) : Yrkesaktivitet
@@ -44,7 +44,7 @@ sealed interface Behandlingsporing {
 }
 
 fun Behandlingsporing.erLik(other: Behandlingsporing) = when (this) {
-    Behandlingsporing.IngenArbeidsgiver -> other is Behandlingsporing.IngenArbeidsgiver
+    Behandlingsporing.IngenYrkesaktivitet -> other is Behandlingsporing.IngenYrkesaktivitet
     Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> other is Behandlingsporing.Yrkesaktivitet.Arbeidsledig
     is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> other is Behandlingsporing.Yrkesaktivitet.Arbeidstaker && this.organisasjonsnummer == other.organisasjonsnummer
     Behandlingsporing.Yrkesaktivitet.Frilans -> other is Behandlingsporing.Yrkesaktivitet.Frilans

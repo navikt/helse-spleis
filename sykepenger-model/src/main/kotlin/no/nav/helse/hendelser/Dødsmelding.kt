@@ -9,7 +9,7 @@ class Dødsmelding(
     meldingsreferanseId: MeldingsreferanseId,
     private val dødsdato: LocalDate
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
+    override val behandlingsporing = Behandlingsporing.IngenYrkesaktivitet
 
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(

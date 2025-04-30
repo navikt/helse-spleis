@@ -10,7 +10,7 @@ class SkjønnsmessigFastsettelse(
     val arbeidsgiveropplysninger: List<SkjønnsfastsattInntekt>,
     opprettet: LocalDateTime
 ) : Hendelse, OverstyrInntektsgrunnlag {
-    override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
+    override val behandlingsporing = Behandlingsporing.IngenYrkesaktivitet
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = Avsender.SAKSBEHANDLER,

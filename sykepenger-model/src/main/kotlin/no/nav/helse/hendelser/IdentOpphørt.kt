@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import no.nav.helse.hendelser.Avsender.SYSTEM
 
 class IdentOpphørt(meldingsreferanseId: MeldingsreferanseId) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
+    override val behandlingsporing = Behandlingsporing.IngenYrkesaktivitet
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

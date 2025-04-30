@@ -277,7 +277,7 @@ internal class DagerFraInntektsmelding(
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans,
             Behandlingsporing.Yrkesaktivitet.Selvstendig,
-            Behandlingsporing.IngenArbeidsgiver -> error("Inntektsmelding uten arbeidsgiver?!?! Det blir litt vel tøysete spør du meg")
+            Behandlingsporing.IngenYrkesaktivitet -> error("Inntektsmelding uten arbeidsgiver?!?! Det blir litt vel tøysete spør du meg")
         }
         private val perioderViTrorInntektsmeldingenPrøverÅSiNoeOm = listOfNotNull(
             førsteFraværsdag?.somPeriode(),

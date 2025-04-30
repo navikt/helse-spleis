@@ -18,7 +18,7 @@ class MinimumSykdomsgradsvurderingMelding(
         sjekkForOverlapp()
     }
 
-    override val behandlingsporing = Behandlingsporing.IngenArbeidsgiver
+    override val behandlingsporing = Behandlingsporing.IngenYrkesaktivitet
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,
