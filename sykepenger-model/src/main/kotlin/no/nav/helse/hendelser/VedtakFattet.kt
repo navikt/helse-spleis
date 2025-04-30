@@ -7,7 +7,7 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 
 class VedtakFattet(
     meldingsreferanseId: MeldingsreferanseId,
-    organisasjonsnummer: String,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     private val vedtaksperiodeId: UUID,
     override val utbetalingId: UUID,
     private val saksbehandlerIdent: String,
@@ -15,9 +15,6 @@ class VedtakFattet(
     vedtakFattetTidspunkt: LocalDateTime,
     override val automatisert: Boolean
 ) : Behandlingsavgjørelse {
-    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-        organisasjonsnummer = organisasjonsnummer
-    )
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = if (automatisert) SYSTEM else SAKSBEHANDLER,

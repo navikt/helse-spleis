@@ -390,7 +390,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()
     ) = VedtakFattet(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        organisasjonsnummer = organisasjonsnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeId,
         saksbehandlerIdent = "Vedtak fattesen",
