@@ -24,11 +24,13 @@ class UtbetalingkladdBuilder(
     // private val fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID())
     private var arbeidsgiveroppdragBuilder = OppdragBuilder(
         mottaker = mottakerRefusjon,
-        fagområde = SykepengerRefusjon
+        fagområde = SykepengerRefusjon,
+        klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
     )
     private var personoppdragBuilder = OppdragBuilder(
         mottaker = mottakerBruker,
-        fagområde = Sykepenger
+        fagområde = Sykepenger,
+        klassekode = Klassekode.SykepengerArbeidstakerOrdinær
     )
 
     init {

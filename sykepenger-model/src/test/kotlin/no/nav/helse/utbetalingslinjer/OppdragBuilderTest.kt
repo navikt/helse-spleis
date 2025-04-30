@@ -13,9 +13,20 @@ import org.junit.jupiter.api.Test
 
 internal class OppdragBuilderTest {
 
+    private fun refusjonBuilder() = OppdragBuilder(
+        mottaker = "orgnr",
+        fagområde = Fagområde.SykepengerRefusjon,
+        klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
+    )
+    private fun personBuilder() = OppdragBuilder(
+        mottaker = "fnr",
+        fagområde = Fagområde.Sykepenger,
+        klassekode = Klassekode.SykepengerArbeidstakerOrdinær
+    )
+
     @Test
     fun `kan starte oppdrag på helg`() {
-        val builder = OppdragBuilder(mottaker = "ornr", fagområde = Fagområde.SykepengerRefusjon)
+        val builder = refusjonBuilder()
         builder.betalingshelgedag(20.januar, 100)
         builder.betalingshelgedag(21.januar, 100)
         builder.betalingsdag(femhundreKronerIRefusjon, 22.januar, 100)
@@ -28,7 +39,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `kan slutte linje på helg`() {
-        val builder = OppdragBuilder(mottaker = "ornr", fagområde = Fagområde.SykepengerRefusjon)
+        val builder = refusjonBuilder()
         builder.betalingshelgedag(20.januar, 100)
         builder.betalingshelgedag(21.januar, 100)
         builder.betalingsdag(femhundreKronerIRefusjon, 22.januar, 100)
@@ -49,7 +60,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `kan slutte oppdrag på helg`() {
-        val builder = OppdragBuilder(mottaker = "ornr", fagområde = Fagområde.SykepengerRefusjon)
+        val builder = refusjonBuilder()
         builder.betalingshelgedag(20.januar, 100)
         builder.betalingshelgedag(21.januar, 100)
         builder.betalingsdag(femhundreKronerIRefusjon, 22.januar, 100)
@@ -67,7 +78,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `siste dager i arbeidsgiverperioden er lørdag og søndag`() {
-        val builder = OppdragBuilder(mottaker = "ornr", fagområde = Fagområde.Sykepenger)
+        val builder = personBuilder()
         builder.arbeidsgiverperiodedag(20.januar, 100)
         builder.arbeidsgiverperiodedag(21.januar, 100)
         builder.betalingsdag(femhundreKronerIBrukerutbetaling, 22.januar, 100)
@@ -85,7 +96,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `flekkvis utbetalingsdager i arbeidsgiverperioden`() {
-        val builder = OppdragBuilder(mottaker = "ornr", fagområde = Fagområde.Sykepenger)
+        val builder = personBuilder()
         // to SykNav-dager i arbeidsgiverperioden
         builder.betalingsdag(femhundreKronerIBrukerutbetaling, 1.januar, 100)
         builder.betalingsdag(femhundreKronerIBrukerutbetaling, 2.januar, 100)

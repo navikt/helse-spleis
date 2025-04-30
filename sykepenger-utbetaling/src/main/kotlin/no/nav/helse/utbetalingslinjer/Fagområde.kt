@@ -1,11 +1,8 @@
 package no.nav.helse.utbetalingslinjer
 
-enum class Fagområde(
-    val verdi: String,
-    val klassekode: Klassekode
-) {
-    SykepengerRefusjon("SPREF", Klassekode.RefusjonIkkeOpplysningspliktig),
-    Sykepenger("SP", Klassekode.SykepengerArbeidstakerOrdinær);
+enum class Fagområde(val verdi: String) {
+    SykepengerRefusjon("SPREF"),
+    Sykepenger("SP");
 
     override fun toString() = verdi
 }

@@ -7,9 +7,10 @@ import no.nav.helse.nesteDag
 import no.nav.helse.økonomi.Økonomi
 
 class OppdragBuilder(
-    private val fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()),
     private val mottaker: String,
-    private val fagområde: Fagområde
+    private val fagområde: Fagområde,
+    private val klassekode: Klassekode,
+    private val fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID())
 ) {
     private val økonomibeløp: (Økonomi) -> Int = { økonomi ->
         when (fagområde) {
@@ -107,7 +108,7 @@ class OppdragBuilder(
             beløp = beløp,
             grad = grad,
             refFagsystemId = fagsystemId,
-            klassekode = fagområde.klassekode
+            klassekode = klassekode
         )
     }
 
