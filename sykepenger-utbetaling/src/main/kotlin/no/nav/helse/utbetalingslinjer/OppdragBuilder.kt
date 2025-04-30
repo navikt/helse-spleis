@@ -1,10 +1,9 @@
 package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.helse.erHelg
 import no.nav.helse.nesteDag
-import no.nav.helse.økonomi.Økonomi
 
 class OppdragBuilder(
     private val mottaker: String,
@@ -12,12 +11,6 @@ class OppdragBuilder(
     private val klassekode: Klassekode,
     private val fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID())
 ) {
-    private val økonomibeløp: (Økonomi) -> Int = { økonomi ->
-        when (fagområde) {
-            Fagområde.SykepengerRefusjon -> økonomi.arbeidsgiverbeløp
-            Fagområde.Sykepenger -> økonomi.personbeløp
-        }?.daglig?.toInt()!!
-    }
     private val utbetalingslinjer = mutableListOf<Utbetalingslinje>()
     private var tilstand: Tilstand = MellomLinjer
     private val sisteLinje get() = utbetalingslinjer.last()
@@ -41,8 +34,7 @@ class OppdragBuilder(
         }
     }
 
-    fun betalingsdag(økonomi: Økonomi, dato: LocalDate, grad: Int) {
-        val beløp = økonomibeløp(økonomi)
+    fun betalingsdag(dato: LocalDate, beløp: Int, grad: Int) {
         val nyLinje = nyLinje(beløp, dato, grad)
 
         // må lage ny linje hvis det ikke er noen linjer fra før,

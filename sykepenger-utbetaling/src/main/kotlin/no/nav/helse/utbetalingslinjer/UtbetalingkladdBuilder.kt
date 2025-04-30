@@ -52,8 +52,8 @@ class UtbetalingkladdBuilder(
 
                 is ArbeidsgiverperiodedagNav,
                 is NavDag -> {
-                    arbeidsgiveroppdragBuilder.betalingsdag(økonomi = dag.økonomi, dato = dag.dato, grad = dag.økonomi.brukAvrundetGrad { grad -> grad })
-                    personoppdragBuilder.betalingsdag(økonomi = dag.økonomi, dato = dag.dato, grad = dag.økonomi.brukAvrundetGrad { grad -> grad })
+                    arbeidsgiveroppdragBuilder.betalingsdag(dato = dag.dato, beløp = dag.økonomi.arbeidsgiverbeløp!!.daglig.toInt(), grad = dag.økonomi.brukAvrundetGrad { grad -> grad })
+                    personoppdragBuilder.betalingsdag(dato = dag.dato, beløp = dag.økonomi.personbeløp!!.daglig.toInt(), grad = dag.økonomi.brukAvrundetGrad { grad -> grad })
                 }
 
                 is NavHelgDag -> {
