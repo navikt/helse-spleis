@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.inspectors.inspektør
@@ -364,7 +365,7 @@ internal class OppdragTest {
         )
         )
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger)
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), "orgnr", oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag1))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
@@ -395,7 +396,7 @@ internal class OppdragTest {
             )
         )
         )
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), "orgnr", oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         assertFalse(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
 
@@ -425,8 +426,8 @@ internal class OppdragTest {
             )
         )
         )
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), "orgnr", oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
-        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), "orgnr", oppdrag2.fagsystemId, UUID.randomUUID(), Oppdragstatus.AVVIST, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), oppdrag2.fagsystemId, UUID.randomUUID(), Oppdragstatus.AVVIST, "", 1234L, LocalDateTime.now()))
         assertFalse(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
 
@@ -456,8 +457,8 @@ internal class OppdragTest {
             )
         )
         )
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), "orgnr", oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
-        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), "orgnr", oppdrag2.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), oppdrag2.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
 
@@ -603,7 +604,7 @@ internal class OppdragTest {
         oppdrag.lagreOverføringsinformasjon(
             UtbetalingHendelse(
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-                orgnummer = "5678",
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("5678"),
                 fagsystemId = oppdrag.fagsystemId,
                 utbetalingId = UUID.randomUUID(),
                 avstemmingsnøkkel = avstemmingsnøkkel,
@@ -639,7 +640,7 @@ internal class OppdragTest {
         oppdrag.lagreOverføringsinformasjon(
             UtbetalingHendelse(
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-                orgnummer = "5678",
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("5678"),
                 fagsystemId = oppdrag.fagsystemId,
                 utbetalingId = UUID.randomUUID(),
                 avstemmingsnøkkel = avstemmingsnøkkel,
@@ -653,7 +654,7 @@ internal class OppdragTest {
         oppdrag.lagreOverføringsinformasjon(
             UtbetalingHendelse(
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-                orgnummer = "5678",
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("5678"),
                 fagsystemId = oppdrag.fagsystemId,
                 utbetalingId = UUID.randomUUID(),
                 avstemmingsnøkkel = avstemmingsnøkkel,
@@ -687,7 +688,7 @@ internal class OppdragTest {
         oppdrag.lagreOverføringsinformasjon(
             UtbetalingHendelse(
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-                orgnummer = "5678",
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("5678"),
                 fagsystemId = "${UUID.randomUUID()}",
                 utbetalingId = UUID.randomUUID(),
                 avstemmingsnøkkel = 6666,
@@ -700,7 +701,7 @@ internal class OppdragTest {
         oppdrag.lagreOverføringsinformasjon(
             UtbetalingHendelse(
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-                orgnummer = "5678",
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("5678"),
                 fagsystemId = "${UUID.randomUUID()}",
                 utbetalingId = UUID.randomUUID(),
                 avstemmingsnøkkel = 6666,

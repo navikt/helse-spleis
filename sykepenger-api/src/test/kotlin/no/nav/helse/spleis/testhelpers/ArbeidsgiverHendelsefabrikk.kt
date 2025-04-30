@@ -383,7 +383,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     ) =
         UtbetalingHendelse(
             meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
-            orgnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             fagsystemId = fagsystemId,
             utbetalingId = utbetalingId,
             status = status,

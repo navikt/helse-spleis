@@ -72,7 +72,7 @@ internal fun AbstractEndToEndTest.utbetaling(
 ) =
     UtbetalingHendelse(
         meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
-        orgnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         fagsystemId = fagsystemId,
         utbetalingId = utbetalingId
             ?: personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).alleKontekster.getValue("utbetalingId")
@@ -91,7 +91,7 @@ internal fun AbstractEndToEndTest.feriepengeutbetaling(
 ) =
     UtbetalingHendelse(
         meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
-        orgnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         fagsystemId = fagsystemId,
         utbetalingId = personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).alleKontekster.getValue("utbetalingId")
             .let { UUID.fromString(it) },

@@ -7,7 +7,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 
 class UtbetalingHendelse(
     meldingsreferanseId: MeldingsreferanseId,
-    orgnummer: String,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     override val fagsystemId: String,
     override val utbetalingId: UUID,
     override val status: Oppdragstatus,
@@ -15,9 +15,6 @@ class UtbetalingHendelse(
     override val avstemmingsnøkkel: Long,
     override val overføringstidspunkt: LocalDateTime
 ) : Hendelse, UtbetalingmodulHendelse {
-    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-        organisasjonsnummer = orgnummer
-    )
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

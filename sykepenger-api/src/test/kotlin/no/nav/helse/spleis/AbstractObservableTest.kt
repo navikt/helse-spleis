@@ -297,7 +297,7 @@ internal abstract class AbstractObservableTest {
     ) =
         UtbetalingHendelse(
             meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
-            orgnummer = orgnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
             fagsystemId = fagsystemId,
             utbetalingId = utbetalingId,
             status = status,
