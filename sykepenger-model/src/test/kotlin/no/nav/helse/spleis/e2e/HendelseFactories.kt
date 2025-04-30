@@ -401,7 +401,7 @@ internal fun AbstractEndToEndTest.simulering(
     Simulering(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
-        orgnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         fagsystemId = simuleringsBehov.detaljer().getValue("fagsystemId") as String,
         fagområde = simuleringsBehov.detaljer().getValue("fagområde") as String,
         simuleringOK = simuleringOK,

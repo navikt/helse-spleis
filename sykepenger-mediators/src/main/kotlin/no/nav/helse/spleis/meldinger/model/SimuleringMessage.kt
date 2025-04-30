@@ -5,6 +5,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.spleis.IHendelseMediator
@@ -69,7 +70,7 @@ internal class SimuleringMessage(packet: JsonMessage, override val meldingsporin
         get() = Simulering(
             meldingsreferanseId = meldingsporing.id,
             vedtaksperiodeId = vedtaksperiodeId,
-            orgnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             fagsystemId = fagsystemId,
             fagområde = fagområde,
             simuleringOK = simuleringOK,

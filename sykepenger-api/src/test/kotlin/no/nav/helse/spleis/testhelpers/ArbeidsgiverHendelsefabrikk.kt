@@ -320,7 +320,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         return Simulering(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
-            orgnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             fagsystemId = fagsystemId,
             fagområde = fagområde,
             simuleringOK = simuleringOK,

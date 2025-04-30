@@ -224,7 +224,7 @@ internal abstract class AbstractObservableTest {
         Simulering(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
-            orgnummer = orgnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
             fagsystemId = fagsystemId,
             fagområde = fagområde,
             simuleringOK = simuleringOK,

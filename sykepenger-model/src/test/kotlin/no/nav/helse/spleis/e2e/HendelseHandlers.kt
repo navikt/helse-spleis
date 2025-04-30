@@ -715,7 +715,7 @@ internal fun AbstractEndToEndTest.håndterSimulering(
     Simulering(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
-        orgnummer = orgnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         fagsystemId = fagsystemId,
         fagområde = fagområde.toString(),
         simuleringOK = simuleringOK,
