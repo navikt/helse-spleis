@@ -197,7 +197,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = mottatt,
         registrert = mottatt.plusSeconds(1),
-        organisasjonsnummer = organisasjonsnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
         vedtaksperiodeId = vedtaksperiodeId,
         opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,

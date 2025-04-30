@@ -518,7 +518,7 @@ internal fun AbstractEndToEndTest.håndterKorrigerteArbeidsgiveropplysninger(
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = LocalDateTime.now(),
         registrert = LocalDateTime.now().plusSeconds(1),
-        organisasjonsnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         vedtaksperiodeId = vedtaksperiodeId.id(orgnummer),
         opplysninger = opplysning.toList()
     ).håndter(Person::håndter)

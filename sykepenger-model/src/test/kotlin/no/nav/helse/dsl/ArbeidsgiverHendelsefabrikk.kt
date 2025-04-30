@@ -230,7 +230,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
         innsendt = innsendt,
         registrert = registrert,
-        organisasjonsnummer = organisasjonsnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
         vedtaksperiodeId = vedtaksperiodeId,
         opplysninger = opplysninger.toList()
     )

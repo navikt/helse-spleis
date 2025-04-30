@@ -10,6 +10,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDateTime
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.spleis.IHendelseMediator
@@ -45,7 +46,7 @@ internal class NavNoSelvbestemtInntektsmeldingMessage(
         meldingsreferanseId = meldingsporing.id,
         innsendt = mottatt,
         registrert = LocalDateTime.now(),
-        organisasjonsnummer = orgnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         vedtaksperiodeId = vedtaksperiodeId,
         opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
             beregnetInntekt = beregnetInntekt?.månedlig,
