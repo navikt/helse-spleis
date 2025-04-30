@@ -277,7 +277,6 @@ internal class TestPerson(
             opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
             begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
             id: UUID = UUID.randomUUID(),
-            orgnummer: String = "",
             mottatt: LocalDateTime = LocalDateTime.now()
         ): UUID {
 
@@ -285,7 +284,9 @@ internal class TestPerson(
                 meldingsreferanseId = MeldingsreferanseId(id),
                 innsendt = mottatt,
                 registrert = mottatt.plusSeconds(1),
-                organisasjonsnummer = this.orgnummer,
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                    organisasjonsnummer = this.orgnummer
+                ),
                 vedtaksperiodeId = vedtaksperiodeId,
                 opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
                     beregnetInntekt = beregnetInntekt,

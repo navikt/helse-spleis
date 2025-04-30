@@ -152,7 +152,10 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         a1 {
             håndterSøknad(1.januar til 16.januar)
             håndterSøknad(17.januar til 21.januar)
-            håndterArbeidsgiveropplysninger(listOf(tirsdag(23.januar) til 7.februar), vedtaksperiodeId = 2.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(
+                listOf(tirsdag(23.januar) til 7.februar),
+                vedtaksperiodeId = 2.vedtaksperiode
+            )
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
             assertVarsler(emptyList(), 2.vedtaksperiode.filter()) // Ingen har jo håndtert disse dagene, så ikke noe varsel

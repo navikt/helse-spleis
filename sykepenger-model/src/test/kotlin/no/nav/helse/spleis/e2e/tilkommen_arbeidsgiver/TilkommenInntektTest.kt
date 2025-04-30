@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.tilkommen_arbeidsgiver
 
 import no.nav.helse.Toggle
-import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT

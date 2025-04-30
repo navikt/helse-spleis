@@ -460,7 +460,9 @@ internal fun AbstractEndToEndTest.håndterArbeidsgiveropplysninger(
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = innsendt,
         registrert = innsendt.plusSeconds(1),
-        organisasjonsnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+            organisasjonsnummer = orgnummer
+        ),
         vedtaksperiodeId = vedtaksperiodeId,
         opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
             beregnetInntekt = beregnetInntekt,

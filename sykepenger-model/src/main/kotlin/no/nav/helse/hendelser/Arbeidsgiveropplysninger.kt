@@ -166,7 +166,7 @@ class Arbeidsgiveropplysninger(
     meldingsreferanseId: MeldingsreferanseId,
     innsendt: LocalDateTime,
     registrert: LocalDateTime,
-    organisasjonsnummer: String,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     val vedtaksperiodeId: UUID,
     val opplysninger: List<Arbeidsgiveropplysning>
 ) : Collection<Arbeidsgiveropplysning> by opplysninger, Hendelse {
@@ -174,8 +174,6 @@ class Arbeidsgiveropplysninger(
     init {
         opplysninger.valider()
     }
-
-    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer)
 
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,

@@ -5,12 +5,14 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.be
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDateTime
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -43,7 +45,9 @@ internal class NavNoInntektsmeldingMessage(
         meldingsreferanseId = meldingsporing.id,
         innsendt = mottatt,
         registrert = LocalDateTime.now(),
-        organisasjonsnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+            organisasjonsnummer = orgnummer,
+        ),
         vedtaksperiodeId = vedtaksperiodeId,
         opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
             beregnetInntekt = beregnetInntekt?.månedlig,
