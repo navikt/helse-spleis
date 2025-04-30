@@ -364,7 +364,9 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         automatisert: Boolean = true
     ) = KanIkkeBehandlesHer(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        organisasjonsnummer = organisasjonsnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+            organisasjonsnummer = organisasjonsnummer
+        ),
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeId,
         saksbehandlerIdent = "Info trygdesen",

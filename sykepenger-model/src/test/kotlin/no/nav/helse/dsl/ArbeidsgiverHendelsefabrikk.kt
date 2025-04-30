@@ -407,7 +407,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         automatisert: Boolean = true
     ) = KanIkkeBehandlesHer(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        organisasjonsnummer = organisasjonsnummer,
+        behandlingsporing = behandlingsporing,
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeId,
         saksbehandlerIdent = "Info trygdesen",
