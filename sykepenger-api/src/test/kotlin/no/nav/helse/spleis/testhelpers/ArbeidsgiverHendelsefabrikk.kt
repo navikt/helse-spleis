@@ -433,7 +433,9 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     internal fun lagHåndterForkastSykmeldingsperioder(periode: Periode) =
         ForkastSykmeldingsperioder(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            organisasjonsnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                organisasjonsnummer = organisasjonsnummer
+            ),
             periode = periode
         )
 

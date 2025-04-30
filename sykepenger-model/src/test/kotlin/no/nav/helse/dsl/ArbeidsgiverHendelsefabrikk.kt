@@ -479,7 +479,7 @@ internal class ArbeidsgiverHendelsefabrikk(
     internal fun lagHåndterForkastSykmeldingsperioder(periode: Periode) =
         ForkastSykmeldingsperioder(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            organisasjonsnummer = organisasjonsnummer,
+            behandlingsporing = behandlingsporing,
             periode = periode
         )
 

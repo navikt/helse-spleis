@@ -5,13 +5,9 @@ import no.nav.helse.person.Sykmeldingsperioder
 
 class ForkastSykmeldingsperioder(
     meldingsreferanseId: MeldingsreferanseId,
-    organisasjonsnummer: String,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     private val periode: Periode
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-        organisasjonsnummer = organisasjonsnummer
-    )
-
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

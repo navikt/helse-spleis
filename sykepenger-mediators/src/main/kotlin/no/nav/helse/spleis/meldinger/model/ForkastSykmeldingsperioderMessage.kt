@@ -3,6 +3,7 @@ package no.nav.helse.spleis.meldinger.model
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.spleis.IHendelseMediator
@@ -16,7 +17,9 @@ internal class ForkastSykmeldingsperioderMessage(packet: JsonMessage, override v
     private val forkastSykmeldingsperioder
         get() = ForkastSykmeldingsperioder(
             meldingsreferanseId = meldingsporing.id,
-            organisasjonsnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                organisasjonsnummer = organisasjonsnummer
+            ),
             periode = periode
         )
 
