@@ -238,7 +238,9 @@ internal class ArbeidsgiverHendelsefabrikk(
     internal fun lagInntektsmeldingReplay(forespørsel: Forespørsel, håndterteInntektsmeldinger: Set<UUID>) =
         InntektsmeldingerReplay(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            organisasjonsnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                organisasjonsnummer = organisasjonsnummer
+            ),
             vedtaksperiodeId = forespørsel.vedtaksperiodeId,
             inntektsmeldinger = inntektsmeldinger
                 .filter { forespørsel.erInntektsmeldingRelevant(it.value.inntektsmeldingkontrakt) }

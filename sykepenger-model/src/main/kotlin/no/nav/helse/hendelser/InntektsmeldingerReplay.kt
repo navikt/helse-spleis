@@ -6,13 +6,10 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 
 class InntektsmeldingerReplay(
     meldingsreferanseId: MeldingsreferanseId,
-    organisasjonsnummer: String,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     val vedtaksperiodeId: UUID,
     val inntektsmeldinger: List<Inntektsmelding>
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-        organisasjonsnummer = organisasjonsnummer
-    )
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

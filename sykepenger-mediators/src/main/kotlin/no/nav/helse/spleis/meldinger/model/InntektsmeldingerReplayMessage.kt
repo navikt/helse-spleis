@@ -27,7 +27,9 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
 
     private val inntektsmeldingerReplay = InntektsmeldingerReplay(
         meldingsreferanseId = meldingsporing.id,
-        organisasjonsnummer = organisasjonsnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+            organisasjonsnummer = organisasjonsnummer
+        ),
         vedtaksperiodeId = vedtaksperiodeId,
         inntektsmeldinger = inntektsmeldinger
     )

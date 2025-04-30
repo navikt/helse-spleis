@@ -209,7 +209,11 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     )
 
     internal fun lagInntektsmeldingReplayUtført(vedtaksperiodeId: UUID) =
-        InntektsmeldingerReplay(MeldingsreferanseId(UUID.randomUUID()), organisasjonsnummer, vedtaksperiodeId, emptyList())
+        InntektsmeldingerReplay(
+            MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+            organisasjonsnummer = organisasjonsnummer
+        ), vedtaksperiodeId, emptyList()
+        )
 
     internal fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,

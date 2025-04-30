@@ -434,7 +434,9 @@ private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: St
             .filter { im -> im.behandlingsporing.organisasjonsnummer == orgnummer }
         InntektsmeldingerReplay(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            organisasjonsnummer = orgnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                organisasjonsnummer = orgnummer
+            ),
             vedtaksperiodeId = forespørsel.vedtaksperiodeId,
             inntektsmeldinger = imReplays
         ).håndter(Person::håndter)
