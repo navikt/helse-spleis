@@ -231,7 +231,7 @@ internal fun utbetalingpåminnelse(
 ): Utbetalingpåminnelse {
     return Utbetalingpåminnelse(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        organisasjonsnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         utbetalingId = utbetalingId,
         antallGangerPåminnet = 0,
         status = status,

@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Utbetalingpåminnelse
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -22,7 +23,7 @@ internal class UtbetalingpåminnelseMessage(packet: JsonMessage, override val me
     private val påminnelse
         get() = Utbetalingpåminnelse(
             meldingsreferanseId = meldingsporing.id,
-            organisasjonsnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             utbetalingId = utbetalingId,
             antallGangerPåminnet = antallGangerPåminnet,
             status = Utbetalingstatus.valueOf(status),
