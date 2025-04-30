@@ -9,6 +9,6 @@ internal class OverstyrTidslinjeTest {
 
     @Test
     fun `overstyring uten dager`() {
-        assertThrows<RuntimeException> { OverstyrTidslinje(MeldingsreferanseId(UUID.randomUUID()), "orgnr", emptyList(), LocalDateTime.now()) }
+        assertThrows<RuntimeException> { OverstyrTidslinje(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), emptyList(), LocalDateTime.now()) }
     }
 }

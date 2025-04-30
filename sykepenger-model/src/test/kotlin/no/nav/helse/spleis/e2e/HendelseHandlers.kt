@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.PersonHendelsefabrikk
 import no.nav.helse.dsl.a1
@@ -715,7 +715,7 @@ internal fun AbstractEndToEndTest.håndterSimulering(
     Simulering(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         fagsystemId = fagsystemId,
         fagområde = fagområde.toString(),
         simuleringOK = simuleringOK,
@@ -1029,7 +1029,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrTidslinje(
 ): OverstyrTidslinje {
     val hendelse = OverstyrTidslinje(
         meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
-        organisasjonsnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         dager = overstyringsdager,
         opprettet = LocalDateTime.now()
     )

@@ -458,7 +458,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     internal fun lagHåndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>, meldingsreferanseId: UUID = UUID.randomUUID()) =
         OverstyrTidslinje(
             meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
-            organisasjonsnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             dager = overstyringsdager,
             opprettet = LocalDateTime.now()
         )
