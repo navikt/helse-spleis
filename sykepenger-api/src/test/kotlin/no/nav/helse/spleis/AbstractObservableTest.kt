@@ -187,7 +187,7 @@ internal abstract class AbstractObservableTest {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
             meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
-            organisasjonsnummer = orgnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
             vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
             foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepenger),
             svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapspenger),

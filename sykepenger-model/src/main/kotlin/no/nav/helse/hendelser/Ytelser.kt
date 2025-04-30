@@ -12,7 +12,7 @@ import no.nav.helse.person.inntekt.Inntektskilde
 
 class Ytelser(
     meldingsreferanseId: MeldingsreferanseId,
-    organisasjonsnummer: String,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     private val vedtaksperiodeId: String,
     private val foreldrepenger: Foreldrepenger,
     private val svangerskapspenger: Svangerskapspenger,
@@ -24,9 +24,6 @@ class Ytelser(
     private val dagpenger: Dagpenger,
     private val inntekterForBeregning: InntekterForBeregning
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-        organisasjonsnummer = organisasjonsnummer
-    )
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
             meldingsreferanseId = meldingsreferanseId,

@@ -7,6 +7,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDate
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.GradertPeriode
@@ -102,7 +103,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     private val ytelser
         get() = Ytelser(
             meldingsreferanseId = meldingsporing.id,
-            organisasjonsnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             vedtaksperiodeId = vedtaksperiodeId,
             foreldrepenger = foreldrepenger,
             svangerskapspenger = svangerskapspenger,

@@ -275,7 +275,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
             meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
-            organisasjonsnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             foreldrepenger = Foreldrepenger(
                 foreldrepengeytelse = foreldrepenger,
