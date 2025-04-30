@@ -24,8 +24,6 @@ import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -1145,37 +1143,6 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(ENDR, actual.endringskode)
         assertEquals(0, actual.stønadsdager())
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
-    }
-
-    @Test
-    fun `hashcode equality`() {
-        val first = linjer(1.januar to 5.januar)
-        val second = linjer(1.januar to 5.januar)
-
-        assertEquals(first[0].hashCode(), second[0].hashCode())
-        val intermediate = second - first
-        assertEquals(first[0].hashCode(), second[0].hashCode())
-        assertNotEquals(intermediate[0].hashCode(), second[0].hashCode())
-
-        val third = linjer(1.januar to 5.januar)
-
-        val final = third - intermediate
-
-        assertNotEquals(first[0].hashCode(), intermediate[0].hashCode())
-        assertEquals(intermediate[0].hashCode(), final[0].hashCode())
-    }
-
-    @Test
-    fun `hashcode på siste linje endres når et oppdrag opphører`() {
-        val original = linjer(
-            1.januar to 5.januar
-        )
-        val new = tomtOppdrag(original.fagsystemId)
-
-        val actual = new - original
-
-        assertNotNull(actual[0].datoStatusFom)
-        assertNotEquals(original[0].hashCode(), actual[0].hashCode())
     }
 
     private fun tomtOppdrag(fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()), sisteArbeidsgiverdag: LocalDate? = null) =

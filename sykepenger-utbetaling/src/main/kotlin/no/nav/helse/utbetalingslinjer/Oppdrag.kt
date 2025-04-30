@@ -426,15 +426,15 @@ class Oppdrag private constructor(
 
         private inner class Identisk : Tilstand {
             override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Utbetalingslinje> {
-                if (nåværende == tidligere) return listOf(nåværende.markerUendret(tidligere))
+                if (nåværende.funksjoneltLik(tidligere)) return listOf(nåværende.markerUendret(tidligere))
                 return håndterUlikhet(nåværende, tidligere)
             }
         }
 
         private inner class Slett(private val sisteLinjeINyttOppdrag: Utbetalingslinje) : Tilstand {
             override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Utbetalingslinje> {
-                if (nåværende == tidligere) {
-                    if (nåværende == sisteLinjeINyttOppdrag) return listOf(nåværende.kobleTil(linkTo))
+                if (nåværende.funksjoneltLik(tidligere)) {
+                    if (nåværende.funksjoneltLik(sisteLinjeINyttOppdrag)) return listOf(nåværende.kobleTil(linkTo))
                     return listOf(nåværende.markerUendret(tidligere))
                 }
                 return håndterUlikhet(nåværende, tidligere)

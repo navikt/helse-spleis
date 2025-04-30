@@ -15,7 +15,7 @@ import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
 
-class Utbetalingslinje(
+data class Utbetalingslinje(
     val fom: LocalDate,
     val tom: LocalDate,
     val beløp: Int,
@@ -159,33 +159,23 @@ class Utbetalingslinje(
         .filter { !it.erHelg() }
         .toList()
 
-    override fun equals(other: Any?) = other is Utbetalingslinje && this.equals(other)
-
-    private fun equals(other: Utbetalingslinje) =
-        this.fom == other.fom &&
+    fun funksjoneltLik(other: Utbetalingslinje): Boolean {
+        return this.fom == other.fom &&
             this.tom == other.tom &&
             this.beløp == other.beløp &&
             this.grad == other.grad &&
             this.datoStatusFom == other.datoStatusFom
+    }
 
     fun kanEndreEksisterendeLinje(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
-        other == sisteLinjeITidligereOppdrag &&
+        other.funksjoneltLik(sisteLinjeITidligereOppdrag) &&
             this.fom == other.fom &&
             this.beløp == other.beløp &&
             this.grad == other.grad &&
             this.datoStatusFom == other.datoStatusFom
 
     fun skalOpphøreOgErstatte(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
-        other == sisteLinjeITidligereOppdrag && (this.fom > other.fom)
-
-    override fun hashCode(): Int {
-        return fom.hashCode() * 37 +
-            tom.hashCode() * 17 +
-            beløp.hashCode() * 41 +
-            grad.hashCode() * 61 +
-            endringskode.name.hashCode() * 59 +
-            datoStatusFom.hashCode() * 23
-    }
+        other.funksjoneltLik(sisteLinjeITidligereOppdrag) && (this.fom > other.fom)
 
     fun markerUendret(tidligere: Utbetalingslinje) = kopier(
         endringskode = UEND,
