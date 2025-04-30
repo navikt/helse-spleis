@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
@@ -1044,7 +1044,17 @@ internal class Arbeidsgiver private constructor(
         }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
-        return SpesifikkKontekst("Arbeidsgiver", mapOf("organisasjonsnummer" to organisasjonsnummer))
+        return SpesifikkKontekst(
+            "Arbeidsgiver", mapOf(
+            "organisasjonsnummer" to organisasjonsnummer,
+            "yrkesaktivitetstype" to when (yrkesaktivitetssporing) {
+                Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> "ARBEIDSLEDIG"
+                is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> "ARBEIDSTAKER"
+                Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANS"
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+            }
+        )
+        )
     }
 
     internal fun lås(periode: Periode) {

@@ -7,14 +7,11 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 
 class Utbetalingshistorikk(
     meldingsreferanseId: MeldingsreferanseId,
-    organisasjonsnummer: String,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     val vedtaksperiodeId: UUID,
     val element: InfotrygdhistorikkElement,
     besvart: LocalDateTime
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-        organisasjonsnummer = organisasjonsnummer
-    )
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = SYSTEM,

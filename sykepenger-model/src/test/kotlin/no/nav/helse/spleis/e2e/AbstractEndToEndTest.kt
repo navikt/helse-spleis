@@ -116,7 +116,7 @@ internal abstract class AbstractEndToEndTest {
     protected fun createPingPongPerson() = createTestPerson { regelverkslogg -> pingPongPerson(regelverkslogg) }.also {
         Utbetalingshistorikk(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            organisasjonsnummer = a1,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
             vedtaksperiodeId = UUID.randomUUID(),
             element = InfotrygdhistorikkElement.opprett(
                 LocalDateTime.now(),

@@ -249,7 +249,7 @@ internal class ArbeidsgiverHendelsefabrikk(
     ) =
         Utbetalingshistorikk(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            organisasjonsnummer = organisasjonsnummer,
+            behandlingsporing = behandlingsporing,
             vedtaksperiodeId = vedtaksperiodeId,
             element = InfotrygdhistorikkElement.opprett(
                 oppdatert = besvart,

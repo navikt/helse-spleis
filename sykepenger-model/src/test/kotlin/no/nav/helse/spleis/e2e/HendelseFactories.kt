@@ -4,7 +4,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
@@ -292,7 +292,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
 ): Utbetalingshistorikk {
     return Utbetalingshistorikk(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        organisasjonsnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer),
         besvart = LocalDateTime.now(),
         element = InfotrygdhistorikkElement.opprett(
