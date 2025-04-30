@@ -461,7 +461,7 @@ internal class ArbeidsgiverHendelsefabrikk(
     ) =
         Påminnelse(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            organisasjonsnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             antallGangerPåminnet = 0,
             tilstand = tilstand,

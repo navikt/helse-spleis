@@ -418,7 +418,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     internal fun lagPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime, flagg: Set<String> = emptySet()) =
         Påminnelse(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            organisasjonsnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             antallGangerPåminnet = 0,
             tilstand = tilstand,

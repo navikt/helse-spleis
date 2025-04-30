@@ -156,7 +156,21 @@ internal class PersonMediator(
     }
 
     override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {
-        queueMessage(JsonMessage.newMessage("vedtaksperiode_påminnet", påminnelse.toOutgoingMessage()))
+        queueMessage(
+            JsonMessage.newMessage(
+                "vedtaksperiode_påminnet",
+                mapOf(
+                    "organisasjonsnummer" to påminnelse.behandlingsporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to påminnelse.behandlingsporing.somYrkesaktivitetstype,
+                    "vedtaksperiodeId" to påminnelse.vedtaksperiodeId,
+                    "tilstand" to påminnelse.tilstand,
+                    "antallGangerPåminnet" to påminnelse.antallGangerPåminnet,
+                    "tilstandsendringstidspunkt" to påminnelse.tilstandsendringstidspunkt,
+                    "påminnelsestidspunkt" to påminnelse.påminnelsestidspunkt,
+                    "nestePåminnelsestidspunkt" to påminnelse.nestePåminnelsestidspunkt
+                )
+            )
+        )
     }
 
     override fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, nåværendeTilstand: TilstandType) {
@@ -228,25 +242,27 @@ internal class PersonMediator(
     }
 
     override fun overstyringIgangsatt(event: PersonObserver.OverstyringIgangsatt) {
-        queueMessage(JsonMessage.newMessage("overstyring_igangsatt", mapOf(
-            "revurderingId" to UUID.randomUUID(),
-            "kilde" to message.meldingsporing.id,
-            "skjæringstidspunkt" to event.skjæringstidspunkt,
-            "periodeForEndringFom" to event.periodeForEndring.start,
-            "periodeForEndringTom" to event.periodeForEndring.endInclusive,
-            "årsak" to event.årsak,
-            "typeEndring" to event.typeEndring,
-            "berørtePerioder" to event.berørtePerioder.map {
-                mapOf(
-                    "vedtaksperiodeId" to it.vedtaksperiodeId,
-                    "skjæringstidspunkt" to it.skjæringstidspunkt,
-                    "periodeFom" to it.periode.start,
-                    "periodeTom" to it.periode.endInclusive,
-                    "orgnummer" to it.orgnummer,
-                    "typeEndring" to it.typeEndring,
-                )
-            }
-        )))
+        queueMessage(
+            JsonMessage.newMessage(
+                "overstyring_igangsatt", mapOf(
+                "revurderingId" to UUID.randomUUID(),
+                "kilde" to message.meldingsporing.id,
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "periodeForEndringFom" to event.periodeForEndring.start,
+                "periodeForEndringTom" to event.periodeForEndring.endInclusive,
+                "årsak" to event.årsak,
+                "typeEndring" to event.typeEndring,
+                "berørtePerioder" to event.berørtePerioder.map {
+                    mapOf(
+                        "vedtaksperiodeId" to it.vedtaksperiodeId,
+                        "skjæringstidspunkt" to it.skjæringstidspunkt,
+                        "periodeFom" to it.periode.start,
+                        "periodeTom" to it.periode.endInclusive,
+                        "orgnummer" to it.orgnummer,
+                        "typeEndring" to it.typeEndring,
+                    )
+                }
+            )))
     }
 
     override fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {
@@ -316,30 +332,32 @@ internal class PersonMediator(
     }
 
     override fun vedtaksperioderVenter(eventer: List<PersonObserver.VedtaksperiodeVenterEvent>) {
-        queueMessage(JsonMessage.newMessage("vedtaksperioder_venter", mapOf(
-            "vedtaksperioder" to eventer.map { event ->
-                mapOf(
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "behandlingId" to event.behandlingId,
-                    "skjæringstidspunkt" to event.skjæringstidspunkt,
-                    "hendelser" to event.hendelser,
-                    "ventetSiden" to event.ventetSiden,
-                    "venterTil" to event.venterTil,
-                    "venterPå" to mapOf(
-                        "vedtaksperiodeId" to event.venterPå.vedtaksperiodeId,
-                        "skjæringstidspunkt" to event.venterPå.skjæringstidspunkt,
-                        "organisasjonsnummer" to event.venterPå.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                        "yrkesaktivitetstype" to event.venterPå.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                        "venteårsak" to mapOf(
-                            "hva" to event.venterPå.venteårsak.hva,
-                            "hvorfor" to event.venterPå.venteårsak.hvorfor
+        queueMessage(
+            JsonMessage.newMessage(
+                "vedtaksperioder_venter", mapOf(
+                "vedtaksperioder" to eventer.map { event ->
+                    mapOf(
+                        "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                        "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                        "vedtaksperiodeId" to event.vedtaksperiodeId,
+                        "behandlingId" to event.behandlingId,
+                        "skjæringstidspunkt" to event.skjæringstidspunkt,
+                        "hendelser" to event.hendelser,
+                        "ventetSiden" to event.ventetSiden,
+                        "venterTil" to event.venterTil,
+                        "venterPå" to mapOf(
+                            "vedtaksperiodeId" to event.venterPå.vedtaksperiodeId,
+                            "skjæringstidspunkt" to event.venterPå.skjæringstidspunkt,
+                            "organisasjonsnummer" to event.venterPå.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                            "yrkesaktivitetstype" to event.venterPå.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                            "venteårsak" to mapOf(
+                                "hva" to event.venterPå.venteårsak.hva,
+                                "hvorfor" to event.venterPå.venteårsak.hvorfor
+                            )
                         )
                     )
-                )
-            }
-        )))
+                }
+            )))
     }
 
     override fun vedtaksperiodeOpprettet(event: PersonObserver.VedtaksperiodeOpprettet) {
@@ -640,5 +658,4 @@ internal class PersonMediator(
             context.publish(fødselsnummer, blob.also { sikkerLogg.info("sender $eventName: $it") })
         }
     }
-
 }

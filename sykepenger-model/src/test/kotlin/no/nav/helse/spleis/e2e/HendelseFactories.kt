@@ -271,7 +271,7 @@ internal fun påminnelse(
 ): Påminnelse {
     return Påminnelse(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        organisasjonsnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         antallGangerPåminnet = antallGangerPåminnet,
         tilstand = påminnetTilstand,

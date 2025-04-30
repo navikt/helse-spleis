@@ -11,20 +11,17 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Påminnelse(
     meldingsreferanseId: MeldingsreferanseId,
-    organisasjonsnummer: String,
-    private val vedtaksperiodeId: String,
-    private val antallGangerPåminnet: Int,
-    private val tilstand: TilstandType,
-    private val tilstandsendringstidspunkt: LocalDateTime,
-    private val påminnelsestidspunkt: LocalDateTime,
-    private val nestePåminnelsestidspunkt: LocalDateTime,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
+    val vedtaksperiodeId: String,
+    val antallGangerPåminnet: Int,
+    val tilstand: TilstandType,
+    val tilstandsendringstidspunkt: LocalDateTime,
+    val påminnelsestidspunkt: LocalDateTime,
+    val nestePåminnelsestidspunkt: LocalDateTime,
     private val flagg: Set<String>,
     private val nå: LocalDateTime = LocalDateTime.now(),
     opprettet: LocalDateTime
 ) : Hendelse {
-    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-        organisasjonsnummer = organisasjonsnummer
-    )
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = SYSTEM,
@@ -55,16 +52,6 @@ class Påminnelse(
             aktivitetslogg.info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
         }
     }
-
-    fun toOutgoingMessage() = mapOf(
-        "organisasjonsnummer" to behandlingsporing.organisasjonsnummer,
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "tilstand" to tilstand,
-        "antallGangerPåminnet" to antallGangerPåminnet,
-        "tilstandsendringstidspunkt" to tilstandsendringstidspunkt,
-        "påminnelsestidspunkt" to påminnelsestidspunkt,
-        "nestePåminnelsestidspunkt" to nestePåminnelsestidspunkt
-    )
 
     fun eventyr(skjæringstidspunkt: LocalDate, periode: Periode): Revurderingseventyr? {
         if (!når(Predikat.Flagg("ønskerReberegning"))) return null

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.meldinger.model
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.IHendelseMediator
@@ -23,7 +24,7 @@ internal class PåminnelseMessage(packet: JsonMessage, override val meldingspori
     private val påminnelse
         get() = Påminnelse(
             meldingsreferanseId = meldingsporing.id,
-            organisasjonsnummer = organisasjonsnummer,
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             vedtaksperiodeId = vedtaksperiodeId,
             antallGangerPåminnet = antallGangerPåminnet,
             tilstand = tilstand,
