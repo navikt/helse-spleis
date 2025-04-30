@@ -902,7 +902,9 @@ internal fun AbstractEndToEndTest.håndterAnnullerUtbetaling(
 ) {
     AnnullerUtbetaling(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        organisasjonsnummer = orgnummer,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+            organisasjonsnummer = orgnummer
+        ),
         utbetalingId = utbetalingId,
         saksbehandlerIdent = "Ola Nordmann",
         saksbehandlerEpost = "tbd@nav.no",

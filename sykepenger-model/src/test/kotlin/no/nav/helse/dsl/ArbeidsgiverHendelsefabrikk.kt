@@ -434,7 +434,7 @@ internal class ArbeidsgiverHendelsefabrikk(
     internal fun lagAnnullering(utbetalingId: UUID) =
         AnnullerUtbetaling(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            organisasjonsnummer = organisasjonsnummer,
+            behandlingsporing = behandlingsporing,
             utbetalingId = utbetalingId,
             saksbehandlerIdent = "Ola Nordmann",
             saksbehandlerEpost = "tbd@nav.no",

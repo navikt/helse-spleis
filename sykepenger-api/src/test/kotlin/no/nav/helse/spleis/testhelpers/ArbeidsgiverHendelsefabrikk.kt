@@ -391,7 +391,9 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     internal fun lagAnnullering(utbetalingId: UUID) =
         AnnullerUtbetaling(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            organisasjonsnummer = organisasjonsnummer,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                organisasjonsnummer = organisasjonsnummer
+            ),
             utbetalingId = utbetalingId,
             saksbehandlerIdent = "Ola Nordmann",
             saksbehandlerEpost = "tbd@nav.no",

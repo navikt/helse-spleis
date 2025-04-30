@@ -5,6 +5,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
@@ -16,7 +17,9 @@ internal class AnnulleringMessage(packet: JsonMessage, override val meldingspori
     private val annullerUtbetaling
         get() = AnnullerUtbetaling(
             meldingsporing.id,
-            organisasjonsnummer,
+            Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                organisasjonsnummer = organisasjonsnummer
+            ),
             utbetalingId,
             saksbehandler.ident,
             saksbehandler.epostadresse,

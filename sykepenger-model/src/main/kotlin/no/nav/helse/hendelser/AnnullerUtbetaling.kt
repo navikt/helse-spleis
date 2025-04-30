@@ -7,15 +7,12 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 
 class AnnullerUtbetaling(
     meldingsreferanseId: MeldingsreferanseId,
-    organisasjonsnummer: String,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     override val utbetalingId: UUID,
     private val saksbehandlerIdent: String,
     saksbehandlerEpost: String,
     internal val opprettet: LocalDateTime
 ) : Hendelse, AnnullerUtbetalingHendelse {
-    override val behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-        organisasjonsnummer = organisasjonsnummer
-    )
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,
         avsender = SAKSBEHANDLER,
