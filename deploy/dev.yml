@@ -60,6 +60,8 @@ spec:
       value: EARLIEST
     - name: IDENTBYTTE
       value: "true"
+    - name: SEND_FERIEPENGEOPPDRAG
+      value: "true"
     - name: TILKOMMEN_INNTEKT_V4
       value: "true"
     - name: SELVSTENDIG_NAERINGSDRIVENDE
