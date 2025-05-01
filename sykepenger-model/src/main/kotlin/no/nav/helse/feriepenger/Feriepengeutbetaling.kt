@@ -145,7 +145,7 @@ internal class Feriepengeutbetaling private constructor(
             )
 
             if (forrigeOppdrag == null) return nyttOppdrag
-            if (beløp == 0) forrigeOppdrag.annuller(aktivitetslogg)
+            if (beløp == 0) return forrigeOppdrag.annuller()
             return nyttOppdrag.minus(forrigeOppdrag, aktivitetslogg)
         }
 

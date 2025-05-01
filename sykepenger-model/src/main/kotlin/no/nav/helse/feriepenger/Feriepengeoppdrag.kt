@@ -29,6 +29,12 @@ data class Feriepengeoppdrag(
     val tidsstempel: LocalDateTime,
 ) : Aktivitetskontekst {
 
+    init {
+        check(linjer.size <= 1) {
+            "Et feriepengeoppdrag kan maksimalt ha én linje"
+        }
+    }
+
     companion object {
         fun gjenopprett(dto: FeriepengeoppdragInnDto): Feriepengeoppdrag {
             return Feriepengeoppdrag(
@@ -110,16 +116,12 @@ data class Feriepengeoppdrag(
 
     fun linjerUtenOpphør() = linjer.filter { !it.erOpphør() }
 
-    fun annuller(aktivitetslogg: IAktivitetslogg): Feriepengeoppdrag {
-        return tomtOppdrag().minus(this, aktivitetslogg)
-    }
-
-    private fun tomtOppdrag(): Feriepengeoppdrag =
-        Feriepengeoppdrag(
-            mottaker = mottaker,
-            fagområde = fagområde,
-            fagsystemId = fagsystemId
+    fun annuller(): Feriepengeoppdrag {
+        return kopierMed(
+            linjer = listOf(this.linjer.single().opphørslinje(this.linjer.single().fom)),
+            endringskode = Endringskode.ENDR
         )
+    }
 
     operator fun plus(other: Feriepengeoppdrag): Feriepengeoppdrag {
         check(linjer.none { linje -> other.linjer.any { it.periode.overlapperMed(linje.periode) } }) {
