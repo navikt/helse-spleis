@@ -27,7 +27,7 @@ class Feriepengeoppdrag private constructor(
     val endringskode: Endringskode,
     nettoBeløp: Int = linjer.sumOf { it.totalbeløp() },
     val tidsstempel: LocalDateTime,
-) : List<Feriepengeutbetalingslinje> by linjer, Aktivitetskontekst {
+) : Aktivitetskontekst {
     var nettoBeløp: Int = nettoBeløp
         private set
 
@@ -63,7 +63,7 @@ class Feriepengeoppdrag private constructor(
     )
 
     fun detaljer(): OppdragDetaljer {
-        val linjene = map { it.detaljer() }
+        val linjene = linjer.map { it.detaljer() }
         return OppdragDetaljer(
             fagsystemId = fagsystemId,
             fagområde = fagområde.verdi,
@@ -89,7 +89,7 @@ class Feriepengeoppdrag private constructor(
         return mapOf(
             "mottaker" to mottaker,
             "fagområde" to "$fagområde",
-            "linjer" to kopierKunLinjerMedEndring().map(Feriepengeutbetalingslinje::behovdetaljer),
+            "linjer" to kopierKunLinjerMedEndring().linjer.map(Feriepengeutbetalingslinje::behovdetaljer),
             "fagsystemId" to fagsystemId,
             "endringskode" to "$endringskode",
             "saksbehandler" to saksbehandler
@@ -97,7 +97,7 @@ class Feriepengeoppdrag private constructor(
     }
 
     fun totalbeløp() = linjerUtenOpphør().sumOf { it.totalbeløp() }
-    fun stønadsdager() = sumOf { it.stønadsdager() }
+    fun stønadsdager() = linjer.sumOf { it.stønadsdager() }
 
     fun nettoBeløp() = nettoBeløp
 
@@ -105,16 +105,16 @@ class Feriepengeoppdrag private constructor(
         nettoBeløp = this.totalbeløp() - tidligere.totalbeløp()
     }
 
-    fun harUtbetalinger() = any(Feriepengeutbetalingslinje::erForskjell)
+    fun harUtbetalinger() = linjer.any(Feriepengeutbetalingslinje::erForskjell)
 
     fun erRelevant(fagsystemId: String, fagområde: Fagområde) =
         this.fagsystemId == fagsystemId && this.fagområde == fagområde
 
-    private fun kopierKunLinjerMedEndring() = kopierMed(filter(Feriepengeutbetalingslinje::erForskjell))
+    private fun kopierKunLinjerMedEndring() = kopierMed(linjer.filter(Feriepengeutbetalingslinje::erForskjell))
 
     private fun kopierUtenOpphørslinjer() = kopierMed(linjerUtenOpphør())
 
-    fun linjerUtenOpphør() = filter { !it.erOpphør() }
+    fun linjerUtenOpphør() = linjer.filter { !it.erOpphør() }
 
     fun annuller(aktivitetslogg: IAktivitetslogg): Feriepengeoppdrag {
         return tomtOppdrag().minus(this, aktivitetslogg)
@@ -128,18 +128,18 @@ class Feriepengeoppdrag private constructor(
         )
 
     operator fun plus(other: Feriepengeoppdrag): Feriepengeoppdrag {
-        check(none { linje -> other.any { it.periode.overlapperMed(linje.periode) } }) {
+        check(linjer.none { linje -> other.linjer.any { it.periode.overlapperMed(linje.periode) } }) {
             "ikke støttet: kan ikke overlappe med annet oppdrag"
         }
-        if (this.isNotEmpty() && other.isNotEmpty() && this.fomHarFlyttetSegFremover(other)) return other + this
+        if (this.linjer.isNotEmpty() && other.linjer.isNotEmpty() && this.fomHarFlyttetSegFremover(other)) return other + this
         return kopierMed((slåSammenOppdrag(other)))
     }
 
     private fun slåSammenOppdrag(other: Feriepengeoppdrag): List<Feriepengeutbetalingslinje> {
-        if (this.isEmpty()) return other.linjer
-        if (other.isEmpty()) return this.linjer
-        val sisteLinje = this.last()
-        val første = other.first()
+        if (this.linjer.isEmpty()) return other.linjer
+        if (other.linjer.isEmpty()) return this.linjer
+        val sisteLinje = this.linjer.last()
+        val første = other.linjer.first()
         val mellomlinje = sisteLinje.slåSammenLinje(første) ?: return this.linjer + other.linjer
         return this.linjer.dropLast(1) + listOf(mellomlinje) + other.linjer.drop(1)
     }
@@ -166,25 +166,25 @@ class Feriepengeoppdrag private constructor(
 
     private fun ingenUtbetalteDager() = linjerUtenOpphør().isEmpty()
 
-    private fun erTomt() = this.isEmpty()
+    private fun erTomt() = this.linjer.isEmpty()
 
     // Vi har oppdaget utbetalingsdager tidligere i tidslinjen
-    private fun fomHarFlyttetSegBakover(eldre: Feriepengeoppdrag) = this.first().fom < eldre.first().fom
+    private fun fomHarFlyttetSegBakover(eldre: Feriepengeoppdrag) = this.linjer.first().fom < eldre.linjer.first().fom
 
     // Vi har endret tidligere utbetalte dager til ikke-utbetalte dager i starten av tidslinjen
-    private fun fomHarFlyttetSegFremover(eldre: Feriepengeoppdrag) = this.first().fom > eldre.first().fom
+    private fun fomHarFlyttetSegFremover(eldre: Feriepengeoppdrag) = this.linjer.first().fom > eldre.linjer.first().fom
 
     // man opphører (annullerer) et annet oppdrag ved å lage en opphørslinje som dekker hele perioden som er utbetalt
     // om det forrige oppdraget også var et opphør så kopieres siste linje for å bevare
     // delytelseId-rekkefølgen slik at det nye oppdraget kan bygges videre på
     private fun annulleringsoppdrag(tidligere: Feriepengeoppdrag) =
         if (tidligere.kopierUtenOpphørslinjer().erTomt()) kopierMed(
-            linjer = listOf(tidligere.last().markerUendret(tidligere.last())),
+            linjer = listOf(tidligere.linjer.last().markerUendret(tidligere.linjer.last())),
             fagsystemId = tidligere.fagsystemId,
             endringskode = Endringskode.UEND
         )
         else kopierMed(
-            linjer = listOf(tidligere.last().opphørslinje(tidligere.kopierUtenOpphørslinjer().first().fom)),
+            linjer = listOf(tidligere.linjer.last().opphørslinje(tidligere.kopierUtenOpphørslinjer().linjer.first().fom)),
             fagsystemId = tidligere.fagsystemId,
             endringskode = Endringskode.ENDR
         )
@@ -198,7 +198,7 @@ class Feriepengeoppdrag private constructor(
     // Fordi linje "1. januar - 10. januar" opprettes som NY, medfører dette at oppdragsystemet opphører 11. januar til 31. januar automatisk
     private fun kjørFrem(tidligere: Feriepengeoppdrag): Feriepengeoppdrag {
         val sammenkoblet = this.kobleTil(tidligere)
-        val linjer = kjedeSammenLinjer(sammenkoblet, tidligere.last())
+        val linjer = kjedeSammenLinjer(sammenkoblet.linjer, tidligere.linjer.last())
         return sammenkoblet.kopierMed(linjer)
     }
 
@@ -216,7 +216,7 @@ class Feriepengeoppdrag private constructor(
     }
 
     private fun opphørOppdrag(tidligere: Feriepengeoppdrag) =
-        tidligere.last().opphørslinje(tidligere.first().fom)
+        tidligere.linjer.last().opphørslinje(tidligere.linjer.first().fom)
 
 
     private fun medFagsystemId(other: Feriepengeoppdrag) = kopierMed(this.linjer, fagsystemId = other.fagsystemId)
@@ -250,10 +250,10 @@ class Feriepengeoppdrag private constructor(
         //    ulik dagsats eller fom-dato medfører enten at linjen får status OPPH, eller at man overskriver
         //    ved å sende NY linjer
         fun kalkulerDifferanse(avtroppendeOppdrag: Feriepengeoppdrag, aktivitetslogg: IAktivitetslogg): Feriepengeoppdrag {
-            this.linkTo = avtroppendeOppdrag.last()
+            this.linkTo = avtroppendeOppdrag.linjer.last()
             val kobletTil = påtroppendeOppdrag.kobleTil(avtroppendeOppdrag)
             val medLinkeLinjer = kopierLikeLinjer(kobletTil, avtroppendeOppdrag, aktivitetslogg)
-            if (medLinkeLinjer.last().erForskjell()) return medLinkeLinjer
+            if (medLinkeLinjer.linjer.last().erForskjell()) return medLinkeLinjer
             return medLinkeLinjer.kopierMed(medLinkeLinjer.linjer, endringskode = Endringskode.UEND)
         }
 
@@ -271,11 +271,11 @@ class Feriepengeoppdrag private constructor(
         }
 
         private fun kopierLikeLinjer(nytt: Feriepengeoppdrag, tidligere: Feriepengeoppdrag, aktivitetslogg: IAktivitetslogg): Feriepengeoppdrag {
-            tilstand = if (tidligere.last().tom > nytt.last().tom) Slett(nytt.last()) else Identisk()
-            sisteLinjeITidligereOppdrag = tidligere.last()
-            val linjer = nytt.zip(tidligere).map { (a, b) -> tilstand.håndterForskjell(a, b, aktivitetslogg) }.flatten()
-            val remaining = (nytt.size - minOf(nytt.size, tidligere.size)).coerceAtLeast(0)
-            val nyeLinjer = nytt.takeLast(remaining)
+            tilstand = if (tidligere.linjer.last().tom > nytt.linjer.last().tom) Slett(nytt.linjer.last()) else Identisk()
+            sisteLinjeITidligereOppdrag = tidligere.linjer.last()
+            val linjer = nytt.linjer.zip(tidligere.linjer).map { (a, b) -> tilstand.håndterForskjell(a, b, aktivitetslogg) }.flatten()
+            val remaining = (nytt.linjer.size - minOf(nytt.linjer.size, tidligere.linjer.size)).coerceAtLeast(0)
+            val nyeLinjer = nytt.linjer.takeLast(remaining)
             return nytt.kopierMed(linjer + kjedeSammenLinjer(nyeLinjer, linjer.last()))
         }
 

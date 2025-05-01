@@ -161,17 +161,6 @@ interface PersonObserver {
                             totalbeløp = linje.totalbeløp()
                         )
                     })
-                fun mapOppdrag(oppdrag: Feriepengeoppdrag) = OppdragEventDetaljer(
-                    fagsystemId = oppdrag.fagsystemId,
-                    mottaker = oppdrag.mottaker,
-                    nettoBeløp = oppdrag.nettoBeløp(),
-                    linjer = oppdrag.map { linje ->
-                        OppdragEventLinjeDetaljer(
-                            fom = linje.fom,
-                            tom = linje.tom,
-                            totalbeløp = linje.totalbeløp()
-                        )
-                    })
             }
         }
     }
