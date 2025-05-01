@@ -18,7 +18,7 @@ import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
 
-class Feriepengeutbetalingslinje(
+data class Feriepengeutbetalingslinje(
     val fom: LocalDate,
     val tom: LocalDate,
     val beløp: Int,

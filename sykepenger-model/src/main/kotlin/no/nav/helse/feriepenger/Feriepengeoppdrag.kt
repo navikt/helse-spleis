@@ -19,17 +19,15 @@ import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
 import no.nav.helse.utbetalingslinjer.genererUtbetalingsreferanse
 
-class Feriepengeoppdrag private constructor(
+data class Feriepengeoppdrag(
     val mottaker: String,
     val fagområde: Fagområde,
-    val linjer: MutableList<Feriepengeutbetalingslinje>,
+    val linjer: List<Feriepengeutbetalingslinje>,
     val fagsystemId: String,
     val endringskode: Endringskode,
-    nettoBeløp: Int = linjer.sumOf { it.totalbeløp() },
+    val nettoBeløp: Int = linjer.sumOf { it.totalbeløp() },
     val tidsstempel: LocalDateTime,
 ) : Aktivitetskontekst {
-    var nettoBeløp: Int = nettoBeløp
-        private set
 
     companion object {
         fun gjenopprett(dto: FeriepengeoppdragInnDto): Feriepengeoppdrag {
@@ -39,7 +37,7 @@ class Feriepengeoppdrag private constructor(
                     FagområdeDto.SP -> Fagområde.Sykepenger
                     FagområdeDto.SPREF -> Fagområde.SykepengerRefusjon
                 },
-                linjer = dto.linjer.map { Feriepengeutbetalingslinje.gjenopprett(it) }.toMutableList(),
+                linjer = dto.linjer.map { Feriepengeutbetalingslinje.gjenopprett(it) },
                 fagsystemId = dto.fagsystemId,
                 endringskode = Endringskode.gjenopprett(dto.endringskode),
                 nettoBeløp = dto.nettoBeløp,
@@ -56,7 +54,7 @@ class Feriepengeoppdrag private constructor(
     ) : this(
         mottaker,
         fagområde,
-        normaliserLinjer(fagsystemId, linjer).toMutableList(),
+        normaliserLinjer(fagsystemId, linjer),
         fagsystemId,
         Endringskode.NY,
         tidsstempel = LocalDateTime.now()
@@ -100,10 +98,6 @@ class Feriepengeoppdrag private constructor(
     fun stønadsdager() = linjer.sumOf { it.stønadsdager() }
 
     fun nettoBeløp() = nettoBeløp
-
-    private fun nettoBeløp(tidligere: Feriepengeoppdrag) {
-        nettoBeløp = this.totalbeløp() - tidligere.totalbeløp()
-    }
 
     fun harUtbetalinger() = linjer.any(Feriepengeutbetalingslinje::erForskjell)
 
@@ -161,7 +155,9 @@ class Feriepengeoppdrag private constructor(
             }
             // fom er lik, men endring kan oppstå overalt ellers
             else -> endre(eldre.kopierUtenOpphørslinjer(), aktivitetslogg)
-        }.also { it.nettoBeløp(eldre) }
+        }.let {
+            it.copy(nettoBeløp = it.totalbeløp() - eldre.totalbeløp())
+        }
     }
 
     private fun ingenUtbetalteDager() = linjerUtenOpphør().isEmpty()
@@ -224,7 +220,7 @@ class Feriepengeoppdrag private constructor(
     private fun kopierMed(linjer: List<Feriepengeutbetalingslinje>, fagsystemId: String = this.fagsystemId, endringskode: Endringskode = this.endringskode) = Feriepengeoppdrag(
         mottaker = mottaker,
         fagområde = fagområde,
-        linjer = linjer.map { it.kopier() }.toMutableList(),
+        linjer = linjer.map { it.kopier() },
         fagsystemId = fagsystemId,
         endringskode = endringskode,
         tidsstempel = tidsstempel
