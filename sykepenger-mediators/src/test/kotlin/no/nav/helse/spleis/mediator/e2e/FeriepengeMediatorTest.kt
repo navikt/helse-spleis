@@ -80,7 +80,6 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals("SPREFAGFER-IOP", linjer[0].path("klassekode").asText())
         assertEquals("ENG", linjer[0].path("satstype").asText())
         assertEquals(1460, linjer[0].path("sats").asInt())
-        assertEquals(1460, linjer[0].path("totalbeløp").asInt())
     }
 
     @Test
@@ -157,7 +156,6 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals("SPREFAGFER-IOP", linjer[0].path("klassekode").asText())
         assertEquals("ENG", linjer[0].path("satstype").asText())
         assertEquals(1460, linjer[0].path("sats").asInt())
-        assertEquals(1460, linjer[0].path("totalbeløp").asInt())
     }
 
     @Test
@@ -234,7 +232,6 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals("SPREFAGFER-IOP", linjer[0].path("klassekode").asText())
         assertEquals("ENG", linjer[0].path("satstype").asText())
         assertEquals(1460, linjer[0].path("sats").asInt())
-        assertEquals(1460, linjer[0].path("totalbeløp").asInt())
     }
 
     @Test
@@ -313,7 +310,6 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals("SPREFAGFER-IOP", linjer1[0].path("klassekode").asText())
         assertEquals("ENG", linjer1[0].path("satstype").asText())
         assertEquals(1460, linjer1[0].path("sats").asInt())
-        assertEquals(1460, linjer1[0].path("totalbeløp").asInt())
 
         val behov2 = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
         val linjer2 = behov2.path("Feriepengeutbetaling").path("linjer")
@@ -327,7 +323,6 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals("SPREFAGFER-IOP", linjer2[0].path("klassekode").asText())
         assertEquals("ENG", linjer2[0].path("satstype").asText())
         assertEquals(-334, linjer2[0].path("sats").asInt())
-        assertEquals(-334, linjer2[0].path("totalbeløp").asInt())
 
         assertNotEquals(utbetalingId1, utbetalingId2)
     }

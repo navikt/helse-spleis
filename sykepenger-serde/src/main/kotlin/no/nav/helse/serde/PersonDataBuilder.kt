@@ -683,8 +683,7 @@ private fun FeriepengeoppdragUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     linjer = this.linjer.map { it.tilPersonData() },
     fagsystemId = this.fagsystemId,
     endringskode = this.endringskode.tilPersonData(),
-    tidsstempel = this.tidsstempel,
-    nettoBeløp = this.nettoBeløp
+    tidsstempel = this.tidsstempel
 )
 
 private fun FeriepengeutbetalingslinjeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.UtbetalingslinjeData(

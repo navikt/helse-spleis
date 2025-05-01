@@ -2,14 +2,10 @@ package no.nav.helse.feriepenger
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
 import no.nav.helse.dto.deserialisering.FeriepengeoppdragInnDto
 import no.nav.helse.dto.serialisering.FeriepengeoppdragUtDto
-import no.nav.helse.feriepenger.Feriepengeutbetalingslinje.Companion.kjedeSammenLinjer
-import no.nav.helse.feriepenger.Feriepengeutbetalingslinje.Companion.kobleTil
-import no.nav.helse.feriepenger.Feriepengeutbetalingslinje.Companion.normaliserLinjer
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -17,7 +13,6 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
-import no.nav.helse.utbetalingslinjer.genererUtbetalingsreferanse
 
 data class Feriepengeoppdrag(
     val mottaker: String,
@@ -25,7 +20,6 @@ data class Feriepengeoppdrag(
     val linjer: List<Feriepengeutbetalingslinje>,
     val fagsystemId: String,
     val endringskode: Endringskode,
-    val nettoBeløp: Int = linjer.sumOf { it.totalbeløp() },
     val tidsstempel: LocalDateTime,
 ) : Aktivitetskontekst {
 
@@ -46,25 +40,12 @@ data class Feriepengeoppdrag(
                 linjer = dto.linjer.map { Feriepengeutbetalingslinje.gjenopprett(it) },
                 fagsystemId = dto.fagsystemId,
                 endringskode = Endringskode.gjenopprett(dto.endringskode),
-                nettoBeløp = dto.nettoBeløp,
                 tidsstempel = dto.tidsstempel
             )
         }
     }
 
-    constructor(
-        mottaker: String,
-        fagområde: Fagområde,
-        linjer: List<Feriepengeutbetalingslinje> = listOf(),
-        fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID())
-    ) : this(
-        mottaker,
-        fagområde,
-        normaliserLinjer(fagsystemId, linjer),
-        fagsystemId,
-        Endringskode.NY,
-        tidsstempel = LocalDateTime.now()
-    )
+    val skalSendeOppdrag = linjer.singleOrNull()?.endringskode?.let { it != Endringskode.UEND } ?: false
 
     fun detaljer(): OppdragDetaljer {
         val linjene = linjer.map { it.detaljer() }
@@ -72,8 +53,8 @@ data class Feriepengeoppdrag(
             fagsystemId = fagsystemId,
             fagområde = fagområde.verdi,
             mottaker = mottaker,
-            nettoBeløp = nettoBeløp,
-            stønadsdager = stønadsdager(),
+            stønadsdager = 1,
+            nettoBeløp = linjer.singleOrNull()?.beløp ?: 0,
             fom = linjene.firstOrNull()?.fom ?: LocalDate.MIN,
             tom = linjene.lastOrNull()?.tom ?: LocalDate.MIN,
             linjer = linjene
@@ -82,9 +63,47 @@ data class Feriepengeoppdrag(
 
     fun overfør(aktivitetslogg: IAktivitetslogg, saksbehandler: String) {
         val aktivitetsloggMedOppdragkontekst = aktivitetslogg.kontekst(this)
-        if (!harUtbetalinger()) return aktivitetsloggMedOppdragkontekst.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
+        if (!linjer.any(Feriepengeutbetalingslinje::erForskjell))
+            return aktivitetsloggMedOppdragkontekst.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
         check(endringskode != Endringskode.UEND)
         aktivitetsloggMedOppdragkontekst.behov(Behovtype.Feriepengeutbetaling, "Trenger å sende utbetaling til Oppdrag", behovdetaljer(saksbehandler))
+    }
+
+    fun endreBeløp(beløp: Int): Feriepengeoppdrag {
+        if (beløp == 0) return this.annuller()
+        if (beløp == this.linjer.single().beløp) return this.utenEndring()
+        return this.medEndring(beløp)
+    }
+
+    private fun annuller(): Feriepengeoppdrag {
+        return copy(
+            linjer = listOf(this.linjer.single().opphørslinje(this.linjer.single().fom)),
+            endringskode = Endringskode.ENDR
+        )
+    }
+
+    private fun utenEndring(): Feriepengeoppdrag {
+        return this.copy(
+            endringskode = Endringskode.UEND,
+            linjer = listOf(
+                this.linjer.single().copy(endringskode = Endringskode.UEND)
+            )
+        )
+    }
+
+    private fun medEndring(beløp: Int): Feriepengeoppdrag {
+        return this.copy(
+            endringskode = Endringskode.ENDR,
+            linjer = listOf(
+                this.linjer.single().copy(
+                    endringskode = Endringskode.NY,
+                    beløp = beløp,
+                    delytelseId = this.linjer.single().delytelseId + 1,
+                    refDelytelseId = this.linjer.single().delytelseId,
+                    refFagsystemId = this.fagsystemId
+                )
+            )
+        )
     }
 
     override fun toSpesifikkKontekst() = SpesifikkKontekst("Feriepengeoppdrag", mapOf("fagsystemId" to fagsystemId))
@@ -93,236 +112,19 @@ data class Feriepengeoppdrag(
         return mapOf(
             "mottaker" to mottaker,
             "fagområde" to "$fagområde",
-            "linjer" to kopierKunLinjerMedEndring().linjer.map(Feriepengeutbetalingslinje::behovdetaljer),
+            "linjer" to linjer.map(Feriepengeutbetalingslinje::behovdetaljer),
             "fagsystemId" to fagsystemId,
             "endringskode" to "$endringskode",
             "saksbehandler" to saksbehandler
         )
     }
 
-    fun totalbeløp() = linjerUtenOpphør().sumOf { it.totalbeløp() }
-    fun stønadsdager() = linjer.sumOf { it.stønadsdager() }
-
-    fun nettoBeløp() = nettoBeløp
-
-    fun harUtbetalinger() = linjer.any(Feriepengeutbetalingslinje::erForskjell)
-
-    fun erRelevant(fagsystemId: String, fagområde: Fagområde) =
-        this.fagsystemId == fagsystemId && this.fagområde == fagområde
-
-    private fun kopierKunLinjerMedEndring() = kopierMed(linjer.filter(Feriepengeutbetalingslinje::erForskjell))
-
-    private fun kopierUtenOpphørslinjer() = kopierMed(linjerUtenOpphør())
+    fun totalbeløp(): Int {
+        if (linjer.single().datoStatusFom != null) return 0
+        return linjer.single().beløp
+    }
 
     fun linjerUtenOpphør() = linjer.filter { !it.erOpphør() }
-
-    fun annuller(): Feriepengeoppdrag {
-        return kopierMed(
-            linjer = listOf(this.linjer.single().opphørslinje(this.linjer.single().fom)),
-            endringskode = Endringskode.ENDR
-        )
-    }
-
-    operator fun plus(other: Feriepengeoppdrag): Feriepengeoppdrag {
-        check(linjer.none { linje -> other.linjer.any { it.periode.overlapperMed(linje.periode) } }) {
-            "ikke støttet: kan ikke overlappe med annet oppdrag"
-        }
-        if (this.linjer.isNotEmpty() && other.linjer.isNotEmpty() && this.fomHarFlyttetSegFremover(other)) return other + this
-        return kopierMed((slåSammenOppdrag(other)))
-    }
-
-    private fun slåSammenOppdrag(other: Feriepengeoppdrag): List<Feriepengeutbetalingslinje> {
-        if (this.linjer.isEmpty()) return other.linjer
-        if (other.linjer.isEmpty()) return this.linjer
-        val sisteLinje = this.linjer.last()
-        val første = other.linjer.first()
-        val mellomlinje = sisteLinje.slåSammenLinje(første) ?: return this.linjer + other.linjer
-        return this.linjer.dropLast(1) + listOf(mellomlinje) + other.linjer.drop(1)
-    }
-
-    fun minus(eldre: Feriepengeoppdrag, aktivitetslogg: IAktivitetslogg): Feriepengeoppdrag {
-        // overtar fagsystemId fra tidligere Oppdrag uten utbetaling, gitt at det er samme arbeidsgiverperiode
-        if (eldre.erTomt()) return medFagsystemId(eldre)
-        return when {
-            // om man trekker fra et utbetalt oppdrag med et tomt oppdrag medfører det et oppdrag som opphører (les: annullerer) hele fagsystemIDen
-            erTomt() -> annulleringsoppdrag(eldre)
-            eldre.ingenUtbetalteDager() -> kjørFrem(eldre)
-            // "fom" kan flytte seg fremover i tid dersom man, eksempelvis, revurderer en utbetalt periode til å starte med ikke-utbetalte dager (f.eks. ferie)
-            fomHarFlyttetSegFremover(eldre.kopierUtenOpphørslinjer()) -> {
-                returførOgKjørFrem(eldre.kopierUtenOpphørslinjer())
-            }
-            // utbetaling kan endres til å starte tidligere, eksempelvis via revurdering der feriedager egentlig er sykedager
-            fomHarFlyttetSegBakover(eldre.kopierUtenOpphørslinjer()) -> {
-                kjørFrem(eldre.kopierUtenOpphørslinjer())
-            }
-            // fom er lik, men endring kan oppstå overalt ellers
-            else -> endre(eldre.kopierUtenOpphørslinjer(), aktivitetslogg)
-        }.let {
-            it.copy(nettoBeløp = it.totalbeløp() - eldre.totalbeløp())
-        }
-    }
-
-    private fun ingenUtbetalteDager() = linjerUtenOpphør().isEmpty()
-
-    private fun erTomt() = this.linjer.isEmpty()
-
-    // Vi har oppdaget utbetalingsdager tidligere i tidslinjen
-    private fun fomHarFlyttetSegBakover(eldre: Feriepengeoppdrag) = this.linjer.first().fom < eldre.linjer.first().fom
-
-    // Vi har endret tidligere utbetalte dager til ikke-utbetalte dager i starten av tidslinjen
-    private fun fomHarFlyttetSegFremover(eldre: Feriepengeoppdrag) = this.linjer.first().fom > eldre.linjer.first().fom
-
-    // man opphører (annullerer) et annet oppdrag ved å lage en opphørslinje som dekker hele perioden som er utbetalt
-    // om det forrige oppdraget også var et opphør så kopieres siste linje for å bevare
-    // delytelseId-rekkefølgen slik at det nye oppdraget kan bygges videre på
-    private fun annulleringsoppdrag(tidligere: Feriepengeoppdrag) =
-        if (tidligere.kopierUtenOpphørslinjer().erTomt()) kopierMed(
-            linjer = listOf(tidligere.linjer.last().markerUendret(tidligere.linjer.last())),
-            fagsystemId = tidligere.fagsystemId,
-            endringskode = Endringskode.UEND
-        )
-        else kopierMed(
-            linjer = listOf(tidligere.linjer.last().opphørslinje(tidligere.kopierUtenOpphørslinjer().linjer.first().fom)),
-            fagsystemId = tidligere.fagsystemId,
-            endringskode = Endringskode.ENDR
-        )
-
-    // når man oppretter en NY linje med dato-intervall "(a, b)" vil oppdragsystemet
-    // automatisk opphøre alle eventuelle linjer med fom > b.
-    //
-    // Eksempel:
-    // Oppdrag 1: 5. januar til 31. januar (linje 1)
-    // Oppdrag 2: 1. januar til 10. januar
-    // Fordi linje "1. januar - 10. januar" opprettes som NY, medfører dette at oppdragsystemet opphører 11. januar til 31. januar automatisk
-    private fun kjørFrem(tidligere: Feriepengeoppdrag): Feriepengeoppdrag {
-        val sammenkoblet = this.kobleTil(tidligere)
-        val linjer = kjedeSammenLinjer(sammenkoblet.linjer, tidligere.linjer.last())
-        return sammenkoblet.kopierMed(linjer)
-    }
-
-
-    private fun endre(avtroppendeOppdrag: Feriepengeoppdrag, aktivitetslogg: IAktivitetslogg) =
-        DifferanseBuilder(this).kalkulerDifferanse(avtroppendeOppdrag, aktivitetslogg)
-
-    // når man oppretter en NY linje vil Oppdragsystemet IKKE ta stilling til periodene FØR.
-    // Man må derfor eksplisitt opphøre evt. perioder tidligere, som i praksis vil medføre at
-    // oppdraget kjøres tilbake, så fremover
-    private fun returførOgKjørFrem(tidligere: Feriepengeoppdrag): Feriepengeoppdrag {
-        val deletion = this.opphørOppdrag(tidligere)
-        val kjørtFrem = this.kjørFrem(tidligere)
-        return kjørtFrem.kopierMed(listOf(deletion) + kjørtFrem.linjer)
-    }
-
-    private fun opphørOppdrag(tidligere: Feriepengeoppdrag) =
-        tidligere.linjer.last().opphørslinje(tidligere.linjer.first().fom)
-
-
-    private fun medFagsystemId(other: Feriepengeoppdrag) = kopierMed(this.linjer, fagsystemId = other.fagsystemId)
-
-    private fun kopierMed(linjer: List<Feriepengeutbetalingslinje>, fagsystemId: String = this.fagsystemId, endringskode: Endringskode = this.endringskode) = Feriepengeoppdrag(
-        mottaker = mottaker,
-        fagområde = fagområde,
-        linjer = linjer.map { it.kopier() },
-        fagsystemId = fagsystemId,
-        endringskode = endringskode,
-        tidsstempel = tidsstempel
-    )
-
-    private fun kobleTil(tidligere: Feriepengeoppdrag) = kopierMed(
-        linjer.kobleTil(tidligere.fagsystemId),
-        tidligere.fagsystemId,
-        Endringskode.ENDR
-    )
-
-    private class DifferanseBuilder(
-        private val påtroppendeOppdrag: Feriepengeoppdrag
-    ) {
-        private lateinit var tilstand: Tilstand
-        private lateinit var sisteLinjeITidligereOppdrag: Feriepengeutbetalingslinje
-
-        private lateinit var linkTo: Feriepengeutbetalingslinje
-
-        // forsøker så langt det lar seg gjøre å endre _siste_ linje, dersom mulig *)
-        // ellers lager den NY linjer fra og med linja før endringen oppstod
-        // *) en linje kan endres dersom "tom"-dato eller grad er eneste forskjell
-        //    ulik dagsats eller fom-dato medfører enten at linjen får status OPPH, eller at man overskriver
-        //    ved å sende NY linjer
-        fun kalkulerDifferanse(avtroppendeOppdrag: Feriepengeoppdrag, aktivitetslogg: IAktivitetslogg): Feriepengeoppdrag {
-            this.linkTo = avtroppendeOppdrag.linjer.last()
-            val kobletTil = påtroppendeOppdrag.kobleTil(avtroppendeOppdrag)
-            val medLinkeLinjer = kopierLikeLinjer(kobletTil, avtroppendeOppdrag, aktivitetslogg)
-            if (medLinkeLinjer.linjer.last().erForskjell()) return medLinkeLinjer
-            return medLinkeLinjer.kopierMed(medLinkeLinjer.linjer, endringskode = Endringskode.UEND)
-        }
-
-        private fun opphørTidligereLinjeOgOpprettNy(
-            nåværende: Feriepengeutbetalingslinje,
-            tidligere: Feriepengeutbetalingslinje,
-            datoStatusFom: LocalDate = tidligere.fom
-        ): List<Feriepengeutbetalingslinje> {
-            linkTo = tidligere
-            val opphørslinje = tidligere.opphørslinje(datoStatusFom)
-            val linketTilForrige = nåværende.kobleTil(linkTo)
-            linkTo = linketTilForrige
-            tilstand = Ny()
-            return listOf(opphørslinje, linketTilForrige)
-        }
-
-        private fun kopierLikeLinjer(nytt: Feriepengeoppdrag, tidligere: Feriepengeoppdrag, aktivitetslogg: IAktivitetslogg): Feriepengeoppdrag {
-            tilstand = if (tidligere.linjer.last().tom > nytt.linjer.last().tom) Slett(nytt.linjer.last()) else Identisk()
-            sisteLinjeITidligereOppdrag = tidligere.linjer.last()
-            val linjer = nytt.linjer.zip(tidligere.linjer).map { (a, b) -> tilstand.håndterForskjell(a, b, aktivitetslogg) }.flatten()
-            val remaining = (nytt.linjer.size - minOf(nytt.linjer.size, tidligere.linjer.size)).coerceAtLeast(0)
-            val nyeLinjer = nytt.linjer.takeLast(remaining)
-            return nytt.kopierMed(linjer + kjedeSammenLinjer(nyeLinjer, linjer.last()))
-        }
-
-        private fun håndterUlikhet(nåværende: Feriepengeutbetalingslinje, tidligere: Feriepengeutbetalingslinje): List<Feriepengeutbetalingslinje> {
-            return when {
-                nåværende.kanEndreEksisterendeLinje(tidligere, sisteLinjeITidligereOppdrag) -> listOf(nåværende.endreEksisterendeLinje(tidligere))
-                nåværende.skalOpphøreOgErstatte(tidligere, sisteLinjeITidligereOppdrag) -> opphørTidligereLinjeOgOpprettNy(nåværende, tidligere)
-                nåværende.fom > tidligere.fom -> opphørTidligereLinjeOgOpprettNy(nåværende, sisteLinjeITidligereOppdrag, tidligere.fom)
-                else -> listOf(opprettNyLinje(nåværende))
-            }
-        }
-
-        private fun opprettNyLinje(nåværende: Feriepengeutbetalingslinje): Feriepengeutbetalingslinje {
-            val nyLinje = nåværende.kobleTil(linkTo)
-            linkTo = nyLinje
-            tilstand = Ny()
-            return nyLinje
-        }
-
-
-        private interface Tilstand {
-            fun håndterForskjell(nåværende: Feriepengeutbetalingslinje, tidligere: Feriepengeutbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Feriepengeutbetalingslinje>
-        }
-
-        private inner class Identisk : Tilstand {
-            override fun håndterForskjell(nåværende: Feriepengeutbetalingslinje, tidligere: Feriepengeutbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Feriepengeutbetalingslinje> {
-                if (nåværende == tidligere) return listOf(nåværende.markerUendret(tidligere))
-                return håndterUlikhet(nåværende, tidligere)
-            }
-        }
-
-        private inner class Slett(private val sisteLinjeINyttOppdrag: Feriepengeutbetalingslinje) : Tilstand {
-            override fun håndterForskjell(nåværende: Feriepengeutbetalingslinje, tidligere: Feriepengeutbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Feriepengeutbetalingslinje> {
-                if (nåværende == tidligere) {
-                    if (nåværende == sisteLinjeINyttOppdrag) return listOf(nåværende.kobleTil(linkTo))
-                    return listOf(nåværende.markerUendret(tidligere))
-                }
-                return håndterUlikhet(nåværende, tidligere)
-            }
-        }
-
-        private inner class Ny : Tilstand {
-            override fun håndterForskjell(nåværende: Feriepengeutbetalingslinje, tidligere: Feriepengeutbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Feriepengeutbetalingslinje> {
-                val nyLinje = nåværende.kobleTil(linkTo)
-                linkTo = nyLinje
-                return listOf(nyLinje)
-            }
-        }
-    }
 
     fun dto() = FeriepengeoppdragUtDto(
         mottaker = mottaker,
@@ -337,9 +139,6 @@ data class Feriepengeoppdrag(
             Endringskode.UEND -> EndringskodeDto.UEND
             Endringskode.ENDR -> EndringskodeDto.ENDR
         },
-        nettoBeløp = nettoBeløp,
-        totalbeløp = this.totalbeløp(),
-        stønadsdager = this.stønadsdager(),
         tidsstempel = tidsstempel
     )
 }

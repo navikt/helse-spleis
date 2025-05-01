@@ -631,8 +631,7 @@ data class PersonData(
                 val linjer: List<UtbetalingslinjeData>,
                 val fagsystemId: String,
                 val endringskode: String,
-                val tidsstempel: LocalDateTime,
-                val nettoBeløp: Int
+                val tidsstempel: LocalDateTime
             ) {
                 fun tilDto() = FeriepengeoppdragInnDto(
                     mottaker = this.mottaker,
@@ -649,7 +648,6 @@ data class PersonData(
                         "UEND" -> EndringskodeDto.UEND
                         else -> error("Ukjent endringskode: $endringskode")
                     },
-                    nettoBeløp = this.nettoBeløp,
                     tidsstempel = this.tidsstempel
                 )
 
