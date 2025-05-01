@@ -83,7 +83,7 @@ class Feriepengeoppdrag private constructor(
         aktivitetsloggMedOppdragkontekst.behov(Behovtype.Utbetaling, "Trenger å sende utbetaling til Oppdrag", behovdetaljer(saksbehandler))
     }
 
-    override fun toSpesifikkKontekst() = SpesifikkKontekst("Oppdrag", mapOf("fagsystemId" to fagsystemId))
+    override fun toSpesifikkKontekst() = SpesifikkKontekst("Feriepengeoppdrag", mapOf("fagsystemId" to fagsystemId))
 
     private fun behovdetaljer(saksbehandler: String): Map<String, Any> {
         return mapOf(
