@@ -595,7 +595,7 @@ data class SpannerPersonDto(
         val avsluttet: LocalDateTime?,
         val oppdatert: LocalDateTime
     ) {
-        enum class UtbetalingtypeData { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
+        enum class UtbetalingtypeData { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING }
         enum class UtbetalingstatusData {
             NY,
             IKKE_UTBETALT,
@@ -1187,7 +1187,6 @@ private fun UtbetalingUtDto.tilPersonData() = UtbetalingData(
     type = when (this.type) {
         UtbetalingtypeDto.ANNULLERING -> UtbetalingData.UtbetalingtypeData.ANNULLERING
         UtbetalingtypeDto.ETTERUTBETALING -> UtbetalingData.UtbetalingtypeData.ETTERUTBETALING
-        UtbetalingtypeDto.FERIEPENGER -> UtbetalingData.UtbetalingtypeData.FERIEPENGER
         UtbetalingtypeDto.REVURDERING -> UtbetalingData.UtbetalingtypeData.REVURDERING
         UtbetalingtypeDto.UTBETALING -> UtbetalingData.UtbetalingtypeData.UTBETALING
     },

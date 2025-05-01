@@ -458,7 +458,6 @@ private fun UtbetalingUtDto.tilPersonData() = PersonData.UtbetalingData(
     type = when (this.type) {
         UtbetalingtypeDto.ANNULLERING -> PersonData.UtbetalingData.UtbetalingtypeData.ANNULLERING
         UtbetalingtypeDto.ETTERUTBETALING -> PersonData.UtbetalingData.UtbetalingtypeData.ETTERUTBETALING
-        UtbetalingtypeDto.FERIEPENGER -> PersonData.UtbetalingData.UtbetalingtypeData.FERIEPENGER
         UtbetalingtypeDto.REVURDERING -> PersonData.UtbetalingData.UtbetalingtypeData.REVURDERING
         UtbetalingtypeDto.UTBETALING -> PersonData.UtbetalingData.UtbetalingtypeData.UTBETALING
     },

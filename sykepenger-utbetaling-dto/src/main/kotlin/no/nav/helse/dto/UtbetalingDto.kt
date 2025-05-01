@@ -15,7 +15,6 @@ sealed class UtbetalingtypeDto {
     data object ETTERUTBETALING : UtbetalingtypeDto()
     data object ANNULLERING : UtbetalingtypeDto()
     data object REVURDERING : UtbetalingtypeDto()
-    data object FERIEPENGER : UtbetalingtypeDto()
 }
 
 sealed class UtbetalingTilstandDto {

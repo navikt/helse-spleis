@@ -1076,7 +1076,7 @@ data class PersonData(
         val avsluttet: LocalDateTime?,
         val oppdatert: LocalDateTime
     ) {
-        enum class UtbetalingtypeData { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
+        enum class UtbetalingtypeData { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING }
         enum class UtbetalingstatusData {
             NY,
             IKKE_UTBETALT,
@@ -1113,7 +1113,6 @@ data class PersonData(
                 UtbetalingtypeData.ETTERUTBETALING -> UtbetalingtypeDto.ETTERUTBETALING
                 UtbetalingtypeData.ANNULLERING -> UtbetalingtypeDto.ANNULLERING
                 UtbetalingtypeData.REVURDERING -> UtbetalingtypeDto.REVURDERING
-                UtbetalingtypeData.FERIEPENGER -> UtbetalingtypeDto.FERIEPENGER
             },
             maksdato = this.maksdato,
             forbrukteSykedager = this.forbrukteSykedager,

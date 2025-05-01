@@ -440,7 +440,6 @@ class Utbetaling private constructor(
                     UtbetalingtypeDto.UTBETALING -> UTBETALING
                     UtbetalingtypeDto.ANNULLERING -> ANNULLERING
                     UtbetalingtypeDto.ETTERUTBETALING -> Utbetalingtype.ETTERUTBETALING
-                    UtbetalingtypeDto.FERIEPENGER -> Utbetalingtype.FERIEPENGER
                     UtbetalingtypeDto.REVURDERING -> Utbetalingtype.REVURDERING
                 },
                 maksdato = dto.maksdato,
@@ -802,7 +801,6 @@ class Utbetaling private constructor(
             Utbetalingtype.ETTERUTBETALING -> UtbetalingtypeDto.ETTERUTBETALING
             ANNULLERING -> UtbetalingtypeDto.ANNULLERING
             Utbetalingtype.REVURDERING -> UtbetalingtypeDto.REVURDERING
-            Utbetalingtype.FERIEPENGER -> UtbetalingtypeDto.FERIEPENGER
         },
         maksdato = this.maksdato,
         forbrukteSykedager = this.forbrukteSykedager,
@@ -828,7 +826,7 @@ enum class Utbetalingstatus {
     FORKASTET;
 }
 
-enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
+enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING }
 enum class Endringskode {
     NY, UEND, ENDR;
 
