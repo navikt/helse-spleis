@@ -8,6 +8,7 @@ import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
+import no.nav.helse.harBehov
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
@@ -734,34 +735,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020)
             )
-            assertFalse(personlogg.toString().contains("Trenger å sende utbetaling til Oppdrag"))
-        }
-    }
-
-    @Test
-    fun `Totalbeløp settes til sats for utbetaling av feriepenger`() {
-        Toggle.SendFeriepengeOppdrag.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
-            håndterSøknad(1.juni(2020) til 30.juni(2020))
-            håndterArbeidsgiveropplysninger(
-                listOf(1.juni(2020) til 16.juni(2020)),
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode
-            )
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-
-            håndterUtbetalingshistorikkForFeriepenger(
-                opptjeningsår = Year.of(2020)
-            )
-
-            @Suppress("unchecked_cast")
-            val linje = (personlogg.behov.last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
-
-            assertEquals("1460", "${linje["sats"]}")
-            assertEquals("1460", "${linje["totalbeløp"]}")
+            assertFalse(personlogg.harBehov(Aktivitet.Behov.Behovtype.Feriepengeutbetaling))
         }
     }
 

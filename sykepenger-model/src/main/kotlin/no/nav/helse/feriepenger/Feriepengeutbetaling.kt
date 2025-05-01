@@ -19,6 +19,7 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -127,31 +128,53 @@ internal class Feriepengeutbetaling private constructor(
         private val utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
         private val tidligereFeriepengeutbetalinger: List<Feriepengeutbetaling>
     ) {
-        private fun oppdrag(aktivitetslogg: IAktivitetslogg, mottaker: String, fagområde: Fagområde, klassekode: Klassekode, forrigeOppdrag: Feriepengeoppdrag?, beløp: Int): Feriepengeoppdrag {
-            val fagsystemId = forrigeOppdrag?.fagsystemId ?: genererUtbetalingsreferanse(UUID.randomUUID())
-
-            val nyttOppdrag = Feriepengeoppdrag(
-                mottaker = mottaker,
-                fagområde = fagområde,
-                linjer = listOf(
-                    Feriepengeutbetalingslinje(
-                        fom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atDay(1),
-                        tom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atEndOfMonth(),
-                        beløp = beløp,
-                        klassekode = klassekode,
+        private fun oppdrag(mottaker: String, fagområde: Fagområde, klassekode: Klassekode, forrigeOppdrag: Feriepengeoppdrag?, beløp: Int): Feriepengeoppdrag {
+            if (forrigeOppdrag == null) {
+                val maiMåned = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY)
+                val linjer = if (beløp == 0)
+                    emptyList()
+                else
+                    listOf(
+                        Feriepengeutbetalingslinje(
+                            fom = maiMåned.atDay(1),
+                            tom = maiMåned.atEndOfMonth(),
+                            beløp = beløp,
+                            klassekode = klassekode,
+                        )
                     )
-                ),
-                fagsystemId = fagsystemId,
-            )
+                return Feriepengeoppdrag(
+                    mottaker = mottaker,
+                    fagområde = fagområde,
+                    fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID()),
+                    endringskode = Endringskode.NY,
+                    linjer = linjer,
+                    tidsstempel = LocalDateTime.now()
+                )
+            }
 
-            if (forrigeOppdrag == null) return nyttOppdrag
             if (beløp == 0) return forrigeOppdrag.annuller()
-            return nyttOppdrag.minus(forrigeOppdrag, aktivitetslogg)
+            if (beløp == forrigeOppdrag.linjer.single().beløp) return forrigeOppdrag.copy(
+                endringskode = Endringskode.UEND,
+                linjer = listOf(
+                    forrigeOppdrag.linjer.single().copy(endringskode = Endringskode.UEND)
+                )
+            )
+            return forrigeOppdrag.copy(
+                endringskode = Endringskode.ENDR,
+                linjer = listOf(
+                    forrigeOppdrag.linjer.single().copy(
+                        endringskode = Endringskode.NY,
+                        beløp = beløp,
+                        delytelseId = forrigeOppdrag.linjer.single().delytelseId + 1,
+                        refDelytelseId = forrigeOppdrag.linjer.single().delytelseId,
+                        refFagsystemId = forrigeOppdrag.fagsystemId
+                    )
+                )
+            )
         }
 
-        private fun skalSendeOppdrag(forrigeOppdrag: Feriepengeoppdrag?, beløp: Int): Boolean {
-            if (forrigeOppdrag == null) return beløp != 0
-            return beløp != forrigeOppdrag.totalbeløp() || beløp == 0
+        private fun skalSendeOppdrag(nyttOppdrag: Feriepengeoppdrag): Boolean {
+            return nyttOppdrag.linjer.singleOrNull()?.endringskode != Endringskode.UEND
         }
 
         private val Double.finere get() = "$this".padStart(10, ' ')
@@ -188,7 +211,6 @@ internal class Feriepengeutbetaling private constructor(
                     ?.takeIf { it.linjerUtenOpphør().isNotEmpty() }
 
             val arbeidsgiveroppdrag = oppdrag(
-                aktivitetslogg = aktivitetslogg,
                 mottaker = orgnummer,
                 fagområde = Fagområde.SykepengerRefusjon,
                 klassekode = Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
@@ -198,7 +220,7 @@ internal class Feriepengeutbetaling private constructor(
 
             if (arbeidsgiverbeløp != 0 && orgnummer == "0") aktivitetslogg.info("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\".")
 
-            val sendArbeidsgiveroppdrag = skalSendeOppdrag(forrigeSendteArbeidsgiverOppdrag, arbeidsgiverbeløp)
+            val sendArbeidsgiveroppdrag = skalSendeOppdrag(arbeidsgiveroppdrag)
 
             // Person
             val infotrygdHarUtbetaltTilPerson = utbetalingshistorikkForFeriepenger.utbetalteFeriepengerTilPerson()
@@ -230,7 +252,6 @@ internal class Feriepengeutbetaling private constructor(
                     ?.takeIf { it.linjerUtenOpphør().isNotEmpty() }
 
             val personoppdrag = oppdrag(
-                aktivitetslogg = aktivitetslogg,
                 mottaker = personidentifikator.toString(),
                 fagområde = Fagområde.Sykepenger,
                 klassekode = Klassekode.SykepengerArbeidstakerFeriepenger,
@@ -238,7 +259,7 @@ internal class Feriepengeutbetaling private constructor(
                 beløp = personbeløp
             )
 
-            val sendPersonoppdrag = skalSendeOppdrag(forrigeSendtePersonOppdrag, personbeløp)
+            val sendPersonoppdrag = skalSendeOppdrag(personoppdrag)
 
             if (differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson < -499 || differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson > 100) aktivitetslogg.info(
                 """

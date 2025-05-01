@@ -8,8 +8,6 @@ data class FeriepengeutbetalingslinjeUtDto(
     val fom: LocalDate,
     val tom: LocalDate,
     val beløp: Int,
-    val stønadsdager: Int,
-    val totalbeløp: Int,
     val refFagsystemId: String?,
     val delytelseId: Int,
     val refDelytelseId: Int?,

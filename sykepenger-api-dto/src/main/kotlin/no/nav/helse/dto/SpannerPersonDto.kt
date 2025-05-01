@@ -300,17 +300,12 @@ data class SpannerPersonDto(
                 val linjer: List<UtbetalingslinjeData>,
                 val fagsystemId: String,
                 val endringskode: String,
-                val tidsstempel: LocalDateTime,
-                val nettoBeløp: Int,
-                val stønadsdager: Int,
-                val totalbeløp: Int
+                val tidsstempel: LocalDateTime
             ) {
                 data class UtbetalingslinjeData(
                     val fom: LocalDate,
                     val tom: LocalDate,
                     val sats: Int,
-                    val stønadsdager: Int,
-                    val totalbeløp: Int,
                     val refFagsystemId: String?,
                     val delytelseId: Int,
                     val refDelytelseId: Int?,
@@ -1422,18 +1417,13 @@ private fun FeriepengeoppdragUtDto.tilPersonData() = SpannerPersonDto.Arbeidsgiv
     linjer = this.linjer.map { it.tilPersonData() },
     fagsystemId = this.fagsystemId,
     endringskode = this.endringskode.tilPersonData(),
-    tidsstempel = this.tidsstempel,
-    nettoBeløp = this.nettoBeløp,
-    totalbeløp = this.totalbeløp,
-    stønadsdager = this.stønadsdager
+    tidsstempel = this.tidsstempel
 )
 
 private fun FeriepengeutbetalingslinjeUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.UtbetalingslinjeData(
     fom = this.fom,
     tom = this.tom,
     sats = this.beløp,
-    totalbeløp = this.totalbeløp,
-    stønadsdager = this.stønadsdager,
     refFagsystemId = this.refFagsystemId,
     delytelseId = this.delytelseId,
     refDelytelseId = this.refDelytelseId,
