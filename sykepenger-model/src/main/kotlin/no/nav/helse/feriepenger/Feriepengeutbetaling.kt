@@ -15,15 +15,12 @@ import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.genererUtbetalingsreferanse
 
 internal class Feriepengeutbetaling private constructor(
@@ -101,19 +98,6 @@ internal class Feriepengeutbetaling private constructor(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
                 arbeidsgiverOppdrag = PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(oppdrag),
                 personOppdrag = PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personoppdrag)
-            )
-        )
-
-        person.utbetalingEndret(
-            PersonObserver.UtbetalingEndretEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
-                utbetalingId = utbetalingId,
-                type = Utbetalingtype.FERIEPENGER.name,
-                forrigeStatus = Utbetalingstatus.IKKE_UTBETALT.name,
-                gjeldendeStatus = Utbetalingstatus.UTBETALT.name,
-                arbeidsgiverOppdrag = OppdragEventDetaljer.mapOppdrag(oppdrag),
-                personOppdrag = OppdragEventDetaljer.mapOppdrag(personoppdrag),
-                korrelasjonsId = UUID.randomUUID()
             )
         )
     }

@@ -30,7 +30,6 @@ import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Klassekode
-import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -721,9 +720,6 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals("2021-05-31", linje.tom.toString())
             assertEquals("2627", linje.totalbeløp.toString())
         }
-
-        val feriepengerUtbetaltEndretEventer = observatør.utbetaltEndretEventer.filter { it.type == Utbetalingtype.FERIEPENGER.name }
-        assertEquals(2, feriepengerUtbetaltEndretEventer.size)
     }
 
     @Test
