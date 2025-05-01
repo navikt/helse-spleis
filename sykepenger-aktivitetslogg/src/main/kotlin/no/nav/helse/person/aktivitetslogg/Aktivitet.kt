@@ -250,6 +250,8 @@ sealed class Aktivitet(
             Godkjenning,
             Simulering,
             Utbetaling,
+            Feriepengeutbetaling,
+
             InntekterForSykepengegrunnlag,
             InntekterForSykepengegrunnlagForArbeidsgiver,
             InntekterForOpptjeningsvurdering,

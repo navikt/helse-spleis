@@ -20,6 +20,7 @@ import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -42,7 +43,6 @@ import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
-import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
@@ -1070,7 +1070,7 @@ internal fun AbstractEndToEndTest.håndterFeriepengerUtbetalt(
     orgnummer: String = a1,
     fagsystemId: String,
     meldingsreferanseId: UUID = UUID.randomUUID()
-): UtbetalingHendelse {
+): FeriepengeutbetalingHendelse {
     return feriepengeutbetaling(
         fagsystemId = fagsystemId,
         status = status,

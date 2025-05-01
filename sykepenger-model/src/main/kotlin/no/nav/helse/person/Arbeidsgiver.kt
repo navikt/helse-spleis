@@ -15,7 +15,6 @@ import no.nav.helse.feriepenger.Arbeidsgiverferiepengegrunnlag.Feriepengegrunnla
 import no.nav.helse.feriepenger.Arbeidsgiverferiepengegrunnlag.Feriepengegrunnlag.UtbetaltDag
 import no.nav.helse.feriepenger.Feriepengeberegner
 import no.nav.helse.feriepenger.Feriepengeutbetaling
-import no.nav.helse.feriepenger.Feriepengeutbetaling.Companion.gjelderFeriepengeutbetaling
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
@@ -23,6 +22,7 @@ import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.DagerFraInntektsmelding
+import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Hendelseskilde
@@ -382,7 +382,7 @@ internal class Arbeidsgiver private constructor(
                 .flatMap { linje ->
                     linje
                         .filterNot { it.erHelg() }
-                        .map { UtbetaltDag(it, linje.beløp!!) }
+                        .map { UtbetaltDag(it, linje.beløp) }
                 }
         }
         return Arbeidsgiverferiepengegrunnlag(
@@ -697,25 +697,18 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
+    internal fun håndter(utbetalingHendelse: FeriepengeutbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
+        feriepengeutbetalinger.forEach { it.håndter(utbetalingHendelse, aktivitetsloggMedArbeidsgiverkontekst, organisasjonsnummer, person) }
+    }
+
     internal fun håndter(utbetalingHendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        if (feriepengeutbetalinger.gjelderFeriepengeutbetaling(utbetalingHendelse)) return håndterFeriepengeUtbetaling(
-            utbetalingHendelse,
-            aktivitetsloggMedArbeidsgiverkontekst
-        )
-        håndterUtbetaling(utbetalingHendelse, aktivitetsloggMedArbeidsgiverkontekst)
-    }
-
-    private fun håndterFeriepengeUtbetaling(utbetalingHendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
-        feriepengeutbetalinger.forEach { it.håndter(utbetalingHendelse, aktivitetslogg, organisasjonsnummer, person) }
-    }
-
-    private fun håndterUtbetaling(utbetaling: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
-        utbetalinger.forEach { it.håndter(utbetaling, aktivitetslogg) }
+        utbetalinger.forEach { it.håndter(utbetalingHendelse, aktivitetsloggMedArbeidsgiverkontekst) }
         håndter {
-            it.håndter(utbetaling, aktivitetslogg)
+            it.håndter(utbetalingHendelse, aktivitetsloggMedArbeidsgiverkontekst)
         }
-        person.gjenopptaBehandling(aktivitetslogg)
+        person.gjenopptaBehandling(aktivitetsloggMedArbeidsgiverkontekst)
     }
 
     internal fun nyAnnullering(

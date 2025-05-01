@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -89,11 +90,11 @@ internal fun AbstractEndToEndTest.feriepengeutbetaling(
     orgnummer: String = a1,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) =
-    UtbetalingHendelse(
+    FeriepengeutbetalingHendelse(
         meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
         behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         fagsystemId = fagsystemId,
-        utbetalingId = personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).alleKontekster.getValue("utbetalingId")
+        utbetalingId = personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Feriepengeutbetaling).alleKontekster.getValue("utbetalingId")
             .let { UUID.fromString(it) },
         status = status,
         melding = "hey",

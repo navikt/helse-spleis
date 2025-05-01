@@ -9,6 +9,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.deserialisering.FeriepengeInnDto
 import no.nav.helse.dto.serialisering.FeriepengeUtDto
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.UtbetalingHendelse
@@ -74,7 +75,7 @@ internal class Feriepengeutbetaling private constructor(
         personoppdrag = personoppdrag
     )
 
-    fun håndter(utbetalingHendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, person: Person) {
+    fun håndter(utbetalingHendelse: FeriepengeutbetalingHendelse, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, person: Person) {
         if (utbetalingHendelse.utbetalingId != this.utbetalingId || utbetalingHendelse.fagsystemId !in setOf(oppdrag.fagsystemId, personoppdrag.fagsystemId)) return
 
         aktivitetslogg.info("Behandler svar fra Oppdrag/UR/spenn for feriepenger")
@@ -102,7 +103,7 @@ internal class Feriepengeutbetaling private constructor(
         )
     }
 
-    private fun lagreInformasjon(hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg, gikkBra: Boolean) {
+    private fun lagreInformasjon(hendelse: FeriepengeutbetalingHendelse, aktivitetslogg: IAktivitetslogg, gikkBra: Boolean) {
         overføringstidspunkt = hendelse.overføringstidspunkt
         avstemmingsnøkkel = hendelse.avstemmingsnøkkel
         aktivitetslogg.info("Data for feriepenger fra Oppdrag/UR: tidspunkt: $overføringstidspunkt, avstemmingsnøkkel $avstemmingsnøkkel og utbetalt ok: ${if (gikkBra) "ja" else "nei"}")

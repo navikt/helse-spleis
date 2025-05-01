@@ -70,11 +70,11 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         )
 
         val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
-        val linjer = behov.path("Utbetaling").path("linjer")
+        val linjer = behov.path("Feriepengeutbetaling").path("linjer")
 
-        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitet.Behov.Behovtype.Utbetaling))
+        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitet.Behov.Behovtype.Feriepengeutbetaling))
         assertEquals(1, linjer.size())
-        assertEquals("Utbetaling", behov.path("@behov")[0].asText())
+        assertEquals("Feriepengeutbetaling", behov.path("@behov")[0].asText())
         assertEquals(ORGNUMMER, behov.path("organisasjonsnummer").asText())
         assertTrue(behov.path("utbetalingId").asText().isNotBlank())
         assertEquals("SPREFAGFER-IOP", linjer[0].path("klassekode").asText())
@@ -147,11 +147,11 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         )
 
         val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
-        val linjer = behov.path("Utbetaling").path("linjer")
+        val linjer = behov.path("Feriepengeutbetaling").path("linjer")
 
-        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitet.Behov.Behovtype.Utbetaling))
+        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitet.Behov.Behovtype.Feriepengeutbetaling))
         assertEquals(1, linjer.size())
-        assertEquals("Utbetaling", behov.path("@behov")[0].asText())
+        assertEquals("Feriepengeutbetaling", behov.path("@behov")[0].asText())
         assertEquals(ORGNUMMER, behov.path("organisasjonsnummer").asText())
         assertTrue(behov.path("utbetalingId").asText().isNotBlank())
         assertEquals("SPREFAGFER-IOP", linjer[0].path("klassekode").asText())
@@ -224,11 +224,11 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         )
 
         val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
-        val linjer = behov.path("Utbetaling").path("linjer")
+        val linjer = behov.path("Feriepengeutbetaling").path("linjer")
 
-        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitet.Behov.Behovtype.Utbetaling))
+        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitet.Behov.Behovtype.Feriepengeutbetaling))
         assertEquals(1, linjer.size())
-        assertEquals("Utbetaling", behov.path("@behov")[0].asText())
+        assertEquals("Feriepengeutbetaling", behov.path("@behov")[0].asText())
         assertEquals(ORGNUMMER, behov.path("organisasjonsnummer").asText())
         assertTrue(behov.path("utbetalingId").asText().isNotBlank())
         assertEquals("SPREFAGFER-IOP", linjer[0].path("klassekode").asText())
@@ -302,11 +302,11 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         )
 
         val behov1 = testRapid.inspektør.melding(testRapid.inspektør.antall() - 2)
-        val linjer1 = behov1.path("Utbetaling").path("linjer")
+        val linjer1 = behov1.path("Feriepengeutbetaling").path("linjer")
 
-        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitet.Behov.Behovtype.Utbetaling))
+        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitet.Behov.Behovtype.Feriepengeutbetaling))
         assertEquals(1, linjer1.size())
-        assertEquals("Utbetaling", behov1.path("@behov")[0].asText())
+        assertEquals("Feriepengeutbetaling", behov1.path("@behov")[0].asText())
         assertEquals(ORGNUMMER, behov1.path("organisasjonsnummer").asText())
         val utbetalingId1 = behov1.path("utbetalingId").asText()
         assertTrue(utbetalingId1.isNotBlank())
@@ -316,11 +316,11 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals(1460, linjer1[0].path("totalbeløp").asInt())
 
         val behov2 = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
-        val linjer2 = behov2.path("Utbetaling").path("linjer")
+        val linjer2 = behov2.path("Feriepengeutbetaling").path("linjer")
 
-        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitet.Behov.Behovtype.Utbetaling))
+        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitet.Behov.Behovtype.Feriepengeutbetaling))
         assertEquals(1, linjer2.size())
-        assertEquals("Utbetaling", behov2.path("@behov")[0].asText())
+        assertEquals("Feriepengeutbetaling", behov2.path("@behov")[0].asText())
         assertEquals("321654987", behov2.path("organisasjonsnummer").asText())
         val utbetalingId2 = behov2.path("utbetalingId").asText()
         assertTrue(utbetalingId2.isNotBlank())

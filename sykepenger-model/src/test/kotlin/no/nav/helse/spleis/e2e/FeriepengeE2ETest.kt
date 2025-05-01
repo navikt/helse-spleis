@@ -653,7 +653,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             opptjeningsår = Year.of(2020)
         )
 
-        val fagsystemIdFeriepenger = personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).detaljer()["fagsystemId"] as String
+        val fagsystemIdFeriepenger = personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Feriepengeutbetaling).detaljer()["fagsystemId"] as String
         håndterFeriepengerUtbetalt(fagsystemId = fagsystemIdFeriepenger)
 
         assertTrue(personlogg.toString().contains("Data for feriepenger fra Oppdrag/UR"))
@@ -685,7 +685,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             opptjeningsår = Year.of(2020)
         )
 
-        val fagsystemIdFeriepenger = personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).detaljer()["fagsystemId"] as String
+        val fagsystemIdFeriepenger = personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Feriepengeutbetaling).detaljer()["fagsystemId"] as String
         håndterFeriepengerUtbetalt(fagsystemId = fagsystemIdFeriepenger)
 
         håndterSykmelding(Sykmeldingsperiode(1.juli(2020), 10.juli(2020)))
@@ -1243,7 +1243,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     }
 
     private fun engangsutbetalinger() = personlogg.behov
-        .filter { it.type == Aktivitet.Behov.Behovtype.Utbetaling }
+        .filter { it.type == Aktivitet.Behov.Behovtype.Feriepengeutbetaling }
         .filter { utbetaling -> utbetaling.detaljer()["linjer"].castAsList<Map<String, Any>>().any { linje -> linje["satstype"] == "ENG" } }
 
     private fun Aktivitet.Behov.linje() = this

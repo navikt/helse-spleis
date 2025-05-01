@@ -17,6 +17,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dødsmelding
+import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
@@ -414,6 +415,13 @@ class Person private constructor(
         finnArbeidsgiver(simulering.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(simulering, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(simulering, aktivitetsloggMedPersonkontekst)
     }
+
+    fun håndter(utbetaling: FeriepengeutbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler utbetaling")
+        finnArbeidsgiver(utbetaling.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(utbetaling, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(utbetaling, aktivitetsloggMedPersonkontekst)
+    }
+
 
     fun håndter(utbetaling: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler utbetaling")

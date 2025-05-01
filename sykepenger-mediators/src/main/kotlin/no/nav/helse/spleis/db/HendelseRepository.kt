@@ -16,6 +16,7 @@ import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.ANMODNING_OM_FORKASTING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.AVBRUTT_SØKNAD
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.DØDSMELDING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.FERIEPENGEUTBETALING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.FORKAST_SYKMELDINGSPERIODER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GRUNNBELØPSREGULERING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.IDENT_OPPHØRT
@@ -57,6 +58,7 @@ import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigTidligereArbeidsta
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -165,6 +167,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is SimuleringMessage -> SIMULERING
         is UtbetalingsgodkjenningMessage -> UTBETALINGSGODKJENNING
         is UtbetalingMessage -> UTBETALING
+        is FeriepengeutbetalingMessage -> FERIEPENGEUTBETALING
         is AnnulleringMessage -> KANSELLER_UTBETALING
         is GrunnbeløpsreguleringMessage -> GRUNNBELØPSREGULERING
         is OverstyrTidslinjeMessage -> OVERSTYRTIDSLINJE
@@ -238,6 +241,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         VILKÅRSGRUNNLAG,
         UTBETALINGSGODKJENNING,
         UTBETALING,
+        FERIEPENGEUTBETALING,
         SIMULERING,
         ROLLBACK,
         KANSELLER_UTBETALING,
