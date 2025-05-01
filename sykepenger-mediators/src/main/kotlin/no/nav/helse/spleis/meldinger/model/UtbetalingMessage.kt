@@ -24,7 +24,7 @@ internal class UtbetalingMessage(packet: JsonMessage, override val meldingsporin
     private val utbetaling
         get() = UtbetalingHendelse(
             meldingsreferanseId = meldingsporing.id,
-                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             fagsystemId = fagsystemId,
             utbetalingId = utbetalingId,
             status = status,
