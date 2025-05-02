@@ -541,8 +541,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsforholdV2))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag))
-        val skjæringstidspunktFraBehov =
-            testRapid.inspektør.etterspurteBehov(Medlemskap).path("Medlemskap").path("skjæringstidspunkt").asLocalDate()
+        val skjæringstidspunktFraBehov = testRapid.inspektør.etterspurteBehov(Medlemskap).path("Medlemskap").path("skjæringstidspunkt").asLocalDate()
+        val yrkesaktivitetstypeFraBehov = testRapid.inspektør.etterspurteBehov(Medlemskap).path("yrkesaktivitetstype").asText()
         val (_, message) = meldingsfabrikk.lagVilkårsgrunnlag(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             skjæringstidspunkt = skjæringstidspunktFraBehov,
@@ -550,17 +550,13 @@ internal abstract class AbstractEndToEndMediatorTest {
             inntekterForOpptjeningsvurdering = listOf(
                 InntekterForOpptjeningsvurderingFraLøsning(
                     måned = YearMonth.from(skjæringstidspunktFraBehov.minusMonths(1)),
-                    inntekter = listOf(
-                        InntekterForOpptjeningsvurderingFraLøsning.Inntekt(
-                            32000.0,
-                            ORGNUMMER
-                        )
-                    ),
+                    inntekter = listOf(InntekterForOpptjeningsvurderingFraLøsning.Inntekt(32000.0, ORGNUMMER))
                 )
             ),
             arbeidsforhold = (arbeidsforhold),
             medlemskapstatus = medlemskapstatus,
-            orgnummer = orgnummer
+            orgnummer = orgnummer,
+            yrkesaktivitetstype = yrkesaktivitetstypeFraBehov
         )
         testRapid.sendTestMessage(message)
     }

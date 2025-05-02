@@ -9,7 +9,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype
-import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -20,13 +19,14 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterFor
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
+import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 // Understands a JSON message representing a Vilkårsgrunnlagsbehov
 internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
-    private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
+    private val yrkesaktivitetssporing = packet.yrkesaktivitetssporing
 
     private val inntekterForSykepengegrunnlag = mapSkatteopplysninger(packet["@løsning.${InntekterForSykepengegrunnlag.name}"])
 
@@ -71,7 +71,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
             meldingsreferanseId = meldingsporing.id,
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkter.distinct().single(),
-                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = yrkesaktivitetssporing,
             medlemskapsvurdering = Medlemskapsvurdering(
                 medlemskapstatus = medlemskapstatus
             ),

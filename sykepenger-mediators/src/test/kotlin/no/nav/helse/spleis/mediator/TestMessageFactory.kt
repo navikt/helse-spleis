@@ -1003,7 +1003,8 @@ internal class TestMessageFactory(
         inntekterForOpptjeningsvurdering: List<InntekterForOpptjeningsvurderingFraLøsning>,
         arbeidsforhold: List<Arbeidsforhold>,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
-        orgnummer: String = organisasjonsnummer
+        orgnummer: String = organisasjonsnummer,
+        yrkesaktivitetstype: String = "ARBEIDSTAKER"
     ): Pair<String, String> {
         return lagBehovMedLøsning(
             behov = listOf(
@@ -1014,6 +1015,7 @@ internal class TestMessageFactory(
             ),
             vedtaksperiodeId = vedtaksperiodeId,
             orgnummer = orgnummer,
+            yrkesaktivitetstype = yrkesaktivitetstype,
             løsninger = mapOf(
                 Medlemskap.name to mapOf<String, Any>(
                     "resultat" to mapOf<String, Any>(

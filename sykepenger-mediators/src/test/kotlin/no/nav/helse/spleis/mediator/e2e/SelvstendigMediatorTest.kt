@@ -14,6 +14,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendSelvstendigsøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING")
+        sendVilkårsgrunnlag(0)
+        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING", "AVVENTER_HISTORIKK")
     }
 }
