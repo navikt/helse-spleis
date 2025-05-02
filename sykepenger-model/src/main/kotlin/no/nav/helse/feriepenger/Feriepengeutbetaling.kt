@@ -181,7 +181,6 @@ internal class Feriepengeutbetaling private constructor(
                 tidligereFeriepengeutbetalinger
                     .lastOrNull { it.gjelderForÅr(utbetalingshistorikkForFeriepenger.opptjeningsår) && it.sendTilOppdrag }
                     ?.oppdrag
-                    ?.takeUnless { it.linje!!.datoStatusFom != null }
 
             val arbeidsgiveroppdrag = oppdrag(
                 mottaker = orgnummer,
@@ -222,7 +221,6 @@ internal class Feriepengeutbetaling private constructor(
                 tidligereFeriepengeutbetalinger
                     .lastOrNull { it.gjelderForÅr(utbetalingshistorikkForFeriepenger.opptjeningsår) && it.sendPersonoppdragTilOS }
                     ?.personoppdrag
-                    ?.takeUnless { it.linje!!.datoStatusFom != null }
 
             val personoppdrag = oppdrag(
                 mottaker = personidentifikator.toString(),

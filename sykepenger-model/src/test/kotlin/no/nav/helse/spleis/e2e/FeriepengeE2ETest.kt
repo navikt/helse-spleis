@@ -34,7 +34,6 @@ import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -1023,7 +1022,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         val fagsystemId3 = inspektør.feriepengeoppdrag[4].fagsystemId
 
         assertEquals(fagsystemId1, fagsystemId2)
-        assertNotEquals(fagsystemId1, fagsystemId3)
+        assertEquals(fagsystemId1, fagsystemId3)
 
         val fagsystemId2FraBehov = engangsutbetalinger().last().detaljer()["fagsystemId"]
         assertEquals(fagsystemId1, fagsystemId1FraBehov)
@@ -1076,7 +1075,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         val fagsystemId3 = inspektør.feriepengeoppdrag[4].fagsystemId
 
         assertEquals(fagsystemId1, fagsystemId2)
-        assertNotEquals(fagsystemId1, fagsystemId3)
+        assertEquals(fagsystemId1, fagsystemId3)
 
         val fagsystemId2FraBehov = engangsutbetalinger()[1].detaljer()["fagsystemId"]
         assertEquals(fagsystemId1, fagsystemId1FraBehov)
