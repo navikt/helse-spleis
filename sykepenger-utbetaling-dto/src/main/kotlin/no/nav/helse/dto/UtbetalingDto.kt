@@ -74,4 +74,5 @@ sealed class KlassekodeDto(val verdi: String) {
     data object RefusjonFeriepengerIkkeOpplysningspliktig : KlassekodeDto("SPREFAGFER-IOP")
     data object SykepengerArbeidstakerOrdinær : KlassekodeDto("SPATORD")
     data object SykepengerArbeidstakerFeriepenger : KlassekodeDto("SPATFER")
+    data object SelvstendigNæringsdrivendeOppgavepliktig : KlassekodeDto("SPSND-OP")
 }

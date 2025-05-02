@@ -11,6 +11,7 @@ class UtbetalingslinjeInspektør(utbetalingslinje: Utbetalingslinje) {
     val periode = utbetalingslinje.periode
     val beløp = utbetalingslinje.beløp
     val grad = utbetalingslinje.grad
+    val klassekode = utbetalingslinje.klassekode
     val delytelseId = utbetalingslinje.delytelseId
     val refDelytelseId = utbetalingslinje.refDelytelseId
     val refFagsystemId = utbetalingslinje.refFagsystemId

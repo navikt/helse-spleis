@@ -843,7 +843,8 @@ enum class Klassekode(val verdi: String) {
     RefusjonIkkeOpplysningspliktig(verdi = "SPREFAG-IOP"),
     RefusjonFeriepengerIkkeOpplysningspliktig(verdi = "SPREFAGFER-IOP"),
     SykepengerArbeidstakerOrdinær(verdi = "SPATORD"),
-    SykepengerArbeidstakerFeriepenger(verdi = "SPATFER");
+    SykepengerArbeidstakerFeriepenger(verdi = "SPATFER"),
+    SelvstendigNæringsdrivendeOppgavepliktig(verdi = "SPSND-OP");
 
     companion object {
         private val map = entries.associateBy(Klassekode::verdi)
@@ -853,6 +854,7 @@ enum class Klassekode(val verdi: String) {
             KlassekodeDto.RefusjonIkkeOpplysningspliktig -> RefusjonIkkeOpplysningspliktig
             KlassekodeDto.SykepengerArbeidstakerFeriepenger -> SykepengerArbeidstakerFeriepenger
             KlassekodeDto.SykepengerArbeidstakerOrdinær -> SykepengerArbeidstakerOrdinær
+            KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig -> SelvstendigNæringsdrivendeOppgavepliktig
         }
     }
 }

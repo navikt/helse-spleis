@@ -614,6 +614,7 @@ private fun KlassekodeDto.tilPersonData() = when (this) {
     KlassekodeDto.RefusjonIkkeOpplysningspliktig -> "SPREFAG-IOP"
     KlassekodeDto.SykepengerArbeidstakerFeriepenger -> "SPATFER"
     KlassekodeDto.SykepengerArbeidstakerOrdinær -> "SPATORD"
+    KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig -> "SPSND-OP"
 }
 
 private fun SimuleringResultatDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData(

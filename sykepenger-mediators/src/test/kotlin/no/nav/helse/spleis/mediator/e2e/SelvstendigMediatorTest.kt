@@ -16,6 +16,6 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
-        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING", "AVVENTER_HISTORIKK")
+        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING", "AVVENTER_HISTORIKK", "AVVENTER_GODKJENNING")
     }
 }

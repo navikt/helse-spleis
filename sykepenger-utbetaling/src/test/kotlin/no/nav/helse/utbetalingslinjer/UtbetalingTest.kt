@@ -379,6 +379,7 @@ internal class UtbetalingTest {
                 tidslinje = tidslinje,
                 mottakerRefusjon = ORGNUMMER,
                 mottakerBruker = UNG_PERSON_FNR_2018,
+                klassekodeBruker = Klassekode.SykepengerArbeidstakerOrdinær
             ).build(),
             utbetalingstidslinje = tidslinje,
             periode = tidslinje.periode(),
@@ -710,6 +711,7 @@ internal class UtbetalingTest {
             tidslinje = tidslinje,
             mottakerRefusjon = ORGNUMMER,
             mottakerBruker = UNG_PERSON_FNR_2018,
+            klassekodeBruker = Klassekode.SykepengerArbeidstakerOrdinær
         ).build()
 
         return Utbetaling.lagUtbetaling(

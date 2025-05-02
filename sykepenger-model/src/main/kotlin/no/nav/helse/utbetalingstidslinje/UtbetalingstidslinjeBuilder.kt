@@ -24,42 +24,25 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
     private val refusjonstidslinje: Beløpstidslinje,
     private val inntektstidslinje: Beløpstidslinje
 ) {
-
-    private val lagDefaultRefusjonsbeløpHvisMangler = { _: LocalDate, aktuellDagsinntekt: Inntekt -> aktuellDagsinntekt }
-    private val krevRefusjonsbeløpHvisMangler = { dato: LocalDate, _: Inntekt ->
-        error("Har ingen refusjonsopplysninger på vilkårsgrunnlag for utbetalingsdag $dato")
-    }
-
-    private fun refusjonsbeløp(dato: LocalDate, aktuellDagsinntekt: Inntekt, refusjonsopplysningFinnesIkkeStrategi: (LocalDate, Inntekt) -> Inntekt): Inntekt {
+    private fun refusjonsbeløp(dato: LocalDate): Inntekt {
         val refusjonFraBehandling = refusjonstidslinje[dato].takeIf { it is Beløpsdag }?.beløp
-        return refusjonFraBehandling ?: refusjonsopplysningFinnesIkkeStrategi(dato, aktuellDagsinntekt)
+        return refusjonFraBehandling ?: Inntekt.INGEN
     }
 
     internal fun medInntektHvisFinnes(
         dato: LocalDate,
         grad: Prosentdel
     ): Økonomi {
-        return medInntekt(dato, grad, lagDefaultRefusjonsbeløpHvisMangler)
+        return medInntekt(dato, grad)
     }
 
-    private fun medInntektOrThrow(
-        dato: LocalDate,
-        grad: Prosentdel
-    ): Økonomi {
-        return medInntekt(dato, grad, krevRefusjonsbeløpHvisMangler)
-    }
-
-    private fun medInntekt(
-        dato: LocalDate,
-        grad: Prosentdel,
-        refusjonsopplysningFinnesIkkeStrategi: (LocalDate, Inntekt) -> Inntekt
-    ): Økonomi {
+    private fun medInntekt(dato: LocalDate, grad: Prosentdel): Økonomi {
         val aktuellDagsinntekt = inntektstidslinje[dato].beløp
         return Økonomi.inntekt(
             sykdomsgrad = grad,
             aktuellDagsinntekt = aktuellDagsinntekt,
             dekningsgrunnlag = aktuellDagsinntekt * regler.dekningsgrad(),
-            refusjonsbeløp = refusjonsbeløp(dato, aktuellDagsinntekt, refusjonsopplysningFinnesIkkeStrategi)
+            refusjonsbeløp = refusjonsbeløp(dato)
         )
     }
 
@@ -152,7 +135,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
 
     private fun arbeidsgiverperiodedagEllerNavAnsvar(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel) {
         if (erAGPNavAnsvar(dato) && !dato.erHelg())
-            return builder.addArbeidsgiverperiodedagNav(dato, medInntektOrThrow(dato, grad))
+            return builder.addArbeidsgiverperiodedagNav(dato, medInntektHvisFinnes(dato, grad))
         builder.addArbeidsgiverperiodedag(dato, medInntektHvisFinnes(dato, grad).ikkeBetalt())
     }
 
@@ -169,7 +152,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
     }
 
     private fun navDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel) {
-        builder.addNAVdag(dato, medInntektOrThrow(dato, grad))
+        builder.addNAVdag(dato, medInntektHvisFinnes(dato, grad))
     }
 
     private fun fridag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {

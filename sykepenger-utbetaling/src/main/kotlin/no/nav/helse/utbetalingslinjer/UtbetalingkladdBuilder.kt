@@ -16,7 +16,8 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 class UtbetalingkladdBuilder(
     tidslinje: Utbetalingstidslinje,
     mottakerRefusjon: String,
-    mottakerBruker: String
+    mottakerBruker: String,
+    klassekodeBruker: Klassekode
 ) {
     // bruker samme "sak id" i OS for begge oppdragene
     // TODO: krever at Overføringer/kvitteringer inneholder fagområde, ellers
@@ -30,7 +31,7 @@ class UtbetalingkladdBuilder(
     private val personoppdragBuilder = OppdragBuilder(
         mottaker = mottakerBruker,
         fagområde = Sykepenger,
-        klassekode = Klassekode.SykepengerArbeidstakerOrdinær
+        klassekode = klassekodeBruker
     )
 
     init {

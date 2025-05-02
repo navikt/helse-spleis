@@ -31,7 +31,6 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
     @Test
@@ -46,9 +45,9 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertEquals("H SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomstidslinje.toShortString())
-            assertThrows<IllegalStateException> {
-                håndterSøknad(Sykdom(lørdag den 13.januar, onsdag den 31.januar, 100.prosent), Arbeid(16.januar, 31.januar))
-            }
+            håndterSøknad(Sykdom(lørdag den 13.januar, onsdag den 31.januar, 100.prosent), Arbeid(16.januar, 31.januar))
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         }
     }
     /*

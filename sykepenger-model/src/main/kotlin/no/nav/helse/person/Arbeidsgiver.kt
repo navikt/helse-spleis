@@ -90,6 +90,7 @@ import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
+import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
@@ -404,6 +405,12 @@ internal class Arbeidsgiver private constructor(
             tidslinje = utbetalingstidslinje,
             mottakerRefusjon = organisasjonsnummer,
             mottakerBruker = person.fødselsnummer,
+            klassekodeBruker = when (yrkesaktivitetssporing) {
+                is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> Klassekode.SykepengerArbeidstakerOrdinær
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> Klassekode.SelvstendigNæringsdrivendeOppgavepliktig
+                Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                Behandlingsporing.Yrkesaktivitet.Frilans -> error("Forventer ikke å lage utbetaling for $yrkesaktivitetssporing ennå")
+            }
         ).build()
     }
 

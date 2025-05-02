@@ -86,6 +86,7 @@ data class Feriepengeutbetalingslinje(
             Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig -> KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig
             Klassekode.SykepengerArbeidstakerOrdinær -> KlassekodeDto.SykepengerArbeidstakerOrdinær
             Klassekode.SykepengerArbeidstakerFeriepenger -> KlassekodeDto.SykepengerArbeidstakerFeriepenger
+            Klassekode.SelvstendigNæringsdrivendeOppgavepliktig -> KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig
         },
         datoStatusFom = this.datoStatusFom,
         statuskode = this.statuskode
