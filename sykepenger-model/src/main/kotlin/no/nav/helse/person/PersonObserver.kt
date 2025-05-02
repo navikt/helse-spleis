@@ -220,7 +220,7 @@ interface PersonObserver {
                                 fom = it.fom,
                                 tom = it.tom,
                                 sats = it.sats,
-                                grad = it.grad ?: error("mangler grad for linje"),
+                                grad = it.grad,
                                 stønadsdager = it.stønadsdager,
                                 totalbeløp = it.totalbeløp,
                                 statuskode = it.statuskode
@@ -301,17 +301,17 @@ interface PersonObserver {
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val fom: LocalDate,
         val tom: LocalDate,
-        val arbeidsgiverOppdrag: OppdragEventDetaljer,
-        val personOppdrag: OppdragEventDetaljer
+        val arbeidsgiverOppdrag: FeriepengeoppdragEventDetaljer,
+        val personOppdrag: FeriepengeoppdragEventDetaljer
     ) {
-        data class OppdragEventDetaljer(
+        data class FeriepengeoppdragEventDetaljer(
             val fagsystemId: String,
             val mottaker: String,
             val totalbeløp: Int
         ) {
             companion object {
                 fun mapOppdrag(oppdrag: Feriepengeoppdrag) =
-                    OppdragEventDetaljer(
+                    FeriepengeoppdragEventDetaljer(
                         fagsystemId = oppdrag.fagsystemId,
                         mottaker = oppdrag.mottaker,
                         totalbeløp = oppdrag.totalbeløp

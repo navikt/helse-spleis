@@ -16,7 +16,7 @@ data class OppdragDetaljer(
         val fom: LocalDate,
         val tom: LocalDate,
         val sats: Int,
-        val grad: Double?,
+        val grad: Double,
         val stønadsdager: Int,
         val totalbeløp: Int,
         val statuskode: String?

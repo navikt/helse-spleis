@@ -1,6 +1,5 @@
 package no.nav.helse.feriepenger
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
@@ -12,7 +11,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
-import no.nav.helse.utbetalingslinjer.OppdragDetaljer
 
 data class Feriepengeoppdrag(
     val mottaker: String,
@@ -41,19 +39,6 @@ data class Feriepengeoppdrag(
 
     val totalbeløp: Int = if (linje == null || linje.datoStatusFom != null) 0 else linje.beløp
     val skalSendeOppdrag = linje?.endringskode?.let { it != Endringskode.UEND } ?: false
-
-    fun detaljer(): OppdragDetaljer {
-        return OppdragDetaljer(
-            fagsystemId = fagsystemId,
-            fagområde = fagområde.verdi,
-            mottaker = mottaker,
-            stønadsdager = 1,
-            nettoBeløp = linje?.beløp ?: 0,
-            fom = linje?.fom ?: LocalDate.MIN,
-            tom = linje?.tom ?: LocalDate.MIN,
-            linjer = listOfNotNull(linje?.detaljer())
-        )
-    }
 
     fun overfør(aktivitetslogg: IAktivitetslogg, saksbehandler: String) {
         val aktivitetsloggMedOppdragkontekst = aktivitetslogg.kontekst(this)

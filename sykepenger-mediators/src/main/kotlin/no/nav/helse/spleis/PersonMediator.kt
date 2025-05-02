@@ -5,13 +5,15 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import java.util.UUID
+import java.util.*
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Arbeidsgiverperiode
 import no.nav.helse.person.PersonObserver.Inntekt
 import no.nav.helse.person.PersonObserver.Refusjon
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
@@ -217,13 +219,30 @@ internal class PersonMediator(
                     "type" to event.type,
                     "forrigeStatus" to event.forrigeStatus,
                     "gjeldendeStatus" to event.gjeldendeStatus,
-                    "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
-                    "personOppdrag" to event.personOppdrag,
+                    "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag.tilJsonMap(),
+                    "personOppdrag" to event.personOppdrag.tilJsonMap(),
                     "korrelasjonsId" to event.korrelasjonsId
                 )
             )
         )
     }
+
+    private fun PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer.tilJsonMap() =
+        mapOf(
+            "fagsystemId" to this.fagsystemId,
+            "mottaker" to this.mottaker,
+            "nettoBeløp" to this.nettoBeløp,
+            "linjer" to this.linjer.map {
+                it.tilJsonMap()
+            }
+        )
+
+    private fun PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer.OppdragEventLinjeDetaljer.tilJsonMap() =
+        mapOf(
+            "fom" to this.fom,
+            "tom" to this.tom,
+            "totalbeløp" to this.totalbeløp
+        )
 
     override fun nyVedtaksperiodeUtbetaling(
         organisasjonsnummer: String,
@@ -293,10 +312,77 @@ internal class PersonMediator(
                 "epost" to event.epost,
                 "tidspunkt" to event.tidspunkt,
                 "automatiskBehandling" to event.automatiskBehandling,
-                "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
-                "personOppdrag" to event.personOppdrag,
-                "utbetalingsdager" to event.utbetalingsdager
+                "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag.tilJsonMap(),
+                "personOppdrag" to event.personOppdrag.tilJsonMap(),
+                "utbetalingsdager" to event.utbetalingsdager.map {
+                    it.tilJsonMap()
+                }
             )
+        )
+
+    private fun PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.tilJsonMap() =
+        mapOf(
+            "fagsystemId" to this.fagsystemId,
+            "fagområde" to this.fagområde,
+            "mottaker" to this.mottaker,
+            "nettoBeløp" to this.nettoBeløp,
+            "stønadsdager" to this.stønadsdager,
+            "fom" to this.fom,
+            "tom" to this.tom,
+            "linjer" to this.linjer.map {
+                it.tilJsonMap()
+            }
+        )
+
+    private fun PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.OppdragEventLinjeDetaljer.tilJsonMap() =
+        mapOf(
+            "fom" to this.fom,
+            "tom" to this.tom,
+            "sats" to this.sats,
+            "grad" to this.grad,
+            "stønadsdager" to this.stønadsdager,
+            "totalbeløp" to this.totalbeløp,
+            "statuskode" to this.statuskode,
+        )
+
+    private fun PersonObserver.Utbetalingsdag.tilJsonMap() =
+        mapOf(
+            "dato" to this.dato,
+            "type" to when (this.type) {
+                Dagtype.ArbeidsgiverperiodeDag -> "ArbeidsgiverperiodeDag"
+                Dagtype.NavDag -> "NavDag"
+                Dagtype.NavHelgDag -> "NavHelgDag"
+                Dagtype.Arbeidsdag -> "Arbeidsdag"
+                Dagtype.Fridag -> "Fridag"
+                Dagtype.AvvistDag -> "AvvistDag"
+                Dagtype.UkjentDag -> "UkjentDag"
+                Dagtype.ForeldetDag -> "ForeldetDag"
+                Dagtype.Permisjonsdag -> "Permisjonsdag"
+                Dagtype.Feriedag -> "Feriedag"
+                Dagtype.ArbeidIkkeGjenopptattDag -> "ArbeidIkkeGjenopptattDag"
+                Dagtype.AndreYtelser -> "AndreYtelser"
+            },
+            "begrunnelser" to this.begrunnelser?.map {
+                when (it) {
+                    EksternBegrunnelseDTO.SykepengedagerOppbrukt -> "SykepengedagerOppbrukt"
+                    EksternBegrunnelseDTO.SykepengedagerOppbruktOver67 -> "SykepengedagerOppbruktOver67"
+                    EksternBegrunnelseDTO.MinimumInntekt -> "MinimumInntekt"
+                    EksternBegrunnelseDTO.MinimumInntektOver67 -> "MinimumInntektOver67"
+                    EksternBegrunnelseDTO.EgenmeldingUtenforArbeidsgiverperiode -> "EgenmeldingUtenforArbeidsgiverperiode"
+                    EksternBegrunnelseDTO.AndreYtelserAap -> "AndreYtelserAap"
+                    EksternBegrunnelseDTO.AndreYtelserDagpenger -> "AndreYtelserDagpenger"
+                    EksternBegrunnelseDTO.AndreYtelserForeldrepenger -> "AndreYtelserForeldrepenger"
+                    EksternBegrunnelseDTO.AndreYtelserOmsorgspenger -> "AndreYtelserOmsorgspenger"
+                    EksternBegrunnelseDTO.AndreYtelserOpplaringspenger -> "AndreYtelserOpplaringspenger"
+                    EksternBegrunnelseDTO.AndreYtelserPleiepenger -> "AndreYtelserPleiepenger"
+                    EksternBegrunnelseDTO.AndreYtelserSvangerskapspenger -> "AndreYtelserSvangerskapspenger"
+                    EksternBegrunnelseDTO.MinimumSykdomsgrad -> "MinimumSykdomsgrad"
+                    EksternBegrunnelseDTO.EtterDødsdato -> "EtterDødsdato"
+                    EksternBegrunnelseDTO.ManglerMedlemskap -> "ManglerMedlemskap"
+                    EksternBegrunnelseDTO.ManglerOpptjening -> "ManglerOpptjening"
+                    EksternBegrunnelseDTO.Over70 -> "Over70"
+                }
+            }
         )
 
     override fun feriepengerUtbetalt(event: PersonObserver.FeriepengerUtbetaltEvent) =
@@ -308,18 +394,17 @@ internal class PersonMediator(
                     "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
                     "fom" to event.fom,
                     "tom" to event.tom,
-                    "arbeidsgiverOppdrag" to mapOf(
-                        "fagsystemId" to event.arbeidsgiverOppdrag.fagsystemId,
-                        "mottaker" to event.arbeidsgiverOppdrag.mottaker,
-                        "totalbeløp" to event.arbeidsgiverOppdrag.totalbeløp
-                    ),
-                    "personOppdrag" to mapOf(
-                        "fagsystemId" to event.personOppdrag.fagsystemId,
-                        "mottaker" to event.personOppdrag.mottaker,
-                        "totalbeløp" to event.personOppdrag.totalbeløp
-                    )
+                    "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag.tilJsonMap(),
+                    "personOppdrag" to event.personOppdrag.tilJsonMap()
                 )
             )
+        )
+
+    private fun PersonObserver.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.tilJsonMap() =
+        mapOf(
+            "fagsystemId" to this.fagsystemId,
+            "mottaker" to this.mottaker,
+            "totalbeløp" to this.totalbeløp
         )
 
     override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretEvent) {

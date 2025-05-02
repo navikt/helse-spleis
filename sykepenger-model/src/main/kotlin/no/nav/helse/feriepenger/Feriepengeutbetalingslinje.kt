@@ -12,7 +12,6 @@ import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
-import no.nav.helse.utbetalingslinjer.OppdragDetaljer
 
 data class Feriepengeutbetalingslinje(
     val fom: LocalDate,
@@ -55,17 +54,6 @@ data class Feriepengeutbetalingslinje(
     override operator fun iterator() = periode.iterator()
 
     override fun toString() = "$fom til $tom $endringskode ${datoStatusFom?.let { "opphører fom $it" }}"
-
-    internal fun detaljer() =
-        OppdragDetaljer.LinjeDetaljer(
-            fom = fom,
-            tom = tom,
-            sats = beløp,
-            grad = null,
-            stønadsdager = 1,
-            totalbeløp = beløp,
-            statuskode = statuskode
-        )
 
     fun behovdetaljer() = mapOf<String, Any?>(
         "fom" to fom.toString(),
