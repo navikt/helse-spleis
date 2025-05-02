@@ -465,6 +465,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Dagpenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Institusjonsopphold))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForBeregning))
+        val yrkesaktivitetstype = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger).path("yrkesaktivitetstype").asText()
         val (_, message) = meldingsfabrikk.lagYtelser(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             pleiepenger = pleiepenger,
@@ -474,7 +475,8 @@ internal abstract class AbstractEndToEndMediatorTest {
             arbeidsavklaringspenger = arbeidsavklaringspenger,
             dagpenger = dagpenger,
             inntekterForBeregning = inntekterForBeregning,
-            orgnummer = orgnummer
+            orgnummer = orgnummer,
+            yrkesaktivitetstype = yrkesaktivitetstype
         )
         testRapid.sendTestMessage(message)
     }

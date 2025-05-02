@@ -881,7 +881,8 @@ internal class TestMessageFactory(
         arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList(),
         dagpenger: List<DagpengerTestdata> = emptyList(),
         inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
-        orgnummer: String = organisasjonsnummer
+        orgnummer: String = organisasjonsnummer,
+        yrkesaktivitetstype: String = "ARBEIDSTAKER"
     ): Pair<String, String> {
         val behovliste = mutableListOf(
             "Foreldrepenger",
@@ -896,6 +897,7 @@ internal class TestMessageFactory(
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
             orgnummer = orgnummer,
+            yrkesaktivitetstype = yrkesaktivitetstype,
             behov = behovliste,
             løsninger = mapOf(
                 "Foreldrepenger" to emptyMap<String, String>(),

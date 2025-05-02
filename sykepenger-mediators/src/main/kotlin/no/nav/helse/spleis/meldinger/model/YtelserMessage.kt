@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDate
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
-import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.GradertPeriode
@@ -23,6 +22,7 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
+import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -36,7 +36,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     }
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
-    private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
+    private val yrkesaktivitetssporing = packet.yrkesaktivitetssporing
     private val arbeidsavklaringspenger: List<Pair<LocalDate, LocalDate>>
     private val ugyldigeArbeidsavklaringspengeperioder: List<Pair<LocalDate, LocalDate>>
     private val dagpenger: List<Pair<LocalDate, LocalDate>>
@@ -103,7 +103,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     private val ytelser
         get() = Ytelser(
             meldingsreferanseId = meldingsporing.id,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = yrkesaktivitetssporing,
             vedtaksperiodeId = vedtaksperiodeId,
             foreldrepenger = foreldrepenger,
             svangerskapspenger = svangerskapspenger,

@@ -301,7 +301,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             skjæringstidspunkt = skjæringstidspunkt,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
@@ -324,7 +324,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
             meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             foreldrepenger = Foreldrepenger(
                 foreldrepengeytelse = foreldrepenger,

@@ -118,16 +118,16 @@ internal class TestRapid : RapidsConnection() {
             get() = tilstander.filter { it.key !in forkastedeVedtaksperiodeIder }
 
         private val behov
-            get() = buildMap<UUID, MutableList<Aktivitet.Behov.Behovtype>> {
-                events("behov") {
-                    val vedtaksperiodeIdString = it.path("vedtaksperiodeId")
+            get() = buildMap<UUID, MutableList<Pair<Aktivitet.Behov.Behovtype, JsonNode>>> {
+                events("behov") { behovEvent ->
+                    val vedtaksperiodeIdString = behovEvent.path("vedtaksperiodeId")
                         .takeIf { id -> !id.isMissingNode }
                         ?.asText() ?: return@events
 
                     val id = UUID.fromString(vedtaksperiodeIdString)
                     this.getOrPut(id) { mutableListOf() }.apply {
-                        it.path("@behov").onEach {
-                            add(Aktivitet.Behov.Behovtype.valueOf(it.asText()))
+                        behovEvent.path("@behov").onEach {
+                            add(Aktivitet.Behov.Behovtype.valueOf(it.asText()) to behovEvent)
                         }
                     }
                 }
@@ -179,7 +179,10 @@ internal class TestRapid : RapidsConnection() {
         fun forkastedeTilstander(vedtaksperiodeId: UUID) = forkastedeTilstander[vedtaksperiodeId]?.toList() ?: emptyList()
 
         fun harEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitet.Behov.Behovtype) =
-            behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it == behovtype } ?: false
+            behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it.first == behovtype } ?: false
+
+        fun etterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitet.Behov.Behovtype) =
+            behov[vedtaksperiodeId(vedtaksperiodeIndeks)]!!.last { it.first == behovtype }.second
 
         fun etterspurteBehov(behovtype: Aktivitet.Behov.Behovtype) =
             behovmeldinger.last { it.first == behovtype }.second

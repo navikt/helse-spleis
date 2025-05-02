@@ -6,12 +6,14 @@ import no.nav.helse.dsl.selvstendig
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class SelvstendigTest : AbstractDslTest() {
 
@@ -28,7 +30,12 @@ internal class SelvstendigTest : AbstractDslTest() {
     fun `Ta inn selvstendigsøknad`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
             håndterSøknad(januar)
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            val m = assertThrows<IllegalStateException> {
+                håndterYtelser(1.vedtaksperiode)
+            }
+            assertEquals("Har ingen refusjonsopplysninger på vilkårsgrunnlag for utbetalingsdag 2018-01-01", m.message)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
             assertIngenFunksjonelleFeil()
             assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
         }
