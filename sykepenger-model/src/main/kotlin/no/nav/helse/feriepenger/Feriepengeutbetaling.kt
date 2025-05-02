@@ -39,6 +39,10 @@ internal class Feriepengeutbetaling private constructor(
     var overføringstidspunkt: LocalDateTime? = null
     var avstemmingsnøkkel: Long? = null
 
+    private val maiMåned = feriepengegrunnlag.opptjeningsår.plusYears(1).atMonth(Month.MAY)
+    val fom = maiMåned.atDay(1)
+    val tom = maiMåned.atEndOfMonth()
+
     companion object {
         internal fun gjenopprett(dto: FeriepengeInnDto): Feriepengeutbetaling {
             return Feriepengeutbetaling(
@@ -95,6 +99,8 @@ internal class Feriepengeutbetaling private constructor(
         person.feriepengerUtbetalt(
             PersonObserver.FeriepengerUtbetaltEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+                fom = fom,
+                tom = tom,
                 arbeidsgiverOppdrag = PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(oppdrag),
                 personOppdrag = PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personoppdrag)
             )

@@ -660,10 +660,9 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertTrue(personlogg.toString().contains("utbetalt ok: ja"))
         observatør.feriepengerUtbetaltEventer.first().let { event ->
             assertEquals(fagsystemIdFeriepenger, event.arbeidsgiverOppdrag.fagsystemId)
-            val linje = event.arbeidsgiverOppdrag.linjer.first()
-            assertEquals("2021-05-01", linje.fom.toString())
-            assertEquals("2021-05-31", linje.tom.toString())
-            assertEquals("1460", linje.totalbeløp.toString())
+            assertEquals("2021-05-01", event.fom.toString())
+            assertEquals("2021-05-31", event.tom.toString())
+            assertEquals("1460", event.arbeidsgiverOppdrag.totalbeløp.toString())
         }
     }
 
@@ -708,17 +707,15 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
         observatør.feriepengerUtbetaltEventer.first().let { event ->
             assertEquals(fagsystemIdFeriepenger, event.arbeidsgiverOppdrag.fagsystemId)
-            val linje = (event.arbeidsgiverOppdrag.linjer).first()
-            assertEquals("2021-05-01", linje.fom.toString())
-            assertEquals("2021-05-31", linje.tom.toString())
-            assertEquals("1460", linje.totalbeløp.toString())
+            assertEquals("2021-05-01", event.fom.toString())
+            assertEquals("2021-05-31", event.tom.toString())
+            assertEquals("1460", event.arbeidsgiverOppdrag.totalbeløp.toString())
         }
         observatør.feriepengerUtbetaltEventer.last().let { event ->
             assertEquals(fagsystemIdFeriepenger, event.arbeidsgiverOppdrag.fagsystemId)
-            val linje = (event.arbeidsgiverOppdrag.linjer).first()
-            assertEquals("2021-05-01", linje.fom.toString())
-            assertEquals("2021-05-31", linje.tom.toString())
-            assertEquals("2627", linje.totalbeløp.toString())
+            assertEquals("2021-05-01", event.fom.toString())
+            assertEquals("2021-05-31", event.tom.toString())
+            assertEquals("2627", event.arbeidsgiverOppdrag.totalbeløp.toString())
         }
     }
 

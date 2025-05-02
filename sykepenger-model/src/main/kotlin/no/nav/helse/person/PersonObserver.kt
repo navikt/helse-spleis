@@ -299,37 +299,22 @@ interface PersonObserver {
 
     data class FeriepengerUtbetaltEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val fom: LocalDate,
+        val tom: LocalDate,
         val arbeidsgiverOppdrag: OppdragEventDetaljer,
         val personOppdrag: OppdragEventDetaljer
     ) {
         data class OppdragEventDetaljer(
             val fagsystemId: String,
             val mottaker: String,
-            val fom: LocalDate,
-            val tom: LocalDate,
-            val linjer: List<OppdragEventLinjeDetaljer>
+            val totalbeløp: Int
         ) {
-            data class OppdragEventLinjeDetaljer(
-                val fom: LocalDate,
-                val tom: LocalDate,
-                val totalbeløp: Int
-            )
-
             companion object {
-                fun mapOppdrag(oppdrag: Feriepengeoppdrag) = mapDetaljer(oppdrag.detaljer())
-                private fun mapDetaljer(detaljer: OppdragDetaljer) =
+                fun mapOppdrag(oppdrag: Feriepengeoppdrag) =
                     OppdragEventDetaljer(
-                        fagsystemId = detaljer.fagsystemId,
-                        mottaker = detaljer.mottaker,
-                        fom = detaljer.fom,
-                        tom = detaljer.tom,
-                        linjer = detaljer.linjer.map {
-                            OppdragEventLinjeDetaljer(
-                                fom = it.fom,
-                                tom = it.tom,
-                                totalbeløp = it.totalbeløp
-                            )
-                        }
+                        fagsystemId = oppdrag.fagsystemId,
+                        mottaker = oppdrag.mottaker,
+                        totalbeløp = oppdrag.totalbeløp
                     )
             }
         }

@@ -306,8 +306,18 @@ internal class PersonMediator(
                 mapOf(
                     "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
                     "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
-                    "personOppdrag" to event.personOppdrag,
+                    "fom" to event.fom,
+                    "tom" to event.tom,
+                    "arbeidsgiverOppdrag" to mapOf(
+                        "fagsystemId" to event.arbeidsgiverOppdrag.fagsystemId,
+                        "mottaker" to event.arbeidsgiverOppdrag.mottaker,
+                        "totalbeløp" to event.arbeidsgiverOppdrag.totalbeløp
+                    ),
+                    "personOppdrag" to mapOf(
+                        "fagsystemId" to event.personOppdrag.fagsystemId,
+                        "mottaker" to event.personOppdrag.mottaker,
+                        "totalbeløp" to event.personOppdrag.totalbeløp
+                    )
                 )
             )
         )
