@@ -11,6 +11,9 @@ import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.DokumenttypeDto
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
+import no.nav.helse.dto.FeriepengerendringskodeDto
+import no.nav.helse.dto.FeriepengerfagområdeDto
+import no.nav.helse.dto.FeriepengerklassekodeDto
 import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.dto.InfotrygdFerieperiodeDto
 import no.nav.helse.dto.InntekttypeDto
@@ -610,9 +613,7 @@ private fun UtbetalingslinjeUtDto.tilPersonData() = PersonData.UtbetalingslinjeD
 )
 
 private fun KlassekodeDto.tilPersonData() = when (this) {
-    KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig -> "SPREFAGFER-IOP"
     KlassekodeDto.RefusjonIkkeOpplysningspliktig -> "SPREFAG-IOP"
-    KlassekodeDto.SykepengerArbeidstakerFeriepenger -> "SPATFER"
     KlassekodeDto.SykepengerArbeidstakerOrdinær -> "SPATORD"
     KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig -> "SPSND-OP"
 }
@@ -677,14 +678,20 @@ private fun FeriepengeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Feriep
 private fun FeriepengeoppdragUtDto.tilPersonData() = PersonData.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData(
     mottaker = this.mottaker,
     fagområde = when (this.fagområde) {
-        FagområdeDto.SP -> "SP"
-        FagområdeDto.SPREF -> "SPREF"
+        FeriepengerfagområdeDto.SP -> "SP"
+        FeriepengerfagområdeDto.SPREF -> "SPREF"
     },
     linjer = this.linjer.map { it.tilPersonData() },
     fagsystemId = this.fagsystemId,
     endringskode = this.endringskode.tilPersonData(),
     tidsstempel = this.tidsstempel
 )
+
+private fun FeriepengerendringskodeDto.tilPersonData() = when (this) {
+    FeriepengerendringskodeDto.ENDR -> "ENDR"
+    FeriepengerendringskodeDto.NY -> "NY"
+    FeriepengerendringskodeDto.UEND -> "UEND"
+}
 
 private fun FeriepengeutbetalingslinjeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.UtbetalingslinjeData(
     fom = this.fom,
@@ -697,6 +704,11 @@ private fun FeriepengeutbetalingslinjeUtDto.tilPersonData() = PersonData.Arbeids
     klassekode = this.klassekode.tilPersonData(),
     datoStatusFom = this.datoStatusFom
 )
+
+private fun FeriepengerklassekodeDto.tilPersonData() = when (this) {
+    FeriepengerklassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig -> "SPREFAGFER-IOP"
+    FeriepengerklassekodeDto.SykepengerArbeidstakerFeriepenger -> "SPATFER"
+}
 
 private fun UtbetaltDagUtDto.tilPersonData() = PersonData.ArbeidsgiverData.FeriepengeutbetalingData.UtbetaltDagData(
     type = when (this) {

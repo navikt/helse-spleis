@@ -841,18 +841,14 @@ enum class Endringskode {
 
 enum class Klassekode(val verdi: String) {
     RefusjonIkkeOpplysningspliktig(verdi = "SPREFAG-IOP"),
-    RefusjonFeriepengerIkkeOpplysningspliktig(verdi = "SPREFAGFER-IOP"),
     SykepengerArbeidstakerOrdinær(verdi = "SPATORD"),
-    SykepengerArbeidstakerFeriepenger(verdi = "SPATFER"),
     SelvstendigNæringsdrivendeOppgavepliktig(verdi = "SPSND-OP");
 
     companion object {
         private val map = entries.associateBy(Klassekode::verdi)
         fun from(verdi: String) = requireNotNull(map[verdi]) { "Støtter ikke klassekode: $verdi" }
         fun gjenopprett(dto: KlassekodeDto) = when (dto) {
-            KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig -> RefusjonFeriepengerIkkeOpplysningspliktig
             KlassekodeDto.RefusjonIkkeOpplysningspliktig -> RefusjonIkkeOpplysningspliktig
-            KlassekodeDto.SykepengerArbeidstakerFeriepenger -> SykepengerArbeidstakerFeriepenger
             KlassekodeDto.SykepengerArbeidstakerOrdinær -> SykepengerArbeidstakerOrdinær
             KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig -> SelvstendigNæringsdrivendeOppgavepliktig
         }

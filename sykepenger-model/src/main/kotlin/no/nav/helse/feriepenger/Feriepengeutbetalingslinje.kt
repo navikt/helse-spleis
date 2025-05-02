@@ -1,17 +1,14 @@
 package no.nav.helse.feriepenger
 
 import java.time.LocalDate
-import no.nav.helse.dto.EndringskodeDto
-import no.nav.helse.dto.KlassekodeDto
+import no.nav.helse.dto.FeriepengerendringskodeDto
+import no.nav.helse.dto.FeriepengerklassekodeDto
 import no.nav.helse.dto.deserialisering.FeriepengeutbetalingslinjeInnDto
 import no.nav.helse.dto.serialisering.FeriepengeutbetalingslinjeUtDto
+import no.nav.helse.feriepenger.Feriepengerendringskode.ENDR
+import no.nav.helse.feriepenger.Feriepengerendringskode.NY
+import no.nav.helse.feriepenger.Feriepengerendringskode.UEND
 import no.nav.helse.hendelser.til
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
-import no.nav.helse.utbetalingslinjer.Endringskode.NY
-import no.nav.helse.utbetalingslinjer.Endringskode.UEND
-import no.nav.helse.utbetalingslinjer.Klassekode
-import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
 
 data class Feriepengeutbetalingslinje(
     val fom: LocalDate,
@@ -20,8 +17,8 @@ data class Feriepengeutbetalingslinje(
     val refFagsystemId: String? = null,
     val delytelseId: Int = 1,
     val refDelytelseId: Int? = null,
-    val endringskode: Endringskode = NY,
-    val klassekode: Klassekode,
+    val endringskode: Feriepengerendringskode = NY,
+    val klassekode: Feriepengerklassekode,
     val datoStatusFom: LocalDate? = null
 ) : Iterable<LocalDate> {
 
@@ -40,8 +37,8 @@ data class Feriepengeutbetalingslinje(
                 refFagsystemId = dto.refFagsystemId,
                 delytelseId = dto.delytelseId,
                 refDelytelseId = dto.refDelytelseId,
-                endringskode = Endringskode.Companion.gjenopprett(dto.endringskode),
-                klassekode = Klassekode.Companion.gjenopprett(dto.klassekode),
+                endringskode = Feriepengerendringskode.gjenopprett(dto.endringskode),
+                klassekode = Feriepengerklassekode.gjenopprett(dto.klassekode),
                 datoStatusFom = dto.datoStatusFom
             )
         }
@@ -77,18 +74,41 @@ data class Feriepengeutbetalingslinje(
         delytelseId = this.delytelseId,
         refDelytelseId = this.refDelytelseId,
         endringskode = when (endringskode) {
-            NY -> EndringskodeDto.NY
-            UEND -> EndringskodeDto.UEND
-            ENDR -> EndringskodeDto.ENDR
+            NY -> FeriepengerendringskodeDto.NY
+            UEND -> FeriepengerendringskodeDto.UEND
+            ENDR -> FeriepengerendringskodeDto.ENDR
         },
         klassekode = when (klassekode) {
-            RefusjonIkkeOpplysningspliktig -> KlassekodeDto.RefusjonIkkeOpplysningspliktig
-            Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig -> KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig
-            Klassekode.SykepengerArbeidstakerOrdinær -> KlassekodeDto.SykepengerArbeidstakerOrdinær
-            Klassekode.SykepengerArbeidstakerFeriepenger -> KlassekodeDto.SykepengerArbeidstakerFeriepenger
-            Klassekode.SelvstendigNæringsdrivendeOppgavepliktig -> KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig
+            Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig -> FeriepengerklassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig
+            Feriepengerklassekode.SykepengerArbeidstakerFeriepenger -> FeriepengerklassekodeDto.SykepengerArbeidstakerFeriepenger
         },
         datoStatusFom = this.datoStatusFom,
         statuskode = this.statuskode
     )
+}
+
+enum class Feriepengerendringskode {
+    NY, UEND, ENDR;
+
+    companion object {
+        fun gjenopprett(dto: FeriepengerendringskodeDto) = when (dto) {
+            FeriepengerendringskodeDto.ENDR -> ENDR
+            FeriepengerendringskodeDto.NY -> NY
+            FeriepengerendringskodeDto.UEND -> UEND
+        }
+    }
+}
+
+enum class Feriepengerklassekode(val verdi: String) {
+    RefusjonFeriepengerIkkeOpplysningspliktig(verdi = "SPREFAGFER-IOP"),
+    SykepengerArbeidstakerFeriepenger(verdi = "SPATFER");
+
+    companion object {
+        private val map = entries.associateBy(Feriepengerklassekode::verdi)
+        fun from(verdi: String) = requireNotNull(map[verdi]) { "Støtter ikke klassekode: $verdi" }
+        fun gjenopprett(dto: FeriepengerklassekodeDto) = when (dto) {
+            FeriepengerklassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig -> RefusjonFeriepengerIkkeOpplysningspliktig
+            FeriepengerklassekodeDto.SykepengerArbeidstakerFeriepenger -> SykepengerArbeidstakerFeriepenger
+        }
+    }
 }

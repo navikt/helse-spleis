@@ -18,9 +18,6 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Fagområde
-import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.genererUtbetalingsreferanse
 
@@ -131,7 +128,7 @@ internal class Feriepengeutbetaling private constructor(
         private val utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
         private val tidligereFeriepengeutbetalinger: List<Feriepengeutbetaling>
     ) {
-        private fun oppdrag(mottaker: String, fagområde: Fagområde, klassekode: Klassekode, forrigeOppdrag: Feriepengeoppdrag?, beløp: Int): Feriepengeoppdrag {
+        private fun oppdrag(mottaker: String, fagområde: Feriepengerfagområde, klassekode: Feriepengerklassekode, forrigeOppdrag: Feriepengeoppdrag?, beløp: Int): Feriepengeoppdrag {
             if (forrigeOppdrag == null) {
                 val maiMåned = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY)
                 val linje = if (beløp == 0)
@@ -147,7 +144,7 @@ internal class Feriepengeutbetaling private constructor(
                     mottaker = mottaker,
                     fagområde = fagområde,
                     fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID()),
-                    endringskode = Endringskode.NY,
+                    endringskode = Feriepengerendringskode.NY,
                     linje = linje,
                     tidsstempel = LocalDateTime.now()
                 )
@@ -190,8 +187,8 @@ internal class Feriepengeutbetaling private constructor(
 
             val arbeidsgiveroppdrag = oppdrag(
                 mottaker = orgnummer,
-                fagområde = Fagområde.SykepengerRefusjon,
-                klassekode = Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
+                fagområde = Feriepengerfagområde.SykepengerRefusjon,
+                klassekode = Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
                 forrigeOppdrag = forrigeSendteArbeidsgiverOppdrag,
                 beløp = arbeidsgiverbeløp
             )
@@ -230,8 +227,8 @@ internal class Feriepengeutbetaling private constructor(
 
             val personoppdrag = oppdrag(
                 mottaker = personidentifikator.toString(),
-                fagområde = Fagområde.Sykepenger,
-                klassekode = Klassekode.SykepengerArbeidstakerFeriepenger,
+                fagområde = Feriepengerfagområde.Sykepenger,
+                klassekode = Feriepengerklassekode.SykepengerArbeidstakerFeriepenger,
                 forrigeOppdrag = forrigeSendtePersonOppdrag,
                 beløp = personbeløp
             )

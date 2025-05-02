@@ -1,8 +1,8 @@
 package no.nav.helse.dto.serialisering
 
 import java.time.LocalDate
-import no.nav.helse.dto.EndringskodeDto
-import no.nav.helse.dto.KlassekodeDto
+import no.nav.helse.dto.FeriepengerendringskodeDto
+import no.nav.helse.dto.FeriepengerklassekodeDto
 
 data class FeriepengeutbetalingslinjeUtDto(
     val fom: LocalDate,
@@ -11,8 +11,8 @@ data class FeriepengeutbetalingslinjeUtDto(
     val refFagsystemId: String?,
     val delytelseId: Int,
     val refDelytelseId: Int?,
-    val endringskode: EndringskodeDto,
-    val klassekode: KlassekodeDto,
+    val endringskode: FeriepengerendringskodeDto,
+    val klassekode: FeriepengerklassekodeDto,
     val datoStatusFom: LocalDate?,
     val statuskode: String?
 )

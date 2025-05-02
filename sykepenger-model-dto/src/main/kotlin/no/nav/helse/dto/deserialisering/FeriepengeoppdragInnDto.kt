@@ -1,14 +1,14 @@
 package no.nav.helse.dto.deserialisering
 
 import java.time.LocalDateTime
-import no.nav.helse.dto.EndringskodeDto
-import no.nav.helse.dto.FagområdeDto
+import no.nav.helse.dto.FeriepengerendringskodeDto
+import no.nav.helse.dto.FeriepengerfagområdeDto
 
 data class FeriepengeoppdragInnDto(
     val mottaker: String,
-    val fagområde: FagområdeDto,
+    val fagområde: FeriepengerfagområdeDto,
     val linjer: List<FeriepengeutbetalingslinjeInnDto>,
     val fagsystemId: String,
-    val endringskode: EndringskodeDto,
+    val endringskode: FeriepengerendringskodeDto,
     val tidsstempel: LocalDateTime
 )

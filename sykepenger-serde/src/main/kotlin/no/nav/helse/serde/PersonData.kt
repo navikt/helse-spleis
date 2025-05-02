@@ -19,6 +19,9 @@ import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.DokumenttypeDto
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
+import no.nav.helse.dto.FeriepengerendringskodeDto
+import no.nav.helse.dto.FeriepengerfagområdeDto
+import no.nav.helse.dto.FeriepengerklassekodeDto
 import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.dto.InfotrygdFerieperiodeDto
 import no.nav.helse.dto.InntektbeløpDto
@@ -636,16 +639,16 @@ data class PersonData(
                 fun tilDto() = FeriepengeoppdragInnDto(
                     mottaker = this.mottaker,
                     fagområde = when (fagområde) {
-                        "SPREF" -> FagområdeDto.SPREF
-                        "SP" -> FagområdeDto.SP
+                        "SPREF" -> FeriepengerfagområdeDto.SPREF
+                        "SP" -> FeriepengerfagområdeDto.SP
                         else -> error("Ukjent fagområde: $fagområde")
                     },
                     linjer = this.linjer.map { it.tilDto() },
                     fagsystemId = this.fagsystemId,
                     endringskode = when (endringskode) {
-                        "NY" -> EndringskodeDto.NY
-                        "ENDR" -> EndringskodeDto.ENDR
-                        "UEND" -> EndringskodeDto.UEND
+                        "NY" -> FeriepengerendringskodeDto.NY
+                        "ENDR" -> FeriepengerendringskodeDto.ENDR
+                        "UEND" -> FeriepengerendringskodeDto.UEND
                         else -> error("Ukjent endringskode: $endringskode")
                     },
                     tidsstempel = this.tidsstempel
@@ -670,16 +673,14 @@ data class PersonData(
                         delytelseId = this.delytelseId,
                         refDelytelseId = this.refDelytelseId,
                         endringskode = when (this.endringskode) {
-                            "NY" -> EndringskodeDto.NY
-                            "ENDR" -> EndringskodeDto.ENDR
-                            "UEND" -> EndringskodeDto.UEND
+                            "NY" -> FeriepengerendringskodeDto.NY
+                            "ENDR" -> FeriepengerendringskodeDto.ENDR
+                            "UEND" -> FeriepengerendringskodeDto.UEND
                             else -> error("Ukjent endringskode: $endringskode")
                         },
                         klassekode = when (this.klassekode) {
-                            "SPREFAG-IOP" -> KlassekodeDto.RefusjonIkkeOpplysningspliktig
-                            "SPREFAGFER-IOP" -> KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig
-                            "SPATORD" -> KlassekodeDto.SykepengerArbeidstakerOrdinær
-                            "SPATFER" -> KlassekodeDto.SykepengerArbeidstakerFeriepenger
+                            "SPREFAGFER-IOP" -> FeriepengerklassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig
+                            "SPATFER" -> FeriepengerklassekodeDto.SykepengerArbeidstakerFeriepenger
                             else -> error("Ukjent klassekode: ${this.klassekode}")
                         },
                         datoStatusFom = this.datoStatusFom
@@ -1214,9 +1215,7 @@ data class PersonData(
             },
             klassekode = when (this.klassekode) {
                 "SPREFAG-IOP" -> KlassekodeDto.RefusjonIkkeOpplysningspliktig
-                "SPREFAGFER-IOP" -> KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig
                 "SPATORD" -> KlassekodeDto.SykepengerArbeidstakerOrdinær
-                "SPATFER" -> KlassekodeDto.SykepengerArbeidstakerFeriepenger
                 "SPSND-OP" -> KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig
                 else -> error("Ukjent klassekode: ${this.klassekode}")
             },

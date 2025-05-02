@@ -71,8 +71,22 @@ sealed class OppdragstatusDto {
 
 sealed class KlassekodeDto(val verdi: String) {
     data object RefusjonIkkeOpplysningspliktig : KlassekodeDto("SPREFAG-IOP")
-    data object RefusjonFeriepengerIkkeOpplysningspliktig : KlassekodeDto("SPREFAGFER-IOP")
     data object SykepengerArbeidstakerOrdinær : KlassekodeDto("SPATORD")
-    data object SykepengerArbeidstakerFeriepenger : KlassekodeDto("SPATFER")
     data object SelvstendigNæringsdrivendeOppgavepliktig : KlassekodeDto("SPSND-OP")
+}
+
+sealed class FeriepengerfagområdeDto {
+    data object SPREF : FeriepengerfagområdeDto()
+    data object SP : FeriepengerfagområdeDto()
+}
+
+sealed class FeriepengerendringskodeDto {
+    data object NY : FeriepengerendringskodeDto()
+    data object UEND : FeriepengerendringskodeDto()
+    data object ENDR : FeriepengerendringskodeDto()
+}
+
+sealed class FeriepengerklassekodeDto(val verdi: String) {
+    data object RefusjonFeriepengerIkkeOpplysningspliktig : FeriepengerklassekodeDto("SPREFAGFER-IOP")
+    data object SykepengerArbeidstakerFeriepenger : FeriepengerklassekodeDto("SPATFER")
 }

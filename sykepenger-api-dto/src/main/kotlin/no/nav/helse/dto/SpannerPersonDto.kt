@@ -1354,9 +1354,7 @@ private fun UtbetalingslinjeUtDto.tilPersonData() = SpannerPersonDto.Utbetalings
 )
 
 private fun KlassekodeDto.tilPersonData() = when (this) {
-    KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig -> "SPREFAGFER-IOP"
     KlassekodeDto.RefusjonIkkeOpplysningspliktig -> "SPREFAG-IOP"
-    KlassekodeDto.SykepengerArbeidstakerFeriepenger -> "SPATFER"
     KlassekodeDto.SykepengerArbeidstakerOrdinær -> "SPATORD"
     KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig -> "SPSND-OP"
 }
@@ -1423,14 +1421,20 @@ private fun FeriepengeUtDto.tilPersonData() =
 private fun FeriepengeoppdragUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData(
     mottaker = this.mottaker,
     fagområde = when (this.fagområde) {
-        FagområdeDto.SP -> "SP"
-        FagområdeDto.SPREF -> "SPREF"
+        FeriepengerfagområdeDto.SP -> "SP"
+        FeriepengerfagområdeDto.SPREF -> "SPREF"
     },
     linjer = this.linjer.map { it.tilPersonData() },
     fagsystemId = this.fagsystemId,
     endringskode = this.endringskode.tilPersonData(),
     tidsstempel = this.tidsstempel
 )
+
+private fun FeriepengerendringskodeDto.tilPersonData() = when (this) {
+    FeriepengerendringskodeDto.ENDR -> "ENDR"
+    FeriepengerendringskodeDto.NY -> "NY"
+    FeriepengerendringskodeDto.UEND -> "UEND"
+}
 
 private fun FeriepengeutbetalingslinjeUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.OppdragData.UtbetalingslinjeData(
     fom = this.fom,
@@ -1444,6 +1448,11 @@ private fun FeriepengeutbetalingslinjeUtDto.tilPersonData() = SpannerPersonDto.A
     datoStatusFom = this.datoStatusFom,
     statuskode = this.statuskode
 )
+
+private fun FeriepengerklassekodeDto.tilPersonData() = when (this) {
+    FeriepengerklassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig -> "SPREFAGFER-IOP"
+    FeriepengerklassekodeDto.SykepengerArbeidstakerFeriepenger -> "SPATFER"
+}
 
 private fun UtbetaltDagUtDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.FeriepengeutbetalingData.UtbetaltDagData(

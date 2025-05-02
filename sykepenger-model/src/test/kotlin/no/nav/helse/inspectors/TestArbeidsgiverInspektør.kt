@@ -2,13 +2,13 @@ package no.nav.helse.inspectors
 
 import java.time.LocalDate
 import java.util.*
+import no.nav.helse.feriepenger.Feriepengerendringskode
+import no.nav.helse.feriepenger.Feriepengerklassekode
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.spleis.e2e.IdInnhenter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import org.junit.jupiter.api.fail
 
@@ -83,8 +83,8 @@ internal class TestArbeidsgiverInspektør(
         val fom: LocalDate,
         val tom: LocalDate,
         val beløp: Int?,
-        val klassekode: Klassekode,
-        val endringskode: Endringskode,
+        val klassekode: Feriepengerklassekode,
+        val endringskode: Feriepengerendringskode,
         val statuskode: String? = null
     )
 

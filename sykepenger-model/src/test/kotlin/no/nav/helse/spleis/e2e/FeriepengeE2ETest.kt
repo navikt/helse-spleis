@@ -8,6 +8,8 @@ import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
+import no.nav.helse.feriepenger.Feriepengerendringskode
+import no.nav.helse.feriepenger.Feriepengerklassekode
 import no.nav.helse.harBehov
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -29,8 +31,6 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.september
 import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.sisteBehov
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -140,14 +140,14 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 fom = 1.mai(2023),
                 tom = 31.mai(2023),
                 beløp = -267,
-                klassekode = Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
-                endringskode = Endringskode.NY
+                klassekode = Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
+                endringskode = Feriepengerendringskode.NY
             ), Feriepengeutbetalingslinje(
             fom = 1.mai(2023),
             tom = 31.mai(2023),
             beløp = 268,
-            klassekode = Klassekode.SykepengerArbeidstakerFeriepenger,
-            endringskode = Endringskode.NY
+            klassekode = Feriepengerklassekode.SykepengerArbeidstakerFeriepenger,
+            endringskode = Feriepengerendringskode.NY
         )
         )
         assertEquals(utbetalingslinjer, inspektør.feriepengeoppdrag.utbetalingslinjer)
@@ -174,8 +174,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 fom = 1.mai(2023),
                 tom = 31.mai(2023),
                 beløp = -700,
-                klassekode = Klassekode.SykepengerArbeidstakerFeriepenger,
-                endringskode = Endringskode.NY
+                klassekode = Feriepengerklassekode.SykepengerArbeidstakerFeriepenger,
+                endringskode = Feriepengerendringskode.NY
             )
         )
         assertEquals(utbetalingslinje, inspektør.feriepengeoppdrag.utbetalingslinjer)
@@ -203,8 +203,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 fom = 1.mai(2023),
                 tom = 31.mai(2023),
                 beløp = -700,
-                klassekode = Klassekode.SykepengerArbeidstakerFeriepenger,
-                endringskode = Endringskode.NY
+                klassekode = Feriepengerklassekode.SykepengerArbeidstakerFeriepenger,
+                endringskode = Feriepengerendringskode.NY
             )
         )
         assertEquals(utbetalingslinje, inspektør.feriepengeoppdrag.utbetalingslinjer)
@@ -227,8 +227,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 fom = 1.mai(2023),
                 tom = 31.mai(2023),
                 beløp = -700,
-                klassekode = Klassekode.SykepengerArbeidstakerFeriepenger,
-                endringskode = Endringskode.ENDR,
+                klassekode = Feriepengerklassekode.SykepengerArbeidstakerFeriepenger,
+                endringskode = Feriepengerendringskode.ENDR,
                 statuskode = "OPPH"
             )
         )
@@ -272,8 +272,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             1.mai(2021),
             31.mai(2021),
             1460,
-            Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
-            Endringskode.NY
+            Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
+            Feriepengerendringskode.NY
         )
         assertEquals(utbetalingslinje, inspektør.feriepengeoppdrag.first().feriepengeutbetalingslinjer.first())
     }
@@ -314,8 +314,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             1.mai(2021),
             31.mai(2021),
             1460,
-            Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
-            Endringskode.NY
+            Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
+            Feriepengerendringskode.NY
         )
         assertEquals(utbetalingslinje, inspektør.feriepengeoppdrag.first().feriepengeutbetalingslinjer.first())
     }
@@ -359,8 +359,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             1.mai(2021),
             31.mai(2021),
             1460,
-            Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
-            Endringskode.NY
+            Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
+            Feriepengerendringskode.NY
         )
         assertEquals(utbetalingslinje, inspektør.feriepengeoppdrag.first().feriepengeutbetalingslinjer.first())
     }
