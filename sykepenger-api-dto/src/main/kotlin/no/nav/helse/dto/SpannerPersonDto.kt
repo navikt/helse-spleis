@@ -193,6 +193,7 @@ data class SpannerPersonDto(
 
     data class ArbeidsgiverData(
         val organisasjonsnummer: String,
+        val yrkesaktivitetstype: YrkesaktivitetstypeData,
         val id: UUID,
         val inntektshistorikk: List<InntektsmeldingData>,
         val sykdomshistorikk: List<SykdomshistorikkData>,
@@ -203,6 +204,12 @@ data class SpannerPersonDto(
         val feriepengeutbetalinger: List<FeriepengeutbetalingData>,
         val ubrukteRefusjonsopplysninger: RefusjonservitørData
     ) {
+        enum class YrkesaktivitetstypeData {
+            ARBEIDSTAKER,
+            ARBEIDSLEDIG,
+            FRILANS,
+            SELVSTENDIG
+        }
         data class InntektsmeldingData(
             val id: UUID,
             val dato: LocalDate,
@@ -722,6 +729,12 @@ private fun ArbeidsgiverUtDto.tilPersonData(vilkårsgrunnlagHistorikk: List<Vilk
     return SpannerPersonDto.ArbeidsgiverData(
         id = this.id,
         organisasjonsnummer = this.organisasjonsnummer,
+        yrkesaktivitetstype = when (this.yrkesaktivitetstype) {
+            ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSTAKER -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.ARBEIDSTAKER
+            ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSLEDIG -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.ARBEIDSLEDIG
+            ArbeidsgiverUtDto.Yrkesaktivitetstype.FRILANS -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.FRILANS
+            ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.SELVSTENDIG
+        },
         inntektshistorikk = this.inntektshistorikk.historikk.map { it.tilPersonData() },
         sykdomshistorikk = this.sykdomshistorikk.elementer.map { it.tilPersonData() },
         sykmeldingsperioder = this.sykmeldingsperioder.tilPersonData(),
