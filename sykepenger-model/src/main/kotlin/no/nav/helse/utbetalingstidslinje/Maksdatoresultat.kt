@@ -15,8 +15,7 @@ data class Maksdatoresultat(
     val oppholdsdager: List<Periode>,
     val avslåtteDager: List<Periode>,
     val maksdato: LocalDate,
-    val gjenståendeDager: Int,
-    val grunnlag: Utbetalingstidslinje
+    val gjenståendeDager: Int
 ) {
     val antallForbrukteDager = forbrukteDager.sumOf { it.count() }
 
@@ -31,8 +30,7 @@ data class Maksdatoresultat(
             oppholdsdager = emptyList(),
             avslåtteDager = emptyList(),
             maksdato = LocalDate.MIN,
-            gjenståendeDager = 0,
-            grunnlag = Utbetalingstidslinje()
+            gjenståendeDager = 0
         )
 
         fun gjenopprett(dto: MaksdatoresultatInnDto) = Maksdatoresultat(
@@ -49,8 +47,7 @@ data class Maksdatoresultat(
             oppholdsdager = dto.oppholdsdager.map { Periode.gjenopprett(it) },
             avslåtteDager = dto.avslåtteDager.map { Periode.gjenopprett(it) },
             maksdato = dto.maksdato,
-            gjenståendeDager = dto.gjenståendeDager,
-            grunnlag = Utbetalingstidslinje.gjenopprett(dto.grunnlag)
+            gjenståendeDager = dto.gjenståendeDager
         )
     }
 
@@ -68,7 +65,6 @@ data class Maksdatoresultat(
         oppholdsdager = oppholdsdager.map { it.dto() },
         avslåtteDager = avslåtteDager.map { it.dto() },
         maksdato = maksdato,
-        gjenståendeDager = gjenståendeDager,
-        grunnlag = grunnlag.dto()
+        gjenståendeDager = gjenståendeDager
     )
 }

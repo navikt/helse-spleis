@@ -422,8 +422,7 @@ private fun MaksdatoresultatUtDto.tilPersonData() = PersonData.ArbeidsgiverData.
     oppholdsdager = oppholdsdager.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     avslåtteDager = avslåtteDager.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     maksdato = maksdato,
-    gjenståendeDager = gjenståendeDager,
-    grunnlag = grunnlag.tilPersonData()
+    gjenståendeDager = gjenståendeDager
 )
 
 private fun DokumentsporingDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentsporingData(

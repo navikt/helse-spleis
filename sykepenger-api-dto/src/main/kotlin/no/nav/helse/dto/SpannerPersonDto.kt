@@ -433,8 +433,7 @@ data class SpannerPersonDto(
                 val oppholdsdager: List<PeriodeData>,
                 val avslåtteDager: List<PeriodeData>,
                 val maksdato: LocalDate,
-                val gjenståendeDager: Int,
-                val grunnlag: UtbetalingstidslinjeData
+                val gjenståendeDager: Int
             ) {
                 val forbrukteDagerAntall = forbrukteDager.sumOf { it.fom.datesUntil(it.tom).count() + 1 }
             }
@@ -1145,8 +1144,7 @@ private fun MaksdatoresultatUtDto.tilPersonData() = SpannerPersonDto.Arbeidsgive
     oppholdsdager = oppholdsdager.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     avslåtteDager = avslåtteDager.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     maksdato = maksdato,
-    gjenståendeDager = gjenståendeDager,
-    grunnlag = grunnlag.tilPersonData()
+    gjenståendeDager = gjenståendeDager
 )
 
 private fun DokumentsporingDto.tilPersonData() =

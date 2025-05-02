@@ -45,7 +45,7 @@ internal class MaksimumSykepengedagerfilter(
         return Maksdatovurdering(
             resultat = sisteVurdering
                 .avgrensTil(periode.endInclusive)
-                .beregnMaksdato(alder, arbeidsgiverRegler, beregnetTidslinje),
+                .beregnMaksdato(alder, arbeidsgiverRegler),
             tidslinjegrunnlagsubsumsjon = tidslinjegrunnlagsubsumsjon,
             beregnetTidslinjesubsumsjon = beregnetTidslinjesubsumsjon,
             syttiårsdag = alder.syttiårsdagen

@@ -13,6 +13,5 @@ data class MaksdatoresultatUtDto(
     val oppholdsdager: List<PeriodeDto>,
     val avslåtteDager: List<PeriodeDto>,
     val maksdato: LocalDate,
-    val gjenståendeDager: Int,
-    val grunnlag: UtbetalingstidslinjeUtDto
+    val gjenståendeDager: Int
 )

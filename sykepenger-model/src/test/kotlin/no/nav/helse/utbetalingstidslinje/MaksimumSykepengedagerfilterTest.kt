@@ -794,7 +794,7 @@ internal class MaksimumSykepengedagerfilterTest {
 
         val maksdatoresultat = maksimumSykepengedagerfilter.maksdatoresultatForVedtaksperiode(filterperiode).resultat
         maksdatoer = maksimumSykepengedagerfilter.maksdatosaker
-            .map { it.beregnMaksdato(fødselsdato.alder, NormalArbeidstaker, Utbetalingstidslinje()) }
+            .map { it.beregnMaksdato(fødselsdato.alder, NormalArbeidstaker) }
             .map { it.maksdato }
             .plusElement(maksdatoresultat.maksdato)
             .toSet()

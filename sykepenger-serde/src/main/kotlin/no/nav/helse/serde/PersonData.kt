@@ -764,8 +764,7 @@ data class PersonData(
                 val oppholdsdager: List<PeriodeData>,
                 val avslåtteDager: List<PeriodeData>,
                 val maksdato: LocalDate,
-                val gjenståendeDager: Int,
-                val grunnlag: UtbetalingstidslinjeData
+                val gjenståendeDager: Int
             ) {
                 fun tilDto() = MaksdatoresultatInnDto(
                     vurdertTilOgMed = vurdertTilOgMed,
@@ -781,8 +780,7 @@ data class PersonData(
                     oppholdsdager = oppholdsdager.map { PeriodeDto(fom = it.fom, tom = it.tom) },
                     avslåtteDager = avslåtteDager.map { PeriodeDto(fom = it.fom, tom = it.tom) },
                     maksdato = maksdato,
-                    gjenståendeDager = gjenståendeDager,
-                    grunnlag = grunnlag.tilDto()
+                    gjenståendeDager = gjenståendeDager
                 )
             }
 

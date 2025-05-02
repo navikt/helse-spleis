@@ -7,7 +7,6 @@ import java.time.LocalDate
 import no.nav.helse.Alder
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.til
 import no.nav.helse.plus
 import no.nav.helse.ukedager
 
@@ -110,8 +109,7 @@ internal data class Maksdatokontekst(
 
     internal fun beregnMaksdato(
         alder: Alder,
-        regler: ArbeidsgiverRegler,
-        samletGrunnlagstidslinje: Utbetalingstidslinje
+        regler: ArbeidsgiverRegler
     ): Maksdatoresultat {
         fun LocalDate.forrigeVirkedagFør() = minusDays(
             when (dayOfWeek) {
@@ -159,7 +157,6 @@ internal data class Maksdatokontekst(
             }
         }
 
-        val tidligsteDag = if (startdatoSykepengerettighet == LocalDate.MIN) startdatoTreårsvindu else minOf(startdatoTreårsvindu, startdatoSykepengerettighet)
         return Maksdatoresultat(
             vurdertTilOgMed = vurdertTilOgMed,
             bestemmelse = hjemmelsbegrunnelse,
@@ -169,8 +166,7 @@ internal data class Maksdatokontekst(
             oppholdsdager = oppholdsdager.grupperSammenhengendePerioder(),
             avslåtteDager = avslåtteDager.grupperSammenhengendePerioder(),
             maksdato = maksdato,
-            gjenståendeDager = gjenståendeDager,
-            grunnlag = samletGrunnlagstidslinje.subset(tidligsteDag til vurdertTilOgMed)
+            gjenståendeDager = gjenståendeDager
         )
     }
 }
