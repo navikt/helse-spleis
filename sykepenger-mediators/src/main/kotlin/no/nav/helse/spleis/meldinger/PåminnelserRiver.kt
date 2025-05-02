@@ -22,7 +22,7 @@ internal class PåminnelserRiver(
     }
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("antallGangerPåminnet", "vedtaksperiodeId", "organisasjonsnummer", "fødselsnummer")
+        message.requireKey("antallGangerPåminnet", "vedtaksperiodeId", "organisasjonsnummer", "fødselsnummer", "yrkesaktivitetstype")
         message.require("tilstandsendringstidspunkt", JsonNode::asLocalDateTime)
         message.require("påminnelsestidspunkt", JsonNode::asLocalDateTime)
         message.require("nestePåminnelsestidspunkt", JsonNode::asLocalDateTime)

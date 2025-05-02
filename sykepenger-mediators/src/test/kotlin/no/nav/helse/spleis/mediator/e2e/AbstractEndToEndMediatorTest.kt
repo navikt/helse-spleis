@@ -412,10 +412,11 @@ internal abstract class AbstractEndToEndMediatorTest {
         vedtaksperiodeIndeks: Int = -1,
         tilstandType: TilstandType = TilstandType.START,
         orgnummer: String = ORGNUMMER,
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
         tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()
     ): UUID {
         val vedtaksperiodeId = if (vedtaksperiodeIndeks == -1) UUID.randomUUID() else testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks)
-        val (_, message) = meldingsfabrikk.lagPåminnelse(vedtaksperiodeId, tilstandType, orgnummer, tilstandsendringstidspunkt)
+        val (_, message) = meldingsfabrikk.lagPåminnelse(vedtaksperiodeId, tilstandType, orgnummer, yrkesaktivitetstype, tilstandsendringstidspunkt)
         testRapid.sendTestMessage(message)
         return vedtaksperiodeId
     }

@@ -1232,12 +1232,14 @@ internal class TestMessageFactory(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
         orgnummer: String = organisasjonsnummer,
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
         tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()
     ): Pair<String, String> {
         return nyHendelse(
             "påminnelse", mapOf(
             "fødselsnummer" to fødselsnummer,
             "organisasjonsnummer" to orgnummer,
+            "yrkesaktivitetstype" to yrkesaktivitetstype,
             "vedtaksperiodeId" to vedtaksperiodeId,
             "tilstand" to tilstand.name,
             "antallGangerPåminnet" to 0,
