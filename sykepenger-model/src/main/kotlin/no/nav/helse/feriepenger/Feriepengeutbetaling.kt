@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -41,8 +40,6 @@ internal class Feriepengeutbetaling private constructor(
     var avstemmingsnøkkel: Long? = null
 
     companion object {
-        fun List<Feriepengeutbetaling>.gjelderFeriepengeutbetaling(hendelse: UtbetalingHendelse) = any { hendelse.fagsystemId == it.oppdrag.fagsystemId || hendelse.fagsystemId == it.personoppdrag.fagsystemId }
-
         internal fun gjenopprett(dto: FeriepengeInnDto): Feriepengeutbetaling {
             return Feriepengeutbetaling(
                 feriepengegrunnlag = Feriepengeutbetalinggrunnlag(
