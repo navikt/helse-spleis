@@ -933,11 +933,17 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun beregnArbeidsgiverperiode() = { vedtaksperiode: Periode ->
-        arbeidsgiverperiodeFor()
-            .finn(vedtaksperiode)
-            ?.arbeidsgiverperiode
-            ?.grupperSammenhengendePerioder()
-            ?: emptyList()
+        when (yrkesaktivitetssporing) {
+            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> arbeidsgiverperiodeFor()
+                .finn(vedtaksperiode)
+                ?.arbeidsgiverperiode
+                ?.grupperSammenhengendePerioder()
+                ?: emptyList()
+
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.Frilans,
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> emptyList()
+        }
     }
 
     internal fun arbeidsgiverperiode(periode: Periode): Arbeidsgiverperiode? {

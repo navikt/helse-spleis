@@ -4,7 +4,6 @@ import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.selvstendig
-import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
@@ -45,16 +44,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     assertIngenFunksjonelleFeil()
                 }
             )
-
-            assertForventetFeil(
-                forklaring = "Selvstendige har ikke arbeidsgiverperiode",
-                nå = {
-                    assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-                },
-                ønsket = {
-                    assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-                }
-            )
+            assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
         }
     }
 }
