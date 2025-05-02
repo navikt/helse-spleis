@@ -1,0 +1,30 @@
+{
+  "arbeidsgivere": [
+    {
+      "feriepengeutbetalinger": [
+        {
+          "utbetalingId": "4d00f0ea-eee5-49d1-81f2-c9aca9643594",
+          "oppdrag": {
+            "linjer": [
+              {
+                "fom" : "2022-05-01",
+                "tom" : "2022-05-31",
+                "sats": 100
+              }
+            ]
+          },
+          "personoppdrag": {
+            "linjer": [
+              {
+                "fom" : "2022-05-01",
+                "tom" : "2022-05-31",
+                "sats": 0
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 323
+}
