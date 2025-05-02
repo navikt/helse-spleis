@@ -26,6 +26,8 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiver
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsavgjørelse
+import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
@@ -823,7 +825,12 @@ internal class Vedtaksperiode private constructor(
         if (hendelse.vedtaksperiodeId != this.id) return
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         when (tilstand) {
-            AvventerInfotrygdHistorikk -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
+            AvventerInfotrygdHistorikk -> when (arbeidsgiver.yrkesaktivitetssporing) {
+                is Arbeidstaker -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
+                Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                Behandlingsporing.Yrkesaktivitet.Frilans,
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
+            }
 
             Avsluttet,
             AvsluttetUtenUtbetaling,
@@ -1933,9 +1940,17 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun måInnhenteInntektEllerRefusjon(): Boolean {
-        if (!skalBehandlesISpeil()) return false
-        if (harInntektOgRefusjon()) return false
-        return true
+        when (arbeidsgiver.yrkesaktivitetssporing) {
+            is Arbeidstaker -> {
+                if (!skalBehandlesISpeil()) return false
+                if (harInntektOgRefusjon()) return false
+                return true
+            }
+
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.Frilans,
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> return false
+        }
     }
 
     private fun harInntektOgRefusjon(): Boolean {

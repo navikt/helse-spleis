@@ -1,6 +1,7 @@
 package no.nav.helse.person.view
 
 import no.nav.helse.feriepenger.FeriepengeutbetalingView
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.person.SykmeldingsperioderView
 import no.nav.helse.person.VedtaksperiodeView
 import no.nav.helse.person.VilkårsgrunnlagHistorikkView
@@ -16,6 +17,7 @@ internal data class PersonView(
 
 internal data class ArbeidsgiverView(
     val organisasjonsnummer: String,
+    val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
     val sykdomshistorikk: SykdomshistorikkView,
     val utbetalinger: List<UtbetalingView>,
     val inntektshistorikk: InntektshistorikkView,

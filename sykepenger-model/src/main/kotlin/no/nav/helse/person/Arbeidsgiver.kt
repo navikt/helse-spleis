@@ -156,6 +156,7 @@ internal class Arbeidsgiver private constructor(
 
     fun view(): ArbeidsgiverView = ArbeidsgiverView(
         organisasjonsnummer = organisasjonsnummer,
+        yrkesaktivitetssporing = yrkesaktivitetssporing,
         sykdomshistorikk = sykdomshistorikk.view(),
         utbetalinger = utbetalinger.map { it.view },
         inntektshistorikk = inntektshistorikk.view(),

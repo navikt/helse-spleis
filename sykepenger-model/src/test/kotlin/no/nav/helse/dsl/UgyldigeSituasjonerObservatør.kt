@@ -2,6 +2,7 @@ package no.nav.helse.dsl
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.BehandlingView
@@ -236,6 +237,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
 
     private fun validerRefusjonsopplysningerPåBehandlinger() {
         arbeidsgivere.map { it.view() }.forEach { arbeidsgiver ->
+            if (arbeidsgiver.yrkesaktivitetssporing !is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) return@forEach
             arbeidsgiver.aktiveVedtaksperioder.forEach { vedtaksperiode ->
                 vedtaksperiode.behandlinger.behandlinger.forEach behandling@{ behandling ->
                     behandling.endringer.last().let { endring ->
