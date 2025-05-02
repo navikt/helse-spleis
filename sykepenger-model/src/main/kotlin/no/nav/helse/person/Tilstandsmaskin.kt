@@ -3,6 +3,8 @@ package no.nav.helse.person
 import java.time.LocalDateTime
 import java.time.Period
 import no.nav.helse.etterlevelse.`fvl § 35 ledd 1`
+import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Hendelse
@@ -128,10 +130,16 @@ internal data object Start : Vedtaksperiodetilstand {
         aktivitetslogg: IAktivitetslogg
     ) {
         vedtaksperiode.tilstand(
-            aktivitetslogg, when {
-            !vedtaksperiode.person.infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
-            else -> AvventerInntektsmelding
-        }
+            aktivitetslogg,
+            when {
+                !vedtaksperiode.person.infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
+                else -> when (vedtaksperiode.arbeidsgiver.yrkesaktivitetssporing) {
+                    is Arbeidstaker -> AvventerInntektsmelding
+                    Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                    Behandlingsporing.Yrkesaktivitet.Frilans,
+                    Behandlingsporing.Yrkesaktivitet.Selvstendig -> AvventerBlokkerendePeriode
+                }
+            }
         )
     }
 }
@@ -350,6 +358,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         tilstandsendringstidspunkt.plusDays(180)
 
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+        check(vedtaksperiode.arbeidsgiver.yrkesaktivitetssporing is Arbeidstaker) { "Forventer kun arbeidstakere her" }
         vedtaksperiode.trengerInntektsmeldingReplay()
     }
 

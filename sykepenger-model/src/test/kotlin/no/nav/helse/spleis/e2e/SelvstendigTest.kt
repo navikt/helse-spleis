@@ -4,6 +4,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
@@ -30,6 +31,19 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
             assertIngenFunksjonelleFeil()
             assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        }
+    }
+
+    @Test
+    fun `To selvstendigsøknader`() = Toggle.SelvstendigNæringsdrivende.enable {
+        selvstendig {
+            håndterSøknad(januar)
+            håndterSøknad(mars)
+            
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE)
+            assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
         }
     }
 }
