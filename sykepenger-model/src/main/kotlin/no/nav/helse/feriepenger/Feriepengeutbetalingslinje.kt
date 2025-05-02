@@ -26,6 +26,12 @@ data class Feriepengeutbetalingslinje(
     val datoStatusFom: LocalDate? = null
 ) : Iterable<LocalDate> {
 
+    init {
+        check(beløp != 0) {
+            "beløp kan ikke være 0"
+        }
+    }
+
     companion object {
         internal fun gjenopprett(dto: FeriepengeutbetalingslinjeInnDto): Feriepengeutbetalingslinje {
             return Feriepengeutbetalingslinje(
@@ -60,17 +66,6 @@ data class Feriepengeutbetalingslinje(
             totalbeløp = beløp,
             statuskode = statuskode
         )
-
-    fun opphørslinje(datoStatusFom: LocalDate) = copy(
-        endringskode = ENDR,
-        refFagsystemId = null,
-        refDelytelseId = null,
-        datoStatusFom = datoStatusFom
-    )
-
-    fun erForskjell() = endringskode != UEND
-
-    fun erOpphør() = datoStatusFom != null
 
     fun behovdetaljer() = mapOf<String, Any?>(
         "fom" to fom.toString(),

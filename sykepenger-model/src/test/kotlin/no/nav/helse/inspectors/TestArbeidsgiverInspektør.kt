@@ -51,9 +51,9 @@ internal class TestArbeidsgiverInspektør(
         .map {
             Feriepengeoppdrag(
                 fagsystemId = it.fagsystemId,
-                feriepengeutbetalingslinjer = it.linjer.map { linje ->
+                feriepengeutbetalingslinjer = listOfNotNull(it.linje?.let { linje ->
                     Feriepengeutbetalingslinje(linje.fom, linje.tom, linje.beløp, linje.klassekode, linje.endringskode, linje.statuskode)
-                }
+                })
             )
         }
     internal val infotrygdFeriepengebeløpPerson = view.feriepengeutbetalinger.map { it.infotrygdFeriepengebeløpPerson }

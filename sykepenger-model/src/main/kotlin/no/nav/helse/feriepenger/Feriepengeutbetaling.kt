@@ -128,23 +128,21 @@ internal class Feriepengeutbetaling private constructor(
         private fun oppdrag(mottaker: String, fagområde: Fagområde, klassekode: Klassekode, forrigeOppdrag: Feriepengeoppdrag?, beløp: Int): Feriepengeoppdrag {
             if (forrigeOppdrag == null) {
                 val maiMåned = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY)
-                val linjer = if (beløp == 0)
-                    emptyList()
+                val linje = if (beløp == 0)
+                    null
                 else
-                    listOf(
-                        Feriepengeutbetalingslinje(
-                            fom = maiMåned.atDay(1),
-                            tom = maiMåned.atEndOfMonth(),
-                            beløp = beløp,
-                            klassekode = klassekode,
-                        )
+                    Feriepengeutbetalingslinje(
+                        fom = maiMåned.atDay(1),
+                        tom = maiMåned.atEndOfMonth(),
+                        beløp = beløp,
+                        klassekode = klassekode,
                     )
                 return Feriepengeoppdrag(
                     mottaker = mottaker,
                     fagområde = fagområde,
                     fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID()),
                     endringskode = Endringskode.NY,
-                    linjer = linjer,
+                    linje = linje,
                     tidsstempel = LocalDateTime.now()
                 )
             }
@@ -183,7 +181,7 @@ internal class Feriepengeutbetaling private constructor(
                 tidligereFeriepengeutbetalinger
                     .lastOrNull { it.gjelderForÅr(utbetalingshistorikkForFeriepenger.opptjeningsår) && it.sendTilOppdrag }
                     ?.oppdrag
-                    ?.takeIf { it.linjerUtenOpphør().isNotEmpty() }
+                    ?.takeUnless { it.linje!!.datoStatusFom != null }
 
             val arbeidsgiveroppdrag = oppdrag(
                 mottaker = orgnummer,
@@ -224,7 +222,7 @@ internal class Feriepengeutbetaling private constructor(
                 tidligereFeriepengeutbetalinger
                     .lastOrNull { it.gjelderForÅr(utbetalingshistorikkForFeriepenger.opptjeningsår) && it.sendPersonoppdragTilOS }
                     ?.personoppdrag
-                    ?.takeIf { it.linjerUtenOpphør().isNotEmpty() }
+                    ?.takeUnless { it.linje!!.datoStatusFom != null }
 
             val personoppdrag = oppdrag(
                 mottaker = personidentifikator.toString(),
@@ -277,11 +275,11 @@ internal class Feriepengeutbetaling private constructor(
                 
                 - OPPDRAG:
                 Skal sende arbeidsgiveroppdrag til OS: $sendArbeidsgiveroppdrag
-                Differanse fra forrige sendte arbeidsgoiveroppdrag: ${forrigeSendteArbeidsgiverOppdrag?.totalbeløp()?.minus(arbeidsgiveroppdrag.totalbeløp())}
+                Differanse fra forrige sendte arbeidsgoiveroppdrag: ${forrigeSendteArbeidsgiverOppdrag?.totalbeløp?.minus(arbeidsgiveroppdrag.totalbeløp)}
                 Arbeidsgiveroppdrag: $arbeidsgiveroppdragdetaljer
                 
                 Skal sende personoppdrag til OS: $sendPersonoppdrag
-                Differanse fra forrige sendte personoppdrag: ${forrigeSendtePersonOppdrag?.totalbeløp()?.minus(personoppdrag.totalbeløp())}
+                Differanse fra forrige sendte personoppdrag: ${forrigeSendtePersonOppdrag?.totalbeløp?.minus(personoppdrag.totalbeløp)}
                 Personoppdrag: $personoppdragdetaljer
                 """
             )

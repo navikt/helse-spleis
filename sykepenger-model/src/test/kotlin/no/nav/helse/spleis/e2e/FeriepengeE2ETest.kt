@@ -630,7 +630,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertEquals(personlogg.behov.last().detaljer()["saksbehandler"], "SPLEIS")
 
         @Suppress("unchecked_cast")
-        val linje = (personlogg.behov.last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
+        val linje = (personlogg.behov.last().detaljer()["linjer"] as List<LinkedHashMap<String, String>>).first()
         assertEquals(linje["satstype"], "ENG")
         assertEquals(linje["klassekode"], "SPREFAGFER-IOP")
         assertEquals(linje["grad"], null)
