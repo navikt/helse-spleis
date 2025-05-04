@@ -68,6 +68,7 @@ import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
@@ -810,9 +811,18 @@ internal fun AbstractEndToEndTest.håndterPersonPåminnelse() = PersonHendelsefa
 
 internal fun AbstractEndToEndTest.håndterSykepengegrunnlagForArbeidsgiver(
     skjæringstidspunkt: LocalDate = 1.januar,
-    orgnummer: String = a1
+    orgnummer: String = a1,
+    inntekter: List<ArbeidsgiverInntekt.MånedligInntekt> = (1..3).map {
+        ArbeidsgiverInntekt.MånedligInntekt(
+            yearMonth = skjæringstidspunkt.yearMonth.minusMonths(it.toLong()),
+            inntekt = INNTEKT,
+            type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+            fordel = "",
+            beskrivelse = ""
+        )
+    }
 ): UUID {
-    val inntektFraAOrdningen: SykepengegrunnlagForArbeidsgiver = sykepengegrunnlagForArbeidsgiver(skjæringstidspunkt, orgnummer)
+    val inntektFraAOrdningen: SykepengegrunnlagForArbeidsgiver = sykepengegrunnlagForArbeidsgiver(skjæringstidspunkt, orgnummer, inntekter)
     inntektFraAOrdningen.håndter(Person::håndter)
     return inntektFraAOrdningen.metadata.meldingsreferanseId.id
 }

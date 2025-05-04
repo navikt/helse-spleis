@@ -50,7 +50,7 @@ internal class ArbeidsgiverperiodeTest {
     fun `ingen utbetaling dersom perioden er innenfor arbeidsgiverperioden eller før det utbetales noe`() {
         agp(1.januar til 16.januar).utbetalingsdag(23.januar).also { agp ->
             assertFalse(agp.forventerInntekt(31.desember(2017) til 5.januar))
-            assertFalse(agp.forventerInntekt(15.januar til 22.januar))
+            assertTrue(agp.forventerInntekt(15.januar til 22.januar))
             assertTrue(agp.forventerInntekt(15.januar til 23.januar))
         }
     }

@@ -17,9 +17,12 @@ import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterHove
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.somOrganisasjonsnummer
@@ -28,6 +31,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNull
 
 internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
 
@@ -70,14 +74,12 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         val inntektsmeldingId = håndterInntektsmelding(
             listOf(1.januar til 16.januar)
         )
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertEquals(0, inspektør.antallUtbetalinger)
         assertEquals(0, observatør.utbetalingUtenUtbetalingEventer.size)
         assertEquals(0, observatør.utbetalingMedUtbetalingEventer.size)
         1.vedtaksperiode.assertIngenVedtakFattet()
-        assertEquals(2, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
-        assertEquals(setOf(søknadId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.first().hendelseIder)
-        assertEquals(setOf(søknadId, inntektsmeldingId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
+        assertNull(observatør.avsluttetUtenVedtakEventer[1.vedtaksperiode.id(a1)])
     }
 
     @Test
@@ -241,10 +243,10 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar))
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), Ferie(10.februar, 28.februar))
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
         2.vedtaksperiode.assertIngenVedtakFattet()
-        assertEquals(10.februar til 28.februar, 2.vedtaksperiode.avsluttetUtenVedtakEventer.single().periode)
+        assertNull(observatør.avsluttetUtenVedtakEventer[2.vedtaksperiode.id(a1)])
     }
 
     @Test
@@ -254,12 +256,10 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(15.januar, 31.januar))
         håndterSøknad(Sykdom(15.januar, 31.januar, 100.prosent), Ferie(15.januar, 31.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
         assertEquals(1, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
-        assertEquals(1, 2.vedtaksperiode.avsluttetUtenVedtakEventer.size)
         1.vedtaksperiode.assertIngenVedtakFattet()
-        2.vedtaksperiode.assertIngenVedtakFattet()
     }
 
     @Test

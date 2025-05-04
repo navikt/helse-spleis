@@ -101,6 +101,11 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
             listOf(5.februar til 20.februar)
         )
 
+        håndterSykepengegrunnlagForArbeidsgiver(6.januar, a1)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -108,11 +113,12 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertEquals(5.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
-        assertEquals(2, inspektør.antallUtbetalinger)
+        assertEquals(3, inspektør.antallUtbetalinger)
         assertEquals(5.desember(2017) til 5.januar, inspektør.utbetaling(0).periode)
         assertEquals(korrelasjonsIdAugust2017, inspektør.utbetaling(0).korrelasjonsId)
         val korrelasjonsIdFebruar2018 = inspektør.utbetaling(1).korrelasjonsId
-        assertEquals(5.februar til 24.februar, inspektør.utbetaling(1).periode)
+        assertEquals(6.januar til 4.februar, inspektør.utbetaling(1).periode)
+        assertEquals(5.februar til 24.februar, inspektør.utbetaling(2).periode)
         assertNotEquals(korrelasjonsIdAugust2017, korrelasjonsIdFebruar2018)
 
         // Inntektsmelding som flytter arbeidsgiverperioden en uke frem
@@ -131,8 +137,8 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
-        assertEquals(3, inspektør.antallUtbetalinger)
-        val utbetalingenSomTrekkerPenger = inspektør.utbetaling(2)
+        assertEquals(4, inspektør.antallUtbetalinger)
+        val utbetalingenSomTrekkerPenger = inspektør.utbetaling(3)
         assertEquals(REVURDERING, utbetalingenSomTrekkerPenger.type)
         assertEquals(korrelasjonsIdFebruar2018, utbetalingenSomTrekkerPenger.korrelasjonsId)
         assertEquals(5.februar til 24.februar, utbetalingenSomTrekkerPenger.periode)

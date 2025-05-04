@@ -45,7 +45,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         innflytelseperioden.overlapperMed(periode)
 
     internal fun forventerInntekt(periode: Periode): Boolean {
-        return !dekkesAvArbeidsgiver(periode) && erFørsteUtbetalingsdagFørEllerLik(periode)
+        return !dekkesAvArbeidsgiver(periode)// && erFørsteUtbetalingsdagFørEllerLik(periode)
     }
 
     internal fun dekkesAvArbeidsgiver(periode: Periode): Boolean {

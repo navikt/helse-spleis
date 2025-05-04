@@ -244,20 +244,13 @@ internal fun utbetalingpåminnelse(
 internal fun sykepengegrunnlagForArbeidsgiver(
     skjæringstidspunkt: LocalDate = 1.januar,
     orgnummer: String = a1,
+    inntekter: List<ArbeidsgiverInntekt.MånedligInntekt>
 ): SykepengegrunnlagForArbeidsgiver {
     return SykepengegrunnlagForArbeidsgiver(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         skjæringstidspunkt = skjæringstidspunkt,
         behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
-        inntekter = ArbeidsgiverInntekt(orgnummer, (1..3).map {
-            ArbeidsgiverInntekt.MånedligInntekt(
-                yearMonth = skjæringstidspunkt.yearMonth.minusMonths(it.toLong()),
-                inntekt = INNTEKT,
-                type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                fordel = "",
-                beskrivelse = ""
-            )
-        })
+        inntekter = ArbeidsgiverInntekt(orgnummer, inntekter)
     )
 }
 

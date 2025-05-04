@@ -158,7 +158,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         håndterOverstyrTidslinje(forlengelse.map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
 
         håndterSøknad(februar)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)

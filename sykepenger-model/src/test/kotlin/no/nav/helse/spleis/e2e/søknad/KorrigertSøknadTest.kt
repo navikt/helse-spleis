@@ -340,7 +340,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVSLUTTET_UTEN_UTBETALING
+            AVVENTER_VILKÅRSPRØVING
         )
         assertVarsler(emptyList(), 1.vedtaksperiode.filter())
     }
@@ -365,7 +365,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVSLUTTET_UTEN_UTBETALING
+            AVVENTER_VILKÅRSPRØVING
         )
         assertVarsler(emptyList(), 1.vedtaksperiode.filter())
     }

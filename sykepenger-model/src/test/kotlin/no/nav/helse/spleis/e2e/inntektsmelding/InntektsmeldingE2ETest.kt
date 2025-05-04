@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -90,6 +90,7 @@ import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -182,6 +183,12 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(februar)
 
         håndterInntektsmelding(listOf(1.februar til 16.februar))
+        håndterSykepengegrunnlagForArbeidsgiver(17.januar, a1)
+        assertVarsel(Varselkode.RV_IV_10, 2.vedtaksperiode.filter(a1))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -190,12 +197,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         assertVarsler(listOf(RV_IM_3), 3.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
         håndtererInntektsmeldingInntektUtenDokumentsporing(2.vedtaksperiode) {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
         }
+        assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter(a1))
     }
 
     @Test

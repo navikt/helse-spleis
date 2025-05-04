@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.april
 import no.nav.helse.den
 import no.nav.helse.desember
@@ -338,6 +338,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalt()
         }
         a3 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -345,7 +347,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 { assertEquals(1, inspektør.antallUtbetalinger) }
         a2 { assertEquals(1, inspektør.antallUtbetalinger) }
-        a3 { assertEquals(1, inspektør.antallUtbetalinger) }
+        a3 { assertEquals(2, inspektør.antallUtbetalinger) }
     }
 
     @Test

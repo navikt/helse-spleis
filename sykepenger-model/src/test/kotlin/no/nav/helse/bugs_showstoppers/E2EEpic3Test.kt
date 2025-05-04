@@ -862,7 +862,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             listOf(1.mars til 16.mars)
         )
 
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         val sykdomstidslinjedagerForAndrePeriode = inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller
         assertEquals(21, sykdomstidslinjedagerForAndrePeriode.values.reduce { acc, i -> acc + i })
         assertEquals(7, sykdomstidslinjedagerForAndrePeriode[Sykedag::class])
@@ -870,6 +870,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertEquals(2, sykdomstidslinjedagerForAndrePeriode[FriskHelgedag::class])
         assertEquals(3, sykdomstidslinjedagerForAndrePeriode[Dag.Arbeidsdag::class])
         assertEquals(5, sykdomstidslinjedagerForAndrePeriode[Arbeidsgiverdag::class])
+
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         val maksdatoFør26UkerOpphold = LocalDate.of(2018, 12, 28)
         assertEquals(maksdatoFør26UkerOpphold, inspektør.sisteMaksdato(1.vedtaksperiode).maksdato)
@@ -896,6 +900,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.mars til 16.mars)
         )
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         nyttVedtak(1.mai til 21.mai, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
         assertEquals(12.april(2019), inspektør.sisteMaksdato(3.vedtaksperiode).maksdato)
     }

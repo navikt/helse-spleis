@@ -9,7 +9,9 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.november
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -66,20 +68,22 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         assertEquals(4.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(4.januar til 22.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(listOf(4.januar til 19.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertEquals(4.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(23.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
         assertEquals(listOf(4.januar til 19.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
 
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
-        assertEquals(1, inspektør.antallUtbetalinger)
-        assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).size)
+        assertEquals(2, inspektør.antallUtbetalinger)
+        assertEquals(1, inspektør.utbetalinger(1.vedtaksperiode).size)
         assertEquals(1, inspektør.utbetalinger(2.vedtaksperiode).size)
     }
 

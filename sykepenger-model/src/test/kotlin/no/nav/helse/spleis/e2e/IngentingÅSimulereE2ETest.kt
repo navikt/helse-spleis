@@ -44,7 +44,7 @@ internal class IngentingÅSimulereE2ETest : AbstractDslTest() {
             nyttVedtak(1.januar til 18.januar)
             håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar))
             håndterSøknad(20.januar til 21.januar)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         }
     }
 
