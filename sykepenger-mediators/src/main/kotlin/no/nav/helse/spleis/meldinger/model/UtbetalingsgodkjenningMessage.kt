@@ -9,12 +9,13 @@ import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
+import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
 
 // Understands a JSON message representing a Godkjenning-behov
 internal class UtbetalingsgodkjenningMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
     private val utbetalingId = packet["utbetalingId"].asText()
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
-    private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
+    private val behandlingsporing = packet.yrkesaktivitetssporing
     private val saksbehandler = packet["@løsning.${Godkjenning.name}.saksbehandlerIdent"].asText()
     private val saksbehandlerEpost = packet["@løsning.${Godkjenning.name}.saksbehandlerEpost"].asText()
     private val godkjenttidspunkt = packet["@løsning.${Godkjenning.name}.godkjenttidspunkt"].asLocalDateTime()
@@ -23,15 +24,15 @@ internal class UtbetalingsgodkjenningMessage(packet: JsonMessage, override val m
 
     private val utbetalingsgodkjenning
         get() = Utbetalingsgodkjenning(
-            meldingsreferanseId = meldingsporing.id,
-                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
-            utbetalingId = UUID.fromString(utbetalingId),
-            vedtaksperiodeId = vedtaksperiodeId,
-            saksbehandler = saksbehandler,
-            saksbehandlerEpost = saksbehandlerEpost,
-            utbetalingGodkjent = utbetalingGodkjent,
-            godkjenttidspunkt = godkjenttidspunkt,
-            automatiskBehandling = automatiskBehandling
+                meldingsreferanseId = meldingsporing.id,
+                behandlingsporing = behandlingsporing,
+                utbetalingId = UUID.fromString(utbetalingId),
+                vedtaksperiodeId = vedtaksperiodeId,
+                saksbehandler = saksbehandler,
+                saksbehandlerEpost = saksbehandlerEpost,
+                utbetalingGodkjent = utbetalingGodkjent,
+                godkjenttidspunkt = godkjenttidspunkt,
+                automatiskBehandling = automatiskBehandling
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
