@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.RefusjonservitørData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
@@ -13,6 +13,7 @@ import no.nav.helse.dto.SpannerPersonDto.UtbetalingstidslinjeData.Utbetalingsdag
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsopplysningstypeData
+import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.PensjonsgivendeInntektData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagInnslagData
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
@@ -141,15 +142,20 @@ data class SpannerPersonDto(
                 val dato: LocalDate,
                 val hendelseId: UUID,
                 val beløp: InntektDto?,
-                val kilde: String,
+                val kilde: String?,
                 val type: InntektsopplysningstypeData,
                 val tidsstempel: LocalDateTime,
                 val skatteopplysninger: List<SkatteopplysningData>?,
+                val pensjonsgivendeInntekter: List<PensjonsgivendeInntektData>?
             ) {
                 enum class InntektsopplysningstypeData {
-                    ARBEIDSTAKER
+                    ARBEIDSTAKER,
+                    SELVSTENDIG
                 }
+
+                data class PensjonsgivendeInntektData(val årstall: Year, val beløp: InntektDto)
             }
+
             data class KorrigertInntektsopplysningData(
                 val id: UUID,
                 val dato: LocalDate,
@@ -157,6 +163,7 @@ data class SpannerPersonDto(
                 val beløp: InntektDto?,
                 val tidsstempel: LocalDateTime
             )
+
             data class SkjønnsmessigFastsattData(
                 val id: UUID,
                 val dato: LocalDate,
@@ -210,6 +217,7 @@ data class SpannerPersonDto(
             FRILANS,
             SELVSTENDIG
         }
+
         data class InntektsmeldingData(
             val id: UUID,
             val dato: LocalDate,
@@ -1582,6 +1590,7 @@ private fun FaktaavklartInntektUtDto.tilPersonData() =
         tidsstempel = this.inntektsdata.tidsstempel,
         type = when (this.inntektsopplysning) {
             is InntektsopplysningUtDto.ArbeidstakerDto -> InntektsopplysningstypeData.ARBEIDSTAKER
+            is InntektsopplysningUtDto.SelvstendigDto -> InntektsopplysningstypeData.SELVSTENDIG
         },
         kilde = when (val io = this.inntektsopplysning) {
             is InntektsopplysningUtDto.ArbeidstakerDto -> when (io.kilde) {
@@ -1589,14 +1598,28 @@ private fun FaktaavklartInntektUtDto.tilPersonData() =
                 is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> "INNTEKTSMELDING"
                 is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> "SKATT_SYKEPENGEGRUNNLAG"
             }
+
+            is InntektsopplysningUtDto.SelvstendigDto -> null
         },
         skatteopplysninger = when (val io = this.inntektsopplysning) {
             is InntektsopplysningUtDto.ArbeidstakerDto -> when (val kilde = io.kilde) {
                 is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> kilde.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
                 else -> null
             }
+
+            is InntektsopplysningUtDto.SelvstendigDto -> null
+        },
+        pensjonsgivendeInntekter = when (val inntektsopplysning = this.inntektsopplysning) {
+            is InntektsopplysningUtDto.ArbeidstakerDto -> null
+            is InntektsopplysningUtDto.SelvstendigDto -> inntektsopplysning.pensjonsgivendeInntekt.map {
+                PensjonsgivendeInntektData(
+                    årstall = it.årstall,
+                    beløp = it.beløp.tilPersonData()
+                )
+            }
         }
     )
+
 private fun SaksbehandlerUtDto.tilPersonData() =
     ArbeidsgiverInntektsopplysningData.KorrigertInntektsopplysningData(
         id = this.id,
@@ -1605,6 +1628,7 @@ private fun SaksbehandlerUtDto.tilPersonData() =
         beløp = this.inntektsdata.beløp.tilPersonData(),
         tidsstempel = this.inntektsdata.tidsstempel
     )
+
 private fun SkjønnsmessigFastsattUtDto.tilPersonData() =
     ArbeidsgiverInntektsopplysningData.SkjønnsmessigFastsattData(
         id = this.id,

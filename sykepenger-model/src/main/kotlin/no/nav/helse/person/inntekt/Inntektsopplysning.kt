@@ -1,7 +1,10 @@
 package no.nav.helse.person.inntekt
 
+import java.time.Year
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
+import no.nav.helse.dto.serialisering.InntektsopplysningUtDto.SelvstendigDto.PensjonsgivendeInntektDto
+import no.nav.helse.økonomi.Inntekt
 
 internal sealed interface Inntektsopplysning {
     data class Arbeidstaker(val kilde: Arbeidstakerinntektskilde) : Inntektsopplysning {
@@ -16,11 +19,29 @@ internal sealed interface Inntektsopplysning {
         }
     }
 
+    data class Selvstendig(val pensjonsgivendeInntekt: List<PensjonsgivendeInntekt>) : Inntektsopplysning {
+        override fun dto() = InntektsopplysningUtDto.SelvstendigDto(
+            pensjonsgivendeInntekt = pensjonsgivendeInntekt.map {
+                PensjonsgivendeInntektDto(it.årstall, it.beløp.dto())
+            }
+        )
+
+        data class PensjonsgivendeInntekt(val årstall: Year, val beløp: Inntekt)
+        companion object {
+            fun gjenopprett(dto: InntektsopplysningInnDto.SelvstendigDto) = Selvstendig(
+                pensjonsgivendeInntekt = dto.pensjonsgivendeInntekt.map {
+                    PensjonsgivendeInntekt(it.årstall, Inntekt.gjenopprett(it.beløp))
+                }
+            )
+        }
+    }
+
     fun dto(): InntektsopplysningUtDto
 
     companion object {
         fun gjenopprett(dto: InntektsopplysningInnDto) = when (dto) {
             is InntektsopplysningInnDto.ArbeidstakerDto -> Arbeidstaker.gjenopprett(dto)
+            is InntektsopplysningInnDto.SelvstendigDto -> Selvstendig.gjenopprett(dto)
         }
     }
 }

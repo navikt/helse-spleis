@@ -261,6 +261,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                     is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> IInntektkilde.Inntektsmelding
                     is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> if (faktaavklartInntekt.inntektsdata.beløp.årlig.beløp == 0.0) IInntektkilde.IkkeRapportert else IInntektkilde.AOrdningen
                 }
+
+                is InntektsopplysningUtDto.SelvstendigDto -> IInntektkilde.AOrdningen
             },
             beløp = faktaavklartInntekt.inntektsdata.beløp.årlig.beløp,
             månedsbeløp = faktaavklartInntekt.inntektsdata.beløp.månedligDouble.beløp,
@@ -279,6 +281,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                             )
                         }
                 }
+
+                is InntektsopplysningUtDto.SelvstendigDto -> null
             }
         )
     }

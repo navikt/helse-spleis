@@ -2,7 +2,7 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dto.deserialisering.FaktaavklartInntektInnDto
 import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -18,6 +18,12 @@ internal data class FaktaavklartInntekt(
         return when (this.inntektsopplysning) {
             is Inntektsopplysning.Arbeidstaker -> when (other.inntektsopplysning) {
                 is Inntektsopplysning.Arbeidstaker -> this.inntektsopplysning.kilde::class == other.inntektsopplysning.kilde::class
+                is Inntektsopplysning.Selvstendig -> false
+            }
+
+            is Inntektsopplysning.Selvstendig -> when (other.inntektsopplysning) {
+                is Inntektsopplysning.Selvstendig -> this.inntektsopplysning.pensjonsgivendeInntekt == other.inntektsopplysning.pensjonsgivendeInntekt
+                is Inntektsopplysning.Arbeidstaker -> false
             }
         }
     }

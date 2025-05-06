@@ -75,6 +75,8 @@ internal data class ArbeidsgiverInntektsopplysning(
                 Arbeidstakerinntektskilde.Arbeidsgiver,
                 Arbeidstakerinntektskilde.Infotrygd -> emptyList()
             }
+
+            is Inntektsopplysning.Selvstendig -> emptyList()
         }
         subsumsjonslogg.logg(
             `§ 8-15`(
@@ -221,6 +223,8 @@ internal data class ArbeidsgiverInntektsopplysning(
                                 Arbeidstakerinntektskilde.Arbeidsgiver -> Inntektskilde.Arbeidsgiver
                                 Arbeidstakerinntektskilde.Infotrygd -> Inntektskilde.Arbeidsgiver
                             }
+
+                            is Inntektsopplysning.Selvstendig -> Inntektskilde.AOrdningen
                         }
                 )
             }

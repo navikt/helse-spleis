@@ -48,6 +48,7 @@ import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.ArbeidstakerinntektskildeInnDto
+import no.nav.helse.dto.deserialisering.ArbeidstakerinntektskildeInnDto.AOrdningenDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
 import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
 import no.nav.helse.dto.deserialisering.BehandlingerInnDto
@@ -66,7 +67,8 @@ import no.nav.helse.dto.deserialisering.InntektsdataInnDto
 import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.deserialisering.InntektsmeldingInnDto
-import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
+import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto.ArbeidstakerDto
+import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto.SelvstendigDto
 import no.nav.helse.dto.deserialisering.MaksdatoresultatInnDto
 import no.nav.helse.dto.deserialisering.MinimumSykdomsgradVurderingInnDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
@@ -284,12 +286,14 @@ data class PersonData(
                 val hendelseId: UUID,
                 val beløp: Double,
                 val tidsstempel: LocalDateTime,
-                val kilde: InntektsopplysningskildeData,
+                val kilde: InntektsopplysningskildeData?,
                 val type: InntektsopplysningstypeData,
+                val pensjonsgivendeInntekter: List<PensjonsgivendeInntektData>?,
                 val skatteopplysninger: List<SkatteopplysningData>?
             ) {
                 enum class InntektsopplysningstypeData {
-                    ARBEIDSTAKER
+                    ARBEIDSTAKER,
+                    SELVSTENDIG
                 }
 
                 enum class InntektsopplysningskildeData {
@@ -297,6 +301,8 @@ data class PersonData(
                     INFOTRYGD,
                     INNTEKTSMELDING
                 }
+
+                data class PensjonsgivendeInntektData(val årstall: Int, val årligBeløp: Double)
 
                 fun tilDto(): FaktaavklartInntektInnDto {
                     val inntektsdata = InntektsdataInnDto(
@@ -309,15 +315,19 @@ data class PersonData(
                         id = this.id,
                         inntektsdata = inntektsdata,
                         inntektsopplysning = when (type) {
-                            InntektsopplysningstypeData.ARBEIDSTAKER -> InntektsopplysningInnDto.ArbeidstakerDto(
-                                kilde = when (kilde) {
-                                    InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> ArbeidstakerinntektskildeInnDto.AOrdningenDto(
+                            InntektsopplysningstypeData.ARBEIDSTAKER -> ArbeidstakerDto(
+                                kilde = when (kilde!!) {
+                                    InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> AOrdningenDto(
                                         inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
                                     )
 
                                     InntektsopplysningskildeData.INFOTRYGD -> ArbeidstakerinntektskildeInnDto.InfotrygdDto
                                     InntektsopplysningskildeData.INNTEKTSMELDING -> ArbeidstakerinntektskildeInnDto.ArbeidsgiverDto
                                 }
+                            )
+
+                            InntektsopplysningstypeData.SELVSTENDIG -> SelvstendigDto(
+                                pensjonsgivendeInntekt = this.pensjonsgivendeInntekter!!.map { SelvstendigDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) }
                             )
                         }
                     )
