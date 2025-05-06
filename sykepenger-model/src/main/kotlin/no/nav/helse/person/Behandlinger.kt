@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
@@ -40,6 +40,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
+import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektskilde
 import no.nav.helse.sykdomstidslinje.Dag
@@ -471,7 +472,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val arbeidsgiverperiode: List<Periode>,
             val dagerNavOvertarAnsvar: List<Periode>,
             val maksdatoresultat: Maksdatoresultat,
-            val inntekter: Map<Inntektskilde, Beløpstidslinje>
+            val inntekter: Map<Inntektskilde, Beløpstidslinje>,
+            val faktaavklartInntekt: FaktaavklartInntekt?
         ) {
 
             fun view() = BehandlingendringView(
@@ -549,7 +551,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         maksdatoresultat = dto.maksdatoresultat.let { Maksdatoresultat.gjenopprett(it) },
                         inntekter = dto.inntekter.map { (inntektskildeDto, beløpstidslinjeDto) ->
                             Inntektskilde.gjenopprett(inntektskildeDto) to Beløpstidslinje.gjenopprett(beløpstidslinjeDto)
-                        }.toMap()
+                        }.toMap(),
+                        faktaavklartInntekt = dto.faktaavklartInntekt?.let { FaktaavklartInntekt.gjenopprett(it) }
                     )
                 }
             }
@@ -777,7 +780,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     maksdatoresultat = this.maksdatoresultat.dto(),
                     inntekter = this.inntekter.map { (inntektskilde, beløpstidslinje) ->
                         inntektskilde.dto() to beløpstidslinje.dto()
-                    }.toMap()
+                    }.toMap(),
+                    faktaavklartInntekt = faktaavklartInntekt?.dto()
                 )
             }
         }
@@ -1266,7 +1270,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             egenmeldingsdager = egenmeldingsdager,
                             dagerNavOvertarAnsvar = emptyList(),
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert,
-                            inntekter = emptyMap()
+                            inntekter = emptyMap(),
+                            faktaavklartInntekt = null
                         )
                     ),
                     avsluttet = null,

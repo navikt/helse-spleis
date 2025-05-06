@@ -520,7 +520,8 @@ data class SpannerPersonDto(
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
                     val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
-                    val inntekter: Map<String, BeløpstidslinjeData>
+                    val inntekter: Map<String, BeløpstidslinjeData>,
+                    val faktaavklartInntekt: ArbeidsgiverInntektsopplysningData.InntektsopplysningData?
                 )
             }
 
@@ -1148,7 +1149,8 @@ private fun BehandlingendringUtDto.tilPersonData() =
         maksdatoresultat = maksdatoresultat.tilPersonData(),
         inntekter = inntekter.map { (inntektskilde, beløpstidslinje) ->
             inntektskilde.id to beløpstidslinje.tilPersonData()
-        }.toMap()
+        }.toMap(),
+        faktaavklartInntekt = faktaavklartInntekt?.tilPersonData()
     )
 
 private fun MaksdatoresultatUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatoresultatData(

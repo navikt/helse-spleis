@@ -86,6 +86,7 @@ import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnslagInnDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlaghistorikkInnDto
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
+import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 
 data class PersonData(
@@ -915,7 +916,8 @@ data class PersonData(
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
                     val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
-                    val inntekter: Map<String, BeløpstidslinjeData>? // TODO: Fjerne optional når alle personer har fått seg det
+                    val inntekter: Map<String, BeløpstidslinjeData>?, // TODO: Fjerne optional når alle personer har fått seg det
+                    val faktaavklartInntekt: InntektsopplysningData?
                 ) {
                     fun tilDto() = BehandlingendringInnDto(
                         id = this.id,
@@ -937,7 +939,8 @@ data class PersonData(
                         maksdatoresultat = maksdatoresultat.tilDto(),
                         inntekter = inntekter?.map { (inntektskilde, beløpstidslinje) ->
                             InntektskildeDto(inntektskilde) to beløpstidslinje.tilDto()
-                        }?.toMap() ?: emptyMap()
+                        }?.toMap() ?: emptyMap(),
+                        faktaavklartInntekt = faktaavklartInntekt?.tilDto()
                     )
                 }
             }
