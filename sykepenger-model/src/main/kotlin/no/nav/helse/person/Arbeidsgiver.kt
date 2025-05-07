@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
@@ -178,7 +179,11 @@ internal class Arbeidsgiver private constructor(
                     .filter { utbetaling -> utbetaling.potensiellDobbelutbetaling() }
                     .mapNotNull { utbetaling -> arbeidsgiver.vedtaksperioder.eier(utbetaling) }
                     .forEach { vedtaksperiode ->
-                        sikkerlogg.info("Mistenkt dobbelutbetaling!\n\t${vedtaksperiode.påminnelseJson()}")
+                        sikkerlogg.info("Mistenkt dobbelutbetaling! {}, {}, {}",
+                            keyValue("fødselsnummer", vedtaksperiode.person.fødselsnummer),
+                            keyValue("vedtaksperiodeId", vedtaksperiode.id.toString()),
+                            keyValue("tilstand", vedtaksperiode.tilstand.type.name),
+                        )
                     }
             }
         }

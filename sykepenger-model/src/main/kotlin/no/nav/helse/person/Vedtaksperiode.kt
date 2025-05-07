@@ -140,7 +140,6 @@ import no.nav.helse.utbetalingstidslinje.Vedtaksperiodeberegning
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.intellij.lang.annotations.Language
 
 internal class Vedtaksperiode private constructor(
     internal val person: Person,
@@ -219,21 +218,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun eier(utbetaling: Utbetaling) = behandlinger.eier(utbetaling)
-    @Language("JSON")
-    internal fun påminnelseJson() = """
-        {
-          "@event_name": "påminnelse",
-          "fødselsnummer": "${person.fødselsnummer}",
-          "organisasjonsnummer": "${arbeidsgiver.organisasjonsnummer}",
-          "vedtaksperiodeId": "$id",
-          "tilstand": "${tilstand.type.name}",
-          "påminnelsestidspunkt": "{{now}}",
-          "nestePåminnelsestidspunkt": "{{now+1h}}",
-          "tilstandsendringstidspunkt": "{{now-1h}}",
-          "antallGangerPåminnet": 1,
-          "flagg": ["ønskerReberegning"]
-        }
-    """.trimIndent()
 
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.trimLeft(periode.endInclusive)
