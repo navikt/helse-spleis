@@ -131,7 +131,8 @@ internal class ArbeidsgiverHendelsefabrikk(
             egenmeldinger = egenmeldinger,
             søknadstype = søknadstype,
             registrert = registrert,
-            inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold
+            inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
+            pensjonsgivendeInntekter = null
         ).apply {
             søknader.add(this)
         }

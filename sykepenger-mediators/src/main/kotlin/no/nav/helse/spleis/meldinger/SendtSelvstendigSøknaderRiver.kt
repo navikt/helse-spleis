@@ -17,9 +17,10 @@ internal class SendtSelvstendigSøknaderRiver(
     override val riverName = "Sendt søknad Selvstendig"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("id")
+        message.requireKey("id", "selvstendigNaringsdrivende")
         message.forbid("arbeidsgiver.orgnummer")
         message.require("sendtNav", JsonNode::asLocalDateTime)
+        message.requireArray("selvstendigNaringsdrivende.sykepengegrunnlagNaeringsdrivende.inntekter")
         message.interestedIn("egenmeldingsdagerFraSykmelding") { egenmeldinger -> egenmeldinger.map { it.asLocalDate() } }
         message.interestedIn("sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys", "fravar", "papirsykmeldinger", "inntektFraNyttArbeidsforhold")
     }

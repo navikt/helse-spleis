@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import no.nav.helse.Alder
 import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.Regelverkslogg
@@ -68,7 +69,8 @@ class Søknad(
     private val egenmeldinger: List<Periode>,
     private val søknadstype: Søknadstype,
     registrert: LocalDateTime,
-    private val inntekterFraNyeArbeidsforhold: Boolean
+    private val inntekterFraNyeArbeidsforhold: Boolean,
+    private val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>? //TODO Vi skal ta denne i bruk senare
 ) : Hendelse {
 
     override val metadata = HendelseMetadata(
@@ -351,4 +353,7 @@ class Søknad(
 
         fun build() = foreldedeDager.grupperSammenhengendePerioder()
     }
+
+    data class PensjonsgivendeInntekt(val inntektsår: Year, val næringsinntekt: Int)
+
 }

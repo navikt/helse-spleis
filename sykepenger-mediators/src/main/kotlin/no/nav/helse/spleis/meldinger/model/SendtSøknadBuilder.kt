@@ -43,11 +43,16 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         egenmeldinger = egenmeldinger,
         registrert = registrert,
         søknadstype = søknadstype,
-        inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold
+        inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
+        pensjonsgivendeInntekter = pensjonsgivendeInntekter
     )
 
     fun arbeidsledigsøknad() {
         søknadstype = Søknad.Søknadstype.Arbeidsledig
+    }
+
+    internal fun pensjonsgivendeInntekter(pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>) = apply {
+        this.pensjonsgivendeInntekter = pensjonsgivendeInntekter
     }
 
     override fun inntektskilde(andreInntektskilder: Boolean) = apply {
