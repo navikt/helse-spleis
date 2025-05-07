@@ -64,6 +64,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
+import no.nav.helse.person.Vedtaksperiode.Companion.eier
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
@@ -108,6 +109,7 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.slf4j.LoggerFactory
 
 internal class Arbeidsgiver private constructor(
     private val person: Person,
@@ -169,6 +171,17 @@ internal class Arbeidsgiver private constructor(
     )
 
     internal companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        internal fun List<Arbeidsgiver>.loggPotensielleDobbelutbetalinger() {
+            forEach { arbeidsgiver ->
+                arbeidsgiver.utbetalinger
+                    .filter { utbetaling -> utbetaling.potensiellDobbelutbetaling() }
+                    .mapNotNull { utbetaling -> arbeidsgiver.vedtaksperioder.eier(utbetaling) }
+                    .forEach { vedtaksperiode ->
+                        sikkerlogg.info("Mistenkt dobbelutbetaling!\n\t${vedtaksperiode.påminnelseJson()}")
+                    }
+            }
+        }
         internal fun List<Arbeidsgiver>.finn(behandlingsporing: Behandlingsporing) =
             find { it.yrkesaktivitetssporing.erLik(behandlingsporing) }
 
