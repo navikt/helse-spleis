@@ -218,6 +218,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun eier(utbetaling: Utbetaling) = behandlinger.eier(utbetaling)
+    internal fun reberegningJson() =
+        """{"@event_name":"påminnelse","fødselsnummer":"${person.fødselsnummer}","yrkesaktivitetstype":"ARBEIDSTAKER","organisasjonsnummer":"${arbeidsgiver.organisasjonsnummer}","vedtaksperiodeId":"$id","tilstand":"${tilstand.type.name}","påminnelsestidspunkt":"{{now}}","nestePåminnelsestidspunkt":"{{now+1h}}","tilstandsendringstidspunkt":"{{now-1h}}","antallGangerPåminnet":1,"flagg":["ønskerReberegning"]}"""
 
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.trimLeft(periode.endInclusive)
