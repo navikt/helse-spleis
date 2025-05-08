@@ -112,6 +112,7 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
         val `3G` = Grunnbeløp(3.0)
         val `2G` = Grunnbeløp(2.0)
         val `1G` = Grunnbeløp(1.0)
+        val `12G` = Grunnbeløp(12.0)
 
         private fun Inntekt.gyldigFra(gyldigFra: LocalDate, virkningsdato: LocalDate = gyldigFra, gyldigSomMinsteinntektKrav: LocalDate = gyldigFra) = HistoriskGrunnbeløp(this, gyldigFra, virkningsdato, gyldigSomMinsteinntektKrav)
 

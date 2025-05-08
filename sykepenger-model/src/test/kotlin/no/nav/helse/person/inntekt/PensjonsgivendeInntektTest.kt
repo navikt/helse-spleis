@@ -1,13 +1,14 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import no.nav.helse.Grunnbeløp.Companion.`12G`
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Grunnbeløp.Companion.`2G`
-import no.nav.helse.Grunnbeløp.Companion.`3G`
-import no.nav.helse.Grunnbeløp.Companion.`4G`
+import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -54,7 +55,7 @@ internal class PensjonsgivendeInntektTest {
 private class SelvstendigNæringsdrivende(private val inntekter: List<PensjonsgivendeInntekt>) {
     fun fastsattÅrsinntekt(skjæringstidspunkt: LocalDate): Inntekt {
         return inntekter
-            .map { it.omregnetÅrsinntekt(skjæringstidspunkt) }
+            .map { it.justertÅrsgrunnlag(skjæringstidspunkt) }
             .summer()
             .årlig.toInt()
             .årlig
@@ -66,11 +67,16 @@ private class PensjonsgivendeInntekt(
     private val beløp: Inntekt
 ) {
 
-    fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate): Inntekt {
-        val grense = `2G`.beløp(skjæringstidspunkt)
-        val utgangspunkt = beløp * (`1G`.beløp(skjæringstidspunkt) ratio `3G`.snitt(år))
-        val aktuelt = minOf(grense, utgangspunkt)
-        val ekstra = (utgangspunkt.coerceAtMost(`4G`.beløp(skjæringstidspunkt)) - aktuelt) / 3
-        return aktuelt + ekstra
+    fun justertÅrsgrunnlag(skjæringstidspunkt: LocalDate): Inntekt {
+        val justering = `1G`.beløp(skjæringstidspunkt).årlig / `1G`.snitt(år).årlig
+        val gJustertInntekt = beløp * justering
+        val `6G` = `6G`.beløp(skjæringstidspunkt)
+
+        val inntekterOppTil6g = minOf(`6G`, beløp * justering)
+        val inntekterOppTil12g = minOf(`12G`.beløp(skjæringstidspunkt), gJustertInntekt)
+        val inntekterOver6g = maxOf(INGEN, inntekterOppTil12g - `6G`)
+        val enTredjedelAvInntekterOver6g = inntekterOver6g / 3
+
+        return (inntekterOppTil6g + enTredjedelAvInntekterOver6g) / 3
     }
 }
