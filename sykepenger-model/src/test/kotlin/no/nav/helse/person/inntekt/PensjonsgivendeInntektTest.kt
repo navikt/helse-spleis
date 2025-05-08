@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`12G`
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Grunnbeløp.Companion.`2G`
@@ -68,15 +69,15 @@ private class PensjonsgivendeInntekt(
 ) {
 
     fun justertÅrsgrunnlag(skjæringstidspunkt: LocalDate): Inntekt {
-        val justering = `1G`.beløp(skjæringstidspunkt).årlig / `1G`.snitt(år).årlig
-        val gJustertInntekt = beløp * justering
-        val `6G` = `6G`.beløp(skjæringstidspunkt)
-
-        val inntekterOppTil6g = minOf(`6G`, beløp * justering)
-        val inntekterOppTil12g = minOf(`12G`.beløp(skjæringstidspunkt), gJustertInntekt)
-        val inntekterOver6g = maxOf(INGEN, inntekterOppTil12g - `6G`)
-        val enTredjedelAvInntekterOver6g = inntekterOver6g / 3
-
-        return (inntekterOppTil6g + enTredjedelAvInntekterOver6g) / 3
+        val snitt = `1G`.snitt(år)
+        // hvor mange G inntekten utgjør
+        val antallG = beløp.årlig / snitt.årlig
+        // alle inntekter opp til 6g
+        val inntekterOppTil6g = minOf(6.0, antallG)
+        // 1/3 av inntekter mellom 6g og 12g
+        val enTredjedelAvInntekterMellom6gOg12g = maxOf(0.0, minOf(4.0, antallG * 1/3) - 2.0)
+        val Q = (inntekterOppTil6g + enTredjedelAvInntekterMellom6gOg12g) / 3.0
+        // dekningen dette året er nå gitt ved dagens grunnbeløp multiplisert med Q
+        return Grunnbeløp(Q).beløp(skjæringstidspunkt)
     }
 }

@@ -8,7 +8,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
-class Grunnbeløp private constructor(private val multiplier: Double) {
+class Grunnbeløp(private val multiplier: Double) {
     private val grunnbeløp = listOf(
         124028.årlig.gyldigFra(1.mai(2024), gyldigSomMinsteinntektKrav = 3.juni(2024)),
         118620.årlig.gyldigFra(1.mai(2023), gyldigSomMinsteinntektKrav = 29.mai(2023)),
