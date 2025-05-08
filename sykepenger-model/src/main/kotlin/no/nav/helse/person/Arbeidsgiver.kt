@@ -174,12 +174,10 @@ internal class Arbeidsgiver private constructor(
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         internal fun List<Arbeidsgiver>.loggPotensielleDobbelutbetalinger() {
             forEach { arbeidsgiver ->
-                arbeidsgiver.utbetalinger
+                arbeidsgiver.utbetalinger.aktive()
                     .filter { utbetaling -> utbetaling.potensiellDobbelutbetaling() }
                     .mapNotNull { utbetaling -> arbeidsgiver.vedtaksperioder.eier(utbetaling) }
-                    .forEach { vedtaksperiode ->
-                        sikkerlogg.info("Mistenkt dobbelutbetaling! ${vedtaksperiode.reberegningJson()}")
-                    }
+                    .forEach { vedtaksperiode -> sikkerlogg.info("Mistenkt dobbelutbetaling! ${vedtaksperiode.reberegningJson()}") }
             }
         }
         internal fun List<Arbeidsgiver>.finn(behandlingsporing: Behandlingsporing) =

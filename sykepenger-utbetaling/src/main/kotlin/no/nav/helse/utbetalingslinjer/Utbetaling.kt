@@ -813,22 +813,13 @@ class Utbetaling private constructor(
         oppdatert = oppdatert
     )
 
-    private val OppdragPerVedtaksperiodeFraOgMed = LocalDateTime.of(2025, 4, 24, 15, 24, 2,988000000)
     fun potensiellDobbelutbetaling(): Boolean {
-        if (tilstand is Forkastet) return false // Kan ikke bli dobbelutbetaling, den er jo forkastet
-
         val sisteLinjeDato = listOfNotNull(
             arbeidsgiverOppdrag.linjer.maxOfOrNull { it.tom },
             personOppdrag.linjer.maxOfOrNull { it.tom }
         ).maxOrNull() ?: return false
 
-        if (sisteLinjeDato <= periode.endInclusive) return false // Ingen linjer som strekker seg utover perioden
-        if (tidsstempel > OppdragPerVedtaksperiodeFraOgMed) return false // Beregnet med ny kode
-        val utbetalt = avsluttet
-        if (utbetalt != null && utbetalt < OppdragPerVedtaksperiodeFraOgMed) return false // Utbetalt før ny kode
-
-        // Nå er det kanskje trøbbel
-        return true
+        return sisteLinjeDato > periode.endInclusive // Linjer som strekker seg utover perioden
     }
 }
 
