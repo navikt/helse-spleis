@@ -439,7 +439,7 @@ class Person private constructor(
     fun håndter(påminnelse: PersonPåminnelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler personpåminnelse")
         arbeidsgivere.loggPotensielleDobbelutbetalinger()
-        håndterGjenoppta(påminnelse, aktivitetsloggMedPersonkontekst)
+        //håndterGjenoppta(påminnelse, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
