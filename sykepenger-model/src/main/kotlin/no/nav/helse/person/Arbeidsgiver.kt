@@ -173,13 +173,17 @@ internal class Arbeidsgiver private constructor(
     internal companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         internal fun List<Arbeidsgiver>.loggPotensielleDobbelutbetalinger() {
-            forEach { arbeidsgiver ->
-                arbeidsgiver.utbetalinger.aktive()
-                    .filter { utbetaling -> utbetaling.potensiellDobbelutbetaling() }
+            val førsteVedtaksperiodeSomBurdeReberegnes = mapNotNull { arbeidsgiver ->
+                arbeidsgiver.utbetalinger
+                    .aktive()
+                    .filter(Utbetaling::potensiellDobbelutbetaling)
                     .mapNotNull { utbetaling -> arbeidsgiver.vedtaksperioder.eier(utbetaling) }
-                    .forEach { vedtaksperiode -> sikkerlogg.info("Mistenkt dobbelutbetaling! ${vedtaksperiode.reberegningJson()}") }
-            }
+                    .minByOrNull { it.periode.start } // Første periode med potensiell dobbel utbetaling per arbeidsgiver
+                }.minByOrNull { it.periode.start } ?: return // Første periode med potensiell dobbel utbetaling på tvers av arbeidsgivere
+
+            sikkerlogg.info("Mistenkt dobbelutbetaling. Burde reberegnes! ${førsteVedtaksperiodeSomBurdeReberegnes.reberegningJson()}")
         }
+
         internal fun List<Arbeidsgiver>.finn(behandlingsporing: Behandlingsporing) =
             find { it.yrkesaktivitetssporing.erLik(behandlingsporing) }
 
