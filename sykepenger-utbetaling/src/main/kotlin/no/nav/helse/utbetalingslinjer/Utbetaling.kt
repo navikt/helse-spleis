@@ -374,8 +374,8 @@ class Utbetaling private constructor(
             return utbetalingen
         }
 
-        fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv).filterNot { it.tilstand is Annullert  }
-        private fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
+        fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
+        fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
         fun List<Utbetaling>.aktive(periode: Periode) = this
             .aktive()
             .filter { utbetaling -> utbetaling.periode.overlapperMed(periode) }

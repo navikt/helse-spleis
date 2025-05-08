@@ -95,6 +95,7 @@ import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktiveMedUbetalte
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd
@@ -175,7 +176,7 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.loggPotensielleDobbelutbetalinger() {
             val førsteVedtaksperiodeSomBurdeReberegnes = mapNotNull { arbeidsgiver ->
                 arbeidsgiver.utbetalinger
-                    .aktive()
+                    .aktiveMedUbetalte()
                     .filter(Utbetaling::potensiellDobbelutbetaling)
                     .mapNotNull { utbetaling -> arbeidsgiver.vedtaksperioder.eier(utbetaling) }
                     .minByOrNull { it.periode.start } // Første periode med potensiell dobbel utbetaling per arbeidsgiver
