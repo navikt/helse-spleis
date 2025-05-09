@@ -19,11 +19,12 @@ internal sealed interface Inntektsopplysning {
         }
     }
 
-    data class Selvstendig(val pensjonsgivendeInntekt: List<PensjonsgivendeInntekt>) : Inntektsopplysning {
+    data class Selvstendig(val pensjonsgivendeInntekt: List<PensjonsgivendeInntekt>, val anvendtGrunnbeløp: Inntekt) : Inntektsopplysning {
         override fun dto() = InntektsopplysningUtDto.SelvstendigDto(
             pensjonsgivendeInntekt = pensjonsgivendeInntekt.map {
                 PensjonsgivendeInntektDto(it.årstall, it.beløp.dto())
-            }
+            },
+            anvendtGrunnbeløp = anvendtGrunnbeløp.dto()
         )
 
         data class PensjonsgivendeInntekt(val årstall: Year, val beløp: Inntekt)
@@ -31,7 +32,8 @@ internal sealed interface Inntektsopplysning {
             fun gjenopprett(dto: InntektsopplysningInnDto.SelvstendigDto) = Selvstendig(
                 pensjonsgivendeInntekt = dto.pensjonsgivendeInntekt.map {
                     PensjonsgivendeInntekt(it.årstall, Inntekt.gjenopprett(it.beløp))
-                }
+                },
+                anvendtGrunnbeløp = Inntekt.gjenopprett(dto.anvendtGrunnbeløp)
             )
         }
     }

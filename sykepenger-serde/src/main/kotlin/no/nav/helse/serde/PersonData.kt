@@ -290,6 +290,7 @@ data class PersonData(
                 val kilde: InntektsopplysningskildeData?,
                 val type: InntektsopplysningstypeData,
                 val pensjonsgivendeInntekter: List<PensjonsgivendeInntektData>?,
+                val anvendtÅrligGrunnbeløp: Double?,
                 val skatteopplysninger: List<SkatteopplysningData>?
             ) {
                 enum class InntektsopplysningstypeData {
@@ -328,7 +329,8 @@ data class PersonData(
                             )
 
                             InntektsopplysningstypeData.SELVSTENDIG -> SelvstendigDto(
-                                pensjonsgivendeInntekt = this.pensjonsgivendeInntekter!!.map { SelvstendigDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) }
+                                pensjonsgivendeInntekt = this.pensjonsgivendeInntekter!!.map { SelvstendigDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) },
+                                anvendtGrunnbeløp = InntektbeløpDto.Årlig(this.anvendtÅrligGrunnbeløp!!)
                             )
                         }
                     )

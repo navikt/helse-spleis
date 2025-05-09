@@ -856,6 +856,10 @@ private fun FaktaavklartInntektUtDto.tilPersonData() = PersonData.Vilkårsgrunnl
                 årligBeløp = it.beløp.årlig.beløp
             )
         }
+    },
+    anvendtÅrligGrunnbeløp = when (val inntektsopplysning = this.inntektsopplysning) {
+        is InntektsopplysningUtDto.ArbeidstakerDto -> null
+        is InntektsopplysningUtDto.SelvstendigDto -> inntektsopplysning.anvendtGrunnbeløp.årlig.beløp
     }
 
 )

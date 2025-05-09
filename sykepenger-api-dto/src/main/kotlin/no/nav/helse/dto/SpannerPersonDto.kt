@@ -146,7 +146,8 @@ data class SpannerPersonDto(
                 val type: InntektsopplysningstypeData,
                 val tidsstempel: LocalDateTime,
                 val skatteopplysninger: List<SkatteopplysningData>?,
-                val pensjonsgivendeInntekter: List<PensjonsgivendeInntektData>?
+                val pensjonsgivendeInntekter: List<PensjonsgivendeInntektData>?,
+                val anvendtGrunnbeløp: InntektDto?
             ) {
                 enum class InntektsopplysningstypeData {
                     ARBEIDSTAKER,
@@ -1619,6 +1620,10 @@ private fun FaktaavklartInntektUtDto.tilPersonData() =
                     beløp = it.beløp.tilPersonData()
                 )
             }
+        },
+        anvendtGrunnbeløp = when (val inntektsopplysning = this.inntektsopplysning) {
+            is InntektsopplysningUtDto.ArbeidstakerDto -> null
+            is InntektsopplysningUtDto.SelvstendigDto -> inntektsopplysning.anvendtGrunnbeløp.tilPersonData()
         }
     )
 
