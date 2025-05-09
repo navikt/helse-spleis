@@ -812,15 +812,6 @@ class Utbetaling private constructor(
         avsluttet = avsluttet,
         oppdatert = oppdatert
     )
-
-    fun potensiellDobbelutbetaling(): Boolean {
-        val sisteLinjeDato = listOfNotNull(
-            arbeidsgiverOppdrag.linjerUtenOpphør().maxOfOrNull { it.tom },
-            personOppdrag.linjerUtenOpphør().maxOfOrNull { it.tom }
-        ).maxOrNull() ?: return false
-
-        return sisteLinjeDato > periode.endInclusive // Linjer som strekker seg utover perioden
-    }
 }
 
 enum class Utbetalingstatus {

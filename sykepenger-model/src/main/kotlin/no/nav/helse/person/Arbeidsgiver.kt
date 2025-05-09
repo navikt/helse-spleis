@@ -64,7 +64,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
-import no.nav.helse.person.Vedtaksperiode.Companion.eier
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
@@ -95,7 +94,6 @@ import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktiveMedUbetalte
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd
@@ -110,7 +108,6 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.slf4j.LoggerFactory
 
 internal class Arbeidsgiver private constructor(
     private val person: Person,
@@ -172,19 +169,6 @@ internal class Arbeidsgiver private constructor(
     )
 
     internal companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-        internal fun List<Arbeidsgiver>.loggPotensielleDobbelutbetalinger() {
-            val førsteVedtaksperiodeSomBurdeReberegnes = mapNotNull { arbeidsgiver ->
-                arbeidsgiver.utbetalinger
-                    .aktiveMedUbetalte()
-                    .filter(Utbetaling::potensiellDobbelutbetaling)
-                    .mapNotNull { utbetaling -> arbeidsgiver.vedtaksperioder.eier(utbetaling) }
-                    .minByOrNull { it.periode.start } // Første periode med potensiell dobbel utbetaling per arbeidsgiver
-                }.minByOrNull { it.periode.start } ?: return // Første periode med potensiell dobbel utbetaling på tvers av arbeidsgivere
-
-            sikkerlogg.info("Mistenkt dobbelutbetaling. Burde reberegnes! ${førsteVedtaksperiodeSomBurdeReberegnes.reberegningJson()}")
-        }
-
         internal fun List<Arbeidsgiver>.finn(behandlingsporing: Behandlingsporing) =
             find { it.yrkesaktivitetssporing.erLik(behandlingsporing) }
 

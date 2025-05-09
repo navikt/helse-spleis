@@ -72,7 +72,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     private val behandlinger = behandlinger.toMutableList()
     private val siste get() = behandlinger.lastOrNull()?.utbetaling()
-    internal fun eier(utbetaling: Utbetaling) = siste?.id == utbetaling.id
 
     private val observatører = mutableListOf<BehandlingObserver>()
 

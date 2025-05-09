@@ -217,10 +217,6 @@ internal class Vedtaksperiode private constructor(
         return SpesifikkKontekst("Vedtaksperiode", mapOf("vedtaksperiodeId" to id.toString()))
     }
 
-    internal fun eier(utbetaling: Utbetaling) = behandlinger.eier(utbetaling)
-    internal fun reberegningJson() =
-        """{"@event_name":"påminnelse","fødselsnummer":"${person.fødselsnummer}","yrkesaktivitetstype":"ARBEIDSTAKER","organisasjonsnummer":"${arbeidsgiver.organisasjonsnummer}","vedtaksperiodeId":"$id","tilstand":"${tilstand.type.name}","påminnelsestidspunkt":"{{now}}","nestePåminnelsestidspunkt":"{{now+1h}}","tilstandsendringstidspunkt":"{{now-1h}}","antallGangerPåminnet":1,"flagg":["ønskerReberegning"]}"""
-
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.trimLeft(periode.endInclusive)
     }
@@ -2227,7 +2223,6 @@ internal class Vedtaksperiode private constructor(
         // det kan derfor være mer enn 16 dager avstand mellom periodene, og arbeidsgiverperioden kan være den samme
         // Derfor bruker vi tallet 18 fremfor kanskje det forventende 16…
         internal const val MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD = 18L
-        internal fun List<Vedtaksperiode>.eier(utbetaling: Utbetaling) = firstOrNull { it.eier(utbetaling) }
         internal fun List<Vedtaksperiode>.egenmeldingsperioder(): List<Periode> = flatMap { it.behandlinger.egenmeldingsdager() }
         internal fun List<Vedtaksperiode>.refusjonstidslinje() =
             fold(Beløpstidslinje()) { beløpstidslinje, vedtaksperiode ->

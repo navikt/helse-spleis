@@ -65,7 +65,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvRefusjon
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
-import no.nav.helse.person.Arbeidsgiver.Companion.loggPotensielleDobbelutbetalinger
 import no.nav.helse.person.Arbeidsgiver.Companion.mursteinsperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
@@ -438,8 +437,7 @@ class Person private constructor(
 
     fun håndter(påminnelse: PersonPåminnelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler personpåminnelse")
-        arbeidsgivere.loggPotensielleDobbelutbetalinger()
-        //håndterGjenoppta(påminnelse, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(påminnelse, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
