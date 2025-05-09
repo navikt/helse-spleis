@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
@@ -161,6 +162,7 @@ internal class Vedtaksperiode private constructor(
         sykdomstidslinje: Sykdomstidslinje,
         dokumentsporing: Dokumentsporing,
         sykmeldingsperiode: Periode,
+        faktaavklartInntekt: FaktaavklartInntekt?,
         inntektsendringer: Beløpstidslinje = Beløpstidslinje(),
         regelverkslogg: Regelverkslogg
     ) : this(
@@ -175,7 +177,7 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         val periode = checkNotNull(sykdomstidslinje.periode()) { "sykdomstidslinjen er tom" }
         person.vedtaksperiodeOpprettet(id, arbeidsgiver.yrkesaktivitetssporing, periode, periode.start, opprettet)
-        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, egenmeldingsperioder, inntektsendringer, dokumentsporing, metadata.behandlingkilde)
+        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, egenmeldingsperioder, faktaavklartInntekt, inntektsendringer, dokumentsporing, metadata.behandlingkilde)
     }
 
     private val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()
@@ -1394,7 +1396,13 @@ internal class Vedtaksperiode private constructor(
         val alleForSammeArbeidsgiver = vedtaksperioderMedSammeSkjæringstidspunkt
             .filter { it.arbeidsgiver === this.arbeidsgiver }
 
-        val faktaavklartInntekt = inntektForArbeidsgiver(hendelse, aktivitetsloggTilDenSomVilkårsprøver, skatteopplysning, alleForSammeArbeidsgiver)
+        val faktaavklartInntekt = when (this.arbeidsgiver.yrkesaktivitetssporing) {
+            is Arbeidstaker -> inntektForArbeidsgiver(hendelse, aktivitetsloggTilDenSomVilkårsprøver, skatteopplysning, alleForSammeArbeidsgiver)
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> inntektForSelvstendig()
+
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.Frilans -> error("Støtter ikke å beregne inntektsgrunnlaget for arbeidsledig eller frilans")
+        }
 
         return ArbeidsgiverInntektsopplysning(
             orgnummer = arbeidsgiver.organisasjonsnummer,
@@ -1402,6 +1410,20 @@ internal class Vedtaksperiode private constructor(
             korrigertInntekt = null,
             skjønnsmessigFastsatt = null
         )
+    }
+
+    private fun inntektForSelvstendig(): FaktaavklartInntekt {
+        val faktaavklartInntekt = checkNotNull(behandlinger.faktaavklartInntekt) { "Forventer å ha en inntekt for selvstendig" }
+        val inntektsgrunnlag = when (faktaavklartInntekt.inntektsopplysning) {
+            is Inntektsopplysning.Arbeidstaker -> error("Forventer ikke å ha en inntekt for arbeidstaker")
+            is Inntektsopplysning.Selvstendig -> faktaavklartInntekt.inntektsopplysning.beregnInntektsgrunnlag(`1G`.beløp(skjæringstidspunkt))
+        }
+        return faktaavklartInntekt
+            .copy(
+                inntektsdata = faktaavklartInntekt.inntektsdata.copy(
+                    beløp = inntektsgrunnlag
+                )
+            )
     }
 
     private fun subsummerBrukAvSkatteopplysninger(orgnummer: String, inntektsdata: Inntektsdata, skatteopplysninger: List<Skatteopplysning>) {

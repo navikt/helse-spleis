@@ -104,7 +104,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         egenmeldinger: List<Periode> = emptyList(),
         søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker,
         registrert: LocalDateTime = LocalDateTime.now(),
-        inntekterFraNyeArbeidsforhold: Boolean = false
+        inntekterFraNyeArbeidsforhold: Boolean = false,
+        pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>? = null
     ): Søknad {
         val innsendt = (sendtTilNAVEllerArbeidsgiver ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive).let {
             when (it) {
@@ -132,7 +133,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             søknadstype = søknadstype,
             registrert = registrert,
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
-            pensjonsgivendeInntekter = null
+            pensjonsgivendeInntekter = pensjonsgivendeInntekter
         ).apply {
             søknader.add(this)
         }

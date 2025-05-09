@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
 internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, private val builder: SendtSøknadBuilder = SendtSøknadBuilder()) : SøknadMessage(packet, builder.selvstendig()) {
     override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: MessageContext) {
@@ -17,7 +18,7 @@ internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val 
         val pensjonsgivendeInntekter = packet["selvstendigNaringsdrivende"]["sykepengegrunnlagNaeringsdrivende"]["inntekter"].flatMap {
             val inntektsaar = Year.parse(it["inntektsaar"].asText())
             it["pensjonsgivendeInntekt"].map { pensjonsgivendeInntekt ->
-                Søknad.PensjonsgivendeInntekt(inntektsaar, pensjonsgivendeInntekt["pensjonsgivendeInntektAvNaeringsinntekt"].asText().toInt())
+                Søknad.PensjonsgivendeInntekt(inntektsaar, pensjonsgivendeInntekt["pensjonsgivendeInntektAvNaeringsinntekt"].asText().toInt().årlig)
             }
         }
         builder.pensjonsgivendeInntekter(pensjonsgivendeInntekter)

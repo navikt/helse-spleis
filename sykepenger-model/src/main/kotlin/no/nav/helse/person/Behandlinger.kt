@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
@@ -76,9 +76,27 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     private val observatører = mutableListOf<BehandlingObserver>()
 
     val sisteBehandlingId get() = behandlinger.last().id
-    internal fun initiellBehandling(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, egenmeldingsdager: List<Periode>, inntektsendringer: Beløpstidslinje, dokumentsporing: Dokumentsporing, behandlingkilde: Behandlingkilde) {
+
+    internal fun initiellBehandling(
+        sykmeldingsperiode: Periode,
+        sykdomstidslinje: Sykdomstidslinje,
+        egenmeldingsdager: List<Periode>,
+        faktaavklartInntekt: FaktaavklartInntekt?,
+        inntektsendringer: Beløpstidslinje,
+        dokumentsporing: Dokumentsporing,
+        behandlingkilde: Behandlingkilde
+    ) {
         check(behandlinger.isEmpty())
-        val behandling = Behandling.nyBehandling(this.observatører, sykdomstidslinje, egenmeldingsdager, inntektsendringer, dokumentsporing, sykmeldingsperiode, behandlingkilde)
+        val behandling = Behandling.nyBehandling(
+            observatører = this.observatører,
+            sykdomstidslinje = sykdomstidslinje,
+            egenmeldingsdager = egenmeldingsdager,
+            faktaavklartInntekt = faktaavklartInntekt,
+            inntektsendringer = inntektsendringer,
+            dokumentsporing = dokumentsporing,
+            sykmeldingsperiode = sykmeldingsperiode,
+            behandlingkilde = behandlingkilde
+        )
         leggTilNyBehandling(behandling)
     }
 
@@ -98,6 +116,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal val maksdato get() = behandlinger.last().maksdato
     internal val dagerNavOvertarAnsvar get() = behandlinger.last().dagerNavOvertarAnsvar
+    internal val faktaavklartInntekt get() = behandlinger.last().faktaavklartInntekt
+
     internal fun utbetalingstidslinje() = behandlinger.last().utbetalingstidslinje()
     internal fun skjæringstidspunkt() = behandlinger.last().skjæringstidspunkt
     internal fun skjæringstidspunkter() = behandlinger.last().skjæringstidspunkter
@@ -377,6 +397,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val dagerNavOvertarAnsvar get() = gjeldende.dagerNavOvertarAnsvar
         val sykdomstidslinje get() = endringer.last().sykdomstidslinje
         val refusjonstidslinje get() = endringer.last().refusjonstidslinje
+        val faktaavklartInntekt get() = endringer.last().faktaavklartInntekt
         val inntektsendringer get() = endringer.last().inntektsendringer
 
         constructor(observatører: List<BehandlingObserver>, tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde, observatører) {
@@ -583,7 +604,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dagerNavOvertarAnsvar: List<Periode> = this.dagerNavOvertarAnsvar,
                 egenmeldingsdager: List<Periode> = this.egenmeldingsdager,
                 maksdatoresultat: Maksdatoresultat = this.maksdatoresultat,
-                inntekter: Map<Inntektskilde, Beløpstidslinje> = this.inntekter
+                inntekter: Map<Inntektskilde, Beløpstidslinje> = this.inntekter,
+                faktaavklartInntekt: FaktaavklartInntekt? = this.faktaavklartInntekt
             ) = copy(
                 id = UUID.randomUUID(),
                 tidsstempel = LocalDateTime.now(),
@@ -602,7 +624,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                 egenmeldingsdager = egenmeldingsdager,
                 maksdatoresultat = maksdatoresultat,
-                inntekter = inntekter
+                inntekter = inntekter,
+                faktaavklartInntekt = faktaavklartInntekt
             )
 
             internal fun kopierMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>): Endring? {
@@ -1247,7 +1270,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val List<Behandling>.sykmeldingsperiode get() = first().periode
             val List<Behandling>.dokumentsporing get() = map { it.dokumentsporing }.takeUnless { it.isEmpty() }?.reduce(Set<Dokumentsporing>::plus) ?: emptySet()
             val List<Behandling>.forrigeDokumentsporing get() = last().gjeldende.dokumentsporing
-            fun nyBehandling(observatører: List<BehandlingObserver>, sykdomstidslinje: Sykdomstidslinje, egenmeldingsdager: List<Periode>, inntektsendringer: Beløpstidslinje, dokumentsporing: Dokumentsporing, sykmeldingsperiode: Periode, behandlingkilde: Behandlingkilde) =
+            fun nyBehandling(
+                observatører: List<BehandlingObserver>,
+                sykdomstidslinje: Sykdomstidslinje,
+                egenmeldingsdager: List<Periode>,
+                faktaavklartInntekt: FaktaavklartInntekt?,
+                inntektsendringer: Beløpstidslinje,
+                dokumentsporing: Dokumentsporing,
+                sykmeldingsperiode: Periode,
+                behandlingkilde: Behandlingkilde
+            ) =
                 Behandling(
                     observatører = observatører,
                     tilstand = Tilstand.Uberegnet,
@@ -1271,7 +1303,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             dagerNavOvertarAnsvar = emptyList(),
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert,
                             inntekter = emptyMap(),
-                            faktaavklartInntekt = null
+                            faktaavklartInntekt = faktaavklartInntekt
                         )
                     ),
                     avsluttet = null,

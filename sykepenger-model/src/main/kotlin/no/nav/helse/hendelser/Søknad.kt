@@ -4,7 +4,9 @@ import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
+import java.util.UUID
 import no.nav.helse.Alder
+import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
@@ -44,10 +46,14 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_YS_1
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.inntekt.FaktaavklartInntekt
+import no.nav.helse.person.inntekt.Inntektsdata
+import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
 
@@ -70,7 +76,7 @@ class Søknad(
     private val søknadstype: Søknadstype,
     registrert: LocalDateTime,
     private val inntekterFraNyeArbeidsforhold: Boolean,
-    private val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>? //TODO Vi skal ta denne i bruk senare
+    private val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>?
 ) : Hendelse {
 
     override val metadata = HendelseMetadata(
@@ -168,6 +174,33 @@ class Søknad(
 
     internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, arbeidsgiver: Arbeidsgiver, regelverkslogg: Regelverkslogg): Vedtaksperiode {
         requireNotNull(sykdomstidslinje.periode()) { "ugyldig søknad: tidslinjen er tom" }
+        val faktaavklartInntekt = when (behandlingsporing) {
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
+            Behandlingsporing.Yrkesaktivitet.Frilans -> null
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
+                val anvendtGrunnbeløp = `1G`.beløp(sykdomsperiode.start)
+                val inntektsopplysning = Inntektsopplysning.Selvstendig(
+                    pensjonsgivendeInntekt = pensjonsgivendeInntekter?.map {
+                        Inntektsopplysning.Selvstendig.PensjonsgivendeInntekt(
+                            årstall = it.inntektsår,
+                            beløp = it.næringsinntekt
+                        )
+                    } ?: emptyList(),
+                    anvendtGrunnbeløp = anvendtGrunnbeløp
+                )
+                FaktaavklartInntekt(
+                    id = UUID.randomUUID(),
+                    inntektsdata = Inntektsdata(
+                        hendelseId = metadata.meldingsreferanseId,
+                        dato = sykdomsperiode.start,
+                        beløp = inntektsopplysning.inntektsgrunnlag,
+                        tidsstempel = LocalDateTime.now()
+                    ),
+                    inntektsopplysning = inntektsopplysning
+                )
+            }
+        }
         return Vedtaksperiode(
             egenmeldingsperioder = egenmeldingsperioder(),
             metadata = metadata,
@@ -175,6 +208,7 @@ class Søknad(
             person = person,
             arbeidsgiver = arbeidsgiver,
             sykdomstidslinje = sykdomstidslinje,
+            faktaavklartInntekt = faktaavklartInntekt,
             dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
             sykmeldingsperiode = sykdomsperiode,
             regelverkslogg = regelverkslogg
@@ -354,6 +388,6 @@ class Søknad(
         fun build() = foreldedeDager.grupperSammenhengendePerioder()
     }
 
-    data class PensjonsgivendeInntekt(val inntektsår: Year, val næringsinntekt: Int)
+    data class PensjonsgivendeInntekt(val inntektsår: Year, val næringsinntekt: Inntekt)
 
 }

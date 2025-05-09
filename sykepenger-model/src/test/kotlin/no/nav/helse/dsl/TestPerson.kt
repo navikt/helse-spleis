@@ -178,12 +178,14 @@ internal class TestPerson(
             periode: Periode,
             inntekterFraNyeArbeidsforhold: Boolean = false,
             sendTilGosys: Boolean = false,
-            egenmeldinger: List<Periode> = emptyList()
+            egenmeldinger: List<Periode> = emptyList(),
+            pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>? = null
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, 100.prosent),
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
             sendTilGosys = sendTilGosys,
-            egenmeldinger = egenmeldinger
+            egenmeldinger = egenmeldinger,
+            pensjonsgivendeInntekter = pensjonsgivendeInntekter
         )
 
         internal fun håndterArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning): UUID {
@@ -215,6 +217,7 @@ internal class TestPerson(
             registrert: LocalDateTime = LocalDateTime.now(),
             merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
             inntekterFraNyeArbeidsforhold: Boolean = false,
+            pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>? = null
         ) =
             behovsamler.fangInntektsmeldingReplay({
                 vedtaksperiodesamler.fangVedtaksperiode(this.orgnummer) {
@@ -232,7 +235,8 @@ internal class TestPerson(
                         sendTilGosys = sendTilGosys,
                         registrert = registrert,
                         merknaderFraSykmelding = merknaderFraSykmelding,
-                        inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold
+                        inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
+                        pensjonsgivendeInntekter = pensjonsgivendeInntekter
                     ).håndter(Person::håndter)
                 }?.also {
                     if (behovsamler.harBehov(it, Sykepengehistorikk)) {
