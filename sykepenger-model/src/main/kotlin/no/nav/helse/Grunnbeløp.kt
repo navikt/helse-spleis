@@ -8,7 +8,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
-class Grunnbeløp(private val multiplier: Double) {
+class Grunnbeløp private constructor(private val multiplier: Double) {
     private val grunnbeløp = listOf(
         124028.årlig.gyldigFra(1.mai(2024), gyldigSomMinsteinntektKrav = 3.juni(2024)),
         118620.årlig.gyldigFra(1.mai(2023), gyldigSomMinsteinntektKrav = 29.mai(2023)),
@@ -108,11 +108,8 @@ class Grunnbeløp(private val multiplier: Double) {
     companion object {
         val `6G` = Grunnbeløp(6.0)
         val halvG = Grunnbeløp(0.5)
-        val `4G` = Grunnbeløp(4.0)
-        val `3G` = Grunnbeløp(3.0)
         val `2G` = Grunnbeløp(2.0)
         val `1G` = Grunnbeløp(1.0)
-        val `12G` = Grunnbeløp(12.0)
 
         private fun Inntekt.gyldigFra(gyldigFra: LocalDate, virkningsdato: LocalDate = gyldigFra, gyldigSomMinsteinntektKrav: LocalDate = gyldigFra) = HistoriskGrunnbeløp(this, gyldigFra, virkningsdato, gyldigSomMinsteinntektKrav)
 
