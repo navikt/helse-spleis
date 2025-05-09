@@ -815,8 +815,8 @@ class Utbetaling private constructor(
 
     fun potensiellDobbelutbetaling(): Boolean {
         val sisteLinjeDato = listOfNotNull(
-            arbeidsgiverOppdrag.linjer.maxOfOrNull { it.tom },
-            personOppdrag.linjer.maxOfOrNull { it.tom }
+            arbeidsgiverOppdrag.linjerUtenOpphør().maxOfOrNull { it.tom },
+            personOppdrag.linjerUtenOpphør().maxOfOrNull { it.tom }
         ).maxOrNull() ?: return false
 
         return sisteLinjeDato > periode.endInclusive // Linjer som strekker seg utover perioden
