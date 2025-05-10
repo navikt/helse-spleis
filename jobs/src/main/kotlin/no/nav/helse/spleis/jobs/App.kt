@@ -56,6 +56,7 @@ fun main(cliArgs: Array<String>) {
         "migrate_v2" -> migrateV2Task(args[1].trim(), args.getOrNull(2)?.toIntOrNull() ?: 10)
         "test_speiljson" -> testSpeilJsonTask(args[1].trim())
         "migrereg" -> migrereGrunnbeløp(factory, args[1].trim())
+        "dobbelutbetalinger" -> finneDobbelutbetalinger(args[1].trim())
         else -> log.error("Unknown task $task")
     }
 }
