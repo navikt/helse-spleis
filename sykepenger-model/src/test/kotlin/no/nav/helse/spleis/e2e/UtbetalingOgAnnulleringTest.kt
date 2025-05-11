@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDateTime
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
+import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -17,6 +18,7 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
@@ -39,8 +41,43 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `tillater ikke opprettelse av overlappende oppdrag`() {
+        /**
+         * før commit 5b78da0 så ble utbetalingene til vedtaksperiodene
+         * gruppert på arbeidsgiver, at alle vedtaksperioder med samme AGP ble
+         * utbetalt på samme fagsystemId.
+         * Når en slik utbetalingsak ble revurdert så ble perioden begrenset
+         * til vedtaksperioden som ble revurdert, men senere oppdragslinjer ble stiplet inn på oppdraget.
+         * For eksempel hvis det var 3 vedtaksperioder (januar, februar, mars) med samme fagsystemId og
+         * januar ble revurdert så ble perioden til utbetalingen begrenset til januar, mens linjene for februar og mars
+         * ble kopiert inn.
+         *
+         * Fordi vi brukte arbeidsgiverperioden som utgangspunkt for å finne utbetalinger så ville februar og mars
+         * likevel finne ut at de skulle bygge videre på samme utbetaling siden de deler arbeidsgiverperiode med januar.
+         *
+         * ETTER commit 5b78da0 så blir saken litt annerledes: da blir det opprettet en utbetalingsak for hver
+         * vedtaksperiode. Det betyr at når en vedtaksperiode skulle finne riktig utbetaling å bygge videre på så
+         * brukte vi kun 'vedtaksperiodens periode' til å finne overlapp.
+         * I eksempelet over ville da februar og mars plutselig ikke finne noen tidligere utbetaling lenger,
+         * siden ingen utbetalinger hadde en 'periode' som overlappet med februar eller mars. Til tross for at
+         * utbetalingen hadde oppdragslinjer som strakk seg over februar og mars.
+         */
+        createTestPerson { regelverkslogg ->
+            gjenopprettFraJSON("/personer/revurdering-av-flere-vedtak-i-samme-utbetaling.json", regelverkslogg)
+        }
+
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        val m = assertThrows<IllegalStateException> {
+            håndterYtelser(2.vedtaksperiode)
+        }
+        assertEquals("Har laget en overlappende utbetaling", m.message)
+    }
 
     @Test
     fun `utbetaling hopper ut av fagsystemid`() {

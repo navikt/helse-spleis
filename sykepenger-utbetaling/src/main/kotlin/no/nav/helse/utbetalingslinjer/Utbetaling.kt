@@ -393,19 +393,27 @@ class Utbetaling private constructor(
                 .toList()
 
         fun List<Utbetaling>.tillaterOpprettelseAvUtbetaling(other: Utbetaling): Boolean {
-            if (other.erAnnullering()) return true // må godta annulleringer ettersom de vil rydde opp i nettopp overlappende utbetalinger
             val overlappendeUtbetalingsperioder = overlappendeUtbetalingsperioder(other)
             if (overlappendeUtbetalingsperioder.isNotEmpty()) {
-                sikkerlogg.warn("Vi har opprettet en utbetaling med periode ${other.periode} & korrelasjonsId ${other.korrelasjonsId} som overlapper med eksisterende utbetalinger $overlappendeUtbetalingsperioder")
+                sikkerlogg.warn("Vi har opprettet en utbetaling med periode ${other.periode} & korrelasjonsId ${other.korrelasjonsId} som overlapper med oppdragslinjer i eksisterende utbetalinger $overlappendeUtbetalingsperioder")
             }
             return overlappendeUtbetalingsperioder.isEmpty()
         }
 
-        private fun List<Utbetaling>.overlappendeUtbetalingsperioder(other: Utbetaling): List<Periode> {
+        private fun List<Utbetaling>.overlappendeUtbetalingsperioder(nyUtbetaling: Utbetaling): List<Periode> {
             return aktiveMedUbetalte()
-                .filterNot { it.hørerSammen(other) }
-                .filter { it.periode.overlapperMed(other.periode) }
+                .filterNot { it.hørerSammen(nyUtbetaling) }
+                .filter { other ->
+                    other.arbeidsgiverOppdrag.overlapperMed(nyUtbetaling.arbeidsgiverOppdrag)
+                        || other.personOppdrag.overlapperMed(nyUtbetaling.personOppdrag)
+                }
                 .map { it.periode }
+        }
+
+        private fun Oppdrag.overlapperMed(nyttOppdrag: Oppdrag): Boolean {
+            return nyttOppdrag.linjerUtenOpphør().any { linje ->
+                this.linjer.any { linje.periode.overlapperMed(it.periode) }
+            }
         }
 
         // kan forkaste dersom ingen utbetalinger er utbetalt/in flight, eller de er annullert
