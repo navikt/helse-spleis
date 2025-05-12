@@ -38,6 +38,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
@@ -175,7 +176,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         arbeidsgiver: Arbeidsgiver,
         aktivitetslogg: IAktivitetslogg,
         beregning: BeregnetPeriode
-    ) = behandlinger.last().utbetaling(vedtaksperiodeSomLagerUtbetaling, arbeidsgiver, aktivitetslogg, beregning)
+    ) {
+        val forrigeUtbetaling = behandlinger.dropLast(1).lastOrNull()?.utbetalingstidslinje
+        behandlinger.last().utbetaling(vedtaksperiodeSomLagerUtbetaling, arbeidsgiver, aktivitetslogg, beregning)
+        if (forrigeUtbetaling != null) {
+            val negativEndringIBeløp = behandlinger.last().utbetalingstidslinje.negativEndringIBeløp(forrigeUtbetaling)
+            if (negativEndringIBeløp) {
+                aktivitetslogg.varsel(RV_UT_23)
+            }
+        }
+    }
 
     internal fun forkast(arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, automatiskBehandling: Boolean, aktivitetslogg: IAktivitetslogg) {
         leggTilNyBehandling(behandlinger.last().forkastVedtaksperiode(arbeidsgiver, behandlingkilde, aktivitetslogg))
@@ -397,6 +407,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val dagerNavOvertarAnsvar get() = gjeldende.dagerNavOvertarAnsvar
         val sykdomstidslinje get() = endringer.last().sykdomstidslinje
         val refusjonstidslinje get() = endringer.last().refusjonstidslinje
+        val utbetalingstidslinje get() = endringer.last().utbetalingstidslinje
         val faktaavklartInntekt get() = endringer.last().faktaavklartInntekt
         val inntektsendringer get() = endringer.last().inntektsendringer
 

@@ -243,7 +243,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter(orgnummer = a1))
         val utbetalingstidslinje = inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode)
         val økonomiInspektør = utbetalingstidslinje[17.januar].økonomi.inspektør
-        assertEquals(1081.daglig, økonomiInspektør.arbeidsgiverbeløp)
+        assertEquals(INGEN, økonomiInspektør.arbeidsgiverbeløp)
         assertEquals(INGEN, økonomiInspektør.personbeløp)
         assertEquals(100, økonomiInspektør.totalGrad)
     }

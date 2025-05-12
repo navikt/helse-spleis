@@ -16,8 +16,10 @@ import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
@@ -52,6 +54,29 @@ internal class UtbetalingstidslinjeTest {
         assertEquals(0, (tidslinjeOf() + tidslinjeOf()).size)
         assertEquals(1.januar til 5.januar, (tidslinjeOf() + tidslinjeOf(5.NAV)).periode())
         assertEquals(1.januar til 10.januar, (tidslinjeOf(3.NAV) + tidslinjeOf(5.NAV, startDato = 6.januar)).periode())
+    }
+
+    @Test
+    fun negativEndringIBeløp() {
+        val inntekt = 1000.daglig
+        val fullRefusjon = Utbetalingstidslinje.betale(inntekt, listOf(tidslinjeOf(5.NAV(dekningsgrunnlag = inntekt, refusjonsbeløp = inntekt)))).single()
+        val merRefusjon = Utbetalingstidslinje.betale(inntekt * 2, listOf(tidslinjeOf(5.NAV(dekningsgrunnlag = inntekt * 2, refusjonsbeløp = inntekt * 2)))).single()
+        val delvisRefusjon = Utbetalingstidslinje.betale(inntekt, listOf(tidslinjeOf(5.NAV(dekningsgrunnlag = inntekt, refusjonsbeløp = inntekt / 2)))).single()
+        val ingenRefusjon = Utbetalingstidslinje.betale(inntekt, listOf(tidslinjeOf(5.NAV(dekningsgrunnlag = inntekt, refusjonsbeløp = Inntekt.INGEN)))).single()
+
+        val ferie = Utbetalingstidslinje.betale(inntekt, listOf(tidslinjeOf(5.FRI))).single()
+
+        assertFalse(merRefusjon.negativEndringIBeløp(fullRefusjon))
+        assertTrue(fullRefusjon.negativEndringIBeløp(merRefusjon))
+        assertFalse(fullRefusjon.negativEndringIBeløp(fullRefusjon))
+        assertTrue(fullRefusjon.negativEndringIBeløp(delvisRefusjon))
+        assertTrue(fullRefusjon.negativEndringIBeløp(ingenRefusjon))
+        assertFalse(fullRefusjon.negativEndringIBeløp(ferie))
+        assertFalse(delvisRefusjon.negativEndringIBeløp(ferie))
+        assertFalse(ingenRefusjon.negativEndringIBeløp(ferie))
+        assertTrue(ferie.negativEndringIBeløp(fullRefusjon))
+        assertTrue(ferie.negativEndringIBeløp(delvisRefusjon))
+        assertTrue(ferie.negativEndringIBeløp(ingenRefusjon))
     }
 
     @Test

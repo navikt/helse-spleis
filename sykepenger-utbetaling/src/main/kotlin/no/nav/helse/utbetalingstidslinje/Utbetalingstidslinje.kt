@@ -20,6 +20,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.betal
 import no.nav.helse.økonomi.Økonomi
 
@@ -31,6 +32,13 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
 
     private val førsteDato get() = utbetalingsdager.firstKey()
     private val sisteDato get() = utbetalingsdager.lastKey()
+    private val totalbeløpPerson = this
+        .mapNotNull { it.økonomi.personbeløp }
+        .summer()
+    private val totalbeløpRefusjon = this
+        .mapNotNull { it.økonomi.arbeidsgiverbeløp }
+        .summer()
+    private val totalbeløp = totalbeløpPerson + totalbeløpRefusjon
 
     constructor(utbetalingsdager: Collection<Utbetalingsdag>) : this(utbetalingsdager.associateBy { it.dato }.toSortedMap()) {
         check(utbetalingsdager.distinctBy { it.dato }.size == utbetalingsdager.size) {
@@ -163,6 +171,11 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
                     else -> "?"
                 }
         }.trim()
+    }
+
+    fun negativEndringIBeløp(other: Utbetalingstidslinje): Boolean {
+        if (this.totalbeløpPerson < other.totalbeløpPerson) return true
+        return this.totalbeløpRefusjon < other.totalbeløpRefusjon
     }
 
     fun toFancyString() = "${UtbetalingtidslinjeButFancy(this)}"

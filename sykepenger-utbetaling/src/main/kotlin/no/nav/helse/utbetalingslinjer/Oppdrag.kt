@@ -17,7 +17,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT_MED_FEIL
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
@@ -76,11 +75,6 @@ class Oppdrag private constructor(
         fun ingenFeil(vararg oppdrag: Oppdrag) = oppdrag.none { it.status in listOf(AVVIST, FEIL) }
         fun harFeil(vararg oppdrag: Oppdrag) = oppdrag.any { it.status in listOf(AVVIST, FEIL) }
         fun kanIkkeForsøkesPåNy(vararg oppdrag: Oppdrag) = oppdrag.any { it.status == AVVIST }
-
-        internal fun List<Oppdrag>.valider(aktivitetslogg: IAktivitetslogg) {
-            if (all { it.nettoBeløp >= 0 }) return
-            aktivitetslogg.varsel(RV_UT_23)
-        }
 
         fun gjenopprett(dto: OppdragInnDto): Oppdrag {
             return Oppdrag(

@@ -96,7 +96,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
 
                 is Dag.ForeldetSykedag -> {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.grad)
-                    else builder.addForeldetDag(dag.dato, medInntektHvisFinnes(dag.dato, dag.grad))
+                    else builder.addForeldetDag(dag.dato, medInntektHvisFinnes(dag.dato, dag.grad).ikkeBetalt())
                 }
 
                 is Dag.ArbeidIkkeGjenopptattDag -> {
