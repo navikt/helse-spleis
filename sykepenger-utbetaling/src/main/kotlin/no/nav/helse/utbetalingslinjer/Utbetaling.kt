@@ -412,7 +412,7 @@ class Utbetaling private constructor(
 
         private fun Oppdrag.overlapperMed(nyttOppdrag: Oppdrag): Boolean {
             return nyttOppdrag.linjerUtenOpphør().any { linje ->
-                this.linjer.any { linje.periode.overlapperMed(it.periode) }
+                this.linjerUtenOpphør().any { linje.periode.overlapperMed(it.periode) }
             }
         }
 
