@@ -26,12 +26,6 @@ internal sealed interface Inntektsopplysning {
         val inntektsgrunnlag = beregnInntektsgrunnlag(anvendtGrunnbeløp)
 
         init {
-            check(pensjonsgivendeInntekt.size <= 3) {
-                "Selvstendig kan ikke ha mer enn tre inntekter"
-            }
-            check(pensjonsgivendeInntekt.distinctBy { it.årstall }.size == pensjonsgivendeInntekt.size) {
-                "Selvstendig kan ikke ha flere inntekter med samme årstall"
-            }
             pensjonsgivendeInntekt
                 .sortedBy { it.årstall }
                 .also { sortertListe ->
