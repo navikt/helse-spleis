@@ -122,8 +122,13 @@ class Søknad(
     internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, refusjonstidslinje: Beløpstidslinje, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
         valider(aktivitetslogg, subsumsjonslogg)
         validerInntektskilder(aktivitetslogg, vilkårsgrunnlag)
+        validerPensjonsgivendeInntekter(aktivitetslogg)
         søknadstype.valider(aktivitetslogg, vilkårsgrunnlag, sykdomstidslinje.periode(), refusjonstidslinje)
         return aktivitetslogg
+    }
+
+    private fun validerPensjonsgivendeInntekter(aktivitetslogg: IAktivitetslogg) {
+        if (pensjonsgivendeInntekter?.size != null && pensjonsgivendeInntekter.size < 3) aktivitetslogg.varsel(Varselkode.RV_IV_12)
     }
 
     private fun valider(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {

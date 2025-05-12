@@ -16,12 +16,28 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SelvstendigTest : AbstractDslTest() {
+
+    @Test
+    fun `selvstendigsøknad med færre inntekter enn 3 år gir varsel`() = Toggle.SelvstendigNæringsdrivende.enable {
+        selvstendig {
+            håndterSøknad(
+                januar,
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
+                )
+            )
+            assertVarsel(Varselkode.RV_IV_12, 1.vedtaksperiode.filter())
+        }
+    }
 
     @Test
     fun `selvstendigsøknad gir error`() = Toggle.SelvstendigNæringsdrivende.disable {
@@ -35,11 +51,14 @@ internal class SelvstendigTest : AbstractDslTest() {
     @Test
     fun `Ta inn selvstendigsøknad`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknad(januar, pensjonsgivendeInntekter = listOf(
-                Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
-                Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
-                Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig),
-            ))
+            håndterSøknad(
+                januar,
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig),
+                )
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
@@ -65,7 +84,7 @@ internal class SelvstendigTest : AbstractDslTest() {
         selvstendig {
             håndterSøknad(januar)
             håndterSøknad(mars)
-            
+
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
             assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
             assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE)
