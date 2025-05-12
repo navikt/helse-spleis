@@ -28,15 +28,6 @@ internal sealed interface Inntektsopplysning {
         init {
             pensjonsgivendeInntekt
                 .sortedBy { it.årstall }
-                .also { sortertListe ->
-                    sortertListe.forEachIndexed { index, pgi ->
-                        if (index > 0) {
-                            check(sortertListe[index - 1].årstall == pgi.årstall.minusYears(1)) {
-                                "inntektene må være i sekvens; årstallet må øke med 1 for hvert år"
-                            }
-                        }
-                    }
-                }
         }
 
         fun beregnInntektsgrunnlag(anvendtGrunnbeløp: Inntekt) =
