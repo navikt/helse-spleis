@@ -174,8 +174,10 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
     }
 
     fun negativEndringIBeløp(other: Utbetalingstidslinje): Boolean {
-        if (this.totalbeløpPerson < other.totalbeløpPerson) return true
-        return this.totalbeløpRefusjon < other.totalbeløpRefusjon
+        val endringTotalbeløp = this.totalbeløp - other.totalbeløp
+        val endringPersonbeløp = this.totalbeløpPerson - other.totalbeløpPerson
+        if (endringPersonbeløp < Inntekt.INGEN) return true
+        return endringTotalbeløp < Inntekt.INGEN
     }
 
     fun toFancyString() = "${UtbetalingtidslinjeButFancy(this)}"

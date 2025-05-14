@@ -80,6 +80,25 @@ internal class UtbetalingstidslinjeTest {
     }
 
     @Test
+    fun `negativ endring i personbeløp`() {
+        val inntekt = 1000.daglig
+        val fullRefusjon = Utbetalingstidslinje.betale(inntekt, listOf(tidslinjeOf(5.NAV(dekningsgrunnlag = inntekt, refusjonsbeløp = inntekt)))).single()
+        val øktInntektMedRefusjonOgPerson = Utbetalingstidslinje.betale(inntekt * 2, listOf(tidslinjeOf(5.NAV(dekningsgrunnlag = inntekt * 2, refusjonsbeløp = inntekt)))).single()
+        val øktInntektMedPerson = Utbetalingstidslinje.betale(inntekt * 2, listOf(tidslinjeOf(5.NAV(dekningsgrunnlag = inntekt * 2, refusjonsbeløp = Inntekt.INGEN)))).single()
+        val ingenRefusjon = Utbetalingstidslinje.betale(inntekt, listOf(tidslinjeOf(5.NAV(dekningsgrunnlag = inntekt, refusjonsbeløp = Inntekt.INGEN)))).single()
+
+        assertTrue(fullRefusjon.negativEndringIBeløp(ingenRefusjon)) {
+            "mindre personbeløp vil starte en tilbakekreving fra bruker"
+        }
+        assertFalse(øktInntektMedRefusjonOgPerson.negativEndringIBeløp(ingenRefusjon)) {
+            "inntekt økes slik at bruker fremdeles får utbetalt samme så er det ikke en negativ endring for personen"
+        }
+        assertFalse(øktInntektMedPerson.negativEndringIBeløp(øktInntektMedRefusjonOgPerson)) {
+            "totalbeløp er det samme selv om arbeidsgiverrefusjonen har byttet hender til personen"
+        }
+    }
+
+    @Test
     fun betale() {
         val `6G`= 2161.daglig
         val input = listOf(tidslinjeOf(1.NAV(1000)), tidslinjeOf(1.NAV(1000)))

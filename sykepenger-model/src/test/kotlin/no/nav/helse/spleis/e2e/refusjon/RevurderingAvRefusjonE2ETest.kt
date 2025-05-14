@@ -9,8 +9,6 @@ import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -45,7 +43,6 @@ internal class RevurderingAvRefusjonE2ETest : AbstractDslTest() {
                 )
             )
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertSubsumsjoner { assertEquals(1, antallSubsumsjoner(this)) }
         }
     }

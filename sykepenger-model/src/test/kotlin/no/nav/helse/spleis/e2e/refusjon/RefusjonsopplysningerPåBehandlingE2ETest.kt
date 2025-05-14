@@ -271,7 +271,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             val overstyringId = UUID.randomUUID()
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(1.januar, null, INNTEKT / 2)))), hendelseId = overstyringId)
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -299,13 +298,11 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                 )
             )
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
             håndterYtelser(2.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
@@ -1094,7 +1091,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterSøknad(februar)
 
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-02-2018 til 01-02-2018", AktivitetsloggFilter.arbeidsgiver(a1))
 
             assertEquals(
@@ -1128,7 +1124,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                 )
             )
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             assertEquals(INNTEKT, inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje[1.februar].beløp)
         }

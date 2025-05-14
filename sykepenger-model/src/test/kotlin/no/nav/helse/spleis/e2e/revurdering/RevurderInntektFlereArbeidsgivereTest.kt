@@ -146,7 +146,6 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()

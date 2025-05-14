@@ -448,7 +448,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         assertGodkjenningsbehov(tags = setOf("Førstegangsbehandling", "Innvilget", "Revurdering", "NegativArbeidsgiverutbetaling", "Personutbetaling", "EnArbeidsgiver"), kanAvvises = false, utbetalingstype = "REVURDERING")
     }
 

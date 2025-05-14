@@ -311,7 +311,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         )
         håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
-        assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
     }
 

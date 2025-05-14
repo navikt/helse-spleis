@@ -104,8 +104,6 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertEquals(INNTEKT / 2, inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje[1.februar].beløp)
         håndterYtelser(2.vedtaksperiode)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -259,7 +257,6 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
 
-        assertVarsel(Varselkode.RV_UT_23, 3.vedtaksperiode.filter())
         val førsteMarsUtbetaling = inspektør.utbetaling(2)
         val revurderingMarsUtbetaling = inspektør.utbetaling(3)
         assertEquals(førsteMarsUtbetaling.korrelasjonsId, revurderingMarsUtbetaling.korrelasjonsId)
@@ -578,8 +575,6 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         håndterYtelser(1.vedtaksperiode)
-
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a2))
 
         assertEquals(2, inspektør(a1).antallUtbetalinger)
         assertEquals(2, inspektør(a2).antallUtbetalinger)

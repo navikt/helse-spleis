@@ -16,14 +16,13 @@ import org.junit.jupiter.api.Test
 internal class VarselVedNegativtBeløpE2ETest : AbstractDslTest() {
 
     @Test
-    fun `skal få varsel når utbetaling flyttes fra arbeidsgiver til person`() {
+    fun `skal ikke få varsel når utbetaling flyttes fra arbeidsgiver til person`() {
         a1 {
             nyttVedtak(januar)
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(1.januar, null, Inntekt.INGEN)))))
             håndterYtelser(1.vedtaksperiode)
             assertEquals(-15741, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.inspektør.nettoBeløp)
             assertEquals(15741, inspektør.sisteUtbetaling().personOppdrag.inspektør.nettoBeløp)
-            assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
         }
     }
 
