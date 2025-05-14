@@ -15,6 +15,7 @@ import com.zaxxer.hikari.HikariDataSource
 import java.sql.Connection
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import java.util.*
 import kotlin.system.measureTimeMillis
 import kotlin.time.DurationUnit
@@ -57,6 +58,7 @@ fun main(cliArgs: Array<String>) {
         "test_speiljson" -> testSpeilJsonTask(args[1].trim())
         "migrereg" -> migrereGrunnbeløp(factory, args[1].trim())
         "dobbelutbetalinger" -> finneDobbelutbetalinger(args[1].trim())
+        "feriepenger" -> startFeriepenger(factory, args[1].trim(), Year.of(args[2].trim().toInt()))
         else -> log.error("Unknown task $task")
     }
 }
