@@ -21,7 +21,7 @@ spec:
       enabled: false
       runtime: java
   replicas:
-    min: 2
+    min: 24
     max: 24
     scalingStrategy:
       kafka:
@@ -47,7 +47,7 @@ spec:
         diskSize: 250
         diskType: SSD
         name: spleis2
-        tier: db-custom-4-4096
+        tier: db-custom-64-65536
         retainedBackups: 14
         databases:
           - name: spleis
@@ -79,5 +79,7 @@ spec:
     value: tbd-spleis-v1
   - name: KAFKA_RESET_POLICY
     value: NONE
+  - name: SEND_FERIEPENGEOPPDRAG
+    value: "true"
   - name: JAVA_TOOL_OPTIONS
     value: "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-prod-eacd,-logtostderr,-minloglevel=1"
