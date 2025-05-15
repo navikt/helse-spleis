@@ -11,7 +11,9 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.feriepenger.Feriepengerendringskode
 import no.nav.helse.feriepenger.Feriepengerklassekode
 import no.nav.helse.harBehov
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode
@@ -27,6 +29,7 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.september
 import no.nav.helse.serde.reflection.castAsList
@@ -68,6 +71,32 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         )
 
         assertEquals(1605.5819999999999, inspektør.spleisFeriepengebeløpPerson.first())
+        assertEquals(0.0, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
+    }
+
+    @Test
+    fun `person som har fått revurdert en utbetalt periode med ferie`() {
+        nyttVedtak(januar)
+        håndterOverstyrTidslinje(januar.map { ManuellOverskrivingDag(it, Dagtype.Feriedag) })
+        håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        inspektør.utbetaling(1).let { utbetalingInspektør ->
+            assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
+            assertEquals(0, utbetalingInspektør.personOppdrag.size)
+            utbetalingInspektør.arbeidsgiverOppdrag.single().also { linje ->
+                assertEquals(17.januar til 31.januar, linje.periode)
+                assertEquals(1431, linje.beløp)
+                assertEquals(17.januar, linje.datoStatusFom)
+            }
+        }
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2018)
+        )
+
+        assertEquals(0.0, inspektør.spleisFeriepengebeløpPerson.first())
         assertEquals(0.0, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
     }
 

@@ -12,6 +12,8 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.erHelg
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -23,10 +25,12 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.IdInnhenter
-import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -413,8 +417,14 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
         håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterUtbetalt(orgnummer = orgnummer)
-        håndterAnnullerUtbetaling(orgnummer = orgnummer)
-        håndterUtbetalt()
+        håndterOverstyrTidslinje(arbeidsgiverperiode.oppdaterTom(syktil).map {
+            ManuellOverskrivingDag(it, Dagtype.Feriedag)
+        })
+        håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        assertVarsel(Varselkode.RV_UT_23, observatør.sisteVedtaksperiode().filter(orgnummer))
+        håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalt(orgnummer = orgnummer)
     }
 
     private fun byggPersonToParallelle(

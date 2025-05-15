@@ -381,6 +381,7 @@ internal class Arbeidsgiver private constructor(
     internal fun grunnlagForFeriepenger(): Arbeidsgiverferiepengegrunnlag {
         val utbetalteDager = fun(oppdrag: Oppdrag): List<UtbetaltDag> {
             return oppdrag
+                .linjerUtenOpphør()
                 .flatMap { linje ->
                     linje
                         .filterNot { it.erHelg() }
