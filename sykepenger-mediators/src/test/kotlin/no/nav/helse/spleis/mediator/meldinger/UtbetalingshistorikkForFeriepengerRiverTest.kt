@@ -28,7 +28,8 @@ internal class UtbetalingshistorikkForFeriepengerRiverTest : RiverTest() {
       ],
       "SykepengehistorikkForFeriepenger": {
         "historikkFom": "2020-01-01",
-        "historikkTom": "2020-12-31"
+        "historikkTom": "2020-12-31",
+        "datoForSisteFeriepengekjøringIInfotrygd": "2021-05-10"
       },
       "fødselsnummer": "14123456789",
       "system_read_count": 0,

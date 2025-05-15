@@ -24,15 +24,17 @@ internal class UtbetalingshistorikkForFeriepengerRiver(
     }
 
     override fun createMessage(packet: JsonMessage) = UtbetalingshistorikkForFeriepengerMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
+        packet = packet,
+        meldingsporing = Meldingsporing(
+            id = packet.meldingsreferanseId(),
+            fødselsnummer = packet["fødselsnummer"].asText()
+        )
     )
 
     internal companion object {
         fun validerSykepengehistorikk(message: JsonMessage) {
             message.requireKey("${SykepengehistorikkForFeriepenger.name}.historikkFom")
+            message.require("${SykepengehistorikkForFeriepenger.name}.datoForSisteFeriepengekjøringIInfotrygd", JsonNode::asLocalDate)
             message.requireKey("@løsning.${SykepengehistorikkForFeriepenger.name}.feriepengerSkalBeregnesManuelt")
             message.requireArray("@løsning.${SykepengehistorikkForFeriepenger.name}.utbetalinger") {
                 interestedIn("fom", JsonNode::asLocalDate)

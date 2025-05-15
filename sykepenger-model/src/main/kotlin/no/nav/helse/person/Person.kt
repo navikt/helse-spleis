@@ -335,13 +335,10 @@ class Person private constructor(
             return
         }
 
-        // Hardkodet dato skal være datoen Infotrygd sist kjørte feriepenger
-        val DATO_FOR_SISTE_FERIEPENGEKJØRING_I_INFOTRYGD = LocalDate.of(2025, 1, 18)
-
         val feriepengeberegner = Feriepengeberegner(
             alder = alder,
             opptjeningsår = utbetalingshistorikk.opptjeningsår,
-            grunnlagFraInfotrygd = utbetalingshistorikk.grunnlagForFeriepenger(DATO_FOR_SISTE_FERIEPENGEKJØRING_I_INFOTRYGD),
+            grunnlagFraInfotrygd = utbetalingshistorikk.grunnlagForFeriepenger(utbetalingshistorikk.datoForSisteFeriepengekjøringIInfotrygd),
             grunnlagFraSpleis = grunnlagForFeriepenger()
         )
 

@@ -372,6 +372,7 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
             arbeidskategorikoder = arbeidskategorikoder,
             opptjeningsår = Year.of(2020),
             skalBeregnesManuelt = skalBeregnesManuelt,
+            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2025)
         )
 
     private fun byggPerson(

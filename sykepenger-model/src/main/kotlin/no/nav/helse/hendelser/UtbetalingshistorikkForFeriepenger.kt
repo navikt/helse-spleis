@@ -18,6 +18,7 @@ class UtbetalingshistorikkForFeriepenger(
     private val arbeidskategorikoder: Arbeidskategorikoder,
     internal val opptjeningsår: Year,
     internal val skalBeregnesManuelt: Boolean,
+    internal val datoForSisteFeriepengekjøringIInfotrygd: LocalDate
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.IngenYrkesaktivitet
     override val metadata = LocalDateTime.now().let { nå ->

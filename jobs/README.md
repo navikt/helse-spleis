@@ -4,6 +4,14 @@ Jobs
 
 # Starte feriepenger
 
+Parametrene til feriepenger er:
+- `datoForSisteFeriepengekjøringIInfotrygd`
+- `opptjeningsår`
+
+I eksempelet under er `datoForSisteFeriepengekjøringIInfotrygd` satt til `2025-05-10`.
+
+Parametrene skilles med mellomrom.
+
 ```
 % ./deploy_jobb.sh
 🐳 Image: imagenavnet mitt
@@ -13,7 +21,7 @@ Jobs
 🛠️ Hvilken jobb skal du kjøre? feriepenger
 🪪 Hva skal arbeidId settes til? fp2025
 🏜️ Dryrun? (Y/n): n
-🎒 Eventuelt andre parametre til jobben? 2024
+🎒 Eventuelt andre parametre til jobben? 2025-05-10 2024
 
 Når jobben er ferdig, husk å kjøre
   kubectl delete naisjob spleis-migrate

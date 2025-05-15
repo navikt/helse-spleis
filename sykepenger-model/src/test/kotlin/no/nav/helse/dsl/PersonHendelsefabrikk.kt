@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.til
+import no.nav.helse.mai
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.Inntektsdata
@@ -70,7 +71,8 @@ internal class PersonHendelsefabrikk {
             feriepengehistorikk = emptyList(),
             arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(emptyList()),
             opptjeningsår = opptjeningsår,
-            skalBeregnesManuelt = false
+            skalBeregnesManuelt = false,
+            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2025)
         )
 }
 

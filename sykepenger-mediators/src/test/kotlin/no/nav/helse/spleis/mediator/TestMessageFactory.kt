@@ -687,7 +687,8 @@ internal class TestMessageFactory(
             ekstraFelter = mapOf(
                 "SykepengehistorikkForFeriepenger" to mapOf(
                     "historikkFom" to testdata.fom.toString(),
-                    "historikkTom" to testdata.tom.toString()
+                    "historikkTom" to testdata.tom.toString(),
+                    "datoForSisteFeriepengekjøringIInfotrygd" to "2025-05-10"
                 )
             ),
             løsninger = mapOf(

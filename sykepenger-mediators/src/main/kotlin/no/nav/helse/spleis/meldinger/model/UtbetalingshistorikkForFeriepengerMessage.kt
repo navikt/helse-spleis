@@ -13,8 +13,12 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
 // Understands a JSON message representing an Ytelserbehov
-internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
+internal class UtbetalingshistorikkForFeriepengerMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing
+) : BehovMessage(packet) {
     private val skalBeregnesManuelt = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.feriepengerSkalBeregnesManuelt"].asBoolean()
+    private val datoForSisteFeriepengekjøringIInfotrygd = packet["${SykepengehistorikkForFeriepenger.name}.datoForSisteFeriepengekjøringIInfotrygd"].asLocalDate()
 
     private val utbetalinger = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.utbetalinger"]
         .filter(::erGyldigPeriode)
@@ -79,7 +83,8 @@ internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage, ov
             feriepengehistorikk = feriepengehistorikk,
             arbeidskategorikoder = arbeidskategorikoder,
             opptjeningsår = opptjeningsår,
-            skalBeregnesManuelt = skalBeregnesManuelt
+            skalBeregnesManuelt = skalBeregnesManuelt,
+            datoForSisteFeriepengekjøringIInfotrygd = datoForSisteFeriepengekjøringIInfotrygd
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
