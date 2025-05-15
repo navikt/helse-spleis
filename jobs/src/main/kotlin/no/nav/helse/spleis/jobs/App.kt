@@ -58,7 +58,7 @@ fun main(cliArgs: Array<String>) {
         "test_speiljson" -> testSpeilJsonTask(args[1].trim())
         "migrereg" -> migrereGrunnbeløp(factory, args[1].trim())
         "dobbelutbetalinger" -> finneDobbelutbetalinger(args[1].trim())
-        "feriepenger" -> startFeriepenger(factory, args[1].trim(), Year.of(args[2].trim().toInt()))
+        "feriepenger" -> startFeriepenger(factory, arbeidId = args[1].trim(), opptjeningsår = Year.of(args[2].trim().toInt()), dryrun = (args.getOrNull(3) == "DRYRUN"))
         else -> log.error("Unknown task $task")
     }
 }

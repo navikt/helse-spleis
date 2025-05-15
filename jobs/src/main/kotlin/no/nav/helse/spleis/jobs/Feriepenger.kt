@@ -26,8 +26,7 @@ private val objectMapper: ObjectMapper = jacksonObjectMapper()
     .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-
-fun startFeriepenger(factory: ConsumerProducerFactory, arbeidId: String, opptjeningsår: Year, antallPersonerOmGangen: Int = 10) {
+fun startFeriepenger(factory: ConsumerProducerFactory, arbeidId: String, opptjeningsår: Year, antallPersonerOmGangen: Int = 10, dryrun: Boolean = true) {
     factory.createProducer().use { producer ->
         opprettOgUtførArbeid(arbeidId, size = antallPersonerOmGangen) { session, fnr ->
             hentPerson(session, fnr).let { data ->
@@ -36,7 +35,9 @@ fun startFeriepenger(factory: ConsumerProducerFactory, arbeidId: String, opptjen
                     if (dto.potensiellFeriepengekjøring(opptjeningsår)) {
                         sikkerlogg.info("sender behov om SykepengehistorikkForFeriepenger for fødselsnummer=${dto.fødselsnummer}")
                         val event = SykepengehistorikkForFeriepenger(dto.fødselsnummer, opptjeningsår)
-                        producer.send(ProducerRecord("tbd.teknisk.v1", dto.fødselsnummer, event.tilJson()))
+                        if (!dryrun) {
+                            producer.send(ProducerRecord("tbd.teknisk.v1", dto.fødselsnummer, event.tilJson()))
+                        }
                     }
                 } catch (err: Exception) {
                     log.info("person lar seg ikke serialisere: ${err.message}")
