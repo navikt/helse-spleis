@@ -21,4 +21,4 @@ Når jobben er ferdig, husk å kjøre
 
 API-key hentes i [Nais-konsollet](https://console.nav.cloud.nais.io/team/tbd/settings). 
 
-Dryrun settes til Y om du ønsker å teste jobben. Dette forutsetter at jobbe skjønner hva dryrun er.
+Dryrun settes til Y om du ønsker å teste jobben. Dette forutsetter at jobben skjønner hva dryrun er.
