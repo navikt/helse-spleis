@@ -58,7 +58,7 @@ private fun PersonInnDto.potensiellFeriepengekjøring(opptjeningsår: Year): Boo
 
 private fun List<UtbetalingInnDto>.aktive(): List<UtbetalingInnDto> {
     return this
-        .filterNot { it.tilstand == UtbetalingTilstandDto.FORKASTET }
+        .filterNot { it.tilstand in setOf(UtbetalingTilstandDto.FORKASTET, UtbetalingTilstandDto.NY, UtbetalingTilstandDto.IKKE_GODKJENT, UtbetalingTilstandDto.IKKE_UTBETALT) }
         .groupBy { it.korrelasjonsId }
         .map { (_, utbetalinger) -> utbetalinger.maxBy { it.tidsstempel } }
         .filterNot { utbetaling -> utbetaling.tilstand == UtbetalingTilstandDto.ANNULLERT }
