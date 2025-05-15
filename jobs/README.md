@@ -17,3 +17,5 @@ Jobs
 Når jobben er ferdig, husk å kjøre
   kubectl delete naisjob spleis-migrate
 ```
+
+API-key hentes i [Nais-konsollet](https://console.nav.cloud.nais.io/team/tbd/settings). 
