@@ -8,6 +8,7 @@ read -p "🔑 Parallelism: (30 default) " PARALLELISM
 
 read -p "🛠️ Hvilken jobb skal du kjøre? " JOBB
 read -p "🪪 Hva skal arbeidId settes til? " ARBEID_ID
+read -p "🏜️ Dryrun? (Y/n): " DRYRUN
 read -p "🎒 Eventuelt andre parametre til jobben? " EKSTRA_PARAMETRE
 
 if [ "$CLUSTER_OPT" = "1" ]; then
@@ -28,9 +29,18 @@ if [ "$CLUSTER" = "prod-gcp" ]; then
   POOL="nav-prod"
 fi
 
+if [[ -z $DRYRUN || "$DRYRUN" =~ ^(yes|y|true|1|YES|Y|TRUE)$ ]]; then
+  DRYRUN="true"
+else
+  DRYRUN="false"
+fi
+
+echo $DRYRUN
+exit
+
 docker run --rm -it -v $(PWD)/deploy:/config \
   -e CLUSTER=$CLUSTER \
-  -e VAR="team=tbd,app=spleis-migrate,image=$IMAGE,parallelism=$PARALLELISM,pool=$POOL,jobb=$JOBB,arbeid_id=$ARBEID_ID,ekstra_parametre=$EKSTRA_PARAMETRE" \
+  -e VAR="team=tbd,app=spleis-migrate,image=$IMAGE,parallelism=$PARALLELISM,pool=$POOL,jobb=$JOBB,arbeid_id=$ARBEID_ID,dryrun=$DRYRUN,ekstra_parametre=$EKSTRA_PARAMETRE" \
   -e APIKEY="$APIKEY" \
   ghcr.io/nais/deploy/deploy:latest /app/deploy \
     --print-payload --resource /config/job.yml

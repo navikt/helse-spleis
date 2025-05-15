@@ -33,3 +33,5 @@ spec:
       value: "spleis2"
     - name: RUNTIME_OPTS
       value: "{{jobb}} {{arbeid_id}} {{ekstra_parametre}}"
+    - name: DRYRUN
+      value: "{{dryrun}}"

@@ -48,6 +48,8 @@ fun main(cliArgs: Array<String>) {
     val args = cliArgs.takeIf(Array<*>::isNotEmpty)?.toList() ?: System.getenv("RUNTIME_OPTS").split(" ")
     if (args.isEmpty()) return log.error("Provide a task name as CLI argument")
 
+    val dryrun = System.getenv("DRYRUN")?.toBoolean() ?: false
+
     val factory by lazy { ConsumerProducerFactory(AivenConfig.default) }
 
     when (val task = args[0].trim().lowercase()) {
@@ -58,7 +60,7 @@ fun main(cliArgs: Array<String>) {
         "test_speiljson" -> testSpeilJsonTask(args[1].trim())
         "migrereg" -> migrereGrunnbeløp(factory, args[1].trim())
         "dobbelutbetalinger" -> finneDobbelutbetalinger(args[1].trim())
-        "feriepenger" -> startFeriepenger(factory, arbeidId = args[1].trim(), opptjeningsår = Year.of(args[2].trim().toInt()), dryrun = (args.getOrNull(3) == "DRYRUN"))
+        "feriepenger" -> startFeriepenger(factory, arbeidId = args[1].trim(), opptjeningsår = Year.of(args[2].trim().toInt()), dryrun = dryrun)
         else -> log.error("Unknown task $task")
     }
 }
