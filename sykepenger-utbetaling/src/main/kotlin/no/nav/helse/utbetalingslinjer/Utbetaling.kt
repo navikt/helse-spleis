@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.UtbetalingTilstandDto
@@ -391,26 +392,34 @@ class Utbetaling private constructor(
                 .toList()
 
         fun List<Utbetaling>.tillaterOpprettelseAvUtbetaling(other: Utbetaling): Boolean {
-            val overlappendeUtbetalingsperioder = overlappendeUtbetalingsperioder(other)
-            if (overlappendeUtbetalingsperioder.isNotEmpty()) {
-                sikkerlogg.warn("Vi har opprettet en utbetaling med periode ${other.periode} & korrelasjonsId ${other.korrelasjonsId} som overlapper med oppdragslinjer i eksisterende utbetalinger $overlappendeUtbetalingsperioder")
-            }
-            return overlappendeUtbetalingsperioder.isEmpty()
+            return !harOverlappendeUtbetalingsperioder(other)
         }
 
-        private fun List<Utbetaling>.overlappendeUtbetalingsperioder(nyUtbetaling: Utbetaling): List<Periode> {
-            return aktiveMedUbetalte()
+        private fun List<Utbetaling>.harOverlappendeUtbetalingsperioder(nyUtbetaling: Utbetaling): Boolean {
+            return this
+                .aktiveMedUbetalte()
                 .filterNot { it.hørerSammen(nyUtbetaling) }
-                .filter { other ->
-                    other.arbeidsgiverOppdrag.overlapperMed(nyUtbetaling.arbeidsgiverOppdrag)
-                        || other.personOppdrag.overlapperMed(nyUtbetaling.personOppdrag)
+                .flatMap { other ->
+                    other.arbeidsgiverOppdrag.overlappendeLinjer(nyUtbetaling.arbeidsgiverOppdrag) + other.personOppdrag.overlappendeLinjer(nyUtbetaling.personOppdrag)
                 }
-                .map { it.periode }
+                .also { overlappendeLinjer ->
+                    val feilmelding = """
+                        |Vi har opprettet en utbetaling med periode ${nyUtbetaling.periode} & 
+                        |korrelasjonsId ${nyUtbetaling.korrelasjonsId} som overlapper med 
+                        |oppdragslinjer i eksisterende utbetalinger:\n
+                        |${overlappendeLinjer.joinToString(separator = "\n") { (fagområde, fagsystemId, linje) -> "$fagområde - $fagsystemId - ${linje.periode}" }}\n
+                        |""".trimMargin()
+                    sikkerlogg.error(feilmelding, kv("fødselsnummer", nyUtbetaling.personOppdrag.mottaker))
+                }
+                .isNotEmpty()
         }
 
-        private fun Oppdrag.overlapperMed(nyttOppdrag: Oppdrag): Boolean {
-            return nyttOppdrag.linjerUtenOpphør().any { linje ->
-                this.linjerUtenOpphør().any { linje.periode.overlapperMed(it.periode) }
+        private fun Oppdrag.overlappendeLinjer(nyttOppdrag: Oppdrag): List<Triple<Fagområde, String, Utbetalingslinje>> {
+            return nyttOppdrag.linjerUtenOpphør().flatMap { linje ->
+                this
+                    .linjerUtenOpphør()
+                    .filter { linje.periode.overlapperMed(it.periode) }
+                    .map { Triple(this.fagområde, this.fagsystemId, it) }
             }
         }
 
