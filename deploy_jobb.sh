@@ -35,8 +35,6 @@ else
   DRYRUN="false"
 fi
 
-echo $DRYRUN
-exit
 
 docker run --rm -it -v $(PWD)/deploy:/config \
   -e CLUSTER=$CLUSTER \
