@@ -526,6 +526,7 @@ private fun UtbetalingsdagUtDto.tilPersonData() = UtbetalingsdagData(
     },
     aktuellDagsinntekt = this.økonomi.aktuellDagsinntekt.dagligDouble.beløp,
     dekningsgrunnlag = this.økonomi.dekningsgrunnlag.dagligDouble.beløp,
+    dekningsgrad = this.økonomi.dekningsgrad.prosent,
     begrunnelser = when (this) {
         is UtbetalingsdagUtDto.AvvistDagDto -> this.begrunnelser.map { it.tilPersonData() }
         else -> null

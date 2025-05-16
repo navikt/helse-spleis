@@ -14,6 +14,7 @@ data class Økonomi(
     val refusjonsbeløp: Inntekt,
     val aktuellDagsinntekt: Inntekt,
     val dekningsgrunnlag: Inntekt,
+    val dekningsgrad: Prosentdel,
     val totalSykdomsgrad: Prosentdel = sykdomsgrad,
     val arbeidsgiverbeløp: Inntekt? = null,
     val personbeløp: Inntekt? = null
@@ -29,7 +30,8 @@ data class Økonomi(
                 utbetalingsgrad = sykdomsgrad,
                 refusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
-                dekningsgrunnlag = dekningsgrunnlag
+                dekningsgrunnlag = dekningsgrunnlag,
+                dekningsgrad = 100.prosent,
             )
 
         fun ikkeBetalt(aktuellDagsinntekt: Inntekt = INGEN) = inntekt(
@@ -157,6 +159,7 @@ data class Økonomi(
                 refusjonsbeløp = Inntekt.gjenopprett(dto.arbeidsgiverRefusjonsbeløp),
                 aktuellDagsinntekt = Inntekt.gjenopprett(dto.aktuellDagsinntekt),
                 dekningsgrunnlag = Inntekt.gjenopprett(dto.dekningsgrunnlag),
+                dekningsgrad = Prosentdel.gjenopprett(dto.dekningsgrad),
                 arbeidsgiverbeløp = dto.arbeidsgiverbeløp?.let { Inntekt.gjenopprett(it) },
                 personbeløp = dto.personbeløp?.let { Inntekt.gjenopprett(it) }
             )
@@ -192,6 +195,7 @@ data class Økonomi(
         arbeidsgiverRefusjonsbeløp = refusjonsbeløp.dto(),
         aktuellDagsinntekt = aktuellDagsinntekt.dto(),
         dekningsgrunnlag = dekningsgrunnlag.dto(),
+        dekningsgrad = dekningsgrad.dto(),
         arbeidsgiverbeløp = arbeidsgiverbeløp?.dto(),
         personbeløp = personbeløp?.dto()
     )

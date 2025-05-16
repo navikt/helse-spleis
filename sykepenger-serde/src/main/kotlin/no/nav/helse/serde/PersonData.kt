@@ -1301,6 +1301,7 @@ data class PersonData(
             val type: TypeData,
             val aktuellDagsinntekt: Double,
             val dekningsgrunnlag: Double,
+            val dekningsgrad: Double?, // TODO: Fjerne optional når alle personer har fått seg det
             val begrunnelser: List<BegrunnelseData>?,
             val grad: Double,
             val totalGrad: Double,
@@ -1321,6 +1322,7 @@ data class PersonData(
                     arbeidsgiverRefusjonsbeløp = InntektbeløpDto.DagligDouble(this.arbeidsgiverRefusjonsbeløp),
                     aktuellDagsinntekt = InntektbeløpDto.DagligDouble(this.aktuellDagsinntekt),
                     dekningsgrunnlag = InntektbeløpDto.DagligDouble(this.dekningsgrunnlag),
+                    dekningsgrad = dekningsgrad?.let { ProsentdelDto(it) } ?: ProsentdelDto(100.0),
                     arbeidsgiverbeløp = this.arbeidsgiverbeløp?.let { InntektbeløpDto.DagligDouble(it) },
                     personbeløp = this.personbeløp?.let { InntektbeløpDto.DagligDouble(it) }
                 )
