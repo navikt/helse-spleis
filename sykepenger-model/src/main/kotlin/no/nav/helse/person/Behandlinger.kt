@@ -53,6 +53,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.UtbetalingView
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
@@ -514,7 +515,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 periode = periode,
                 sykdomstidslinje = sykdomstidslinje,
                 grunnlagsdata = grunnlagsdata,
-                utbetaling = utbetaling,
+                utbetaling = utbetaling?.view,
                 dokumentsporing = dokumentsporing,
                 utbetalingstidslinje = utbetalingstidslinje,
                 refusjonstidslinje = refusjonstidslinje,
@@ -2007,7 +2008,7 @@ internal data class BehandlingendringView(
     val periode: Periode,
     val sykdomstidslinje: Sykdomstidslinje,
     val grunnlagsdata: VilkårsgrunnlagElement?,
-    val utbetaling: Utbetaling?,
+    val utbetaling: UtbetalingView?,
     val dokumentsporing: Dokumentsporing,
     val utbetalingstidslinje: Utbetalingstidslinje,
     val refusjonstidslinje: Beløpstidslinje,

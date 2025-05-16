@@ -68,7 +68,8 @@ class Utbetaling private constructor(
             personOppdrag = personOppdrag,
             status = tilstand.status,
             type = type,
-            annulleringer = annulleringer.map { it.id }
+            annulleringer = annulleringer.map { it.id },
+            erAvsluttet = erAvsluttet()
         )
 
     constructor(
@@ -879,5 +880,6 @@ data class UtbetalingView(
     val personOppdrag: Oppdrag,
     val status: Utbetalingstatus,
     val type: Utbetalingtype,
-    val annulleringer: List<UUID>
+    val annulleringer: List<UUID>,
+    val erAvsluttet: Boolean
 )

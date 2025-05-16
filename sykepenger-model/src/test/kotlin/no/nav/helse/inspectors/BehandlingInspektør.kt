@@ -10,7 +10,7 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.UtbetalingView
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal val BehandlingView.inspektør get() = BehandlingInspektør(this)
@@ -57,7 +57,7 @@ internal class BehandlingInspektør(view: BehandlingView) {
 
         data class Behandlingendring(
             val grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
-            val utbetaling: Utbetaling?,
+            val utbetaling: UtbetalingView?,
             val periode: Periode,
             val dokumentsporing: Dokumentsporing,
             val utbetalingstidslinje: Utbetalingstidslinje,

@@ -204,7 +204,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_GODKJENNING trenger hjelp!") {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingId = utbetalingId, utbetalingGodkjent = false)
         }
-        assertEquals(IKKE_GODKJENT, utbetaling.inspektør.tilstand)
+        assertEquals(IKKE_GODKJENT, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.tilstand)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
