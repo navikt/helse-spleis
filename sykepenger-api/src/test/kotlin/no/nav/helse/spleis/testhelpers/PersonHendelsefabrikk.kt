@@ -2,8 +2,7 @@ package no.nav.helse.spleis.testhelpers
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Year
-import java.util.UUID
+import java.util.*
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -13,7 +12,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
@@ -68,16 +66,6 @@ internal class PersonHendelsefabrikk {
             opprettet = opprettet
         )
     }
-
-    internal fun lagUtbetalingshistorikkForFeriepenger(opptjeningsår: Year) =
-        UtbetalingshistorikkForFeriepenger(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            utbetalinger = emptyList(),
-            feriepengehistorikk = emptyList(),
-            arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(emptyList()),
-            opptjeningsår = opptjeningsår,
-            skalBeregnesManuelt = false
-        )
 }
 
 internal class OverstyrtArbeidsgiveropplysning(
