@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDateTime
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
@@ -95,8 +96,12 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `annullere senere periode enn perioden til godkjenning`() {
         nyttVedtak(mars)
         tilGodkjenning(januar, a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
-        håndterUtbetalt()
+        assertUgyldigSituasjon("forventer at utbetaling i behandlingstilstand BEREGNET skal være IKKE_UTBETALT, men var FORKASTET") {
+            håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
+        }
+        assertUgyldigSituasjon("forventer at utbetaling i behandlingstilstand BEREGNET skal være IKKE_UTBETALT, men var FORKASTET") {
+            håndterUtbetalt()
+        }
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
     }

@@ -21,6 +21,7 @@ import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_UTBETALT
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat.Bestemmelse.IKKE_VURDERT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -264,7 +265,11 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
                         when (behandling.tilstand) {
                             BehandlingView.TilstandView.BEREGNET,
                             BehandlingView.TilstandView.BEREGNET_OMGJØRING,
-                            BehandlingView.TilstandView.BEREGNET_REVURDERING,
+                            BehandlingView.TilstandView.BEREGNET_REVURDERING -> {
+                                assertNotNull(endring.utbetaling) { "forventer utbetaling i ${behandling.tilstand}" }
+                                assertNotNull(endring.grunnlagsdata) { "forventer vilkårsgrunnlag i ${behandling.tilstand}" }
+                                assertEquals(IKKE_UTBETALT, endring.utbetaling!!.inspektør.tilstand) { "forventer at utbetaling i behandlingstilstand ${behandling.tilstand} skal være IKKE_UTBETALT, men var ${endring.utbetaling.inspektør.tilstand}" }
+                            }
                             BehandlingView.TilstandView.REVURDERT_VEDTAK_AVVIST,
                             BehandlingView.TilstandView.VEDTAK_FATTET,
                             BehandlingView.TilstandView.VEDTAK_IVERKSATT,
@@ -272,7 +277,6 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
                                 assertNotNull(endring.utbetaling) { "forventer utbetaling i ${behandling.tilstand}" }
                                 assertNotNull(endring.grunnlagsdata) { "forventer vilkårsgrunnlag i ${behandling.tilstand}" }
                             }
-
                             BehandlingView.TilstandView.TIL_INFOTRYGD,
                             BehandlingView.TilstandView.UBEREGNET,
                             UBEREGNET_OMGJØRING,
