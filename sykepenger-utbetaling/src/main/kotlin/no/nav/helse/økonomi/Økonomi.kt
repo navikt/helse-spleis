@@ -24,21 +24,21 @@ data class Økonomi(
         private val personBeløp = { økonomi: Økonomi -> økonomi.personbeløp!! }
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-        fun inntekt(sykdomsgrad: Prosentdel, aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt, refusjonsbeløp: Inntekt) =
+        fun inntekt(sykdomsgrad: Prosentdel, aktuellDagsinntekt: Inntekt, dekningsgrad: Prosentdel, refusjonsbeløp: Inntekt) =
             Økonomi(
                 sykdomsgrad = sykdomsgrad,
                 utbetalingsgrad = sykdomsgrad,
                 refusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
-                dekningsgrunnlag = dekningsgrunnlag,
-                dekningsgrad = 100.prosent,
+                dekningsgrad = dekningsgrad,
+                dekningsgrunnlag = aktuellDagsinntekt * dekningsgrad
             )
 
         fun ikkeBetalt(aktuellDagsinntekt: Inntekt = INGEN) = inntekt(
             sykdomsgrad = 0.prosent,
             aktuellDagsinntekt = aktuellDagsinntekt,
-            dekningsgrunnlag = INGEN,
-            refusjonsbeløp = INGEN
+            refusjonsbeløp = INGEN,
+            dekningsgrad = 100.prosent
         ).ikkeBetalt()
 
         private fun List<Økonomi>.aktuellDagsinntekt() = map { it.aktuellDagsinntekt }.summer()
@@ -168,6 +168,7 @@ data class Økonomi(
 
     init {
         require(dekningsgrunnlag >= INGEN) { "dekningsgrunnlag kan ikke være negativ." }
+        require(dekningsgrad in setOf(80.prosent, 100.prosent)) { "dekningsgrad må være 100 % eller 80 % var $dekningsgrad." }
     }
 
     // sykdomsgrader opprettes som int, og det gir ikke mening å runde opp og på den måten "gjøre personen mer syk"

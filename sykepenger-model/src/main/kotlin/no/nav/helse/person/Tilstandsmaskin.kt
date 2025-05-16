@@ -861,7 +861,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         }
         val inntektstidslinje = inntekterForBeregning.tilBeregning(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
 
-        val utbetalingstidslinje = vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektstidslinje)
+        val utbetalingstidslinje = vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektstidslinje, vedtaksperiode.arbeidsgiver.yrkesaktivitetssporing)
 
         vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
     }

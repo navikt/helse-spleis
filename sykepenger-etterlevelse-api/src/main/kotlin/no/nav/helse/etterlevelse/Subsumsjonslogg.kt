@@ -439,15 +439,14 @@ fun `§ 8-15`(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, innte
  * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-16)
  *
  * @param dato dagen [dekningsgrunnlag] beregnes for
- * @param dekningsgrad hvor stor andel av inntekten det ytes sykepenger av
  * @param inntekt inntekt for aktuell arbeidsgiver
  * @param dekningsgrunnlag maks dagsats før reduksjon til 6G og reduksjon for sykmeldingsgrad
  */
-fun `§ 8-16 ledd 1`(dato: Collection<ClosedRange<LocalDate>>, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) =
+fun `§ 8-16 ledd 1`(dato: Collection<ClosedRange<LocalDate>>, inntekt: Double, dekningsgrunnlag: Double) =
     Subsumsjon.periodisertSubsumsjon(
         perioder = dato,
         lovverk = "folketrygdloven",
-        input = mapOf("dekningsgrad" to dekningsgrad, "inntekt" to inntekt),
+        input = mapOf("dekningsgrad" to 1.0, "inntekt" to inntekt),
         output = mapOf("dekningsgrunnlag" to dekningsgrunnlag),
         utfall = VILKAR_BEREGNET,
         paragraf = PARAGRAF_8_16,

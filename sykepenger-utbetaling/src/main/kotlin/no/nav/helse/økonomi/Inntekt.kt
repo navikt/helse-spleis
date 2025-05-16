@@ -94,7 +94,3 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
     private fun dtoDagligDouble() = InntektbeløpDto.DagligDouble(daglig)
     private fun dtoDagligInt() = InntektbeløpDto.DagligInt(dagligInt)
 }
-
-interface DekningsgradKilde {
-    fun dekningsgrad(): Double
-}

@@ -12,6 +12,7 @@ import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 2`
 import no.nav.helse.etterlevelse.`§ 8-19 andre ledd`
 import no.nav.helse.etterlevelse.`§ 8-48 ledd 2 punktum 2`
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -90,7 +91,8 @@ internal class Utbetalingstidslinjesubsumsjon(
         }
     }
 
-    fun subsummer(vedtaksperiode: Periode, regler: ArbeidsgiverRegler) {
+    fun subsummer(vedtaksperiode: Periode, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet) {
+        if (yrkesaktivitet !is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) return
         subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a`(false, arbeidsgiverperiodedager, tidslinjesubsumsjonsformat))
         utbetalingsdager.firstOrNull()?.firstOrNull { !it.erHelg() }?.also {
             subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a`(oppfylt = true, dagen = listOf(it.rangeTo(it)), tidslinjesubsumsjonsformat))
@@ -107,7 +109,7 @@ internal class Utbetalingstidslinjesubsumsjon(
             .filter { it.inntekt.årligInntekt > 0 }
             .groupBy { it.inntekt }
             .forEach { (inntekt, perioder) ->
-                subsumsjonslogg.logg(`§ 8-16 ledd 1`(perioder.map { it.periode }, regler.dekningsgrad(), inntekt.årligInntekt, inntekt.årligDekningsgrunnlag))
+                subsumsjonslogg.logg(`§ 8-16 ledd 1`(perioder.map { it.periode }, inntekt.årligInntekt, inntekt.årligDekningsgrunnlag))
             }
     }
 

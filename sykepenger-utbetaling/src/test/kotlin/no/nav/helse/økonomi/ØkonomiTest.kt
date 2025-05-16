@@ -35,8 +35,8 @@ internal class ØkonomiTest {
     fun `total sykdomsgrad regnes ut fra aktuell dagsinntekt`() {
         val inntekt = 10000.månedlig
         val økonomi = listOf(
-            100.prosent.inntekt(inntekt, dekningsgrunnlag = inntekt),
-            50.prosent.inntekt(inntekt, dekningsgrunnlag = INGEN)
+            100.prosent.inntekt(inntekt),
+            50.prosent.inntekt(inntekt)
         )
         assertEquals(75.prosent, økonomi.totalSykdomsgrad())
     }
@@ -59,14 +59,14 @@ internal class ØkonomiTest {
         assertEquals(
             75.prosent,
             listOf(
-                75.prosent.inntekt(1200.daglig, 1200.daglig)
+                75.prosent.inntekt(1200.daglig)
             ).totalSykdomsgrad()
         )
     }
 
     @Test
     fun `total sykdomsgrad med 0 kr inntekt`() {
-        assertEquals(0.prosent, listOf(75.prosent.inntekt(0.daglig, 0.daglig)).totalSykdomsgrad())
+        assertEquals(0.prosent, listOf(75.prosent.inntekt(0.daglig)).totalSykdomsgrad())
     }
 
     @Test
@@ -74,8 +74,8 @@ internal class ØkonomiTest {
         assertEquals(
             38.prosent,
             listOf(
-                50.prosent.inntekt(1200.daglig, 1200.daglig),
-                20.prosent.inntekt(800.daglig, 800.daglig)
+                50.prosent.inntekt(1200.daglig),
+                20.prosent.inntekt(800.daglig)
             ).totalSykdomsgrad().also {
                 assertFalse(it.erUnderGrensen())
             }
@@ -85,8 +85,8 @@ internal class ØkonomiTest {
     @Test
     fun `total sykdomsgrad med 0 kr inntekt - flere arbeidsgivere`() {
         val totalSykdomsgrad = listOf(
-            50.prosent.inntekt(0.daglig, 0.daglig),
-            20.prosent.inntekt(0.daglig, 0.daglig)
+            50.prosent.inntekt(0.daglig),
+            20.prosent.inntekt(0.daglig)
         ).totalSykdomsgrad()
 
         assertEquals(0.prosent, totalSykdomsgrad)
@@ -98,9 +98,9 @@ internal class ØkonomiTest {
         assertEquals(
             49.prosent,
             listOf(
-                50.prosent.inntekt(1200.daglig, 1200.daglig),
-                20.prosent.inntekt(800.daglig, 800.daglig),
-                60.prosent.inntekt(2000.daglig, 2000.daglig)
+                50.prosent.inntekt(1200.daglig),
+                20.prosent.inntekt(800.daglig),
+                60.prosent.inntekt(2000.daglig)
             ).totalSykdomsgrad()
         )
     }
@@ -110,9 +110,9 @@ internal class ØkonomiTest {
         assertEquals(
             49.prosent,
             listOf(
-                50.prosent.inntekt(1200.daglig, 1200.daglig),
-                20.prosent.inntekt(800.daglig, 800.daglig),
-                60.prosent.inntekt(2000.daglig, 2000.daglig).ikkeBetalt()
+                50.prosent.inntekt(1200.daglig),
+                20.prosent.inntekt(800.daglig),
+                60.prosent.inntekt(2000.daglig).ikkeBetalt()
             ).totalSykdomsgrad().also {
                 assertFalse(it.erUnderGrensen())
             }
@@ -130,20 +130,20 @@ internal class ØkonomiTest {
     @Test
     fun `dekningsgrunnlag returns clone`() {
         50.prosent.also { original ->
-            assertNotSame(original, original.inntekt(1200.daglig, 1200.daglig))
+            assertNotSame(original, original.inntekt(1200.daglig))
         }
     }
 
     @Test
     fun `toMap med dekningsgrunnlag`() {
-        val økonomi = 79.5.prosent.inntekt(1200.4.daglig, 1200.4.daglig)
+        val økonomi = 79.5.prosent.inntekt(1200.4.daglig)
         assertEquals(79.5, økonomi.inspektør.grad.toDouble())
         assertEquals(1200.4.daglig, økonomi.inspektør.dekningsgrunnlag)
     }
 
     @Test
     fun `toIntMap med dekningsgrunnlag`() {
-        79.5.prosent.inntekt(1200.4.daglig, 1200.4.daglig)
+        79.5.prosent.inntekt(1200.4.daglig)
             .also { økonomi ->
                 assertEquals(79.5, økonomi.inspektør.grad.toDouble())
                 assertEquals(1200.4.daglig, økonomi.inspektør.dekningsgrunnlag)
@@ -153,7 +153,7 @@ internal class ØkonomiTest {
     @Test
     fun `kan beregne betaling mer enn en gang`() {
         assertDoesNotThrow {
-            listOf(80.prosent.inntekt(1200.daglig, 1200.daglig))
+            listOf(80.prosent.inntekt(1200.daglig))
                 .betal(1200.daglig)
                 .betal(1200.daglig)
         }
@@ -162,7 +162,6 @@ internal class ØkonomiTest {
     @Test
     fun `Beregn utbetaling når mindre enn 6G`() {
         80.prosent.inntekt(
-            1200.daglig,
             1200.daglig,
             refusjonsbeløp = 1200.daglig
         ).also {
@@ -285,8 +284,8 @@ internal class ØkonomiTest {
 
     @Test
     fun `Sykdomdsgrad rundes opp`() {
-        val a = 20.prosent.inntekt(10000.daglig, 10000.daglig, refusjonsbeløp = 10000.daglig)
-        val b = 21.prosent.inntekt(10000.daglig, 10000.daglig, refusjonsbeløp = 10000.daglig)
+        val a = 20.prosent.inntekt(10000.daglig, refusjonsbeløp = 10000.daglig)
+        val b = 21.prosent.inntekt(10000.daglig, refusjonsbeløp = 10000.daglig)
         val betalte = listOf(a, b).betal(561804.årlig).also {
             assertEquals(20.5.prosent, it.totalSykdomsgrad()) //dekningsgrunnlag 454
         }
@@ -297,7 +296,6 @@ internal class ØkonomiTest {
     @Test
     fun `Refusjonsbeløp graderes i henhold til sykdomsgrad`() {
         val økonomi = 50.prosent.inntekt(
-            1000.daglig,
             1000.daglig,
             refusjonsbeløp = 500.daglig
         )
@@ -432,10 +430,9 @@ internal class ØkonomiTest {
 
     private fun Prosentdel.inntekt(
         aktuellDagsinntekt: Inntekt,
-        dekningsgrunnlag: Inntekt = aktuellDagsinntekt,
         refusjonsbeløp: Inntekt = aktuellDagsinntekt
     ) =
-        Økonomi.inntekt(this, aktuellDagsinntekt, dekningsgrunnlag, refusjonsbeløp)
+        Økonomi.inntekt(this, aktuellDagsinntekt, 100.prosent, refusjonsbeløp)
 }
 
 private const val ØnsketOppførsel =

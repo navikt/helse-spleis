@@ -1905,7 +1905,7 @@ internal class Vedtaksperiode private constructor(
             beregning = beregning
         )
         val subsumsjonen = Utbetalingstidslinjesubsumsjon(this.subsumsjonslogg, this.sykdomstidslinje, beregning.utbetalingstidslinje)
-        subsumsjonen.subsummer(periode, person.regler)
+        subsumsjonen.subsummer(periode, this.arbeidsgiver.yrkesaktivitetssporing)
         beregning.maksdatovurdering.subsummer(subsumsjonslogg, periode)
         loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(arbeidsgiverSomBeregner, aktivitetslogg)
     }
@@ -2068,7 +2068,8 @@ internal class Vedtaksperiode private constructor(
                 Vedtaksperiodeberegning(
                     vedtaksperiodeId = vedtaksperiode.id,
                     utbetalingstidslinje = vedtaksperiode.behandlinger.lagUtbetalingstidslinje(
-                        inntektstidslinje = inntekterForBeregning.tilBeregning(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
+                        inntektstidslinje = inntekterForBeregning.tilBeregning(vedtaksperiode.arbeidsgiver.organisasjonsnummer),
+                        yrkesaktivitet = vedtaksperiode.arbeidsgiver.yrkesaktivitetssporing
                     )
                 )
             }

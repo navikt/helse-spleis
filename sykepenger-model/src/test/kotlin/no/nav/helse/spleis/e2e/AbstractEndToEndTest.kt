@@ -98,7 +98,6 @@ internal abstract class AbstractEndToEndTest {
     private fun regler(maksSykedager: Int): ArbeidsgiverRegler = object : ArbeidsgiverRegler {
         override fun burdeStarteNyArbeidsgiverperiode(oppholdsdagerBrukt: Int) = oppholdsdagerBrukt >= 16
         override fun arbeidsgiverperiodenGjennomført(arbeidsgiverperiodedagerBrukt: Int) = arbeidsgiverperiodedagerBrukt >= 16
-        override fun dekningsgrad() = 1.0
         override fun maksSykepengedager() = maksSykedager
         override fun maksSykepengedagerOver67() = maksSykedager
     }

@@ -18,7 +18,7 @@ internal data class ArbeidsgiverperiodeForVedtaksperiode(
 )
 
 internal class UtbetalingstidslinjeBuilderVedtaksperiode(
-    private val regler: ArbeidsgiverRegler,
+    private val dekningsgrad: Prosentdel,
     private val arbeidsgiverperiode: List<Periode>,
     private val dagerNavOvertarAnsvar: List<Periode>,
     private val refusjonstidslinje: Beløpstidslinje,
@@ -41,7 +41,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
         return Økonomi.inntekt(
             sykdomsgrad = grad,
             aktuellDagsinntekt = aktuellDagsinntekt,
-            dekningsgrunnlag = aktuellDagsinntekt * regler.dekningsgrad(),
+            dekningsgrad = dekningsgrad,
             refusjonsbeløp = refusjonsbeløp(dato)
         )
     }

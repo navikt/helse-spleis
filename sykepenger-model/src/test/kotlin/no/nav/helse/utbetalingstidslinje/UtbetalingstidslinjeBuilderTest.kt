@@ -32,6 +32,7 @@ import no.nav.helse.testhelpers.YS
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -1042,7 +1043,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         perioder.addAll(arbeidsgiverperioder)
 
         val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
-            regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
+            dekningsgrad = 100.prosent,
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje(),

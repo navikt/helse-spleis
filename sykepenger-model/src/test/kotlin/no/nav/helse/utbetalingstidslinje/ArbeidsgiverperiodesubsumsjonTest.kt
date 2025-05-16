@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.dsl.a1
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
@@ -13,6 +14,7 @@ import no.nav.helse.etterlevelse.førsteLedd
 import no.nav.helse.etterlevelse.paragraf
 import no.nav.helse.etterlevelse.tredjeLedd
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
@@ -26,6 +28,7 @@ import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -200,7 +203,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         }
 
         val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
-            regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
+            dekningsgrad = 100.prosent,
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
             dagerNavOvertarAnsvar = emptyList(),
             refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje(),
@@ -212,7 +215,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         observatør = Dagobservatør(utbetalingstidslinje)
 
         val subsummering = Utbetalingstidslinjesubsumsjon(jurist, tidslinje, utbetalingstidslinje)
-        subsummering.subsummer(tidslinje.periode()!!, ArbeidsgiverRegler.Companion.NormalArbeidstaker)
+        subsummering.subsummer(tidslinje.periode()!!, Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1))
     }
 
     private class Subsumsjonobservatør : Subsumsjonslogg {

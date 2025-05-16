@@ -7,7 +7,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -44,7 +43,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiodeTest {
         inntekt: Inntekt = 21000.månedlig,
         fastsattÅrsinntekt: Inntekt? = inntekt
     ) = UtbetalingstidslinjeBuilderVedtaksperiode(
-        regler = NormalArbeidstaker,
+        dekningsgrad = 100.prosent,
         arbeidsgiverperiode = listOf(1.januar til 16.januar),
         dagerNavOvertarAnsvar = emptyList(),
         refusjonstidslinje = Beløpstidslinje(),
