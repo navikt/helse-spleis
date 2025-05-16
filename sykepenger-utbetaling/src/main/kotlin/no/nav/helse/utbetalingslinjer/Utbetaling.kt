@@ -404,12 +404,10 @@ class Utbetaling private constructor(
                 }
                 .also { overlappendeLinjer ->
                     if (overlappendeLinjer.isNotEmpty()) {
-                        val feilmelding = """
-                            |Vi har opprettet en utbetaling med periode ${nyUtbetaling.periode} & 
-                            |korrelasjonsId ${nyUtbetaling.korrelasjonsId} som overlapper med 
-                            |oppdragslinjer i eksisterende utbetalinger:\n
-                            |${overlappendeLinjer.joinToString(separator = "\n") { (fagområde, fagsystemId, linje) -> "$fagområde - $fagsystemId - ${linje.periode}" }}\n
-                            |""".trimMargin()
+                        val feilmelding = "Vi har opprettet en utbetaling med periode ${nyUtbetaling.periode} & " +
+                            "korrelasjonsId ${nyUtbetaling.korrelasjonsId} som overlapper med " +
+                            "oppdragslinjer i eksisterende utbetalinger:\n" +
+                            overlappendeLinjer.joinToString(separator = "\n") { (fagområde, fagsystemId, linje) -> "* $fagområde - $fagsystemId - ${linje.periode}" }
                         sikkerlogg.error(feilmelding, kv("fødselsnummer", nyUtbetaling.personOppdrag.mottaker))
                     }
                 }
