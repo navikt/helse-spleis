@@ -157,9 +157,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             Inntektsmelding(
                 meldingsreferanseId = MeldingsreferanseId(id),
                 refusjon = refusjon,
-                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-                    organisasjonsnummer = organisasjonsnummer
-                ),
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer = organisasjonsnummer),
                 beregnetInntekt = beregnetInntekt,
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = fraInnteksmelding(begrunnelseForReduksjonEllerIkkeUtbetalt),
@@ -215,9 +213,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
         innsendt = innsendt,
         registrert = registrert,
-        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-            organisasjonsnummer = organisasjonsnummer
-        ),
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer = organisasjonsnummer),
         vedtaksperiodeId = vedtaksperiodeId,
         opplysninger = opplysninger.toList()
     )
@@ -363,7 +359,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         return Simulering(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             fagsystemId = fagsystemId,
             fagområde = fagområde,
             simuleringOK = simuleringOK,
@@ -381,7 +377,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         godkjenttidspunkt: LocalDateTime = LocalDateTime.now()
     ) = Utbetalingsgodkjenning(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+        behandlingsporing = behandlingsporing,
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         saksbehandler = "Ola Nordmann",
@@ -398,7 +394,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()
     ) = VedtakFattet(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+        behandlingsporing = behandlingsporing,
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeId,
         saksbehandlerIdent = "Vedtak fattesen",
@@ -430,7 +426,7 @@ internal class ArbeidsgiverHendelsefabrikk(
     ) =
         UtbetalingHendelse(
             meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             fagsystemId = fagsystemId,
             utbetalingId = utbetalingId,
             status = status,
@@ -463,7 +459,7 @@ internal class ArbeidsgiverHendelsefabrikk(
     ) =
         Påminnelse(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             antallGangerPåminnet = 0,
             tilstand = tilstand,
@@ -500,7 +496,7 @@ internal class ArbeidsgiverHendelsefabrikk(
     internal fun lagHåndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>) =
         OverstyrTidslinje(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             dager = overstyringsdager,
             opprettet = LocalDateTime.now()
         )
