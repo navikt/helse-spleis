@@ -10,6 +10,7 @@ import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
@@ -51,7 +52,9 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SY_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
@@ -73,6 +76,43 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
+
+    @Test
+    fun `En situasjon som skaper ugyldig situasjon & smeller i Speilbuilder`() {
+        a1 { nyttVedtak(januar) } // Ignorer denne, den må bare på plass til å lage rett rekkefølge på ting
+        a2 {
+            håndterSøknad(16.januar(2025) til 24.januar(2025))
+            håndterSøknad(25.januar(2025) til 9.februar(2025))
+            håndterSøknad(17.februar(2025) til 24.februar(2025))
+        }
+        a1 {
+            håndterSøknad(17.februar(2025) til 24.februar(2025))
+            assertEquals(17.februar(2025) til 24.februar(2025), inspektør.periode(2.vedtaksperiode))
+            håndterInntektsmelding(listOf(16.januar(2025) til 31.januar(2025)), førsteFraværsdag = 17.februar(2025))
+            // Blir strukket en måned i snuten
+            assertEquals(16.januar(2025) til 24.februar(2025), inspektør.periode(2.vedtaksperiode))
+        }
+        a2 {
+            håndterInntektsmelding(listOf(16.januar(2025) til 31.januar(2025)))
+            håndterInntektsmelding(listOf(16.januar(2025) til 31.januar(2025)), førsteFraværsdag = 17.februar(2025))
+        }
+        a1 {
+            håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            assertEquals(listOf(17.februar(2025), 16.januar(2025)), inspektør.skjæringstidspunkter(2.vedtaksperiode))
+        }
+        a2 {
+            // Dette er jo det første skjæringstidspunktet til den over, så nå har den to vilkårsprøvde skjæringstidspunkt. Skaper det krøllet?
+            assertEquals(16.januar(2025), inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
+            assertVarsler(2.vedtaksperiode, RV_VV_2)
+            assertUgyldigSituasjon("forventer at utbetaling i behandlingstilstand BEREGNET skal være IKKE_UTBETALT, men var FORKASTET") { håndterYtelser(2.vedtaksperiode) }
+            assertUgyldigSituasjon("forventer at utbetaling i behandlingstilstand BEREGNET skal være IKKE_UTBETALT, men var FORKASTET") { håndterSimulering(2.vedtaksperiode) }
+        }
+    }
 
     @Test
     fun `En kort AUU på annen arbeidsgiver på eget skjæringstidspunkt, så kommer søknad på opprinnelig arbeidsgiver som gjør at hen er på samme skjæringstidspunkt`() {
@@ -448,7 +488,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                     mandag den 22.januar til 25.januar
                 )
             )
-            assertVarsel(Varselkode.RV_IM_3, 3.vedtaksperiode.filter())
+            assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
         }
         a1 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
