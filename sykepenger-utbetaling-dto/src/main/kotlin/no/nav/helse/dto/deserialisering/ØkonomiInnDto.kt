@@ -12,5 +12,7 @@ data class ØkonomiInnDto(
     val dekningsgrunnlag: InntektbeløpDto.DagligDouble,
     val dekningsgrad: ProsentdelDto,
     val arbeidsgiverbeløp: InntektbeløpDto.DagligDouble?,
-    val personbeløp: InntektbeløpDto.DagligDouble?
+    val personbeløp: InntektbeløpDto.DagligDouble?,
+    val reservertArbeidsgiverbeløp: InntektbeløpDto.DagligDouble?,
+    val reservertPersonbeløp: InntektbeløpDto.DagligDouble?
 )

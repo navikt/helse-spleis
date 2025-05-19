@@ -711,6 +711,8 @@ data class SpannerPersonDto(
             val arbeidsgiverRefusjonsbeløp: Double,
             val arbeidsgiverbeløp: Double?,
             val personbeløp: Double?,
+            val reservertArbeidsgiverbeløp: Double?,
+            val reservertPersonbeløp: Double?,
             val dato: LocalDate?,
             val fom: LocalDate?,
             val tom: LocalDate?
@@ -1283,6 +1285,8 @@ private fun UtbetalingsdagUtDto.tilPersonData() =
         arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.dagligDouble.beløp,
         arbeidsgiverbeløp = this.økonomi.arbeidsgiverbeløp?.dagligDouble?.beløp,
         personbeløp = this.økonomi.personbeløp?.dagligDouble?.beløp,
+        reservertArbeidsgiverbeløp = this.økonomi.reservertArbeidsgiverbeløp?.dagligDouble?.beløp,
+        reservertPersonbeløp = this.økonomi.reservertPersonbeløp?.dagligDouble?.beløp,
         dato = this.dato,
         fom = null,
         tom = null

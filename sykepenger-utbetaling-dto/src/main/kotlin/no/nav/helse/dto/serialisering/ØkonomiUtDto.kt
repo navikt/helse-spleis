@@ -12,5 +12,7 @@ data class ØkonomiUtDto(
     val dekningsgrunnlag: InntektDto,
     val dekningsgrad: ProsentdelDto,
     val arbeidsgiverbeløp: InntektDto?,
-    val personbeløp: InntektDto?
+    val personbeløp: InntektDto?,
+    val reservertArbeidsgiverbeløp: InntektDto?,
+    val reservertPersonbeløp: InntektDto?
 )

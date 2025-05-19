@@ -1309,12 +1309,16 @@ data class PersonData(
             val arbeidsgiverRefusjonsbeløp: Double,
             val arbeidsgiverbeløp: Double?,
             val personbeløp: Double?,
+            val reservertArbeidsgiverbeløp: Double?,
+            val reservertPersonbeløp: Double?,
             val dato: LocalDate?,
             val fom: LocalDate?,
             val tom: LocalDate?
         ) {
             private val datoer = datosekvens(dato, fom, tom)
             private val økonomiDto by lazy {
+                val lagretArbeidsgiverbeløp = this.arbeidsgiverbeløp?.let { InntektbeløpDto.DagligDouble(it) }
+                val lagretPersonbeløp = this.personbeløp?.let { InntektbeløpDto.DagligDouble(it) }
                 ØkonomiInnDto(
                     grad = ProsentdelDto(grad),
                     totalGrad = ProsentdelDto(totalGrad),
@@ -1323,8 +1327,12 @@ data class PersonData(
                     aktuellDagsinntekt = InntektbeløpDto.DagligDouble(this.aktuellDagsinntekt),
                     dekningsgrunnlag = InntektbeløpDto.DagligDouble(this.dekningsgrunnlag),
                     dekningsgrad = dekningsgrad?.let { ProsentdelDto(it) } ?: ProsentdelDto(100.0),
-                    arbeidsgiverbeløp = this.arbeidsgiverbeløp?.let { InntektbeløpDto.DagligDouble(it) },
-                    personbeløp = this.personbeløp?.let { InntektbeløpDto.DagligDouble(it) }
+                    arbeidsgiverbeløp = lagretArbeidsgiverbeløp,
+                    personbeløp = lagretPersonbeløp,
+                    // Disse elvisene kan fjernes når alle personer har blitt oppdatert i databasen
+                    // Feltene må være nullable (om ingen finner ut at arbeidsigverbeløp & personbeløp aldri blir lagret ned som null)
+                    reservertArbeidsgiverbeløp = this.reservertArbeidsgiverbeløp?.let { InntektbeløpDto.DagligDouble(it) } ?: lagretArbeidsgiverbeløp,
+                    reservertPersonbeløp = this.reservertPersonbeløp?.let { InntektbeløpDto.DagligDouble(it) } ?: lagretPersonbeløp
                 )
             }
 

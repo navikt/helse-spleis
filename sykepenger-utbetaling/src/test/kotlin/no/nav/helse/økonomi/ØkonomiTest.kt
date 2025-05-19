@@ -9,7 +9,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.ratio
 import no.nav.helse.økonomi.Økonomi.Companion.totalSykdomsgrad
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -151,12 +150,13 @@ internal class ØkonomiTest {
     }
 
     @Test
-    fun `kan beregne betaling mer enn en gang`() {
-        assertDoesNotThrow {
+    fun `et økonomi-objekt skal bare kunne betales én gang`() {
+        val feil = assertThrows<IllegalStateException> {
             listOf(80.prosent.inntekt(1200.daglig))
                 .betal(1200.daglig)
                 .betal(1200.daglig)
-        }
+        }.message
+        assertEquals("Arbeidsgiverbeløp skal kun settes én gang!", feil)
     }
 
     @Test

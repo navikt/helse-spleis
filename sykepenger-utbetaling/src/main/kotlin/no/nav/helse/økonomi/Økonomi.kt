@@ -17,11 +17,11 @@ data class Økonomi(
     val dekningsgrad: Prosentdel,
     val totalSykdomsgrad: Prosentdel = sykdomsgrad,
     val arbeidsgiverbeløp: Inntekt? = null,
-    val personbeløp: Inntekt? = null
+    val personbeløp: Inntekt? = null,
+    private val reservertArbeidsgiverbeløp: Inntekt? = null,
+    private val reservertPersonbeløp: Inntekt? = null
 ) {
     companion object {
-        private val arbeidsgiverBeløp = { økonomi: Økonomi -> økonomi.arbeidsgiverbeløp!! }
-        private val personBeløp = { økonomi: Økonomi -> økonomi.personbeløp!! }
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         fun inntekt(sykdomsgrad: Prosentdel, aktuellDagsinntekt: Inntekt, dekningsgrad: Prosentdel, refusjonsbeløp: Inntekt) =
@@ -64,10 +64,11 @@ data class Økonomi(
         fun betal(sykepengegrunnlagBegrenset6G: Inntekt, økonomiList: List<Økonomi>): List<Økonomi> {
             val utbetalingsgrad = totalUtbetalingsgrad(økonomiList)
             val foreløpig = delteUtbetalinger(økonomiList)
-            return fordelBeløp(foreløpig, sykepengegrunnlagBegrenset6G, utbetalingsgrad)
+            val fordelt = fordelBeløp(foreløpig, sykepengegrunnlagBegrenset6G, utbetalingsgrad)
+            return fordelt.map { it.betal() }
         }
 
-        private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.map { it.betal() }
+        private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.map { it.reserver() }
 
         private fun fordelBeløp(økonomiList: List<Økonomi>, sykepengegrunnlagBegrenset6G: Inntekt, utbetalingsgrad: Prosentdel): List<Økonomi> {
             val totalArbeidsgiver = totalArbeidsgiver(økonomiList)
@@ -76,11 +77,21 @@ data class Økonomi(
             if (total == INGEN) return økonomiList
 
             val inntektstapSomSkalDekkesAvNAV = maxOf(INGEN, (sykepengegrunnlagBegrenset6G * utbetalingsgrad).rundTilDaglig())
-            val fordelingRefusjon = fordel(økonomiList, totalArbeidsgiver, inntektstapSomSkalDekkesAvNAV, { økonomi, inntekt -> økonomi.copy(arbeidsgiverbeløp = inntekt) }, arbeidsgiverBeløp)
+            val fordelingRefusjon = fordel(
+                økonomiList = økonomiList,
+                total = totalArbeidsgiver,
+                grense = inntektstapSomSkalDekkesAvNAV,
+                setter = { økonomi, inntekt -> økonomi.copy(reservertArbeidsgiverbeløp = inntekt) },
+                getter = { it.reservertArbeidsgiverbeløp!! }
+            )
             val totalArbeidsgiverrefusjon = totalArbeidsgiver(fordelingRefusjon)
-            val fordelingPerson = fordel(fordelingRefusjon, total - totalArbeidsgiverrefusjon, inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon, { økonomi, inntekt ->
-                økonomi.copy(personbeløp = inntekt)
-            }, personBeløp)
+            val fordelingPerson = fordel(
+                økonomiList = fordelingRefusjon,
+                total = total - totalArbeidsgiverrefusjon,
+                grense = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon,
+                setter = { økonomi, inntekt -> økonomi.copy(reservertPersonbeløp = inntekt) },
+                getter = { it.reservertPersonbeløp!! }
+            )
             val totalPersonbeløp = totalPerson(fordelingPerson)
             val restbeløp = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon - totalPersonbeløp
             val restfordeling = restfordeling(fordelingPerson, restbeløp)
@@ -99,10 +110,10 @@ data class Økonomi(
             // Fordeler 1 krone per arbeidsforhold som skal ha en utbetaling uansett frem til hele potten er fordelt
             while (budsjett > INGEN) {
                 list = list.map {
-                    val personbeløp = personBeløp(it)
-                    if (budsjett > INGEN && (arbeidsgiverBeløp(it) > INGEN || personbeløp > INGEN)) {
+                    val reservertPersonbeløp = it.reservertPersonbeløp!!
+                    if (budsjett > INGEN && (it.reservertArbeidsgiverbeløp!! > INGEN || reservertPersonbeløp > INGEN)) {
                         budsjett -= 1.daglig
-                        it.copy(personbeløp = personbeløp + 1.daglig)
+                        it.copy(reservertPersonbeløp = reservertPersonbeløp + 1.daglig)
                     } else {
                         it
                     }
@@ -147,9 +158,9 @@ data class Økonomi(
         private fun total(økonomiList: List<Økonomi>, strategi: (Økonomi) -> Inntekt): Inntekt =
             økonomiList.map { strategi(it) }.summer()
 
-        private fun totalArbeidsgiver(økonomiList: List<Økonomi>) = total(økonomiList, arbeidsgiverBeløp)
+        private fun totalArbeidsgiver(økonomiList: List<Økonomi>) = total(økonomiList) { it.reservertArbeidsgiverbeløp!! }
 
-        private fun totalPerson(økonomiList: List<Økonomi>) = total(økonomiList, personBeløp)
+        private fun totalPerson(økonomiList: List<Økonomi>) = total(økonomiList) { it.reservertPersonbeløp!! }
 
         fun gjenopprett(dto: ØkonomiInnDto): Økonomi {
             return Økonomi(
@@ -161,7 +172,9 @@ data class Økonomi(
                 dekningsgrunnlag = Inntekt.gjenopprett(dto.dekningsgrunnlag),
                 dekningsgrad = Prosentdel.gjenopprett(dto.dekningsgrad),
                 arbeidsgiverbeløp = dto.arbeidsgiverbeløp?.let { Inntekt.gjenopprett(it) },
-                personbeløp = dto.personbeløp?.let { Inntekt.gjenopprett(it) }
+                personbeløp = dto.personbeløp?.let { Inntekt.gjenopprett(it) },
+                reservertArbeidsgiverbeløp = dto.reservertArbeidsgiverbeløp?.let { Inntekt.gjenopprett(it) },
+                reservertPersonbeløp = dto.reservertPersonbeløp?.let { Inntekt.gjenopprett(it) }
             )
         }
     }
@@ -177,13 +190,22 @@ data class Økonomi(
     // speil viser grad som nedrundet int (det rundes -ikke- oppover siden det ville gjort 19.5 % (for liten sykdomsgrad) til 20 % (ok sykdomsgrad)
     fun <R> brukTotalGrad(block: (totalGrad: Int) -> R) = block(totalSykdomsgrad.toDouble().toInt())
 
-    private fun betal(): Økonomi {
-        val total = (dekningsgrunnlag * utbetalingsgrad).rundTilDaglig()
+    private fun reserver(): Økonomi {
+        val total = (aktuellDagsinntekt * utbetalingsgrad).rundTilDaglig()
         val gradertArbeidsgiverRefusjonsbeløp = (refusjonsbeløp * utbetalingsgrad).rundTilDaglig()
         val arbeidsgiverbeløp = gradertArbeidsgiverRefusjonsbeløp.coerceAtMost(total)
         return copy(
-            arbeidsgiverbeløp = arbeidsgiverbeløp,
-            personbeløp = (total - arbeidsgiverbeløp).coerceAtLeast(INGEN)
+            reservertArbeidsgiverbeløp = arbeidsgiverbeløp,
+            reservertPersonbeløp = (total - arbeidsgiverbeløp).coerceAtLeast(INGEN)
+        )
+    }
+
+    private fun betal(): Økonomi {
+        check(arbeidsgiverbeløp == null) { "Arbeidsgiverbeløp skal kun settes én gang!" }
+        check(personbeløp == null) { "Personbeløp skal kun settes én gang!" }
+        return copy(
+            arbeidsgiverbeløp = (reservertArbeidsgiverbeløp!! * dekningsgrad).rundTilDaglig(),
+            personbeløp = (reservertPersonbeløp!! * dekningsgrad).rundTilDaglig(),
         )
     }
 
@@ -198,7 +220,9 @@ data class Økonomi(
         dekningsgrunnlag = dekningsgrunnlag.dto(),
         dekningsgrad = dekningsgrad.dto(),
         arbeidsgiverbeløp = arbeidsgiverbeløp?.dto(),
-        personbeløp = personbeløp?.dto()
+        personbeløp = personbeløp?.dto(),
+        reservertArbeidsgiverbeløp = reservertArbeidsgiverbeløp?.dto(),
+        reservertPersonbeløp = reservertPersonbeløp?.dto()
     )
 }
 

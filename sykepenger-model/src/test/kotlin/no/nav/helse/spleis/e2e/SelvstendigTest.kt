@@ -70,7 +70,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                 assertEquals(1, utbetalinginspektør.personOppdrag.size)
                 utbetalinginspektør.personOppdrag.single().inspektør.also { linje ->
                     assertEquals(januar, linje.periode)
-                    assertEquals(1771, linje.beløp)
+                    assertEquals(1417, linje.beløp)
                     assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
                 }
             }
