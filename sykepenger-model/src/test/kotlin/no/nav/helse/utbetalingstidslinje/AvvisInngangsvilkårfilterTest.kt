@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
@@ -92,6 +92,7 @@ class AvvisInngangsvilkårfilterTest {
                     skjønnsmessigFastsatt = null
                 )
             ),
+            selvstendigInntektsopplysning = null,
             deaktiverteArbeidsforhold = emptyList(),
             skjæringstidspunkt = skjæringstidspunkt,
             subsumsjonslogg = subsumsjonslogg,

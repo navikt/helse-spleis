@@ -639,7 +639,7 @@ internal class Vedtaksperiode private constructor(
                 inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.Arbeidsgiver)
             )
         )
-            // todo: per 10. januar 2025 så sender alltid Hag inntekt i portal-inntektsmeldinger selv om vi ikke har bedt om det, derfor må vi ta høyde for at det ikke nødvendigvis er endringer
+        // todo: per 10. januar 2025 så sender alltid Hag inntekt i portal-inntektsmeldinger selv om vi ikke har bedt om det, derfor må vi ta høyde for at det ikke nødvendigvis er endringer
             ?: return emptyList()
 
         val (nyttGrunnlag, _) = result
@@ -877,8 +877,18 @@ internal class Vedtaksperiode private constructor(
 
         val maksdatoresultat = beregnUtbetalinger(aktivitetslogg, inntekterForBeregningBuilder)
 
-        checkNotNull(vilkårsgrunnlag).valider(aktivitetslogg, arbeidsgiver.organisasjonsnummer)
-        checkNotNull(vilkårsgrunnlag).opptjening?.validerOpptjeningsdager(aktivitetslogg)
+        when (arbeidsgiver.yrkesaktivitetssporing) {
+            is Arbeidstaker -> {
+                checkNotNull(vilkårsgrunnlag).valider(aktivitetslogg, arbeidsgiver.organisasjonsnummer)
+                checkNotNull(vilkårsgrunnlag).opptjening?.validerOpptjeningsdager(aktivitetslogg)
+            }
+
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.Frilans,
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
+            }
+        }
+
         infotrygdhistorikk.validerMedVarsel(aktivitetslogg, periode)
         infotrygdhistorikk.validerNyereOpplysninger(aktivitetslogg, periode)
         ytelser.valider(aktivitetslogg, periode, skjæringstidspunkt, maksdatoresultat.maksdato, erForlengelse())
@@ -912,25 +922,30 @@ internal class Vedtaksperiode private constructor(
         behandlinger.vedtakFattet(arbeidsgiver, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst)
 
         if (erAvvist) return // er i limbo
-        tilstand(aktivitetsloggMedVedtaksperiodekontekst, when {
-            behandlinger.harUtbetalinger() -> TilUtbetaling
-            else -> Avsluttet
-        })
+        tilstand(
+            aktivitetsloggMedVedtaksperiodekontekst,
+            when {
+                behandlinger.harUtbetalinger() -> TilUtbetaling
+                else -> Avsluttet
+            }
+        )
     }
 
     internal fun håndter(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg): Boolean {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         return when (tilstand) {
-            AvventerInntektsmelding ->  {
+            AvventerInntektsmelding -> {
                 if (!håndterSykepengegrunnlagForArbeidsgiver(sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedVedtaksperiodekontekst)) return false
                 tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
                 true
             }
+
             AvventerRevurdering -> {
                 if (!håndterSykepengegrunnlagForArbeidsgiver(sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedVedtaksperiodekontekst)) return false
                 person.gjenopptaBehandling(aktivitetslogg)
                 true
             }
+
             Avsluttet,
             AvsluttetUtenUtbetaling,
             AvventerBlokkerendePeriode,
@@ -1492,11 +1507,13 @@ internal class Vedtaksperiode private constructor(
         skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>
     ): Inntektsgrunnlag {
         val inntektsgrunnlagArbeidsgivere = inntektsgrunnlagArbeidsgivere(hendelse, aktivitetslogg, skatteopplysninger)
+        val (arbeidstaker, selvstendig) = inntektsgrunnlagArbeidsgivere.partition { it.faktaavklartInntekt.inntektsopplysning is Inntektsopplysning.Arbeidstaker }
         // ghosts er alle inntekter fra skatt, som vi ikke har søknad for og som skal vektlegges som ghost
-        val ghosts = ghostArbeidsgivere(inntektsgrunnlagArbeidsgivere, skatteopplysninger)
+        val ghosts = ghostArbeidsgivere(arbeidstaker, skatteopplysninger)
         if (ghosts.isNotEmpty()) aktivitetslogg.varsel(Varselkode.RV_VV_2)
         return Inntektsgrunnlag.opprett(
-            arbeidsgiverInntektsopplysninger = inntektsgrunnlagArbeidsgivere + ghosts,
+            arbeidsgiverInntektsopplysninger = arbeidstaker + ghosts,
+            selvstendigInntektsopplysning = selvstendig.firstOrNull(),
             deaktiverteArbeidsforhold = emptyList(),
             skjæringstidspunkt = skjæringstidspunkt,
             subsumsjonslogg = subsumsjonslogg
@@ -2109,7 +2126,7 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg = aktivitetslogg,
                 inntektsgrunnlag = grunnlagsdata.inntektsgrunnlag,
                 medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus,
-                opptjening = grunnlagsdata.opptjening
+                opptjening = grunnlagsdata.opptjening.takeUnless { arbeidsgiver.yrkesaktivitetssporing is Behandlingsporing.Yrkesaktivitet.Selvstendig }
             ),
             maksdatofilter,
             MaksimumUtbetalingFilter(
@@ -2274,7 +2291,7 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        internal val SAMME_ARBEIDSGIVERPERIODE = fun (arbeidsgiver: Arbeidsgiver, arbeidsgiverperiode: Periode): VedtaksperiodeFilter {
+        internal val SAMME_ARBEIDSGIVERPERIODE = fun(arbeidsgiver: Arbeidsgiver, arbeidsgiverperiode: Periode): VedtaksperiodeFilter {
             return fun(other: Vedtaksperiode): Boolean {
                 return other.arbeidsgiver.organisasjonsnummer == arbeidsgiver.organisasjonsnummer && (other.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode()?.overlapperMed(arbeidsgiverperiode) == true)
             }
@@ -2296,7 +2313,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal fun SPEILRELATERT(vararg perioder: Periode): VedtaksperiodeFilter {
-            return fun (vedtaksperiode: Vedtaksperiode): Boolean {
+            return fun(vedtaksperiode: Vedtaksperiode): Boolean {
                 if (!vedtaksperiode.skalBehandlesISpeil()) return false // Om vedtaksperioden er en AUU skal den ikke hensyntas ved vurdering på avstand mellom perioder & vedtaksperiode
                 return perioder.any { periode ->
                     // Om avstand mellom vedtaksperioden og en av periodene er mindre enn 18 dager er det speilrelatert.

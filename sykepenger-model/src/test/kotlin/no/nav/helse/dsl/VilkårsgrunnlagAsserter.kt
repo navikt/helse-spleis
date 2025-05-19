@@ -1,7 +1,7 @@
 package no.nav.helse.dsl
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import no.nav.helse.inspectors.ArbeidsgiverInntektsopplysningInspektør
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.inspektør
@@ -98,6 +98,28 @@ internal data class InntektsgrunnlagAssert(val inntektsgrunnlag: Inntektsgrunnla
         assertInntektsgrunnlag(actual.inspektør, forventetFaktaavklartInntekt, forventetOmregnetÅrsinntekt, forventetFastsattÅrsinntekt, forventetKorrigertInntekt, forventetkilde, forventetKildeId)
     }
 
+    internal fun assertSelvstendigInntektsgrunnlag(
+        forventetFaktaavklartInntekt: Inntekt,
+        forventetOmregnetÅrsinntekt: Inntekt = forventetFaktaavklartInntekt,
+        forventetFastsattÅrsinntekt: Inntekt = forventetOmregnetÅrsinntekt,
+        forventetKorrigertInntekt: Inntekt? = null,
+    ) {
+        fastsatteÅrsinntekter.add(forventetFastsattÅrsinntekt)
+
+        val selvstendigInntektsopplysning = inntektsgrunnlag
+            .selvstendigInntektsopplysning
+
+        val actual = selvstendigInntektsopplysning
+        assertNotNull(actual)
+        assertInntektsgrunnlag(
+            inspektør = actual.inspektør,
+            forventetFaktaavklartInntekt = forventetFaktaavklartInntekt,
+            forventetOmregnetÅrsinntekt = forventetOmregnetÅrsinntekt,
+            forventetFastsattÅrsinntekt = forventetFastsattÅrsinntekt,
+            forventetKorrigertInntekt = forventetKorrigertInntekt
+        )
+    }
+
     internal fun assert() {
         assertBeregningsgrunnlag(fastsatteÅrsinntekter.summer())
     }
@@ -123,12 +145,15 @@ private fun assertInntektsgrunnlag(
     assertEquals(forventetKorrigertInntekt, inspektør.korrigertInntekt?.inntektsdata?.beløp) { "korrigert inntekt er feil" }
     when (inspektør.faktaavklartInntekt.inntektsopplysning) {
         is Inntektsopplysning.Arbeidstaker -> {
-            assertEquals(forventetkilde, when (inspektør.faktaavklartInntekt.inntektsopplysning.kilde) {
+            assertEquals(
+                forventetkilde, when (inspektør.faktaavklartInntekt.inntektsopplysning.kilde) {
                 is Arbeidsgiver -> Arbeidstakerkilde.Arbeidsgiver
                 Infotrygd -> Arbeidstakerkilde.Arbeidsgiver
                 is AOrdningen -> Arbeidstakerkilde.AOrdningen
-            })
+            }
+            )
         }
+
         is Inntektsopplysning.Selvstendig -> {}
     }
 

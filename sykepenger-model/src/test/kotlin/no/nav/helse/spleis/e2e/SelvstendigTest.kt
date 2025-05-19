@@ -62,11 +62,11 @@ internal class SelvstendigTest : AbstractDslTest() {
                     Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig),
                 )
             )
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
             håndterYtelser(1.vedtaksperiode)
 
-            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
-                assertInntektsgrunnlag(selvstendig, 460589.årlig)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 0) {
+                assertSelvstendigInntektsgrunnlag(460589.årlig)
             }
             inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
                 assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)

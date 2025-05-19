@@ -118,6 +118,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
                     Triple(a1, 31.desember(2017), null)
                 )
             )
+            håndterYtelser(1.vedtaksperiode)
 
             assertAntallOpptjeningsdager(1)
             assertErIkkeOppfylt()

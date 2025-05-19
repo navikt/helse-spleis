@@ -595,8 +595,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode, arbeidsforhold = arbeidsforhold)
-        assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_VV_1), 2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
+        assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_VV_1), 2.vedtaksperiode.filter())
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         assertTilstander(
@@ -638,8 +638,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = arbeidsforhold)
-        assertVarsel(Varselkode.RV_OV_1, 1.vedtaksperiode.filter())
         håndterYtelser()
+        assertVarsel(Varselkode.RV_OV_1, 1.vedtaksperiode.filter())
         håndterUtbetalingsgodkjenning()
 
         assertTilstander(
@@ -671,8 +671,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode, arbeidsforhold = arbeidsforhold)
-        assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_VV_1), 2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
+        assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_VV_1), 2.vedtaksperiode.filter())
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         assertTilstander(

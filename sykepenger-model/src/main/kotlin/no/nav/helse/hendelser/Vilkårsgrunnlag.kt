@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektFor
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektI
@@ -93,14 +93,13 @@ class Vilkårsgrunnlag(
             aktivitetslogg.info("Har inntekt måneden før skjæringstidspunkt med inntekter for opptjeningsvurdering, men ikke med inntekter for sykepengegrunnlag")
         }
 
-        val opptjeningvurderingOk = opptjening.validerOpptjeningsdager(aktivitetslogg)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(aktivitetslogg)
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
             inntektsgrunnlag = inntektsgrunnlag,
             opptjening = opptjening,
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
-            vurdertOk = opptjeningvurderingOk && medlemskapsvurderingOk,
+            vurdertOk = medlemskapsvurderingOk,
             meldingsreferanseId = metadata.meldingsreferanseId,
             vilkårsgrunnlagId = UUID.randomUUID()
         )

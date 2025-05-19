@@ -87,6 +87,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
                 skatteinntekter = listOf(a1 to INGEN),
                 arbeidsforhold = listOf(Triple(a1, 1.januar, null))
             )
+            håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_IM_8, Varselkode.RV_VV_1, Varselkode.RV_OV_1), 1.vedtaksperiode.filter())
         }
     }

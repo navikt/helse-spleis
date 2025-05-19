@@ -2,7 +2,7 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -98,6 +98,7 @@ internal class InntektsgrunnlagTest {
                     skjønnsmessigFastsatt = null
                 )
             ),
+            selvstendigInntektsopplysning = null,
             deaktiverteArbeidsforhold = emptyList(),
             vurdertInfotrygd = false
         )
@@ -140,8 +141,9 @@ internal class InntektsgrunnlagTest {
     fun `lager varsel dersom en arbeidsgiver i sykepengegrunnlaget ikke har registrert opptjening`() {
         val skjæringstidspunkt = 1.mars
         val inntektsgrunnlag = Inntektsgrunnlag(
-            skjæringstidspunkt,
-            listOf<ArbeidsgiverInntektsopplysning>(
+            skjæringstidspunkt = skjæringstidspunkt,
+            selvstendigInntektsopplysning = null,
+            arbeidsgiverInntektsopplysninger = listOf<ArbeidsgiverInntektsopplysning>(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     faktaavklartInntekt = arbeidsgiverinntekt(
@@ -161,8 +163,8 @@ internal class InntektsgrunnlagTest {
                     skjønnsmessigFastsatt = null
                 )
             ),
-            emptyList<ArbeidsgiverInntektsopplysning>(),
-            false
+            deaktiverteArbeidsforhold = emptyList<ArbeidsgiverInntektsopplysning>(),
+            vurdertInfotrygd = false
         )
 
         val opptjeningUtenA2 = Opptjening.nyOpptjening(

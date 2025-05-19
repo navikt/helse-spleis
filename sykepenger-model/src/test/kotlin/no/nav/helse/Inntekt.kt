@@ -25,6 +25,7 @@ internal fun Inntekt.inntektsgrunnlag(orgnr: String, skjæringstidspunkt: LocalD
                 skjønnsmessigFastsatt = null
             )
         ),
+        selvstendigInntektsopplysning = null,
         deaktiverteArbeidsforhold = emptyList(),
         skjæringstidspunkt = skjæringstidspunkt,
         subsumsjonslogg = subsumsjonslogg
@@ -41,6 +42,7 @@ internal fun Inntekt.inntektsgrunnlag(orgnr: String, skjæringstidspunkt: LocalD
                 skjønnsmessigFastsatt = null
             )
         ),
+        selvstendigInntektsopplysning = null,
         deaktiverteArbeidsforhold = emptyList(),
         vurdertInfotrygd = false,
         `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningstidspunkt)

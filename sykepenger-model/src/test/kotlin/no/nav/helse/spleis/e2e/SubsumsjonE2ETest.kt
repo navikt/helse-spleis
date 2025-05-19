@@ -152,6 +152,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(arbeidsforhold = listOf(Triple(a1, 5.desember(2017), null)))
+        håndterYtelser(1.vedtaksperiode)
 
         assertVarsel(Varselkode.RV_OV_1, 1.vedtaksperiode.filter())
         SubsumsjonInspektør(regelverkslogg).assertIkkeOppfylt(

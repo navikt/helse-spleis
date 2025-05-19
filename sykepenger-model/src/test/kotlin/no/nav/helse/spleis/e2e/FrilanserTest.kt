@@ -70,7 +70,7 @@ internal class FrilanserTest : AbstractDslTest() {
                     Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = Arbeidsforholdtype.FRILANSER)
                 )
             )
-            assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_VV_1), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_VV_1), 1.vedtaksperiode.filter())
             assertFunksjonellFeil("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene", 1.vedtaksperiode.filter())
             assertForkastetPeriodeTilstander(
                 1.vedtaksperiode,

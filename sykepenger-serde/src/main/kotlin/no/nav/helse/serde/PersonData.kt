@@ -218,11 +218,13 @@ data class PersonData(
         data class InntektsgrunnlagData(
             val grunnbeløp: Double?,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
+            val selvstendigInntektsopplysninger: ArbeidsgiverInntektsopplysningData?,
             val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
-            val vurdertInfotrygd: Boolean
+            val vurdertInfotrygd: Boolean,
         ) {
             fun tilSpleisDto() = InntektsgrunnlagInnDto(
                 arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilDto() },
+                selvstendigInntektsopplysning = selvstendigInntektsopplysninger?.tilDto(),
                 deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
                 vurdertInfotrygd = this.vurdertInfotrygd,
                 `6G` = InntektbeløpDto.Årlig(grunnbeløp!!)
@@ -230,6 +232,7 @@ data class PersonData(
 
             fun tilInfotrygdDto() = InntektsgrunnlagInnDto(
                 arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilDto() },
+                selvstendigInntektsopplysning = selvstendigInntektsopplysninger?.tilDto(),
                 deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
                 vurdertInfotrygd = this.vurdertInfotrygd,
                 `6G` = InntektbeløpDto.Årlig(grunnbeløp!!)
