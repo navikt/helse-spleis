@@ -10,7 +10,6 @@ private class ØkonomiInspektørBuilder(økonomi: Økonomi) {
     private val inspektøren = ØkonomiInspektør(
         økonomi.sykdomsgrad.toDouble(),
         økonomi.refusjonsbeløp,
-        økonomi.dekningsgrunnlag,
         økonomi.totalSykdomsgrad.toDouble().toInt(),
         økonomi.aktuellDagsinntekt,
         økonomi.arbeidsgiverbeløp,
@@ -23,7 +22,6 @@ private class ØkonomiInspektørBuilder(økonomi: Økonomi) {
 class ØkonomiInspektør(
     val gradProsent: Double,
     val arbeidsgiverRefusjonsbeløp: Inntekt,
-    val dekningsgrunnlag: Inntekt,
     val totalGrad: Int,
     val aktuellDagsinntekt: Inntekt,
     val arbeidsgiverbeløp: Inntekt?,

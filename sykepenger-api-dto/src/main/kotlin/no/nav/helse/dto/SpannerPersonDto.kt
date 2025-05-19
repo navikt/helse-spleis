@@ -702,7 +702,6 @@ data class SpannerPersonDto(
         data class UtbetalingsdagData(
             val type: TypeData,
             val aktuellDagsinntekt: Double,
-            val dekningsgrunnlag: Double,
             val dekingsgrad: Double,
             val begrunnelser: List<BegrunnelseData>?,
             val grad: Double,
@@ -1273,7 +1272,6 @@ private fun UtbetalingsdagUtDto.tilPersonData() =
             is UtbetalingsdagUtDto.UkjentDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.UkjentDag
         },
         aktuellDagsinntekt = this.økonomi.aktuellDagsinntekt.dagligDouble.beløp,
-        dekningsgrunnlag = this.økonomi.dekningsgrunnlag.dagligDouble.beløp,
         dekingsgrad = this.økonomi.dekningsgrad.prosent,
         begrunnelser = when (this) {
             is UtbetalingsdagUtDto.AvvistDagDto -> this.begrunnelser.map { it.tilPersonData() }

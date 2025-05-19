@@ -31,7 +31,6 @@ internal class Utbetalingstidslinjesubsumsjon(
     utbetalingstidslinje: Utbetalingstidslinje
 ) {
 
-    // private val tidslinjesubsumsjonsformat = mutableListOf<Tidslinjedag>()
     private val tidslinjesubsumsjonsformat = sykdomstidslinje.subsumsjonsformat()
     private val arbeidsgiverperiodedager = mutableListOf<Periode>()
     private val arbeidsgiverperiodeNavdager = mutableListOf<Periode>()
@@ -145,7 +144,9 @@ internal class Utbetalingstidslinjesubsumsjon(
                         periode = dato.somPeriode(),
                         inntekt = Dekningsgrunnlagsubsumsjon(
                             årligInntekt = økonomi.aktuellDagsinntekt.årlig,
-                            årligDekningsgrunnlag = økonomi.dekningsgrunnlag.årlig
+                            // TODO: 8-16-subsumsjonen virker noe merkelig. Loven viser til sykepengegrunnlag (som jo er 6G-begrenset)
+                            // Men her subsummerer vi noe annet..
+                            årligDekningsgrunnlag = økonomi.aktuellDagsinntekt.årlig
                         )
                     )
                 }

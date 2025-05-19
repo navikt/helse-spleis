@@ -134,22 +134,6 @@ internal class ØkonomiTest {
     }
 
     @Test
-    fun `toMap med dekningsgrunnlag`() {
-        val økonomi = 79.5.prosent.inntekt(1200.4.daglig)
-        assertEquals(79.5, økonomi.inspektør.grad.toDouble())
-        assertEquals(1200.4.daglig, økonomi.inspektør.dekningsgrunnlag)
-    }
-
-    @Test
-    fun `toIntMap med dekningsgrunnlag`() {
-        79.5.prosent.inntekt(1200.4.daglig)
-            .also { økonomi ->
-                assertEquals(79.5, økonomi.inspektør.grad.toDouble())
-                assertEquals(1200.4.daglig, økonomi.inspektør.dekningsgrunnlag)
-            }
-    }
-
-    @Test
     fun `et økonomi-objekt skal bare kunne betales én gang`() {
         val feil = assertThrows<IllegalStateException> {
             listOf(80.prosent.inntekt(1200.daglig))
@@ -168,13 +152,11 @@ internal class ØkonomiTest {
             val betalte = listOf(it).betal(1200.daglig)
             betalte.single().also { økonomi ->
                 assertEquals(80.0, økonomi.inspektør.grad.toDouble())
-                assertEquals(1200.daglig, økonomi.inspektør.dekningsgrunnlag)
                 assertEquals(960.daglig, økonomi.inspektør.arbeidsgiverbeløp)
                 assertEquals(INGEN, økonomi.inspektør.personbeløp)
             }
             betalte.single().also { økonomi ->
                 assertEquals(80.0, økonomi.inspektør.grad.toDouble())
-                assertEquals(1200.daglig, økonomi.inspektør.dekningsgrunnlag)
                 assertEquals(960.daglig, økonomi.inspektør.arbeidsgiverbeløp)
                 assertEquals(INGEN, økonomi.inspektør.personbeløp)
             }
@@ -190,7 +172,6 @@ internal class ØkonomiTest {
                 betalte.single().also { økonomi ->
                     assertEquals(100.0, økonomi.inspektør.grad.toDouble())
                     assertEquals(499.5.daglig, økonomi.inspektør.arbeidsgiverRefusjonsbeløp)
-                    assertEquals(999.daglig, økonomi.inspektør.dekningsgrunnlag)
                     assertEquals(500.daglig, økonomi.inspektør.arbeidsgiverbeløp)
                     assertEquals(499.daglig, økonomi.inspektør.personbeløp)
                 }

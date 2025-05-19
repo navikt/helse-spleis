@@ -9,7 +9,6 @@ data class ØkonomiUtDto(
     val utbetalingsgrad: ProsentdelDto,
     val arbeidsgiverRefusjonsbeløp: InntektDto,
     val aktuellDagsinntekt: InntektDto,
-    val dekningsgrunnlag: InntektDto,
     val dekningsgrad: ProsentdelDto,
     val arbeidsgiverbeløp: InntektDto?,
     val personbeløp: InntektDto?,

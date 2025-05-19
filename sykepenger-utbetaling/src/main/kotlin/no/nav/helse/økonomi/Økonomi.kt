@@ -13,7 +13,6 @@ data class Økonomi(
     val utbetalingsgrad: Prosentdel,
     val refusjonsbeløp: Inntekt,
     val aktuellDagsinntekt: Inntekt,
-    val dekningsgrunnlag: Inntekt,
     val dekningsgrad: Prosentdel,
     val totalSykdomsgrad: Prosentdel = sykdomsgrad,
     val arbeidsgiverbeløp: Inntekt? = null,
@@ -30,8 +29,7 @@ data class Økonomi(
                 utbetalingsgrad = sykdomsgrad,
                 refusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
-                dekningsgrad = dekningsgrad,
-                dekningsgrunnlag = aktuellDagsinntekt * dekningsgrad
+                dekningsgrad = dekningsgrad
             )
 
         fun ikkeBetalt(aktuellDagsinntekt: Inntekt = INGEN) = inntekt(
@@ -169,7 +167,6 @@ data class Økonomi(
                 utbetalingsgrad = Prosentdel.gjenopprett(dto.utbetalingsgrad),
                 refusjonsbeløp = Inntekt.gjenopprett(dto.arbeidsgiverRefusjonsbeløp),
                 aktuellDagsinntekt = Inntekt.gjenopprett(dto.aktuellDagsinntekt),
-                dekningsgrunnlag = Inntekt.gjenopprett(dto.dekningsgrunnlag),
                 dekningsgrad = Prosentdel.gjenopprett(dto.dekningsgrad),
                 arbeidsgiverbeløp = dto.arbeidsgiverbeløp?.let { Inntekt.gjenopprett(it) },
                 personbeløp = dto.personbeløp?.let { Inntekt.gjenopprett(it) },
@@ -180,7 +177,6 @@ data class Økonomi(
     }
 
     init {
-        require(dekningsgrunnlag >= INGEN) { "dekningsgrunnlag kan ikke være negativ." }
         require(dekningsgrad in setOf(80.prosent, 100.prosent)) { "dekningsgrad må være 100 % eller 80 % var $dekningsgrad." }
     }
 
@@ -217,7 +213,6 @@ data class Økonomi(
         utbetalingsgrad = utbetalingsgrad.dto(),
         arbeidsgiverRefusjonsbeløp = refusjonsbeløp.dto(),
         aktuellDagsinntekt = aktuellDagsinntekt.dto(),
-        dekningsgrunnlag = dekningsgrunnlag.dto(),
         dekningsgrad = dekningsgrad.dto(),
         arbeidsgiverbeløp = arbeidsgiverbeløp?.dto(),
         personbeløp = personbeløp?.dto(),
