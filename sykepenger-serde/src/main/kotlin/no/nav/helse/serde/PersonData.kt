@@ -75,6 +75,7 @@ import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.deserialisering.OpptjeningInnDto
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.deserialisering.SaksbehandlerInnDto
+import no.nav.helse.dto.deserialisering.SelvstendigInntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.SkjønnsmessigFastsattInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingsdagInnDto
@@ -218,7 +219,7 @@ data class PersonData(
         data class InntektsgrunnlagData(
             val grunnbeløp: Double?,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
-            val selvstendigInntektsopplysninger: ArbeidsgiverInntektsopplysningData?,
+            val selvstendigInntektsopplysninger: SelvstendigInntektsopplysningData?,
             val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
             val vurdertInfotrygd: Boolean,
         ) {
@@ -356,6 +357,96 @@ data class PersonData(
                         tidsstempel = this.tidsstempel
                     )
                 )
+            }
+
+            data class SkjønnsmessigFastsattData(
+                val id: UUID,
+                val dato: LocalDate,
+                val hendelseId: UUID,
+                val beløp: Double,
+                val tidsstempel: LocalDateTime
+            ) {
+                fun tilDto() = SkjønnsmessigFastsattInnDto(
+                    id = this.id,
+                    inntektsdata = InntektsdataInnDto(
+                        hendelseId = MeldingsreferanseDto(this.hendelseId),
+                        dato = this.dato,
+                        beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
+                        tidsstempel = this.tidsstempel
+                    )
+                )
+            }
+        }
+
+        data class SelvstendigInntektsopplysningData(
+            val inntektsopplysning: InntektsopplysningData,
+            val skjønnsmessigFastsatt: SkjønnsmessigFastsattData?
+        ) {
+            fun tilDto() = SelvstendigInntektsopplysningInnDto(
+                faktaavklartInntekt = inntektsopplysning.tilDto(),
+                skjønnsmessigFastsatt = skjønnsmessigFastsatt?.tilDto()
+            )
+
+            data class SkatteopplysningData(
+                val hendelseId: UUID,
+                val beløp: Double,
+                val måned: YearMonth,
+                val type: InntekttypeData,
+                val fordel: String,
+                val beskrivelse: String,
+                val tidsstempel: LocalDateTime
+            ) {
+                enum class InntekttypeData {
+                    LØNNSINNTEKT,
+                    NÆRINGSINNTEKT,
+                    PENSJON_ELLER_TRYGD,
+                    YTELSE_FRA_OFFENTLIGE
+                }
+
+                fun tilDto() = SkatteopplysningDto(
+                    hendelseId = MeldingsreferanseDto(this.hendelseId),
+                    beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
+                    måned = this.måned,
+                    type = when (type) {
+                        InntekttypeData.LØNNSINNTEKT -> InntekttypeDto.LØNNSINNTEKT
+                        InntekttypeData.NÆRINGSINNTEKT -> InntekttypeDto.NÆRINGSINNTEKT
+                        InntekttypeData.PENSJON_ELLER_TRYGD -> InntekttypeDto.PENSJON_ELLER_TRYGD
+                        InntekttypeData.YTELSE_FRA_OFFENTLIGE -> InntekttypeDto.YTELSE_FRA_OFFENTLIGE
+                    },
+                    fordel = fordel,
+                    beskrivelse = beskrivelse,
+                    tidsstempel = tidsstempel
+                )
+            }
+
+            data class InntektsopplysningData(
+                val id: UUID,
+                val dato: LocalDate,
+                val hendelseId: UUID,
+                val beløp: Double,
+                val tidsstempel: LocalDateTime,
+                val pensjonsgivendeInntekter: List<PensjonsgivendeInntektData>?,
+                val anvendtÅrligGrunnbeløp: Double?,
+                val skatteopplysninger: List<SkatteopplysningData>?
+            ) {
+                data class PensjonsgivendeInntektData(val årstall: Int, val årligBeløp: Double)
+
+                fun tilDto(): FaktaavklartInntektInnDto {
+                    val inntektsdata = InntektsdataInnDto(
+                        hendelseId = MeldingsreferanseDto(this.hendelseId),
+                        dato = this.dato,
+                        beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
+                        tidsstempel = this.tidsstempel
+                    )
+                    return FaktaavklartInntektInnDto(
+                        id = this.id,
+                        inntektsdata = inntektsdata,
+                        inntektsopplysning = SelvstendigDto(
+                            pensjonsgivendeInntekt = this.pensjonsgivendeInntekter!!.map { SelvstendigDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) },
+                            anvendtGrunnbeløp = InntektbeløpDto.Årlig(this.anvendtÅrligGrunnbeløp!!)
+                        )
+                    )
+                }
             }
 
             data class SkjønnsmessigFastsattData(

@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import kotlin.reflect.KClass
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
@@ -10,6 +10,7 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.assertArbeidsgiverInntektsopplysning
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
@@ -1152,7 +1153,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
         with (inntektsopplysningerFørEndring) {
             assertEquals(inspektør.faktaavklartInntekt.inspektør.hendelseId, inntektsopplysningerEtterEndring.inspektør.faktaavklartInntekt.inspektør.hendelseId)
             assertEquals(inspektør.faktaavklartInntekt.inspektør.tidsstempel, inntektsopplysningerEtterEndring.inspektør.faktaavklartInntekt.inspektør.tidsstempel)
-            assertInntektsgrunnlag(inntektsopplysningerEtterEndring.omregnetÅrsinntekt.beløp, inntektsopplysningerEtterEndring.fastsattÅrsinntekt)
+            assertArbeidsgiverInntektsopplysning(inntektsopplysningerEtterEndring.omregnetÅrsinntekt.beløp, inntektsopplysningerEtterEndring.fastsattÅrsinntekt)
         }
 
     }

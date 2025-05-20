@@ -118,6 +118,7 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.Inntektsopplysning
+import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
@@ -1402,29 +1403,41 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun avklarSykepengegrunnlag(
+    private fun avklarSykepengegrunnlagArbeidstaker(
         hendelse: Hendelse,
         aktivitetsloggTilDenSomVilkårsprøver: IAktivitetslogg,
         skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
         vedtaksperioderMedSammeSkjæringstidspunkt: List<Vedtaksperiode>
-    ): ArbeidsgiverInntektsopplysning {
+    ): ArbeidsgiverInntektsopplysning? {
         val alleForSammeArbeidsgiver = vedtaksperioderMedSammeSkjæringstidspunkt
             .filter { it.arbeidsgiver === this.arbeidsgiver }
 
-        val faktaavklartInntekt = when (this.arbeidsgiver.yrkesaktivitetssporing) {
-            is Arbeidstaker -> inntektForArbeidsgiver(hendelse, aktivitetsloggTilDenSomVilkårsprøver, skatteopplysning, alleForSammeArbeidsgiver)
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> inntektForSelvstendig()
+        return when (this.arbeidsgiver.yrkesaktivitetssporing) {
+            is Arbeidstaker -> ArbeidsgiverInntektsopplysning(
+                orgnummer = arbeidsgiver.organisasjonsnummer,
+                faktaavklartInntekt = inntektForArbeidsgiver(hendelse, aktivitetsloggTilDenSomVilkårsprøver, skatteopplysning, alleForSammeArbeidsgiver),
+                korrigertInntekt = null,
+                skjønnsmessigFastsatt = null
+            )
+
+            Behandlingsporing.Yrkesaktivitet.Selvstendig,
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-            Behandlingsporing.Yrkesaktivitet.Frilans -> error("Støtter ikke å beregne inntektsgrunnlaget for arbeidsledig eller frilans")
+            Behandlingsporing.Yrkesaktivitet.Frilans -> null
         }
+    }
 
-        return ArbeidsgiverInntektsopplysning(
-            orgnummer = arbeidsgiver.organisasjonsnummer,
-            faktaavklartInntekt = faktaavklartInntekt,
-            korrigertInntekt = null,
-            skjønnsmessigFastsatt = null
-        )
+    private fun avklarSykepengegrunnlagForSelvstendig(): SelvstendigInntektsopplysning? {
+        return when (this.arbeidsgiver.yrkesaktivitetssporing) {
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigInntektsopplysning(
+                faktaavklartInntekt = inntektForSelvstendig(),
+                skjønnsmessigFastsatt = null
+            )
+
+            is Arbeidstaker,
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.Frilans -> null
+        }
     }
 
     private fun inntektForSelvstendig(): FaktaavklartInntekt {
@@ -1474,10 +1487,9 @@ internal class Vedtaksperiode private constructor(
 
         // en inntekt per arbeidsgiver med søknad
         return perioderMedSammeSkjæringstidspunkt
-            .distinctBy { it.arbeidsgiver }
-            .map { vedtaksperiode ->
+            .distinctBy { it.arbeidsgiver }.mapNotNull { vedtaksperiode ->
                 val skatteopplysningForArbeidsgiver = skatteopplysninger.firstOrNull { it.arbeidsgiver == vedtaksperiode.arbeidsgiver.organisasjonsnummer }
-                vedtaksperiode.avklarSykepengegrunnlag(hendelse, aktivitetslogg, skatteopplysningForArbeidsgiver, perioderMedSammeSkjæringstidspunkt)
+                vedtaksperiode.avklarSykepengegrunnlagArbeidstaker(hendelse, aktivitetslogg, skatteopplysningForArbeidsgiver, perioderMedSammeSkjæringstidspunkt)
             }
     }
 
@@ -1507,13 +1519,13 @@ internal class Vedtaksperiode private constructor(
         skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>
     ): Inntektsgrunnlag {
         val inntektsgrunnlagArbeidsgivere = inntektsgrunnlagArbeidsgivere(hendelse, aktivitetslogg, skatteopplysninger)
-        val (arbeidstaker, selvstendig) = inntektsgrunnlagArbeidsgivere.partition { it.faktaavklartInntekt.inntektsopplysning is Inntektsopplysning.Arbeidstaker }
+        val inntektsgrunnlagSelvstendig = avklarSykepengegrunnlagForSelvstendig()
         // ghosts er alle inntekter fra skatt, som vi ikke har søknad for og som skal vektlegges som ghost
-        val ghosts = ghostArbeidsgivere(arbeidstaker, skatteopplysninger)
+        val ghosts = ghostArbeidsgivere(inntektsgrunnlagArbeidsgivere, skatteopplysninger)
         if (ghosts.isNotEmpty()) aktivitetslogg.varsel(Varselkode.RV_VV_2)
         return Inntektsgrunnlag.opprett(
-            arbeidsgiverInntektsopplysninger = arbeidstaker + ghosts,
-            selvstendigInntektsopplysning = selvstendig.firstOrNull(),
+            arbeidsgiverInntektsopplysninger = inntektsgrunnlagArbeidsgivere + ghosts,
+            selvstendigInntektsopplysning = inntektsgrunnlagSelvstendig,
             deaktiverteArbeidsforhold = emptyList(),
             skjæringstidspunkt = skjæringstidspunkt,
             subsumsjonslogg = subsumsjonslogg
@@ -2284,6 +2296,7 @@ internal class Vedtaksperiode private constructor(
 
             return startdatoer.values.toSet()
         }
+
         internal fun List<Vedtaksperiode>.aktiv(vedtaksperiodeId: UUID) = any { it.id == vedtaksperiodeId }
 
         // Fredet funksjonsnavn
