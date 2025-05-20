@@ -10,7 +10,6 @@ import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
-import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
@@ -78,7 +77,7 @@ import org.junit.jupiter.api.Test
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
     @Test
-    fun `En situasjon som skaper ugyldig situasjon & smeller i Speilbuilder`() {
+    fun `Periode som starter før en annen, men med senere skjæringstidspunkt - da må de behandles i rett rekkefølge`() {
         a1 { nyttVedtak(januar) } // Ignorer denne, den må bare på plass til å lage rett rekkefølge på ting
         a2 {
             håndterSøknad(16.januar(2025) til 24.januar(2025))
@@ -95,6 +94,14 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 {
             håndterInntektsmelding(listOf(16.januar(2025) til 31.januar(2025)))
             håndterInntektsmelding(listOf(16.januar(2025) til 31.januar(2025)), førsteFraværsdag = 17.februar(2025))
+            assertEquals(16.januar(2025), inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            assertEquals(16.januar(2025), inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertVarsler(2.vedtaksperiode, RV_VV_2)
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
@@ -105,12 +112,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertEquals(listOf(17.februar(2025), 16.januar(2025)), inspektør.skjæringstidspunkter(2.vedtaksperiode))
         }
         a2 {
-            // Dette er jo det første skjæringstidspunktet til den over, så nå har den to vilkårsprøvde skjæringstidspunkt. Skaper det krøllet?
-            assertEquals(16.januar(2025), inspektør.skjæringstidspunkt(2.vedtaksperiode))
-            håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
-            assertVarsler(2.vedtaksperiode, RV_VV_2)
-            assertUgyldigSituasjon("forventer at utbetaling i behandlingstilstand BEREGNET skal være IKKE_UTBETALT, men var FORKASTET") { håndterYtelser(2.vedtaksperiode) }
-            assertUgyldigSituasjon("forventer at utbetaling i behandlingstilstand BEREGNET skal være IKKE_UTBETALT, men var FORKASTET") { håndterSimulering(2.vedtaksperiode) }
+            assertEquals(17.februar(2025), inspektør.skjæringstidspunkt(3.vedtaksperiode))
+            håndterYtelser(3.vedtaksperiode)
+            håndterSimulering(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+            håndterUtbetalt()
         }
     }
 
@@ -218,7 +224,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 assertInntektsgrunnlag(a2, INNTEKT)
                 assertInntektsgrunnlag(a3, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
             }
-            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
+            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -408,7 +414,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
+            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
@@ -510,7 +516,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             nyPeriode(20.januar til 31.januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
-            assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter())
+            assertVarsel(RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
         }
@@ -577,12 +583,12 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         val inntekt = 20000.månedlig
         listOf(a1).nyeVedtak(januar, inntekt = inntekt, ghosts = listOf(a2))
         a1 {
-            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
+            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
         }
         listOf(a1).forlengVedtak(februar)
         a2 {
             tilGodkjenning(april, beregnetInntekt = inntekt, ghosts = listOf(a1))
-            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
+            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
         }
         listOf(a1).forlengVedtak(mars)
 
@@ -600,7 +606,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
-            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
+            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -979,7 +985,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
+            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
 
@@ -1022,7 +1028,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
-            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
+            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
 
@@ -1535,7 +1541,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
-            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
+            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -1592,7 +1598,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
-            assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter())
+            assertVarsel(RV_VV_2, 2.vedtaksperiode.filter())
         }
 
         a2 {
@@ -1616,7 +1622,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSøknad(17.januar til 21.januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
-            assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter())
+            assertVarsel(RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)

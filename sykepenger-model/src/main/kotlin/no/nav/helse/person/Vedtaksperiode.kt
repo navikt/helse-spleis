@@ -2341,17 +2341,9 @@ internal class Vedtaksperiode private constructor(
         internal fun Iterable<Vedtaksperiode>.nåværendeVedtaksperiode(filter: VedtaksperiodeFilter) =
             firstOrNull(filter)
 
-        private fun Vedtaksperiode.erTidligereEnn(other: Vedtaksperiode): Boolean =
-            this <= other || this.skjæringstidspunkt < other.skjæringstidspunkt
 
-        private fun Iterable<Vedtaksperiode>.førstePeriode(): Vedtaksperiode? {
-            var minste: Vedtaksperiode? = null
-            this
-                .forEach { vedtaksperiode ->
-                    minste = minste?.takeIf { it.erTidligereEnn(vedtaksperiode) } ?: vedtaksperiode
-                }
-            return minste
-        }
+        private fun Iterable<Vedtaksperiode>.førstePeriode() =
+            sortedWith(compareBy({ it.skjæringstidspunkt }, { it.periode.start }, { it.periode.endInclusive })).firstOrNull()
 
         internal fun Iterable<Vedtaksperiode>.nestePeriodeSomSkalGjenopptas() =
             firstOrNull(HAR_PÅGÅENDE_UTBETALING) ?: filter(IKKE_FERDIG_BEHANDLET).førstePeriode()
