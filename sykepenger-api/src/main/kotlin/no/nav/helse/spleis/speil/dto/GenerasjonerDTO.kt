@@ -220,8 +220,6 @@ internal class AnnullertUtbetaling(
         Utbetalingstatus.Annullert -> Periodetilstand.Annullert
         else -> Periodetilstand.TilAnnullering
     }
-
-    fun annullerer(korrelasjonsId: UUID) = this.korrelasjonsId == korrelasjonsId
 }
 
 data class SpeilOppdrag(
