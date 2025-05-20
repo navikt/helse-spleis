@@ -149,7 +149,6 @@ data class BeregnetPeriode(
     val utbetaling: Utbetaling,
     val periodevilkår: Vilkår,
     val vilkårsgrunnlagId: UUID,
-    val inntekter: List<Inntekt>,
     val refusjonstidslinje: BeløpstidslinjeDto // TODO: Legge til denne i GraphQL
 ) : SpeilTidslinjeperiode() {
     override fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): BeregnetPeriode {
@@ -182,17 +181,6 @@ data class BeregnetPeriode(
     data class Alder(
         val alderSisteSykedag: Int,
         val oppfylt: Boolean
-    )
-
-    data class Inntekt(
-        val inntektskilde: String,
-        val periodisertInntekter: List<PeriodisertInntekt>
-    )
-
-    data class PeriodisertInntekt(
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val dagligBeløp: Double
     )
 }
 

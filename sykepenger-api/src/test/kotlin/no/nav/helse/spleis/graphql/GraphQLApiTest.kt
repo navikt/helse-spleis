@@ -698,18 +698,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                     }
                   },
                   "vilkarsgrunnlagId": "00000000-0000-0000-0000-000000000000",
-                  "inntekter": [
-                    {
-                      "inntektskilde": "987654321", 
-                      "periodiserteInntekter": [
-                        {
-                          "fom": "2018-01-01",
-                          "tom": "2018-01-30",
-                          "dagligBelop": 1430.7692307692307
-                        }
-                      ]
-                    }
-                  ],
+                  "inntekter": [],
                   "kilde": "00000000-0000-0000-0000-000000000000"
                 }
               ]

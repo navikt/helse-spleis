@@ -1,8 +1,7 @@
 package no.nav.helse.spleis.graphql
 
-import no.nav.helse.spleis.graphql.dto.Utbetalingtype as GraphQLUtbetalingtype
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.dto.HendelsetypeDto
@@ -13,7 +12,6 @@ import no.nav.helse.spleis.graphql.dto.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLDag
 import no.nav.helse.spleis.graphql.dto.GraphQLHendelse
 import no.nav.helse.spleis.graphql.dto.GraphQLInfotrygdVilkarsgrunnlag
-import no.nav.helse.spleis.graphql.dto.GraphQLInntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektFraAOrdningen
 import no.nav.helse.spleis.graphql.dto.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektskilde
@@ -24,7 +22,6 @@ import no.nav.helse.spleis.graphql.dto.GraphQLOppdrag
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetype
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodevilkar
-import no.nav.helse.spleis.graphql.dto.GraphQLPeriodisertInntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLRefusjonselement
 import no.nav.helse.spleis.graphql.dto.GraphQLSimulering
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsdetaljer
@@ -48,6 +45,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsdagType
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsinfo
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingstatus
 import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
+import no.nav.helse.spleis.graphql.dto.Utbetalingtype as GraphQLUtbetalingtype
 import no.nav.helse.spleis.speil.builders.SykepengegrunnlagsgrenseDTO
 import no.nav.helse.spleis.speil.dto.AnnullertPeriode
 import no.nav.helse.spleis.speil.dto.Arbeidsgiverinntekt
@@ -374,22 +372,8 @@ private fun mapBeregnetPeriode(periode: BeregnetPeriode, hendelser: List<Hendels
         hendelser = periode.hendelser.tilHendelseDTO(hendelser),
         periodevilkar = mapPeriodevilkår(periode.periodevilkår),
         periodetilstand = mapTilstand(periode.periodetilstand),
-        vilkarsgrunnlagId = periode.vilkårsgrunnlagId,
-        inntekter = mapInntekter(periode.inntekter)
+        vilkarsgrunnlagId = periode.vilkårsgrunnlagId
     )
-
-private fun mapInntekter(inntekter: List<BeregnetPeriode.Inntekt>) = inntekter.map {
-    GraphQLInntekt(
-        inntektskilde = it.inntektskilde,
-        periodiserteInntekter = it.periodisertInntekter.map { periodisertInntekt ->
-            GraphQLPeriodisertInntekt(
-                fom = periodisertInntekt.fom,
-                tom = periodisertInntekt.tom,
-                dagligBelop = periodisertInntekt.dagligBeløp
-            )
-        }
-    )
-}
 
 private fun mapAnnullertPeriode(periode: AnnullertPeriode, hendelser: List<HendelseDTO>) =
     GraphQLBeregnetPeriode(
@@ -424,8 +408,7 @@ private fun mapAnnullertPeriode(periode: AnnullertPeriode, hendelser: List<Hende
             )
         ),
         periodetilstand = mapTilstand(periode.periodetilstand),
-        vilkarsgrunnlagId = null,
-        inntekter = emptyList()
+        vilkarsgrunnlagId = null
     )
 
 private fun Set<UUID>.tilHendelseDTO(hendelser: List<HendelseDTO>): List<GraphQLHendelse> {

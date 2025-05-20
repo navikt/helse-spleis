@@ -248,9 +248,11 @@ data class GraphQLBeregnetPeriode(
     val maksdato: LocalDate,
     val utbetaling: GraphQLUtbetaling,
     val periodevilkar: GraphQLPeriodevilkar,
-    val vilkarsgrunnlagId: UUID?,
-    val inntekter: List<GraphQLInntekt>
-) : GraphQLTidslinjeperiode
+    val vilkarsgrunnlagId: UUID?
+) : GraphQLTidslinjeperiode {
+    @Suppress("unused", "TODO: denne skal fjernes når Speilvendt har fjernet den på sin ende")
+    val inntekter: List<GraphQLInntekt> = emptyList()
+}
 
 data class GraphQLInntekt(
     val inntektskilde: String,
