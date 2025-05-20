@@ -6,28 +6,25 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.BeregnetDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.HentPensjonsgivendeInntektResponseDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.MerknadDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.PensjonsgivendeInntektDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.NaringsdrivendeInntektDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.NaringsdrivendeInntektsAarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SelvstendigNaringsdrivendeDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.SkatteordningDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SporsmalDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SummertPensjonsgivendeInntektDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SvarDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.SykepengegrunnlagNaeringsdrivendeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -408,52 +405,34 @@ internal class TestMessageFactory(
 
     private fun selvstendigNæringsdrivende(): SelvstendigNaringsdrivendeDTO = SelvstendigNaringsdrivendeDTO(
         roller = emptyList(),
-        sykepengegrunnlagNaeringsdrivende = SykepengegrunnlagNaeringsdrivendeDTO(
-            gjennomsnittPerAar = emptyList(),
-            grunnbeloepPerAar = emptyList(),
-            grunnbeloepPaaSykmeldingstidspunkt = 0,
-            beregnetSnittOgEndring25 = BeregnetDTO(BigInteger("0"), BigInteger("0"), BigInteger("0")),
-            inntekter = listOf(
-                HentPensjonsgivendeInntektResponseDTO(
-                    norskPersonidentifikator = "12345678912",
+        naringsdrivendeInntekt = NaringsdrivendeInntektDTO(
+            norskPersonidentifikator = "12345678912",
+            inntekt = listOf(
+                NaringsdrivendeInntektsAarDTO(
                     inntektsaar = "2017",
-                    pensjonsgivendeInntekt = listOf(
-                        PensjonsgivendeInntektDTO(
-                            datoForFastsetting = "2018-01-01",
-                            skatteordning = SkatteordningDTO.FASTLAND,
-                            pensjonsgivendeInntektAvLoennsinntekt = 0,
-                            pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
-                            pensjonsgivendeInntektAvNaeringsinntekt = 400000,
-                            pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0
-                        )
+                    pensjonsgivendeInntekt = SummertPensjonsgivendeInntektDTO(
+                        pensjonsgivendeInntektAvLoennsinntekt = 0,
+                        pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
+                        pensjonsgivendeInntektAvNaeringsinntekt = 400_000,
+                        pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0
                     )
                 ),
-                HentPensjonsgivendeInntektResponseDTO(
-                    norskPersonidentifikator = "12345678912",
+                NaringsdrivendeInntektsAarDTO(
                     inntektsaar = "2016",
-                    pensjonsgivendeInntekt = listOf(
-                        PensjonsgivendeInntektDTO(
-                            datoForFastsetting = "2017-01-01",
-                            skatteordning = SkatteordningDTO.FASTLAND,
-                            pensjonsgivendeInntektAvLoennsinntekt = 0,
-                            pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
-                            pensjonsgivendeInntektAvNaeringsinntekt = 800000,
-                            pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0
-                        )
+                    pensjonsgivendeInntekt = SummertPensjonsgivendeInntektDTO(
+                        pensjonsgivendeInntektAvLoennsinntekt = 0,
+                        pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
+                        pensjonsgivendeInntektAvNaeringsinntekt = 800_000,
+                        pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0
                     )
                 ),
-                HentPensjonsgivendeInntektResponseDTO(
-                    norskPersonidentifikator = "12345678912",
+                NaringsdrivendeInntektsAarDTO(
                     inntektsaar = "2015",
-                    pensjonsgivendeInntekt = listOf(
-                        PensjonsgivendeInntektDTO(
-                            datoForFastsetting = "2016-01-01",
-                            skatteordning = SkatteordningDTO.FASTLAND,
-                            pensjonsgivendeInntektAvLoennsinntekt = 0,
-                            pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
-                            pensjonsgivendeInntektAvNaeringsinntekt = 0,
-                            pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0
-                        )
+                    pensjonsgivendeInntekt = SummertPensjonsgivendeInntektDTO(
+                        pensjonsgivendeInntektAvLoennsinntekt = 0,
+                        pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
+                        pensjonsgivendeInntektAvNaeringsinntekt = 0,
+                        pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0
                     )
                 )
             )
