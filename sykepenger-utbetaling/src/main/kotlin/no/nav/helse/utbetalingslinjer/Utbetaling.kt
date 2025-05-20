@@ -415,6 +415,18 @@ class Utbetaling private constructor(
                 .isNotEmpty()
         }
 
+        fun List<Utbetaling>.validerNyUtbetaling(nyUtbetaling: Utbetaling) {
+            if (nyUtbetaling.erAnnullering()) return
+            val ikkeUtbetalt = filter { it.tilstand is Ubetalt }.takeUnless { it.isEmpty() } ?: return
+            val feilmelding = """
+                Det er ${ikkeUtbetalt.size} utbetalinger som står som IKKE_UTBETALT når det nå legges til ny utbetaling for {} på {}. 
+                Hvorfor er ikke disse forkastet?
+                Ny utbetaling (${nyUtbetaling.id}) gjelder ${nyUtbetaling.periode} 
+                Utbetalingene som burde vært forkastet, men står som IKKE_UTBETALT er ${ikkeUtbetalt.joinToString { "${it.id}" }}
+            """
+            sikkerlogg.warn(feilmelding, kv("fødselsnummer", nyUtbetaling.personOppdrag.mottaker), kv("organisasjonsnummer", nyUtbetaling.arbeidsgiverOppdrag.mottaker))
+        }
+
         private fun Oppdrag.overlappendeLinjer(nyttOppdrag: Oppdrag): List<Triple<Fagområde, String, Utbetalingslinje>> {
             return nyttOppdrag.linjerUtenOpphør().flatMap { linje ->
                 this

@@ -95,6 +95,7 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.validerNyUtbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd
 import no.nav.helse.utbetalingslinjer.UtbetalingkladdBuilder
@@ -443,6 +444,7 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg: IAktivitetslogg,
         utbetaling: Utbetaling
     ) {
+        utbetalinger.validerNyUtbetaling(utbetaling)
         utbetalinger.lastOrNull()?.forkast(aktivitetslogg)
         check(utbetalinger.tillaterOpprettelseAvUtbetaling(utbetaling)) { "Har laget en overlappende utbetaling" }
         utbetalinger.add(utbetaling)
