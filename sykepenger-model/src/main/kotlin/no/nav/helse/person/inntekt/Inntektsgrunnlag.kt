@@ -33,12 +33,14 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.vali
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTRYGD
+import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning.Companion.berik
+import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning.Companion.beverte
 import no.nav.helse.økonomi.Inntekt
 
 internal class Inntektsgrunnlag(
     private val skjæringstidspunkt: LocalDate,
     val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-    val selvstendigInntektsopplysning: ArbeidsgiverInntektsopplysning?,
+    val selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
     private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
     private val vurdertInfotrygd: Boolean,
     `6G`: Inntekt? = null
@@ -66,7 +68,7 @@ internal class Inntektsgrunnlag(
 
     internal constructor(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-        selvstendigInntektsopplysning: ArbeidsgiverInntektsopplysning?,
+        selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
         skjæringstidspunkt: LocalDate,
         subsumsjonslogg: Subsumsjonslogg,
@@ -86,7 +88,7 @@ internal class Inntektsgrunnlag(
 
     internal fun beverte(builder: InntekterForBeregning.Builder) {
         arbeidsgiverInntektsopplysninger.beverte(builder)
-        listOfNotNull(selvstendigInntektsopplysning).beverte(builder)
+        selvstendigInntektsopplysning?.beverte(builder)
         deaktiverteArbeidsforhold.beverteDeaktiverte(builder)
     }
 
@@ -98,7 +100,7 @@ internal class Inntektsgrunnlag(
 
         fun opprett(
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-            selvstendigInntektsopplysning: ArbeidsgiverInntektsopplysning?,
+            selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
             deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
             subsumsjonslogg: Subsumsjonslogg
@@ -120,7 +122,7 @@ internal class Inntektsgrunnlag(
             return Inntektsgrunnlag(
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiverInntektsopplysninger = dto.arbeidsgiverInntektsopplysninger.map { ArbeidsgiverInntektsopplysning.gjenopprett(it) },
-                selvstendigInntektsopplysning = dto.selvstendigInntektsopplysning?.let { ArbeidsgiverInntektsopplysning.gjenopprett(it) },
+                selvstendigInntektsopplysning = dto.selvstendigInntektsopplysning?.let { SelvstendigInntektsopplysning.gjenopprett(it) },
                 deaktiverteArbeidsforhold = dto.deaktiverteArbeidsforhold.map { ArbeidsgiverInntektsopplysning.gjenopprett(it) },
                 vurdertInfotrygd = dto.vurdertInfotrygd,
                 `6G` = Inntekt.gjenopprett(dto.`6G`)
@@ -219,7 +221,7 @@ internal class Inntektsgrunnlag(
 
     private fun kopierSykepengegrunnlagHvisFunksjonellEndring(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-        selvstendigInntektsopplysning: ArbeidsgiverInntektsopplysning?,
+        selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>
     ): Inntektsgrunnlag? {
         if (!arbeidsgiverInntektsopplysninger.harFunksjonellEndring(this.arbeidsgiverInntektsopplysninger)) return null
@@ -228,7 +230,7 @@ internal class Inntektsgrunnlag(
 
     private fun kopierSykepengegrunnlag(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-        selvstendigInntektsopplysning: ArbeidsgiverInntektsopplysning?,
+        selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
         nyttSkjæringstidspunkt: LocalDate = skjæringstidspunkt
     ) = Inntektsgrunnlag(
@@ -257,7 +259,7 @@ internal class Inntektsgrunnlag(
             inngangsvilkårFraInfotrygd = vurdertInfotrygd
         )
         arbeidsgiverInntektsopplysninger.berik(builder)
-        listOfNotNull(selvstendigInntektsopplysning).berik(builder)
+        selvstendigInntektsopplysning?.berik(builder)
     }
 
     override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
@@ -306,7 +308,7 @@ internal data class InntektsgrunnlagView(
     val begrensning: Inntektsgrunnlag.Begrensning,
     val vurdertInfotrygd: Boolean,
     val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-    val selvstendigInntektsopplysning: ArbeidsgiverInntektsopplysning?,
+    val selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
     val deaktiverteArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     val deaktiverteArbeidsforhold: List<String>
 )

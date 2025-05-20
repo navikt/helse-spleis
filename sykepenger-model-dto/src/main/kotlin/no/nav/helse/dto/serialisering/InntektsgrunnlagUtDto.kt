@@ -4,7 +4,7 @@ import no.nav.helse.dto.InntektDto
 
 data class InntektsgrunnlagUtDto(
     val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningUtDto>,
-    val selvstendigInntektsopplysning: ArbeidsgiverInntektsopplysningUtDto?,
+    val selvstendigInntektsopplysning: SelvstendigInntektsopplysningUtDto?,
     val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningUtDto>,
     val vurdertInfotrygd: Boolean,
     val `6G`: InntektDto,

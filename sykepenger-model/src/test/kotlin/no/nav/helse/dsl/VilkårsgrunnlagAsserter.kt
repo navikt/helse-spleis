@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.inspectors.ArbeidsgiverInntektsopplysningInspektør
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
+import no.nav.helse.inspectors.SelvstendigInntektsopplysningInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.AOrdningen
@@ -18,14 +19,14 @@ import no.nav.helse.økonomi.Inntekt.Companion.summer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.fail
 
-internal fun ArbeidsgiverInntektsopplysning.assertInntektsgrunnlag(
+internal fun ArbeidsgiverInntektsopplysning.assertArbeidsgiverInntektsopplysning(
     forventetFaktaavklartInntekt: Inntekt,
     forventetOmregnetÅrsinntekt: Inntekt = forventetFaktaavklartInntekt,
     forventetFastsattÅrsinntekt: Inntekt = forventetOmregnetÅrsinntekt,
     forventetKorrigertInntekt: Inntekt? = null,
     forventetkilde: Arbeidstakerkilde = Arbeidstakerkilde.Arbeidsgiver
 ) {
-    assertInntektsgrunnlag(inspektør, forventetFaktaavklartInntekt, forventetOmregnetÅrsinntekt, forventetFastsattÅrsinntekt, forventetKorrigertInntekt, forventetkilde)
+    assertArbeidsgiverInntektsopplysning(inspektør, forventetFaktaavklartInntekt, forventetOmregnetÅrsinntekt, forventetFastsattÅrsinntekt, forventetKorrigertInntekt, forventetkilde)
 }
 
 internal fun TestPerson.TestArbeidsgiver.assertInntektsgrunnlag(
@@ -95,14 +96,13 @@ internal data class InntektsgrunnlagAssert(val inntektsgrunnlag: Inntektsgrunnla
         assertNotNull(actual)
         assertEquals(deaktivert, aktiv == null) { "forventet at inntekten er ${if (deaktivert) "deaktivert" else "aktivert"}" }
         assertEquals(deaktivert, deaktiv != null) { "forventet at inntekten er ${if (deaktivert) "deaktivert" else "aktivert"}" }
-        assertInntektsgrunnlag(actual.inspektør, forventetFaktaavklartInntekt, forventetOmregnetÅrsinntekt, forventetFastsattÅrsinntekt, forventetKorrigertInntekt, forventetkilde, forventetKildeId)
+        assertArbeidsgiverInntektsopplysning(actual.inspektør, forventetFaktaavklartInntekt, forventetOmregnetÅrsinntekt, forventetFastsattÅrsinntekt, forventetKorrigertInntekt, forventetkilde, forventetKildeId)
     }
 
     internal fun assertSelvstendigInntektsgrunnlag(
         forventetFaktaavklartInntekt: Inntekt,
         forventetOmregnetÅrsinntekt: Inntekt = forventetFaktaavklartInntekt,
         forventetFastsattÅrsinntekt: Inntekt = forventetOmregnetÅrsinntekt,
-        forventetKorrigertInntekt: Inntekt? = null,
     ) {
         fastsatteÅrsinntekter.add(forventetFastsattÅrsinntekt)
 
@@ -111,12 +111,11 @@ internal data class InntektsgrunnlagAssert(val inntektsgrunnlag: Inntektsgrunnla
 
         val actual = selvstendigInntektsopplysning
         assertNotNull(actual)
-        assertInntektsgrunnlag(
+        assertSelvstendigInntektsopplysning(
             inspektør = actual.inspektør,
             forventetFaktaavklartInntekt = forventetFaktaavklartInntekt,
             forventetOmregnetÅrsinntekt = forventetOmregnetÅrsinntekt,
             forventetFastsattÅrsinntekt = forventetFastsattÅrsinntekt,
-            forventetKorrigertInntekt = forventetKorrigertInntekt
         )
     }
 
@@ -130,7 +129,7 @@ internal enum class Arbeidstakerkilde {
     AOrdningen
 }
 
-private fun assertInntektsgrunnlag(
+private fun assertArbeidsgiverInntektsopplysning(
     inspektør: ArbeidsgiverInntektsopplysningInspektør,
     forventetFaktaavklartInntekt: Inntekt,
     forventetOmregnetÅrsinntekt: Inntekt = forventetFaktaavklartInntekt,
@@ -159,3 +158,15 @@ private fun assertInntektsgrunnlag(
 
     if (forventetKildeId != null) assertEquals(forventetKildeId, inspektør.faktaavklartInntekt.inntektsdata.hendelseId.id)
 }
+
+private fun assertSelvstendigInntektsopplysning(
+    inspektør: SelvstendigInntektsopplysningInspektør,
+    forventetFaktaavklartInntekt: Inntekt,
+    forventetOmregnetÅrsinntekt: Inntekt = forventetFaktaavklartInntekt,
+    forventetFastsattÅrsinntekt: Inntekt = forventetOmregnetÅrsinntekt
+) {
+    assertEquals(forventetFaktaavklartInntekt, inspektør.faktaavklartInntekt.inntektsdata.beløp) { "faktaavklart inntekt er feil" }
+    assertEquals(forventetOmregnetÅrsinntekt, inspektør.omregnetÅrsinntekt) { "omregnet årsinntekt er feil" }
+    assertEquals(forventetFastsattÅrsinntekt, inspektør.fastsattÅrsinntekt) { "fastsatt årsinntekt er feil" }
+}
+
