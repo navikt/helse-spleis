@@ -9,6 +9,7 @@ data class ØkonomiInnDto(
     val utbetalingsgrad: ProsentdelDto,
     val arbeidsgiverRefusjonsbeløp: InntektbeløpDto.DagligDouble,
     val aktuellDagsinntekt: InntektbeløpDto.DagligDouble,
+    val inntektjustering: InntektbeløpDto.DagligDouble,
     val dekningsgrad: ProsentdelDto,
     val arbeidsgiverbeløp: InntektbeløpDto.DagligDouble?,
     val personbeløp: InntektbeløpDto.DagligDouble?,

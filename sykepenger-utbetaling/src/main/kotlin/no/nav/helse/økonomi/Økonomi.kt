@@ -13,6 +13,7 @@ data class Økonomi(
     val utbetalingsgrad: Prosentdel,
     val refusjonsbeløp: Inntekt,
     val aktuellDagsinntekt: Inntekt,
+    val inntektjustering: Inntekt,
     val dekningsgrad: Prosentdel,
     val totalSykdomsgrad: Prosentdel = sykdomsgrad,
     val arbeidsgiverbeløp: Inntekt? = null,
@@ -29,6 +30,7 @@ data class Økonomi(
                 utbetalingsgrad = sykdomsgrad,
                 refusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
+                inntektjustering = INGEN,
                 dekningsgrad = dekningsgrad
             )
 
@@ -167,6 +169,7 @@ data class Økonomi(
                 utbetalingsgrad = Prosentdel.gjenopprett(dto.utbetalingsgrad),
                 refusjonsbeløp = Inntekt.gjenopprett(dto.arbeidsgiverRefusjonsbeløp),
                 aktuellDagsinntekt = Inntekt.gjenopprett(dto.aktuellDagsinntekt),
+                inntektjustering = Inntekt.gjenopprett(dto.inntektjustering),
                 dekningsgrad = Prosentdel.gjenopprett(dto.dekningsgrad),
                 arbeidsgiverbeløp = dto.arbeidsgiverbeløp?.let { Inntekt.gjenopprett(it) },
                 personbeløp = dto.personbeløp?.let { Inntekt.gjenopprett(it) },
@@ -213,6 +216,7 @@ data class Økonomi(
         utbetalingsgrad = utbetalingsgrad.dto(),
         arbeidsgiverRefusjonsbeløp = refusjonsbeløp.dto(),
         aktuellDagsinntekt = aktuellDagsinntekt.dto(),
+        inntektjustering = inntektjustering.dto(),
         dekningsgrad = dekningsgrad.dto(),
         arbeidsgiverbeløp = arbeidsgiverbeløp?.dto(),
         personbeløp = personbeløp?.dto(),
