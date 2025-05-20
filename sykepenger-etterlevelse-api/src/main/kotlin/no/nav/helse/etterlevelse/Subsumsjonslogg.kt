@@ -25,6 +25,7 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_28
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_29
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_3
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_34
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_48
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
@@ -807,6 +808,24 @@ fun `§ 8-29`(
 fun `§ 8-33 ledd 1`() {}
 
 fun `§ 8-33 ledd 3`(grunnlagForFeriepenger: Int, opptjeningsår: Year, prosentsats: Double, alder: Int, feriepenger: Double) {}
+
+/**
+ * Vurdering av krav på om det ytes full kompensasjonsnivå, eller begrenset til 80 % av sykepengegrunnlag, til selvstendig næringsdrivende
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-34)
+ */
+fun `§ 8-34 ledd 1`(dagsats: Double, utbetaltePerioder: List<ClosedRange<LocalDate>>) = Subsumsjon.periodisertSubsumsjon(
+    utfall = VILKAR_BEREGNET,
+    lovverk = "folketrygdloven",
+    versjon = LocalDate.of(2019, 1, 1),
+    paragraf = PARAGRAF_8_34,
+    ledd = LEDD_1,
+    perioder = utbetaltePerioder,
+    input = emptyMap(),
+    output = mapOf(
+        "dagsats" to dagsats,
+    )
+)
 
 /**
  * Vurdering av krav til minimum inntekt ved alder mellom 67 og 70 år

@@ -5,7 +5,10 @@ import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.selvstendig
+import no.nav.helse.etterlevelse.Ledd
+import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -116,6 +119,33 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterUtbetalt()
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
             assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        }
+    }
+
+    @Test
+    fun `Subsumerer 8-34 ledd 1 for selvstendig uten forsikring`() = Toggle.SelvstendigNæringsdrivende.enable {
+        selvstendig {
+            håndterSøknad(
+                januar,
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig),
+                )
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterYtelser(1.vedtaksperiode)
+
+            val antallSubsumsjoner = { subsumsjonInspektør: SubsumsjonInspektør ->
+                subsumsjonInspektør.antallSubsumsjoner(
+                    paragraf = Paragraf.PARAGRAF_8_34,
+                    versjon = 1.januar(2019),
+                    ledd = Ledd.LEDD_1,
+                    punktum = null,
+                    bokstav = null
+                )
+            }
+            assertSubsumsjoner { assertEquals(1, antallSubsumsjoner(this)) }
         }
     }
 

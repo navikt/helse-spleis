@@ -11,9 +11,11 @@ import no.nav.helse.etterlevelse.`§ 8-17 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 2`
 import no.nav.helse.etterlevelse.`§ 8-19 andre ledd`
+import no.nav.helse.etterlevelse.`§ 8-34 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-48 ledd 2 punktum 2`
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserAap
@@ -40,6 +42,7 @@ internal class Utbetalingstidslinjesubsumsjon(
     private val andreYtelser = mutableListOf<Periode>()
     private val utbetalingsdager = mutableListOf<Periode>()
     private val dekningsgrunnlag = mutableListOf<Dekningsgrunnlag>()
+    private val utbetalteDager = mutableListOf<UtbetaltDag>()
 
     init {
         utbetalingstidslinje.forEach { dag ->
@@ -76,6 +79,13 @@ internal class Utbetalingstidslinjesubsumsjon(
                 is Utbetalingsdag.NavDag -> {
                     utbetalingsdager.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
                     dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
+                    utbetalteDager.add(
+                        UtbetaltDag(
+                            dato = dag.dato,
+                            dekningsgrad = dag.økonomi.dekningsgrad.toDouble(),
+                            dagsats = (dag.økonomi.personbeløp?.daglig ?: 0.0) + (dag.økonomi.arbeidsgiverbeløp?.daglig ?: 0.0)
+                        )
+                    )
                 }
 
                 is Utbetalingsdag.NavHelgDag -> {
@@ -91,7 +101,29 @@ internal class Utbetalingstidslinjesubsumsjon(
     }
 
     fun subsummer(vedtaksperiode: Periode, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet) {
-        if (yrkesaktivitet !is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) return
+        when (yrkesaktivitet) {
+            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> subsummerArbeidstaker(vedtaksperiode)
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> subsummerSelvstendig(vedtaksperiode)
+
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.Frilans -> error("Ikke implementert subsumsjon for abrbeidsledig eller frilans")
+        }
+    }
+
+    private fun subsummerSelvstendig(vedtaksperiode: Periode) {
+        // kap 8-34 ledd 1
+        utbetalteDager
+            .filter{ it.dekningsgrad == 80.0 }
+            .filter{ it.dagsats > 0.0 }
+            .groupBy { it.dagsats }
+            .mapValues { (_, utbetalteDager) ->
+                utbetalteDager.map { it.dato }.grupperSammenhengendePerioder()
+            }.forEach { (dagsats, utbetaltePerioder) ->
+                subsumsjonslogg.logg(`§ 8-34 ledd 1`(dagsats, utbetaltePerioder))
+            }
+    }
+
+    private fun subsummerArbeidstaker(vedtaksperiode: Periode) {
         subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a`(false, arbeidsgiverperiodedager, tidslinjesubsumsjonsformat))
         utbetalingsdager.firstOrNull()?.firstOrNull { !it.erHelg() }?.also {
             subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a`(oppfylt = true, dagen = listOf(it.rangeTo(it)), tidslinjesubsumsjonsformat))
@@ -120,6 +152,12 @@ internal class Utbetalingstidslinjesubsumsjon(
     private data class Dekningsgrunnlagsubsumsjon(
         val årligInntekt: Double,
         val årligDekningsgrunnlag: Double
+    )
+
+    private data class UtbetaltDag(
+        val dato: LocalDate,
+        val dekningsgrad: Double,
+        val dagsats: Double
     )
 
     private companion object {
