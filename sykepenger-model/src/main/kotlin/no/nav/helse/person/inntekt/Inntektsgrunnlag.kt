@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
@@ -244,11 +243,6 @@ internal class Inntektsgrunnlag(
         val nyttInntektsgrunnlag = kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, selvstendigInntektsopplysning, deaktiverteArbeidsforhold)
         if (this.`6G` == nyttInntektsgrunnlag.`6G`) return null
         return nyttInntektsgrunnlag
-    }
-
-    internal fun inntektskilde() = when {
-        arbeidsgiverInntektsopplysninger.size > 1 -> UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
-        else -> UtbetalingInntektskilde.EN_ARBEIDSGIVER
     }
 
     internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) =

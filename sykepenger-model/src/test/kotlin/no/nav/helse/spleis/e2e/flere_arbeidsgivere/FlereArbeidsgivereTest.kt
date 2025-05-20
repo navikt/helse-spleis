@@ -49,7 +49,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SY_4
@@ -1378,7 +1377,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
-            assertEquals(UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE, a1.inspektør.inntektskilde(2.vedtaksperiode))
             assertInntektsgrunnlag(3.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
                 assertInntektsgrunnlag(a2, INGEN, forventetkilde = Arbeidstakerkilde.AOrdningen)

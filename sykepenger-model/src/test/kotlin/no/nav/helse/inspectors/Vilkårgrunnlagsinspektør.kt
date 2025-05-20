@@ -1,7 +1,6 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
-import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikkView
 import no.nav.helse.person.VilkårsgrunnlagView
@@ -33,5 +32,4 @@ internal class GrunnlagsdataInspektør(view: VilkårsgrunnlagView) {
     val inntektsgrunnlag = view.inntektsgrunnlag
     val opptjening = view.opptjening
     val vurdertOk = view.vurdertOk
-    val inntektskilde = if (view.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size > 1) UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE else UtbetalingInntektskilde.EN_ARBEIDSGIVER
 }

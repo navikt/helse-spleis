@@ -35,8 +35,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.UtbetalingInntektskilde.EN_ARBEIDSGIVER
-import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
@@ -49,8 +47,6 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
-import no.nav.helse.spleis.e2e.assertInfo
-import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -475,7 +471,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(17.januar, a1Linje.fom)
         assertEquals(15.mars, a1Linje.tom)
         assertEquals(1080, a1Linje.beløp)
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
     }
 
     @Test
@@ -504,31 +499,12 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(17.januar, a1Linje.fom)
         assertEquals(15.mars, a1Linje.tom)
         assertEquals(1080, a1Linje.beløp)
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
 
         val andreOppdrag = inspektør(a1).utbetaling(1).arbeidsgiverOppdrag
         val a1Linje2 = andreOppdrag.single()
         assertEquals(26.mars, a1Linje2.fom)
         assertEquals(10.april, a1Linje2.tom)
         assertEquals(1080, a1Linje2.beløp)
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(2.vedtaksperiode))
-    }
-
-    @Test
-    fun `Førstegangsbehandling med ghost - skal få warning om flere arbeidsforhold med ulikt sykefravær`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterArbeidsgiveropplysninger(
-            listOf(1.mars til 16.mars),
-            beregnetInntekt = 10000.månedlig,
-            orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-        )
-        håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
-        assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter(a1))
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
     }
 
     @Test
@@ -555,11 +531,14 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+        }
+
         val a1Linje = inspektør(a1).utbetaling(0).arbeidsgiverOppdrag.single()
         assertEquals(17.januar, a1Linje.fom)
         assertEquals(15.mars, a1Linje.tom)
         assertEquals(1431, a1Linje.beløp)
-        assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
     }
 
     @Test
@@ -589,11 +568,14 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+        }
+
         val a1Linje = inspektør(a1).utbetaling(0).arbeidsgiverOppdrag.single()
         assertEquals(17.januar, a1Linje.fom)
         assertEquals(15.mars, a1Linje.tom)
         assertEquals(1431, a1Linje.beløp)
-        assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
     }
 
     @Test
@@ -711,33 +693,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
         assertVarsler(emptyList(), 2.vedtaksperiode.filter(a1))
-    }
-
-    @Test
-    fun `ettergølgende vedtaksperider av en vedtaksperiode med inntektskilde FLERE_ARBEIDSGIVERE blir også markert som flere arbeidsgivere`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-
-        håndterArbeidsgiveropplysninger(
-            listOf(1.mars til 16.mars),
-            beregnetInntekt = 30000.månedlig,
-            orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-        )
-        håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
-        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        håndterSykmelding(Sykmeldingsperiode(1.april, 30.april), orgnummer = a1)
-        håndterSøknad(Sykdom(1.april, 30.april, 100.prosent), orgnummer = a1)
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(2.vedtaksperiode))
     }
 
     @Test
@@ -1028,11 +983,5 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         if (tilGodkjenning) return
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
-    }
-
-    private fun assertInfoSomFølgeAv(forventetInfo: String, block: () -> Unit) {
-        assertIngenInfo(forventetInfo)
-        block()
-        assertInfo(forventetInfo)
     }
 }

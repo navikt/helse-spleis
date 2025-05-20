@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import OpenInSpanner
 import no.nav.helse.august
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -36,7 +35,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
@@ -751,9 +749,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        assertEquals("FLERE_ARBEIDSGIVERE", personlogg.sisteBehov(Godkjenning).detaljer()["inntektskilde"] as? String)
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
@@ -802,7 +797,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
 
         assertEquals("FLERE_ARBEIDSGIVERE", personlogg.sisteBehov(Godkjenning).detaljer()["inntektskilde"] as? String)
-        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
 
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)

@@ -142,8 +142,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) = inntektsgrunnlag.erArbeidsgiverRelevant(organisasjonsnummer)
 
-        internal fun inntektskilde() = inntektsgrunnlag.inntektskilde()
-
         final override fun toSpesifikkKontekst() = SpesifikkKontekst(
             kontekstType = "vilkårsgrunnlag",
             kontekstMap = mapOf(

@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.dto.BeløpstidslinjeDto
-import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.spleis.speil.builders.ISpleisGrunnlag
 import no.nav.helse.spleis.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.spleis.speil.dto.Periodetilstand.IngenUtbetaling
@@ -58,7 +57,6 @@ sealed class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
     abstract val tom: LocalDate
     abstract val sammenslåttTidslinje: List<SammenslåttDag>
     abstract val periodetype: Tidslinjeperiodetype
-    abstract val inntektskilde: UtbetalingInntektskilde
     abstract val erForkastet: Boolean
     abstract val opprettet: LocalDateTime
     abstract val oppdatert: LocalDateTime
@@ -99,7 +97,6 @@ data class UberegnetPeriode(
     override val tom: LocalDate,
     override val sammenslåttTidslinje: List<SammenslåttDag>,
     override val periodetype: Tidslinjeperiodetype, // feltet gir ikke mening for uberegnede perioder
-    override val inntektskilde: UtbetalingInntektskilde, // feltet gir ikke mening for uberegnede perioder
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime,
     override val oppdatert: LocalDateTime,
@@ -136,7 +133,6 @@ data class BeregnetPeriode(
     override val sammenslåttTidslinje: List<SammenslåttDag>,
     override val erForkastet: Boolean, // feltet trengs ikke i speil
     override val periodetype: Tidslinjeperiodetype,
-    override val inntektskilde: UtbetalingInntektskilde, // verdien av dette feltet brukes bare for å sjekke !=null i speil
     override val opprettet: LocalDateTime,
     val behandlingOpprettet: LocalDateTime,
     override val oppdatert: LocalDateTime,
@@ -207,7 +203,6 @@ data class AnnullertPeriode(
     override val skjæringstidspunkt = fom // feltet gir ikke mening for annullert periode
     override val periodetype =
         Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING // feltet gir ikke mening for annullert periode
-    override val inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER // feltet gir ikke mening for annullert periode
     override fun medPeriodetype(periodetype: Tidslinjeperiodetype): SpeilTidslinjeperiode {
         return this
     }

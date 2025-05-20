@@ -16,7 +16,6 @@ import no.nav.helse.dto.serialisering.UbrukteRefusjonsopplysningerUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.forrigeDag
 import no.nav.helse.mapWithNext
-import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.spleis.speil.SpekematDTO
 import no.nav.helse.spleis.speil.builders.ArbeidsgiverBuilder.Companion.fjernUnødvendigeRader
 import no.nav.helse.spleis.speil.dto.AlderDTO
@@ -115,7 +114,6 @@ internal class SpeilGenerasjonerBuilder(
             tom = sisteEndring.periode.tom,
             sammenslåttTidslinje = sykdomstidslinje.merge(utbetalingstidslinje),
             periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // feltet gir ikke mening for uberegnede perioder
-            inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER, // feltet gir ikke mening for uberegnede perioder
             erForkastet = false,
             opprettet = generasjon.endringer.first().tidsstempel,
             oppdatert = sisteEndring.tidsstempel,
@@ -154,7 +152,6 @@ internal class SpeilGenerasjonerBuilder(
             sammenslåttTidslinje = sykdomstidslinje.merge(utbetalingstidslinje),
             erForkastet = false,
             periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // TODO: fikse
-            inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER, // verdien av feltet brukes ikke i speil
             opprettet = vedtaksperiode.opprettet,
             behandlingOpprettet = generasjon.endringer.first().tidsstempel,
             oppdatert = vedtaksperiode.oppdatert,

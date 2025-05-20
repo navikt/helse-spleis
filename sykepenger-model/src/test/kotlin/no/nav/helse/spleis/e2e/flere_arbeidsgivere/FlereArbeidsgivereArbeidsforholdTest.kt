@@ -2,9 +2,11 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import no.nav.helse.april
+import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -15,7 +17,6 @@ import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
@@ -115,30 +116,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
         assertVarsler(emptyList(), 1.vedtaksperiode.filter(a1))
-    }
-
-    @Test
-    fun `arbeidsgivere med sammenligningsgrunnlag, men uten inntekt, skal ikke anses som ekstra arbeidsgiver`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterArbeidsgiveropplysninger(
-            listOf(1.januar til 16.januar),
-            orgnummer = a1,
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        assertEquals(UtbetalingInntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-
-        assertVarsler(emptyList(), 1.vedtaksperiode.filter(a1))
-        assertEquals(UtbetalingInntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(2.vedtaksperiode))
     }
 
     @Test
@@ -314,7 +291,10 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
-        assertEquals(UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
+        assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+            assertInntektsgrunnlag(a1, INNTEKT)
+            assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        }
     }
 
     @Test

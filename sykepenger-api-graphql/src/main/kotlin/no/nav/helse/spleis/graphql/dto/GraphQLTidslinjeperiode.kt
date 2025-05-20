@@ -201,14 +201,16 @@ data class GraphQLUberegnetPeriode(
     override val tom: LocalDate,
     override val tidslinje: List<GraphQLDag>,
     override val periodetype: GraphQLPeriodetype,
-    override val inntektstype: GraphQLInntektstype,
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime,
     override val vedtaksperiodeId: UUID,
     override val periodetilstand: GraphQLPeriodetilstand,
     override val skjaeringstidspunkt: LocalDate,
     override val hendelser: List<GraphQLHendelse>
-) : GraphQLTidslinjeperiode
+) : GraphQLTidslinjeperiode {
+    @Suppress("unused", "verdien av feltet brukes ikke i speil (brukes bare for å sjekke !=null i speil)")
+    override val inntektstype: GraphQLInntektstype get() = GraphQLInntektstype.EnArbeidsgiver
+}
 
 data class GraphQLPeriodevilkar(
     val sykepengedager: Sykepengedager,
@@ -235,7 +237,6 @@ data class GraphQLBeregnetPeriode(
     override val tom: LocalDate,
     override val tidslinje: List<GraphQLDag>,
     override val periodetype: GraphQLPeriodetype,
-    override val inntektstype: GraphQLInntektstype,
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime,
     override val vedtaksperiodeId: UUID,
@@ -250,6 +251,9 @@ data class GraphQLBeregnetPeriode(
     val periodevilkar: GraphQLPeriodevilkar,
     val vilkarsgrunnlagId: UUID?
 ) : GraphQLTidslinjeperiode {
+    @Suppress("unused", "verdien av feltet brukes ikke i speil (brukes bare for å sjekke !=null i speil)")
+    override val inntektstype: GraphQLInntektstype get() = GraphQLInntektstype.EnArbeidsgiver
+
     @Suppress("unused", "TODO: denne skal fjernes når Speilvendt har fjernet den på sin ende")
     val inntekter: List<GraphQLInntekt> = emptyList()
 }

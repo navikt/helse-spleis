@@ -2,7 +2,6 @@ package no.nav.helse.spleis.graphql
 
 import java.time.LocalDate
 import java.util.*
-import no.nav.helse.person.UtbetalingInntektskilde
 import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.dto.HendelsetypeDto
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverinntekt
@@ -16,7 +15,6 @@ import no.nav.helse.spleis.graphql.dto.GraphQLInntektFraAOrdningen
 import no.nav.helse.spleis.graphql.dto.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektskilde
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektsmelding
-import no.nav.helse.spleis.graphql.dto.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.dto.GraphQLOmregnetArsinntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLOppdrag
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetilstand
@@ -325,11 +323,6 @@ private fun mapPeriodetype(type: Tidslinjeperiodetype) = when (type) {
     Tidslinjeperiodetype.INFOTRYGDFORLENGELSE -> GraphQLPeriodetype.Infotrygdforlengelse
 }
 
-private fun mapInntektstype(kilde: UtbetalingInntektskilde) = when (kilde) {
-    UtbetalingInntektskilde.EN_ARBEIDSGIVER -> GraphQLInntektstype.EnArbeidsgiver
-    UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE -> GraphQLInntektstype.FlereArbeidsgivere
-}
-
 internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List<HendelseDTO>) =
     when (periode) {
         is AnnullertPeriode -> mapAnnullertPeriode(periode, hendelser)
@@ -341,7 +334,6 @@ internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List
             tom = periode.tom,
             tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
             periodetype = mapPeriodetype(periode.periodetype),
-            inntektstype = mapInntektstype(periode.inntektskilde),
             erForkastet = periode.erForkastet,
             opprettet = periode.oppdatert,
             vedtaksperiodeId = periode.vedtaksperiodeId,
@@ -359,7 +351,6 @@ private fun mapBeregnetPeriode(periode: BeregnetPeriode, hendelser: List<Hendels
         tom = periode.tom,
         tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
         periodetype = mapPeriodetype(periode.periodetype),
-        inntektstype = mapInntektstype(periode.inntektskilde),
         erForkastet = periode.erForkastet,
         opprettet = periode.behandlingOpprettet,
         vedtaksperiodeId = periode.vedtaksperiodeId,
@@ -383,7 +374,6 @@ private fun mapAnnullertPeriode(periode: AnnullertPeriode, hendelser: List<Hende
         tom = periode.tom,
         tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
         periodetype = mapPeriodetype(periode.periodetype),
-        inntektstype = mapInntektstype(periode.inntektskilde),
         erForkastet = periode.erForkastet,
         opprettet = periode.opprettet,
         vedtaksperiodeId = periode.vedtaksperiodeId,

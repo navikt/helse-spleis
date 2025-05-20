@@ -152,9 +152,6 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.utbetalinger.last().arbeidsgiverOppdrag.fagsystemId
 
-    internal fun inntektskilde(vedtaksperiodeIdInnhenter: IdInnhenter) = vilkårsgrunnlag(vedtaksperiodeIdInnhenter)?.inntektskilde()
-    internal fun inntektskilde(vedtaksperiodeId: UUID) = vilkårsgrunnlag(vedtaksperiodeId)?.inntektskilde()
-
     internal fun vedtaksperiodeId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.id(orgnummer)
 
     internal fun sykmeldingsperioder() = sykmeldingsperioder.toList()
