@@ -377,7 +377,7 @@ internal class SpeilGenerasjonerBuilder(
                     fom = linje.fom,
                     tom = linje.tom,
                     dagsats = linje.beløp,
-                    grad = linje.grad!!,
+                    grad = linje.grad,
                     endringskode = when (linje.endringskode) {
                         EndringskodeDto.ENDR -> EndringskodeDTO.ENDR
                         EndringskodeDto.NY -> EndringskodeDTO.NY
