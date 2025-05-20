@@ -18,8 +18,8 @@ spec:
   secureLogs:
     enabled: true
   envFrom:
-    - secret: google-sql-spleis-spleis-spleis-avstemming-c09f6283
-    - secret: google-sql-spleis-spleis-spleis-migrate-dc6feb9b
+    - secret: "{{avstemming-secret}}"
+    - secret: "{{migrate-secret}}"
   gcp:
     permissions:
       - resource:
@@ -30,7 +30,7 @@ spec:
     - name: DATABASE_REGION
       value: "europe-north1"
     - name: DATABASE_INSTANCE
-      value: "spleis2"
+      value: "{{database}}"
     - name: RUNTIME_OPTS
       value: "{{jobb}} {{arbeid_id}} {{ekstra_parametre}}"
     - name: DRYRUN
