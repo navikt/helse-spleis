@@ -76,4 +76,7 @@ spec:
       value: SPEED_API_DEV_PROXY_TOKEN_ENDPOINT
     - name: SPEED_API_DEV_PROXY_TOKEN_ENDPOINT
       value: http://speed-api-dev-proxy/token
-
+  observability:
+    logging:
+      destinations:
+        - id: elastic
