@@ -41,7 +41,7 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal) : Compara
         }
         val Number.prosent get() = Prosentdel(this.toDouble().toBigDecimal(mc).divide(HUNDRE_PROSENT, mc))
 
-        fun gjenopprett(dto: ProsentdelDto) = dto.prosent.prosent
+        fun gjenopprett(dto: ProsentdelDto) = Prosentdel(dto.prosentDesimal.toBigDecimal(mc))
     }
 
     override fun equals(other: Any?) = other is Prosentdel && this.equals(other)
@@ -68,5 +68,5 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal) : Compara
 
     internal fun erUnderGrensen() = this < GRENSE
 
-    fun dto() = ProsentdelDto(prosent = toDouble())
+    fun dto() = ProsentdelDto(prosentDesimal = brøkdel.toDouble())
 }

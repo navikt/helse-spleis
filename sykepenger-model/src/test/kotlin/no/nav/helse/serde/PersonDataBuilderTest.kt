@@ -73,7 +73,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             InntektbeløpDto.DagligDouble(beløp = 0.0),
             InntektbeløpDto.DagligInt(beløp = 0)
         )
-        private val IngenGrad = ProsentdelDto(prosent = 0.0)
+        private val IngenGrad = ProsentdelDto(prosentDesimal = 0.0)
     }
 
     /**
@@ -209,8 +209,8 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         }
         dto.dager[1].also { dag ->
             assertEquals(2.januar, dag.dato)
-            assertEquals(100.0, dag.økonomi.grad.prosent)
-            assertEquals(100.0, dag.økonomi.totalGrad.prosent)
+            assertEquals(1.0, dag.økonomi.grad.prosentDesimal)
+            assertEquals(1.0, dag.økonomi.totalGrad.prosentDesimal)
             assertEquals(
                 InntektDto(
                     InntektbeløpDto.Årlig(beløp = 312000.0),
@@ -224,8 +224,8 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         }
         dto.dager[2].also { dag ->
             assertEquals(3.januar, dag.dato)
-            assertEquals(100.0, dag.økonomi.grad.prosent)
-            assertEquals(100.0, dag.økonomi.totalGrad.prosent)
+            assertEquals(1.0, dag.økonomi.grad.prosentDesimal)
+            assertEquals(1.0, dag.økonomi.totalGrad.prosentDesimal)
             assertEquals(
                 InntektDto(
                     InntektbeløpDto.Årlig(beløp = 156000.0),
@@ -246,8 +246,8 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         }
         dto.dager[3].also { dag ->
             assertEquals(4.januar, dag.dato)
-            assertEquals(100.0, dag.økonomi.grad.prosent)
-            assertEquals(100.0, dag.økonomi.totalGrad.prosent)
+            assertEquals(1.0, dag.økonomi.grad.prosentDesimal)
+            assertEquals(1.0, dag.økonomi.totalGrad.prosentDesimal)
             assertEquals(
                 InntektDto(
                     InntektbeløpDto.Årlig(beløp = 312000.0),

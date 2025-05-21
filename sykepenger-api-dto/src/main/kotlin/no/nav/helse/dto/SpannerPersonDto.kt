@@ -248,6 +248,8 @@ data class SpannerPersonDto(
                 val tom: LocalDate?,
                 val dato: LocalDate?
             ) {
+                val gradSomProsent = grad * 100
+
                 init {
                     check(dato != null || (fom != null && tom != null)) {
                         "enten må dato være satt eller så må både fom og tom være satt"
@@ -715,7 +717,12 @@ data class SpannerPersonDto(
             val dato: LocalDate?,
             val fom: LocalDate?,
             val tom: LocalDate?
-        )
+        ) {
+            val gradSomProsent = grad * 100
+            val totalGradSomProsent = totalGrad * 100
+            val utbetalingsgradSomProsent = utbetalingsgrad * 100
+            val dekingsgradSomProsent = dekingsgrad * 100
+        }
     }
 
     data class BeløpstidslinjeData(val perioder: List<BeløpstidslinjeperiodeData>)
@@ -881,7 +888,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
         kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
+        grad = this.grad.prosentDesimal,
         other = null,
         melding = null,
         dato = dato,
@@ -892,7 +899,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.ArbeidsgiverdagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
         kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
+        grad = this.grad.prosentDesimal,
         other = null,
         melding = null,
         dato = dato,
@@ -914,7 +921,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.ForeldetSykedagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FORELDET_SYKEDAG,
         kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
+        grad = this.grad.prosentDesimal,
         other = null,
         melding = null,
         dato = dato,
@@ -958,7 +965,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.SykHelgedagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
+        grad = this.grad.prosentDesimal,
         other = null,
         melding = null,
         dato = dato,
@@ -969,7 +976,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.SykedagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
+        grad = this.grad.prosentDesimal,
         other = null,
         melding = null,
         dato = dato,
@@ -1272,14 +1279,14 @@ private fun UtbetalingsdagUtDto.tilPersonData() =
             is UtbetalingsdagUtDto.UkjentDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.UkjentDag
         },
         aktuellDagsinntekt = this.økonomi.aktuellDagsinntekt.dagligDouble.beløp,
-        dekingsgrad = this.økonomi.dekningsgrad.prosent,
+        dekingsgrad = this.økonomi.dekningsgrad.prosentDesimal,
         begrunnelser = when (this) {
             is UtbetalingsdagUtDto.AvvistDagDto -> this.begrunnelser.map { it.tilPersonData() }
             else -> null
         },
-        grad = this.økonomi.grad.prosent,
-        totalGrad = this.økonomi.totalGrad.prosent,
-        utbetalingsgrad = this.økonomi.utbetalingsgrad.prosent,
+        grad = this.økonomi.grad.prosentDesimal,
+        totalGrad = this.økonomi.totalGrad.prosentDesimal,
+        utbetalingsgrad = this.økonomi.utbetalingsgrad.prosentDesimal,
         arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.dagligDouble.beløp,
         arbeidsgiverbeløp = this.økonomi.arbeidsgiverbeløp?.dagligDouble?.beløp,
         personbeløp = this.økonomi.personbeløp?.dagligDouble?.beløp,

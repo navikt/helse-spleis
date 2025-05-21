@@ -111,14 +111,14 @@ internal class SykdomstidslinjeBuilder(
                 dagen = it.dato,
                 type = SykdomstidslinjedagType.ARBEIDSGIVERDAG,
                 kilde = it.kilde.tilKildeDTO(),
-                grad = it.grad.prosent.roundToInt()
+                grad = (it.grad.prosentDesimal * 100).roundToInt()
             )
 
             is SykdomstidslinjeDagDto.ArbeidsgiverdagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
                 type = if (dagerNavOvertarAnsvar.any { (fom, tom) -> it.dato in (fom..tom) }) SykdomstidslinjedagType.SYKEDAG_NAV else SykdomstidslinjedagType.ARBEIDSGIVERDAG,
                 kilde = it.kilde.tilKildeDTO(),
-                grad = it.grad.prosent.roundToInt()
+                grad = (it.grad.prosentDesimal * 100).roundToInt()
             )
 
             is SykdomstidslinjeDagDto.FeriedagDto -> Sykdomstidslinjedag(
@@ -132,7 +132,7 @@ internal class SykdomstidslinjeBuilder(
                 dagen = it.dato,
                 type = SykdomstidslinjedagType.FORELDET_SYKEDAG,
                 kilde = it.kilde.tilKildeDTO(),
-                grad = it.grad.prosent.roundToInt()
+                grad = (it.grad.prosentDesimal * 100).roundToInt()
             )
 
             is SykdomstidslinjeDagDto.FriskHelgedagDto -> Sykdomstidslinjedag(
@@ -160,14 +160,14 @@ internal class SykdomstidslinjeBuilder(
                 dagen = it.dato,
                 type = SykdomstidslinjedagType.SYK_HELGEDAG,
                 kilde = it.kilde.tilKildeDTO(),
-                grad = it.grad.prosent.roundToInt()
+                grad = (it.grad.prosentDesimal * 100).roundToInt()
             )
 
             is SykdomstidslinjeDagDto.SykedagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
                 type = if (dagerNavOvertarAnsvar.any { (fom, tom) -> it.dato in (fom..tom) }) SykdomstidslinjedagType.SYKEDAG_NAV else SykdomstidslinjedagType.SYKEDAG,
                 kilde = it.kilde.tilKildeDTO(),
-                grad = it.grad.prosent.roundToInt()
+                grad = (it.grad.prosentDesimal * 100).roundToInt()
             )
 
             is SykdomstidslinjeDagDto.UkjentDagDto -> Sykdomstidslinjedag(
@@ -205,7 +205,7 @@ internal class UtbetalingstidslinjeBuilder(private val dto: Utbetalingstidslinje
                     type = UtbetalingstidslinjedagType.AvvistDag,
                     dato = it.dato,
                     begrunnelser = it.begrunnelser.map { BegrunnelseDTO.fraBegrunnelse(it) },
-                    totalGrad = it.økonomi.totalGrad.prosent.toInt()
+                    totalGrad = (it.økonomi.totalGrad.prosentDesimal * 100).toInt()
                 )
 
                 is UtbetalingsdagUtDto.ForeldetDagDto -> UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.ForeldetDag, dato = it.dato)
@@ -231,7 +231,7 @@ internal class UtbetalingstidslinjeBuilder(private val dto: Utbetalingstidslinje
             dato = dato,
             arbeidsgiverbeløp = økonomi.arbeidsgiverbeløp?.dagligInt?.beløp ?: 0,
             personbeløp = økonomi.personbeløp?.dagligInt?.beløp ?: 0,
-            totalGrad = økonomi.totalGrad.prosent.roundToInt()
+            totalGrad = (økonomi.totalGrad.prosentDesimal * 100).roundToInt()
         )
     }
 

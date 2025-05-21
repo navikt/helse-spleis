@@ -212,7 +212,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
         kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
+        grad = this.grad.prosentDesimal,
         other = null,
         melding = null,
         dato = dato,
@@ -223,7 +223,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.ArbeidsgiverdagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
         kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
+        grad = this.grad.prosentDesimal,
         other = null,
         melding = null,
         dato = dato,
@@ -245,7 +245,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.ForeldetSykedagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FORELDET_SYKEDAG,
         kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
+        grad = this.grad.prosentDesimal,
         other = null,
         melding = null,
         dato = dato,
@@ -289,7 +289,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.SykHelgedagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
+        grad = this.grad.prosentDesimal,
         other = null,
         melding = null,
         dato = dato,
@@ -300,7 +300,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.SykedagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosent,
+        grad = this.grad.prosentDesimal,
         other = null,
         melding = null,
         dato = dato,
@@ -526,14 +526,14 @@ private fun UtbetalingsdagUtDto.tilPersonData() = UtbetalingsdagData(
     },
     aktuellDagsinntekt = this.økonomi.aktuellDagsinntekt.dagligDouble.beløp,
     inntektjustering = this.økonomi.inntektjustering.dagligDouble.beløp,
-    dekningsgrad = this.økonomi.dekningsgrad.prosent,
+    dekningsgrad = this.økonomi.dekningsgrad.prosentDesimal,
     begrunnelser = when (this) {
         is UtbetalingsdagUtDto.AvvistDagDto -> this.begrunnelser.map { it.tilPersonData() }
         else -> null
     },
-    grad = this.økonomi.grad.prosent,
-    totalGrad = this.økonomi.totalGrad.prosent,
-    utbetalingsgrad = this.økonomi.utbetalingsgrad.prosent,
+    grad = this.økonomi.grad.prosentDesimal,
+    totalGrad = this.økonomi.totalGrad.prosentDesimal,
+    utbetalingsgrad = this.økonomi.utbetalingsgrad.prosentDesimal,
     arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.dagligDouble.beløp,
     arbeidsgiverbeløp = this.økonomi.arbeidsgiverbeløp?.dagligDouble?.beløp,
     personbeløp = this.økonomi.personbeløp?.dagligDouble?.beløp,
