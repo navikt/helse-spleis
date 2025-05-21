@@ -73,4 +73,7 @@ spec:
     value: http://speed-api
   - name: TOKEN_ENDPOINT_ENV_KEY
     value: AZURE_OPENID_CONFIG_TOKEN_ENDPOINT
-
+  observability:
+    logging:
+      destinations:
+        - id: elastic

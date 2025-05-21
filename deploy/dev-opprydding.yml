@@ -53,3 +53,7 @@ spec:
       value: LATEST
     - name: DATABASE_INSTANCE
       value: "helse-spleis"
+  observability:
+    logging:
+      destinations:
+        - id: elastic
