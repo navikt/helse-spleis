@@ -20,9 +20,6 @@ spec:
     autoInstrumentation:
       enabled: false
       runtime: java
-    logging:
-      destinations:
-        - id: elastic
   replicas:
     min: 2
     max: 24

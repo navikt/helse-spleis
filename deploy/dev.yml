@@ -67,7 +67,4 @@ spec:
     - name: SELVSTENDIG_NAERINGSDRIVENDE
       value: "true"
     - name: JAVA_TOOL_OPTIONS
-  observability:
-    logging:
-      destinations:
-        - id: elastic
+      value: "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-dev-7ff9,-logtostderr,-minloglevel=1"
