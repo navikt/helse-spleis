@@ -1,0 +1,6 @@
+{
+  "database": "helse-spleis",
+  "avstemming-secret": "google-sql-helse-spleis-spleis-spleis-avstemming-038f9535",
+  "migrate-secret": "google-sql-helse-spleis-spleis-spleis-migrate-70ddf3c6",
+  "pool": "nav-dev"
+}

@@ -1,0 +1,6 @@
+{
+  "database": "spleis2",
+  "avstemming-secret": "google-sql-spleis-spleis-spleis-avstemming-c09f6283",
+  "migrate-secret": "google-sql-spleis-spleis-spleis-migrate-dc6feb9b",
+  "pool": "nav-prod"
+}
