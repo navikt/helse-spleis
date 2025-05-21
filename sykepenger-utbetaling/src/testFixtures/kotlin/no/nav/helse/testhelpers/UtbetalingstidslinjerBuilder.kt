@@ -25,7 +25,7 @@ fun tidslinjeOf(
         var dato = startDato
         val antallDager = antallDagerFun(startDato)
         repeat(antallDager) {
-            val økonomi = Økonomi.inntekt(grad.prosent, dekningsgrunnlag, 100.prosent, refusjonsbeløp = arbeidsgiverbeløp)
+            val økonomi = Økonomi.inntekt(grad.prosent, dekningsgrunnlag, 100.prosent, inntektjustering = INGEN, refusjonsbeløp = arbeidsgiverbeløp)
             if (helgedag != null && dato.erHelg()) this.helgedag(dato, økonomi)
             else this.utbetalingsdag(dato, økonomi)
             dato = dato.plusDays(1)
@@ -128,13 +128,4 @@ data class Utbetalingsdager(
     val dekningsgrunnlag: Inntekt = 1200.daglig,
     val grad: Number = 0.0,
     val arbeidsgiverbeløp: Inntekt = dekningsgrunnlag
-) {
-    fun copyWith(beløp: Number? = null, grad: Number? = null, arbeidsgiverbeløp: Number? = null) = Utbetalingsdager(
-        antallDager = this.antallDager,
-        addDagFun = addDagFun,
-        addHelgFun = addHelgFun,
-        dekningsgrunnlag = beløp?.daglig ?: this.dekningsgrunnlag,
-        arbeidsgiverbeløp = arbeidsgiverbeløp?.daglig ?: beløp?.daglig ?: this.dekningsgrunnlag,
-        grad = grad ?: this.grad
-    )
-}
+)

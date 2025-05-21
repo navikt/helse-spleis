@@ -19,7 +19,7 @@ internal class ProsentdelTest {
             100.prosent to 502400.04,
             100.prosent to 70065.12
         )
-        val result = inntekter.average(total = inntekter.sumOf { it.second })
+        val result = inntekter.average(0.0)
         assertEquals(100.prosent, result)
     }
 

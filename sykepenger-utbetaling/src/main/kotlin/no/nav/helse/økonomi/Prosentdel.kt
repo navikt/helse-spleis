@@ -9,7 +9,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 class Prosentdel private constructor(private val brøkdel: BigDecimal) : Comparable<Prosentdel> {
     init {
         require(brøkdel.toDouble() in 0.0..1.0) {
-            "Må være prosent mellom 0 og 100"
+            "Må være prosent mellom 0 og 100 var ${brøkdel.toDouble()}"
         }
     }
 
@@ -27,17 +27,17 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal) : Compara
             subsumsjonslogg.block(GRENSE.toDouble())
         }
 
-        internal fun Collection<Pair<Prosentdel, Double>>.average(total: Double): Prosentdel {
-            return map { it.first to it.second.toBigDecimal(mc) }.average(total.toBigDecimal(mc))
+        internal fun Collection<Pair<Prosentdel, Double>>.average(inntektjustering: Double): Prosentdel {
+            return map { it.first to it.second.toBigDecimal(mc) }.average(inntektjustering.toBigDecimal(mc))
         }
 
-        private fun Collection<Pair<Prosentdel, BigDecimal>>.average(total: BigDecimal): Prosentdel {
-            require(total > BigDecimal.ZERO) {
-                "Kan ikke dele på 0"
-            }
-            val teller = this.sumOf { it.first.not().brøkdel.multiply(it.second, mc) }
-            val totalInntektsbevaringsgrad = teller.divide(total, mc).coerceAtMost(BigDecimal.ONE)
-            return Prosentdel(totalInntektsbevaringsgrad).not()
+        private fun Collection<Pair<Prosentdel, BigDecimal>>.average(inntektjustering: BigDecimal): Prosentdel {
+            val total = this.sumOf { it.second }
+            require(total > BigDecimal.ZERO) { "Kan ikke dele på 0" }
+            val inntekter = this.sumOf { it.first.brøkdel.multiply(it.second, mc) }
+            val teller = inntekter - inntektjustering.coerceAtMost(inntekter)
+            val ratio = teller.divide(total, mc)
+            return Prosentdel(ratio)
         }
         val Number.prosent get() = Prosentdel(this.toDouble().toBigDecimal(mc).divide(HUNDRE_PROSENT, mc))
 
@@ -61,8 +61,6 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal) : Compara
     }
 
     internal fun gradér(beløp: Double) = beløp.toBigDecimal(mc).divide(this.brøkdel, mc).toDouble().roundToInt().toDouble()
-
-    internal fun resiprok() = BigDecimal.ONE.divide(this.brøkdel, mc).toDouble()
 
     internal fun times(other: Double) = (other.toBigDecimal(mc) * brøkdel).toDouble()
 

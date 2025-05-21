@@ -207,7 +207,8 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
             dagerNavOvertarAnsvar = emptyList(),
             refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje(),
-            inntektstidslinje = ARBEIDSGIVER.beløpstidslinje(tidslinje.periode()!!, 31000.månedlig)
+            fastsattÅrsinntekt = 31000.månedlig,
+            inntektjusteringer = Beløpstidslinje()
         )
 
         val utbetalingstidslinje = builder.result(tidslinje)

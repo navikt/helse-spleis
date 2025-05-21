@@ -413,7 +413,7 @@ internal class ØkonomiTest {
         aktuellDagsinntekt: Inntekt,
         refusjonsbeløp: Inntekt = aktuellDagsinntekt
     ) =
-        Økonomi.inntekt(this, aktuellDagsinntekt, 100.prosent, refusjonsbeløp)
+        Økonomi.inntekt(this, aktuellDagsinntekt, 100.prosent, refusjonsbeløp, INGEN)
 }
 
 private const val ØnsketOppførsel =

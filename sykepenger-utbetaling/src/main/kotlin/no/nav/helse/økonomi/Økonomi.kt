@@ -24,29 +24,31 @@ data class Økonomi(
     companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-        fun inntekt(sykdomsgrad: Prosentdel, aktuellDagsinntekt: Inntekt, dekningsgrad: Prosentdel, refusjonsbeløp: Inntekt) =
+        fun inntekt(sykdomsgrad: Prosentdel, aktuellDagsinntekt: Inntekt, dekningsgrad: Prosentdel, refusjonsbeløp: Inntekt, inntektjustering: Inntekt) =
             Økonomi(
                 sykdomsgrad = sykdomsgrad,
                 utbetalingsgrad = sykdomsgrad,
                 refusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
-                inntektjustering = INGEN,
+                inntektjustering = inntektjustering,
                 dekningsgrad = dekningsgrad
             )
 
-        fun ikkeBetalt(aktuellDagsinntekt: Inntekt = INGEN) = inntekt(
+        fun ikkeBetalt(aktuellDagsinntekt: Inntekt = INGEN, inntektjustering: Inntekt = INGEN) = inntekt(
             sykdomsgrad = 0.prosent,
             aktuellDagsinntekt = aktuellDagsinntekt,
             refusjonsbeløp = INGEN,
-            dekningsgrad = 100.prosent
+            dekningsgrad = 100.prosent,
+            inntektjustering = inntektjustering
         ).ikkeBetalt()
 
         private fun List<Økonomi>.aktuellDagsinntekt() = map { it.aktuellDagsinntekt }.summer()
+        private fun List<Økonomi>.inntektjustering() = map { it.inntektjustering }.summer()
 
         private fun totalSykdomsgrad(økonomiList: List<Økonomi>, gradStrategi: (Økonomi) -> Prosentdel): Prosentdel {
             val aktuellDagsinntekt = økonomiList.aktuellDagsinntekt()
             if (aktuellDagsinntekt == INGEN) return 0.prosent
-            val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { gradStrategi(it) to it.aktuellDagsinntekt }, aktuellDagsinntekt)
+            val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { gradStrategi(it) to it.aktuellDagsinntekt }, økonomiList.inntektjustering())
             return totalgrad
         }
 

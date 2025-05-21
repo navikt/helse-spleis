@@ -859,9 +859,9 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
             vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag?.beverte(this)
             build()
         }
-        val inntektstidslinje = inntekterForBeregning.tilBeregning(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
+        val (fastsattÅrsinntekt, inntektjusteringer) = inntekterForBeregning.tilBeregning(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
 
-        val utbetalingstidslinje = vedtaksperiode.behandlinger.lagUtbetalingstidslinje(inntektstidslinje, vedtaksperiode.arbeidsgiver.yrkesaktivitetssporing)
+        val utbetalingstidslinje = vedtaksperiode.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, inntektjusteringer, vedtaksperiode.arbeidsgiver.yrkesaktivitetssporing)
 
         vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
     }

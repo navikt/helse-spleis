@@ -65,6 +65,7 @@ import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderVedtaksperiode
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class Behandlinger private constructor(behandlinger: List<Behandling>) {
@@ -118,8 +119,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     )
 
     internal fun arbeidsgiverperiode() = ArbeidsgiverperiodeForVedtaksperiode(periode(), behandlinger.last().arbeidsgiverperiode)
-    internal fun lagUtbetalingstidslinje(inntektstidslinje: Beløpstidslinje, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet) =
-        behandlinger.last().lagUtbetalingstidslinje(inntektstidslinje, yrkesaktivitet)
+    internal fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet) =
+        behandlinger.last().lagUtbetalingstidslinje(fastsattÅrsinntekt, inntektjusteringer, yrkesaktivitet)
 
     internal val maksdato get() = behandlinger.last().maksdato
     internal val dagerNavOvertarAnsvar get() = behandlinger.last().dagerNavOvertarAnsvar
@@ -466,7 +467,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         fun utbetalingstidslinje() = gjeldende.utbetalingstidslinje
-        fun lagUtbetalingstidslinje(inntektstidslinje: Beløpstidslinje, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet): Utbetalingstidslinje {
+        fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet): Utbetalingstidslinje {
             val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
                 dekningsgrad = when (yrkesaktivitet) {
                     is Arbeidstaker -> 100.prosent
@@ -477,7 +478,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 arbeidsgiverperiode = arbeidsgiverperiode,
                 dagerNavOvertarAnsvar = gjeldende.dagerNavOvertarAnsvar,
                 refusjonstidslinje = refusjonstidslinje,
-                inntektstidslinje = inntektstidslinje
+                fastsattÅrsinntekt = fastsattÅrsinntekt,
+                inntektjusteringer = inntektjusteringer
             )
             return builder.result(sykdomstidslinje)
         }
@@ -626,7 +628,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dagerNavOvertarAnsvar: List<Periode> = this.dagerNavOvertarAnsvar,
                 egenmeldingsdager: List<Periode> = this.egenmeldingsdager,
                 maksdatoresultat: Maksdatoresultat = this.maksdatoresultat,
-                inntekter: Map<Inntektskilde, Beløpstidslinje> = this.inntekter,
+                inntekter: Map<Inntektskilde, Beløpstidslinje> = this.inntekter, // TODO'dlido: Denne burde hete inntektjusteringer
                 faktaavklartInntekt: FaktaavklartInntekt? = this.faktaavklartInntekt
             ) = copy(
                 id = UUID.randomUUID(),
@@ -755,7 +757,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utbetaling = utbetaling,
                 utbetalingstidslinje = beregning.utbetalingstidslinje.subset(this.periode),
                 maksdatoresultat = beregning.maksdatovurdering.resultat,
-                inntekter = beregning.inntekterForBeregning.forPeriode(this.periode)
+                inntekter = beregning.inntekterForBeregning.inntektsjusteringer(this.periode)
             )
 
             internal fun kopierMedAnnullering(grunnlagsdata: VilkårsgrunnlagElement, annullering: Utbetaling) = kopierMed(
@@ -769,7 +771,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             internal fun kopierDokument(dokument: Dokumentsporing) = kopierMed(dokumentsporing = dokument)
             internal fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: InntekterForBeregning) = kopierMed(
                 utbetalingstidslinje = utbetalingstidslinje.subset(this.periode),
-                inntekter = inntekterForBeregning.forPeriode(this.periode)
+                inntekter = inntekterForBeregning.inntektsjusteringer(this.periode)
             )
 
             fun forkastUtbetaling(aktivitetslogg: IAktivitetslogg) {

@@ -8,6 +8,7 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
@@ -22,13 +23,9 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
     private val arbeidsgiverperiode: List<Periode>,
     private val dagerNavOvertarAnsvar: List<Periode>,
     private val refusjonstidslinje: Beløpstidslinje,
-    private val inntektstidslinje: Beløpstidslinje
+    private val fastsattÅrsinntekt: Inntekt,
+    private val inntektjusteringer: Beløpstidslinje
 ) {
-    private fun refusjonsbeløp(dato: LocalDate): Inntekt {
-        val refusjonFraBehandling = refusjonstidslinje[dato].takeIf { it is Beløpsdag }?.beløp
-        return refusjonFraBehandling ?: Inntekt.INGEN
-    }
-
     internal fun medInntektHvisFinnes(
         dato: LocalDate,
         grad: Prosentdel
@@ -37,12 +34,12 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
     }
 
     private fun medInntekt(dato: LocalDate, grad: Prosentdel): Økonomi {
-        val aktuellDagsinntekt = inntektstidslinje[dato].beløp
         return Økonomi.inntekt(
             sykdomsgrad = grad,
-            aktuellDagsinntekt = aktuellDagsinntekt,
+            aktuellDagsinntekt = fastsattÅrsinntekt,
             dekningsgrad = dekningsgrad,
-            refusjonsbeløp = refusjonsbeløp(dato)
+            refusjonsbeløp = (refusjonstidslinje[dato] as? Beløpsdag)?.beløp ?: INGEN,
+            inntektjustering = (inntektjusteringer[dato] as? Beløpsdag)?.beløp ?: INGEN,
         )
     }
 
