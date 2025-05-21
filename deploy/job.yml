@@ -35,3 +35,7 @@ spec:
       value: "{{jobb}} {{arbeid_id}} {{ekstra_parametre}}"
     - name: DRYRUN
       value: "{{dryrun}}"
+  observability:
+    logging:
+      destinations:
+        - id: elastic
