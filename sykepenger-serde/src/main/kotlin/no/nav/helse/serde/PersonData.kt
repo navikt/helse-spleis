@@ -1304,7 +1304,7 @@ data class PersonData(
             val type: TypeData,
             val aktuellDagsinntekt: Double,
             val inntektjustering: Double,
-            val dekningsgrad: Double?, // TODO: Fjerne optional når alle personer har fått seg det
+            val dekningsgrad: Double,
             val begrunnelser: List<BegrunnelseData>?,
             val grad: Double,
             val totalGrad: Double,
@@ -1329,7 +1329,7 @@ data class PersonData(
                     arbeidsgiverRefusjonsbeløp = InntektbeløpDto.DagligDouble(this.arbeidsgiverRefusjonsbeløp),
                     aktuellDagsinntekt = InntektbeløpDto.DagligDouble(this.aktuellDagsinntekt),
                     inntektjustering = InntektbeløpDto.DagligDouble(this.inntektjustering),
-                    dekningsgrad = dekningsgrad?.let { ProsentdelDto(it) } ?: ProsentdelDto(100.0),
+                    dekningsgrad = ProsentdelDto(dekningsgrad),
                     arbeidsgiverbeløp = lagretArbeidsgiverbeløp,
                     personbeløp = lagretPersonbeløp,
                     // Disse elvisene kan fjernes når alle personer har blitt oppdatert i databasen
