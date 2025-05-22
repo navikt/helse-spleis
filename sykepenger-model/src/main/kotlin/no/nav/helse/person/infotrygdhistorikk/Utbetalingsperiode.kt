@@ -10,7 +10,7 @@ import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.Prosentdel.Companion.HundreProsent
 import no.nav.helse.økonomi.Økonomi
 
 sealed class Utbetalingsperiode(
@@ -19,7 +19,7 @@ sealed class Utbetalingsperiode(
     tom: LocalDate
 ) : Infotrygdperiode(fom, tom) {
     override fun sykdomstidslinje(kilde: Hendelseskilde): Sykdomstidslinje {
-        return Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, 100.prosent, kilde)
+        return Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, HundreProsent, kilde)
     }
 
     override fun utbetalingstidslinje() =

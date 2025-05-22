@@ -14,6 +14,9 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal) : Compara
     }
 
     companion object {
+        val NullProsent = Prosentdel(BigDecimal.ZERO)
+        val HundreProsent = Prosentdel(BigDecimal.ONE)
+
         private val mc = MathContext.DECIMAL128
         private val SIKKER_BRØK = 1.0.toBigDecimal(mc)
         private val HUNDRE_PROSENT = 100.0.toBigDecimal(mc)

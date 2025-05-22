@@ -5,6 +5,7 @@ import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
+import no.nav.helse.økonomi.Prosentdel.Companion.NullProsent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.slf4j.LoggerFactory
 
@@ -35,10 +36,10 @@ data class Økonomi(
             )
 
         fun ikkeBetalt(aktuellDagsinntekt: Inntekt = INGEN, inntektjustering: Inntekt = INGEN) = inntekt(
-            sykdomsgrad = 0.prosent,
+            sykdomsgrad = NullProsent,
             aktuellDagsinntekt = aktuellDagsinntekt,
             refusjonsbeløp = INGEN,
-            dekningsgrad = 100.prosent,
+            dekningsgrad = DekningsgradArbeidstaker,
             inntektjustering = inntektjustering
         ).ikkeBetalt()
 
@@ -47,7 +48,7 @@ data class Økonomi(
 
         private fun totalSykdomsgrad(økonomiList: List<Økonomi>, gradStrategi: (Økonomi) -> Prosentdel): Prosentdel {
             val aktuellDagsinntekt = økonomiList.aktuellDagsinntekt()
-            if (aktuellDagsinntekt == INGEN) return 0.prosent
+            if (aktuellDagsinntekt == INGEN) return NullProsent
             val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { gradStrategi(it) to it.aktuellDagsinntekt }, økonomiList.inntektjustering())
             return totalgrad
         }
@@ -153,7 +154,7 @@ data class Økonomi(
         }
 
         private fun reduksjon(grense: Inntekt, total: Inntekt): Prosentdel {
-            if (total == INGEN) return 0.prosent
+            if (total == INGEN) return NullProsent
             return grense ratio total
         }
 
@@ -212,7 +213,7 @@ data class Økonomi(
         )
     }
 
-    fun ikkeBetalt() = copy(utbetalingsgrad = 0.prosent)
+    fun ikkeBetalt() = copy(utbetalingsgrad = NullProsent)
 
     fun dto() = ØkonomiUtDto(
         grad = sykdomsgrad.dto(),
