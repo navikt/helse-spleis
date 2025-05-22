@@ -1629,12 +1629,12 @@ private fun ArbeidstakerFaktaavklartInntektUtDto.tilPersonData() =
         beløp = this.inntektsdata.beløp.tilPersonData(),
         tidsstempel = this.inntektsdata.tidsstempel,
         type = InntektsopplysningstypeData.ARBEIDSTAKER,
-        kilde = when (this.inntektsopplysning.kilde) {
+        kilde = when (this.inntektsopplysningskilde) {
                 is ArbeidstakerinntektskildeUtDto.InfotrygdDto -> "INFOTRYGD"
                 is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> "INNTEKTSMELDING"
                 is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> "SKATT_SYKEPENGEGRUNNLAG"
         },
-        skatteopplysninger = when (val kilde = this.inntektsopplysning.kilde) {
+        skatteopplysninger = when (val kilde = this.inntektsopplysningskilde) {
                 is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> kilde.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
                 else -> null
         },

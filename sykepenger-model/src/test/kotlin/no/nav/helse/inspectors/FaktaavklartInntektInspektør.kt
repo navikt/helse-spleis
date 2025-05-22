@@ -11,5 +11,5 @@ internal class FaktaavklartInntektInspektør(inntekt: ArbeidstakerFaktaavklartIn
     val beløp: Inntekt = inntekt.inntektsdata.beløp
     val hendelseId: UUID = inntekt.inntektsdata.hendelseId.id
     val tidsstempel: LocalDateTime = inntekt.inntektsdata.tidsstempel
-    val opplysningstype = inntekt.inntektsopplysning
+    val opplysningstype = inntekt.inntektsopplysningskilde
 }

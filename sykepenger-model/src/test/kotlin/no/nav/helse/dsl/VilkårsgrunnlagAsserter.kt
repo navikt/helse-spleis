@@ -143,7 +143,7 @@ private fun assertArbeidsgiverInntektsopplysning(
     assertEquals(forventetKorrigertInntekt, inspektør.korrigertInntekt?.inntektsdata?.beløp) { "korrigert inntekt er feil" }
     assertEquals(
         forventetkilde,
-        when (inspektør.faktaavklartInntekt.inntektsopplysning.kilde) {
+        when (inspektør.faktaavklartInntekt.inntektsopplysningskilde) {
             is Arbeidsgiver -> Arbeidstakerkilde.Arbeidsgiver
             Infotrygd -> Arbeidstakerkilde.Arbeidsgiver
             is AOrdningen -> Arbeidstakerkilde.AOrdningen

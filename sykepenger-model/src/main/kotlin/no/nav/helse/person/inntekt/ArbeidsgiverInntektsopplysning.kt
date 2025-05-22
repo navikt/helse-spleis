@@ -69,8 +69,8 @@ internal data class ArbeidsgiverInntektsopplysning(
         oppfylt: Boolean,
         subsumsjonslogg: Subsumsjonslogg
     ): ArbeidsgiverInntektsopplysning {
-        val inntekterSisteTreMåneder = when (faktaavklartInntekt.inntektsopplysning.kilde) {
-                is Arbeidstakerinntektskilde.AOrdningen -> faktaavklartInntekt.inntektsopplysning.kilde.inntektsopplysninger
+        val inntekterSisteTreMåneder = when (faktaavklartInntekt.inntektsopplysningskilde) {
+            is Arbeidstakerinntektskilde.AOrdningen -> faktaavklartInntekt.inntektsopplysningskilde.inntektsopplysninger
                 Arbeidstakerinntektskilde.Arbeidsgiver,
                 Arbeidstakerinntektskilde.Infotrygd -> emptyList()
             }
@@ -215,7 +215,7 @@ internal data class ArbeidsgiverInntektsopplysning(
                     inntektskilde =
                         if (arbeidsgiver.skjønnsmessigFastsatt != null || arbeidsgiver.korrigertInntekt != null) {
                             Inntektskilde.Saksbehandler
-                        } else when (arbeidsgiver.faktaavklartInntekt.inntektsopplysning.kilde) {
+                        } else when (arbeidsgiver.faktaavklartInntekt.inntektsopplysningskilde) {
                             is Arbeidstakerinntektskilde.AOrdningen -> Inntektskilde.AOrdningen
                             Arbeidstakerinntektskilde.Arbeidsgiver -> Inntektskilde.Arbeidsgiver
                             Arbeidstakerinntektskilde.Infotrygd -> Inntektskilde.Arbeidsgiver
@@ -251,8 +251,7 @@ internal data class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.harGjenbrukbarInntekt(organisasjonsnummer: String) =
             singleOrNull { it.orgnummer == organisasjonsnummer }
                 ?.faktaavklartInntekt
-                ?.inntektsopplysning
-                ?.kilde is Arbeidstakerinntektskilde.Arbeidsgiver
+                ?.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver
 
         internal fun List<ArbeidsgiverInntektsopplysning>.lagreTidsnæreInntekter(
             skjæringstidspunkt: LocalDate,
@@ -261,7 +260,7 @@ internal data class ArbeidsgiverInntektsopplysning(
             nyArbeidsgiverperiode: Boolean
         ) {
             this.forEach {
-                val tidsnær = it.faktaavklartInntekt.inntektsopplysning.kilde as? Arbeidstakerinntektskilde.Arbeidsgiver
+                val tidsnær = it.faktaavklartInntekt.inntektsopplysningskilde as? Arbeidstakerinntektskilde.Arbeidsgiver
                 if (tidsnær != null) {
                     arbeidsgiver.lagreTidsnærInntektsmelding(
                         skjæringstidspunkt = skjæringstidspunkt,
@@ -269,7 +268,7 @@ internal data class ArbeidsgiverInntektsopplysning(
                         arbeidsgiverinntekt = ArbeidstakerFaktaavklartInntekt(
                             id = UUID.randomUUID(),
                             inntektsdata = it.faktaavklartInntekt.inntektsdata.copy(beløp = it.omregnetÅrsinntekt.beløp),
-                            inntektsopplysning = ArbeidstakerRenameMe(Arbeidstakerinntektskilde.Arbeidsgiver)
+                            inntektsopplysningskilde = Arbeidstakerinntektskilde.Arbeidsgiver
                         ),
                         aktivitetslogg = aktivitetslogg,
                         nyArbeidsgiverperiode = nyArbeidsgiverperiode

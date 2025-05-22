@@ -13,14 +13,14 @@ internal fun arbeidsgiverinntekt(
     ArbeidstakerFaktaavklartInntekt(
         id = UUID.randomUUID(),
         inntektsdata = Inntektsdata(MeldingsreferanseId(UUID.randomUUID()), dato, beløp, LocalDateTime.now()),
-        inntektsopplysning = ArbeidstakerRenameMe(Arbeidstakerinntektskilde.Arbeidsgiver)
+        inntektsopplysningskilde = Arbeidstakerinntektskilde.Arbeidsgiver
     )
 
 internal fun infotrygd(id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) =
     ArbeidstakerFaktaavklartInntekt(
         id = UUID.randomUUID(),
         inntektsdata = Inntektsdata(MeldingsreferanseId(hendelseId), dato, beløp, tidsstempel),
-        inntektsopplysning = ArbeidstakerRenameMe(Arbeidstakerinntektskilde.Infotrygd)
+        inntektsopplysningskilde = Arbeidstakerinntektskilde.Infotrygd
     )
 
 internal fun skattSykepengegrunnlag(
@@ -31,7 +31,7 @@ internal fun skattSykepengegrunnlag(
     ArbeidstakerFaktaavklartInntekt(
         id = UUID.randomUUID(),
         inntektsdata = Inntektsdata(MeldingsreferanseId(hendelseId), dato, Skatteopplysning.omregnetÅrsinntekt(inntektsopplysninger), LocalDateTime.now()),
-        inntektsopplysning = ArbeidstakerRenameMe(Arbeidstakerinntektskilde.AOrdningen(inntektsopplysninger))
+        inntektsopplysningskilde = Arbeidstakerinntektskilde.AOrdningen(inntektsopplysninger)
     )
 
 internal fun skjønnsmessigFastsatt(
