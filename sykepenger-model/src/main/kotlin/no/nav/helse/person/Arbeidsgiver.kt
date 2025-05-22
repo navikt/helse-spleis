@@ -79,7 +79,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsgiveroppl
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.inntekt.FaktaavklartInntekt
+import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
@@ -996,7 +996,7 @@ internal class Arbeidsgiver private constructor(
     internal fun lagreTidsnærInntektsmelding(
         skjæringstidspunkt: LocalDate,
         orgnummer: String,
-        arbeidsgiverinntekt: FaktaavklartInntekt,
+        arbeidsgiverinntekt: ArbeidstakerFaktaavklartInntekt,
         aktivitetslogg: IAktivitetslogg,
         nyArbeidsgiverperiode: Boolean
     ) {

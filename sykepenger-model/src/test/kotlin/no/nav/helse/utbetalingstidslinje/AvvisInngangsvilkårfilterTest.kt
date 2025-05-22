@@ -13,8 +13,8 @@ import no.nav.helse.januar
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
-import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsopplysning
@@ -78,7 +78,7 @@ class AvvisInngangsvilkårfilterTest {
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = "a1",
-                    faktaavklartInntekt = FaktaavklartInntekt(
+                    faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt(
                         id = UUID.randomUUID(),
                         inntektsdata = Inntektsdata(
                             hendelseId = MeldingsreferanseId(UUID.randomUUID()),

@@ -22,7 +22,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
 internal data class ArbeidsgiverInntektsopplysning(
     val orgnummer: String,
-    val faktaavklartInntekt: FaktaavklartInntekt,
+    val faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
     val korrigertInntekt: Saksbehandler?,
     val skjønnsmessigFastsatt: SkjønnsmessigFastsatt?
 ) {
@@ -32,7 +32,7 @@ internal data class ArbeidsgiverInntektsopplysning(
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
-    private fun overstyrMedInntektsmelding(organisasjonsnummer: String, nyInntekt: FaktaavklartInntekt): ArbeidsgiverInntektsopplysning {
+    private fun overstyrMedInntektsmelding(organisasjonsnummer: String, nyInntekt: ArbeidstakerFaktaavklartInntekt): ArbeidsgiverInntektsopplysning {
         if (this.orgnummer != organisasjonsnummer) return this
         if (nyInntekt.inntektsdata.dato.yearMonth != this.omregnetÅrsinntekt.dato.yearMonth) return this
         return copy(
@@ -161,7 +161,7 @@ internal data class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.overstyrMedInntektsmelding(
             organisasjonsnummer: String,
-            nyInntekt: FaktaavklartInntekt
+            nyInntekt: ArbeidstakerFaktaavklartInntekt
         ): List<ArbeidsgiverInntektsopplysning> {
             val endringen = this.map { inntekt -> inntekt.overstyrMedInntektsmelding(organisasjonsnummer, nyInntekt) }
             if (skalSkjønnsmessigFastsattRullesTilbake(endringen)) {
@@ -272,7 +272,7 @@ internal data class ArbeidsgiverInntektsopplysning(
                     arbeidsgiver.lagreTidsnærInntektsmelding(
                         skjæringstidspunkt = skjæringstidspunkt,
                         orgnummer = it.orgnummer,
-                        arbeidsgiverinntekt = FaktaavklartInntekt(
+                        arbeidsgiverinntekt = ArbeidstakerFaktaavklartInntekt(
                             id = UUID.randomUUID(),
                             inntektsdata = it.faktaavklartInntekt.inntektsdata.copy(beløp = it.omregnetÅrsinntekt.beløp),
                             inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.Arbeidsgiver)
@@ -287,7 +287,7 @@ internal data class ArbeidsgiverInntektsopplysning(
         internal fun gjenopprett(dto: ArbeidsgiverInntektsopplysningInnDto): ArbeidsgiverInntektsopplysning {
             return ArbeidsgiverInntektsopplysning(
                 orgnummer = dto.orgnummer,
-                faktaavklartInntekt = FaktaavklartInntekt.gjenopprett(dto.faktaavklartInntekt),
+                faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt.gjenopprett(dto.faktaavklartInntekt),
                 korrigertInntekt = dto.korrigertInntekt?.let { Saksbehandler.gjenopprett(it) },
                 skjønnsmessigFastsatt = dto.skjønnsmessigFastsatt?.let { SkjønnsmessigFastsatt.gjenopprett(it) }
             )

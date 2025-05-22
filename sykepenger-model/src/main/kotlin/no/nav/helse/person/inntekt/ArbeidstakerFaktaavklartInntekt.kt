@@ -8,12 +8,12 @@ import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 
-internal data class FaktaavklartInntekt(
+internal data class ArbeidstakerFaktaavklartInntekt(
     val id: UUID,
     val inntektsdata: Inntektsdata,
     val inntektsopplysning: Inntektsopplysning
 ) {
-    internal fun funksjoneltLik(other: FaktaavklartInntekt): Boolean {
+    internal fun funksjoneltLik(other: ArbeidstakerFaktaavklartInntekt): Boolean {
         if (!this.inntektsdata.funksjoneltLik(other.inntektsdata)) return false
         return when (this.inntektsopplysning) {
             is Inntektsopplysning.Arbeidstaker -> when (other.inntektsopplysning) {
@@ -57,7 +57,7 @@ internal data class FaktaavklartInntekt(
     )
 
     internal companion object {
-        internal fun gjenopprett(dto: FaktaavklartInntektInnDto) = FaktaavklartInntekt(
+        internal fun gjenopprett(dto: FaktaavklartInntektInnDto) = ArbeidstakerFaktaavklartInntekt(
             id = dto.id,
             inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata),
             inntektsopplysning = Inntektsopplysning.gjenopprett(dto.inntektsopplysning)

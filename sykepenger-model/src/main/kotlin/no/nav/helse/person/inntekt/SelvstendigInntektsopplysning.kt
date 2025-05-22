@@ -10,7 +10,7 @@ import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 
 internal data class SelvstendigInntektsopplysning(
-    val faktaavklartInntekt: FaktaavklartInntekt,
+    val faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
     val skjønnsmessigFastsatt: SkjønnsmessigFastsatt?
 ) {
     val omregnetÅrsinntekt = faktaavklartInntekt.inntektsdata
@@ -58,7 +58,7 @@ internal data class SelvstendigInntektsopplysning(
 
         internal fun gjenopprett(dto: SelvstendigInntektsopplysningInnDto): SelvstendigInntektsopplysning {
             return SelvstendigInntektsopplysning(
-                faktaavklartInntekt = FaktaavklartInntekt.gjenopprett(dto.faktaavklartInntekt),
+                faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt.gjenopprett(dto.faktaavklartInntekt),
                 skjønnsmessigFastsatt = dto.skjønnsmessigFastsatt?.let { SkjønnsmessigFastsatt.gjenopprett(it) }
             )
         }
