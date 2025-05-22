@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime
+import java.time.LocalDateTime.MIN
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
@@ -13,6 +14,7 @@ import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.fredag
+import no.nav.helse.gjenopprettFraJSONtekst
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Dagtype.Feriedag
@@ -65,6 +67,9 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
+import no.nav.helse.serde.tilPersonData
+import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -124,6 +129,50 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Bruker feil refusjonsopplysninger når arbeidsgiver fyller små hull & opplyser om opphør frem i tid`() {
+        håndterSøknad(14.mars(2025) til 21.mars(2025))
+        val im = håndterInntektsmelding(listOf(12.mars(2025) til 27.mars(2025)), refusjon = Refusjon(INNTEKT, 13.april(2025)))
+        val imKilde = Kilde(MeldingsreferanseId(im), ARBEIDSGIVER, MIN)
+
+        håndterSøknad(24.mars(2025) til 28.mars(2025))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        forlengVedtak(29.mars(2025) til 4.april(2025))
+        forlengVedtak(5.april(2025) til 23.april(2025))
+
+        assertBeløpstidslinje(
+            expected = Beløpstidslinje.fra(5.april(2025) til 13.april(2025), INNTEKT, imKilde) + Beløpstidslinje.fra(14.april(2025) til 23.april(2025), INGEN, imKilde),
+            actual = inspektør.refusjon(4.vedtaksperiode)
+        )
+        // En veldig viktig detalj for å fremprovosere feilen
+        // Ubrukte refusjonsopplysninger er litt tøysete laget, så må fremprovosere
+        // det som skjer på ekte (person lagres ned og lastes opp igjen)
+        // kunne også fått samme opppførsel ved å skrive mediator-test
+        reserialiser()
+        forlengVedtak(24.april(2025) til 4.mai(2025))
+
+        assertForventetFeil(
+            forklaring = "Bruker feil refusjonsopplysninger",
+            nå = {
+                assertBeløpstidslinje(
+                    expected = Beløpstidslinje.fra(24.april(2025) til 4.mai(2025), INNTEKT, imKilde),
+                    actual = inspektør.refusjon(5.vedtaksperiode)
+                )
+            },
+            ønsket = {
+                assertBeløpstidslinje(
+                    expected = Beløpstidslinje.fra(24.april(2025) til 4.mai(2025), INGEN, imKilde),
+                    actual = inspektør.refusjon(5.vedtaksperiode)
+                )
+            }
+        )
+    }
 
     @Test
     fun `sender forespørsel når man går fra auu til avim pga annen im & dager nav dekker`() {
