@@ -110,6 +110,12 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
             else add(insertIndex, elementToBeInserted)
         }
 
+        fun List<Periode>.flattenMutableList(): MutableList<LocalDate> {
+            return mutableListOf<LocalDate>().apply {
+                this@flattenMutableList.flatMapTo(this) { it }
+            }
+        }
+
         fun mellom(a: Periode, b: Periode) =
             a.periodeMellom(b.start) ?: b.periodeMellom(a.start)
 

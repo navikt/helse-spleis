@@ -6,6 +6,7 @@ import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.fredag
+import no.nav.helse.hendelser.Periode.Companion.flattenMutableList
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.Periode.Companion.intersect
@@ -34,6 +35,21 @@ import org.junit.jupiter.api.assertThrows
 
 internal class PeriodeTest {
     private val periode = Periode(1.juli, 10.juli)
+
+    @Test
+    fun `flatten til mutable list`() {
+        val perioder = listOf(
+            3.juli til 4.juli,
+            1.juli til 5.juli,
+            5.juli til 7.juli
+        )
+        val expected = mutableListOf(
+            3.juli, 4.juli,
+            1.juli, 2.juli, 3.juli, 4.juli, 5.juli,
+            5.juli, 6.juli, 7.juli
+        )
+        assertEquals(expected, perioder.flattenMutableList())
+    }
 
     @Test
     fun overlapperEllerStarterFør() {

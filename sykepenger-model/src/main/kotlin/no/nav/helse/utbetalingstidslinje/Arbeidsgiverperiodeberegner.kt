@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.flattenMutableList
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -43,8 +44,11 @@ internal class Arbeidsgiverperiodeberegner(
         val periodeFremTilSpleis = infotrygdperiodeFørSpleis(sykdomstidslinje.periode(), infotrygdBetalteDager, infotrygdFerieperioder)
         // vurderer en eventuell infotrygdperiode i forkant av spleis, i tilfelle
         // vi starter spleishistorikken med en ferdig avklart arbeidsgiverperiode
+        val gjenståendeInfotrygdBetalteDager = infotrygdBetalteDager.flattenMutableList()
+        val gjenståendeInfotrygdFerieperioder = infotrygdFerieperioder.flattenMutableList()
+
         periodeFremTilSpleis?.forEach { dato ->
-            håndterUkjentDag(dato, infotrygdBetalteDager, infotrygdFerieperioder)
+            håndterUkjentDag(dato, gjenståendeInfotrygdBetalteDager, gjenståendeInfotrygdFerieperioder)
         }
 
         sykdomstidslinje.forEach { dag ->
@@ -60,17 +64,17 @@ internal class Arbeidsgiverperiodeberegner(
                 is Dag.Permisjonsdag -> tilstand.feriedag(this, dag.dato)
                 is Dag.ProblemDag -> throw ProblemdagException(dag.melding)
                 is Dag.SykHelgedag -> {
-                    ferdigstillTellingHvisInfotrygdHarUtbetalt(infotrygdBetalteDager, dag.dato)
+                    ferdigstillTellingHvisInfotrygdHarUtbetalt(gjenståendeInfotrygdBetalteDager, dag.dato)
                     sykedag(dag.dato)
                 }
 
                 is Dag.Sykedag -> {
-                    ferdigstillTellingHvisInfotrygdHarUtbetalt(infotrygdBetalteDager, dag.dato)
+                    ferdigstillTellingHvisInfotrygdHarUtbetalt(gjenståendeInfotrygdBetalteDager, dag.dato)
                     sykedag(dag.dato)
                 }
 
                 is Dag.UkjentDag -> {
-                    håndterUkjentDag(dag.dato, infotrygdBetalteDager, infotrygdFerieperioder)
+                    håndterUkjentDag(dag.dato, gjenståendeInfotrygdBetalteDager, gjenståendeInfotrygdFerieperioder)
                 }
             }
         }
@@ -88,12 +92,12 @@ internal class Arbeidsgiverperiodeberegner(
         return periodeFørSpleis.oppdaterTom(sykdomstidslinjeperiode.start.forrigeDag)
     }
 
-    private fun håndterUkjentDag(dato: LocalDate, infotrygdBetalteDager: List<Periode>, infotrygdFerieperioder: List<Periode>) {
-        if (infotrygdFerieperioder.any { dato in it }) {
+    private fun håndterUkjentDag(dato: LocalDate, infotrygdBetalteDager: MutableList<LocalDate>, infotrygdFerieperioder: MutableList<LocalDate>) {
+        if (infotrygdFerieperioder.remove(dato)) {
             return feriedagMedSykmelding(dato)
         }
 
-        if (infotrygdBetalteDager.any { dato in it }) {
+        if (infotrygdBetalteDager.remove(dato)) {
             arbeidsgiverperiodeteller.fullfør()
             return sykedag(dato)
         }
@@ -110,8 +114,8 @@ internal class Arbeidsgiverperiodeberegner(
         this.tilstand.entering(this)
     }
 
-    private fun ferdigstillTellingHvisInfotrygdHarUtbetalt(infotrygdBetalteDager: List<Periode>, dato: LocalDate) {
-        if (infotrygdBetalteDager.any { dato in it }) arbeidsgiverperiodeteller.fullfør()
+    private fun ferdigstillTellingHvisInfotrygdHarUtbetalt(infotrygdBetalteDager: MutableList<LocalDate>, dato: LocalDate) {
+        if (infotrygdBetalteDager.remove(dato)) arbeidsgiverperiodeteller.fullfør()
     }
 
     override fun arbeidsgiverperiodeFerdig() {
