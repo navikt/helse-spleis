@@ -48,7 +48,6 @@ import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.ArbeidstakerFaktaavklartInntektInnDto
-import no.nav.helse.dto.deserialisering.ArbeidstakerRenameMeInnDto
 import no.nav.helse.dto.deserialisering.ArbeidstakerinntektskildeInnDto
 import no.nav.helse.dto.deserialisering.ArbeidstakerinntektskildeInnDto.AOrdningenDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
@@ -320,16 +319,15 @@ data class PersonData(
                     return ArbeidstakerFaktaavklartInntektInnDto(
                         id = this.id,
                         inntektsdata = inntektsdata,
-                        inntektsopplysning = ArbeidstakerRenameMeInnDto(
-                            kilde = when (kilde!!) {
-                                InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> AOrdningenDto(
-                                    inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
-                                )
+                        inntektsopplysningskilde = when (kilde!!) {
+                            InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> AOrdningenDto(
+                                inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
+                            )
 
-                                InntektsopplysningskildeData.INFOTRYGD -> ArbeidstakerinntektskildeInnDto.InfotrygdDto
-                                InntektsopplysningskildeData.INNTEKTSMELDING -> ArbeidstakerinntektskildeInnDto.ArbeidsgiverDto
-                            }
-                        )
+                            InntektsopplysningskildeData.INFOTRYGD -> ArbeidstakerinntektskildeInnDto.InfotrygdDto
+                            InntektsopplysningskildeData.INNTEKTSMELDING -> ArbeidstakerinntektskildeInnDto.ArbeidsgiverDto
+                        }
+
                     )
                 }
             }

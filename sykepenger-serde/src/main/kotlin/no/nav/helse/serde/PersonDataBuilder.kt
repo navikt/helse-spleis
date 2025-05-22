@@ -831,12 +831,12 @@ private fun ArbeidstakerFaktaavklartInntektUtDto.tilPersonData() = PersonData.Vi
     beløp = this.inntektsdata.beløp.månedligDouble.beløp,
     tidsstempel = this.inntektsdata.tidsstempel,
     type = InntektsopplysningstypeData.ARBEIDSTAKER,
-    kilde = when (this.inntektsopplysning.kilde) {
+    kilde = when (this.inntektsopplysningskilde) {
             is ArbeidstakerinntektskildeUtDto.InfotrygdDto -> InntektsopplysningskildeData.INFOTRYGD
             is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> InntektsopplysningskildeData.INNTEKTSMELDING
             is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG
     },
-    skatteopplysninger = when (val kilde = this.inntektsopplysning.kilde) {
+    skatteopplysninger = when (val kilde = this.inntektsopplysningskilde) {
             is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> kilde.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
             ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto,
             ArbeidstakerinntektskildeUtDto.InfotrygdDto -> null

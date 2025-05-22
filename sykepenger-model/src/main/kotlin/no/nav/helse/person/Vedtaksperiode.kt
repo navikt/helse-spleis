@@ -111,7 +111,6 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
-import no.nav.helse.person.inntekt.ArbeidstakerRenameMe
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektsdata
@@ -638,7 +637,7 @@ internal class Vedtaksperiode private constructor(
             inntekt = ArbeidstakerFaktaavklartInntekt(
                 id = UUID.randomUUID(),
                 inntektsdata = inntektsdata,
-                inntektsopplysning = ArbeidstakerRenameMe(Arbeidstakerinntektskilde.Arbeidsgiver)
+                inntektsopplysningskilde = Arbeidstakerinntektskilde.Arbeidsgiver
             )
         )
         // todo: per 10. januar 2025 så sender alltid Hag inntekt i portal-inntektsmeldinger selv om vi ikke har bedt om det, derfor må vi ta høyde for at det ikke nødvendigvis er endringer
@@ -1400,7 +1399,7 @@ internal class Vedtaksperiode private constructor(
         return ArbeidstakerFaktaavklartInntekt(
             id = UUID.randomUUID(),
             inntektsdata = inntektsdata,
-            inntektsopplysning = ArbeidstakerRenameMe(opplysning)
+            inntektsopplysningskilde = opplysning
         )
     }
 
@@ -1499,7 +1498,7 @@ internal class Vedtaksperiode private constructor(
                     faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt(
                         id = UUID.randomUUID(),
                         inntektsdata = skatteopplysning.inntektsdata,
-                        inntektsopplysning = ArbeidstakerRenameMe(Arbeidstakerinntektskilde.AOrdningen.fraSkatt(skatteopplysning.treMånederFørSkjæringstidspunkt))
+                        inntektsopplysningskilde = Arbeidstakerinntektskilde.AOrdningen.fraSkatt(skatteopplysning.treMånederFørSkjæringstidspunkt)
                     ),
                     korrigertInntekt = null,
                     skjønnsmessigFastsatt = null

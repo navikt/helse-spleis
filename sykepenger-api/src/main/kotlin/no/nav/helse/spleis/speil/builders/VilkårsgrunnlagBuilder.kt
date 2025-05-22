@@ -254,14 +254,14 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         )
 
         return IOmregnetÅrsinntekt(
-            kilde = when (faktaavklartInntekt.inntektsopplysning.kilde) {
+            kilde = when (faktaavklartInntekt.inntektsopplysningskilde) {
                     is ArbeidstakerinntektskildeUtDto.InfotrygdDto -> IInntektkilde.Infotrygd
                     is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> IInntektkilde.Inntektsmelding
                     is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> if (faktaavklartInntekt.inntektsdata.beløp.årlig.beløp == 0.0) IInntektkilde.IkkeRapportert else IInntektkilde.AOrdningen
             },
             beløp = faktaavklartInntekt.inntektsdata.beløp.årlig.beløp,
             månedsbeløp = faktaavklartInntekt.inntektsdata.beløp.månedligDouble.beløp,
-            inntekterFraAOrdningen = when (val kilde = faktaavklartInntekt.inntektsopplysning.kilde) {
+            inntekterFraAOrdningen = when (val kilde = faktaavklartInntekt.inntektsopplysningskilde) {
                     is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto,
                     ArbeidstakerinntektskildeUtDto.InfotrygdDto -> null
 
