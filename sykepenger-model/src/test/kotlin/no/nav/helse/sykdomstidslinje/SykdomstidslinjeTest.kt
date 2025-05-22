@@ -18,11 +18,15 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.F
+import no.nav.helse.testhelpers.K
 import no.nav.helse.testhelpers.P
+import no.nav.helse.testhelpers.R
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.TestEvent
+import no.nav.helse.testhelpers.U
 import no.nav.helse.testhelpers.UK
 import no.nav.helse.testhelpers.YF
+import no.nav.helse.testhelpers.YP
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.tirsdag
 import no.nav.helse.torsdag
@@ -178,6 +182,18 @@ internal class SykdomstidslinjeTest {
 
         val merged = tidslinje1.merge(tidslinje2, Dag.replace)
         assertEquals("AAASS", merged.toShortString())
+    }
+
+    @Test
+    fun `legger bare til dager som var ukjente`() {
+        val tidslinje1 = 1.S + 1.UK + 1.F + 1.AIG + 1.P + 1.YF + 1.U + 1.K + 1.R
+        resetSeed()
+        val tidslinje2 = 9.K
+
+        val merged = tidslinje1.merge(tidslinje2, Dag.bareNyeDager)
+        assertEquals("S?FJPYG KR", tidslinje1.toShortString())
+        assertEquals("KKKKKHH KK", tidslinje2.toShortString())
+        assertEquals("SKFJPYG KR", merged.toShortString())
     }
 
     @Test

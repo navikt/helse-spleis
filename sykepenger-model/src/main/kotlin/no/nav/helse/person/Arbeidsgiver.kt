@@ -85,7 +85,7 @@ import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.view.ArbeidsgiverView
-import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
+import no.nav.helse.sykdomstidslinje.Dag.Companion.bareNyeDager
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -108,7 +108,7 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperioderesultat.Companion.f
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.Prosentdel.Companion.HundreProsent
 
 internal class Arbeidsgiver private constructor(
     private val person: Person,
@@ -965,10 +965,10 @@ internal class Arbeidsgiver private constructor(
 
         val tøyseteKilde = Hendelseskilde(Søknad::class, MeldingsreferanseId(UUID.randomUUID()), LocalDateTime.now())
         val egenmeldingstidslinje = egenmeldingsperioder
-            .map { Sykdomstidslinje.arbeidsgiverdager(it.start, it.endInclusive, 100.prosent, tøyseteKilde) }
+            .map { Sykdomstidslinje.arbeidsgiverdager(it.start, it.endInclusive, HundreProsent, tøyseteKilde) }
             .merge()
 
-        return egenmeldingstidslinje.merge(sykdomstidslinje(), replace)
+        return sykdomstidslinje().merge(egenmeldingstidslinje, bareNyeDager)
     }
 
     /**

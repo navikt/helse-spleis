@@ -70,6 +70,10 @@ sealed class Dag(
             else høyre
         }
 
+        internal val bareNyeDager: BesteStrategy = { venstre: Dag, høyre: Dag ->
+            replace(høyre, venstre)
+        }
+
         fun gjenopprett(dag: SykdomstidslinjeDagDto): Dag {
             return when (dag) {
                 is SykdomstidslinjeDagDto.AndreYtelserDto -> AndreYtelser.gjenopprett(dag)
