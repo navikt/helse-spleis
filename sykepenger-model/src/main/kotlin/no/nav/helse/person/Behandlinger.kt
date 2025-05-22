@@ -46,7 +46,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
-import no.nav.helse.person.inntekt.FaktaavklartInntekt
+import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektskilde
 import no.nav.helse.sykdomstidslinje.Dag
@@ -89,7 +89,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         sykmeldingsperiode: Periode,
         sykdomstidslinje: Sykdomstidslinje,
         egenmeldingsdager: List<Periode>,
-        faktaavklartInntekt: FaktaavklartInntekt?,
+        faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt?,
         inntektsendringer: Beløpstidslinje,
         dokumentsporing: Dokumentsporing,
         behandlingkilde: Behandlingkilde
@@ -518,7 +518,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val dagerNavOvertarAnsvar: List<Periode>,
             val maksdatoresultat: Maksdatoresultat,
             val inntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
-            val faktaavklartInntekt: FaktaavklartInntekt?
+            val faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt?
         ) {
 
             fun view() = BehandlingendringView(
@@ -597,7 +597,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         inntektjusteringer = dto.inntektjusteringer.map { (inntektskildeDto, beløpstidslinjeDto) ->
                             Inntektskilde.gjenopprett(inntektskildeDto) to Beløpstidslinje.gjenopprett(beløpstidslinjeDto)
                         }.toMap(),
-                        faktaavklartInntekt = dto.faktaavklartInntekt?.let { FaktaavklartInntekt.gjenopprett(it) }
+                        faktaavklartInntekt = dto.faktaavklartInntekt?.let { ArbeidstakerFaktaavklartInntekt.gjenopprett(it) }
                     )
                 }
             }
@@ -629,7 +629,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 egenmeldingsdager: List<Periode> = this.egenmeldingsdager,
                 maksdatoresultat: Maksdatoresultat = this.maksdatoresultat,
                 inntektjusteringer: Map<Inntektskilde, Beløpstidslinje> = this.inntektjusteringer,
-                faktaavklartInntekt: FaktaavklartInntekt? = this.faktaavklartInntekt
+                faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt? = this.faktaavklartInntekt
             ) = copy(
                 id = UUID.randomUUID(),
                 tidsstempel = LocalDateTime.now(),
@@ -1298,7 +1298,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 observatører: List<BehandlingObserver>,
                 sykdomstidslinje: Sykdomstidslinje,
                 egenmeldingsdager: List<Periode>,
-                faktaavklartInntekt: FaktaavklartInntekt?,
+                faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt?,
                 inntektsendringer: Beløpstidslinje,
                 dokumentsporing: Dokumentsporing,
                 sykmeldingsperiode: Periode,

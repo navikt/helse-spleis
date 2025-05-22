@@ -46,7 +46,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_YS_1
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.inntekt.FaktaavklartInntekt
+import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Dag
@@ -194,7 +194,7 @@ class Søknad(
                     } ?: emptyList(),
                     anvendtGrunnbeløp = anvendtGrunnbeløp
                 )
-                FaktaavklartInntekt(
+                ArbeidstakerFaktaavklartInntekt(
                     id = UUID.randomUUID(),
                     inntektsdata = Inntektsdata(
                         hendelseId = metadata.meldingsreferanseId,

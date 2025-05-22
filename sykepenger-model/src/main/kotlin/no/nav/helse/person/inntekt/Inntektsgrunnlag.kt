@@ -196,7 +196,7 @@ internal class Inntektsgrunnlag(
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
         organisasjonsnummer: String,
-        inntekt: FaktaavklartInntekt
+        inntekt: ArbeidstakerFaktaavklartInntekt
     ): EndretInntektsgrunnlag? {
         val resultat = arbeidsgiverInntektsopplysninger.overstyrMedInntektsmelding(organisasjonsnummer, inntekt)
         return lagEndring(resultat)

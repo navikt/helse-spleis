@@ -110,8 +110,8 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
-import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
@@ -163,7 +163,7 @@ internal class Vedtaksperiode private constructor(
         sykdomstidslinje: Sykdomstidslinje,
         dokumentsporing: Dokumentsporing,
         sykmeldingsperiode: Periode,
-        faktaavklartInntekt: FaktaavklartInntekt?,
+        faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt?,
         inntektsendringer: Beløpstidslinje = Beløpstidslinje(),
         regelverkslogg: Regelverkslogg
     ) : this(
@@ -397,7 +397,7 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun oppdaterVilkårsgrunnlagMedInntekt(korrigertInntekt: FaktaavklartInntekt): Boolean {
+    private fun oppdaterVilkårsgrunnlagMedInntekt(korrigertInntekt: ArbeidstakerFaktaavklartInntekt): Boolean {
         val grunnlag = vilkårsgrunnlag ?: return false
         /* fest setebeltet. nå skal vi prøve å endre vilkårsgrunnlaget */
         val resultat = grunnlag.nyeArbeidsgiverInntektsopplysninger(
@@ -634,7 +634,7 @@ internal class Vedtaksperiode private constructor(
 
         val result = grunnlag.nyeArbeidsgiverInntektsopplysninger(
             organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-            inntekt = FaktaavklartInntekt(
+            inntekt = ArbeidstakerFaktaavklartInntekt(
                 id = UUID.randomUUID(),
                 inntektsdata = inntektsdata,
                 inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.Arbeidsgiver)
@@ -1375,7 +1375,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetsloggTilDenSomVilkårsprøver: IAktivitetslogg,
         skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
         alleForSammeArbeidsgiver: List<Vedtaksperiode>
-    ): FaktaavklartInntekt {
+    ): ArbeidstakerFaktaavklartInntekt {
         val inntektForArbeidsgiver = arbeidsgiver
             .avklarInntekt(skjæringstidspunkt, alleForSammeArbeidsgiver)
             // velger bort inntekten hvis situasjonen er "fom ulik skjæringstidspunktet"
@@ -1396,7 +1396,7 @@ internal class Vedtaksperiode private constructor(
         if (opplysning is Arbeidstakerinntektskilde.AOrdningen)
             subsummerBrukAvSkatteopplysninger(arbeidsgiver.organisasjonsnummer, inntektsdata, skatteopplysning?.treMånederFørSkjæringstidspunkt ?: emptyList())
 
-        return FaktaavklartInntekt(
+        return ArbeidstakerFaktaavklartInntekt(
             id = UUID.randomUUID(),
             inntektsdata = inntektsdata,
             inntektsopplysning = Inntektsopplysning.Arbeidstaker(opplysning)
@@ -1440,7 +1440,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun inntektForSelvstendig(): FaktaavklartInntekt {
+    private fun inntektForSelvstendig(): ArbeidstakerFaktaavklartInntekt {
         val faktaavklartInntekt = checkNotNull(behandlinger.faktaavklartInntekt) { "Forventer å ha en inntekt for selvstendig" }
         val inntektsgrunnlag = when (faktaavklartInntekt.inntektsopplysning) {
             is Inntektsopplysning.Arbeidstaker -> error("Forventer ikke å ha en inntekt for arbeidstaker")
@@ -1502,7 +1502,7 @@ internal class Vedtaksperiode private constructor(
                 subsummerBrukAvSkatteopplysninger(skatteopplysning.arbeidsgiver, skatteopplysning.inntektsdata, skatteopplysning.treMånederFørSkjæringstidspunkt)
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = skatteopplysning.arbeidsgiver,
-                    faktaavklartInntekt = FaktaavklartInntekt(
+                    faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt(
                         id = UUID.randomUUID(),
                         inntektsdata = skatteopplysning.inntektsdata,
                         inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.AOrdningen.fraSkatt(skatteopplysning.treMånederFørSkjæringstidspunkt))

@@ -18,8 +18,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
+import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
-import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.refusjon.Refusjonsservitør
@@ -91,7 +91,7 @@ class Inntektsmelding(
 
     internal val inntektsdata = Inntektsdata(metadata.meldingsreferanseId, kompensertFørsteFraværsdag, beregnetInntekt, metadata.registrert)
 
-    internal fun korrigertInntekt() = FaktaavklartInntekt(
+    internal fun korrigertInntekt() = ArbeidstakerFaktaavklartInntekt(
         id = UUID.randomUUID(),
         inntektsdata = inntektsdata,
         inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.Arbeidsgiver)

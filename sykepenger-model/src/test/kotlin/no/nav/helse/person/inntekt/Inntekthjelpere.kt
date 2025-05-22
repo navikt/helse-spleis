@@ -10,14 +10,14 @@ internal fun arbeidsgiverinntekt(
     dato: LocalDate,
     beløp: Inntekt
 ) =
-    FaktaavklartInntekt(
+    ArbeidstakerFaktaavklartInntekt(
         id = UUID.randomUUID(),
         inntektsdata = Inntektsdata(MeldingsreferanseId(UUID.randomUUID()), dato, beløp, LocalDateTime.now()),
         inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.Arbeidsgiver)
     )
 
 internal fun infotrygd(id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) =
-    FaktaavklartInntekt(
+    ArbeidstakerFaktaavklartInntekt(
         id = UUID.randomUUID(),
         inntektsdata = Inntektsdata(MeldingsreferanseId(hendelseId), dato, beløp, tidsstempel),
         inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.Infotrygd)
@@ -28,7 +28,7 @@ internal fun skattSykepengegrunnlag(
     dato: LocalDate,
     inntektsopplysninger: List<Skatteopplysning>
 ) =
-    FaktaavklartInntekt(
+    ArbeidstakerFaktaavklartInntekt(
         id = UUID.randomUUID(),
         inntektsdata = Inntektsdata(MeldingsreferanseId(hendelseId), dato, Skatteopplysning.omregnetÅrsinntekt(inntektsopplysninger), LocalDateTime.now()),
         inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.AOrdningen(inntektsopplysninger))
