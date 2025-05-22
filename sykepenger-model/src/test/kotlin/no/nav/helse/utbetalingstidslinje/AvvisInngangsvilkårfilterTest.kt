@@ -14,10 +14,10 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
+import no.nav.helse.person.inntekt.ArbeidstakerRenameMe
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
-import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
@@ -86,7 +86,7 @@ class AvvisInngangsvilkårfilterTest {
                             beløp = if (manglerTilstrekkeligInntekt) 1000.månedlig else 31_000.månedlig,
                             tidsstempel = LocalDateTime.now()
                         ),
-                        inntektsopplysning = Inntektsopplysning.Arbeidstaker(kilde = Arbeidstakerinntektskilde.Arbeidsgiver)
+                        inntektsopplysning = ArbeidstakerRenameMe(kilde = Arbeidstakerinntektskilde.Arbeidsgiver)
                     ),
                     korrigertInntekt = null,
                     skjønnsmessigFastsatt = null

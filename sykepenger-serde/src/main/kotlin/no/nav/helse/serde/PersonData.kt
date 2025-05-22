@@ -47,12 +47,13 @@ import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
+import no.nav.helse.dto.deserialisering.ArbeidstakerFaktaavklartInntektInnDto
+import no.nav.helse.dto.deserialisering.ArbeidstakerRenameMeInnDto
 import no.nav.helse.dto.deserialisering.ArbeidstakerinntektskildeInnDto
 import no.nav.helse.dto.deserialisering.ArbeidstakerinntektskildeInnDto.AOrdningenDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
 import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
 import no.nav.helse.dto.deserialisering.BehandlingerInnDto
-import no.nav.helse.dto.deserialisering.FaktaavklartInntektInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeoppdragInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeutbetalinggrunnlagInnDto
@@ -67,15 +68,15 @@ import no.nav.helse.dto.deserialisering.InntektsdataInnDto
 import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.deserialisering.InntektsmeldingInnDto
-import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto.ArbeidstakerDto
-import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto.SelvstendigDto
 import no.nav.helse.dto.deserialisering.MaksdatoresultatInnDto
 import no.nav.helse.dto.deserialisering.MinimumSykdomsgradVurderingInnDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.deserialisering.OpptjeningInnDto
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.deserialisering.SaksbehandlerInnDto
+import no.nav.helse.dto.deserialisering.SelvstendigFaktaavklartInntektInnDto
 import no.nav.helse.dto.deserialisering.SelvstendigInntektsopplysningInnDto
+import no.nav.helse.dto.deserialisering.SelvstendigRenameMeInnDto
 import no.nav.helse.dto.deserialisering.SkjønnsmessigFastsattInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingsdagInnDto
@@ -87,7 +88,6 @@ import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnslagInnDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlaghistorikkInnDto
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
-import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 
 data class PersonData(
@@ -310,33 +310,26 @@ data class PersonData(
 
                 data class PensjonsgivendeInntektData(val årstall: Int, val årligBeløp: Double)
 
-                fun tilDto(): FaktaavklartInntektInnDto {
+                fun tilDto(): ArbeidstakerFaktaavklartInntektInnDto {
                     val inntektsdata = InntektsdataInnDto(
                         hendelseId = MeldingsreferanseDto(this.hendelseId),
                         dato = this.dato,
                         beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
                         tidsstempel = this.tidsstempel
                     )
-                    return FaktaavklartInntektInnDto(
+                    return ArbeidstakerFaktaavklartInntektInnDto(
                         id = this.id,
                         inntektsdata = inntektsdata,
-                        inntektsopplysning = when (type) {
-                            InntektsopplysningstypeData.ARBEIDSTAKER -> ArbeidstakerDto(
-                                kilde = when (kilde!!) {
-                                    InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> AOrdningenDto(
-                                        inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
-                                    )
+                        inntektsopplysning = ArbeidstakerRenameMeInnDto(
+                            kilde = when (kilde!!) {
+                                InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> AOrdningenDto(
+                                    inntektsopplysninger = this.skatteopplysninger?.map { it.tilDto() } ?: emptyList()
+                                )
 
-                                    InntektsopplysningskildeData.INFOTRYGD -> ArbeidstakerinntektskildeInnDto.InfotrygdDto
-                                    InntektsopplysningskildeData.INNTEKTSMELDING -> ArbeidstakerinntektskildeInnDto.ArbeidsgiverDto
-                                }
-                            )
-
-                            InntektsopplysningstypeData.SELVSTENDIG -> SelvstendigDto(
-                                pensjonsgivendeInntekt = this.pensjonsgivendeInntekter!!.map { SelvstendigDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) },
-                                anvendtGrunnbeløp = InntektbeløpDto.Årlig(this.anvendtÅrligGrunnbeløp!!)
-                            )
-                        }
+                                InntektsopplysningskildeData.INFOTRYGD -> ArbeidstakerinntektskildeInnDto.InfotrygdDto
+                                InntektsopplysningskildeData.INNTEKTSMELDING -> ArbeidstakerinntektskildeInnDto.ArbeidsgiverDto
+                            }
+                        )
                     )
                 }
             }
@@ -431,18 +424,18 @@ data class PersonData(
             ) {
                 data class PensjonsgivendeInntektData(val årstall: Int, val årligBeløp: Double)
 
-                fun tilDto(): FaktaavklartInntektInnDto {
+                fun tilDto(): SelvstendigFaktaavklartInntektInnDto {
                     val inntektsdata = InntektsdataInnDto(
                         hendelseId = MeldingsreferanseDto(this.hendelseId),
                         dato = this.dato,
                         beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
                         tidsstempel = this.tidsstempel
                     )
-                    return FaktaavklartInntektInnDto(
+                    return SelvstendigFaktaavklartInntektInnDto(
                         id = this.id,
                         inntektsdata = inntektsdata,
-                        inntektsopplysning = SelvstendigDto(
-                            pensjonsgivendeInntekt = this.pensjonsgivendeInntekter!!.map { SelvstendigDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) },
+                        inntektsopplysning = SelvstendigRenameMeInnDto(
+                            pensjonsgivendeInntekt = this.pensjonsgivendeInntekter!!.map { SelvstendigRenameMeInnDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) },
                             anvendtGrunnbeløp = InntektbeløpDto.Årlig(this.anvendtÅrligGrunnbeløp!!)
                         )
                     )
@@ -1013,7 +1006,7 @@ data class PersonData(
                     val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
                     val inntektjusteringer: Map<String, BeløpstidslinjeData>,
-                    val faktaavklartInntekt: InntektsopplysningData?
+                    val faktaavklartInntekt: VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.InntektsopplysningData?
                 ) {
                     fun tilDto() = BehandlingendringInnDto(
                         id = this.id,

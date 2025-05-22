@@ -3,29 +3,21 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.UUID
-import no.nav.helse.dto.deserialisering.FaktaavklartInntektInnDto
-import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
+import no.nav.helse.dto.deserialisering.ArbeidstakerFaktaavklartInntektInnDto
+import no.nav.helse.dto.deserialisering.ArbeidstakerRenameMeInnDto
+import no.nav.helse.dto.serialisering.ArbeidstakerFaktaavklartInntektUtDto
+import no.nav.helse.dto.serialisering.ArbeidstakerRenameMeUtDto
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 
 internal data class ArbeidstakerFaktaavklartInntekt(
     val id: UUID,
     val inntektsdata: Inntektsdata,
-    val inntektsopplysning: Inntektsopplysning
+    val inntektsopplysning: ArbeidstakerRenameMe
 ) {
     internal fun funksjoneltLik(other: ArbeidstakerFaktaavklartInntekt): Boolean {
         if (!this.inntektsdata.funksjoneltLik(other.inntektsdata)) return false
-        return when (this.inntektsopplysning) {
-            is Inntektsopplysning.Arbeidstaker -> when (other.inntektsopplysning) {
-                is Inntektsopplysning.Arbeidstaker -> this.inntektsopplysning.kilde::class == other.inntektsopplysning.kilde::class
-                is Inntektsopplysning.Selvstendig -> false
-            }
-
-            is Inntektsopplysning.Selvstendig -> when (other.inntektsopplysning) {
-                is Inntektsopplysning.Selvstendig -> this.inntektsopplysning.pensjonsgivendeInntekt == other.inntektsopplysning.pensjonsgivendeInntekt
-                is Inntektsopplysning.Arbeidstaker -> false
-            }
-        }
+        return this.inntektsopplysning.kilde::class == other.inntektsopplysning.kilde::class
     }
 
     internal fun kopierTidsnærOpplysning(
@@ -34,7 +26,6 @@ internal data class ArbeidstakerFaktaavklartInntekt(
         nyArbeidsgiverperiode: Boolean,
         inntektshistorikk: Inntektshistorikk
     ) {
-        if (inntektsopplysning !is Inntektsopplysning.Arbeidstaker) return
         if (inntektsopplysning.kilde !is Arbeidstakerinntektskilde.Arbeidsgiver) return
         if (nyDato == this.inntektsdata.dato) return
         val dagerMellom = ChronoUnit.DAYS.between(this.inntektsdata.dato, nyDato)
@@ -50,19 +41,31 @@ internal data class ArbeidstakerFaktaavklartInntekt(
         aktivitetslogg.info("Kopierte inntekt som lå lagret på ${this.inntektsdata.dato} til $nyDato")
     }
 
-    internal fun dto() = FaktaavklartInntektUtDto(
+    internal fun dto() = ArbeidstakerFaktaavklartInntektUtDto(
         id = this.id,
         inntektsdata = this.inntektsdata.dto(),
         inntektsopplysning = this.inntektsopplysning.dto()
     )
 
     internal companion object {
-        internal fun gjenopprett(dto: FaktaavklartInntektInnDto) = ArbeidstakerFaktaavklartInntekt(
+        internal fun gjenopprett(dto: ArbeidstakerFaktaavklartInntektInnDto) = ArbeidstakerFaktaavklartInntekt(
             id = dto.id,
             inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata),
-            inntektsopplysning = Inntektsopplysning.gjenopprett(dto.inntektsopplysning)
+            inntektsopplysning = ArbeidstakerRenameMe.gjenopprett(dto.inntektsopplysning)
         )
 
     }
-
 }
+
+internal data class ArbeidstakerRenameMe(val kilde: Arbeidstakerinntektskilde) {
+    fun dto() = ArbeidstakerRenameMeUtDto(
+        kilde = kilde.dto()
+    )
+
+    companion object {
+        fun gjenopprett(dto: ArbeidstakerRenameMeInnDto) = ArbeidstakerRenameMe(
+            kilde = Arbeidstakerinntektskilde.gjenopprett(dto.kilde)
+        )
+    }
+}
+

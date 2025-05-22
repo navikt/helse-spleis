@@ -19,9 +19,9 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
+import no.nav.helse.person.inntekt.ArbeidstakerRenameMe
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.Inntektsdata
-import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.økonomi.Inntekt
 
@@ -94,7 +94,7 @@ class Inntektsmelding(
     internal fun korrigertInntekt() = ArbeidstakerFaktaavklartInntekt(
         id = UUID.randomUUID(),
         inntektsdata = inntektsdata,
-        inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.Arbeidsgiver)
+        inntektsopplysning = ArbeidstakerRenameMe(Arbeidstakerinntektskilde.Arbeidsgiver)
     )
 
     internal fun inntektHåndtert() {

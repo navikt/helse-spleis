@@ -111,13 +111,14 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
+import no.nav.helse.person.inntekt.ArbeidstakerRenameMe
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
-import no.nav.helse.person.inntekt.Inntektsopplysning
+import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
@@ -163,7 +164,7 @@ internal class Vedtaksperiode private constructor(
         sykdomstidslinje: Sykdomstidslinje,
         dokumentsporing: Dokumentsporing,
         sykmeldingsperiode: Periode,
-        faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt?,
+        faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
         inntektsendringer: Beløpstidslinje = Beløpstidslinje(),
         regelverkslogg: Regelverkslogg
     ) : this(
@@ -637,7 +638,7 @@ internal class Vedtaksperiode private constructor(
             inntekt = ArbeidstakerFaktaavklartInntekt(
                 id = UUID.randomUUID(),
                 inntektsdata = inntektsdata,
-                inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.Arbeidsgiver)
+                inntektsopplysning = ArbeidstakerRenameMe(Arbeidstakerinntektskilde.Arbeidsgiver)
             )
         )
         // todo: per 10. januar 2025 så sender alltid Hag inntekt i portal-inntektsmeldinger selv om vi ikke har bedt om det, derfor må vi ta høyde for at det ikke nødvendigvis er endringer
@@ -1399,7 +1400,7 @@ internal class Vedtaksperiode private constructor(
         return ArbeidstakerFaktaavklartInntekt(
             id = UUID.randomUUID(),
             inntektsdata = inntektsdata,
-            inntektsopplysning = Inntektsopplysning.Arbeidstaker(opplysning)
+            inntektsopplysning = ArbeidstakerRenameMe(opplysning)
         )
     }
 
@@ -1440,18 +1441,11 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun inntektForSelvstendig(): ArbeidstakerFaktaavklartInntekt {
+    private fun inntektForSelvstendig(): SelvstendigFaktaavklartInntekt {
         val faktaavklartInntekt = checkNotNull(behandlinger.faktaavklartInntekt) { "Forventer å ha en inntekt for selvstendig" }
-        val inntektsgrunnlag = when (faktaavklartInntekt.inntektsopplysning) {
-            is Inntektsopplysning.Arbeidstaker -> error("Forventer ikke å ha en inntekt for arbeidstaker")
-            is Inntektsopplysning.Selvstendig -> faktaavklartInntekt.inntektsopplysning.beregnInntektsgrunnlag(`1G`.beløp(skjæringstidspunkt))
-        }
-        return faktaavklartInntekt
-            .copy(
-                inntektsdata = faktaavklartInntekt.inntektsdata.copy(
-                    beløp = inntektsgrunnlag
-                )
-            )
+        val inntektsgrunnlag = faktaavklartInntekt.inntektsopplysning.beregnInntektsgrunnlag(`1G`.beløp(skjæringstidspunkt))
+
+        return faktaavklartInntekt.copy(inntektsdata = faktaavklartInntekt.inntektsdata.copy(beløp = inntektsgrunnlag))
     }
 
     private fun subsummerBrukAvSkatteopplysninger(orgnummer: String, inntektsdata: Inntektsdata, skatteopplysninger: List<Skatteopplysning>) {
@@ -1505,7 +1499,7 @@ internal class Vedtaksperiode private constructor(
                     faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt(
                         id = UUID.randomUUID(),
                         inntektsdata = skatteopplysning.inntektsdata,
-                        inntektsopplysning = Inntektsopplysning.Arbeidstaker(Arbeidstakerinntektskilde.AOrdningen.fraSkatt(skatteopplysning.treMånederFørSkjæringstidspunkt))
+                        inntektsopplysning = ArbeidstakerRenameMe(Arbeidstakerinntektskilde.AOrdningen.fraSkatt(skatteopplysning.treMånederFørSkjæringstidspunkt))
                     ),
                     korrigertInntekt = null,
                     skjønnsmessigFastsatt = null

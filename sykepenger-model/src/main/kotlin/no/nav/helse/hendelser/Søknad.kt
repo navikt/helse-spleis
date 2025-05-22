@@ -46,9 +46,9 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_YS_1
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsdata
-import no.nav.helse.person.inntekt.Inntektsopplysning
+import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
+import no.nav.helse.person.inntekt.SelvstendigRenameMe
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
@@ -185,16 +185,16 @@ class Søknad(
             Behandlingsporing.Yrkesaktivitet.Frilans -> null
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
                 val anvendtGrunnbeløp = `1G`.beløp(sykdomsperiode.start)
-                val inntektsopplysning = Inntektsopplysning.Selvstendig(
+                val inntektsopplysning = SelvstendigRenameMe(
                     pensjonsgivendeInntekt = pensjonsgivendeInntekter?.map {
-                        Inntektsopplysning.Selvstendig.PensjonsgivendeInntekt(
+                        SelvstendigRenameMe.PensjonsgivendeInntekt(
                             årstall = it.inntektsår,
                             beløp = it.næringsinntekt
                         )
                     } ?: emptyList(),
                     anvendtGrunnbeløp = anvendtGrunnbeløp
                 )
-                ArbeidstakerFaktaavklartInntekt(
+                SelvstendigFaktaavklartInntekt(
                     id = UUID.randomUUID(),
                     inntektsdata = Inntektsdata(
                         hendelseId = metadata.meldingsreferanseId,

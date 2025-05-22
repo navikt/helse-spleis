@@ -11,7 +11,6 @@ import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.AOrdningen
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.Arbeidsgiver
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.Infotrygd
 import no.nav.helse.person.inntekt.InntektsgrunnlagView
-import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt
@@ -142,19 +141,14 @@ private fun assertArbeidsgiverInntektsopplysning(
     assertEquals(forventetOmregnetÅrsinntekt, inspektør.omregnetÅrsinntekt) { "omregnet årsinntekt er feil" }
     assertEquals(forventetFastsattÅrsinntekt, inspektør.fastsattÅrsinntekt) { "fastsatt årsinntekt er feil" }
     assertEquals(forventetKorrigertInntekt, inspektør.korrigertInntekt?.inntektsdata?.beløp) { "korrigert inntekt er feil" }
-    when (inspektør.faktaavklartInntekt.inntektsopplysning) {
-        is Inntektsopplysning.Arbeidstaker -> {
-            assertEquals(
-                forventetkilde, when (inspektør.faktaavklartInntekt.inntektsopplysning.kilde) {
-                is Arbeidsgiver -> Arbeidstakerkilde.Arbeidsgiver
-                Infotrygd -> Arbeidstakerkilde.Arbeidsgiver
-                is AOrdningen -> Arbeidstakerkilde.AOrdningen
-            }
-            )
+    assertEquals(
+        forventetkilde,
+        when (inspektør.faktaavklartInntekt.inntektsopplysning.kilde) {
+            is Arbeidsgiver -> Arbeidstakerkilde.Arbeidsgiver
+            Infotrygd -> Arbeidstakerkilde.Arbeidsgiver
+            is AOrdningen -> Arbeidstakerkilde.AOrdningen
         }
-
-        is Inntektsopplysning.Selvstendig -> {}
-    }
+    )
 
     if (forventetKildeId != null) assertEquals(forventetKildeId, inspektør.faktaavklartInntekt.inntektsdata.hendelseId.id)
 }

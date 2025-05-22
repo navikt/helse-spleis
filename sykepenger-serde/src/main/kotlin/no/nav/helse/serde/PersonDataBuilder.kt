@@ -34,10 +34,10 @@ import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
+import no.nav.helse.dto.serialisering.ArbeidstakerFaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.BehandlingendringUtDto
-import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.FeriepengeUtDto
 import no.nav.helse.dto.serialisering.FeriepengeoppdragUtDto
 import no.nav.helse.dto.serialisering.FeriepengeutbetalingslinjeUtDto
@@ -47,12 +47,12 @@ import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.InntektsmeldingUtDto
-import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.dto.serialisering.SaksbehandlerUtDto
+import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.SelvstendigInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.SkjønnsmessigFastsattUtDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
@@ -69,7 +69,6 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Tilstan
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.UtbetalingsdagData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsopplysningskildeData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsopplysningstypeData
-import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.PensjonsgivendeInntektData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 
@@ -825,48 +824,25 @@ private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() = PersonData.Vil
     skjønnsmessigFastsatt = this.skjønnsmessigFastsatt?.tilPersonData()
 )
 
-private fun FaktaavklartInntektUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData(
+private fun ArbeidstakerFaktaavklartInntektUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData(
     id = this.id,
     dato = this.inntektsdata.dato,
     hendelseId = this.inntektsdata.hendelseId.id,
     beløp = this.inntektsdata.beløp.månedligDouble.beløp,
     tidsstempel = this.inntektsdata.tidsstempel,
-    type = when (this.inntektsopplysning) {
-        is InntektsopplysningUtDto.ArbeidstakerDto -> InntektsopplysningstypeData.ARBEIDSTAKER
-        is InntektsopplysningUtDto.SelvstendigDto -> InntektsopplysningstypeData.SELVSTENDIG
-    },
-    kilde = when (val io = this.inntektsopplysning) {
-        is InntektsopplysningUtDto.ArbeidstakerDto -> when (io.kilde) {
+    type = InntektsopplysningstypeData.ARBEIDSTAKER,
+    kilde = when (this.inntektsopplysning.kilde) {
             is ArbeidstakerinntektskildeUtDto.InfotrygdDto -> InntektsopplysningskildeData.INFOTRYGD
             is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> InntektsopplysningskildeData.INNTEKTSMELDING
             is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG
-        }
-
-        is InntektsopplysningUtDto.SelvstendigDto -> null
     },
-    skatteopplysninger = when (val inntektsopplysning = this.inntektsopplysning) {
-        is InntektsopplysningUtDto.ArbeidstakerDto -> when (val kilde = inntektsopplysning.kilde) {
+    skatteopplysninger = when (val kilde = this.inntektsopplysning.kilde) {
             is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> kilde.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
             ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto,
             ArbeidstakerinntektskildeUtDto.InfotrygdDto -> null
-        }
-
-        is InntektsopplysningUtDto.SelvstendigDto -> null
     },
-    pensjonsgivendeInntekter = when (val inntektsopplysning = this.inntektsopplysning) {
-        is InntektsopplysningUtDto.ArbeidstakerDto -> null
-        is InntektsopplysningUtDto.SelvstendigDto -> inntektsopplysning.pensjonsgivendeInntekt.map {
-            PensjonsgivendeInntektData(
-                årstall = it.årstall.value,
-                årligBeløp = it.beløp.årlig.beløp
-            )
-        }
-    },
-    anvendtÅrligGrunnbeløp = when (val inntektsopplysning = this.inntektsopplysning) {
-        is InntektsopplysningUtDto.ArbeidstakerDto -> null
-        is InntektsopplysningUtDto.SelvstendigDto -> inntektsopplysning.anvendtGrunnbeløp.årlig.beløp
-    }
-
+    pensjonsgivendeInntekter = null,
+    anvendtÅrligGrunnbeløp = null
 )
 
 private fun SaksbehandlerUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.KorrigertInntektsopplysningData(
@@ -915,31 +891,7 @@ private fun BeløpstidslinjeDto.tilPersonData() = PersonData.BeløpstidslinjeDat
 
 private fun RefusjonsservitørDto.tilPersonData() = refusjonstidslinjer.mapValues { (_, beløpstidslinje) -> beløpstidslinje.tilPersonData() }
 
-private fun SelvstendigInntektsopplysningUtDto.tilPersonData(): PersonData.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData {
-    fun FaktaavklartInntektUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.InntektsopplysningData(
-        id = this.id,
-        dato = this.inntektsdata.dato,
-        hendelseId = this.inntektsdata.hendelseId.id,
-        beløp = this.inntektsdata.beløp.månedligDouble.beløp,
-        tidsstempel = this.inntektsdata.tidsstempel,
-        skatteopplysninger = null,
-        pensjonsgivendeInntekter = when (val inntektsopplysning = this.inntektsopplysning) {
-            is InntektsopplysningUtDto.ArbeidstakerDto -> null
-            is InntektsopplysningUtDto.SelvstendigDto -> inntektsopplysning.pensjonsgivendeInntekt.map {
-                PersonData.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.InntektsopplysningData.PensjonsgivendeInntektData(
-                    årstall = it.årstall.value,
-                    årligBeløp = it.beløp.årlig.beløp
-                )
-            }
-
-        },
-        anvendtÅrligGrunnbeløp = when (val inntektsopplysning = this.inntektsopplysning) {
-            is InntektsopplysningUtDto.ArbeidstakerDto -> null
-            is InntektsopplysningUtDto.SelvstendigDto -> inntektsopplysning.anvendtGrunnbeløp.årlig.beløp
-        }
-
-    )
-
+fun SelvstendigInntektsopplysningUtDto.tilPersonData(): PersonData.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData {
     fun SkjønnsmessigFastsattUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.SkjønnsmessigFastsattData(
         id = this.id,
         dato = this.inntektsdata.dato,
@@ -948,12 +900,24 @@ private fun SelvstendigInntektsopplysningUtDto.tilPersonData(): PersonData.Vilk�
         tidsstempel = this.inntektsdata.tidsstempel
     )
 
-
     return PersonData.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData(
         inntektsopplysning = this.faktaavklartInntekt.tilPersonData(),
         skjønnsmessigFastsatt = this.skjønnsmessigFastsatt?.tilPersonData()
     )
 }
 
-
-
+fun SelvstendigFaktaavklartInntektUtDto.tilPersonData(): PersonData.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.InntektsopplysningData = PersonData.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.InntektsopplysningData(
+    id = this.id,
+    dato = this.inntektsdata.dato,
+    hendelseId = this.inntektsdata.hendelseId.id,
+    beløp = this.inntektsdata.beløp.månedligDouble.beløp,
+    tidsstempel = this.inntektsdata.tidsstempel,
+    skatteopplysninger = null,
+    pensjonsgivendeInntekter = this.inntektsopplysning.pensjonsgivendeInntekt.map {
+        PersonData.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.InntektsopplysningData.PensjonsgivendeInntektData(
+            årstall = it.årstall.value,
+            årligBeløp = it.beløp.årlig.beløp
+        )
+    },
+    anvendtÅrligGrunnbeløp = inntektsopplysning.anvendtGrunnbeløp.årlig.beløp
+)

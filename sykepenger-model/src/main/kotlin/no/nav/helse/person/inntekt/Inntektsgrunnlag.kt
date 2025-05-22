@@ -48,12 +48,6 @@ internal class Inntektsgrunnlag(
 
     init {
         arbeidsgiverInntektsopplysninger.validerSkjønnsmessigAltEllerIntet()
-        check(selvstendigInntektsopplysning == null || selvstendigInntektsopplysning.faktaavklartInntekt.inntektsopplysning is Inntektsopplysning.Selvstendig) {
-            "Inntektsopplysningen for selvstendig må være av typen selvstendig"
-        }
-        check(arbeidsgiverInntektsopplysninger.all { it.faktaavklartInntekt.inntektsopplysning is Inntektsopplysning.Arbeidstaker }) {
-            "Alle inntektsopplysninger for arbeidsgiver må være av typen arbeidstaker"
-        }
     }
 
     private val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())

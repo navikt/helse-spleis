@@ -9,8 +9,8 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.dsl.UNG_PERSON_FNR_2018
+import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
@@ -23,8 +23,8 @@ import no.nav.helse.dto.ProsentdelDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
+import no.nav.helse.dto.serialisering.ArbeidstakerRenameMeUtDto
 import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
-import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.erHelg
@@ -394,7 +394,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                 assertEquals(2, vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
                 vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger[0].also { arbeidsgiverInntektsopplysningDto ->
                     val inntektsopplysning = arbeidsgiverInntektsopplysningDto.faktaavklartInntekt.inntektsopplysning
-                    assertInstanceOf<InntektsopplysningUtDto.ArbeidstakerDto>(inntektsopplysning)
+                    assertInstanceOf<ArbeidstakerRenameMeUtDto>(inntektsopplysning)
                     assertInstanceOf<ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto>(inntektsopplysning.kilde)
                     assertEquals(
                         InntektDto(
@@ -407,7 +407,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                 }
                 vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger[1].also { arbeidsgiverInntektsopplysningDto ->
                     val inntektsopplysning = arbeidsgiverInntektsopplysningDto.faktaavklartInntekt.inntektsopplysning
-                    assertInstanceOf<InntektsopplysningUtDto.ArbeidstakerDto>(inntektsopplysning)
+                    assertInstanceOf<ArbeidstakerRenameMeUtDto>(inntektsopplysning)
                     assertInstanceOf<ArbeidstakerinntektskildeUtDto.AOrdningenDto>(inntektsopplysning.kilde)
                     assertEquals(
                         InntektDto(
