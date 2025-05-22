@@ -2,7 +2,7 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Paragraf
@@ -52,7 +52,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             assertEquals(2000.månedlig, it[1].fastsattÅrsinntekt)
             assertNotNull(it[0].korrigertInntekt)
             val inntektsopplysning = it[1].faktaavklartInntekt.inntektsopplysning
-            assertInstanceOf<Inntektsopplysning.Arbeidstaker>(inntektsopplysning)
+            assertInstanceOf<ArbeidstakerRenameMe>(inntektsopplysning)
             assertInstanceOf<Arbeidsgiver>(inntektsopplysning.kilde)
         }
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
@@ -62,7 +62,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             assertEquals(2000.månedlig, it[1].fastsattÅrsinntekt)
             assertNotNull(it[0].korrigertInntekt)
             val inntektsopplysning = it[1].faktaavklartInntekt.inntektsopplysning
-            assertInstanceOf<Inntektsopplysning.Arbeidstaker>(inntektsopplysning)
+            assertInstanceOf<ArbeidstakerRenameMe>(inntektsopplysning)
             assertInstanceOf<Arbeidsgiver>(inntektsopplysning.kilde)
         }
     }

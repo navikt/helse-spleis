@@ -7,10 +7,9 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
+import no.nav.helse.dto.serialisering.ArbeidstakerFaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
-import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
-import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.SaksbehandlerUtDto
 import no.nav.helse.dto.serialisering.SkjønnsmessigFastsattUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
@@ -229,7 +228,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         return mapInntekt(dto.orgnummer, dto.faktaavklartInntekt, dto.korrigertInntekt, dto.skjønnsmessigFastsatt, deaktivert)
     }
 
-    private fun mapInntekt(orgnummer: String, io: FaktaavklartInntektUtDto, korrigertInntekt: SaksbehandlerUtDto?, skjønnsmessigFastsattDto: SkjønnsmessigFastsattUtDto?, deaktivert: Boolean): IArbeidsgiverinntekt {
+    private fun mapInntekt(orgnummer: String, io: ArbeidstakerFaktaavklartInntektUtDto, korrigertInntekt: SaksbehandlerUtDto?, skjønnsmessigFastsattDto: SkjønnsmessigFastsattUtDto?, deaktivert: Boolean): IArbeidsgiverinntekt {
         val omregnetÅrsinntekt = omregnetÅrsinntekt(korrigertInntekt, io).also {
             inntekter[io.id] = it
         }
@@ -246,7 +245,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         )
     }
 
-    private fun omregnetÅrsinntekt(korrigertInntekt: SaksbehandlerUtDto?, faktaavklartInntekt: FaktaavklartInntektUtDto): IOmregnetÅrsinntekt {
+    private fun omregnetÅrsinntekt(korrigertInntekt: SaksbehandlerUtDto?, faktaavklartInntekt: ArbeidstakerFaktaavklartInntektUtDto): IOmregnetÅrsinntekt {
         if (korrigertInntekt != null) return IOmregnetÅrsinntekt(
             kilde = IInntektkilde.Saksbehandler,
             beløp = korrigertInntekt.inntektsdata.beløp.årlig.beløp,
@@ -255,19 +254,14 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         )
 
         return IOmregnetÅrsinntekt(
-            kilde = when (val io = faktaavklartInntekt.inntektsopplysning) {
-                is InntektsopplysningUtDto.ArbeidstakerDto -> when (io.kilde) {
+            kilde = when (faktaavklartInntekt.inntektsopplysning.kilde) {
                     is ArbeidstakerinntektskildeUtDto.InfotrygdDto -> IInntektkilde.Infotrygd
                     is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> IInntektkilde.Inntektsmelding
                     is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> if (faktaavklartInntekt.inntektsdata.beløp.årlig.beløp == 0.0) IInntektkilde.IkkeRapportert else IInntektkilde.AOrdningen
-                }
-
-                is InntektsopplysningUtDto.SelvstendigDto -> IInntektkilde.AOrdningen
             },
             beløp = faktaavklartInntekt.inntektsdata.beløp.årlig.beløp,
             månedsbeløp = faktaavklartInntekt.inntektsdata.beløp.månedligDouble.beløp,
-            inntekterFraAOrdningen = when (val io = faktaavklartInntekt.inntektsopplysning) {
-                is InntektsopplysningUtDto.ArbeidstakerDto -> when (val kilde = io.kilde) {
+            inntekterFraAOrdningen = when (val kilde = faktaavklartInntekt.inntektsopplysning.kilde) {
                     is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto,
                     ArbeidstakerinntektskildeUtDto.InfotrygdDto -> null
 
@@ -280,9 +274,6 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                                 sum = månedligSum
                             )
                         }
-                }
-
-                is InntektsopplysningUtDto.SelvstendigDto -> null
             }
         )
     }

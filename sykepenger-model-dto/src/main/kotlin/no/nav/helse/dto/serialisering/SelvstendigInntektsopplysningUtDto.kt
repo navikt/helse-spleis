@@ -1,6 +1,6 @@
 package no.nav.helse.dto.serialisering
 
 data class SelvstendigInntektsopplysningUtDto(
-    val faktaavklartInntekt: FaktaavklartInntektUtDto,
+    val faktaavklartInntekt: SelvstendigFaktaavklartInntektUtDto,
     val skjønnsmessigFastsatt: SkjønnsmessigFastsattUtDto?
 )

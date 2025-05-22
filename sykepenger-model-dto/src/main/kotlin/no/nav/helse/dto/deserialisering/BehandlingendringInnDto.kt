@@ -28,5 +28,5 @@ data class BehandlingendringInnDto(
     val dagerNavOvertarAnsvar: List<PeriodeDto>,
     val maksdatoresultat: MaksdatoresultatInnDto,
     val inntekter: Map<InntektskildeDto, BeløpstidslinjeDto>,
-    val faktaavklartInntekt: FaktaavklartInntektInnDto?
+    val faktaavklartInntekt: SelvstendigFaktaavklartInntektInnDto?
 )

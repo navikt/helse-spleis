@@ -5,7 +5,7 @@ import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.juni
 import no.nav.helse.mai
-import no.nav.helse.person.inntekt.Inntektsopplysning.Selvstendig.PensjonsgivendeInntekt
+import no.nav.helse.person.inntekt.SelvstendigRenameMe.PensjonsgivendeInntekt
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -21,7 +21,7 @@ internal class PensjonsgivendeInntektTest {
         )
 
         val anvendtGrunnbeløp = `1G`.beløp(16.juni)
-        val selvstendig = Inntektsopplysning.Selvstendig(inntekter, anvendtGrunnbeløp)
+        val selvstendig = SelvstendigRenameMe(inntekter, anvendtGrunnbeløp)
         assertEquals(478906.årlig, selvstendig.inntektsgrunnlag)
     }
 
@@ -34,7 +34,7 @@ internal class PensjonsgivendeInntektTest {
         )
 
         val anvendtGrunnbeløp = `1G`.beløp(12.mai)
-        val selvstendig = Inntektsopplysning.Selvstendig(inntekter, anvendtGrunnbeløp)
+        val selvstendig = SelvstendigRenameMe(inntekter, anvendtGrunnbeløp)
         assertEquals(589138.årlig, selvstendig.inntektsgrunnlag)
     }
 
@@ -49,7 +49,7 @@ internal class PensjonsgivendeInntektTest {
         val skjæringstidspunkt = 12.mai
         val anvendtGrunnbeløp = `1G`.beløp(skjæringstidspunkt)
         val expected = (`2G`.beløp(skjæringstidspunkt) + `2G`.beløp(skjæringstidspunkt) / 3).årlig.toInt().årlig
-        val selvstendig = Inntektsopplysning.Selvstendig(inntekter, anvendtGrunnbeløp)
+        val selvstendig = SelvstendigRenameMe(inntekter, anvendtGrunnbeløp)
         assertEquals(expected, selvstendig.inntektsgrunnlag)
     }
 }
