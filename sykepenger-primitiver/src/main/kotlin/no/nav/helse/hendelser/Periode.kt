@@ -110,9 +110,9 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
             else add(insertIndex, elementToBeInserted)
         }
 
-        fun List<Periode>.flattenMutableList(): MutableList<LocalDate> {
-            return mutableListOf<LocalDate>().apply {
-                this@flattenMutableList.flatMapTo(this) { it }
+        fun List<Periode>.flattenMutableSet(): MutableSet<LocalDate> {
+            return mutableSetOf<LocalDate>().apply {
+                this@flattenMutableSet.flatMapTo(this) { it }
             }
         }
 

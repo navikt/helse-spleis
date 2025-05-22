@@ -6,7 +6,7 @@ import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.fredag
-import no.nav.helse.hendelser.Periode.Companion.flattenMutableList
+import no.nav.helse.hendelser.Periode.Companion.flattenMutableSet
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.Periode.Companion.intersect
@@ -43,12 +43,12 @@ internal class PeriodeTest {
             1.juli til 5.juli,
             5.juli til 7.juli
         )
-        val expected = mutableListOf(
+        val expected = mutableSetOf(
             3.juli, 4.juli,
-            1.juli, 2.juli, 3.juli, 4.juli, 5.juli,
-            5.juli, 6.juli, 7.juli
+            1.juli, 2.juli, 5.juli,
+            6.juli, 7.juli
         )
-        assertEquals(expected, perioder.flattenMutableList())
+        assertEquals(expected, perioder.flattenMutableSet())
     }
 
     @Test

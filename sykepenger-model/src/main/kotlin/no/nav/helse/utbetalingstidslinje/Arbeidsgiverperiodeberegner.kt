@@ -4,7 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.flattenMutableList
+import no.nav.helse.hendelser.Periode.Companion.flattenMutableSet
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -44,8 +44,8 @@ internal class Arbeidsgiverperiodeberegner(
         val periodeFremTilSpleis = infotrygdperiodeFørSpleis(sykdomstidslinje.periode(), infotrygdBetalteDager, infotrygdFerieperioder)
         // vurderer en eventuell infotrygdperiode i forkant av spleis, i tilfelle
         // vi starter spleishistorikken med en ferdig avklart arbeidsgiverperiode
-        val gjenståendeInfotrygdBetalteDager = infotrygdBetalteDager.flattenMutableList()
-        val gjenståendeInfotrygdFerieperioder = infotrygdFerieperioder.flattenMutableList()
+        val gjenståendeInfotrygdBetalteDager = infotrygdBetalteDager.flattenMutableSet()
+        val gjenståendeInfotrygdFerieperioder = infotrygdFerieperioder.flattenMutableSet()
 
         periodeFremTilSpleis?.forEach { dato ->
             håndterUkjentDag(dato, gjenståendeInfotrygdBetalteDager, gjenståendeInfotrygdFerieperioder)
@@ -92,7 +92,7 @@ internal class Arbeidsgiverperiodeberegner(
         return periodeFørSpleis.oppdaterTom(sykdomstidslinjeperiode.start.forrigeDag)
     }
 
-    private fun håndterUkjentDag(dato: LocalDate, infotrygdBetalteDager: MutableList<LocalDate>, infotrygdFerieperioder: MutableList<LocalDate>) {
+    private fun håndterUkjentDag(dato: LocalDate, infotrygdBetalteDager: MutableSet<LocalDate>, infotrygdFerieperioder: MutableSet<LocalDate>) {
         if (infotrygdFerieperioder.remove(dato)) {
             return feriedagMedSykmelding(dato)
         }
@@ -114,7 +114,7 @@ internal class Arbeidsgiverperiodeberegner(
         this.tilstand.entering(this)
     }
 
-    private fun ferdigstillTellingHvisInfotrygdHarUtbetalt(infotrygdBetalteDager: MutableList<LocalDate>, dato: LocalDate) {
+    private fun ferdigstillTellingHvisInfotrygdHarUtbetalt(infotrygdBetalteDager: MutableSet<LocalDate>, dato: LocalDate) {
         if (infotrygdBetalteDager.remove(dato)) arbeidsgiverperiodeteller.fullfør()
     }
 
