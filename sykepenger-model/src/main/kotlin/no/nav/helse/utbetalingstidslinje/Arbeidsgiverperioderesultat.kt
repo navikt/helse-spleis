@@ -101,8 +101,11 @@ data class Arbeidsgiverperioderesultat(
             // dagen utvider ikke siste datoperiode
             dato > last().endInclusive.nesteDag -> this + listOf(dato.somPeriode())
             // dagen utvider siste periode
-            else -> dropLast(1) + listOf(last().oppdaterTom(dato))
+            else -> oppdaterSiste(dato)
         }
+
+        private fun List<Periode>.oppdaterSiste(dato: LocalDate) =
+            toMutableList().apply { addLast(removeLast().oppdaterTom(dato)) }
 
         internal fun Iterable<Arbeidsgiverperioderesultat>.finn(periode: Periode) = lastOrNull { arbeidsgiverperiode ->
             periode.overlapperMed(arbeidsgiverperiode.omsluttendePeriode)
