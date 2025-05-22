@@ -94,6 +94,17 @@ internal class PeriodeTest {
     }
 
     @Test
+    fun `uten dager før`() {
+        val periode = 15.januar til 20.januar
+        assertEquals(15.januar til 16.januar, periode.utenDagerFør(17.januar til 19.januar))
+        assertEquals(15.januar til 16.januar, periode.utenDagerFør(17.januar til 31.januar))
+        assertEquals(periode, periode.utenDagerFør(21.januar.somPeriode()))
+        assertNull(periode.utenDagerFør(15.januar til 31.januar))
+        assertNull(periode.utenDagerFør(1.januar til 31.januar))
+        assertNull(periode.utenDagerFør(1.januar til 5.januar))
+    }
+
+    @Test
     fun `uten helgehale`() {
         val fredag = fredag(5.januar)
         val lørdag = lørdag(6.januar)
