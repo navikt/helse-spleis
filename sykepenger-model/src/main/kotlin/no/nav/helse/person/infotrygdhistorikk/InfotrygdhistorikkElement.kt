@@ -54,14 +54,7 @@ class InfotrygdhistorikkElement private constructor(
     }
 
     internal fun betaltePerioder(orgnummer: String? = null): List<Periode> = perioder.utbetalingsperioder(orgnummer)
-
-    internal fun sykdomstidslinje(orgnummer: String): Sykdomstidslinje {
-        return perioder
-            .filter { it.gjelder(orgnummer) }
-            .fold(Sykdomstidslinje()) { result, periode ->
-                result.merge(periode.sykdomstidslinje(kilde), sammenhengendeSykdom)
-            }
-    }
+    internal fun friperioder(): List<Periode> = perioder.filterIsInstance<Friperiode>().map { it.periode }
 
     internal fun sykdomstidslinje(): Sykdomstidslinje {
         return perioder.fold(Sykdomstidslinje()) { result, periode ->

@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
@@ -933,13 +933,10 @@ internal class Arbeidsgiver private constructor(
     private fun arbeidsgiverperiodeFor(): List<Arbeidsgiverperioderesultat> {
         val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
         val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller)
-        // hensyntar historikk fra infotrygd, men spleis-tidslinjen overskriver eventuell overlappende info
-        val samletTidslinje = person.infotrygdhistorikk
-            .sykdomstidslinje(organisasjonsnummer)
-            .merge(sykdomstidslinjeHensyntattEgenmeldinger(), replace)
         return arbeidsgiverperiodeberegner.resultat(
-            samletTidslinje,
-            person.infotrygdhistorikk.betaltePerioder(organisasjonsnummer)
+            sykdomstidslinje = sykdomstidslinjeHensyntattEgenmeldinger(),
+            infotrygdBetalteDager = person.infotrygdhistorikk.betaltePerioder(organisasjonsnummer),
+            infotrygdFerieperioder = person.infotrygdhistorikk.friperioder()
         )
     }
 

@@ -152,6 +152,28 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `arbeidsgiverperioden begynner i infotrygd`() {
+        val betalteDager = listOf(1.januar til 5.januar)
+        val feriedager = listOf(6.januar til 31.januar)
+        undersøke(31.opphold + 28.S, infotrygdBetalteDager = betalteDager, infotrygdFerieperioder = feriedager)
+        assertEquals(28, inspektør.size)
+        assertEquals(0, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(20, inspektør.navDagTeller)
+        assertEquals(8, inspektør.navHelgDagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = 1.januar til 28.februar,
+                arbeidsgiverperiode = emptyList(),
+                utbetalingsperioder = listOf(1.januar til 5.januar, 1.februar til 28.februar),
+                oppholdsperioder = emptyList(),
+                fullstendig = false,
+                sisteDag = null
+            ), perioder.single()
+        )
+    }
+
+    @Test
     fun `arbeidsgiverperioden oppdages av noen andre`() {
         val betalteDager = listOf(10.januar til 16.januar)
         undersøke(15.S, infotrygdBetalteDager = betalteDager)
@@ -1037,9 +1059,9 @@ internal class UtbetalingstidslinjeBuilderTest {
     private lateinit var utbetalingstidslinje: Utbetalingstidslinje
     private val perioder: MutableList<Arbeidsgiverperioderesultat> = mutableListOf()
 
-    private fun undersøke(tidslinje: Sykdomstidslinje, infotrygdBetalteDager: List<Periode> = emptyList(), dagerNavOvertarAnsvar: List<Periode> = emptyList()) {
+    private fun undersøke(tidslinje: Sykdomstidslinje, infotrygdBetalteDager: List<Periode> = emptyList(), infotrygdFerieperioder: List<Periode> = emptyList(), dagerNavOvertarAnsvar: List<Periode> = emptyList()) {
         val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller)
-        val arbeidsgiverperioder = arbeidsgiverperiodeberegner.resultat(tidslinje, infotrygdBetalteDager)
+        val arbeidsgiverperioder = arbeidsgiverperiodeberegner.resultat(tidslinje, infotrygdBetalteDager, infotrygdFerieperioder)
         perioder.addAll(arbeidsgiverperioder)
 
         val builder = UtbetalingstidslinjeBuilderVedtaksperiode(

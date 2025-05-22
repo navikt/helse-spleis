@@ -2,7 +2,9 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.erHelg
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_3
@@ -33,7 +35,18 @@ internal class Arbeidsgiverperiodeberegner(
         ).also { aktivArbeidsgiverperioderesultat = it }
     }
 
-    internal fun resultat(sykdomstidslinje: Sykdomstidslinje, infotrygdBetalteDager: List<Periode>): List<Arbeidsgiverperioderesultat> {
+    internal fun resultat(
+        sykdomstidslinje: Sykdomstidslinje,
+        infotrygdBetalteDager: List<Periode>,
+        infotrygdFerieperioder: List<Periode>
+    ): List<Arbeidsgiverperioderesultat> {
+        val periodeFremTilSpleis = infotrygdperiodeFørSpleis(sykdomstidslinje.periode(), infotrygdBetalteDager, infotrygdFerieperioder)
+        // vurderer en eventuell infotrygdperiode i forkant av spleis, i tilfelle
+        // vi starter spleishistorikken med en ferdig avklart arbeidsgiverperiode
+        periodeFremTilSpleis?.forEach { dato ->
+            håndterUkjentDag(dato, infotrygdBetalteDager, infotrygdFerieperioder)
+        }
+
         sykdomstidslinje.forEach { dag ->
             when (dag) {
                 is Dag.AndreYtelser -> tilstand.andreYtelser(this, dag.dato)
@@ -57,8 +70,7 @@ internal class Arbeidsgiverperiodeberegner(
                 }
 
                 is Dag.UkjentDag -> {
-                    if (dag.dato.erHelg()) tilstand.feriedag(this, dag.dato)
-                    else arbeidsdag(dag.dato)
+                    håndterUkjentDag(dag.dato, infotrygdBetalteDager, infotrygdFerieperioder)
                 }
             }
         }
@@ -67,6 +79,28 @@ internal class Arbeidsgiverperiodeberegner(
         return aktivArbeidsgiverperioderesultat
             ?.let { arbeidsgiverperioder.toList() + it }
             ?: arbeidsgiverperioder.toList()
+    }
+
+    private fun infotrygdperiodeFørSpleis(sykdomstidslinjeperiode: Periode?, infotrygdBetalteDager: List<Periode>, infotrygdFerieperioder: List<Periode>): Periode? {
+        if (sykdomstidslinjeperiode == null) return null
+        val samletInfotrygdperiode = (infotrygdBetalteDager + infotrygdFerieperioder).periode() ?: return null
+        val periodeFørSpleis = samletInfotrygdperiode.utenDagerFør(sykdomstidslinjeperiode) ?: return null
+        return periodeFørSpleis.oppdaterTom(sykdomstidslinjeperiode.start.forrigeDag)
+    }
+
+    private fun håndterUkjentDag(dato: LocalDate, infotrygdBetalteDager: List<Periode>, infotrygdFerieperioder: List<Periode>) {
+        if (infotrygdFerieperioder.any { dato in it }) {
+            return feriedagMedSykmelding(dato)
+        }
+
+        if (infotrygdBetalteDager.any { dato in it }) {
+            arbeidsgiverperiodeteller.fullfør()
+            return sykedag(dato)
+        }
+
+        if (dato.erHelg()) return tilstand.feriedag(this, dato)
+
+        arbeidsdag(dato)
     }
 
     private fun tilstand(tilstand: Tilstand) {

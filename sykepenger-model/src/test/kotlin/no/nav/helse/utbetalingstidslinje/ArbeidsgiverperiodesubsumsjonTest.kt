@@ -25,6 +25,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinj
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.UK
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -184,6 +185,21 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
     }
 
+    @Test
+    fun `ferie i infotrygd mellom`() {
+        undersøke(20.S + 11.UK + 20.S, infotrygdFerieperioder = listOf(21.januar til 31.januar))
+        assertEquals(51, observatør.dager)
+        assertEquals(16, observatør.arbeidsgiverperiodedager)
+        assertEquals(24, observatør.utbetalingsdager)
+        assertEquals(8, jurist.subsumsjoner)
+        assertEquals(3, jurist.`§ 8-17 ledd 2`)
+        assertEquals(16, jurist.`§ 8-17 første ledd bokstav a - ikke oppfylt`)
+        assertEquals(2, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
+        assertEquals(7, jurist.`§ 8-11 første ledd`)
+        assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
+        assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
+    }
+
     private lateinit var jurist: Subsumsjonobservatør
     private lateinit var teller: Arbeidsgiverperiodeteller
     private lateinit var observatør: Dagobservatør
@@ -195,9 +211,9 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
     }
 
-    private fun undersøke(tidslinje: Sykdomstidslinje, infotrygdBetalteDager: List<Periode> = emptyList()) {
+    private fun undersøke(tidslinje: Sykdomstidslinje, infotrygdBetalteDager: List<Periode> = emptyList(), infotrygdFerieperioder: List<Periode> = emptyList()) {
         val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller)
-        val arbeidsgiverperioder = arbeidsgiverperiodeberegner.resultat(tidslinje, infotrygdBetalteDager)
+        val arbeidsgiverperioder = arbeidsgiverperiodeberegner.resultat(tidslinje, infotrygdBetalteDager, infotrygdFerieperioder)
         arbeidsgiverperioder.forEach {
             it.subsummering(jurist, tidslinje)
         }

@@ -75,11 +75,6 @@ internal class Infotrygdhistorikk private constructor(
         return Sykdomstidslinje.beregnSkjæringstidspunkt(tidslinjer + listOf(sykdomstidslinje()))
     }
 
-    internal fun sykdomstidslinje(orgnummer: String): Sykdomstidslinje {
-        if (!harHistorikk()) return Sykdomstidslinje()
-        return siste.sykdomstidslinje(orgnummer)
-    }
-
     private fun sykdomstidslinje(): Sykdomstidslinje {
         if (!harHistorikk()) return Sykdomstidslinje()
         return siste.sykdomstidslinje()
@@ -101,6 +96,9 @@ internal class Infotrygdhistorikk private constructor(
 
     internal fun betaltePerioder(orgnummer: String? = null) =
         if (!harHistorikk()) emptyList() else siste.betaltePerioder(orgnummer)
+
+    internal fun friperioder() =
+        if (!harHistorikk()) emptyList() else siste.friperioder()
 
     internal fun harHistorikk() = _elementer.isNotEmpty()
     internal fun harUtbetaltI(periode: Periode): Boolean {
