@@ -4,6 +4,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.util.Objects
 import java.util.SortedMap
+import java.util.TreeMap
 import java.util.stream.Collectors.toMap
 import no.nav.helse.dto.SykdomstidslinjeDto
 import no.nav.helse.erHelg
@@ -61,10 +62,10 @@ class Sykdomstidslinje private constructor(
         }
 
     internal fun merge(other: Sykdomstidslinje, beste: BesteStrategy = default): Sykdomstidslinje {
-        val nyeDager = dager.toMutableMap()
+        val nyeDager = TreeMap(dager)
         other.dager.filter { it.key !in låstePerioder }.forEach { (dato, dag) -> nyeDager.merge(dato, dag, beste) }
         return Sykdomstidslinje(
-            nyeDager.toSortedMap(),
+            nyeDager,
             this.periode?.plus(other.periode) ?: other.periode,
             this.låstePerioder.toMutableList()
         )
