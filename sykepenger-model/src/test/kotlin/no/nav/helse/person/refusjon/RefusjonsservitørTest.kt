@@ -47,7 +47,7 @@ internal class RefusjonsservitørTest {
         servitør.servér(ubrukteRefusjonsopplysninger, Aktivitetslogg())
         assertNotNull(ubrukteRefusjonsopplysninger[1.januar])
         assertNull(ubrukteRefusjonsopplysninger[2.januar])
-        assertEquals(listOf(1.januar til 9.januar, 16.januar til 31.januar), ubrukteRefusjonsopplysninger[1.januar]!!.perioderMedBeløp)
+        assertEquals(listOf(16.januar til 31.januar), ubrukteRefusjonsopplysninger[1.januar]!!.perioderMedBeløp)
     }
 
     @Test
@@ -60,12 +60,11 @@ internal class RefusjonsservitørTest {
         servitør.servér(ubrukteRefusjonsopplysninger, Aktivitetslogg())
 
         assertNull(ubrukteRefusjonsopplysninger[4.januar])
-        assertNotNull(ubrukteRefusjonsopplysninger[5.januar])
+        assertNull(ubrukteRefusjonsopplysninger[5.januar])
         assertNotNull(ubrukteRefusjonsopplysninger[16.januar])
         assertNull(ubrukteRefusjonsopplysninger[17.januar])
 
-        assertEquals(listOf(5.januar til 9.januar, 13.januar til 15.januar), ubrukteRefusjonsopplysninger[5.januar]!!.perioderMedBeløp)
-        assertEquals(listOf(16.januar til 22.januar, 26.januar til 31.januar), ubrukteRefusjonsopplysninger[16.januar]!!.perioderMedBeløp)
+        assertEquals(listOf(26.januar til 31.januar), ubrukteRefusjonsopplysninger[16.januar]!!.perioderMedBeløp)
     }
 
     private companion object {

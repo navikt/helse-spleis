@@ -38,7 +38,7 @@ internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = empt
         val refusjonstidslinje = aktuelle.values.map { it.fyll(periode.endInclusive) }.fold(Beløpstidslinje(), Beløpstidslinje::plus)
         refusjonstidslinjer.keys.forEach { dato ->
             if (!refusjonsrester.containsKey(dato)) return@forEach
-            val nyVerdi = refusjonsrester.getValue(dato) - periode
+            val nyVerdi = refusjonsrester.getValue(dato).fraOgMed(periode.endInclusive.nesteDag)
             if (nyVerdi.isEmpty()) refusjonsrester.remove(dato)
             else refusjonsrester[dato] = nyVerdi
         }

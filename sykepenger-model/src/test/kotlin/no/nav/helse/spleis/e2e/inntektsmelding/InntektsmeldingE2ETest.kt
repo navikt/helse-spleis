@@ -197,20 +197,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         reserialiser()
         forlengVedtak(24.april(2025) til 4.mai(2025))
 
-        assertForventetFeil(
-            forklaring = "Bruker feil refusjonsopplysninger",
-            nå = {
-                assertBeløpstidslinje(
-                    expected = Beløpstidslinje.fra(24.april(2025) til 4.mai(2025), INNTEKT, imKilde),
-                    actual = inspektør.refusjon(5.vedtaksperiode)
-                )
-            },
-            ønsket = {
-                assertBeløpstidslinje(
-                    expected = Beløpstidslinje.fra(24.april(2025) til 4.mai(2025), INGEN, imKilde),
-                    actual = inspektør.refusjon(5.vedtaksperiode)
-                )
-            }
+        assertBeløpstidslinje(
+            expected = Beløpstidslinje.fra(24.april(2025) til 4.mai(2025), INGEN, imKilde),
+            actual = inspektør.refusjon(5.vedtaksperiode)
         )
     }
 
