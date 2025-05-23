@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime
 import java.time.LocalDateTime.MIN
-import java.util.UUID
+import java.util.*
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -14,13 +14,13 @@ import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.februar
 import no.nav.helse.fredag
-import no.nav.helse.gjenopprettFraJSONtekst
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Permisjonsdag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
@@ -68,8 +68,6 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.serde.tilPersonData
-import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -129,6 +127,48 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Arbeidsgiver opplyser om endret refusjon før søknad som kommer out of order`() {
+        håndterSøknad(januar)
+        val im = håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            refusjon = Refusjon(INNTEKT, null, endringerIRefusjon = listOf(EndringIRefusjon(0.daglig, 10.februar), EndringIRefusjon(INNTEKT, 1.mars)))
+        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        val imKilde = Kilde(MeldingsreferanseId(im), ARBEIDSGIVER, MIN)
+
+        assertBeløpstidslinje(
+            expected = Beløpstidslinje.fra(januar, INNTEKT, imKilde),
+            actual = inspektør.refusjon(1.vedtaksperiode)
+        )
+
+        // !!OBS!! Out of order
+        håndterSøknad(mars)
+        håndterSøknad(februar)
+
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+        assertBeløpstidslinje(
+            expected = Beløpstidslinje.fra(1.februar til 9.februar, INNTEKT, imKilde) + Beløpstidslinje.fra(10.februar til 28.februar, INGEN, imKilde),
+            actual = inspektør.refusjon(3.vedtaksperiode)
+        )
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        assertBeløpstidslinje(
+            expected = Beløpstidslinje.fra(mars, INNTEKT, imKilde),
+            actual = inspektør.refusjon(2.vedtaksperiode)
+        )
+    }
 
     @Test
     fun `Bruker feil refusjonsopplysninger når arbeidsgiver fyller små hull & opplyser om opphør frem i tid`() {
