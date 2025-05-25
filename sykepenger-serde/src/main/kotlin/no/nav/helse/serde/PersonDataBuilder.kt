@@ -407,7 +407,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     egenmeldingsdager = egenmeldingsdager.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     maksdatoresultat = maksdatoresultat.tilPersonData(),
-    inntekter = inntekter.map { (inntektskilde, beløpstidslinje) ->
+    inntektjusteringer = inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
         inntektskilde.id to beløpstidslinje.tilPersonData()
     }.toMap(),
     faktaavklartInntekt = faktaavklartInntekt?.tilPersonData()

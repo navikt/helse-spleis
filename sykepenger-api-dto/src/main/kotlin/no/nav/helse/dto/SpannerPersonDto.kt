@@ -356,7 +356,7 @@ data class SpannerPersonDto(
             val maksdato: LocalDate,
             val arbeidsgiverOppdrag: OppdragData?,
             val personOppdrag: OppdragData?,
-            val inntekter: Map<String, BeløpstidslinjeData>
+            val inntektjusteringer: Map<String, BeløpstidslinjeData>
         )
 
         data class VedtaksperiodeData(
@@ -395,7 +395,7 @@ data class SpannerPersonDto(
                         arbeidsgiverOppdrag = utbetaling?.arbeidsgiverOppdrag?.takeUnless { it.linjer.isEmpty() },
                         dagerNavOvertarAnsvar = gjeldendeEndring.dagerNavOvertarAnsvar,
                         egenmeldingsdager = gjeldendeEndring.egenmeldingsdager,
-                        inntekter = gjeldendeEndring.inntekter
+                        inntektjusteringer = gjeldendeEndring.inntektjusteringer
                     )
                 }
             }
@@ -523,7 +523,7 @@ data class SpannerPersonDto(
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
                     val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
-                    val inntekter: Map<String, BeløpstidslinjeData>,
+                    val inntektjusteringer: Map<String, BeløpstidslinjeData>,
                     val faktaavklartInntekt: ArbeidsgiverInntektsopplysningData.InntektsopplysningData?
                 )
             }
@@ -1157,7 +1157,7 @@ private fun BehandlingendringUtDto.tilPersonData() =
             )
         },
         maksdatoresultat = maksdatoresultat.tilPersonData(),
-        inntekter = inntekter.map { (inntektskilde, beløpstidslinje) ->
+        inntektjusteringer = inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
             inntektskilde.id to beløpstidslinje.tilPersonData()
         }.toMap(),
         faktaavklartInntekt = faktaavklartInntekt?.tilPersonData()

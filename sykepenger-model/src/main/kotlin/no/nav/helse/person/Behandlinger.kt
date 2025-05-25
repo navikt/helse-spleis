@@ -517,7 +517,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val arbeidsgiverperiode: List<Periode>,
             val dagerNavOvertarAnsvar: List<Periode>,
             val maksdatoresultat: Maksdatoresultat,
-            val inntekter: Map<Inntektskilde, Beløpstidslinje>,
+            val inntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
             val faktaavklartInntekt: FaktaavklartInntekt?
         ) {
 
@@ -594,7 +594,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         egenmeldingsdager = dto.egenmeldingsdager.map { Periode.gjenopprett(it) },
                         dagerNavOvertarAnsvar = dto.dagerNavOvertarAnsvar.map { Periode.gjenopprett(it) },
                         maksdatoresultat = dto.maksdatoresultat.let { Maksdatoresultat.gjenopprett(it) },
-                        inntekter = dto.inntekter.map { (inntektskildeDto, beløpstidslinjeDto) ->
+                        inntektjusteringer = dto.inntektjusteringer.map { (inntektskildeDto, beløpstidslinjeDto) ->
                             Inntektskilde.gjenopprett(inntektskildeDto) to Beløpstidslinje.gjenopprett(beløpstidslinjeDto)
                         }.toMap(),
                         faktaavklartInntekt = dto.faktaavklartInntekt?.let { FaktaavklartInntekt.gjenopprett(it) }
@@ -628,7 +628,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dagerNavOvertarAnsvar: List<Periode> = this.dagerNavOvertarAnsvar,
                 egenmeldingsdager: List<Periode> = this.egenmeldingsdager,
                 maksdatoresultat: Maksdatoresultat = this.maksdatoresultat,
-                inntekter: Map<Inntektskilde, Beløpstidslinje> = this.inntekter, // TODO'dlido: Denne burde hete inntektjusteringer
+                inntektjusteringer: Map<Inntektskilde, Beløpstidslinje> = this.inntektjusteringer,
                 faktaavklartInntekt: FaktaavklartInntekt? = this.faktaavklartInntekt
             ) = copy(
                 id = UUID.randomUUID(),
@@ -648,7 +648,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                 egenmeldingsdager = egenmeldingsdager,
                 maksdatoresultat = maksdatoresultat,
-                inntekter = inntekter,
+                inntektjusteringer = inntektjusteringer,
                 faktaavklartInntekt = faktaavklartInntekt
             )
 
@@ -682,7 +682,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     dagerNavOvertarAnsvar = dagerNavOvertarAnsvar ?: this.dagerNavOvertarAnsvar,
                     egenmeldingsdager = egenmeldingsdager ?: this.egenmeldingsdager,
                     maksdatoresultat = Maksdatoresultat.IkkeVurdert,
-                    inntekter = emptyMap()
+                    inntektjusteringer = emptyMap()
                 )
             }
 
@@ -710,7 +710,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     dagerNavOvertarAnsvar = dagerNavOvertarAnsvar ?: this.dagerNavOvertarAnsvar,
                     egenmeldingsdager = egenmeldingsdager ?: this.egenmeldingsdager,
                     maksdatoresultat = Maksdatoresultat.IkkeVurdert,
-                    inntekter = emptyMap()
+                    inntektjusteringer = emptyMap()
                 )
             }
 
@@ -727,7 +727,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     skjæringstidspunkt = beregnetSkjæringstidspunkt?.first ?: this.skjæringstidspunkt,
                     skjæringstidspunkter = beregnetSkjæringstidspunkt?.second ?: this.skjæringstidspunkter,
                     arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode),
-                    inntekter = emptyMap()
+                    inntektjusteringer = emptyMap()
                 )
             }
 
@@ -748,7 +748,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     skjæringstidspunkt = beregnetSkjæringstidspunkt?.first ?: this.skjæringstidspunkt,
                     skjæringstidspunkter = beregnetSkjæringstidspunkt?.second ?: this.skjæringstidspunkter,
                     arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode),
-                    inntekter = emptyMap()
+                    inntektjusteringer = emptyMap()
                 )
             }
 
@@ -757,7 +757,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utbetaling = utbetaling,
                 utbetalingstidslinje = beregning.utbetalingstidslinje.subset(this.periode),
                 maksdatoresultat = beregning.maksdatovurdering.resultat,
-                inntekter = beregning.inntekterForBeregning.inntektsjusteringer(this.periode)
+                inntektjusteringer = beregning.inntekterForBeregning.inntektsjusteringer(this.periode)
             )
 
             internal fun kopierMedAnnullering(grunnlagsdata: VilkårsgrunnlagElement, annullering: Utbetaling) = kopierMed(
@@ -765,13 +765,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utbetaling = annullering,
                 utbetalingstidslinje = Utbetalingstidslinje(),
                 maksdatoresultat = Maksdatoresultat.IkkeVurdert,
-                inntekter = emptyMap()
+                inntektjusteringer = emptyMap()
             )
 
             internal fun kopierDokument(dokument: Dokumentsporing) = kopierMed(dokumentsporing = dokument)
             internal fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: InntekterForBeregning) = kopierMed(
                 utbetalingstidslinje = utbetalingstidslinje.subset(this.periode),
-                inntekter = inntekterForBeregning.inntektsjusteringer(this.periode)
+                inntektjusteringer = inntekterForBeregning.inntektsjusteringer(this.periode)
             )
 
             fun forkastUtbetaling(aktivitetslogg: IAktivitetslogg) {
@@ -825,7 +825,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     dagerNavOvertarAnsvar = this.dagerNavOvertarAnsvar.map { it.dto() },
                     egenmeldingsdager = this.egenmeldingsdager.map { it.dto() },
                     maksdatoresultat = this.maksdatoresultat.dto(),
-                    inntekter = this.inntekter.map { (inntektskilde, beløpstidslinje) ->
+                    inntektjusteringer = this.inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
                         inntektskilde.dto() to beløpstidslinje.dto()
                     }.toMap(),
                     faktaavklartInntekt = faktaavklartInntekt?.dto()
@@ -1326,7 +1326,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             egenmeldingsdager = egenmeldingsdager,
                             dagerNavOvertarAnsvar = emptyList(),
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert,
-                            inntekter = emptyMap(),
+                            inntektjusteringer = emptyMap(),
                             faktaavklartInntekt = faktaavklartInntekt
                         )
                     ),
