@@ -1649,13 +1649,13 @@ private fun SelvstendigFaktaavklartInntektUtDto.tilPersonData() =
         hendelseId = this.inntektsdata.hendelseId.id,
         beløp = this.inntektsdata.beløp.tilPersonData(),
         tidsstempel = this.inntektsdata.tidsstempel,
-        pensjonsgivendeInntekter = this.inntektsopplysning.pensjonsgivendeInntekt.map {
+        pensjonsgivendeInntekter = this.pensjonsgivendeInntekt.map {
             PensjonsgivendeInntektData(
                 årstall = it.årstall,
                 beløp = it.beløp.tilPersonData()
             )
         },
-        anvendtGrunnbeløp = this.inntektsopplysning.anvendtGrunnbeløp.tilPersonData()
+        anvendtGrunnbeløp = this.anvendtGrunnbeløp.tilPersonData()
     )
 
 private fun SaksbehandlerUtDto.tilPersonData() =

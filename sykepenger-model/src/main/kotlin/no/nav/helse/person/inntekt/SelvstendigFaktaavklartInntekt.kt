@@ -6,7 +6,6 @@ import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.dto.deserialisering.SelvstendigFaktaavklartInntektInnDto
 import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
-import no.nav.helse.dto.serialisering.SelvstendigRenameMeUtDto
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -24,7 +23,10 @@ internal data class SelvstendigFaktaavklartInntekt(
     internal fun dto() = SelvstendigFaktaavklartInntektUtDto(
         id = this.id,
         inntektsdata = this.inntektsdata.dto(),
-        inntektsopplysning = this.inntektsopplysning.dto()
+        pensjonsgivendeInntekt = this.inntektsopplysning.pensjonsgivendeInntekt.map {
+            SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto(it.årstall, it.beløp.dto())
+        },
+        anvendtGrunnbeløp = this.inntektsopplysning.anvendtGrunnbeløp.dto()
     )
 
     internal companion object {
@@ -64,13 +66,6 @@ internal data class SelvstendigRenameMe(
 
     fun beregnInntektsgrunnlag(anvendtGrunnbeløp: Inntekt) =
         beregnInntektsgrunnlag(pensjonsgivendeInntekt, anvendtGrunnbeløp)
-
-    fun dto() = SelvstendigRenameMeUtDto(
-        pensjonsgivendeInntekt = pensjonsgivendeInntekt.map {
-            SelvstendigRenameMeUtDto.PensjonsgivendeInntektDto(it.årstall, it.beløp.dto())
-        },
-        anvendtGrunnbeløp = anvendtGrunnbeløp.dto()
-    )
 
     data class PensjonsgivendeInntekt(val årstall: Year, val beløp: Inntekt) {
         private val snitt = `1G`.snitt(årstall.value)
