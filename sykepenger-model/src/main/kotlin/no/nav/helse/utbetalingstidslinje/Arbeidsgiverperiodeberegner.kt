@@ -31,8 +31,7 @@ internal class Arbeidsgiverperiodeberegner(
             arbeidsgiverperiode = emptyList(),
             utbetalingsperioder = emptyList(),
             oppholdsperioder = emptyList(),
-            fullstendig = false,
-            sisteDag = null
+            fullstendig = false
         ).also { aktivArbeidsgiverperioderesultat = it }
     }
 
@@ -296,8 +295,7 @@ internal class Arbeidsgiverperiodeberegner(
         override fun oppholdsdag(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) {
             builder.aktivArbeidsgiverperioderesultat = builder.arbeidsgiverperiodeResultatet(dato).utvideMed(
                 dato = dato,
-                oppholdsperiode = dato,
-                sisteDag = dato
+                oppholdsperiode = dato
             )
             builder.tilstand(Initiell)
         }

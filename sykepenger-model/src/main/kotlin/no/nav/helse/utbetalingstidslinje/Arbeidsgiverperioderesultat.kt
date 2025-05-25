@@ -1,16 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import no.nav.helse.erHelg
-import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a`
-import no.nav.helse.etterlevelse.`§ 8-19 fjerde ledd`
-import no.nav.helse.etterlevelse.`§ 8-19 første ledd`
-import no.nav.helse.etterlevelse.`§ 8-19 tredje ledd`
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.nesteDag
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
 data class Arbeidsgiverperioderesultat(
     // perioden som dekkes av arbeidsgiverperioden, fra første kjente dag til siste kjente dag
@@ -23,9 +16,7 @@ data class Arbeidsgiverperioderesultat(
     val oppholdsperioder: List<Periode>,
     // hvorvidt arbeidsgiverperiodetellingen er komplett, aka. 16 dager.
     // hvis tellingen er fullstendig så er arbeidsgiverperiode.last() dag nr. 16.
-    val fullstendig: Boolean,
-    // oppholdsdag nr 16. som gjør at arbeidsgiverperioden er ferdig, og ny telling påstartes
-    val sisteDag: LocalDate?
+    val fullstendig: Boolean
 ) {
 
     fun utvideMed(
@@ -33,48 +24,15 @@ data class Arbeidsgiverperioderesultat(
         arbeidsgiverperiode: LocalDate? = null,
         utbetalingsperiode: LocalDate? = null,
         oppholdsperiode: LocalDate? = null,
-        fullstendig: Boolean? = null,
-        sisteDag: LocalDate? = null
+        fullstendig: Boolean? = null
     ): Arbeidsgiverperioderesultat {
         return this.copy(
             omsluttendePeriode = this.omsluttendePeriode.oppdaterTom(dato),
             arbeidsgiverperiode = this.arbeidsgiverperiode.leggTil(arbeidsgiverperiode),
             utbetalingsperioder = this.utbetalingsperioder.leggTil(utbetalingsperiode),
             oppholdsperioder = this.oppholdsperioder.leggTil(oppholdsperiode),
-            fullstendig = fullstendig ?: this.fullstendig,
-            sisteDag = sisteDag ?: this.sisteDag
+            fullstendig = fullstendig ?: this.fullstendig
         )
-    }
-
-    /**
-     * subsummerer arbeidsgiverperioden, men bare dersom dagene overlapper med vedtaksperioden
-     */
-    internal fun subsummering(subsumsjonslogg: Subsumsjonslogg, sykdomstidslinje: Sykdomstidslinje) {
-        if (arbeidsgiverperiode.isEmpty()) return // subsummerer ikke Infotrygd-ting
-
-        val vedtaksperiode = sykdomstidslinje.periode() ?: return
-        val sykdomstidslinjesubsumsjon = sykdomstidslinje.subsumsjonsformat()
-
-        // første agp-dag i hver brudd-periode skal subsummeres med § 8-19 tredje ledd
-        arbeidsgiverperiode.drop(1)
-            .filter { it.start in vedtaksperiode }
-            .map { it.start }
-            .also {
-                subsumsjonslogg.logg(`§ 8-19 tredje ledd`(it, sykdomstidslinjesubsumsjon))
-            }
-
-        // siste 16. agp-dag skal subsummeres med § 8-19 første ledd
-        if (fullstendig && arbeidsgiverperiode.last().endInclusive in vedtaksperiode)
-            subsumsjonslogg.logg(`§ 8-19 første ledd`(arbeidsgiverperiode.last().endInclusive, sykdomstidslinjesubsumsjon))
-
-        // første utbetalingsdag skal subsummeres med § 8-17 ledd 1 bokstav a (oppfylt = true)
-        utbetalingsperioder.firstOrNull()?.firstOrNull { !it.erHelg() }?.takeIf { it in vedtaksperiode }?.also {
-            subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a`(oppfylt = true, dagen = listOf(it.rangeTo(it)), sykdomstidslinjesubsumsjon))
-        }
-
-        // siste oppholdsdag som medfører at agp avbrytes subsummeres med § 8-19 fjerde ledd
-        if (fullstendig && sisteDag != null && sisteDag in vedtaksperiode)
-            subsumsjonslogg.logg(`§ 8-19 fjerde ledd`(sisteDag, sykdomstidslinjesubsumsjon))
     }
 
     internal fun somArbeidsgiverperiode(): Arbeidsgiverperiode {
