@@ -48,7 +48,6 @@ import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
-import no.nav.helse.person.inntekt.SelvstendigRenameMe
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
@@ -185,24 +184,22 @@ class Søknad(
             Behandlingsporing.Yrkesaktivitet.Frilans -> null
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
                 val anvendtGrunnbeløp = `1G`.beløp(sykdomsperiode.start)
-                val inntektsopplysning = SelvstendigRenameMe(
-                    pensjonsgivendeInntekt = pensjonsgivendeInntekter?.map {
-                        SelvstendigRenameMe.PensjonsgivendeInntekt(
-                            årstall = it.inntektsår,
-                            beløp = it.næringsinntekt
-                        )
-                    } ?: emptyList(),
-                    anvendtGrunnbeløp = anvendtGrunnbeløp
-                )
+                val avklartePensjonsgivendeInntekter = pensjonsgivendeInntekter?.map {
+                    SelvstendigFaktaavklartInntekt.PensjonsgivendeInntekt(
+                        årstall = it.inntektsår,
+                        beløp = it.næringsinntekt
+                    )
+                } ?: emptyList()
                 SelvstendigFaktaavklartInntekt(
                     id = UUID.randomUUID(),
                     inntektsdata = Inntektsdata(
                         hendelseId = metadata.meldingsreferanseId,
                         dato = sykdomsperiode.start,
-                        beløp = inntektsopplysning.inntektsgrunnlag,
+                        beløp = SelvstendigFaktaavklartInntekt.beregnInntektsgrunnlag(avklartePensjonsgivendeInntekter, anvendtGrunnbeløp),
                         tidsstempel = LocalDateTime.now()
                     ),
-                    inntektsopplysning = inntektsopplysning
+                    pensjonsgivendeInntekt = avklartePensjonsgivendeInntekter,
+                    anvendtGrunnbeløp = anvendtGrunnbeløp
                 )
             }
         }

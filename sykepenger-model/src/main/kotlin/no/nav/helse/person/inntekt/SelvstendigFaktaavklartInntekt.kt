@@ -3,7 +3,6 @@ package no.nav.helse.person.inntekt
 import java.time.Year
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`1G`
-import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.dto.deserialisering.SelvstendigFaktaavklartInntektInnDto
 import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
 import no.nav.helse.økonomi.Inntekt
@@ -13,37 +12,9 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 internal data class SelvstendigFaktaavklartInntekt(
     val id: UUID,
     val inntektsdata: Inntektsdata,
-    val inntektsopplysning: SelvstendigRenameMe
-) {
-    internal fun funksjoneltLik(other: SelvstendigFaktaavklartInntekt): Boolean {
-        if (!this.inntektsdata.funksjoneltLik(other.inntektsdata)) return false
-        return this.inntektsopplysning.pensjonsgivendeInntekt == other.inntektsopplysning.pensjonsgivendeInntekt
-    }
-
-    internal fun dto() = SelvstendigFaktaavklartInntektUtDto(
-        id = this.id,
-        inntektsdata = this.inntektsdata.dto(),
-        pensjonsgivendeInntekt = this.inntektsopplysning.pensjonsgivendeInntekt.map {
-            SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto(it.årstall, it.beløp.dto())
-        },
-        anvendtGrunnbeløp = this.inntektsopplysning.anvendtGrunnbeløp.dto()
-    )
-
-    internal companion object {
-        internal fun gjenopprett(dto: SelvstendigFaktaavklartInntektInnDto) = SelvstendigFaktaavklartInntekt(
-            id = dto.id,
-            inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata),
-            inntektsopplysning = SelvstendigRenameMe.gjenopprett(dto.pensjonsgivendeInntekt, dto.anvendtGrunnbeløp)
-        )
-    }
-}
-
-internal data class SelvstendigRenameMe(
     val pensjonsgivendeInntekt: List<PensjonsgivendeInntekt>,
     val anvendtGrunnbeløp: Inntekt
 ) {
-    val inntektsgrunnlag = beregnInntektsgrunnlag(anvendtGrunnbeløp)
-
     init {
         check(pensjonsgivendeInntekt.size <= 3) {
             "Selvstendig kan ikke ha mer enn tre inntekter"
@@ -64,8 +35,45 @@ internal data class SelvstendigRenameMe(
             }
     }
 
+    val inntektsgrunnlag = beregnInntektsgrunnlag(anvendtGrunnbeløp)
+
+    internal fun funksjoneltLik(other: SelvstendigFaktaavklartInntekt): Boolean {
+        if (!this.inntektsdata.funksjoneltLik(other.inntektsdata)) return false
+        return this.pensjonsgivendeInntekt == other.pensjonsgivendeInntekt
+    }
+
+    internal fun dto() = SelvstendigFaktaavklartInntektUtDto(
+        id = this.id,
+        inntektsdata = this.inntektsdata.dto(),
+        pensjonsgivendeInntekt = this.pensjonsgivendeInntekt.map {
+            SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto(it.årstall, it.beløp.dto())
+        },
+        anvendtGrunnbeløp = this.anvendtGrunnbeløp.dto()
+    )
+
     fun beregnInntektsgrunnlag(anvendtGrunnbeløp: Inntekt) =
-        beregnInntektsgrunnlag(pensjonsgivendeInntekt, anvendtGrunnbeløp)
+        Companion.beregnInntektsgrunnlag(pensjonsgivendeInntekt, anvendtGrunnbeløp)
+
+    internal companion object {
+        internal fun gjenopprett(dto: SelvstendigFaktaavklartInntektInnDto) = SelvstendigFaktaavklartInntekt(
+            id = dto.id,
+            inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata),
+            pensjonsgivendeInntekt = dto.pensjonsgivendeInntekt.map {
+                PensjonsgivendeInntekt(it.årstall, Inntekt.gjenopprett(it.beløp))
+            },
+            anvendtGrunnbeløp = Inntekt.gjenopprett(dto.anvendtGrunnbeløp)
+        )
+
+        fun beregnInntektsgrunnlag(
+            inntekter: List<PensjonsgivendeInntekt>,
+            anvendtGrunnbeløp: Inntekt
+        ) =
+            inntekter
+                .map { it.justertÅrsgrunnlag(anvendtGrunnbeløp) }
+                .summer()
+                .årlig.toInt()
+                .årlig
+    }
 
     data class PensjonsgivendeInntekt(val årstall: Year, val beløp: Inntekt) {
         private val snitt = `1G`.snitt(årstall.value)
@@ -93,24 +101,5 @@ internal data class SelvstendigRenameMe(
             private const val TOLV_G = 12.0
             private const val EN_TREDJEDEL = 1 / 3.0
         }
-    }
-
-    companion object {
-        fun beregnInntektsgrunnlag(inntekter: List<PensjonsgivendeInntekt>, anvendtGrunnbeløp: Inntekt) =
-            inntekter
-                .map { it.justertÅrsgrunnlag(anvendtGrunnbeløp) }
-                .summer()
-                .årlig.toInt()
-                .årlig
-
-        fun gjenopprett(
-            pensjonsgivendeInntektDto: List<SelvstendigFaktaavklartInntektInnDto.PensjonsgivendeInntektDto>,
-            anvendtGrunnbeløp: InntektbeløpDto.Årlig
-        ) = SelvstendigRenameMe(
-            pensjonsgivendeInntekt = pensjonsgivendeInntektDto.map {
-                PensjonsgivendeInntekt(it.årstall, Inntekt.gjenopprett(it.beløp))
-            },
-            anvendtGrunnbeløp = Inntekt.gjenopprett(anvendtGrunnbeløp)
-        )
     }
 }

@@ -1442,7 +1442,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun inntektForSelvstendig(): SelvstendigFaktaavklartInntekt {
         val faktaavklartInntekt = checkNotNull(behandlinger.faktaavklartInntekt) { "Forventer å ha en inntekt for selvstendig" }
-        val inntektsgrunnlag = faktaavklartInntekt.inntektsopplysning.beregnInntektsgrunnlag(`1G`.beløp(skjæringstidspunkt))
+        val inntektsgrunnlag = faktaavklartInntekt.beregnInntektsgrunnlag(`1G`.beløp(skjæringstidspunkt))
 
         return faktaavklartInntekt.copy(inntektsdata = faktaavklartInntekt.inntektsdata.copy(beløp = inntektsgrunnlag))
     }
