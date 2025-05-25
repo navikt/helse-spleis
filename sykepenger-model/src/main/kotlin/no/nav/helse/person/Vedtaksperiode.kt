@@ -2350,9 +2350,10 @@ internal class Vedtaksperiode private constructor(
         internal fun Iterable<Vedtaksperiode>.nestePeriodeSomSkalGjenopptas() =
             firstOrNull(HAR_PÅGÅENDE_UTBETALING) ?: filter(IKKE_FERDIG_BEHANDLET).førstePeriode()
 
-        internal fun Iterable<Vedtaksperiode>.checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas: Vedtaksperiode) {
-            check(this.filterNot { it == periodeSomSkalGjenopptas }.none(HAR_AVVENTENDE_GODKJENNING)) {
-                "Ugyldig situasjon! Flere perioder til godkjenning samtidig"
+        internal fun Iterable<Vedtaksperiode>.checkBareEnPeriodeTilGodkjenningSamtidig() {
+            val perioderTilGodkjenning = this.filter(HAR_AVVENTENDE_GODKJENNING)
+            check(perioderTilGodkjenning.size <= 1) {
+                "Ugyldig situasjon! Flere perioder til godkjenning samtidig:\n${perioderTilGodkjenning.joinToString(separator = "\n") { "- ${it.id} - $it" }}"
             }
         }
 

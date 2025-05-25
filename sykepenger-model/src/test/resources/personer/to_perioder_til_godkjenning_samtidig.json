@@ -1,0 +1,1922 @@
+{
+  "fødselsnummer": "12029240045",
+  "fødselsdato": "1992-02-12",
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
+      "id": "b0bc88bb-78a4-4938-ade2-a3a782d48ca2",
+      "inntektshistorikk": [
+        {
+          "id": "fc06b17a-5ca6-4903-8bb6-6f9770c5a313",
+          "dato": "2018-01-01",
+          "hendelseId": "da20ae74-19b4-4159-a4c1-880fe58e8901",
+          "beløp": 31000.0,
+          "kilde": "Arbeidsgiver",
+          "tidsstempel": "2025-05-25T10:11:13.096044"
+        }
+      ],
+      "sykdomshistorikk": [
+        {
+          "tidsstempel": "2025-05-25T10:11:13.21255",
+          "id": "7677bb4d-5abd-4454-9e18-e3fbf671cda8",
+          "hendelseId": "da20ae74-19b4-4159-a4c1-880fe58e8901",
+          "hendelseSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "ARBEIDSGIVERDAG",
+                "kilde": {
+                  "type": "Inntektsmelding",
+                  "id": "da20ae74-19b4-4159-a4c1-880fe58e8901",
+                  "tidsstempel": "2025-05-25T10:11:13.096044"
+                },
+                "grad": 1.0,
+                "other": null,
+                "melding": null,
+                "fom": "2018-01-01",
+                "tom": "2018-01-16",
+                "dato": null
+              }
+            ],
+            "periode": {
+              "fom": "2018-01-01",
+              "tom": "2018-01-16"
+            },
+            "låstePerioder": []
+          },
+          "beregnetSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Søknad",
+                  "id": "d41b5f4f-dac3-4175-bf99-a0dc6183173f",
+                  "tidsstempel": "2018-01-01T00:00:00"
+                },
+                "grad": 1.0,
+                "other": null,
+                "melding": null,
+                "fom": "2018-01-01",
+                "tom": "2018-01-31",
+                "dato": null
+              }
+            ],
+            "periode": {
+              "fom": "2018-01-01",
+              "tom": "2018-01-31"
+            },
+            "låstePerioder": []
+          }
+        },
+        {
+          "tidsstempel": "2025-05-25T10:11:13.047178",
+          "id": "24a4be7b-322a-4103-b65f-6336e35f6e6a",
+          "hendelseId": "d41b5f4f-dac3-4175-bf99-a0dc6183173f",
+          "hendelseSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Søknad",
+                  "id": "d41b5f4f-dac3-4175-bf99-a0dc6183173f",
+                  "tidsstempel": "2018-01-01T00:00:00"
+                },
+                "grad": 1.0,
+                "other": null,
+                "melding": null,
+                "fom": "2018-01-01",
+                "tom": "2018-01-31",
+                "dato": null
+              }
+            ],
+            "periode": {
+              "fom": "2018-01-01",
+              "tom": "2018-01-31"
+            },
+            "låstePerioder": []
+          },
+          "beregnetSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Søknad",
+                  "id": "d41b5f4f-dac3-4175-bf99-a0dc6183173f",
+                  "tidsstempel": "2018-01-01T00:00:00"
+                },
+                "grad": 1.0,
+                "other": null,
+                "melding": null,
+                "fom": "2018-01-01",
+                "tom": "2018-01-31",
+                "dato": null
+              }
+            ],
+            "periode": {
+              "fom": "2018-01-01",
+              "tom": "2018-01-31"
+            },
+            "låstePerioder": []
+          }
+        }
+      ],
+      "sykmeldingsperioder": [],
+      "vedtaksperioder": [
+        {
+          "id": "a571c9fe-94ee-4beb-94b4-45aa8b351c3d",
+          "tilstand": "AVVENTER_GODKJENNING",
+          "skjæringstidspunkt": "2018-01-01",
+          "behandlinger": [
+            {
+              "id": "cbab3a51-3549-4540-a05f-4f301fdc0a53",
+              "tilstand": "BEREGNET",
+              "vedtakFattet": null,
+              "avsluttet": null,
+              "kilde": {
+                "meldingsreferanseId": "d41b5f4f-dac3-4175-bf99-a0dc6183173f",
+                "innsendt": "2018-01-31T00:00:00",
+                "registrert": "2025-05-25T10:11:12.996422",
+                "avsender": "SYKMELDT"
+              },
+              "endringer": [
+                {
+                  "id": "0e685fc3-5dce-4b4f-bb8f-c766b2ad70bd",
+                  "tidsstempel": "2025-05-25T10:11:13.042616",
+                  "sykmeldingsperiodeFom": "2018-01-01",
+                  "sykmeldingsperiodeTom": "2018-01-31",
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "skjæringstidspunkt": "-999999999-01-01",
+                  "skjæringstidspunkter": [],
+                  "utbetalingId": null,
+                  "vilkårsgrunnlagId": null,
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "kilde": {
+                          "type": "Søknad",
+                          "id": "d41b5f4f-dac3-4175-bf99-a0dc6183173f",
+                          "tidsstempel": "2018-01-01T00:00:00"
+                        },
+                        "grad": 1.0,
+                        "other": null,
+                        "melding": null,
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dato": null
+                      }
+                    ],
+                    "periode": {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31"
+                    },
+                    "låstePerioder": []
+                  },
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  },
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
+                  "dokumentsporing": {
+                    "dokumentId": "d41b5f4f-dac3-4175-bf99-a0dc6183173f",
+                    "dokumenttype": "Søknad"
+                  },
+                  "arbeidsgiverperioder": [],
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
+                  "maksdatoresultat": {
+                    "vurdertTilOgMed": "-999999999-01-01",
+                    "bestemmelse": "IKKE_VURDERT",
+                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoSykepengerettighet": null,
+                    "forbrukteDager": [],
+                    "oppholdsdager": [],
+                    "avslåtteDager": [],
+                    "maksdato": "-999999999-01-01",
+                    "gjenståendeDager": 0
+                  },
+                  "inntekter": {},
+                  "faktaavklartInntekt": null
+                },
+                {
+                  "id": "8667587d-1fab-4bc4-b704-d508367a71a9",
+                  "tidsstempel": "2025-05-25T10:11:13.052811",
+                  "sykmeldingsperiodeFom": "2018-01-01",
+                  "sykmeldingsperiodeTom": "2018-01-31",
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "skjæringstidspunkt": "2018-01-01",
+                  "skjæringstidspunkter": [
+                    "2018-01-01"
+                  ],
+                  "utbetalingId": null,
+                  "vilkårsgrunnlagId": null,
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "kilde": {
+                          "type": "Søknad",
+                          "id": "d41b5f4f-dac3-4175-bf99-a0dc6183173f",
+                          "tidsstempel": "2018-01-01T00:00:00"
+                        },
+                        "grad": 1.0,
+                        "other": null,
+                        "melding": null,
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dato": null
+                      }
+                    ],
+                    "periode": {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31"
+                    },
+                    "låstePerioder": []
+                  },
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  },
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
+                  "dokumentsporing": {
+                    "dokumentId": "d41b5f4f-dac3-4175-bf99-a0dc6183173f",
+                    "dokumenttype": "Søknad"
+                  },
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-16"
+                    }
+                  ],
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
+                  "maksdatoresultat": {
+                    "vurdertTilOgMed": "-999999999-01-01",
+                    "bestemmelse": "IKKE_VURDERT",
+                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoSykepengerettighet": null,
+                    "forbrukteDager": [],
+                    "oppholdsdager": [],
+                    "avslåtteDager": [],
+                    "maksdato": "-999999999-01-01",
+                    "gjenståendeDager": 0
+                  },
+                  "inntekter": {},
+                  "faktaavklartInntekt": null
+                },
+                {
+                  "id": "06a6ba5e-a73c-4f3f-9141-258777b78649",
+                  "tidsstempel": "2025-05-25T10:11:13.212821",
+                  "sykmeldingsperiodeFom": "2018-01-01",
+                  "sykmeldingsperiodeTom": "2018-01-31",
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "skjæringstidspunkt": "2018-01-01",
+                  "skjæringstidspunkter": [
+                    "2018-01-01"
+                  ],
+                  "utbetalingId": null,
+                  "vilkårsgrunnlagId": null,
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "kilde": {
+                          "type": "Søknad",
+                          "id": "d41b5f4f-dac3-4175-bf99-a0dc6183173f",
+                          "tidsstempel": "2018-01-01T00:00:00"
+                        },
+                        "grad": 1.0,
+                        "other": null,
+                        "melding": null,
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dato": null
+                      }
+                    ],
+                    "periode": {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31"
+                    },
+                    "låstePerioder": []
+                  },
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  },
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
+                  "dokumentsporing": {
+                    "dokumentId": "da20ae74-19b4-4159-a4c1-880fe58e8901",
+                    "dokumenttype": "InntektsmeldingDager"
+                  },
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-16"
+                    }
+                  ],
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
+                  "maksdatoresultat": {
+                    "vurdertTilOgMed": "-999999999-01-01",
+                    "bestemmelse": "IKKE_VURDERT",
+                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoSykepengerettighet": null,
+                    "forbrukteDager": [],
+                    "oppholdsdager": [],
+                    "avslåtteDager": [],
+                    "maksdato": "-999999999-01-01",
+                    "gjenståendeDager": 0
+                  },
+                  "inntekter": {},
+                  "faktaavklartInntekt": null
+                },
+                {
+                  "id": "fc9c9215-b9ed-4ba2-b25e-396aa779982c",
+                  "tidsstempel": "2025-05-25T10:11:13.215291",
+                  "sykmeldingsperiodeFom": "2018-01-01",
+                  "sykmeldingsperiodeTom": "2018-01-31",
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "skjæringstidspunkt": "2018-01-01",
+                  "skjæringstidspunkter": [
+                    "2018-01-01"
+                  ],
+                  "utbetalingId": null,
+                  "vilkårsgrunnlagId": null,
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "kilde": {
+                          "type": "Søknad",
+                          "id": "d41b5f4f-dac3-4175-bf99-a0dc6183173f",
+                          "tidsstempel": "2018-01-01T00:00:00"
+                        },
+                        "grad": 1.0,
+                        "other": null,
+                        "melding": null,
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dato": null
+                      }
+                    ],
+                    "periode": {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31"
+                    },
+                    "låstePerioder": []
+                  },
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  },
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "da20ae74-19b4-4159-a4c1-880fe58e8901",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-05-25T10:11:13.096044"
+                      }
+                    ]
+                  },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
+                  "dokumentsporing": {
+                    "dokumentId": "da20ae74-19b4-4159-a4c1-880fe58e8901",
+                    "dokumenttype": "InntektsmeldingRefusjon"
+                  },
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-16"
+                    }
+                  ],
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
+                  "maksdatoresultat": {
+                    "vurdertTilOgMed": "-999999999-01-01",
+                    "bestemmelse": "IKKE_VURDERT",
+                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoSykepengerettighet": null,
+                    "forbrukteDager": [],
+                    "oppholdsdager": [],
+                    "avslåtteDager": [],
+                    "maksdato": "-999999999-01-01",
+                    "gjenståendeDager": 0
+                  },
+                  "inntekter": {},
+                  "faktaavklartInntekt": null
+                },
+                {
+                  "id": "aefe0207-755e-4767-875a-6b2e5a4e0d76",
+                  "tidsstempel": "2025-05-25T10:11:13.215947",
+                  "sykmeldingsperiodeFom": "2018-01-01",
+                  "sykmeldingsperiodeTom": "2018-01-31",
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "skjæringstidspunkt": "2018-01-01",
+                  "skjæringstidspunkter": [
+                    "2018-01-01"
+                  ],
+                  "utbetalingId": null,
+                  "vilkårsgrunnlagId": null,
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "kilde": {
+                          "type": "Søknad",
+                          "id": "d41b5f4f-dac3-4175-bf99-a0dc6183173f",
+                          "tidsstempel": "2018-01-01T00:00:00"
+                        },
+                        "grad": 1.0,
+                        "other": null,
+                        "melding": null,
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dato": null
+                      }
+                    ],
+                    "periode": {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31"
+                    },
+                    "låstePerioder": []
+                  },
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  },
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "da20ae74-19b4-4159-a4c1-880fe58e8901",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-05-25T10:11:13.096044"
+                      }
+                    ]
+                  },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
+                  "dokumentsporing": {
+                    "dokumentId": "da20ae74-19b4-4159-a4c1-880fe58e8901",
+                    "dokumenttype": "InntektsmeldingInntekt"
+                  },
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-16"
+                    }
+                  ],
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
+                  "maksdatoresultat": {
+                    "vurdertTilOgMed": "-999999999-01-01",
+                    "bestemmelse": "IKKE_VURDERT",
+                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoSykepengerettighet": null,
+                    "forbrukteDager": [],
+                    "oppholdsdager": [],
+                    "avslåtteDager": [],
+                    "maksdato": "-999999999-01-01",
+                    "gjenståendeDager": 0
+                  },
+                  "inntekter": {},
+                  "faktaavklartInntekt": null
+                },
+                {
+                  "id": "49109fd9-362e-4e7e-aa01-3d0c2ed7cf2d",
+                  "tidsstempel": "2025-05-25T10:11:13.276087",
+                  "sykmeldingsperiodeFom": "2018-01-01",
+                  "sykmeldingsperiodeTom": "2018-01-31",
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "skjæringstidspunkt": "2018-01-01",
+                  "skjæringstidspunkter": [
+                    "2018-01-01"
+                  ],
+                  "utbetalingId": "dbc9a293-9852-48d1-bab8-df9a676546f8",
+                  "vilkårsgrunnlagId": "f01c4f69-f4fa-4839-9795-feab481b7271",
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "kilde": {
+                          "type": "Søknad",
+                          "id": "d41b5f4f-dac3-4175-bf99-a0dc6183173f",
+                          "tidsstempel": "2018-01-01T00:00:00"
+                        },
+                        "grad": 1.0,
+                        "other": null,
+                        "melding": null,
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dato": null
+                      }
+                    ],
+                    "periode": {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31"
+                    },
+                    "låstePerioder": []
+                  },
+                  "utbetalingstidslinje": {
+                    "dager": [
+                      {
+                        "type": "ArbeidsgiverperiodeDag",
+                        "aktuellDagsinntekt": 1430.7692307692307,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-16"
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 1430.7692307692307,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                        "arbeidsgiverbeløp": 1081.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 1081.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": "2018-01-17",
+                        "tom": "2018-01-19"
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 1430.7692307692307,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": "2018-01-20",
+                        "tom": "2018-01-21"
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 1430.7692307692307,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                        "arbeidsgiverbeløp": 1081.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 1081.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": "2018-01-22",
+                        "tom": "2018-01-26"
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 1430.7692307692307,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": "2018-01-27",
+                        "tom": "2018-01-28"
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 1430.7692307692307,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                        "arbeidsgiverbeløp": 1081.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 1081.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": "2018-01-29",
+                        "tom": "2018-01-31"
+                      }
+                    ]
+                  },
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "da20ae74-19b4-4159-a4c1-880fe58e8901",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-05-25T10:11:13.096044"
+                      }
+                    ]
+                  },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
+                  "dokumentsporing": {
+                    "dokumentId": "da20ae74-19b4-4159-a4c1-880fe58e8901",
+                    "dokumenttype": "InntektsmeldingInntekt"
+                  },
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-16"
+                    }
+                  ],
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
+                  "maksdatoresultat": {
+                    "vurdertTilOgMed": "2018-01-31",
+                    "bestemmelse": "ORDINÆR_RETT",
+                    "startdatoTreårsvindu": "2015-01-17",
+                    "startdatoSykepengerettighet": "2018-01-17",
+                    "forbrukteDager": [
+                      {
+                        "fom": "2018-01-17",
+                        "tom": "2018-01-19"
+                      },
+                      {
+                        "fom": "2018-01-22",
+                        "tom": "2018-01-26"
+                      },
+                      {
+                        "fom": "2018-01-29",
+                        "tom": "2018-01-31"
+                      }
+                    ],
+                    "oppholdsdager": [],
+                    "avslåtteDager": [],
+                    "maksdato": "2018-12-28",
+                    "gjenståendeDager": 237
+                  },
+                  "inntekter": {},
+                  "faktaavklartInntekt": null
+                }
+              ]
+            }
+          ],
+          "opprettet": "2025-05-25T10:11:13.040622",
+          "oppdatert": "2025-05-25T10:11:13.285306"
+        }
+      ],
+      "forkastede": [],
+      "utbetalinger": [
+        {
+          "id": "dbc9a293-9852-48d1-bab8-df9a676546f8",
+          "korrelasjonsId": "d6e06004-d6c9-4dac-a63e-87582cb7a28c",
+          "fom": "2018-01-01",
+          "tom": "2018-01-31",
+          "annulleringer": [],
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "type": "ArbeidsgiverperiodeDag",
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
+                "begrunnelser": null,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 0.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "arbeidsgiverbeløp": 0.0,
+                "personbeløp": 0.0,
+                "reservertArbeidsgiverbeløp": 0.0,
+                "reservertPersonbeløp": 0.0,
+                "dato": null,
+                "fom": "2018-01-01",
+                "tom": "2018-01-16"
+              },
+              {
+                "type": "NavDag",
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
+                "begrunnelser": null,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 1.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "arbeidsgiverbeløp": 1081.0,
+                "personbeløp": 0.0,
+                "reservertArbeidsgiverbeløp": 1081.0,
+                "reservertPersonbeløp": 0.0,
+                "dato": null,
+                "fom": "2018-01-17",
+                "tom": "2018-01-19"
+              },
+              {
+                "type": "NavHelgDag",
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
+                "begrunnelser": null,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 0.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "arbeidsgiverbeløp": 0.0,
+                "personbeløp": 0.0,
+                "reservertArbeidsgiverbeløp": 0.0,
+                "reservertPersonbeløp": 0.0,
+                "dato": null,
+                "fom": "2018-01-20",
+                "tom": "2018-01-21"
+              },
+              {
+                "type": "NavDag",
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
+                "begrunnelser": null,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 1.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "arbeidsgiverbeløp": 1081.0,
+                "personbeløp": 0.0,
+                "reservertArbeidsgiverbeløp": 1081.0,
+                "reservertPersonbeløp": 0.0,
+                "dato": null,
+                "fom": "2018-01-22",
+                "tom": "2018-01-26"
+              },
+              {
+                "type": "NavHelgDag",
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
+                "begrunnelser": null,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 0.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "arbeidsgiverbeløp": 0.0,
+                "personbeløp": 0.0,
+                "reservertArbeidsgiverbeløp": 0.0,
+                "reservertPersonbeløp": 0.0,
+                "dato": null,
+                "fom": "2018-01-27",
+                "tom": "2018-01-28"
+              },
+              {
+                "type": "NavDag",
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
+                "begrunnelser": null,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 1.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "arbeidsgiverbeløp": 1081.0,
+                "personbeløp": 0.0,
+                "reservertArbeidsgiverbeløp": 1081.0,
+                "reservertPersonbeløp": 0.0,
+                "dato": null,
+                "fom": "2018-01-29",
+                "tom": "2018-01-31"
+              }
+            ]
+          },
+          "arbeidsgiverOppdrag": {
+            "mottaker": "a1",
+            "fagområde": "SPREF",
+            "linjer": [
+              {
+                "fom": "2018-01-17",
+                "tom": "2018-01-31",
+                "sats": 1081,
+                "grad": 100,
+                "refFagsystemId": null,
+                "delytelseId": 1,
+                "refDelytelseId": null,
+                "endringskode": "NY",
+                "klassekode": "SPREFAG-IOP",
+                "datoStatusFom": null
+              }
+            ],
+            "fagsystemId": "DWWGWABMGJBSXBUG72C72T3UIE",
+            "endringskode": "NY",
+            "tidsstempel": "2025-05-25T10:11:13.273505",
+            "nettoBeløp": 11891,
+            "avstemmingsnøkkel": null,
+            "status": null,
+            "overføringstidspunkt": null,
+            "erSimulert": true,
+            "simuleringsResultat": {
+              "totalbeløp": 2000,
+              "perioder": [
+                {
+                  "fom": "2018-01-17",
+                  "tom": "2018-01-20",
+                  "utbetalinger": [
+                    {
+                      "forfallsdato": "2018-01-21",
+                      "utbetalesTil": {
+                        "id": "a1",
+                        "navn": "Org Orgesen AS"
+                      },
+                      "feilkonto": false,
+                      "detaljer": [
+                        {
+                          "fom": "2018-01-17",
+                          "tom": "2018-01-20",
+                          "konto": "81549300",
+                          "beløp": 2000,
+                          "klassekode": {
+                            "kode": "SPREFAG-IOP",
+                            "beskrivelse": "Sykepenger, Refusjon arbeidsgiver"
+                          },
+                          "uføregrad": 100,
+                          "utbetalingstype": "YTEL",
+                          "tilbakeføring": false,
+                          "sats": {
+                            "sats": 1000.0,
+                            "antall": 2,
+                            "type": "DAG"
+                          },
+                          "refunderesOrgnummer": "a1"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "personOppdrag": {
+            "mottaker": "12029240045",
+            "fagområde": "SP",
+            "linjer": [],
+            "fagsystemId": "MRK25OPZZNGIBA5UFXMKLWXXO4",
+            "endringskode": "NY",
+            "tidsstempel": "2025-05-25T10:11:13.273543",
+            "nettoBeløp": 0,
+            "avstemmingsnøkkel": null,
+            "status": null,
+            "overføringstidspunkt": null,
+            "erSimulert": false,
+            "simuleringsResultat": null
+          },
+          "tidsstempel": "2025-05-25T10:11:13.27475",
+          "type": "UTBETALING",
+          "status": "IKKE_UTBETALT",
+          "maksdato": "2018-12-28",
+          "forbrukteSykedager": 11,
+          "gjenståendeSykedager": 237,
+          "vurdering": null,
+          "overføringstidspunkt": null,
+          "avstemmingsnøkkel": null,
+          "avsluttet": null,
+          "oppdatert": "2025-05-25T10:11:13.275353"
+        }
+      ],
+      "feriepengeutbetalinger": [],
+      "ubrukteRefusjonsopplysninger": {}
+    },
+    {
+      "organisasjonsnummer": "a2",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
+      "id": "fed9e385-bbfa-46aa-8bae-0d4514a4c5e1",
+      "inntektshistorikk": [
+        {
+          "id": "046165cd-0fb9-4108-be4f-ccee4d7ee580",
+          "dato": "2018-01-01",
+          "hendelseId": "35fec7be-439b-490d-8ba9-2b1ec5158d31",
+          "beløp": 31000.0,
+          "kilde": "Arbeidsgiver",
+          "tidsstempel": "2025-05-25T10:11:13.223451"
+        }
+      ],
+      "sykdomshistorikk": [
+        {
+          "tidsstempel": "2025-05-25T10:11:13.224155",
+          "id": "0a70f7ce-9467-425a-b257-741fe68ec44b",
+          "hendelseId": "35fec7be-439b-490d-8ba9-2b1ec5158d31",
+          "hendelseSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "ARBEIDSGIVERDAG",
+                "kilde": {
+                  "type": "Inntektsmelding",
+                  "id": "35fec7be-439b-490d-8ba9-2b1ec5158d31",
+                  "tidsstempel": "2025-05-25T10:11:13.223451"
+                },
+                "grad": 1.0,
+                "other": null,
+                "melding": null,
+                "fom": "2018-01-01",
+                "tom": "2018-01-16",
+                "dato": null
+              }
+            ],
+            "periode": {
+              "fom": "2018-01-01",
+              "tom": "2018-01-16"
+            },
+            "låstePerioder": []
+          },
+          "beregnetSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Søknad",
+                  "id": "20717c19-cdc1-4f08-9a45-4dc08195bf70",
+                  "tidsstempel": "2018-01-01T00:00:00"
+                },
+                "grad": 1.0,
+                "other": null,
+                "melding": null,
+                "fom": "2018-01-01",
+                "tom": "2018-01-31",
+                "dato": null
+              }
+            ],
+            "periode": {
+              "fom": "2018-01-01",
+              "tom": "2018-01-31"
+            },
+            "låstePerioder": []
+          }
+        },
+        {
+          "tidsstempel": "2025-05-25T10:11:13.085855",
+          "id": "21302f31-fb03-4261-8592-76926992307c",
+          "hendelseId": "20717c19-cdc1-4f08-9a45-4dc08195bf70",
+          "hendelseSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Søknad",
+                  "id": "20717c19-cdc1-4f08-9a45-4dc08195bf70",
+                  "tidsstempel": "2018-01-01T00:00:00"
+                },
+                "grad": 1.0,
+                "other": null,
+                "melding": null,
+                "fom": "2018-01-01",
+                "tom": "2018-01-31",
+                "dato": null
+              }
+            ],
+            "periode": {
+              "fom": "2018-01-01",
+              "tom": "2018-01-31"
+            },
+            "låstePerioder": []
+          },
+          "beregnetSykdomstidslinje": {
+            "dager": [
+              {
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Søknad",
+                  "id": "20717c19-cdc1-4f08-9a45-4dc08195bf70",
+                  "tidsstempel": "2018-01-01T00:00:00"
+                },
+                "grad": 1.0,
+                "other": null,
+                "melding": null,
+                "fom": "2018-01-01",
+                "tom": "2018-01-31",
+                "dato": null
+              }
+            ],
+            "periode": {
+              "fom": "2018-01-01",
+              "tom": "2018-01-31"
+            },
+            "låstePerioder": []
+          }
+        }
+      ],
+      "sykmeldingsperioder": [],
+      "vedtaksperioder": [
+        {
+          "id": "8269fac5-8c91-4ec3-839e-dbbd6f4c2c05",
+          "tilstand": "AVVENTER_GODKJENNING",
+          "skjæringstidspunkt": "2018-01-01",
+          "behandlinger": [
+            {
+              "id": "84de2cf9-0928-499e-9baf-7c9fe3f3893b",
+              "tilstand": "BEREGNET",
+              "vedtakFattet": null,
+              "avsluttet": null,
+              "kilde": {
+                "meldingsreferanseId": "20717c19-cdc1-4f08-9a45-4dc08195bf70",
+                "innsendt": "2018-01-31T00:00:00",
+                "registrert": "2025-05-25T10:11:13.085286",
+                "avsender": "SYKMELDT"
+              },
+              "endringer": [
+                {
+                  "id": "470a836a-8480-4117-a79b-f10809120022",
+                  "tidsstempel": "2025-05-25T10:11:13.085633",
+                  "sykmeldingsperiodeFom": "2018-01-01",
+                  "sykmeldingsperiodeTom": "2018-01-31",
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "skjæringstidspunkt": "-999999999-01-01",
+                  "skjæringstidspunkter": [],
+                  "utbetalingId": null,
+                  "vilkårsgrunnlagId": null,
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "kilde": {
+                          "type": "Søknad",
+                          "id": "20717c19-cdc1-4f08-9a45-4dc08195bf70",
+                          "tidsstempel": "2018-01-01T00:00:00"
+                        },
+                        "grad": 1.0,
+                        "other": null,
+                        "melding": null,
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dato": null
+                      }
+                    ],
+                    "periode": {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31"
+                    },
+                    "låstePerioder": []
+                  },
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  },
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
+                  "dokumentsporing": {
+                    "dokumentId": "20717c19-cdc1-4f08-9a45-4dc08195bf70",
+                    "dokumenttype": "Søknad"
+                  },
+                  "arbeidsgiverperioder": [],
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
+                  "maksdatoresultat": {
+                    "vurdertTilOgMed": "-999999999-01-01",
+                    "bestemmelse": "IKKE_VURDERT",
+                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoSykepengerettighet": null,
+                    "forbrukteDager": [],
+                    "oppholdsdager": [],
+                    "avslåtteDager": [],
+                    "maksdato": "-999999999-01-01",
+                    "gjenståendeDager": 0
+                  },
+                  "inntekter": {},
+                  "faktaavklartInntekt": null
+                },
+                {
+                  "id": "bf240f4d-bf73-4388-87ad-14d8f5a6a8ed",
+                  "tidsstempel": "2025-05-25T10:11:13.086267",
+                  "sykmeldingsperiodeFom": "2018-01-01",
+                  "sykmeldingsperiodeTom": "2018-01-31",
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "skjæringstidspunkt": "2018-01-01",
+                  "skjæringstidspunkter": [
+                    "2018-01-01"
+                  ],
+                  "utbetalingId": null,
+                  "vilkårsgrunnlagId": null,
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "kilde": {
+                          "type": "Søknad",
+                          "id": "20717c19-cdc1-4f08-9a45-4dc08195bf70",
+                          "tidsstempel": "2018-01-01T00:00:00"
+                        },
+                        "grad": 1.0,
+                        "other": null,
+                        "melding": null,
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dato": null
+                      }
+                    ],
+                    "periode": {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31"
+                    },
+                    "låstePerioder": []
+                  },
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  },
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
+                  "dokumentsporing": {
+                    "dokumentId": "20717c19-cdc1-4f08-9a45-4dc08195bf70",
+                    "dokumenttype": "Søknad"
+                  },
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-16"
+                    }
+                  ],
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
+                  "maksdatoresultat": {
+                    "vurdertTilOgMed": "-999999999-01-01",
+                    "bestemmelse": "IKKE_VURDERT",
+                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoSykepengerettighet": null,
+                    "forbrukteDager": [],
+                    "oppholdsdager": [],
+                    "avslåtteDager": [],
+                    "maksdato": "-999999999-01-01",
+                    "gjenståendeDager": 0
+                  },
+                  "inntekter": {},
+                  "faktaavklartInntekt": null
+                },
+                {
+                  "id": "a31a953d-8f11-41a8-abdb-0839e079bfaf",
+                  "tidsstempel": "2025-05-25T10:11:13.224346",
+                  "sykmeldingsperiodeFom": "2018-01-01",
+                  "sykmeldingsperiodeTom": "2018-01-31",
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "skjæringstidspunkt": "2018-01-01",
+                  "skjæringstidspunkter": [
+                    "2018-01-01"
+                  ],
+                  "utbetalingId": null,
+                  "vilkårsgrunnlagId": null,
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "kilde": {
+                          "type": "Søknad",
+                          "id": "20717c19-cdc1-4f08-9a45-4dc08195bf70",
+                          "tidsstempel": "2018-01-01T00:00:00"
+                        },
+                        "grad": 1.0,
+                        "other": null,
+                        "melding": null,
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dato": null
+                      }
+                    ],
+                    "periode": {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31"
+                    },
+                    "låstePerioder": []
+                  },
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  },
+                  "refusjonstidslinje": {
+                    "perioder": []
+                  },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
+                  "dokumentsporing": {
+                    "dokumentId": "35fec7be-439b-490d-8ba9-2b1ec5158d31",
+                    "dokumenttype": "InntektsmeldingDager"
+                  },
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-16"
+                    }
+                  ],
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
+                  "maksdatoresultat": {
+                    "vurdertTilOgMed": "-999999999-01-01",
+                    "bestemmelse": "IKKE_VURDERT",
+                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoSykepengerettighet": null,
+                    "forbrukteDager": [],
+                    "oppholdsdager": [],
+                    "avslåtteDager": [],
+                    "maksdato": "-999999999-01-01",
+                    "gjenståendeDager": 0
+                  },
+                  "inntekter": {},
+                  "faktaavklartInntekt": null
+                },
+                {
+                  "id": "47a48425-8577-43ac-959e-20277c7b5692",
+                  "tidsstempel": "2025-05-25T10:11:13.225137",
+                  "sykmeldingsperiodeFom": "2018-01-01",
+                  "sykmeldingsperiodeTom": "2018-01-31",
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "skjæringstidspunkt": "2018-01-01",
+                  "skjæringstidspunkter": [
+                    "2018-01-01"
+                  ],
+                  "utbetalingId": null,
+                  "vilkårsgrunnlagId": null,
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "kilde": {
+                          "type": "Søknad",
+                          "id": "20717c19-cdc1-4f08-9a45-4dc08195bf70",
+                          "tidsstempel": "2018-01-01T00:00:00"
+                        },
+                        "grad": 1.0,
+                        "other": null,
+                        "melding": null,
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dato": null
+                      }
+                    ],
+                    "periode": {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31"
+                    },
+                    "låstePerioder": []
+                  },
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  },
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "35fec7be-439b-490d-8ba9-2b1ec5158d31",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-05-25T10:11:13.223451"
+                      }
+                    ]
+                  },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
+                  "dokumentsporing": {
+                    "dokumentId": "35fec7be-439b-490d-8ba9-2b1ec5158d31",
+                    "dokumenttype": "InntektsmeldingRefusjon"
+                  },
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-16"
+                    }
+                  ],
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
+                  "maksdatoresultat": {
+                    "vurdertTilOgMed": "-999999999-01-01",
+                    "bestemmelse": "IKKE_VURDERT",
+                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoSykepengerettighet": null,
+                    "forbrukteDager": [],
+                    "oppholdsdager": [],
+                    "avslåtteDager": [],
+                    "maksdato": "-999999999-01-01",
+                    "gjenståendeDager": 0
+                  },
+                  "inntekter": {},
+                  "faktaavklartInntekt": null
+                },
+                {
+                  "id": "a3a76dab-2868-46b7-8194-b422a0aed7dd",
+                  "tidsstempel": "2025-05-25T10:11:13.225245",
+                  "sykmeldingsperiodeFom": "2018-01-01",
+                  "sykmeldingsperiodeTom": "2018-01-31",
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "skjæringstidspunkt": "2018-01-01",
+                  "skjæringstidspunkter": [
+                    "2018-01-01"
+                  ],
+                  "utbetalingId": null,
+                  "vilkårsgrunnlagId": null,
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "kilde": {
+                          "type": "Søknad",
+                          "id": "20717c19-cdc1-4f08-9a45-4dc08195bf70",
+                          "tidsstempel": "2018-01-01T00:00:00"
+                        },
+                        "grad": 1.0,
+                        "other": null,
+                        "melding": null,
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dato": null
+                      }
+                    ],
+                    "periode": {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31"
+                    },
+                    "låstePerioder": []
+                  },
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  },
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "35fec7be-439b-490d-8ba9-2b1ec5158d31",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-05-25T10:11:13.223451"
+                      }
+                    ]
+                  },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
+                  "dokumentsporing": {
+                    "dokumentId": "35fec7be-439b-490d-8ba9-2b1ec5158d31",
+                    "dokumenttype": "InntektsmeldingInntekt"
+                  },
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-16"
+                    }
+                  ],
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
+                  "maksdatoresultat": {
+                    "vurdertTilOgMed": "-999999999-01-01",
+                    "bestemmelse": "IKKE_VURDERT",
+                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoSykepengerettighet": null,
+                    "forbrukteDager": [],
+                    "oppholdsdager": [],
+                    "avslåtteDager": [],
+                    "maksdato": "-999999999-01-01",
+                    "gjenståendeDager": 0
+                  },
+                  "inntekter": {},
+                  "faktaavklartInntekt": null
+                },
+                {
+                  "id": "d8e15482-0a39-434f-8370-ab5405489b39",
+                  "tidsstempel": "2025-05-25T10:11:13.279869",
+                  "sykmeldingsperiodeFom": "2018-01-01",
+                  "sykmeldingsperiodeTom": "2018-01-31",
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-31",
+                  "skjæringstidspunkt": "2018-01-01",
+                  "skjæringstidspunkter": [
+                    "2018-01-01"
+                  ],
+                  "utbetalingId": "a7c21324-ea57-4704-9924-2dff507e4065",
+                  "vilkårsgrunnlagId": "f01c4f69-f4fa-4839-9795-feab481b7271",
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "kilde": {
+                          "type": "Søknad",
+                          "id": "20717c19-cdc1-4f08-9a45-4dc08195bf70",
+                          "tidsstempel": "2018-01-01T00:00:00"
+                        },
+                        "grad": 1.0,
+                        "other": null,
+                        "melding": null,
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dato": null
+                      }
+                    ],
+                    "periode": {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31"
+                    },
+                    "låstePerioder": []
+                  },
+                  "utbetalingstidslinje": {
+                    "dager": [
+                      {
+                        "type": "ArbeidsgiverperiodeDag",
+                        "aktuellDagsinntekt": 1430.7692307692307,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-16"
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 1430.7692307692307,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                        "arbeidsgiverbeløp": 1080.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 1080.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": "2018-01-17",
+                        "tom": "2018-01-19"
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 1430.7692307692307,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": "2018-01-20",
+                        "tom": "2018-01-21"
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 1430.7692307692307,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                        "arbeidsgiverbeløp": 1080.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 1080.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": "2018-01-22",
+                        "tom": "2018-01-26"
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 1430.7692307692307,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": "2018-01-27",
+                        "tom": "2018-01-28"
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 1430.7692307692307,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                        "arbeidsgiverbeløp": 1080.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 1080.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": "2018-01-29",
+                        "tom": "2018-01-31"
+                      }
+                    ]
+                  },
+                  "refusjonstidslinje": {
+                    "perioder": [
+                      {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "dagligBeløp": 1430.7692307692307,
+                        "meldingsreferanseId": "35fec7be-439b-490d-8ba9-2b1ec5158d31",
+                        "avsender": "ARBEIDSGIVER",
+                        "tidsstempel": "2025-05-25T10:11:13.223451"
+                      }
+                    ]
+                  },
+                  "inntektsendringer": {
+                    "perioder": []
+                  },
+                  "dokumentsporing": {
+                    "dokumentId": "35fec7be-439b-490d-8ba9-2b1ec5158d31",
+                    "dokumenttype": "InntektsmeldingInntekt"
+                  },
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-16"
+                    }
+                  ],
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
+                  "maksdatoresultat": {
+                    "vurdertTilOgMed": "2018-01-31",
+                    "bestemmelse": "ORDINÆR_RETT",
+                    "startdatoTreårsvindu": "2015-01-17",
+                    "startdatoSykepengerettighet": "2018-01-17",
+                    "forbrukteDager": [
+                      {
+                        "fom": "2018-01-17",
+                        "tom": "2018-01-19"
+                      },
+                      {
+                        "fom": "2018-01-22",
+                        "tom": "2018-01-26"
+                      },
+                      {
+                        "fom": "2018-01-29",
+                        "tom": "2018-01-31"
+                      }
+                    ],
+                    "oppholdsdager": [],
+                    "avslåtteDager": [],
+                    "maksdato": "2018-12-28",
+                    "gjenståendeDager": 237
+                  },
+                  "inntekter": {},
+                  "faktaavklartInntekt": null
+                }
+              ]
+            }
+          ],
+          "opprettet": "2025-05-25T10:11:13.085578",
+          "oppdatert": "2025-05-25T10:11:13.225415"
+        }
+      ],
+      "forkastede": [],
+      "utbetalinger": [
+        {
+          "id": "a7c21324-ea57-4704-9924-2dff507e4065",
+          "korrelasjonsId": "78468938-482c-40cc-96d6-cdc70cec684d",
+          "fom": "2018-01-01",
+          "tom": "2018-01-31",
+          "annulleringer": [],
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "type": "ArbeidsgiverperiodeDag",
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
+                "begrunnelser": null,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 0.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "arbeidsgiverbeløp": 0.0,
+                "personbeløp": 0.0,
+                "reservertArbeidsgiverbeløp": 0.0,
+                "reservertPersonbeløp": 0.0,
+                "dato": null,
+                "fom": "2018-01-01",
+                "tom": "2018-01-16"
+              },
+              {
+                "type": "NavDag",
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
+                "begrunnelser": null,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 1.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "arbeidsgiverbeløp": 1080.0,
+                "personbeløp": 0.0,
+                "reservertArbeidsgiverbeløp": 1080.0,
+                "reservertPersonbeløp": 0.0,
+                "dato": null,
+                "fom": "2018-01-17",
+                "tom": "2018-01-19"
+              },
+              {
+                "type": "NavHelgDag",
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
+                "begrunnelser": null,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 0.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "arbeidsgiverbeløp": 0.0,
+                "personbeløp": 0.0,
+                "reservertArbeidsgiverbeløp": 0.0,
+                "reservertPersonbeløp": 0.0,
+                "dato": null,
+                "fom": "2018-01-20",
+                "tom": "2018-01-21"
+              },
+              {
+                "type": "NavDag",
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
+                "begrunnelser": null,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 1.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "arbeidsgiverbeløp": 1080.0,
+                "personbeløp": 0.0,
+                "reservertArbeidsgiverbeløp": 1080.0,
+                "reservertPersonbeløp": 0.0,
+                "dato": null,
+                "fom": "2018-01-22",
+                "tom": "2018-01-26"
+              },
+              {
+                "type": "NavHelgDag",
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
+                "begrunnelser": null,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 0.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "arbeidsgiverbeløp": 0.0,
+                "personbeløp": 0.0,
+                "reservertArbeidsgiverbeløp": 0.0,
+                "reservertPersonbeløp": 0.0,
+                "dato": null,
+                "fom": "2018-01-27",
+                "tom": "2018-01-28"
+              },
+              {
+                "type": "NavDag",
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
+                "begrunnelser": null,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 1.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "arbeidsgiverbeløp": 1080.0,
+                "personbeløp": 0.0,
+                "reservertArbeidsgiverbeløp": 1080.0,
+                "reservertPersonbeløp": 0.0,
+                "dato": null,
+                "fom": "2018-01-29",
+                "tom": "2018-01-31"
+              }
+            ]
+          },
+          "arbeidsgiverOppdrag": {
+            "mottaker": "a2",
+            "fagområde": "SPREF",
+            "linjer": [
+              {
+                "fom": "2018-01-17",
+                "tom": "2018-01-31",
+                "sats": 1080,
+                "grad": 100,
+                "refFagsystemId": null,
+                "delytelseId": 1,
+                "refDelytelseId": null,
+                "endringskode": "NY",
+                "klassekode": "SPREFAG-IOP",
+                "datoStatusFom": null
+              }
+            ],
+            "fagsystemId": "MNG6RLO2HVEJ3I3KHFKT4K7BIQ",
+            "endringskode": "NY",
+            "tidsstempel": "2025-05-25T10:11:13.279765",
+            "nettoBeløp": 11880,
+            "avstemmingsnøkkel": null,
+            "status": null,
+            "overføringstidspunkt": null,
+            "erSimulert": false,
+            "simuleringsResultat": null
+          },
+          "personOppdrag": {
+            "mottaker": "12029240045",
+            "fagområde": "SP",
+            "linjer": [],
+            "fagsystemId": "V4D6AKKBWRF2TGQAG3VJEI3ZJ4",
+            "endringskode": "NY",
+            "tidsstempel": "2025-05-25T10:11:13.279778",
+            "nettoBeløp": 0,
+            "avstemmingsnøkkel": null,
+            "status": null,
+            "overføringstidspunkt": null,
+            "erSimulert": false,
+            "simuleringsResultat": null
+          },
+          "tidsstempel": "2025-05-25T10:11:13.279816",
+          "type": "UTBETALING",
+          "status": "IKKE_UTBETALT",
+          "maksdato": "2018-12-28",
+          "forbrukteSykedager": 11,
+          "gjenståendeSykedager": 237,
+          "vurdering": null,
+          "overføringstidspunkt": null,
+          "avstemmingsnøkkel": null,
+          "avsluttet": null,
+          "oppdatert": "2025-05-25T10:11:13.279832"
+        }
+      ],
+      "feriepengeutbetalinger": [],
+      "ubrukteRefusjonsopplysninger": {}
+    }
+  ],
+  "opprettet": "2025-05-25T10:11:12.952001",
+  "infotrygdhistorikk": [
+    {
+      "id": "697e1352-cb9b-4e50-91fc-32fad2d5f182",
+      "tidsstempel": "2025-05-25T10:11:13.071089",
+      "hendelseId": "75e8e64d-4958-4f8e-8581-15d75dab8fc5",
+      "ferieperioder": [],
+      "arbeidsgiverutbetalingsperioder": [],
+      "personutbetalingsperioder": [],
+      "oppdatert": "2025-05-25T10:11:13.070313"
+    }
+  ],
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "id": "3aaef6fe-ef46-44c5-8beb-afb1d8dd3b7c",
+      "opprettet": "2025-05-25T10:11:13.243473",
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "type": "Vilkårsprøving",
+          "inntektsgrunnlag": {
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "381081ae-4b00-4839-b638-0fdc8f421de6",
+                  "dato": "2018-01-01",
+                  "hendelseId": "da20ae74-19b4-4159-a4c1-880fe58e8901",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-05-25T10:11:13.096044",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "pensjonsgivendeInntekter": null,
+                  "anvendtÅrligGrunnbeløp": null,
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              },
+              {
+                "orgnummer": "a2",
+                "inntektsopplysning": {
+                  "id": "e6dd68fb-2ff1-45c2-a125-a6654574565b",
+                  "dato": "2018-01-01",
+                  "hendelseId": "35fec7be-439b-490d-8ba9-2b1ec5158d31",
+                  "beløp": 31000.0,
+                  "tidsstempel": "2025-05-25T10:11:13.223451",
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "pensjonsgivendeInntekter": null,
+                  "anvendtÅrligGrunnbeløp": null,
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              }
+            ],
+            "selvstendigInntektsopplysninger": null,
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": false
+          },
+          "opptjening": {
+            "opptjeningFom": "1970-01-01",
+            "opptjeningTom": "2017-12-31",
+            "arbeidsforhold": [
+              {
+                "orgnummer": "a1",
+                "ansattPerioder": [
+                  {
+                    "ansattFom": "1970-01-01",
+                    "ansattTom": null,
+                    "deaktivert": false
+                  }
+                ]
+              },
+              {
+                "orgnummer": "a2",
+                "ansattPerioder": [
+                  {
+                    "ansattFom": "1970-01-01",
+                    "ansattTom": null,
+                    "deaktivert": false
+                  }
+                ]
+              }
+            ]
+          },
+          "medlemskapstatus": "JA",
+          "vurdertOk": true,
+          "meldingsreferanseId": "012f77b8-4d75-46b6-983d-35e750300873",
+          "vilkårsgrunnlagId": "f01c4f69-f4fa-4839-9795-feab481b7271"
+        }
+      ]
+    }
+  ],
+  "minimumSykdomsgradVurdering": [],
+  "dødsdato": null,
+  "skjemaVersjon": 327
+}

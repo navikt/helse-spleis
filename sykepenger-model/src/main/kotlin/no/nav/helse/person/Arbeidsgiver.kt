@@ -250,8 +250,10 @@ internal class Arbeidsgiver private constructor(
             .flatMap { it.vedtaksperioder }
             .mursteinsperioder(utgangspunkt.periode, Vedtaksperiode::periode)
 
-        internal fun List<Arbeidsgiver>.validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) =
+        internal fun List<Arbeidsgiver>.validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+            checkBareEnPeriodeTilGodkjenningSamtidig()
             forEach { it.vedtaksperioder.validerTilstand(hendelse, aktivitetslogg) }
+        }
 
         internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(
             personidentifikator: Personidentifikator,
@@ -284,7 +286,6 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
             if (harPågåeneAnnullering()) return aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående annullering")
             val periodeSomSkalGjenopptas = periodeSomSkalGjenopptas() ?: return
-            checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas)
             periodeSomSkalGjenopptas.gjenopptaBehandling(hendelse, aktivitetslogg)
         }
 
@@ -294,8 +295,8 @@ internal class Arbeidsgiver private constructor(
         private fun Iterable<Arbeidsgiver>.periodeSomSkalGjenopptas() =
             flatMap { it.vedtaksperioder }.nestePeriodeSomSkalGjenopptas()
 
-        private fun Iterable<Arbeidsgiver>.checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas: Vedtaksperiode) =
-            flatMap { it.vedtaksperioder }.checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas)
+        private fun Iterable<Arbeidsgiver>.checkBareEnPeriodeTilGodkjenningSamtidig() =
+            flatMap { it.vedtaksperioder }.checkBareEnPeriodeTilGodkjenningSamtidig()
 
         internal fun søppelbøtte(
             arbeidsgivere: List<Arbeidsgiver>,
