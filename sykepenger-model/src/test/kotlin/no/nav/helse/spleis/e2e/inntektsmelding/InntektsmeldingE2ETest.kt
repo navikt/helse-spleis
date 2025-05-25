@@ -149,15 +149,32 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         // !!OBS!! Out of order
         håndterSøknad(mars)
+        // En veldig viktig detalj for å fremprovosere feilen
+        // Ubrukte refusjonsopplysninger er litt tøysete laget, så må fremprovosere
+        // det som skjer på ekte (person lagres ned og lastes opp igjen)
+        // kunne også fått samme opppførsel ved å skrive mediator-test
+        reserialiser()
         håndterSøknad(februar)
 
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
-        assertBeløpstidslinje(
-            expected = Beløpstidslinje.fra(1.februar til 9.februar, INNTEKT, imKilde) + Beløpstidslinje.fra(10.februar til 28.februar, INGEN, imKilde),
-            actual = inspektør.refusjon(3.vedtaksperiode)
+
+        assertForventetFeil(
+            forklaring = "Ettersom vi nå kvitterer ut ubrukte refusjonsopplysninger tom søknad fungerer det ikke ved endringer og out of order",
+            nå = {
+                assertBeløpstidslinje(
+                    expected = Beløpstidslinje.fra(1.februar til 28.februar, INNTEKT, imKilde),
+                    actual = inspektør.refusjon(3.vedtaksperiode)
+                )
+            },
+            ønsket = {
+                assertBeløpstidslinje(
+                    expected = Beløpstidslinje.fra(1.februar til 9.februar, INNTEKT, imKilde) + Beløpstidslinje.fra(10.februar til 28.februar, INGEN, imKilde),
+                    actual = inspektør.refusjon(3.vedtaksperiode)
+                )
+            }
         )
 
         håndterYtelser(2.vedtaksperiode)
