@@ -20,6 +20,7 @@ import no.nav.helse.spleis.meldinger.AvbruttSøknadRiver
 import no.nav.helse.spleis.meldinger.DødsmeldingerRiver
 import no.nav.helse.spleis.meldinger.FeriepengeutbetalingerRiver
 import no.nav.helse.spleis.meldinger.ForkastSykmeldingsperioderRiver
+import no.nav.helse.spleis.meldinger.GjenopptaBehandlingerRiver
 import no.nav.helse.spleis.meldinger.GrunnbeløpsreguleringRiver
 import no.nav.helse.spleis.meldinger.IdentOpphørtRiver
 import no.nav.helse.spleis.meldinger.InfotrygdendringerRiver
@@ -66,6 +67,7 @@ import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
+import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
@@ -143,6 +145,7 @@ internal class MessageMediator(
             FeriepengeutbetalingerRiver(it, this)
             PåminnelserRiver(it, this)
             PersonPåminnelserRiver(it, this)
+            GjenopptaBehandlingerRiver(it, this)
             UtbetalingpåminnelserRiver(it, this)
             SimuleringerRiver(it, this)
             AnnullerUtbetalingerRiver(it, this)
@@ -239,7 +242,8 @@ internal class MessageMediator(
         is PåminnelseMessage,
         is SkjønnsmessigFastsettelseMessage,
         is InntektsendringerMessage,
-        is UtbetalingpåminnelseMessage -> false
+        is UtbetalingpåminnelseMessage,
+        is GjenopptaBehandlingMessage -> false
 
         // meldinger som må replayes/sendes på nytt ved feil får
         // en feilhåndtering som medfører at podden går ned

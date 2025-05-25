@@ -60,6 +60,7 @@ import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
+import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
@@ -184,10 +185,12 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is InntektsmeldingerReplayMessage -> INNTEKTSMELDINGER_REPLAY
         is MinimumSykdomsgradVurdertMessage -> MINIMUM_SYKDOMSGRAD_VURDERT
         is SykepengegrunnlagForArbeidsgiverMessage -> SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER
+
         is MigrateMessage,
         is AvstemmingMessage,
         is PersonPåminnelseMessage,
         is PåminnelseMessage,
+        is GjenopptaBehandlingMessage,
         is UtbetalingshistorikkMessage,
         is InfotrygdendringMessage,
         is InntektsendringerMessage,

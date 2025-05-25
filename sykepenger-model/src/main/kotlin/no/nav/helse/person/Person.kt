@@ -19,6 +19,7 @@ import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
+import no.nav.helse.hendelser.GjenopptaBehandling
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.IdentOpphørt
@@ -435,6 +436,12 @@ class Person private constructor(
     fun håndter(påminnelse: PersonPåminnelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler personpåminnelse")
         håndterGjenoppta(påminnelse, aktivitetsloggMedPersonkontekst)
+    }
+
+    fun håndter(gjenopptaBehandling: GjenopptaBehandling, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler gjenoppta behandling")
+        gjenopptaBehandling(aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(gjenopptaBehandling, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
