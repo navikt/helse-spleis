@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.collections.filter
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
@@ -94,6 +95,7 @@ import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.kunEnIkkeUtbetalt
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.validerNyUtbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
@@ -252,7 +254,7 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
             checkBareEnPeriodeTilGodkjenningSamtidig()
-            forEach { it.vedtaksperioder.validerTilstand(hendelse, aktivitetslogg) }
+            forEach { it.sjekkForUgyldigeSituasjoner(hendelse, aktivitetslogg) }
         }
 
         internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(
@@ -1079,6 +1081,11 @@ internal class Arbeidsgiver private constructor(
 
     internal fun bekreftErÅpen(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().bekreftErÅpen(periode)
+    }
+
+    private fun sjekkForUgyldigeSituasjoner(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+        utbetalinger.kunEnIkkeUtbetalt()
+        vedtaksperioder.validerTilstand(hendelse, aktivitetslogg)
     }
 
     private fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {

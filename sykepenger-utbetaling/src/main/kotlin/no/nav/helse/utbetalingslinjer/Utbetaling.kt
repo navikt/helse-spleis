@@ -421,6 +421,15 @@ class Utbetaling private constructor(
             error("Hvordan kan det ha seg at vi lager en ny utbetaling for ${nyUtbetaling.periode} samtidig som utbetalingene ${ikkeUtbetalt.joinToString { "${it.id}" }} står som IKKE_UTBETALT? Hvorfor er ikke disse forkastet?")
         }
 
+        fun List<Utbetaling>.kunEnIkkeUtbetalt() {
+            val ikkeUtbetalte = this
+                .filterNot { it.erAnnullering() }
+                .filter { it.erUbetalt() }
+            check(ikkeUtbetalte.size <= 1) {
+                "Det er mer enn én utbetaling som er IKKE_UTBETALT:\n${ikkeUtbetalte.joinToString(separator = "\n") { "* ${it.id} - ${it.periode}" }}"
+            }
+        }
+
         private fun Oppdrag.overlappendeLinjer(nyttOppdrag: Oppdrag): List<Triple<Fagområde, String, Utbetalingslinje>> {
             return nyttOppdrag.linjerUtenOpphør().flatMap { linje ->
                 this
