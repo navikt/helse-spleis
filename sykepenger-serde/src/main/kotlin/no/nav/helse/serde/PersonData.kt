@@ -432,10 +432,8 @@ data class PersonData(
                     return SelvstendigFaktaavklartInntektInnDto(
                         id = this.id,
                         inntektsdata = inntektsdata,
-                        inntektsopplysning = SelvstendigRenameMeInnDto(
-                            pensjonsgivendeInntekt = this.pensjonsgivendeInntekter!!.map { SelvstendigRenameMeInnDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) },
-                            anvendtGrunnbeløp = InntektbeløpDto.Årlig(this.anvendtÅrligGrunnbeløp!!)
-                        )
+                        pensjonsgivendeInntekt = this.pensjonsgivendeInntekter!!.map { SelvstendigRenameMeInnDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) },
+                        anvendtGrunnbeløp = InntektbeløpDto.Årlig(this.anvendtÅrligGrunnbeløp!!),
                     )
                 }
             }

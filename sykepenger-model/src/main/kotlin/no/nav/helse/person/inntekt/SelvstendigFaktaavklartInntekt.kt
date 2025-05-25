@@ -3,6 +3,7 @@ package no.nav.helse.person.inntekt
 import java.time.Year
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`1G`
+import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.dto.deserialisering.SelvstendigFaktaavklartInntektInnDto
 import no.nav.helse.dto.deserialisering.SelvstendigRenameMeInnDto
 import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
@@ -31,7 +32,7 @@ internal data class SelvstendigFaktaavklartInntekt(
         internal fun gjenopprett(dto: SelvstendigFaktaavklartInntektInnDto) = SelvstendigFaktaavklartInntekt(
             id = dto.id,
             inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata),
-            inntektsopplysning = SelvstendigRenameMe.gjenopprett(dto.inntektsopplysning)
+            inntektsopplysning = SelvstendigRenameMe.gjenopprett(dto.pensjonsgivendeInntekt, dto.anvendtGrunnbeløp)
         )
     }
 }
@@ -108,11 +109,14 @@ internal data class SelvstendigRenameMe(
                 .årlig.toInt()
                 .årlig
 
-        fun gjenopprett(dto: SelvstendigRenameMeInnDto) = SelvstendigRenameMe(
-            pensjonsgivendeInntekt = dto.pensjonsgivendeInntekt.map {
+        fun gjenopprett(
+            pensjonsgivendeInntektDto: List<SelvstendigRenameMeInnDto.PensjonsgivendeInntektDto>,
+            anvendtGrunnbeløp: InntektbeløpDto.Årlig
+        ) = SelvstendigRenameMe(
+            pensjonsgivendeInntekt = pensjonsgivendeInntektDto.map {
                 PensjonsgivendeInntekt(it.årstall, Inntekt.gjenopprett(it.beløp))
             },
-            anvendtGrunnbeløp = Inntekt.gjenopprett(dto.anvendtGrunnbeløp)
+            anvendtGrunnbeløp = Inntekt.gjenopprett(anvendtGrunnbeløp)
         )
     }
 }
