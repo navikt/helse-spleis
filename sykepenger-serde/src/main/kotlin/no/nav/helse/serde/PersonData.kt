@@ -75,7 +75,6 @@ import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.deserialisering.SaksbehandlerInnDto
 import no.nav.helse.dto.deserialisering.SelvstendigFaktaavklartInntektInnDto
 import no.nav.helse.dto.deserialisering.SelvstendigInntektsopplysningInnDto
-import no.nav.helse.dto.deserialisering.SelvstendigRenameMeInnDto
 import no.nav.helse.dto.deserialisering.SkjønnsmessigFastsattInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingsdagInnDto
@@ -432,7 +431,7 @@ data class PersonData(
                     return SelvstendigFaktaavklartInntektInnDto(
                         id = this.id,
                         inntektsdata = inntektsdata,
-                        pensjonsgivendeInntekt = this.pensjonsgivendeInntekter!!.map { SelvstendigRenameMeInnDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) },
+                        pensjonsgivendeInntekt = this.pensjonsgivendeInntekter!!.map { SelvstendigFaktaavklartInntektInnDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) },
                         anvendtGrunnbeløp = InntektbeløpDto.Årlig(this.anvendtÅrligGrunnbeløp!!),
                     )
                 }

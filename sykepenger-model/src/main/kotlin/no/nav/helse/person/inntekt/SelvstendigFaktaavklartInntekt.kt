@@ -5,7 +5,6 @@ import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.dto.deserialisering.SelvstendigFaktaavklartInntektInnDto
-import no.nav.helse.dto.deserialisering.SelvstendigRenameMeInnDto
 import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.SelvstendigRenameMeUtDto
 import no.nav.helse.økonomi.Inntekt
@@ -110,7 +109,7 @@ internal data class SelvstendigRenameMe(
                 .årlig
 
         fun gjenopprett(
-            pensjonsgivendeInntektDto: List<SelvstendigRenameMeInnDto.PensjonsgivendeInntektDto>,
+            pensjonsgivendeInntektDto: List<SelvstendigFaktaavklartInntektInnDto.PensjonsgivendeInntektDto>,
             anvendtGrunnbeløp: InntektbeløpDto.Årlig
         ) = SelvstendigRenameMe(
             pensjonsgivendeInntekt = pensjonsgivendeInntektDto.map {
