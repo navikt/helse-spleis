@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.util.*
-import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -65,10 +64,6 @@ class Påminnelse(
         }
         data class VentetMinst(private val varighet: Period): Predikat {
             override fun evaluer(påminnelse: Påminnelse) = påminnelse.tilstandsendringstidspunkt.plus(varighet) <= påminnelse.nå
-        }
-        data object VentetFørCutoff : Predikat {
-            private val CUTOFF = 10.februar(2025).minusMonths(3).atStartOfDay()
-            override fun evaluer(påminnelse: Påminnelse) = påminnelse.tilstandsendringstidspunkt < CUTOFF
         }
     }
 }
