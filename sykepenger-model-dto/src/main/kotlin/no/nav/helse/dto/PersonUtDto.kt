@@ -3,7 +3,7 @@ package no.nav.helse.dto
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 data class InntektskildeDto(val id: String)
 
@@ -82,6 +82,17 @@ sealed class VedtaksperiodetilstandDto {
     data object AVVENTER_VILKÅRSPRØVING_REVURDERING : VedtaksperiodetilstandDto()
     data object AVVENTER_SIMULERING_REVURDERING : VedtaksperiodetilstandDto()
     data object AVVENTER_GODKJENNING_REVURDERING : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_AVSLUTTET : VedtaksperiodetilstandDto()
+    data object SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE : VedtaksperiodetilstandDto()
+    data object SELVSTENDIG_AVVENTER_GODKJENNING : VedtaksperiodetilstandDto()
+    data object SELVSTENDIG_AVVENTER_HISTORIKK : VedtaksperiodetilstandDto()
+    data object SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK : VedtaksperiodetilstandDto()
+    data object SELVSTENDIG_AVVENTER_SIMULERING : VedtaksperiodetilstandDto()
+    data object SELVSTENDIG_AVVENTER_VILKÅRSPRØVING : VedtaksperiodetilstandDto()
+    data object SELVSTENDIG_START : VedtaksperiodetilstandDto()
+    data object SELVSTENDIG_TIL_INFOTRYGD : VedtaksperiodetilstandDto()
+    data object SELVSTENDIG_TIL_UTBETALING : VedtaksperiodetilstandDto()
 }
 
 sealed class BehandlingtilstandDto {

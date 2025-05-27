@@ -817,7 +817,19 @@ data class PersonData(
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_VILKÅRSPRØVING_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
-                AVVENTER_GODKJENNING_REVURDERING
+                AVVENTER_GODKJENNING_REVURDERING,
+
+                SELVSTENDIG_START,
+                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
+                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
+                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
+                SELVSTENDIG_AVVENTER_HISTORIKK,
+                SELVSTENDIG_AVVENTER_SIMULERING,
+                SELVSTENDIG_AVVENTER_GODKJENNING,
+
+                SELVSTENDIG_TIL_UTBETALING,
+                SELVSTENDIG_TIL_INFOTRYGD,
+                SELVSTENDIG_AVSLUTTET,
             }
 
             fun tilDto() = VedtaksperiodeInnDto(
@@ -841,6 +853,17 @@ data class PersonData(
                     TilstandTypeData.AVVENTER_VILKÅRSPRØVING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING
                     TilstandTypeData.AVVENTER_SIMULERING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING
                     TilstandTypeData.AVVENTER_GODKJENNING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING
+
+                    TilstandTypeData.SELVSTENDIG_START -> VedtaksperiodetilstandDto.SELVSTENDIG_START
+                    TilstandTypeData.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK
+                    TilstandTypeData.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
+                    TilstandTypeData.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
+                    TilstandTypeData.SELVSTENDIG_AVVENTER_HISTORIKK -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK
+                    TilstandTypeData.SELVSTENDIG_AVVENTER_SIMULERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING
+                    TilstandTypeData.SELVSTENDIG_AVVENTER_GODKJENNING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING
+                    TilstandTypeData.SELVSTENDIG_TIL_UTBETALING -> VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING
+                    TilstandTypeData.SELVSTENDIG_TIL_INFOTRYGD -> VedtaksperiodetilstandDto.SELVSTENDIG_TIL_INFOTRYGD
+                    TilstandTypeData.SELVSTENDIG_AVSLUTTET -> VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET
                 },
                 behandlinger = BehandlingerInnDto(this.behandlinger.map { it.tilDto() }),
                 opprettet = opprettet,
