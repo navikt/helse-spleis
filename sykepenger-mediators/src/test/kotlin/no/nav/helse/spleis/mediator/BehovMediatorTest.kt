@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.FailedMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.SentMessage
 import io.mockk.mockk
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -51,6 +54,18 @@ class BehovMediatorTest {
 
         override fun publish(key: String, message: String) {
             messages.add(key to message)
+        }
+
+        override fun publish(messages: List<OutgoingMessage>): Pair<List<SentMessage>, List<FailedMessage>> {
+            this@BehovMediatorTest.messages.addAll(messages.map { it.key to it.body })
+            return messages.mapIndexed { index, it ->
+                SentMessage(
+                    index = index,
+                    message = it,
+                    partition = 0,
+                    offset = 0L
+                )
+            } to emptyList()
         }
 
         override fun rapidName(): String {

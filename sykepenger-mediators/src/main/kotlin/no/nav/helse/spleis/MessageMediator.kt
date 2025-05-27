@@ -1,10 +1,13 @@
 package no.nav.helse.spleis
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.FailedMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.SentMessage
 import io.micrometer.core.instrument.MeterRegistry
 import java.sql.SQLException
 import java.time.LocalDateTime.now
@@ -325,6 +328,10 @@ internal class MessageMediator(
 
         override fun publish(key: String, message: String) {
             rapidsConnection.publish(key, message)
+        }
+
+        override fun publish(messages: List<OutgoingMessage>): Pair<List<SentMessage>, List<FailedMessage>> {
+            return rapidsConnection.publish(messages)
         }
 
         override fun rapidName() = rapidsConnection.rapidName()

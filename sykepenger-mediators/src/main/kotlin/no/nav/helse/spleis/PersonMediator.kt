@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.util.*
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Påminnelse
@@ -37,7 +38,15 @@ internal class PersonMediator(
     private fun sendUtgåendeMeldinger(context: MessageContext) {
         if (meldinger.isEmpty()) return
         message.logOutgoingMessages(sikkerLogg, meldinger.size)
-        meldinger.forEach { pakke -> pakke.publish(context) }
+        val outgoingMessages = meldinger.map { it.tilUtgåendeMelding() }
+        val (ok, failed) = context.publish(outgoingMessages)
+
+        if (failed.isEmpty()) return
+        val førsteFeil = failed.first().error
+        val feilmelding = "Feil ved sending av ${failed.size} melding(er), ${ok.size} melding(er) gikk ok!\n" +
+            "Disse meldingene feilet:\n" +
+            failed.joinToString(separator = "\n") { "#${it.index}: ${it.error.message}\n\t${it.message}" }
+        throw RuntimeException(feilmelding, førsteFeil)
     }
 
     private fun queueMessage(fødselsnummer: String, message: String) {
@@ -750,8 +759,12 @@ internal class PersonMediator(
         private val eventName: String,
         private val blob: String,
     ) {
-        fun publish(context: MessageContext) {
-            context.publish(fødselsnummer, blob.also { sikkerLogg.info("sender $eventName: $it") })
+        fun tilUtgåendeMelding(): OutgoingMessage {
+            sikkerLogg.info("sender $eventName: $blob")
+            return OutgoingMessage(
+                body = blob,
+                key = fødselsnummer
+            )
         }
     }
 }
