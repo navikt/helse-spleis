@@ -65,7 +65,34 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingData.InntektsmeldingKildeDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_GODKJENNING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_HISTORIKK
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_INFOTRYGDHISTORIKK
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_REVURDERING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_SIMULERING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_VILKÅRSPRØVING_REVURDERING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.REVURDERING_FEILET
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVSLUTTET
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_GODKJENNING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_HISTORIKK
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_SIMULERING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_START
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_TIL_INFOTRYGD
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_TIL_UTBETALING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.START
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.TIL_INFOTRYGD
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.TIL_UTBETALING
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.UtbetalingsdagData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsopplysningskildeData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsopplysningstypeData
@@ -326,24 +353,37 @@ private fun ForkastetVedtaksperiodeUtDto.tilPersonData() = PersonData.Arbeidsgiv
 private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData(
     id = id,
     tilstand = when (tilstand) {
-        VedtaksperiodetilstandDto.AVSLUTTET -> TilstandTypeData.AVSLUTTET
-        VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING -> TilstandTypeData.AVSLUTTET_UTEN_UTBETALING
-        VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> TilstandTypeData.AVVENTER_BLOKKERENDE_PERIODE
-        VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> TilstandTypeData.AVVENTER_GODKJENNING
-        VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING -> TilstandTypeData.AVVENTER_GODKJENNING_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_HISTORIKK -> TilstandTypeData.AVVENTER_HISTORIKK
-        VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING -> TilstandTypeData.AVVENTER_HISTORIKK_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK -> TilstandTypeData.AVVENTER_INFOTRYGDHISTORIKK
-        VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> TilstandTypeData.AVVENTER_INNTEKTSMELDING
-        VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> TilstandTypeData.AVVENTER_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> TilstandTypeData.AVVENTER_SIMULERING
-        VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> TilstandTypeData.AVVENTER_SIMULERING_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> TilstandTypeData.AVVENTER_VILKÅRSPRØVING
-        VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> TilstandTypeData.AVVENTER_VILKÅRSPRØVING_REVURDERING
-        VedtaksperiodetilstandDto.REVURDERING_FEILET -> TilstandTypeData.REVURDERING_FEILET
-        VedtaksperiodetilstandDto.START -> TilstandTypeData.START
-        VedtaksperiodetilstandDto.TIL_INFOTRYGD -> TilstandTypeData.TIL_INFOTRYGD
-        VedtaksperiodetilstandDto.TIL_UTBETALING -> TilstandTypeData.TIL_UTBETALING
+        VedtaksperiodetilstandDto.AVSLUTTET -> AVSLUTTET
+        VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING -> AVSLUTTET_UTEN_UTBETALING
+        VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> AVVENTER_BLOKKERENDE_PERIODE
+        VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> AVVENTER_GODKJENNING
+        VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING -> AVVENTER_GODKJENNING_REVURDERING
+        VedtaksperiodetilstandDto.AVVENTER_HISTORIKK -> AVVENTER_HISTORIKK
+        VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING -> AVVENTER_HISTORIKK_REVURDERING
+        VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK -> AVVENTER_INFOTRYGDHISTORIKK
+        VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> AVVENTER_INNTEKTSMELDING
+        VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> AVVENTER_REVURDERING
+        VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> AVVENTER_SIMULERING
+        VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> AVVENTER_SIMULERING_REVURDERING
+        VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> AVVENTER_VILKÅRSPRØVING
+        VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> AVVENTER_VILKÅRSPRØVING_REVURDERING
+        VedtaksperiodetilstandDto.REVURDERING_FEILET -> REVURDERING_FEILET
+        VedtaksperiodetilstandDto.START -> START
+        VedtaksperiodetilstandDto.TIL_INFOTRYGD -> TIL_INFOTRYGD
+        VedtaksperiodetilstandDto.TIL_UTBETALING -> TIL_UTBETALING
+
+        VedtaksperiodetilstandDto.SELVSTENDIG_START -> SELVSTENDIG_START
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK -> SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE -> SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING -> SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK -> SELVSTENDIG_AVVENTER_HISTORIKK
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING -> SELVSTENDIG_AVVENTER_SIMULERING
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING -> SELVSTENDIG_AVVENTER_GODKJENNING
+
+        VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING -> SELVSTENDIG_TIL_UTBETALING
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET -> SELVSTENDIG_TIL_INFOTRYGD
+        VedtaksperiodetilstandDto.SELVSTENDIG_TIL_INFOTRYGD -> SELVSTENDIG_AVSLUTTET
+
     },
     skjæringstidspunkt = skjæringstidspunkt,
     behandlinger = behandlinger.behandlinger.map { it.tilPersonData() },
@@ -832,14 +872,14 @@ private fun ArbeidstakerFaktaavklartInntektUtDto.tilPersonData() = PersonData.Vi
     tidsstempel = this.inntektsdata.tidsstempel,
     type = InntektsopplysningstypeData.ARBEIDSTAKER,
     kilde = when (this.inntektsopplysningskilde) {
-            is ArbeidstakerinntektskildeUtDto.InfotrygdDto -> InntektsopplysningskildeData.INFOTRYGD
-            is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> InntektsopplysningskildeData.INNTEKTSMELDING
-            is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG
+        is ArbeidstakerinntektskildeUtDto.InfotrygdDto -> InntektsopplysningskildeData.INFOTRYGD
+        is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> InntektsopplysningskildeData.INNTEKTSMELDING
+        is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG
     },
     skatteopplysninger = when (val kilde = this.inntektsopplysningskilde) {
-            is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> kilde.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
-            ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto,
-            ArbeidstakerinntektskildeUtDto.InfotrygdDto -> null
+        is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> kilde.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
+        ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto,
+        ArbeidstakerinntektskildeUtDto.InfotrygdDto -> null
     },
     pensjonsgivendeInntekter = null,
     anvendtÅrligGrunnbeløp = null

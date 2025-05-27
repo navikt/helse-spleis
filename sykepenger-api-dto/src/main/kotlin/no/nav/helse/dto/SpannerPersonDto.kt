@@ -444,7 +444,19 @@ data class SpannerPersonDto(
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_VILKÅRSPRØVING_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
-                AVVENTER_GODKJENNING_REVURDERING
+                AVVENTER_GODKJENNING_REVURDERING,
+
+                SELVSTENDIG_START,
+                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
+                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
+                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
+                SELVSTENDIG_AVVENTER_HISTORIKK,
+                SELVSTENDIG_AVVENTER_SIMULERING,
+                SELVSTENDIG_AVVENTER_GODKJENNING,
+
+                SELVSTENDIG_TIL_UTBETALING,
+                SELVSTENDIG_TIL_INFOTRYGD,
+                SELVSTENDIG_AVSLUTTET,
             }
 
             data class VedtaksperiodeVenterDto(
@@ -1053,6 +1065,17 @@ private fun VedtaksperiodeUtDto.tilPersonData(
         VedtaksperiodetilstandDto.START -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.START
         VedtaksperiodetilstandDto.TIL_INFOTRYGD -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_INFOTRYGD
         VedtaksperiodetilstandDto.TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_UTBETALING
+
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVSLUTTET
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_HISTORIKK
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_SIMULERING
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
+        VedtaksperiodetilstandDto.SELVSTENDIG_START -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_START
+        VedtaksperiodetilstandDto.SELVSTENDIG_TIL_INFOTRYGD -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_TIL_INFOTRYGD
+        VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_TIL_UTBETALING
     },
     skjæringstidspunkt = skjæringstidspunkt,
     fom = fom,

@@ -170,7 +170,12 @@ internal class Vedtaksperiode private constructor(
         person = person,
         arbeidsgiver = arbeidsgiver,
         id = UUID.randomUUID(),
-        tilstand = Start,
+        tilstand = when (arbeidsgiver.yrkesaktivitetssporing) {
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigStart
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            is Arbeidstaker,
+            Behandlingsporing.Yrkesaktivitet.Frilans -> Start
+        },
         behandlinger = Behandlinger(),
         opprettet = LocalDateTime.now(),
         regelverkslogg = regelverkslogg
@@ -225,7 +230,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-        check(tilstand != Start) { "en vedtaksperiode blir stående i Start-tilstanden" }
+        check(tilstand != Start || tilstand != SelvstendigStart) { "en vedtaksperiode blir stående i Start-tilstanden" }
         if (!tilstand.erFerdigBehandlet) return
         behandlinger.validerFerdigBehandlet(hendelse.metadata.meldingsreferanseId, aktivitetslogg)
     }
@@ -236,7 +241,7 @@ internal class Vedtaksperiode private constructor(
         arbeidsgivere: List<Arbeidsgiver>,
         infotrygdhistorikk: Infotrygdhistorikk
     ): Revurderingseventyr {
-        check(tilstand is Start)
+        check(tilstand is Start || tilstand is SelvstendigStart) { "Kan ikke håndtere søknad i tilstand $tilstand" }
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         person.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId.id, id, arbeidsgiver.organisasjonsnummer)
         søknad.forUng(aktivitetsloggMedVedtaksperiodekontekst, person.alder)
@@ -288,6 +293,26 @@ internal class Vedtaksperiode private constructor(
             Start,
             RevurderingFeilet,
             TilInfotrygd -> error("Kan ikke håndtere søknad mens perioden er i $tilstand")
+
+            SelvstendigStart,
+            SelvstendigTilInfotrygd -> error("Kan ikke håndtere søknad mens perioden er i $tilstand")
+
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigTilUtbetaling -> {
+                val nesteTilstand = when (tilstand) {
+                    SelvstendigAvventerBlokkerendePeriode,
+                    SelvstendigAvventerInfotrygdHistorikk -> null
+
+                    else -> SelvstendigAvventerBlokkerendePeriode
+                }
+                håndterOverlappendeSøknad(søknad, aktivitetsloggMedVedtaksperiodekontekst, nesteTilstand)
+            }
         }
         if (aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeilEllerVerre()) forkast(søknad, aktivitetsloggMedVedtaksperiodekontekst)
         return Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode)
@@ -328,6 +353,17 @@ internal class Vedtaksperiode private constructor(
             RevurderingFeilet,
             Start,
             TilInfotrygd -> error("Kan ikke overstyre tidslinjen i $tilstand")
+
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilInfotrygd,
+            SelvstendigTilUtbetaling -> error("Kan ikke overstyre tidslinjen i $tilstand")
         }
 
         hendelse.vurdertTilOgMed(periode.endInclusive)
@@ -358,6 +394,21 @@ internal class Vedtaksperiode private constructor(
             Start,
             TilInfotrygd,
             TilUtbetaling -> {
+                if (anmodningOmForkasting.force) return forkast(anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst)
+                aktivitetsloggMedVedtaksperiodekontekst.info("Avslår anmodning om forkasting i $tilstand")
+            }
+
+            SelvstendigAvventerBlokkerendePeriode -> forkast(anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst)
+
+            SelvstendigAvsluttet,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilInfotrygd,
+            SelvstendigTilUtbetaling -> {
                 if (anmodningOmForkasting.force) return forkast(anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst)
                 aktivitetsloggMedVedtaksperiodekontekst.info("Avslår anmodning om forkasting i $tilstand")
             }
@@ -450,6 +501,17 @@ internal class Vedtaksperiode private constructor(
             TilInfotrygd -> {
                 aktivitetsloggMedVedtaksperiodekontekst.info("Replayer ikke inntektsmelding fordi tilstanden er $tilstand.")
             }
+
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilInfotrygd,
+            SelvstendigTilUtbetaling -> error("Kan ikke håndtere replay av inntektsmelding i en selvstendigtilstand: $tilstand")
         }
         return null
     }
@@ -831,8 +893,10 @@ internal class Vedtaksperiode private constructor(
             AvventerInfotrygdHistorikk -> when (arbeidsgiver.yrkesaktivitetssporing) {
                 is Arbeidstaker -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
                 Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-                Behandlingsporing.Yrkesaktivitet.Frilans,
-                Behandlingsporing.Yrkesaktivitet.Selvstendig -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
+                Behandlingsporing.Yrkesaktivitet.Frilans -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
+
+                Behandlingsporing.Yrkesaktivitet.Selvstendig ->
+                    error("Forventer ikke tilstanden AvventerInfotrygdHistorikk for vedtaksperiode opprettet av en søknad for Selvstendig næringsdrivende")
             }
 
             Avsluttet,
@@ -854,6 +918,26 @@ internal class Vedtaksperiode private constructor(
             TilInfotrygd -> {
                 /* gjør ingenting */
             }
+
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilInfotrygd,
+            SelvstendigTilUtbetaling -> {
+                /* gjør ingenting */
+            }
+
+            SelvstendigAvventerInfotrygdHistorikk -> when (val yrkesaktivitet = arbeidsgiver.yrkesaktivitetssporing) {
+                is Arbeidstaker,
+                Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                Behandlingsporing.Yrkesaktivitet.Frilans -> error("Forventer ikke tilstanden SelvstendigAvventerInfotrygdHistorikk for vedtaksperiode opprettet av en søknad for $yrkesaktivitet")
+
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
+            }
         }
     }
 
@@ -865,7 +949,7 @@ internal class Vedtaksperiode private constructor(
         if (!ytelser.erRelevant(id)) return
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
-        if (tilstand !in setOf(AvventerHistorikk, AvventerHistorikkRevurdering))
+        if (tilstand !in setOf(AvventerHistorikk, AvventerHistorikkRevurdering, SelvstendigAvventerHistorikk))
             return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke ytelsehistorikk i %s".format(tilstand.type))
 
         håndterYtelser(ytelser, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk)
@@ -899,6 +983,7 @@ internal class Vedtaksperiode private constructor(
         val nesteTilstander = when (tilstand) {
             AvventerHistorikk -> AvventerSimulering to AvventerGodkjenning
             AvventerHistorikkRevurdering -> AvventerSimuleringRevurdering to AvventerGodkjenningRevurdering
+            SelvstendigAvventerHistorikk -> SelvstendigAvventerSimulering to SelvstendigAvventerGodkjenning
             else -> error("Forventer ikke ytelsehåndtering i $tilstand")
         }
 
@@ -911,7 +996,7 @@ internal class Vedtaksperiode private constructor(
         if (!utbetalingsavgjørelse.relevantVedtaksperiode(id)) return
         if (behandlinger.gjelderIkkeFor(utbetalingsavgjørelse)) return aktivitetsloggMedVedtaksperiodekontekst.info("Ignorerer løsning på utbetalingsavgjørelse, utbetalingid på løsningen matcher ikke vedtaksperiodens nåværende utbetaling")
 
-        if (tilstand !in setOf(AvventerGodkjenning, AvventerGodkjenningRevurdering)) return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke utbetalingsavgjørelse i %s".format(tilstand.type.name))
+        if (tilstand !in setOf(AvventerGodkjenning, AvventerGodkjenningRevurdering, SelvstendigAvventerGodkjenning)) return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke utbetalingsavgjørelse i %s".format(tilstand.type.name))
 
         val erAvvist = behandlinger.erAvvist()
         if (erAvvist) {
@@ -926,7 +1011,9 @@ internal class Vedtaksperiode private constructor(
         tilstand(
             aktivitetsloggMedVedtaksperiodekontekst,
             when {
+                behandlinger.harUtbetalinger() && arbeidsgiver.yrkesaktivitetssporing == Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigTilUtbetaling
                 behandlinger.harUtbetalinger() -> TilUtbetaling
+                arbeidsgiver.yrkesaktivitetssporing == Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigAvsluttet
                 else -> Avsluttet
             }
         )
@@ -962,7 +1049,18 @@ internal class Vedtaksperiode private constructor(
             RevurderingFeilet,
             Start,
             TilInfotrygd,
-            TilUtbetaling -> false
+            TilUtbetaling,
+
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilInfotrygd,
+            SelvstendigTilUtbetaling -> false
         }
     }
 
@@ -1034,6 +1132,7 @@ internal class Vedtaksperiode private constructor(
         val nesteTilstand = when (tilstand) {
             AvventerVilkårsprøving -> AvventerHistorikk
             AvventerVilkårsprøvingRevurdering -> AvventerHistorikkRevurdering
+            SelvstendigAvventerVilkårsprøving -> SelvstendigAvventerHistorikk
             else -> return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke vilkårsgrunnlag i %s".format(tilstand.type))
         }
         håndterVilkårsgrunnlag(vilkårsgrunnlag, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), nesteTilstand)
@@ -1045,6 +1144,7 @@ internal class Vedtaksperiode private constructor(
         val nesteTilstand = when (tilstand) {
             AvventerSimulering -> AvventerGodkjenning
             AvventerSimuleringRevurdering -> AvventerGodkjenningRevurdering
+            SelvstendigAvventerSimulering -> SelvstendigAvventerGodkjenning
             else -> return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke simulering i %s".format(tilstand.type.name))
         }
 
@@ -1217,7 +1317,18 @@ internal class Vedtaksperiode private constructor(
             AvventerVilkårsprøvingRevurdering,
             RevurderingFeilet,
             TilInfotrygd,
-            TilUtbetaling -> VedtaksperiodeForkastetEventBuilder()
+            TilUtbetaling,
+
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilInfotrygd,
+            SelvstendigTilUtbetaling -> VedtaksperiodeForkastetEventBuilder()
 
             AvventerInfotrygdHistorikk,
             Start -> {
@@ -1865,7 +1976,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun sendNyttGodkjenningsbehov(aktivitetslogg: IAktivitetslogg) {
-        if (this.tilstand !in setOf(AvventerGodkjenningRevurdering, AvventerGodkjenning)) return
+        if (this.tilstand !in setOf(AvventerGodkjenningRevurdering, AvventerGodkjenning, SelvstendigAvventerGodkjenning)) return
         this.trengerGodkjenning(aktivitetslogg)
     }
 
@@ -2349,7 +2460,6 @@ internal class Vedtaksperiode private constructor(
         internal fun Iterable<Vedtaksperiode>.nåværendeVedtaksperiode(filter: VedtaksperiodeFilter) =
             firstOrNull(filter)
 
-
         private fun Iterable<Vedtaksperiode>.førstePeriode() =
             sortedWith(compareBy({ it.skjæringstidspunkt }, { it.periode.start }, { it.periode.endInclusive })).firstOrNull()
 
@@ -2400,6 +2510,18 @@ internal class Vedtaksperiode private constructor(
                     VedtaksperiodetilstandDto.START -> Start
                     VedtaksperiodetilstandDto.TIL_INFOTRYGD -> TilInfotrygd
                     VedtaksperiodetilstandDto.TIL_UTBETALING -> TilUtbetaling
+
+                    VedtaksperiodetilstandDto.SELVSTENDIG_START -> SelvstendigStart
+                    VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK -> SelvstendigAvventerInfotrygdHistorikk
+                    VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE -> SelvstendigAvventerBlokkerendePeriode
+                    VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING -> SelvstendigAvventerVilkårsprøving
+                    VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK -> SelvstendigAvventerHistorikk
+                    VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING -> SelvstendigAvventerSimulering
+                    VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING -> SelvstendigAvventerGodkjenning
+
+                    VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING -> SelvstendigTilUtbetaling
+                    VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET -> SelvstendigAvsluttet
+                    VedtaksperiodetilstandDto.SELVSTENDIG_TIL_INFOTRYGD -> SelvstendigTilInfotrygd
                 },
                 behandlinger = Behandlinger.gjenopprett(dto.behandlinger, grunnlagsdata, utbetalinger),
                 opprettet = dto.opprettet,
@@ -2473,6 +2595,17 @@ internal class Vedtaksperiode private constructor(
             Start -> VedtaksperiodetilstandDto.START
             TilInfotrygd -> VedtaksperiodetilstandDto.TIL_INFOTRYGD
             TilUtbetaling -> VedtaksperiodetilstandDto.TIL_UTBETALING
+
+            SelvstendigAvsluttet -> VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET
+            SelvstendigAvventerBlokkerendePeriode -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
+            SelvstendigAvventerGodkjenning -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING
+            SelvstendigAvventerHistorikk -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK
+            SelvstendigAvventerInfotrygdHistorikk -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK
+            SelvstendigAvventerSimulering -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING
+            SelvstendigAvventerVilkårsprøving -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
+            SelvstendigStart -> VedtaksperiodetilstandDto.SELVSTENDIG_START
+            SelvstendigTilInfotrygd -> VedtaksperiodetilstandDto.SELVSTENDIG_TIL_INFOTRYGD
+            SelvstendigTilUtbetaling -> VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING
         },
         skjæringstidspunkt = this.skjæringstidspunkt,
         fom = this.periode.start,

@@ -16,6 +16,6 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK, forventedeFagområder = setOf("SP"))
-        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING")
+        assertTilstander(0, "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK", "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE", "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING", "SELVSTENDIG_AVVENTER_HISTORIKK", "SELVSTENDIG_AVVENTER_SIMULERING")
     }
 }
