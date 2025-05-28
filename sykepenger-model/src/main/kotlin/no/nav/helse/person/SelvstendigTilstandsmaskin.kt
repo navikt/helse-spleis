@@ -1,12 +1,9 @@
 package no.nav.helse.person
 
-import java.time.Period
 import no.nav.helse.etterlevelse.`fvl § 35 ledd 1`
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
-import no.nav.helse.hendelser.Påminnelse.Predikat.VentetMinst
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.TilstandType.SELVSTENDIG_AVSLUTTET
@@ -23,10 +20,8 @@ import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
 import no.nav.helse.person.Venteårsak.Hva.BEREGNING
 import no.nav.helse.person.Venteårsak.Hva.GODKJENNING
 import no.nav.helse.person.Venteårsak.Hva.HJELP
-import no.nav.helse.person.Venteårsak.Hva.SØKNAD
 import no.nav.helse.person.Venteårsak.Hva.UTBETALING
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SY_4
 
 internal data object SelvstendigStart : Vedtaksperiodetilstand {
     override val type = SELVSTENDIG_START
@@ -84,9 +79,6 @@ internal data object SelvstendigAvventerInfotrygdHistorikk : Vedtaksperiodetilst
 internal data object SelvstendigAvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     override val type: TilstandType = SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-        check(!vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
-            "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}"
-        }
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
@@ -123,8 +115,6 @@ internal data object SelvstendigAvventerBlokkerendePeriode : Vedtaksperiodetilst
         vedtaksperiode: Vedtaksperiode,
     ): Tilstand {
         return when {
-            vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode) -> AvventerTidligereEllerOverlappendeSøknad
-
             vedtaksperiode.vilkårsgrunnlag == null -> KlarForVilkårsprøving
             else -> KlarForBeregning
         }
@@ -135,20 +125,6 @@ internal data object SelvstendigAvventerBlokkerendePeriode : Vedtaksperiodetilst
         fun venterPå(): Vedtaksperiode? = null
         fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg)
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
-    }
-
-    private data object AvventerTidligereEllerOverlappendeSøknad : Tilstand {
-        override fun venteårsak() = SØKNAD.utenBegrunnelse
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden")
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            if (påminnelse.når(VentetMinst(Period.ofMonths(3))) || påminnelse.når(Flagg("forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere"))) {
-                aktivitetslogg.varsel(RV_SY_4)
-                vedtaksperiode.person.fjernSykmeldingsperiode(vedtaksperiode.periode)
-            }
-        }
     }
 
     private data object KlarForVilkårsprøving : Tilstand {
