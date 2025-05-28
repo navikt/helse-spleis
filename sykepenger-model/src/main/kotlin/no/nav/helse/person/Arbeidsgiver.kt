@@ -448,7 +448,6 @@ internal class Arbeidsgiver private constructor(
         utbetaling: Utbetaling
     ) {
         utbetalinger.validerNyUtbetaling(utbetaling)
-        utbetalinger.lastOrNull()?.forkast(aktivitetslogg)
         check(utbetalinger.tillaterOpprettelseAvUtbetaling(utbetaling)) { "Har laget en overlappende utbetaling" }
         utbetalinger.add(utbetaling)
         utbetaling.registrer(this)

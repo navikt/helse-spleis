@@ -16,6 +16,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -24,6 +25,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
@@ -96,14 +98,14 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `annullere senere periode enn perioden til godkjenning`() {
         nyttVedtak(mars)
         tilGodkjenning(januar, a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        assertUgyldigSituasjon("forventer at utbetaling i behandlingstilstand BEREGNET skal være IKKE_UTBETALT, men var FORKASTET") {
-            håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
-        }
-        assertUgyldigSituasjon("forventer at utbetaling i behandlingstilstand BEREGNET skal være IKKE_UTBETALT, men var FORKASTET") {
-            håndterUtbetalt()
-        }
-        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+        nullstillTilstandsendringer()
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
+        håndterUtbetalt()
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, TIL_INFOTRYGD)
+        assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
     }
 
     @Test
