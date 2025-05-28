@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -22,30 +20,11 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
         a1 {
             håndterSøknad(3.januar til 18.januar)
             nullstillTilstandsendringer()
-            assertUgyldigSituasjon("En vedtaksperiode i AVSLUTTET_UTEN_UTBETALING trenger hjelp fordi VIL_OMGJØRES!") {
-                håndterSøknad(19.januar til 31.januar, egenmeldinger = listOf(1.januar til 3.januar))
-            }
-
-            assertForventetFeil(
-                forklaring = "egenmeldingsdagene på forlengelsen burde påvirke vedtaksperioden",
-                nå = {
-                    assertEquals(listOf(3.januar til 18.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-                },
-                ønsket = {
-                    assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-                }
-            )
+            håndterSøknad(19.januar til 31.januar, egenmeldinger = listOf(1.januar til 3.januar))
+            assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
             assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
 
-            assertForventetFeil(
-                forklaring = "vedtaksperioden burde gå ut av auu automatisk",
-                nå = {
-                    assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                },
-                ønsket = {
-                    assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_INNTEKTSMELDING)
-                }
-            )
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         }
     }

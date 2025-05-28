@@ -247,7 +247,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetsloggMedVedtaksperiodekontekst.info("Fullført behandling av søknad")
 
         if (aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeilEllerVerre()) forkast(søknad, aktivitetslogg)
-        return Revurderingseventyr.nyPeriode(søknad, skjæringstidspunkt, periode)
+        return Revurderingseventyr.nyPeriode(søknad, skjæringstidspunkt, behandlinger.egenmeldingsdager().plusElement(periode).periode()!!)
     }
 
     internal fun håndterKorrigertSøknad(søknad: Søknad, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
