@@ -82,13 +82,10 @@ internal data object SelvstendigAvventerBlokkerendePeriode : Vedtaksperiodetilst
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak? {
-        return tilstand(vedtaksperiode).venteårsak()
-    }
+    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = null
 
     override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode): VedtaksperiodeVenter? {
-        val venterPå = tilstand(vedtaksperiode).venterPå() ?: nestemann
-        return vedtaksperiode.vedtaksperiodeVenter(venterPå)
+        return vedtaksperiode.vedtaksperiodeVenter(nestemann)
     }
 
     override fun gjenopptaBehandling(
@@ -96,10 +93,13 @@ internal data object SelvstendigAvventerBlokkerendePeriode : Vedtaksperiodetilst
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) =
-        tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, hendelse, aktivitetslogg)
+        if (vedtaksperiode.vilkårsgrunnlag == null) {
+            vedtaksperiode.tilstand(aktivitetslogg, SelvstendigAvventerVilkårsprøving)
+        } else {
+            vedtaksperiode.tilstand(aktivitetslogg, SelvstendigAvventerHistorikk)
+        }
 
     override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-        tilstand(vedtaksperiode).håndter(vedtaksperiode, påminnelse, aktivitetslogg)
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
@@ -109,42 +109,6 @@ internal data object SelvstendigAvventerBlokkerendePeriode : Vedtaksperiodetilst
         aktivitetslogg: IAktivitetslogg
     ) {
         vedtaksperiode.behandlinger.forkastUtbetaling(aktivitetslogg)
-    }
-
-    private fun tilstand(
-        vedtaksperiode: Vedtaksperiode,
-    ): Tilstand {
-        return when {
-            vedtaksperiode.vilkårsgrunnlag == null -> KlarForVilkårsprøving
-            else -> KlarForBeregning
-        }
-    }
-
-    private sealed interface Tilstand {
-        fun venteårsak(): Venteårsak? = null
-        fun venterPå(): Vedtaksperiode? = null
-        fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg)
-        fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
-    }
-
-    private data object KlarForVilkårsprøving : Tilstand {
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Hendelse,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(aktivitetslogg, SelvstendigAvventerVilkårsprøving)
-        }
-    }
-
-    private data object KlarForBeregning : Tilstand {
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Hendelse,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(aktivitetslogg, SelvstendigAvventerHistorikk)
-        }
     }
 }
 
