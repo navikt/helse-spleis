@@ -27,7 +27,7 @@ jobs:
           distribution: 'temurin'
           java-version: '21.x'
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
       - name: test and build
         run: ./gradlew :sykepenger-opprydding-dev:test :sykepenger-opprydding-dev:build
       - name: build docker image
