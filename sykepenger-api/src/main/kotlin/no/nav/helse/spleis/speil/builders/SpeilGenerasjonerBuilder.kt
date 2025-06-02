@@ -228,13 +228,39 @@ internal class SpeilGenerasjonerBuilder(
                 else -> Periodetilstand.Utbetalt
             }
 
-            Utbetalingstatus.Ubetalt -> when {
-                periodetilstand in setOf(VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING, VedtaksperiodetilstandDto.AVVENTER_GODKJENNING) -> Periodetilstand.TilGodkjenning
-                periodetilstand in setOf(VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING, VedtaksperiodetilstandDto.AVVENTER_SIMULERING, VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING) -> Periodetilstand.ForberederGodkjenning
-                periodetilstand in setOf(VedtaksperiodetilstandDto.AVVENTER_HISTORIKK) -> Periodetilstand.ForberederGodkjenning
-                periodetilstand == VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> Periodetilstand.UtbetaltVenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (revurdering)
-                periodetilstand in setOf(VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE, VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING) -> Periodetilstand.VenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (førstegangsvurdering)
-                else -> error("har ikke mappingregel for utbetalingstatus ${utbetalingDTO.status} og periodetilstand=$periodetilstand")
+            Utbetalingstatus.Ubetalt -> when (periodetilstand) {
+                VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING,
+                VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING,
+                VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> Periodetilstand.TilGodkjenning
+
+                VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING,
+                VedtaksperiodetilstandDto.AVVENTER_SIMULERING,
+                VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING,
+                VedtaksperiodetilstandDto.AVVENTER_HISTORIKK,
+                VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK,
+                VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> Periodetilstand.ForberederGodkjenning
+
+                VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> Periodetilstand.UtbetaltVenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (revurdering)
+
+                VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE,
+                VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
+                VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> Periodetilstand.VenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (førstegangsvurdering)
+
+                VedtaksperiodetilstandDto.AVSLUTTET,
+                VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET,
+                VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING,
+                VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK,
+                VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
+                VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING,
+                VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
+                VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                VedtaksperiodetilstandDto.REVURDERING_FEILET,
+                VedtaksperiodetilstandDto.START,
+                VedtaksperiodetilstandDto.SELVSTENDIG_START,
+                VedtaksperiodetilstandDto.TIL_INFOTRYGD,
+                VedtaksperiodetilstandDto.SELVSTENDIG_TIL_INFOTRYGD,
+                VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING,
+                VedtaksperiodetilstandDto.TIL_UTBETALING -> error("har ikke mappingregel for utbetalingstatus ${utbetalingDTO.status} og periodetilstand=$periodetilstand")
             }
 
             Utbetalingstatus.Godkjent,
