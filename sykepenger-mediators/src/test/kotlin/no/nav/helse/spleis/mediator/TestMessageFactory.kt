@@ -364,8 +364,8 @@ internal class TestMessageFactory(
         historiskeFolkeregisteridenter: List<String> = emptyList(),
         sendTilGosys: Boolean? = false,
         egenmeldingerFraSykmelding: List<LocalDate> = emptyList(),
-        selvstendigNaringsdrivende: SelvstendigNaringsdrivendeDTO? = selvstendigNæringsdrivende(),
-        venteperiode: HendelsePeriode
+        venteperiode: HendelsePeriode,
+        selvstendigNaringsdrivende: SelvstendigNaringsdrivendeDTO? = selvstendigNæringsdrivende(venteperiode),
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }
         val sendtSøknad = SykepengesoknadDTO(
@@ -405,7 +405,8 @@ internal class TestMessageFactory(
         )
     }
 
-    private fun selvstendigNæringsdrivende(): SelvstendigNaringsdrivendeDTO = SelvstendigNaringsdrivendeDTO(
+    //TODO Ta i bruk venteperiode når flex oppdaterer sin datastruktur for selvstendig næringsdrivende
+    private fun selvstendigNæringsdrivende(venteperiode: HendelsePeriode): SelvstendigNaringsdrivendeDTO = SelvstendigNaringsdrivendeDTO(
         roller = emptyList(),
         naringsdrivendeInntekt = NaringsdrivendeInntektDTO(
             norskPersonidentifikator = "12345678912",
