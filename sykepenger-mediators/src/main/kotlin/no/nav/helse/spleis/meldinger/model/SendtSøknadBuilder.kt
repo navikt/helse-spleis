@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger.model
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Merknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -18,6 +19,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
     private val perioder = mutableListOf<Søknadsperiode>()
     private val merkander = mutableListOf<Merknad>()
     private var inntekterFraNyeArbeidsforhold: Boolean = false
+    private var venteperiode: Periode? = null
     private var opprinneligSendt: LocalDateTime? = null
     private var harAndreInntektskilder: Boolean = false
     private var ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false
@@ -44,7 +46,8 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         registrert = registrert,
         søknadstype = søknadstype,
         inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
-        pensjonsgivendeInntekter = pensjonsgivendeInntekter
+        pensjonsgivendeInntekter = pensjonsgivendeInntekter,
+        venteperiode = venteperiode
     )
 
     fun arbeidsledigsøknad() {

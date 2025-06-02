@@ -93,7 +93,8 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         egenmeldinger: List<Periode> = emptyList(),
         søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker,
         registrert: LocalDateTime = LocalDateTime.now(),
-        inntekterFraNyeArbeidsforhold: Boolean = false
+        inntekterFraNyeArbeidsforhold: Boolean = false,
+        venteperiode: Periode? = null
     ): Søknad {
         return Søknad(
             meldingsreferanseId = MeldingsreferanseId(id),
@@ -114,7 +115,8 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             søknadstype = søknadstype,
             registrert = registrert,
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
-            pensjonsgivendeInntekter = null
+            pensjonsgivendeInntekter = null,
+            venteperiode = venteperiode
         ).apply {
             søknader.add(this)
         }

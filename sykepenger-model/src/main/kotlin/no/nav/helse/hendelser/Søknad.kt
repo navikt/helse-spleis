@@ -75,7 +75,8 @@ class Søknad(
     private val søknadstype: Søknadstype,
     registrert: LocalDateTime,
     private val inntekterFraNyeArbeidsforhold: Boolean,
-    private val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>?
+    private val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>?,
+    private val venteperiode: Periode?
 ) : Hendelse {
 
     override val metadata = HendelseMetadata(
@@ -211,6 +212,7 @@ class Søknad(
             arbeidsgiver = arbeidsgiver,
             sykdomstidslinje = sykdomstidslinje,
             faktaavklartInntekt = faktaavklartInntekt,
+            venteperiode = venteperiode,
             dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
             sykmeldingsperiode = sykdomsperiode,
             regelverkslogg = regelverkslogg
