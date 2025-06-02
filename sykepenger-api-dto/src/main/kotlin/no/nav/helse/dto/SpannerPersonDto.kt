@@ -376,6 +376,7 @@ data class SpannerPersonDto(
             val egenmeldingsdager: List<PeriodeData>,
             val utbetalingstidslinje: List<Any>,
             val arbeidsgiverperiode: List<PeriodeData>,
+            val venteperiode: PeriodeData?,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             val forbrukteDager: Long,
             val gjenståendeDager: Int,
@@ -408,6 +409,7 @@ data class SpannerPersonDto(
                     Gjeldende(
                         skjæringstidspunkt = skjæringstidspunkt,
                         arbeidsgiverperiode = gjeldendeEndring.arbeidsgiverperiode,
+                        venteperiode = gjeldendeEndring.venteperiode,
                         refusjonstidslinje = gjeldendeEndring.refusjonstidslinje.perioder,
                         inntektsendringer = gjeldendeEndring.inntektsendringer.perioder,
                         refusjonstidslinjeHensyntattUbrukteRefusjonsopplysninger = if (behandling.id == sisteBehandlingId) sisteRefusjonstidslinje!!.perioder else emptyList(),
@@ -558,6 +560,7 @@ data class SpannerPersonDto(
                     val inntektsendringer: BeløpstidslinjeData,
                     val dokumentsporing: DokumentsporingData,
                     val arbeidsgiverperiode: List<PeriodeData>,
+                    val venteperiode: PeriodeData?,
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
                     val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
@@ -1209,7 +1212,8 @@ private fun BehandlingendringUtDto.tilPersonData() =
         inntektjusteringer = inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
             inntektskilde.id to beløpstidslinje.tilPersonData()
         }.toMap(),
-        faktaavklartInntekt = faktaavklartInntekt?.tilPersonData()
+        faktaavklartInntekt = faktaavklartInntekt?.tilPersonData(),
+        venteperiode = venteperiode?.let { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
     )
 
 private fun MaksdatoresultatUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatoresultatData(
