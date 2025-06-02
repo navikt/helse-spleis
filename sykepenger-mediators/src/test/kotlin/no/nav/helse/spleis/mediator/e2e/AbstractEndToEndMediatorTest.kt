@@ -30,6 +30,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Periode as Hendelseperiode
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
@@ -324,7 +325,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         opprinneligSendt: LocalDateTime? = null,
         historiskeFolkeregisteridenter: List<String> = emptyList(),
         sendTilGosys: Boolean? = false,
-        egenmeldingerFraSykmelding: List<LocalDate> = emptyList()
+        egenmeldingerFraSykmelding: List<LocalDate> = emptyList(),
+        venteperiode: Hendelseperiode
     ): UUID {
         val (id, message) = meldingsfabrikk.lagSøknadSelvstendig(
             fnr = fnr,
@@ -335,7 +337,8 @@ internal abstract class AbstractEndToEndMediatorTest {
             opprinneligSendt = opprinneligSendt,
             historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
             sendTilGosys = sendTilGosys,
-            egenmeldingerFraSykmelding = egenmeldingerFraSykmelding
+            egenmeldingerFraSykmelding = egenmeldingerFraSykmelding,
+            venteperiode = venteperiode
         )
 
         val antallVedtaksperioderFørSøknad = testRapid.inspektør.vedtaksperiodeteller

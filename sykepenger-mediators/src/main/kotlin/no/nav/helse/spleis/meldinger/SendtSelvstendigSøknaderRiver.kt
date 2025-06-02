@@ -22,6 +22,8 @@ internal class SendtSelvstendigSøknaderRiver(
         message.require("sendtNav", JsonNode::asLocalDateTime)
         message.requireArray("selvstendigNaringsdrivende.naringsdrivendeInntekt.inntekt")
         message.interestedIn("egenmeldingsdagerFraSykmelding") { egenmeldinger -> egenmeldinger.map { it.asLocalDate() } }
+        //message.interestedIn("selvstendigNaringsdrivende.venteperiode.fom", JsonNode::asLocalDate)
+        message.interestedIn("selvstendigNaringsdrivende.venteperiode", JsonNode::asLocalDate)
         message.interestedIn("sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys", "fravar", "papirsykmeldinger", "inntektFraNyttArbeidsforhold")
     }
 

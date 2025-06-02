@@ -19,7 +19,6 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
     private val perioder = mutableListOf<Søknadsperiode>()
     private val merkander = mutableListOf<Merknad>()
     private var inntekterFraNyeArbeidsforhold: Boolean = false
-    private var venteperiode: Periode? = null
     private var opprinneligSendt: LocalDateTime? = null
     private var harAndreInntektskilder: Boolean = false
     private var ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false
@@ -56,6 +55,10 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
 
     internal fun pensjonsgivendeInntekter(pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>) = apply {
         this.pensjonsgivendeInntekter = pensjonsgivendeInntekter
+    }
+
+    internal fun venteperiode(venteperiode: Periode?) = apply {
+        this.venteperiode = venteperiode
     }
 
     override fun inntektskilde(andreInntektskilder: Boolean) = apply {

@@ -28,6 +28,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SvarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Periode as HendelsePeriode
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
@@ -363,7 +364,8 @@ internal class TestMessageFactory(
         historiskeFolkeregisteridenter: List<String> = emptyList(),
         sendTilGosys: Boolean? = false,
         egenmeldingerFraSykmelding: List<LocalDate> = emptyList(),
-        selvstendigNaringsdrivende: SelvstendigNaringsdrivendeDTO? = selvstendigNæringsdrivende()
+        selvstendigNaringsdrivende: SelvstendigNaringsdrivendeDTO? = selvstendigNæringsdrivende(),
+        venteperiode: HendelsePeriode
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }
         val sendtSøknad = SykepengesoknadDTO(
