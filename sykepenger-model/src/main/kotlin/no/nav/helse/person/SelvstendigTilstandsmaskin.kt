@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.etterlevelse.`fvl § 35 ledd 1`
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
@@ -275,16 +274,6 @@ internal data object SelvstendigAvsluttet : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.behandlinger.sikreNyBehandling(
-            vedtaksperiode.arbeidsgiver,
-            revurdering.hendelse.metadata.behandlingkilde,
-            vedtaksperiode.person.beregnSkjæringstidspunkt(),
-            vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
-        )
-        vedtaksperiode.subsumsjonslogg.logg(`fvl § 35 ledd 1`())
-        revurdering.inngåSomRevurdering(vedtaksperiode, aktivitetslogg)
-        // HMM VI BURDE IKKE KOMMA HIT?
-        vedtaksperiode.tilstand(aktivitetslogg, AvventerRevurdering)
     }
 }
 
