@@ -49,12 +49,7 @@ import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektskilde
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
-import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
-import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
-import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -65,6 +60,7 @@ import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderVedtaksperiode
+import no.nav.helse.utbetalingstidslinje.VenteperiodeperiodeForVedtaksperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
@@ -121,6 +117,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     )
 
     internal fun arbeidsgiverperiode() = ArbeidsgiverperiodeForVedtaksperiode(periode(), behandlinger.last().arbeidsgiverperiode)
+    internal fun venteperiode() = VenteperiodeperiodeForVedtaksperiode(periode(), behandlinger.last().venteperiode)
     internal fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet) =
         behandlinger.last().lagUtbetalingstidslinje(fastsattÅrsinntekt, inntektjusteringer, yrkesaktivitet)
 
@@ -553,16 +550,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is Arbeidsgiverdag,
                         is ForeldetSykedag,
                         is SykHelgedag,
+                        is Venteperiodedag,
                         is Sykedag -> true
 
-                        is Dag.AndreYtelser,
-                        is Dag.ArbeidIkkeGjenopptattDag,
-                        is Dag.Arbeidsdag,
-                        is Dag.Feriedag,
-                        is Dag.FriskHelgedag,
-                        is Dag.Permisjonsdag,
-                        is Dag.ProblemDag,
-                        is Dag.UkjentDag -> false
+                        is AndreYtelser,
+                        is ArbeidIkkeGjenopptattDag,
+                        is Arbeidsdag,
+                        is Feriedag,
+                        is FriskHelgedag,
+                        is Permisjonsdag,
+                        is ProblemDag,
+                        is UkjentDag -> false
+
                     }
                 }?.dato
 

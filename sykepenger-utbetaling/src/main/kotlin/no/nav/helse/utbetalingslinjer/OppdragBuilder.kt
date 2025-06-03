@@ -34,6 +34,21 @@ class OppdragBuilder(
         }
     }
 
+    fun venteperiodedag(dato: LocalDate, grad: Int) {
+        when (tilstand) {
+            LinjeMedSats,
+            LinjeUtenSats -> when (dato.erHelg()) {
+                true -> betalingshelgedag(dato, grad)
+                false -> ikkeBetalingsdag()
+            }
+
+            MellomLinjer -> {
+                // trenger ikke gjøre noe
+            }
+        }
+    }
+
+
     fun betalingsdag(dato: LocalDate, beløp: Int, grad: Int) {
         val nyLinje = nyLinje(beløp, dato, grad)
 

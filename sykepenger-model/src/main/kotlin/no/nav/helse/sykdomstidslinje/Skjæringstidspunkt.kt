@@ -49,6 +49,7 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
                 is Dag.Arbeidsgiverdag,
                 is Dag.ForeldetSykedag,
                 is Dag.SykHelgedag,
+                is Dag.Venteperiodedag,
                 is Dag.Sykedag -> søkekontekst.potensieltSkjæringstidspunkt(dato)
 
                 is Dag.Permisjonsdag -> søkekontekst

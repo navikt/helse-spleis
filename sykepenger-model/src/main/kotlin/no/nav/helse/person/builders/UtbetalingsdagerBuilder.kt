@@ -19,6 +19,8 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
             is Utbetalingsdag.ArbeidsgiverperiodeDag,
             is Utbetalingsdag.ArbeidsgiverperiodedagNav -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag)
 
+            is Utbetalingsdag.Venteperiodedag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.Venteperiodedag)
+
             is Utbetalingsdag.NavDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.NavDag)
             is Utbetalingsdag.NavHelgDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag)
             is Utbetalingsdag.Fridag -> {
@@ -40,7 +42,9 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                     is Dag.ProblemDag,
                     is Dag.SykHelgedag,
                     is Dag.Sykedag,
+                    is Dag.Venteperiodedag,
                     is Dag.UkjentDag -> PersonObserver.Utbetalingsdag(dag.dato, Fridag)
+
                 }
             }
 
@@ -54,6 +58,7 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
 
             is Utbetalingsdag.ForeldetDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.ForeldetDag)
             is Utbetalingsdag.UkjentDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.UkjentDag)
+
         }
     }
 

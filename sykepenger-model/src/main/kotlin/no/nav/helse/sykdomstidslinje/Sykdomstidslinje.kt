@@ -17,22 +17,10 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
-import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
+import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse
-import no.nav.helse.sykdomstidslinje.Dag.ArbeidIkkeGjenopptattDag
-import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
-import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
-import no.nav.helse.sykdomstidslinje.Dag.Feriedag
-import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
-import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
-import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
-import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.økonomi.Prosentdel
 
 class Sykdomstidslinje private constructor(
@@ -168,6 +156,7 @@ class Sykdomstidslinje private constructor(
                     is FriskHelgedag -> "R"
                     is ForeldetSykedag -> "K"
                     is AndreYtelser -> "Y"
+                    is Venteperiodedag -> "V"
                 }
         }?.trim() ?: "Tom tidslinje"
     }

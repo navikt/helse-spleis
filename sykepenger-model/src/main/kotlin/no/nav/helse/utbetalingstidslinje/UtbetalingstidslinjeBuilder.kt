@@ -18,6 +18,11 @@ internal data class ArbeidsgiverperiodeForVedtaksperiode(
     val arbeidsgiverperioder: List<Periode>
 )
 
+internal data class VenteperiodeperiodeForVedtaksperiode(
+    val vedtaksperiode: Periode,
+    val venteperiode: Periode
+)
+
 internal class UtbetalingstidslinjeBuilderVedtaksperiode(
     private val dekningsgrad: Prosentdel,
     private val arbeidsgiverperiode: List<Periode>,
@@ -57,6 +62,8 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
                     if (erAGP(dag.dato)) arbeidsgiverperiodedagEllerNavAnsvar(builder, dag.dato, dag.grad)
                     else avvistDag(builder, dag.dato, dag.grad, Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode)
                 }
+
+                is Dag.Venteperiodedag -> TODO()
 
                 is Dag.Sykedag -> {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedagEllerNavAnsvar(builder, dag.dato, dag.grad)

@@ -172,6 +172,24 @@ sealed class Utbetalingsdag(
         }
     }
 
+    class Venteperiodedag(dato: LocalDate, økonomi: Økonomi) :
+        Utbetalingsdag(dato, økonomi) {
+        override val prioritet = 40 // Mellom ArbeidsgiverperiodeDag og NavDag
+        override fun kopierMed(økonomi: Økonomi) = ForeldetDag(dato, økonomi)
+        override fun dto(dato: LocalDate, økonomi: ØkonomiUtDto) =
+            UtbetalingsdagUtDto.ForeldetDagDto(dato, økonomi)
+
+        internal companion object {
+            fun gjenopprett(dto: UtbetalingsdagInnDto.ForeldetDagDto): ForeldetDag {
+                return ForeldetDag(
+                    dato = dto.dato,
+                    økonomi = Økonomi.gjenopprett(dto.økonomi)
+                )
+            }
+        }
+    }
+
+
     class UkjentDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 0
         override fun kopierMed(økonomi: Økonomi) = UkjentDag(dato, økonomi)
