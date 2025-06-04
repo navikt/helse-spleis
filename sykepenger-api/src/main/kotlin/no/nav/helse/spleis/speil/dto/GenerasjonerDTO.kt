@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.dto.BeløpstidslinjeDto
+import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
 import no.nav.helse.spleis.speil.builders.ISpleisGrunnlag
 import no.nav.helse.spleis.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.spleis.speil.dto.Periodetilstand.IngenUtbetaling
@@ -145,7 +146,8 @@ data class BeregnetPeriode(
     val utbetaling: Utbetaling,
     val periodevilkår: Vilkår,
     val vilkårsgrunnlagId: UUID,
-    val refusjonstidslinje: BeløpstidslinjeDto // TODO: Legge til denne i GraphQL
+    val refusjonstidslinje: BeløpstidslinjeDto, // TODO: Legge til denne i GraphQL
+    val pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>
 ) : SpeilTidslinjeperiode() {
     override fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): BeregnetPeriode {
         val vilkårsgrunnlag = vilkårsgrunnlagId.let { vilkårsgrunnlaghistorikk.leggIBøtta(it) }

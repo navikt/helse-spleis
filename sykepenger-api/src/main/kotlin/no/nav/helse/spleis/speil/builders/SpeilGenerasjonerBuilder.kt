@@ -162,7 +162,8 @@ internal class SpeilGenerasjonerBuilder(
             utbetaling = utbetaling,
             periodevilkår = periodevilkår(sisteSykepengedag, utbetaling, alder, skjæringstidspunkt),
             vilkårsgrunnlagId = sisteEndring.vilkårsgrunnlagId!!,
-            refusjonstidslinje = mapRefusjonstidslinje(arbeidsgiverUtDto.ubrukteRefusjonsopplysninger, generasjon.id, sisteEndring.refusjonstidslinje)
+            refusjonstidslinje = mapRefusjonstidslinje(arbeidsgiverUtDto.ubrukteRefusjonsopplysninger, generasjon.id, sisteEndring.refusjonstidslinje),
+            pensjonsgivendeInntekter = sisteEndring.faktaavklartInntekt?.pensjonsgivendeInntekt ?: emptyList()
         )
     }
 

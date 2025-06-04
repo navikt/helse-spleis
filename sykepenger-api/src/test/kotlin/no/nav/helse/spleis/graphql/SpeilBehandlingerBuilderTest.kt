@@ -2,12 +2,20 @@ package no.nav.helse.spleis.graphql
 
 import java.time.LocalDate
 import java.time.LocalDate.EPOCH
+import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.halvG
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
+import no.nav.helse.dto.InntektDto
+import no.nav.helse.dto.InntektbeløpDto.DagligDouble
+import no.nav.helse.dto.InntektbeløpDto.DagligInt
+import no.nav.helse.dto.InntektbeløpDto.MånedligDouble
+import no.nav.helse.dto.InntektbeløpDto.Årlig
+import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto
 import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -16,6 +24,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.PensjonsgivendeInntekt
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -26,6 +35,8 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.september
 import no.nav.helse.spleis.speil.dto.AnnullertPeriode
+import no.nav.helse.spleis.speil.dto.Arbeidsgiverinntekt
+import no.nav.helse.spleis.speil.dto.Arbeidsgiverrefusjon
 import no.nav.helse.spleis.speil.dto.BeregnetPeriode
 import no.nav.helse.spleis.speil.dto.Inntekt
 import no.nav.helse.spleis.speil.dto.Inntektkilde
@@ -62,12 +73,73 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
+internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
+
+    @Test
+    fun `Selvstendig næringsdrivende med inntekt under 6G mappes riktig`() = Toggle.SelvstendigNæringsdrivende.enable {
+        håndterSøknadSelvstendig(1.januar til 31.januar)
+        håndterVilkårsgrunnlagSelvstendig()
+        håndterYtelserSelvstendig()
+
+        val forventetPensjonsgivendeInntekt = listOf(
+            PensjonsgivendeInntektDto(årstall = Year.of(2017), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
+            PensjonsgivendeInntektDto(årstall = Year.of(2016), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
+            PensjonsgivendeInntektDto(årstall = Year.of(2015), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730)))
+        )
+
+        generasjoner(organisasjonsnummer = selvstendig) {
+            assertEquals(1, size)
+            0.generasjon {
+                beregnetPeriode(0).also {
+                    assertEquals(460589.0, it.vilkårsgrunnlag().beregningsgrunnlag)
+                    assertEquals(460589.0, it.vilkårsgrunnlag().sykepengegrunnlag)
+                    assertEquals(1.januar, it.vilkårsgrunnlag().skjæringstidspunkt)
+                    assertEquals(listOf(Arbeidsgiverrefusjon(arbeidsgiver = selvstendig, refusjonsopplysninger = emptyList())), it.vilkårsgrunnlag().arbeidsgiverrefusjoner)
+                    assertEquals(emptyList<Arbeidsgiverinntekt>(), it.vilkårsgrunnlag().inntekter)
+                    assertEquals(forventetPensjonsgivendeInntekt, it.pensjonsgivendeInntekter)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `Selvstendig næringsdrivende med inntekt over 6G mappes riktig`() = Toggle.SelvstendigNæringsdrivende.enable {
+        håndterSøknadSelvstendig(
+            1.januar til 31.januar, pensjonsgivendeInntekter = listOf(
+            PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig),
+            PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig),
+            PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig),
+        )
+        )
+        håndterVilkårsgrunnlagSelvstendig()
+        håndterYtelserSelvstendig()
+
+        val forventetPensjonsgivendeInntekt = listOf(
+            PensjonsgivendeInntektDto(årstall = Year.of(2017), beløp = InntektDto(årlig = Årlig(beløp = 1_000_000.0), månedligDouble = MånedligDouble(beløp = 83_333.33333333333), dagligDouble = DagligDouble(beløp = 3846.153846153846), dagligInt = DagligInt(beløp = 3846))),
+            PensjonsgivendeInntektDto(årstall = Year.of(2016), beløp = InntektDto(årlig = Årlig(beløp = 1_000_000.0), månedligDouble = MånedligDouble(beløp = 83_333.33333333333), dagligDouble = DagligDouble(beløp = 3846.153846153846), dagligInt = DagligInt(beløp = 3846))),
+            PensjonsgivendeInntektDto(årstall = Year.of(2015), beløp = InntektDto(årlig = Årlig(beløp = 1_000_000.0), månedligDouble = MånedligDouble(beløp = 83_333.33333333333), dagligDouble = DagligDouble(beløp = 3846.153846153846), dagligInt = DagligInt(beløp = 3846)))
+        )
+
+        generasjoner(organisasjonsnummer = selvstendig) {
+            assertEquals(1, size)
+            0.generasjon {
+                beregnetPeriode(0).also {
+                    assertEquals(715713.0, it.vilkårsgrunnlag().beregningsgrunnlag)
+                    assertEquals(561804.0, it.vilkårsgrunnlag().sykepengegrunnlag)
+                    assertEquals(1.januar, it.vilkårsgrunnlag().skjæringstidspunkt)
+                    assertEquals(listOf(Arbeidsgiverrefusjon(arbeidsgiver = selvstendig, refusjonsopplysninger = emptyList())), it.vilkårsgrunnlag().arbeidsgiverrefusjoner)
+                    assertEquals(emptyList<Arbeidsgiverinntekt>(), it.vilkårsgrunnlag().inntekter)
+                    assertEquals(forventetPensjonsgivendeInntekt, it.pensjonsgivendeInntekter)
+                }
+            }
+        }
+    }
 
     @Test
     fun `En periode i AvventerInntektsmelding venter på inntektsopplysninger`() {

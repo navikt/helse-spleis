@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class SpeilBuilderTest : AbstractE2ETest() {
+internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
     fun `selv om vi har refusjonsopplysninger fra begge arbeidsgivere mappes det kun ut for den som har beregnet perioder`() {

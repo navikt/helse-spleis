@@ -3,8 +3,9 @@ package no.nav.helse.spleis.graphql
 import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
+import java.time.Year
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedDeque
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
@@ -22,6 +23,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.PensjonsgivendeInntekt
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
@@ -36,27 +38,31 @@ import no.nav.helse.spleis.speil.serializePersonForSpeil
 import no.nav.helse.spleis.testhelpers.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.testhelpers.PersonHendelsefabrikk
+import no.nav.helse.spleis.testhelpers.SelvstendigHendelsefabrikk
 import no.nav.helse.spleis.testhelpers.TestObservatør
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.BeforeEach
 
-internal abstract class AbstractE2ETest {
+internal abstract class AbstractSpeilBuilderTest {
     protected companion object {
         private const val UNG_PERSON_FNR = "12029240045"
         private val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         const val a1 = "a1"
         const val a2 = "a2"
         const val a3 = "a3"
+        const val selvstendig = "SELVSTENDIG"
         val INNTEKT = 48000.månedlig
 
         private val personfabrikk = PersonHendelsefabrikk()
         private val a1fabrikk = ArbeidsgiverHendelsefabrikk(a1)
         private val a2fabrikk = ArbeidsgiverHendelsefabrikk(a2)
         private val a3fabrikk = ArbeidsgiverHendelsefabrikk(a3)
+        private val selvstendigFabrikk = SelvstendigHendelsefabrikk()
         private val fabrikker = mapOf(
             a1 to a1fabrikk,
             a2 to a2fabrikk,
@@ -114,6 +120,30 @@ internal abstract class AbstractE2ETest {
         return håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), sykmeldingSkrevet = periode.start.atStartOfDay(), sendtTilNAV = periode.endInclusive.atStartOfDay(), orgnummer = orgnummer)
     }
 
+    protected fun håndterSøknadSelvstendig(
+        periode: Periode,
+        pensjonsgivendeInntekter: List<PensjonsgivendeInntekt> = listOf(
+            PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
+            PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
+            PensjonsgivendeInntekt(Year.of(2015), 450000.årlig),
+        )
+    ): UUID {
+        val søknadId = UUID.randomUUID()
+        val søknad = selvstendigFabrikk.lagSøknad(
+            Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent),
+            sykmeldingSkrevet = 1.januar.atStartOfDay(),
+            sendtTilNAVEllerArbeidsgiver = 1.januar.atStartOfDay(),
+            id = søknadId,
+            pensjonsgivendeInntekter = pensjonsgivendeInntekter
+        )
+        søknad.håndter(Person::håndter)
+
+        val behov = hendelselogg.infotrygdhistorikkbehov()
+        if (behov != null) håndterUtbetalingshistorikkSelvstendig(behov.vedtaksperiodeId)
+
+        return søknadId
+    }
+
     protected fun håndterSøknad(
         vararg perioder: Søknad.Søknadsperiode,
         sykmeldingSkrevet: LocalDateTime = 1.januar.atStartOfDay(),
@@ -154,6 +184,12 @@ internal abstract class AbstractE2ETest {
 
     protected fun håndterUtbetalingshistorikk(vedtaksperiodeId: UUID, orgnummer: String) {
         (fabrikker.getValue(orgnummer).lagUtbetalingshistorikk(
+            vedtaksperiodeId = vedtaksperiodeId
+        )).håndter(Person::håndter)
+    }
+
+    protected fun håndterUtbetalingshistorikkSelvstendig(vedtaksperiodeId: UUID) {
+        (selvstendigFabrikk.lagUtbetalingshistorikk(
             vedtaksperiodeId = vedtaksperiodeId
         )).håndter(Person::håndter)
     }
@@ -296,6 +332,18 @@ internal abstract class AbstractE2ETest {
         )
     }
 
+    protected fun håndterVilkårsgrunnlagSelvstendig(vedtaksperiodeId: UUID = 1.vedtaksperiode.id(selvstendig), skjæringstidspunkt: LocalDate = 1.januar) {
+        val behov = hendelselogg.vilkårsgrunnlagbehov() ?: error("Fant ikke vilkårsgrunnlagbehov")
+        selvstendigFabrikk.lagVilkårsgrunnlag(
+            vedtaksperiodeId = vedtaksperiodeId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            arbeidsforhold = emptyList(),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
+            inntekterForOpptjeningsvurdering = InntekterForOpptjeningsvurdering(emptyList())
+        ).håndter(Person::håndter)
+    }
+
     protected fun grunnlag(orgnr: String, skjæringstidspunkt: LocalDate, inntekter: List<Inntekt>) =
         ArbeidsgiverInntekt(
             arbeidsgiver = orgnr,
@@ -336,6 +384,11 @@ internal abstract class AbstractE2ETest {
     protected fun håndterYtelser() {
         val ytelsebehov = hendelselogg.ytelserbehov() ?: error("Fant ikke ytelserbehov")
         fabrikker.getValue(ytelsebehov.orgnummer).lagYtelser(vedtaksperiodeId = ytelsebehov.vedtaksperiodeId).håndter(Person::håndter)
+    }
+
+    protected fun håndterYtelserSelvstendig() {
+        val ytelsebehov = hendelselogg.ytelserbehov() ?: error("Fant ikke ytelserbehov")
+        selvstendigFabrikk.lagYtelser(vedtaksperiodeId = ytelsebehov.vedtaksperiodeId).håndter(Person::håndter)
     }
 
     protected fun håndterSimulering() {

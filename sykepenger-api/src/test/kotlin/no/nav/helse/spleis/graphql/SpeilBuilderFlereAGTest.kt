@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
+internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
 
     @Test
     fun `lager ikke hvit pølse i helg`() {
