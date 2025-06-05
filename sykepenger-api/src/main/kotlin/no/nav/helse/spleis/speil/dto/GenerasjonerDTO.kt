@@ -64,6 +64,7 @@ sealed class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
     abstract val periodetilstand: Periodetilstand
     abstract val skjæringstidspunkt: LocalDate
     abstract val hendelser: Set<UUID>
+    abstract val pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>
     internal open fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): SpeilTidslinjeperiode {
         return this
     }
@@ -104,7 +105,7 @@ data class UberegnetPeriode(
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
     override val hendelser: Set<UUID>,
-    val pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>
+    override val pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>
 ) : SpeilTidslinjeperiode() {
     override fun toString(): String {
         return "${fom.format()}-${tom.format()} - $periodetilstand"
@@ -148,7 +149,7 @@ data class BeregnetPeriode(
     val periodevilkår: Vilkår,
     val vilkårsgrunnlagId: UUID,
     val refusjonstidslinje: BeløpstidslinjeDto, // TODO: Legge til denne i GraphQL
-    val pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>
+    override val pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>
 ) : SpeilTidslinjeperiode() {
     override fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): BeregnetPeriode {
         val vilkårsgrunnlag = vilkårsgrunnlagId.let { vilkårsgrunnlaghistorikk.leggIBøtta(it) }
@@ -195,6 +196,7 @@ data class AnnullertPeriode(
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val hendelser: Set<UUID>,
+    override val pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>,
 
     // todo: feltet brukes så og si ikke i speil, kan fjernes fra graphql
     // verdien av ID-en brukes ifm. å lage en unik ID for notatet om utbetalingene.

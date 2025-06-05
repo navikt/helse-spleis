@@ -1,7 +1,8 @@
 package no.nav.helse.spleis.graphql
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
+import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
 import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.dto.HendelsetypeDto
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverinntekt
@@ -17,6 +18,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLInntektskilde
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektsmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLOmregnetArsinntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLOppdrag
+import no.nav.helse.spleis.graphql.dto.GraphQLPensjonsgivendeInntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetype
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodevilkar
@@ -316,6 +318,9 @@ private fun mapPeriodevilkår(vilkår: BeregnetPeriode.Vilkår) = GraphQLPeriode
     }
 )
 
+private fun mapPensjonsgivendeInntekter(pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>) =
+    pensjonsgivendeInntekter.map { GraphQLPensjonsgivendeInntekt(it.årstall.value, it.beløp.årlig.beløp) }
+
 private fun mapPeriodetype(type: Tidslinjeperiodetype) = when (type) {
     Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING -> GraphQLPeriodetype.Forstegangsbehandling
     Tidslinjeperiodetype.FORLENGELSE -> GraphQLPeriodetype.Forlengelse
@@ -339,7 +344,8 @@ internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List
             vedtaksperiodeId = periode.vedtaksperiodeId,
             periodetilstand = mapTilstand(periode.periodetilstand),
             skjaeringstidspunkt = periode.skjæringstidspunkt,
-            hendelser = periode.hendelser.tilHendelseDTO(hendelser)
+            hendelser = periode.hendelser.tilHendelseDTO(hendelser),
+            pensjonsgivendeInntekter = mapPensjonsgivendeInntekter(periode.pensjonsgivendeInntekter)
         )
     }
 
@@ -363,7 +369,8 @@ private fun mapBeregnetPeriode(periode: BeregnetPeriode, hendelser: List<Hendels
         hendelser = periode.hendelser.tilHendelseDTO(hendelser),
         periodevilkar = mapPeriodevilkår(periode.periodevilkår),
         periodetilstand = mapTilstand(periode.periodetilstand),
-        vilkarsgrunnlagId = periode.vilkårsgrunnlagId
+        vilkarsgrunnlagId = periode.vilkårsgrunnlagId,
+        pensjonsgivendeInntekter = mapPensjonsgivendeInntekter(periode.pensjonsgivendeInntekter)
     )
 
 private fun mapAnnullertPeriode(periode: AnnullertPeriode, hendelser: List<HendelseDTO>) =
@@ -398,7 +405,8 @@ private fun mapAnnullertPeriode(periode: AnnullertPeriode, hendelser: List<Hende
             )
         ),
         periodetilstand = mapTilstand(periode.periodetilstand),
-        vilkarsgrunnlagId = null
+        vilkarsgrunnlagId = null,
+        pensjonsgivendeInntekter = mapPensjonsgivendeInntekter(periode.pensjonsgivendeInntekter)
     )
 
 private fun Set<UUID>.tilHendelseDTO(hendelser: List<HendelseDTO>): List<GraphQLHendelse> {
@@ -476,6 +484,7 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
             skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
             omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt,
             sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag,
+            beregningsgrunnlag = vilkårsgrunnlag.beregningsgrunnlag,
             inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(vilkårsgrunnlag.skjæringstidspunkt, inntekt) },
             grunnbelop = vilkårsgrunnlag.grunnbeløp,
             sykepengegrunnlagsgrense = mapSykepengergrunnlagsgrense(vilkårsgrunnlag.sykepengegrunnlagsgrense),

@@ -1018,6 +1018,29 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "pensjonsgivendeInntekter",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "LIST",
+              "name" : null,
+              "ofType" : {
+                "kind" : "NON_NULL",
+                "name" : null,
+                "ofType" : {
+                  "kind" : "OBJECT",
+                  "name" : "GraphQLPensjonsgivendeInntekt",
+                  "ofType" : null
+                }
+              }
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "periodetilstand",
           "description" : null,
           "args" : [ ],
@@ -1214,6 +1237,45 @@
           "name" : "GraphQLSykmelding",
           "ofType" : null
         } ]
+      }, {
+        "kind" : "OBJECT",
+        "name" : "GraphQLPensjonsgivendeInntekt",
+        "description" : "",
+        "fields" : [ {
+          "name" : "arligBelop",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "Float",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "inntektsar",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "Int",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        } ],
+        "inputFields" : null,
+        "interfaces" : [ ],
+        "enumValues" : null,
+        "possibleTypes" : null
       }, {
         "kind" : "OBJECT",
         "name" : "GraphQLDag",
@@ -3915,6 +3977,29 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "pensjonsgivendeInntekter",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "LIST",
+              "name" : null,
+              "ofType" : {
+                "kind" : "NON_NULL",
+                "name" : null,
+                "ofType" : {
+                  "kind" : "OBJECT",
+                  "name" : "GraphQLPensjonsgivendeInntekt",
+                  "ofType" : null
+                }
+              }
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "periodetilstand",
           "description" : null,
           "args" : [ ],
@@ -4368,6 +4453,29 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "pensjonsgivendeInntekter",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "LIST",
+              "name" : null,
+              "ofType" : {
+                "kind" : "NON_NULL",
+                "name" : null,
+                "ofType" : {
+                  "kind" : "OBJECT",
+                  "name" : "GraphQLPensjonsgivendeInntekt",
+                  "ofType" : null
+                }
+              }
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "periodetilstand",
           "description" : null,
           "args" : [ ],
@@ -4654,6 +4762,21 @@
                   "ofType" : null
                 }
               }
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "beregningsgrunnlag",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "Float",
+              "ofType" : null
             }
           },
           "isDeprecated" : false,

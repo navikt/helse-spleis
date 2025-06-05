@@ -192,6 +192,7 @@ interface GraphQLTidslinjeperiode {
     val vedtaksperiodeId: UUID
     val periodetilstand: GraphQLPeriodetilstand
     val skjaeringstidspunkt: LocalDate
+    val pensjonsgivendeInntekter: List<GraphQLPensjonsgivendeInntekt>
 }
 
 data class GraphQLUberegnetPeriode(
@@ -206,7 +207,8 @@ data class GraphQLUberegnetPeriode(
     override val vedtaksperiodeId: UUID,
     override val periodetilstand: GraphQLPeriodetilstand,
     override val skjaeringstidspunkt: LocalDate,
-    override val hendelser: List<GraphQLHendelse>
+    override val hendelser: List<GraphQLHendelse>,
+    override val pensjonsgivendeInntekter: List<GraphQLPensjonsgivendeInntekt>
 ) : GraphQLTidslinjeperiode {
     @Suppress("unused", "verdien av feltet brukes ikke i speil (brukes bare for å sjekke !=null i speil)")
     override val inntektstype: GraphQLInntektstype get() = GraphQLInntektstype.EnArbeidsgiver
@@ -243,6 +245,7 @@ data class GraphQLBeregnetPeriode(
     override val periodetilstand: GraphQLPeriodetilstand,
     override val skjaeringstidspunkt: LocalDate,
     override val hendelser: List<GraphQLHendelse>,
+    override val pensjonsgivendeInntekter: List<GraphQLPensjonsgivendeInntekt>,
     val beregningId: UUID,
     val gjenstaendeSykedager: Int?,
     val forbrukteSykedager: Int?,
@@ -267,4 +270,9 @@ data class GraphQLPeriodisertInntekt(
     val fom: LocalDate,
     val tom: LocalDate,
     val dagligBelop: Double
+)
+
+data class GraphQLPensjonsgivendeInntekt(
+    val inntektsar: Int,
+    val arligBelop: Double
 )

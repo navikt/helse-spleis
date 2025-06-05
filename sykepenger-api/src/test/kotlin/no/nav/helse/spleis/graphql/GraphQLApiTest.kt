@@ -166,6 +166,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                   "periodetype": "Forstegangsbehandling",
                   "periodetilstand": "Utbetalt",
                   "skjaeringstidspunkt": "2018-01-01",
+                  "pensjonsgivendeInntekter": [],
                   "tidslinje": [
                     {
                       "begrunnelser": null,
@@ -743,6 +744,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
           "omregnetArsinntekt": 372000.0,
           "skjaeringstidspunkt": "2018-01-01",
           "sykepengegrunnlag": 372000.0,
+          "beregningsgrunnlag": 372000.0,
           "__typename": "GraphQLSpleisVilkarsgrunnlag",
           "antallOpptjeningsdagerErMinst": 365,
           "grunnbelop": 93634,

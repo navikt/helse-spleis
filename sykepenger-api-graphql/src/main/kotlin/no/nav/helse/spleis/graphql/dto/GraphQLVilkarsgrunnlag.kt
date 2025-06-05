@@ -21,6 +21,7 @@ data class GraphQLSpleisVilkarsgrunnlag(
     override val sykepengegrunnlag: Double,
     override val inntekter: List<GraphQLArbeidsgiverinntekt>,
     override val arbeidsgiverrefusjoner: List<GraphQLArbeidsgiverrefusjon>,
+    val beregningsgrunnlag: Double,
     val grunnbelop: Int,
     val sykepengegrunnlagsgrense: GraphQLSykepengegrunnlagsgrense,
     val antallOpptjeningsdagerErMinst: Int,

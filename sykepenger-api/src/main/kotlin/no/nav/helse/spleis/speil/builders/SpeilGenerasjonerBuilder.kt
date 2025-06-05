@@ -198,6 +198,7 @@ internal class SpeilGenerasjonerBuilder(
             periodetilstand = annulleringen.periodetilstand,
             hendelser = dokumenterTilOgMedDenneGenerasjonen(vedtaksperiode, generasjon),
             beregningId = annulleringen.id,
+            pensjonsgivendeInntekter = sisteEndring.faktaavklartInntekt?.pensjonsgivendeInntekt ?: emptyList(),
             utbetaling = Utbetaling(
                 annulleringen.id,
                 Utbetalingtype.ANNULLERING,
