@@ -82,6 +82,26 @@ import org.junit.jupiter.api.Test
 internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
+    fun `Selvstendig har pensjonsgivende inntekt også på uberegnet periode`() = Toggle.SelvstendigNæringsdrivende.enable {
+        håndterSøknadSelvstendig(1.januar til 31.januar)
+
+        val forventetPensjonsgivendeInntekt = listOf(
+            PensjonsgivendeInntektDto(årstall = Year.of(2017), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
+            PensjonsgivendeInntektDto(årstall = Year.of(2016), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
+            PensjonsgivendeInntektDto(årstall = Year.of(2015), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730)))
+        )
+
+        generasjoner(organisasjonsnummer = selvstendig) {
+            assertEquals(1, size)
+            0.generasjon {
+                uberegnetPeriode(0).also {
+                    assertEquals(forventetPensjonsgivendeInntekt, it.pensjonsgivendeInntekter)
+                }
+            }
+        }
+    }
+
+    @Test
     fun `Selvstendig næringsdrivende med inntekt under 6G mappes riktig`() = Toggle.SelvstendigNæringsdrivende.enable {
         håndterSøknadSelvstendig(1.januar til 31.januar)
         håndterVilkårsgrunnlagSelvstendig()

@@ -119,17 +119,25 @@ internal class SpeilGenerasjonerBuilder(
             oppdatert = sisteEndring.tidsstempel,
             skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
             hendelser = dokumenterTilOgMedDenneGenerasjonen(vedtaksperiode, generasjon),
+            pensjonsgivendeInntekter = sisteEndring.faktaavklartInntekt?.pensjonsgivendeInntekt ?: emptyList(),
             periodetilstand = periodetilstand ?: generasjon.avsluttet?.let { Periodetilstand.IngenUtbetaling } ?: when (vedtaksperiode.tilstand) {
                 is VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> Periodetilstand.UtbetaltVenterPåAnnenPeriode
+
+                is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
                 is VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> Periodetilstand.VenterPåAnnenPeriode
 
                 is VedtaksperiodetilstandDto.AVVENTER_HISTORIKK,
+                is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK,
                 is VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING,
                 is VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING,
+                is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
                 is VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> Periodetilstand.ForberederGodkjenning
 
                 is VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> Periodetilstand.AvventerInntektsopplysninger
+
+                is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
                 is VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK -> Periodetilstand.ManglerInformasjon
+
                 else -> error("Forventer ikke mappingregel for ${vedtaksperiode.tilstand}")
             }
 

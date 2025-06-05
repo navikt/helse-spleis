@@ -103,7 +103,8 @@ data class UberegnetPeriode(
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
-    override val hendelser: Set<UUID>
+    override val hendelser: Set<UUID>,
+    val pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>
 ) : SpeilTidslinjeperiode() {
     override fun toString(): String {
         return "${fom.format()}-${tom.format()} - $periodetilstand"
