@@ -699,7 +699,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                     }
                   },
                   "vilkarsgrunnlagId": "00000000-0000-0000-0000-000000000000",
-                  "inntekter": [],
                   "kilde": "00000000-0000-0000-0000-000000000000"
                 }
               ]

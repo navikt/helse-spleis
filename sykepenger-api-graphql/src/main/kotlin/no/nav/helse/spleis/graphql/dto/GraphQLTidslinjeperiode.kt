@@ -256,9 +256,6 @@ data class GraphQLBeregnetPeriode(
 ) : GraphQLTidslinjeperiode {
     @Suppress("unused", "verdien av feltet brukes ikke i speil (brukes bare for å sjekke !=null i speil)")
     override val inntektstype: GraphQLInntektstype get() = GraphQLInntektstype.EnArbeidsgiver
-
-    @Suppress("unused", "TODO: denne skal fjernes når Speilvendt har fjernet den på sin ende")
-    val inntekter: List<GraphQLInntekt> = emptyList()
 }
 
 data class GraphQLInntekt(
