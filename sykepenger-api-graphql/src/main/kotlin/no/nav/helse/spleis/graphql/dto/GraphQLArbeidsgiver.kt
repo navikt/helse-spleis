@@ -19,22 +19,9 @@ data class GraphQLGhostPeriode(
     val organisasjonsnummer: String
 )
 
-data class GraphQLNyttInntektsforholdPeriode(
-    val id: UUID,
-    val organisasjonsnummer: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val dagligBelop: Double,
-    val manedligBelop: Double,
-    val skjaeringstidspunkt: LocalDate
-)
-
 data class GraphQLArbeidsgiver(
     val organisasjonsnummer: String,
     val id: UUID,
     val generasjoner: List<GraphQLGenerasjon>,
     val ghostPerioder: List<GraphQLGhostPeriode>
-) {
-    @Suppress("unused", "TODO: TilkommenV4: Denne må være her helt til Speilvendt er klar for å ikke bruke denne/om V3 må mappes inn som dette her")
-    val nyeInntektsforholdPerioder: List<GraphQLNyttInntektsforholdPeriode> = emptyList()
-}
+)
