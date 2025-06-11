@@ -54,6 +54,7 @@ import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.somPeriode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
@@ -503,6 +504,13 @@ class Person private constructor(
 
     internal fun annullert(event: PersonObserver.UtbetalingAnnullertEvent) {
         observers.forEach { it.annullering(event) }
+    }
+
+    internal fun finnAnnulleringskandidater(vedtaksperiodeId: UUID): Set<Vedtaksperiode> {
+        val vedtaksperiodeSomForsøkesAnnullert = arbeidsgivere.vedtaksperioder { it.id == vedtaksperiodeId }.first()
+        val arbeidsgiverperioder = vedtaksperiodeSomForsøkesAnnullert.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder
+        val søkevindu = arbeidsgiverperioder.first().start til arbeidsgiverperioder.last().endInclusive
+        return arbeidsgivere.flatMap { it.vedtaksperioderKnyttetTilArbeidsgiverperiode(søkevindu) }.toSet()
     }
 
     internal fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {
