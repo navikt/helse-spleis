@@ -31,6 +31,30 @@ interface PersonObserver {
         val skjæringstidspunkt: LocalDate
     )
 
+    data class AnalytiskDatapakkeEvent(
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val vedtaksperiodeId: UUID,
+        val behandlingId: UUID,
+        val skjæringstidspunkt: LocalDate,
+        val beløpTilBruker: Pengeinformasjon,
+        val beløpTilArbeidsgiver: Pengeinformasjon,
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val antallForbrukteSykedagerEtterPeriode: Daginformasjon,
+        val antallGjenståendeSykedagerEtterPeriode: Daginformasjon,
+        val harAndreInntekterIBeregning: Boolean
+    ) {
+        data class Pengeinformasjon (
+            val totalBeløp: Double,
+            val nettoBeløp: Double
+        )
+        data class Daginformasjon(
+            val antallDager: Int,
+            val nettoDager: Int
+        )
+    }
+
+
     data class VedtaksperiodeVenterEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
@@ -488,6 +512,7 @@ interface PersonObserver {
     fun feriepengerUtbetalt(event: FeriepengerUtbetaltEvent) {}
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun avsluttetMedVedtak(event: AvsluttetMedVedtakEvent) {}
+    fun analytiskDatapakke(event: AnalytiskDatapakkeEvent) {}
 
     fun behandlingLukket(event: BehandlingLukketEvent) {}
     fun behandlingForkastet(event: BehandlingForkastetEvent) {}

@@ -561,6 +561,10 @@ class Person private constructor(
         observers.forEach { it.avsluttetMedVedtak(avsluttetMedVedtakEvent) }
     }
 
+    internal fun analytiskDatapakke(analytiskDatapakkeEvent: PersonObserver.AnalytiskDatapakkeEvent) {
+        observers.forEach { it.analytiskDatapakke(analytiskDatapakkeEvent) }
+    }
+
     internal fun behandlingLukket(behandlingLukketEvent: PersonObserver.BehandlingLukketEvent) {
         observers.forEach { it.behandlingLukket(behandlingLukketEvent) }
     }

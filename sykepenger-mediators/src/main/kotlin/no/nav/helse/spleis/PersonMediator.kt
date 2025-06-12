@@ -635,6 +635,36 @@ internal class PersonMediator(
         )
     }
 
+    override fun analytiskDatapakke(event: PersonObserver.AnalytiskDatapakkeEvent) {
+        queueMessage(
+            JsonMessage.newMessage(
+                "analytisk_datapakke",
+                mapOf(
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "behandlingId" to event.behandlingId,
+                    "skjæringstidspunkt" to event.skjæringstidspunkt,
+                    "beløpTilBruker" to mapOf(
+                        "totalBeløp" to event.beløpTilBruker.totalBeløp,
+                        "nettoBeløp" to event.beløpTilBruker.nettoBeløp
+                    ),
+                    "beløpTilArbeidsgiver" to event.beløpTilArbeidsgiver,
+                    "fom" to event.fom,
+                    "tom" to event.tom,
+                    "antallForbrukteSykedagerEtterPeriode" to mapOf(
+                        "antallDager" to event.antallForbrukteSykedagerEtterPeriode.antallDager,
+                        "nettoDager" to event.antallForbrukteSykedagerEtterPeriode.nettoDager
+                    ),
+                    "antallGjenståendeSykedagerEtterPeriode" to mapOf(
+                        "antallDager" to event.antallGjenståendeSykedagerEtterPeriode.antallDager,
+                        "nettoDager" to event.antallGjenståendeSykedagerEtterPeriode.nettoDager
+                    ),
+                    "harAndreInntekterIBeregning" to event.harAndreInntekterIBeregning
+                )
+            )
+        )
+    }
+
     override fun sykefraværstilfelleIkkeFunnet(event: PersonObserver.SykefraværstilfelleIkkeFunnet) {
         queueMessage(
             JsonMessage.newMessage(
