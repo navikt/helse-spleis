@@ -45,6 +45,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val overlappendeInfotrygdperioder = mutableListOf<PersonObserver.OverlappendeInfotrygdperioder>()
     val utkastTilVedtakEventer = mutableListOf<PersonObserver.UtkastTilVedtakEvent>()
     val sykefraværstilfelleIkkeFunnet = mutableListOf<PersonObserver.SykefraværstilfelleIkkeFunnet>()
+    val analytiskDatapakkeEventer = mutableListOf<PersonObserver.AnalytiskDatapakkeEvent>()
 
     private lateinit var sisteVedtaksperiode: UUID
     private val vedtaksperioder = person?.inspektør?.vedtaksperioder()?.mapValues { (_, perioder) ->
@@ -72,6 +73,10 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
     fun kvitterInntektsmeldingReplay(vedtaksperiodeId: UUID) {
         inntektsmeldingReplayEventer.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }
+    }
+
+    override fun analytiskDatapakke(event: PersonObserver.AnalytiskDatapakkeEvent) {
+        this.analytiskDatapakkeEventer.add(event)
     }
 
     override fun vedtaksperioderVenter(eventer: List<PersonObserver.VedtaksperiodeVenterEvent>) {

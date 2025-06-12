@@ -39,6 +39,7 @@ import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentspo
 import no.nav.helse.person.Dokumentsporing.Companion.eksterneIder
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
+import no.nav.helse.person.PersonObserver.AnalytiskDatapakkeEvent
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.aktivitetslogg.Aktivitet
@@ -128,6 +129,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal val dagerNavOvertarAnsvar get() = behandlinger.last().dagerNavOvertarAnsvar
     internal val faktaavklartInntekt get() = behandlinger.last().faktaavklartInntekt
 
+    internal fun analytiskDatapakke(yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, vedtaksperiodeId: UUID): AnalytiskDatapakkeEvent {
+        val forrigeBehandling = behandlinger.dropLast(1).lastOrNull()
+        return behandlinger.last().analytiskDatapakke(forrigeBehandling, yrkesaktivitetssporing, vedtaksperiodeId)
+    }
     internal fun utbetalingstidslinje() = behandlinger.last().utbetalingstidslinje()
     internal fun skjæringstidspunkt() = behandlinger.last().skjæringstidspunkt
     internal fun skjæringstidspunkter() = behandlinger.last().skjæringstidspunkter
@@ -466,6 +471,38 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         fun periode() = periode
         fun behandlingVenter(builder: VedtaksperiodeVenter.Builder) {
             builder.behandlingVenter(id)
+        }
+
+        fun analytiskDatapakke(
+            forrigeBehandling: Behandling?,
+            yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+            vedtaksperiodeId: UUID
+        ): AnalytiskDatapakkeEvent {
+            return AnalytiskDatapakkeEvent(
+                yrkesaktivitetssporing = yrkesaktivitetssporing,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = this.id,
+                skjæringstidspunkt = this.skjæringstidspunkt,
+                beløpTilBruker = AnalytiskDatapakkeEvent.Pengeinformasjon(
+                    totalBeløp = this.utbetalingstidslinje.totalbeløpPerson.daglig,
+                    nettoBeløp = this.utbetalingstidslinje.totalbeløpPerson.daglig - (forrigeBehandling?.utbetalingstidslinje?.totalbeløpPerson?.daglig ?: 0.0),
+                ),
+                beløpTilArbeidsgiver = AnalytiskDatapakkeEvent.Pengeinformasjon(
+                    totalBeløp = this.utbetalingstidslinje.totalbeløpRefusjon.daglig,
+                    nettoBeløp = this.utbetalingstidslinje.totalbeløpRefusjon.daglig - (forrigeBehandling?.utbetalingstidslinje?.totalbeløpRefusjon?.daglig ?: 0.0),
+                ),
+                fom = this.periode.start,
+                tom = this.periode.endInclusive,
+                antallForbrukteSykedagerEtterPeriode = AnalytiskDatapakkeEvent.Daginformasjon(
+                    antallDager = this.maksdato.antallForbrukteDager,
+                    nettoDager = this.maksdato.antallForbrukteDager - (forrigeBehandling?.maksdato?.antallForbrukteDager ?: 0)
+                ),
+                antallGjenståendeSykedagerEtterPeriode = AnalytiskDatapakkeEvent.Daginformasjon(
+                    antallDager = this.maksdato.gjenståendeDager,
+                    nettoDager = this.maksdato.gjenståendeDager - (forrigeBehandling?.maksdato?.gjenståendeDager ?: 0)
+                ),
+                harAndreInntekterIBeregning = this.inntektsendringer.isNotEmpty()
+            )
         }
 
         fun utbetalingstidslinje() = gjeldende.utbetalingstidslinje

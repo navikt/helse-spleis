@@ -32,13 +32,13 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
 
     private val førsteDato get() = utbetalingsdager.firstKey()
     private val sisteDato get() = utbetalingsdager.lastKey()
-    private val totalbeløpPerson = this
+    val totalbeløpPerson = this
         .mapNotNull { it.økonomi.personbeløp }
         .summer()
-    private val totalbeløpRefusjon = this
+    val totalbeløpRefusjon = this
         .mapNotNull { it.økonomi.arbeidsgiverbeløp }
         .summer()
-    private val totalbeløp = totalbeløpPerson + totalbeløpRefusjon
+    val totalbeløp = totalbeløpPerson + totalbeløpRefusjon
 
     constructor(utbetalingsdager: Collection<Utbetalingsdag>) : this(utbetalingsdager.associateBy { it.dato }.toSortedMap()) {
         check(utbetalingsdager.distinctBy { it.dato }.size == utbetalingsdager.size) {

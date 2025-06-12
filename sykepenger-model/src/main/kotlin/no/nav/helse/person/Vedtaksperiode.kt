@@ -1833,6 +1833,7 @@ internal class Vedtaksperiode private constructor(
         // Til ettertanke: Her er vi aldri innom "behandlinger"-nivå, så får ikke "Grunnbeløpsregulering"-tag, men AvsluttetMedVedtak har jo ikke tags nå uansett.
         behandling.berik(utkastTilVedtakBuilder)
         person.avsluttetMedVedtak(utkastTilVedtakBuilder.buildAvsluttedMedVedtak(vedtakFattetTidspunkt, eksterneIder))
+        person.analytiskDatapakke(behandlinger.analytiskDatapakke(this.arbeidsgiver.yrkesaktivitetssporing, this.id))
         person.gjenopptaBehandling(aktivitetslogg)
     }
 
