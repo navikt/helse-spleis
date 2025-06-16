@@ -35,7 +35,8 @@ internal class HendelseDao(private val dataSource: () -> DataSource, private val
         val statement = """
             SELECT melding_type, data FROM melding 
             WHERE fnr=:fnr AND (melding_type = 'NY_SØKNAD' OR melding_type = 'SENDT_SØKNAD_NAV' OR melding_type = 'SENDT_SØKNAD_FRILANS'
-                OR melding_type = 'SENDT_SØKNAD_SELVSTENDIG' OR melding_type = 'SENDT_SØKNAD_ARBEIDSGIVER' OR melding_type = 'SENDT_SØKNAD_ARBEIDSLEDIG' 
+                OR melding_type = 'SENDT_SØKNAD_SELVSTENDIG' OR melding_type = 'SENDT_SØKNAD_ARBEIDSGIVER' 
+                OR melding_type = 'SENDT_SØKNAD_ARBEIDSLEDIG' OR melding_type = 'SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER'
                 OR melding_type = 'INNTEKTSMELDING' OR melding_type = 'NAV_NO_SELVBESTEMT_INNTEKTSMELDING' OR melding_type = 'NAV_NO_KORRIGERT_INNTEKTSMELDING' OR melding_type = 'NAV_NO_INNTEKTSMELDING' 
                 OR melding_type = 'SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER')
         """
