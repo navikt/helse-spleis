@@ -38,7 +38,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     fun `kun én vedtaksperiode skal annulleres`() {
         nyttVedtak(januar)
 
-        val vedtaksperiodeTilAnnullering = person.finnAnnulleringskandidater(1.vedtaksperiode.id(a1)).map { it.id }.toSet()
+        val vedtaksperiodeTilAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
         assertEquals(setOf(1.vedtaksperiode.id(a1)), vedtaksperiodeTilAnnullering)
     }
 
@@ -47,7 +47,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         forlengVedtak(februar)
 
-        val vedtaksperioderTilAnnullering = person.finnAnnulleringskandidater(1.vedtaksperiode.id(a1)).map { it.id }.toSet()
+        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
         assertEquals(setOf(1.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
     }
 
@@ -56,7 +56,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         forlengVedtak(februar)
 
-        val vedtaksperioderTilAnnullering = person.finnAnnulleringskandidater(2.vedtaksperiode.id(a1)).map { it.id }.toSet()
+        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(2.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
         assertEquals(setOf(1.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
     }
 
@@ -66,7 +66,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         forlengVedtak(februar)
         forlengVedtak(mars)
 
-        val vedtaksperioderTilAnnullering = person.finnAnnulleringskandidater(2.vedtaksperiode.id(a1)).map { it.id }.toSet()
+        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(2.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
         assertEquals(setOf(1.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a1), 3.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
     }
 
@@ -76,17 +76,17 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         forlengVedtak(februar)
         nyttVedtak(april, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
 
-        val vedtaksperioderTilAnnullering = person.finnAnnulleringskandidater(2.vedtaksperiode.id(a1)).map { it.id }.toSet()
+        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(2.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
         assertEquals(setOf(1.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
     }
 
     @Test
-    fun `annullerer perioder på tvers av arbeidsgivere ved samme sykefravær`() {
+    fun `annullerer ikke ennå perioder på tvers av arbeidsgivere ved samme sykefravær`() {
         nyeVedtak(januar, a1, a2)
         forlengVedtak(februar, a1, a2)
 
-        val vedtaksperioderTilAnnullering = person.finnAnnulleringskandidater(1.vedtaksperiode.id(a1)).map { it.id }.toSet()
-        assertEquals(setOf(1.vedtaksperiode.id(a1), 1.vedtaksperiode.id(a2), 2.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a2)), vedtaksperioderTilAnnullering)
+        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
+        assertEquals(setOf(1.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
     }
 
     @Test

@@ -54,13 +54,13 @@ import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
+import no.nav.helse.person.Arbeidsgiver.Companion.finnAnnulleringskandidater
 import no.nav.helse.person.Arbeidsgiver.Companion.fjernSykmeldingsperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
@@ -506,12 +506,7 @@ class Person private constructor(
         observers.forEach { it.annullering(event) }
     }
 
-    internal fun finnAnnulleringskandidater(vedtaksperiodeId: UUID): Set<Vedtaksperiode> {
-        val vedtaksperiodeSomForsøkesAnnullert = arbeidsgivere.vedtaksperioder { it.id == vedtaksperiodeId }.first()
-        val arbeidsgiverperioder = vedtaksperiodeSomForsøkesAnnullert.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder
-        val søkevindu = arbeidsgiverperioder.first().start til arbeidsgiverperioder.last().endInclusive
-        return arbeidsgivere.flatMap { it.vedtaksperioderKnyttetTilArbeidsgiverperiode(søkevindu) }.toSet()
-    }
+    internal fun finnAnnulleringskandidater(vedtaksperiode: Vedtaksperiode) = arbeidsgivere.finnAnnulleringskandidater(vedtaksperiode)
 
     internal fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {
         observers.forEach { it.vedtaksperiodePåminnet(vedtaksperiodeId, organisasjonsnummer, påminnelse) }

@@ -36,6 +36,7 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.mursteinsperioder
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
@@ -64,6 +65,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
+import no.nav.helse.person.Vedtaksperiode.Companion.medSammeUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
@@ -188,6 +190,8 @@ internal class Arbeidsgiver private constructor(
                 }
             }
         }
+
+        internal fun List<Arbeidsgiver>.finnAnnulleringskandidater(vedtaksperiode: Vedtaksperiode) = flatMap { it.finnAnnulleringskandidater(vedtaksperiode) }.toSet()
 
         internal fun List<Arbeidsgiver>.venter(nestemann: Vedtaksperiode) =
             flatMap { arbeidsgiver -> arbeidsgiver.vedtaksperioder.venter(nestemann) }
@@ -734,6 +738,20 @@ internal class Arbeidsgiver private constructor(
         annullering.håndter(hendelse, aktivitetslogg)
         looper { vedtaksperiode -> vedtaksperiode.nyAnnullering(aktivitetslogg) }
         return annullering
+    }
+
+    internal fun finnAnnulleringskandidater(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
+        if (vedtaksperioder.none { it === vedtaksperiodeSomForsøkesAnnullert }) return emptySet()
+        return vedtaksperioderMedSammeAgp(vedtaksperiodeSomForsøkesAnnullert) + vedtaksperioderMedSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert)
+    }
+
+    private fun vedtaksperioderMedSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
+        return vedtaksperioder.medSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert)
+    }
+
+    private fun vedtaksperioderMedSammeAgp(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
+        val arbeidsgiverperiode = vedtaksperiodeSomForsøkesAnnullert.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode() ?: return setOf(vedtaksperiodeSomForsøkesAnnullert)
+        return vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).toSet()
     }
 
     internal fun håndter(hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {

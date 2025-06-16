@@ -2034,6 +2034,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     internal fun dto() = BehandlingerUtDto(behandlinger = this.behandlinger.map { it.dto() })
+
+    internal fun harSammeUtbetalingSom(annenVedtaksperiode: Vedtaksperiode): Boolean {
+        val sisteVedtak = behandlinger.lastOrNull { it.erFattetVedtak() } ?: return false
+        return annenVedtaksperiode.behandlinger.siste?.let { sisteVedtak.utbetaling()?.hørerSammen(it) } ?: false
+    }
 }
 
 internal data class BehandlingerView(

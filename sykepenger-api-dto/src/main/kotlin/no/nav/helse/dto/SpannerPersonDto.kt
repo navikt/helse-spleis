@@ -401,7 +401,8 @@ data class SpannerPersonDto(
             private val vilkårsgrunnlag: VilkårsgrunnlagElementData?,
             private val utbetaling: UtbetalingData?,
             private val sisteBehandlingId: UUID?,
-            private val sisteRefusjonstidslinje: BeløpstidslinjeData?
+            private val sisteRefusjonstidslinje: BeløpstidslinjeData?,
+            val annulleringskandidater: List<AnnulleringskandidatDto>
         ) {
             @Suppress("unused", "Denne vises i Spanner sånn at man slipper å gå på siste behandling på siste endring")
             val gjeldende = behandlinger.last().let { behandling ->
@@ -460,6 +461,13 @@ data class SpannerPersonDto(
                 SELVSTENDIG_TIL_INFOTRYGD,
                 SELVSTENDIG_AVSLUTTET,
             }
+
+            data class AnnulleringskandidatDto(
+                val vedtaksperiodeId: UUID,
+                val organisasjonsnummer: String,
+                val fom: LocalDate,
+                val tom: LocalDate
+            )
 
             data class VedtaksperiodeVenterDto(
                 val ventetSiden: LocalDateTime,
@@ -1092,7 +1100,8 @@ private fun VedtaksperiodeUtDto.tilPersonData(
     vilkårsgrunnlag = vilkårsgrunnlag,
     utbetaling = utbetaling,
     sisteBehandlingId,
-    sisteRefusjonstidslinje
+    sisteRefusjonstidslinje,
+    annulleringskandidater = annulleringskandidater.map { SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.AnnulleringskandidatDto(it.vedtaksperiodeId, it.organisasjonsnummer, it.fom, it.tom) }
 )
 
 private fun utledVenteårsak(venteårsak: LazyVedtaksperiodeVenterDto): SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeVenterDto? {

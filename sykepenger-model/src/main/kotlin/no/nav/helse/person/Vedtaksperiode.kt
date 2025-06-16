@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`1G`
+import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
@@ -219,7 +220,8 @@ internal class Vedtaksperiode private constructor(
         egenmeldingsdager = behandlinger.egenmeldingsdager(),
         behandlinger = behandlinger.view(),
         førsteFraværsdag = førsteFraværsdag,
-        skalBehandlesISpeil = skalBehandlesISpeil()
+        skalBehandlesISpeil = skalBehandlesISpeil(),
+        annulleringskandidater = person.finnAnnulleringskandidater(this)
     )
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
@@ -2191,6 +2193,8 @@ internal class Vedtaksperiode private constructor(
         return filtrerUtbetalingstidslinjer(aktivitetslogg, uberegnetTidslinjePerArbeidsgiver, grunnlagsdata)
     }
 
+    private fun harSammeUtbetalingSom(annenVedtaksperiode: Vedtaksperiode) = behandlinger.harSammeUtbetalingSom(annenVedtaksperiode)
+
     private data class Vedtaksperiodeberegningsresultat(
         val vedtaksperiodeId: UUID,
         val utbetalingstidslinje: Utbetalingstidslinje,
@@ -2402,6 +2406,8 @@ internal class Vedtaksperiode private constructor(
 
             return startdatoer.values.toSet()
         }
+
+        internal fun List<Vedtaksperiode>.medSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode) = this.filter { it.harSammeUtbetalingSom(vedtaksperiodeSomForsøkesAnnullert) }.toSet()
 
         internal fun List<Vedtaksperiode>.aktiv(vedtaksperiodeId: UUID) = any { it.id == vedtaksperiodeId }
 
@@ -2617,7 +2623,8 @@ internal class Vedtaksperiode private constructor(
         behandlinger = behandlinger.dto(),
         venteårsak = LazyVedtaksperiodeVenterDto { nestemann?.let { tilstand.venter(this, it)?.dto() } },
         opprettet = opprettet,
-        oppdatert = oppdatert
+        oppdatert = oppdatert,
+        annulleringskandidater = person.finnAnnulleringskandidater(this).map { AnnulleringskandidatDto(it.id, it.arbeidsgiver.organisasjonsnummer, it.periode.start, it.periode.endInclusive) }
     )
 
     private fun IAktivitetslogg.medFeilSomVarslerHvisNødvendig() =
@@ -2639,7 +2646,8 @@ internal data class VedtaksperiodeView(
     val egenmeldingsdager: List<Periode>,
     val behandlinger: BehandlingerView,
     val førsteFraværsdag: LocalDate?,
-    val skalBehandlesISpeil: Boolean
+    val skalBehandlesISpeil: Boolean,
+    val annulleringskandidater: Set<Vedtaksperiode>
 ) {
     val sykdomstidslinje = behandlinger.behandlinger.last().endringer.last().sykdomstidslinje
     val refusjonstidslinje = behandlinger.behandlinger.last().endringer.last().refusjonstidslinje

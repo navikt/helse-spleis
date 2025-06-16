@@ -63,6 +63,13 @@ data class HendelseskildeDto(
     val tidsstempel: LocalDateTime
 )
 
+data class AnnulleringskandidatDto(
+    val vedtaksperiodeId: UUID,
+    val organisasjonsnummer: String,
+    val fom: LocalDate,
+    val tom: LocalDate
+)
+
 sealed class VedtaksperiodetilstandDto {
     data object AVVENTER_HISTORIKK : VedtaksperiodetilstandDto()
     data object AVVENTER_GODKJENNING : VedtaksperiodetilstandDto()
