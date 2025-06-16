@@ -45,7 +45,7 @@ internal class HendelseDao(private val dataSource: () -> DataSource, private val
                 withParameter("fnr", fødselsnummer)
             }.use {
                 it.executeQuery().use { rs ->
-                    rs.mapNotNull { row -> Meldingstype.fra(row.string("melding_type")) to row.string("data") }
+                    rs.mapNotNull { row -> Meldingstype.valueOf(row.string("melding_type")) to row.string("data") }
                 }
             }
         }.mapNotNull { (type, data) ->
@@ -110,6 +110,7 @@ internal class HendelseDao(private val dataSource: () -> DataSource, private val
                         sendtNav = LocalDateTime.parse(node.path("sendtNav").asText())
                     )
 
+                    Meldingstype.SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER,
                     Meldingstype.SENDT_SØKNAD_ARBEIDSLEDIG -> HendelseDTO.sendtSøknadArbeidsledig(
                         id = node.path("@id").asText(),
                         eksternDokumentId = node.path("id").asText(),
@@ -128,6 +129,9 @@ internal class HendelseDao(private val dataSource: () -> DataSource, private val
                         sendtArbeidsgiver = LocalDateTime.parse(node.path("sendtArbeidsgiver").asText())
                     )
 
+                    Meldingstype.NAV_NO_INNTEKTSMELDING,
+                    Meldingstype.NAV_NO_SELVBESTEMT_INNTEKTSMELDING,
+                    Meldingstype.NAV_NO_KORRIGERT_INNTEKTSMELDING,
                     Meldingstype.INNTEKTSMELDING -> HendelseDTO.inntektsmelding(
                         id = node.path("@id").asText(),
                         eksternDokumentId = node.path("inntektsmeldingId").asText(),
@@ -156,16 +160,11 @@ internal class HendelseDao(private val dataSource: () -> DataSource, private val
         SENDT_SØKNAD_SELVSTENDIG,
         SENDT_SØKNAD_ARBEIDSGIVER,
         SENDT_SØKNAD_ARBEIDSLEDIG,
+        SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER,
+        NAV_NO_SELVBESTEMT_INNTEKTSMELDING,
+        NAV_NO_KORRIGERT_INNTEKTSMELDING,
+        NAV_NO_INNTEKTSMELDING,
         INNTEKTSMELDING,
         SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER;
-
-        internal companion object {
-            internal fun fra(verdi: String) = when (verdi) {
-                "NAV_NO_SELVBESTEMT_INNTEKTSMELDING",
-                "NAV_NO_KORRIGERT_INNTEKTSMELDING",
-                "NAV_NO_INNTEKTSMELDING" -> INNTEKTSMELDING
-                else -> valueOf(verdi)
-            }
-        }
     }
 }
