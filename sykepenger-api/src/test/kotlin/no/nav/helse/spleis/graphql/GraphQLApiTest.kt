@@ -166,6 +166,14 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                   "periodetilstand": "Utbetalt",
                   "skjaeringstidspunkt": "2018-01-01",
                   "pensjonsgivendeInntekter": [],
+                  "annulleringskandidater": [
+                      {
+                        "vedtaksperiodeId": "00000000-0000-0000-0000-000000000000",
+                        "organisasjonsnummer": "987654321",
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-30"
+                      }
+                  ],
                   "tidslinje": [
                     {
                       "begrunnelser": null,

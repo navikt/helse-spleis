@@ -4,6 +4,7 @@ import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.desember
+import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagtype
@@ -42,6 +43,19 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
+
+    @Test
+    fun `mapper ut annulleringskandidater på beregnede perioder`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+
+        val annulleringskandidaterFørsteVedtaksperiode = (speilApi().arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).annulleringskandidater
+        val annulleringskandidaterAndreVedtaksperiode = (speilApi().arbeidsgivere.first().generasjoner.first().perioder.last() as BeregnetPeriode).annulleringskandidater
+
+        val forventet = listOf(AnnulleringskandidatDto(1.vedtaksperiode(a1), a1, 1.januar, 31.januar), AnnulleringskandidatDto(2.vedtaksperiode(a1), a1, 1.februar, 28.februar))
+        assertEquals(forventet, annulleringskandidaterFørsteVedtaksperiode)
+        assertEquals(forventet, annulleringskandidaterAndreVedtaksperiode)
+    }
 
     @Test
     fun `selv om vi har refusjonsopplysninger fra begge arbeidsgivere mappes det kun ut for den som har beregnet perioder`() {

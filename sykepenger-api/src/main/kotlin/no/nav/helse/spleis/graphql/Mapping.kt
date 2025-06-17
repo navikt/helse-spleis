@@ -2,9 +2,11 @@ package no.nav.helse.spleis.graphql
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
 import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.dto.HendelsetypeDto
+import no.nav.helse.spleis.graphql.dto.GraphQLAnnulleringskandidat
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverinntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverrefusjon
 import no.nav.helse.spleis.graphql.dto.GraphQLBegrunnelse
@@ -370,8 +372,19 @@ private fun mapBeregnetPeriode(periode: BeregnetPeriode, hendelser: List<Hendels
         periodevilkar = mapPeriodevilkår(periode.periodevilkår),
         periodetilstand = mapTilstand(periode.periodetilstand),
         vilkarsgrunnlagId = periode.vilkårsgrunnlagId,
-        pensjonsgivendeInntekter = mapPensjonsgivendeInntekter(periode.pensjonsgivendeInntekter)
+        pensjonsgivendeInntekter = mapPensjonsgivendeInntekter(periode.pensjonsgivendeInntekter),
+        annulleringskandidater = mapAnnulleringskandidater(periode.annulleringskandidater)
     )
+
+private fun mapAnnulleringskandidater(annulleringskandidater: List<AnnulleringskandidatDto>) =
+    annulleringskandidater.map {
+        GraphQLAnnulleringskandidat(
+            vedtaksperiodeId = it.vedtaksperiodeId,
+            organisasjonsnummer = it.organisasjonsnummer,
+            fom = it.fom,
+            tom = it.tom
+        )
+    }
 
 private fun mapAnnullertPeriode(periode: AnnullertPeriode, hendelser: List<HendelseDTO>) =
     GraphQLBeregnetPeriode(
@@ -406,7 +419,8 @@ private fun mapAnnullertPeriode(periode: AnnullertPeriode, hendelser: List<Hende
         ),
         periodetilstand = mapTilstand(periode.periodetilstand),
         vilkarsgrunnlagId = null,
-        pensjonsgivendeInntekter = mapPensjonsgivendeInntekter(periode.pensjonsgivendeInntekter)
+        pensjonsgivendeInntekter = mapPensjonsgivendeInntekter(periode.pensjonsgivendeInntekter),
+        annulleringskandidater = emptyList()
     )
 
 private fun Set<UUID>.tilHendelseDTO(hendelser: List<HendelseDTO>): List<GraphQLHendelse> {

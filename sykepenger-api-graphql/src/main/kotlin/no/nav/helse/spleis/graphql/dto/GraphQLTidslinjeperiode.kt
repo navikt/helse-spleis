@@ -252,7 +252,8 @@ data class GraphQLBeregnetPeriode(
     val maksdato: LocalDate,
     val utbetaling: GraphQLUtbetaling,
     val periodevilkar: GraphQLPeriodevilkar,
-    val vilkarsgrunnlagId: UUID?
+    val vilkarsgrunnlagId: UUID?,
+    val annulleringskandidater: List<GraphQLAnnulleringskandidat>
 ) : GraphQLTidslinjeperiode {
     @Suppress("unused", "verdien av feltet brukes ikke i speil (brukes bare for å sjekke !=null i speil)")
     override val inntektstype: GraphQLInntektstype get() = GraphQLInntektstype.EnArbeidsgiver
@@ -272,4 +273,11 @@ data class GraphQLPeriodisertInntekt(
 data class GraphQLPensjonsgivendeInntekt(
     val inntektsar: Int,
     val arligBelop: Double
+)
+
+data class GraphQLAnnulleringskandidat(
+    val vedtaksperiodeId: UUID,
+    val organisasjonsnummer: String,
+    val fom: LocalDate,
+    val tom: LocalDate
 )
