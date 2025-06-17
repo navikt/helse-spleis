@@ -158,7 +158,6 @@ internal class Vedtaksperiode private constructor(
     internal constructor(
         egenmeldingsperioder: List<Periode>,
         metadata: HendelseMetadata,
-        aktivitetslogg: IAktivitetslogg,
         person: Person,
         arbeidsgiver: Arbeidsgiver,
         sykdomstidslinje: Sykdomstidslinje,
@@ -182,7 +181,6 @@ internal class Vedtaksperiode private constructor(
         opprettet = LocalDateTime.now(),
         regelverkslogg = regelverkslogg
     ) {
-        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         val periode = checkNotNull(sykdomstidslinje.periode()) { "sykdomstidslinjen er tom" }
         person.vedtaksperiodeOpprettet(id, arbeidsgiver.yrkesaktivitetssporing, periode, periode.start, opprettet)
         behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, egenmeldingsperioder, faktaavklartInntekt, inntektsendringer, venteperiode, dokumentsporing, metadata.behandlingkilde)
@@ -1372,7 +1370,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun registrerKontekst(aktivitetslogg: IAktivitetslogg): IAktivitetslogg {
-        return aktivitetslogg.kontekst(arbeidsgiver).kontekst(this)
+        return aktivitetslogg
+            .kontekst(arbeidsgiver)
+            .kontekst(this)
+            .kontekst(behandlinger)
     }
 
     internal fun tilstand(

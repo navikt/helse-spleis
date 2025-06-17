@@ -207,7 +207,6 @@ class Søknad(
         return Vedtaksperiode(
             egenmeldingsperioder = egenmeldingsperioder(),
             metadata = metadata,
-            aktivitetslogg = aktivitetslogg,
             person = person,
             arbeidsgiver = arbeidsgiver,
             sykdomstidslinje = sykdomstidslinje,

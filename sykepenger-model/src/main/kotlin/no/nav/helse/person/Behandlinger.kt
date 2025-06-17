@@ -43,7 +43,9 @@ import no.nav.helse.person.PersonObserver.AnalytiskDatapakkeEvent
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
@@ -69,7 +71,7 @@ import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderVedtaksperio
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
-internal class Behandlinger private constructor(behandlinger: List<Behandling>) {
+internal class Behandlinger private constructor(behandlinger: List<Behandling>) : Aktivitetskontekst {
     internal constructor() : this(emptyList())
 
     companion object {
@@ -164,6 +166,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun valider(simulering: Simulering, aktivitetslogg: IAktivitetslogg) {
         siste!!.valider(simulering, aktivitetslogg)
+    }
+
+    override fun toSpesifikkKontekst(): SpesifikkKontekst {
+        return SpesifikkKontekst("Behandling", mapOf("behandlingId" to sisteBehandlingId.toString()))
     }
 
     internal fun erKlarForGodkjenning() = siste?.erKlarForGodkjenning() ?: false
