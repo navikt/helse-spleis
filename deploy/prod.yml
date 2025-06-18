@@ -43,6 +43,11 @@ spec:
     path: /metrics
   kafka:
     pool: nav-prod
+  accessPolicy:
+    outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
   gcp:
     sqlInstances:
       - type: POSTGRES_17

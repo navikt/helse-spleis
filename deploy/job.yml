@@ -20,6 +20,11 @@ spec:
   envFrom:
     - secret: "{{avstemming-secret}}"
     - secret: "{{migrate-secret}}"
+  accessPolicy:
+    outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
   gcp:
     permissions:
       - resource:

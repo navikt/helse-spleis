@@ -58,6 +58,8 @@ spec:
         - application: sporing
     outbound:
       rules:
+        - application: logging
+          namespace: nais-system
         - application: spekemat
         - application: speed-api-dev-proxy
   secureLogs:

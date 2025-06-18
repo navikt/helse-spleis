@@ -15,6 +15,11 @@ spec:
     enabled: true
   envFrom:
     - secret: google-sql-spleis
+  accessPolicy:
+    outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
   gcp:
     permissions:
       - resource:
