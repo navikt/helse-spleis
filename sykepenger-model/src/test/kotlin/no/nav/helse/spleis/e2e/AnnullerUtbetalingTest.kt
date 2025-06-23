@@ -52,22 +52,22 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `begge vedtaksperioder annulleres når vi annullerer den siste`() {
+    fun `kun siste vedtaksperiode annulleres når det er denne som forsøkes annullert`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
 
         val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(2.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
-        assertEquals(setOf(1.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
+        assertEquals(setOf(2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
     }
 
     @Test
-    fun `alle vedtaksperioder annulleres når vi annullerer den midterste`() {
+    fun `annullerer bare perioder etter den som forsøkes annullert`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
         forlengVedtak(mars)
 
         val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(2.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
-        assertEquals(setOf(1.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a1), 3.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
+        assertEquals(setOf(2.vedtaksperiode.id(a1), 3.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
     }
 
     @Test
@@ -77,7 +77,32 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(april, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
 
         val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(2.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
+        assertEquals(setOf(2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
+    }
+
+    @Test
+    fun `annullerer også etter kort gap`() {
+        nyttVedtak(januar)
+        nyttVedtak(10.februar til 28.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+
+        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
         assertEquals(setOf(1.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
+    }
+
+    @Test
+    fun `annulleringer på vedtaksperioder med samme utbetaling`() {
+        createPersonMedToVedtakPåSammeFagsystemId()
+
+        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
+        assertEquals(setOf(1.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
+    }
+
+    @Test
+    fun `annullering av siste periode og vedtaksperioder med samme utbetaling`() {
+        createPersonMedToVedtakPåSammeFagsystemId()
+
+        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(2.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
+        assertEquals(setOf(2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
     }
 
     @Test

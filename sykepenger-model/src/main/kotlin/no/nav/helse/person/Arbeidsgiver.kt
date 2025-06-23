@@ -742,16 +742,20 @@ internal class Arbeidsgiver private constructor(
 
     internal fun finnAnnulleringskandidater(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
         if (vedtaksperioder.none { it === vedtaksperiodeSomForsøkesAnnullert }) return emptySet()
-        return vedtaksperioderMedSammeAgp(vedtaksperiodeSomForsøkesAnnullert) + vedtaksperioderMedSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert)
+        // senereVedtaksperioderMedSammeAgp() burde funnet alle vedtaksperioder uavhengig av utbetalingsrigg
+        // MEN vi føler oss litt usikre på om denne klarer å finne alle perioder som ville linket seg på en annen utbetaling på tidligere utbetalingsrigg
+        return senereVedtaksperioderMedSammeAgp(vedtaksperiodeSomForsøkesAnnullert) + vedtaksperioderMedSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert)
     }
 
+    // Utbetalinger gjort på "gammel rigg" (gruppert på samme agp)
     private fun vedtaksperioderMedSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
-        return vedtaksperioder.medSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert)
+        return vedtaksperioder.medSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert).filter { it.periode.start >= vedtaksperiodeSomForsøkesAnnullert.periode.start }.toSet()
     }
 
-    private fun vedtaksperioderMedSammeAgp(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
+    // Utbetalinger gjort på "ny rigg" (én utbetaling per vedtaksperiode)
+    private fun senereVedtaksperioderMedSammeAgp(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
         val arbeidsgiverperiode = vedtaksperiodeSomForsøkesAnnullert.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode() ?: return setOf(vedtaksperiodeSomForsøkesAnnullert)
-        return vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).toSet()
+        return vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).filter { it.periode.start >= vedtaksperiodeSomForsøkesAnnullert.periode.start }.toSet()
     }
 
     internal fun håndter(hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
