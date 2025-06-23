@@ -49,12 +49,13 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
 
-        val annulleringskandidaterFørsteVedtaksperiode = (speilApi().arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).annulleringskandidater
-        val annulleringskandidaterAndreVedtaksperiode = (speilApi().arbeidsgivere.first().generasjoner.first().perioder.last() as BeregnetPeriode).annulleringskandidater
+        val annulleringskandidaterJanuarVedtaksperiode = (speilApi().arbeidsgivere.first().generasjoner.first().perioder.last() as BeregnetPeriode).annulleringskandidater
+        val annulleringskandidaterFebruarVedtaksperiode = (speilApi().arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).annulleringskandidater
 
-        val forventet = listOf(AnnulleringskandidatDto(1.vedtaksperiode(a1), a1, 1.januar, 31.januar), AnnulleringskandidatDto(2.vedtaksperiode(a1), a1, 1.februar, 28.februar))
-        assertEquals(forventet, annulleringskandidaterFørsteVedtaksperiode)
-        assertEquals(forventet, annulleringskandidaterAndreVedtaksperiode)
+        val forventetJanuar = listOf(AnnulleringskandidatDto(1.vedtaksperiode(a1), a1, 1.januar, 31.januar), AnnulleringskandidatDto(2.vedtaksperiode(a1), a1, 1.februar, 28.februar))
+        val forventetFebruar = listOf(AnnulleringskandidatDto(2.vedtaksperiode(a1), a1, 1.februar, 28.februar))
+        assertEquals(forventetJanuar, annulleringskandidaterJanuarVedtaksperiode)
+        assertEquals(forventetFebruar, annulleringskandidaterFebruarVedtaksperiode)
     }
 
     @Test
