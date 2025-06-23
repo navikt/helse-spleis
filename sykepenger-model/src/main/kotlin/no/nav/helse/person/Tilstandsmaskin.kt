@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -1006,6 +1007,16 @@ internal data object RevurderingFeilet : Vedtaksperiodetilstand {
         aktivitetslogg: IAktivitetslogg
     ) {
     }
+}
+
+internal data object AvventerAnnullering : Vedtaksperiodetilstand {
+    override val type = AVVENTER_ANNULLERING
+
+    override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak? {
+        return null
+    }
+
+    override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {}
 }
 
 internal data object TilInfotrygd : Vedtaksperiodetilstand {

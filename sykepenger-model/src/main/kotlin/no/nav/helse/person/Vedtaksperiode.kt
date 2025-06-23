@@ -293,6 +293,7 @@ internal class Vedtaksperiode private constructor(
 
             Start,
             RevurderingFeilet,
+            AvventerAnnullering,
             TilInfotrygd -> error("Kan ikke håndtere søknad mens perioden er i $tilstand")
 
             SelvstendigStart,
@@ -353,6 +354,7 @@ internal class Vedtaksperiode private constructor(
 
             RevurderingFeilet,
             Start,
+            AvventerAnnullering,
             TilInfotrygd -> error("Kan ikke overstyre tidslinjen i $tilstand")
 
             SelvstendigAvsluttet,
@@ -394,6 +396,7 @@ internal class Vedtaksperiode private constructor(
             RevurderingFeilet,
             Start,
             TilInfotrygd,
+            AvventerAnnullering,
             TilUtbetaling -> {
                 if (anmodningOmForkasting.force) return forkast(anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst)
                 aktivitetsloggMedVedtaksperiodekontekst.info("Avslår anmodning om forkasting i $tilstand")
@@ -491,6 +494,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
             AvventerVilkårsprøvingRevurdering,
+            AvventerAnnullering,
             TilUtbetaling -> {
                 aktivitetsloggMedVedtaksperiodekontekst.info("Replayer ikke inntektsmelding fordi tilstanden er $tilstand.")
                 aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
@@ -916,6 +920,7 @@ internal class Vedtaksperiode private constructor(
             RevurderingFeilet,
             Start,
             TilUtbetaling,
+            AvventerAnnullering,
             TilInfotrygd -> {
                 /* gjør ingenting */
             }
@@ -1050,6 +1055,7 @@ internal class Vedtaksperiode private constructor(
             RevurderingFeilet,
             Start,
             TilInfotrygd,
+            AvventerAnnullering,
             TilUtbetaling,
 
             SelvstendigAvsluttet,
@@ -1318,6 +1324,7 @@ internal class Vedtaksperiode private constructor(
             AvventerVilkårsprøvingRevurdering,
             RevurderingFeilet,
             TilInfotrygd,
+            AvventerAnnullering,
             TilUtbetaling,
 
             SelvstendigAvsluttet,
@@ -2519,6 +2526,7 @@ internal class Vedtaksperiode private constructor(
                     VedtaksperiodetilstandDto.START -> Start
                     VedtaksperiodetilstandDto.TIL_INFOTRYGD -> TilInfotrygd
                     VedtaksperiodetilstandDto.TIL_UTBETALING -> TilUtbetaling
+                    VedtaksperiodetilstandDto.AVVENTER_ANNULLERING -> AvventerAnnullering
 
                     VedtaksperiodetilstandDto.SELVSTENDIG_START -> SelvstendigStart
                     VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK -> SelvstendigAvventerInfotrygdHistorikk
@@ -2604,6 +2612,7 @@ internal class Vedtaksperiode private constructor(
             Start -> VedtaksperiodetilstandDto.START
             TilInfotrygd -> VedtaksperiodetilstandDto.TIL_INFOTRYGD
             TilUtbetaling -> VedtaksperiodetilstandDto.TIL_UTBETALING
+            AvventerAnnullering -> VedtaksperiodetilstandDto.AVVENTER_ANNULLERING
 
             SelvstendigAvsluttet -> VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET
             SelvstendigAvventerBlokkerendePeriode -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
