@@ -1184,6 +1184,15 @@ internal class Vedtaksperiode private constructor(
         return Revurderingseventyr.annullering(hendelse, annullering.periode())
     }
 
+    internal fun håndter(hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg): Revurderingseventyr {
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        val sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling = arbeidsgiver.finnSisteVedtaksperiodeFørMedSammenhengendeUtbetaling(this)
+        val periodeForEndring = sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling?.periode ?: periode
+        tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
+
+        return Revurderingseventyr.annullering(hendelse, periodeForEndring)
+    }
+
     internal fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         if (!påminnelse.erRelevant(id)) return null
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
@@ -2642,6 +2651,8 @@ internal class Vedtaksperiode private constructor(
             true -> FunksjonelleFeilTilVarsler(this)
             false -> this
         }
+
+    internal fun harUtbetaling(utbetalingId: UUID) = behandlinger.harUtbetaling(utbetalingId)
 }
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean

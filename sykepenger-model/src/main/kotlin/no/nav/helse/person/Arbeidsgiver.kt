@@ -193,6 +193,8 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.finnAnnulleringskandidater(vedtaksperiode: Vedtaksperiode) = flatMap { it.finnAnnulleringskandidater(vedtaksperiode) }.toSet()
 
+        internal fun List<Arbeidsgiver>.finnVedtaksperiodeForUtbetaling(utbetalingId: UUID) = firstNotNullOfOrNull { it.finnVedtaksperiodeForUtbetaling(utbetalingId) }
+
         internal fun List<Arbeidsgiver>.venter(nestemann: Vedtaksperiode) =
             flatMap { arbeidsgiver -> arbeidsgiver.vedtaksperioder.venter(nestemann) }
 
@@ -367,6 +369,8 @@ internal class Arbeidsgiver private constructor(
             return arbeidsgiver
         }
     }
+
+    private fun finnVedtaksperiodeForUtbetaling(utbetalingId: UUID) = vedtaksperioder.firstOrNull { it.harUtbetaling(utbetalingId) }
 
     internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): Boolean {
         return avklarInntekt(skjæringstidspunkt, vedtaksperioder) != null
@@ -744,11 +748,11 @@ internal class Arbeidsgiver private constructor(
         if (vedtaksperioder.none { it === vedtaksperiodeSomForsøkesAnnullert }) return emptySet()
         // senereVedtaksperioderMedSammeAgp() burde funnet alle vedtaksperioder uavhengig av utbetalingsrigg
         // MEN vi føler oss litt usikre på om denne klarer å finne alle perioder som ville linket seg på en annen utbetaling på tidligere utbetalingsrigg
-        return senereVedtaksperioderMedSammeAgp(vedtaksperiodeSomForsøkesAnnullert) + vedtaksperioderMedSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert)
+        return senereVedtaksperioderMedSammeAgp(vedtaksperiodeSomForsøkesAnnullert) + senereVedtaksperioderMedSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert)
     }
 
     // Utbetalinger gjort på "gammel rigg" (gruppert på samme agp)
-    private fun vedtaksperioderMedSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
+    private fun senereVedtaksperioderMedSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
         return vedtaksperioder.medSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert).filter { it.periode.start >= vedtaksperiodeSomForsøkesAnnullert.periode.start }.toSet()
     }
 
@@ -756,6 +760,10 @@ internal class Arbeidsgiver private constructor(
     private fun senereVedtaksperioderMedSammeAgp(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
         val arbeidsgiverperiode = vedtaksperiodeSomForsøkesAnnullert.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode() ?: return setOf(vedtaksperiodeSomForsøkesAnnullert)
         return vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).filter { it.periode.start >= vedtaksperiodeSomForsøkesAnnullert.periode.start }.toSet()
+    }
+
+    internal fun finnSisteVedtaksperiodeFørMedSammenhengendeUtbetaling(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
+        return vedtaksperioder.medSammeUtbetaling(vedtaksperiode).filterNot { it.periode.start >= vedtaksperiode.periode.start }.maxByOrNull { it.periode.start }
     }
 
     internal fun håndter(hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {

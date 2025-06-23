@@ -61,6 +61,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.finnAnnulleringskandidater
+import no.nav.helse.person.Arbeidsgiver.Companion.finnVedtaksperiodeForUtbetaling
 import no.nav.helse.person.Arbeidsgiver.Companion.fjernSykmeldingsperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
@@ -484,8 +485,15 @@ class Person private constructor(
 
     fun håndter(hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler annulleringforespørsel")
-        val revurderingseventyr = finnArbeidsgiver(hendelse.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(hendelse, aktivitetsloggMedPersonkontekst)
-        if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        if (Toggle.NyAnnulleringsløype.enabled) {
+            val utbetalingId = hendelse.utbetalingId
+            val vedtaksperiodeSomSkalAnnulleres = arbeidsgivere.finnVedtaksperiodeForUtbetaling(utbetalingId) ?: error("Fant ikke vedtaksperiode for utbetaling $utbetalingId")
+            val annulleringskandidater = finnAnnulleringskandidater(vedtaksperiodeSomSkalAnnulleres)
+            vedtaksperiodeSomSkalAnnulleres.håndter(hendelse, aktivitetsloggMedPersonkontekst)
+        } else {
+            val revurderingseventyr = finnArbeidsgiver(hendelse.behandlingsporing, aktivitetsloggMedPersonkontekst).håndter(hendelse, aktivitetsloggMedPersonkontekst)
+            if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        }
         håndterGjenoppta(hendelse, aktivitetsloggMedPersonkontekst)
     }
 
