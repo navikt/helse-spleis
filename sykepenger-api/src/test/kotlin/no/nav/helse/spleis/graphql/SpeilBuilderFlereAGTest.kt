@@ -5,11 +5,13 @@ import java.time.Month
 import java.time.YearMonth
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.spleis.speil.dto.Arbeidsgiverinntekt
@@ -39,6 +41,33 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
 
         val speilJson = speilApi()
         assertEquals(emptyList<GhostPeriodeDTO>(), speilJson.arbeidsgivere.single().ghostPerioder)
+    }
+
+    @Test
+    fun `søknad slutter fredag og fortsetter mandag - ingen ghostpølse i helg`() {
+        håndterSøknad(Sykdom(1.januar, fredag den 19.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, fredag den 19.januar, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(mandag den 22.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(mandag den 22.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a2)
+
+        håndterVilkårsgrunnlag(
+            inntekter = listOf(a1 to INNTEKT, a2 to INNTEKT),
+            arbeidsforhold = listOf(a1 to EPOCH, a3 to EPOCH)
+        )
+        håndterYtelserTilGodkjenning()
+
+        val speilJson1 = speilApi()
+        speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder.also { ghostPerioder ->
+            assertEquals(0, ghostPerioder.size)
+        }
+
+        speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder.also { ghostPerioder ->
+            assertEquals(0, ghostPerioder.size)
+        }
     }
 
     @Test
