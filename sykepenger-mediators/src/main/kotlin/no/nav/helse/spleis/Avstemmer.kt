@@ -23,6 +23,11 @@ class Avstemmer(person: PersonUtDto) {
 
     private val melding = mapTilMelding(person)
 
+    //TODO: Fjern når vi har kjørt avstmming Speilvendt vil ha
+    fun getMaxOpprettetBehandling(): LocalDateTime {
+        return melding.arbeidsgivere.flatMap { it.vedtaksperioder }
+            .flatMap { it.behandlinger }.maxOf { it.behandlingOpprettet }
+    }
     fun tilJsonMessage() = JsonMessage.newMessage("person_avstemt", mapper.convertValue(melding))
 
     private fun mapTilMelding(person: PersonUtDto): AvstemmerDto {
@@ -69,6 +74,12 @@ class Avstemmer(person: PersonUtDto) {
                 generasjon.endringer
                     .filterNot { endring -> endring.utbetalingstatus === UtbetalingTilstandDto.FORKASTET }
                     .mapNotNull { endring -> endring.utbetalingId }
+            },
+            behandlinger = vedtaksperiode.behandlinger.behandlinger.map { generasjon ->
+                AvstemtBehandling(
+                    behandlingId = generasjon.id,
+                    behandlingOpprettet = generasjon.endringer.first().tidsstempel
+                )
             }
         )
     }
@@ -77,6 +88,11 @@ class Avstemmer(person: PersonUtDto) {
 data class AvstemmerDto(
     val fødselsnummer: String,
     val arbeidsgivere: List<AvstemtArbeidsgiver>
+)
+
+data class AvstemtBehandling(
+    val behandlingId: UUID,
+    val behandlingOpprettet: LocalDateTime
 )
 
 data class AvstemtArbeidsgiver(
@@ -94,7 +110,8 @@ data class AvstemtVedtaksperiode(
     val fom: LocalDate,
     val tom: LocalDate,
     val skjæringstidspunkt: LocalDate,
-    val utbetalinger: List<UUID>
+    val utbetalinger: List<UUID>,
+    val behandlinger: List<AvstemtBehandling>
 )
 
 data class AvstemtUtbetaling(
