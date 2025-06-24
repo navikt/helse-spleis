@@ -6,6 +6,8 @@ import no.nav.helse.april
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -16,6 +18,8 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_ANNULLERING
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -25,6 +29,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.assertNotNull
+import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -140,6 +145,86 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `annullerer periode som har ny uberegnet periode etter seg`() = Toggle.NyAnnulleringsløype.enable {
+        nyttVedtak(januar)
+        nyPeriode(februar)
+
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(0))
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
+
+        assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+    }
+
+    @Test
+    fun `annullerer periode som har ny beregnet periode etter seg`() = Toggle.NyAnnulleringsløype.enable {
+        nyttVedtak(januar)
+        nyPeriode(februar)
+        håndterYtelser(2.vedtaksperiode)
+
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(0))
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTrue(inspektør.utbetaling(1).erForkastet)
+        assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
+
+        assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+    }
+
+    @Test
+    fun `annullerer periode som har pågående beregnet revurdering etter seg`() = Toggle.NyAnnulleringsløype.enable {
+        nyttVedtak(januar)
+        forlengVedtak(februar, 50.prosent)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(28.februar, Dagtype.Sykedag, 100)))
+        håndterYtelser(2.vedtaksperiode)
+
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(0))
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertTrue(inspektør.utbetaling(2).erForkastet)
+
+        assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+    }
+
+    @Test
+    fun `annullerer periode som har pågående uberegnet revurdering etter seg`() = Toggle.NyAnnulleringsløype.enable {
+        nyttVedtak(januar)
+        forlengVedtak(februar, 50.prosent)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(28.februar, Dagtype.Sykedag, 100)))
+
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(0))
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
+
+        assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+    }
+
+    @Test
     fun `annulleringer på vedtaksperioder med samme utbetaling`() = Toggle.NyAnnulleringsløype.enable {
         createPersonMedToVedtakPåSammeFagsystemId()
 
@@ -170,10 +255,53 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
         assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode.filter())
 
-        val utbetaling = inspektør.utbetaling(2)
-        assertEquals(1, utbetaling.arbeidsgiverOppdrag.size)
-        assertEquals(19.januar til 26.januar, utbetaling.arbeidsgiverOppdrag[0].periode)
-        assertEquals(3.januar til 26.januar, utbetaling.periode)
+        assertEquals(3, inspektør.utbetalinger.size)
+        val utbetalingForlengelse = inspektør.utbetaling(1)
+        val utbetalingRevurdering = inspektør.utbetaling(2)
+
+        assertEquals(24327, utbetalingForlengelse.nettobeløp)
+        assertEquals(-24327, utbetalingRevurdering.nettobeløp)
+        assertEquals(1, utbetalingRevurdering.arbeidsgiverOppdrag.size)
+        assertEquals(19.januar til 26.januar, utbetalingRevurdering.arbeidsgiverOppdrag[0].periode)
+        assertEquals(3.januar til 26.januar, utbetalingRevurdering.periode)
+
+        val utbetalingslinje = utbetalingRevurdering.arbeidsgiverOppdrag.linjer.first()
+        assertEquals(Endringskode.ENDR, utbetalingslinje.endringskode)
+        assertEquals(19.januar, utbetalingslinje.fom)
+        assertEquals(26.januar, utbetalingslinje.tom)
+    }
+
+    @Test
+    fun `annullering av midterste periode og vedtaksperioder med samme utbetaling`() = Toggle.NyAnnulleringsløype.enable {
+        createPersonMedTreVedtakPåSammeFagsystemId()
+
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.size)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1))
+        håndterYtelser(1.vedtaksperiode)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.size)
+        assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode.filter())
+
+        assertEquals(4, inspektør.utbetalinger.size)
+        val utbetalingRevurdering = inspektør.utbetaling(3)
+
+        assertEquals(-(24327 + 18603), utbetalingRevurdering.nettobeløp)
+        assertEquals(1, utbetalingRevurdering.arbeidsgiverOppdrag.size)
+        assertEquals(19.januar til 26.januar, utbetalingRevurdering.arbeidsgiverOppdrag[0].periode)
+        assertEquals(3.januar til 26.januar, utbetalingRevurdering.periode)
+
+        val utbetalingslinje = utbetalingRevurdering.arbeidsgiverOppdrag.linjer.first()
+        assertEquals(Endringskode.ENDR, utbetalingslinje.endringskode)
+        assertEquals(19.januar, utbetalingslinje.fom)
+        assertEquals(26.januar, utbetalingslinje.tom)
     }
 
     @Test

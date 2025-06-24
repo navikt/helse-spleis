@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
@@ -49,6 +49,7 @@ internal abstract class AbstractEndToEndTest {
         private fun overgangFraInfotrygdPerson(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", regelverkslogg)
         private fun pingPongPerson(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/pingpong.json", regelverkslogg)
         private fun toVedtakMedSammeFagsystemId(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/to_vedtak_samme_fagsystem_id.json", regelverkslogg)
+        private fun treVedtakMedSammeFagsystemId(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/tre_vedtak_samme_fagsystem_id.json", regelverkslogg)
     }
 
     internal val assertetVarsler = Varslersamler.AssertetVarsler()
@@ -111,6 +112,7 @@ internal abstract class AbstractEndToEndTest {
     }
 
     protected fun createPersonMedToVedtakPåSammeFagsystemId() = createTestPerson { regelverkslogg -> toVedtakMedSammeFagsystemId(regelverkslogg) }
+    protected fun createPersonMedTreVedtakPåSammeFagsystemId() = createTestPerson { regelverkslogg -> treVedtakMedSammeFagsystemId(regelverkslogg) }
 
     protected fun createPingPongPerson() = createTestPerson { regelverkslogg -> pingPongPerson(regelverkslogg) }.also {
         Utbetalingshistorikk(
