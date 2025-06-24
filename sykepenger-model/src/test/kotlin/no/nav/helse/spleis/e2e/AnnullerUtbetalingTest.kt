@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -14,7 +15,9 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -35,83 +38,167 @@ import org.junit.jupiter.api.assertThrows
 internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
-    fun `kun én vedtaksperiode skal annulleres`() {
+    fun `kun én vedtaksperiode skal annulleres`() = Toggle.NyAnnulleringsløype.enable {
         nyttVedtak(januar)
 
-        val vedtaksperiodeTilAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
-        assertEquals(setOf(1.vedtaksperiode.id(a1)), vedtaksperiodeTilAnnullering)
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(0))
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
     }
 
     @Test
-    fun `begge vedtaksperioder annulleres når vi annullerer den første`() {
-        nyttVedtak(januar)
-        forlengVedtak(februar)
-
-        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
-        assertEquals(setOf(1.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
-    }
-
-    @Test
-    fun `kun siste vedtaksperiode annulleres når det er denne som forsøkes annullert`() {
+    fun `begge vedtaksperioder annulleres når vi annullerer den første`() = Toggle.NyAnnulleringsløype.enable {
         nyttVedtak(januar)
         forlengVedtak(februar)
 
-        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(2.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
-        assertEquals(setOf(2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(0))
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
     }
 
     @Test
-    fun `annullerer bare perioder etter den som forsøkes annullert`() {
+    fun `kun siste vedtaksperiode annulleres når det er denne som forsøkes annullert`() = Toggle.NyAnnulleringsløype.enable {
+        nyttVedtak(januar)
+        forlengVedtak(februar)
+
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1))
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+    }
+
+    @Test
+    fun `annullerer bare perioder etter den som forsøkes annullert`() = Toggle.NyAnnulleringsløype.enable {
         nyttVedtak(januar)
         forlengVedtak(februar)
         forlengVedtak(mars)
 
-        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(2.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
-        assertEquals(setOf(2.vedtaksperiode.id(a1), 3.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.size)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1))
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.size)
     }
 
     @Test
-    fun `annullerer bare i sammenhengende agp`() {
+    fun `annullerer bare i sammenhengende agp`() = Toggle.NyAnnulleringsløype.enable {
         nyttVedtak(januar)
         forlengVedtak(februar)
         nyttVedtak(april, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
 
-        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(2.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
-        assertEquals(setOf(2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.size)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(0))
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
+        assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.size)
+
+        assertVarsel(Varselkode.RV_RV_7, 3.vedtaksperiode.filter())
     }
 
     @Test
-    fun `annullerer også etter kort gap`() {
+    fun `annullerer også etter kort gap`() = Toggle.NyAnnulleringsløype.enable {
         nyttVedtak(januar)
         nyttVedtak(10.februar til 28.februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
 
-        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
-        assertEquals(setOf(1.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(0))
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
     }
 
     @Test
-    fun `annulleringer på vedtaksperioder med samme utbetaling`() {
+    fun `annulleringer på vedtaksperioder med samme utbetaling`() = Toggle.NyAnnulleringsløype.enable {
         createPersonMedToVedtakPåSammeFagsystemId()
 
-        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
-        assertEquals(setOf(1.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(0))
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
     }
 
     @Test
-    fun `annullering av siste periode og vedtaksperioder med samme utbetaling`() {
+    fun `annullering av siste periode og vedtaksperioder med samme utbetaling`() = Toggle.NyAnnulleringsløype.enable {
         createPersonMedToVedtakPåSammeFagsystemId()
 
-        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(2.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
-        assertEquals(setOf(2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1))
+        håndterYtelser(1.vedtaksperiode)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+        assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode.filter())
+
+        val utbetaling = inspektør.utbetaling(2)
+        assertEquals(1, utbetaling.arbeidsgiverOppdrag.size)
+        assertEquals(19.januar til 26.januar, utbetaling.arbeidsgiverOppdrag[0].periode)
+        assertEquals(3.januar til 26.januar, utbetaling.periode)
     }
 
     @Test
-    fun `annullerer ikke ennå perioder på tvers av arbeidsgivere ved samme sykefravær`() {
+    fun `annullerer ikke ennå perioder på tvers av arbeidsgivere ved samme sykefravær`() = Toggle.NyAnnulleringsløype.enable {
         nyeVedtak(januar, a1, a2)
         forlengVedtak(februar, a1, a2)
 
-        val vedtaksperioderTilAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).annulleringskandidater.map { it.id }.toSet()
-        assertEquals(setOf(1.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a1)), vedtaksperioderTilAnnullering)
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør(a2).vedtaksperioder(1.vedtaksperiode(a2)).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør(a2).vedtaksperioder(2.vedtaksperiode(a2)).behandlinger.behandlinger.size)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør(a1).utbetalingId(0))
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertSisteTilstand(1.vedtaksperiode(a2), AVVENTER_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode(a2), AVVENTER_REVURDERING)
+        assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør(a2).vedtaksperioder(1.vedtaksperiode(a2)).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør(a2).vedtaksperioder(2.vedtaksperiode(a2)).behandlinger.behandlinger.size)
+
+        assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode(a2).filter())
+        assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode(a2).filter())
     }
 
     @Test

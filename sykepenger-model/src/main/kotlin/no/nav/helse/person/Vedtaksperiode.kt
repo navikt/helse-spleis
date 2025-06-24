@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`1G`
+import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -50,6 +51,7 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
 import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.hendelser.Revurderingseventyr.Companion.annullering
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
@@ -1173,15 +1175,74 @@ internal class Vedtaksperiode private constructor(
         vedtaksperioder: List<Vedtaksperiode>
     ): Revurderingseventyr? {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        val annullering = behandlinger.håndterAnnullering(
-            arbeidsgiver,
-            hendelse,
-            hendelse.metadata.behandlingkilde,
-            aktivitetsloggMedVedtaksperiodekontekst,
-            vedtaksperioder.map { it.behandlinger }) ?: return null
-        aktivitetsloggMedVedtaksperiodekontekst.info("Forkaster denne, og senere perioder, som følge av annullering.")
-        forkast(hendelse, aktivitetsloggMedVedtaksperiodekontekst)
-        return Revurderingseventyr.annullering(hendelse, annullering.periode())
+        if (Toggle.NyAnnulleringsløype.enabled) {
+            if (!vedtaksperioder.contains(this)) return null
+
+            val sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling = arbeidsgiver.finnSisteVedtaksperiodeFørMedSammenhengendeUtbetaling(this)
+            val periodeForEndring = sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling?.periode ?: periode
+
+            when (tilstand) {
+                Avsluttet,
+                AvsluttetUtenUtbetaling,
+                TilUtbetaling,
+                SelvstendigTilUtbetaling,
+                SelvstendigAvsluttet -> {
+                    behandlinger.sikreNyBehandling(
+                        arbeidsgiver = arbeidsgiver,
+                        behandlingkilde = hendelse.metadata.behandlingkilde,
+                        beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
+                        beregnArbeidsgiverperiode = arbeidsgiver.beregnArbeidsgiverperiode()
+                    )
+                    tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
+                    return annullering(hendelse, periodeForEndring)
+                }
+
+                AvventerSimuleringRevurdering,
+                AvventerGodkjenningRevurdering,
+                RevurderingFeilet -> {
+                    behandlinger.forkastUtbetaling(aktivitetsloggMedVedtaksperiodekontekst)
+                    tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
+                    return annullering(hendelse, periodeForEndring)
+                }
+
+                AvventerVilkårsprøvingRevurdering,
+                AvventerHistorikkRevurdering,
+                AvventerRevurdering -> {
+                    tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
+                    return annullering(hendelse, periodeForEndring)
+                }
+
+                Start,
+                SelvstendigStart,
+                AvventerAnnullering,
+                AvventerBlokkerendePeriode,
+                AvventerGodkjenning,
+                AvventerHistorikk,
+                AvventerInfotrygdHistorikk,
+                AvventerInntektsmelding,
+                AvventerSimulering,
+                AvventerVilkårsprøving,
+                SelvstendigAvventerBlokkerendePeriode,
+                SelvstendigAvventerGodkjenning,
+                SelvstendigAvventerHistorikk,
+                SelvstendigAvventerInfotrygdHistorikk,
+                SelvstendigAvventerSimulering,
+                SelvstendigAvventerVilkårsprøving -> return null
+
+                SelvstendigTilInfotrygd,
+                TilInfotrygd -> error("Forventet ikke annulleringshendelse i tilstand $tilstand for vedtaksperiodeId $id")
+            }
+        } else {
+            val annullering = behandlinger.håndterAnnullering(
+                arbeidsgiver,
+                hendelse,
+                hendelse.metadata.behandlingkilde,
+                aktivitetsloggMedVedtaksperiodekontekst,
+                vedtaksperioder.map { it.behandlinger }) ?: return null
+            aktivitetsloggMedVedtaksperiodekontekst.info("Forkaster denne, og senere perioder, som følge av annullering.")
+            forkast(hendelse, aktivitetsloggMedVedtaksperiodekontekst)
+            return annullering(hendelse, annullering.periode())
+        }
     }
 
     internal fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
@@ -2642,6 +2703,8 @@ internal class Vedtaksperiode private constructor(
             true -> FunksjonelleFeilTilVarsler(this)
             false -> this
         }
+
+    internal fun harUtbetaling(utbetalingId: UUID) = behandlinger.harUtbetaling(utbetalingId)
 }
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean

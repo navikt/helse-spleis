@@ -1012,6 +1012,10 @@ internal data object RevurderingFeilet : Vedtaksperiodetilstand {
 internal data object AvventerAnnullering : Vedtaksperiodetilstand {
     override val type = AVVENTER_ANNULLERING
 
+    override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+        vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
+    }
+
     override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak? {
         return null
     }

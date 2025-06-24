@@ -368,6 +368,8 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
+    private fun finnVedtaksperiodeForUtbetaling(utbetalingId: UUID) = vedtaksperioder.firstOrNull { it.harUtbetaling(utbetalingId) }
+
     internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): Boolean {
         return avklarInntekt(skjæringstidspunkt, vedtaksperioder) != null
     }
@@ -744,11 +746,11 @@ internal class Arbeidsgiver private constructor(
         if (vedtaksperioder.none { it === vedtaksperiodeSomForsøkesAnnullert }) return emptySet()
         // senereVedtaksperioderMedSammeAgp() burde funnet alle vedtaksperioder uavhengig av utbetalingsrigg
         // MEN vi føler oss litt usikre på om denne klarer å finne alle perioder som ville linket seg på en annen utbetaling på tidligere utbetalingsrigg
-        return senereVedtaksperioderMedSammeAgp(vedtaksperiodeSomForsøkesAnnullert) + vedtaksperioderMedSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert)
+        return senereVedtaksperioderMedSammeAgp(vedtaksperiodeSomForsøkesAnnullert) + senereVedtaksperioderMedSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert)
     }
 
     // Utbetalinger gjort på "gammel rigg" (gruppert på samme agp)
-    private fun vedtaksperioderMedSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
+    private fun senereVedtaksperioderMedSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
         return vedtaksperioder.medSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert).filter { it.periode.start >= vedtaksperiodeSomForsøkesAnnullert.periode.start }.toSet()
     }
 
@@ -758,10 +760,21 @@ internal class Arbeidsgiver private constructor(
         return vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).filter { it.periode.start >= vedtaksperiodeSomForsøkesAnnullert.periode.start }.toSet()
     }
 
+    internal fun finnSisteVedtaksperiodeFørMedSammenhengendeUtbetaling(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
+        return vedtaksperioder.medSammeUtbetaling(vedtaksperiode).filterNot { it.periode.start >= vedtaksperiode.periode.start }.maxByOrNull { it.periode.start }
+    }
+
     internal fun håndter(hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         aktivitetsloggMedArbeidsgiverkontekst.info("Håndterer annullering")
-        return håndter { it.håndter(hendelse, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList()) }.tidligsteEventyr()
+        if (Toggle.NyAnnulleringsløype.enabled) {
+            val utbetalingId = hendelse.utbetalingId
+            val vedtaksperiodeSomSkalAnnulleres = finnVedtaksperiodeForUtbetaling(utbetalingId) ?: error("Fant ikke vedtaksperiode for utbetaling $utbetalingId")
+            val annulleringskandidater = finnAnnulleringskandidater(vedtaksperiodeSomSkalAnnulleres)
+            return håndter { it.håndter(hendelse, aktivitetsloggMedArbeidsgiverkontekst, annulleringskandidater.toList()) }.tidligsteEventyr()
+        } else {
+            return håndter { it.håndter(hendelse, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList()) }.tidligsteEventyr()
+        }
     }
 
     internal fun håndter(påminnelse: Utbetalingpåminnelse, aktivitetslogg: IAktivitetslogg) {

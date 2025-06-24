@@ -127,6 +127,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet) =
         behandlinger.last().lagUtbetalingstidslinje(fastsattÅrsinntekt, inntektjusteringer, yrkesaktivitet)
 
+    internal fun harUtbetaling(utbetalingId: UUID): Boolean = siste?.id == utbetalingId
+
     internal val maksdato get() = behandlinger.last().maksdato
     internal val dagerNavOvertarAnsvar get() = behandlinger.last().dagerNavOvertarAnsvar
     internal val faktaavklartInntekt get() = behandlinger.last().faktaavklartInntekt
