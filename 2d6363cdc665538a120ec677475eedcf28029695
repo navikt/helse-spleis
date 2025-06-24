@@ -1,0 +1,6 @@
+Dette er et forsøk på å bruke kommandoen
+`git notes add 2d6363cdc` som skal gi en
+kommentar på den oppgitte committen, men
+uten å røre committen selv.
+
+Kommer dette til å være synlig på github?
