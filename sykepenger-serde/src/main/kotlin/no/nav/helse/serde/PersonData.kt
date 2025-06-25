@@ -820,6 +820,7 @@ data class PersonData(
                 AVVENTER_GODKJENNING_REVURDERING,
 
                 AVVENTER_ANNULLERING,
+                TIL_ANNULLERING,
 
                 SELVSTENDIG_START,
                 SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
@@ -856,6 +857,7 @@ data class PersonData(
                     TilstandTypeData.AVVENTER_SIMULERING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING
                     TilstandTypeData.AVVENTER_GODKJENNING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING
                     TilstandTypeData.AVVENTER_ANNULLERING -> VedtaksperiodetilstandDto.AVVENTER_ANNULLERING
+                    TilstandTypeData.TIL_ANNULLERING -> VedtaksperiodetilstandDto.TIL_ANNULLERING
 
                     TilstandTypeData.SELVSTENDIG_START -> VedtaksperiodetilstandDto.SELVSTENDIG_START
                     TilstandTypeData.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK

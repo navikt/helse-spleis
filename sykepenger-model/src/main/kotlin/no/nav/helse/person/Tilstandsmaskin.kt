@@ -31,6 +31,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_ANNULLERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.Venteårsak.Companion.fordi
@@ -838,6 +839,31 @@ internal data object TilUtbetaling : Vedtaksperiodetilstand {
             vedtaksperiode.behandlinger.erUbetalt() -> vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
             vedtaksperiode.behandlinger.erAvsluttet() -> vedtaksperiode.tilstand(aktivitetslogg, Avsluttet)
         }
+    }
+}
+
+internal data object TilAnnullering : Vedtaksperiodetilstand {
+    override val type = TIL_ANNULLERING
+
+    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = UTBETALING.utenBegrunnelse
+
+    override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
+        TODO("Not yet implemented")
+    }
+
+    override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+        aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående annullering")
+    }
+
+    override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) =
+        vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
+
+    override fun håndter(
+        vedtaksperiode: Vedtaksperiode,
+        hendelse: UtbetalingHendelse,
+        aktivitetslogg: IAktivitetslogg
+    ) {
+        TODO("Not yet implemented")
     }
 }
 

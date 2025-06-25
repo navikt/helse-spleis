@@ -91,6 +91,7 @@ sealed class VedtaksperiodetilstandDto {
     data object AVVENTER_GODKJENNING_REVURDERING : VedtaksperiodetilstandDto()
 
     data object AVVENTER_ANNULLERING : VedtaksperiodetilstandDto()
+    data object TIL_ANNULLERING : VedtaksperiodetilstandDto()
 
     data object SELVSTENDIG_AVSLUTTET : VedtaksperiodetilstandDto()
     data object SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE : VedtaksperiodetilstandDto()

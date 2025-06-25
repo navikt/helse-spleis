@@ -92,6 +92,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Tilstan
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_TIL_INFOTRYGD
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_TIL_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.START
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.TIL_ANNULLERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.TIL_INFOTRYGD
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.TIL_UTBETALING
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.UtbetalingsdagData
@@ -374,6 +375,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
         VedtaksperiodetilstandDto.TIL_UTBETALING -> TIL_UTBETALING
 
         VedtaksperiodetilstandDto.AVVENTER_ANNULLERING -> AVVENTER_ANNULLERING
+        VedtaksperiodetilstandDto.TIL_ANNULLERING -> TIL_ANNULLERING
 
         VedtaksperiodetilstandDto.SELVSTENDIG_START -> SELVSTENDIG_START
         VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK -> SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK
