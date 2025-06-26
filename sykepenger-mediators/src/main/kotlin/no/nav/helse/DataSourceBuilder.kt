@@ -27,7 +27,14 @@ internal class DataSourceBuilder(env: Map<String, String>) {
         metricRegistry = meterRegistry
     }
 
-    val dataSource by lazy { HikariDataSource(appConfig) }
+    val dataSource by lazy {
+        HikariDataSource(appConfig).apply {
+            Runtime.getRuntime().addShutdownHook(Thread {
+                logger.info("Avslutter datasourcen")
+                close()
+            })
+        }
+    }
 
     internal fun migrate() {
         logger.info("Migrerer database")
