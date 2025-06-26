@@ -1189,37 +1189,29 @@ internal class Vedtaksperiode private constructor(
 
             when (tilstand) {
                 Avsluttet,
-                AvsluttetUtenUtbetaling,
                 TilUtbetaling,
                 SelvstendigTilUtbetaling,
-                SelvstendigAvsluttet -> {
-                    behandlinger.sikreNyBehandling(
-                        arbeidsgiver = arbeidsgiver,
-                        behandlingkilde = hendelse.metadata.behandlingkilde,
-                        beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
-                        beregnArbeidsgiverperiode = arbeidsgiver.beregnArbeidsgiverperiode()
-                    )
-                    tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
-                    return annullering(hendelse, periodeForEndring)
-                }
+                SelvstendigAvsluttet,
 
                 AvventerSimuleringRevurdering,
                 AvventerGodkjenningRevurdering,
-                RevurderingFeilet -> {
-                    behandlinger.forkastUtbetaling(aktivitetsloggMedVedtaksperiodekontekst)
-                    tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
-                    return annullering(hendelse, periodeForEndring)
-                }
+                RevurderingFeilet,
 
                 AvventerVilkårsprøvingRevurdering,
                 AvventerHistorikkRevurdering,
                 AvventerRevurdering -> {
+                    behandlinger.håndterAnnullering(
+                        arbeidsgiver = arbeidsgiver,
+                        behandlingkilde = hendelse.metadata.behandlingkilde,
+                        aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst
+                    )
                     tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
                     return annullering(hendelse, periodeForEndring)
                 }
 
                 Start,
                 SelvstendigStart,
+                AvsluttetUtenUtbetaling,
                 AvventerAnnullering,
                 AvventerBlokkerendePeriode,
                 AvventerGodkjenning,

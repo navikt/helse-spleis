@@ -16,6 +16,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.BehandlingView
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -52,6 +53,10 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ANNULLERING)
         assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
     }
 
     @Test
@@ -68,6 +73,15 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
         assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
     }
 
     @Test
@@ -84,6 +98,15 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
         assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        assertEquals(
+            BehandlingView.TilstandView.VEDTAK_IVERKSATT,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
     }
 
     @Test
@@ -104,6 +127,19 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.size)
+
+        assertEquals(
+            BehandlingView.TilstandView.VEDTAK_IVERKSATT,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
     }
 
     @Test
@@ -126,6 +162,19 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.size)
 
         assertVarsel(Varselkode.RV_RV_7, 3.vedtaksperiode.filter())
+
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_REVURDERING,
+            inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
     }
 
     @Test
@@ -142,6 +191,15 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
         assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
     }
 
     @Test
@@ -160,6 +218,15 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
         assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
     }
 
     @Test
@@ -180,6 +247,15 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
         assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
     }
 
     @Test
@@ -202,6 +278,16 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
         assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+
     }
 
     @Test
@@ -222,6 +308,15 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
         assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
     }
 
     @Test
@@ -237,6 +332,15 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
         assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
     }
 
     @Test
@@ -269,6 +373,15 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(Endringskode.ENDR, utbetalingslinje.endringskode)
         assertEquals(19.januar, utbetalingslinje.fom)
         assertEquals(26.januar, utbetalingslinje.tom)
+
+        assertEquals(
+            BehandlingView.TilstandView.BEREGNET_REVURDERING,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
     }
 
     @Test
@@ -302,6 +415,19 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(Endringskode.ENDR, utbetalingslinje.endringskode)
         assertEquals(19.januar, utbetalingslinje.fom)
         assertEquals(26.januar, utbetalingslinje.tom)
+
+        assertEquals(
+            BehandlingView.TilstandView.BEREGNET_REVURDERING,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
     }
 
     @Test
@@ -327,6 +453,23 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
         assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode(a2).filter())
         assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode(a2).filter())
+
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_REVURDERING,
+            inspektør(a2).vedtaksperioder(1.vedtaksperiode(a2)).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_REVURDERING,
+            inspektør(a2).vedtaksperioder(2.vedtaksperiode(a2)).behandlinger.behandlinger.last().tilstand
+        )
     }
 
     @Test

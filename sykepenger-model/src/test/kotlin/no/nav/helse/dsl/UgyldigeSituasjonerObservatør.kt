@@ -7,6 +7,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.BehandlingView
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.person.BehandlingView.TilstandView.UBEREGNET_ANNULLERING
 import no.nav.helse.person.BehandlingView.TilstandView.UBEREGNET_OMGJØRING
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -291,6 +292,9 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
                                 assertNull(endring.utbetaling) { "forventer ingen utbetaling i ${behandling.tilstand}" }
                                 assertNull(endring.grunnlagsdata) { "forventer inget vilkårsgrunnlag i ${behandling.tilstand}" }
                                 assertEquals(IKKE_VURDERT, endring.maksdatoresultat.bestemmelse) { "forventer maksdatoresultat IKKE_VURDERT i ${behandling.tilstand}" }
+                            }
+                            UBEREGNET_ANNULLERING -> {
+                                assertNull(endring.utbetaling) { "forventer ingen utbetaling i ${behandling.tilstand}" }
                             }
                         }
                     }
