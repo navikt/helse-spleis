@@ -234,7 +234,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         check(tilstand != Start || tilstand != SelvstendigStart) { "en vedtaksperiode blir stående i Start-tilstanden" }
-        if (!tilstand.erFerdigBehandlet) return
+        if (!tilstand.erFerdigBehandlet) return behandlinger.validerIkkeFerdigBehandlet(hendelse.metadata.meldingsreferanseId, aktivitetslogg)
+
         behandlinger.validerFerdigBehandlet(hendelse.metadata.meldingsreferanseId, aktivitetslogg)
     }
 

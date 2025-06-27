@@ -161,6 +161,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     internal fun validerFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
+    internal fun validerIkkeFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerIkkeFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
     internal fun gjelderIkkeFor(hendelse: UtbetalingsavgjørelseHendelse) = siste?.gjelderFor(hendelse) != true
 
     internal fun overlapperMed(other: Behandlinger): Boolean {
@@ -1227,7 +1228,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 observatører = this.observatører,
                 tilstand = Tilstand.UberegnetAnnullering,
                 endringer = listOf(endringer.last().kopierUtenUtbetaling()),
-                avsluttet = LocalDateTime.now(),
+                avsluttet = null,
                 kilde = behandlingkilde
             )
         }
@@ -1370,6 +1371,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         internal fun validerFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = tilstand.validerFerdigBehandlet(this, meldingsreferanseId, aktivitetslogg)
+        internal fun validerIkkeFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = tilstand.validerIkkeFerdigBehandlet(this, meldingsreferanseId, aktivitetslogg)
         private fun valideringFeilet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg, feil: String) {
             // Om de er hendelsen vi håndterer nå som har skapt situasjonen feiler vi fremfor å gå videre.
             if (kilde.meldingsreferanseId == meldingsreferanseId) error(feil)
@@ -1586,6 +1588,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             fun håndterUtbetalinghendelse(behandling: Behandling, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) = false
             fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {
                 behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} burde vært ferdig behandlet, men står i tilstand ${behandling.tilstand::class.simpleName}")
+            }
+            fun validerIkkeFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {
+                if (behandling.avsluttet == null) return
+                behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} burde ikke ha avsluttet tidspunkt, fordi den ikke er ferdig behandlet")
             }
 
             data object Uberegnet : Tilstand {
@@ -1932,6 +1938,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.tilstand(VedtakIverksatt, aktivitetslogg)
                 }
 
+                override fun validerIkkeFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {}
+
                 override fun håndterAnnullering(
                     behandling: Behandling,
                     arbeidsgiver: Arbeidsgiver,
@@ -1984,6 +1992,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return behandling.sikreNyBehandling(arbeidsgiver, UberegnetOmgjøring, behandlingkilde, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
                 }
 
+                override fun validerIkkeFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {}
+
                 override fun håndterEndring(
                     behandling: Behandling,
                     arbeidsgiver: Arbeidsgiver,
@@ -2033,6 +2043,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         behandlingkilde = behandlingkilde
                     )
                 }
+
+                override fun validerIkkeFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {}
 
                 override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling {
                     error("Kan ikke forkaste i tilstand ${this.javaClass.simpleName}")
@@ -2086,6 +2098,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.vedtakAnnullert(aktivitetslogg)
                     return null
                 }
+
+                override fun validerIkkeFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {}
 
                 override fun annuller(
                     behandling: Behandling,
