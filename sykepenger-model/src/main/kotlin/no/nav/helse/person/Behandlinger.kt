@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.Toggle
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
@@ -911,7 +912,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal fun erInFlight() = erFattetVedtak() && !erAvsluttet()
         internal fun erAvsluttet() = avsluttet != null
         internal fun klarForUtbetaling() = this.tilstand in setOf(Tilstand.Uberegnet, Tilstand.UberegnetOmgjøring, Tilstand.UberegnetRevurdering)
-        internal fun harÅpenBehandling() = this.tilstand in setOf(Tilstand.UberegnetRevurdering, Tilstand.UberegnetOmgjøring, Tilstand.AnnullertPeriode, Tilstand.TilInfotrygd, Tilstand.UberegnetAnnullering)
+        internal fun harÅpenBehandling() = this.tilstand in setOf(Tilstand.UberegnetRevurdering, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd, Tilstand.UberegnetAnnullering) || (Toggle.NyAnnulleringsløype.disabled && this.tilstand == Tilstand.AnnullertPeriode)
         internal fun harIkkeUtbetaling() = this.tilstand in setOf(Tilstand.Uberegnet, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd, Tilstand.UberegnetAnnullering)
         internal fun vedtakFattet(arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
             if (utbetalingsavgjørelse.avvist) return tilstand.vedtakAvvist(this, arbeidsgiver, utbetalingsavgjørelse, aktivitetslogg)
@@ -1205,6 +1206,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         private fun nyAnnullertBehandling(arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement): Behandling {
+            check(Toggle.NyAnnulleringsløype.disabled) { "Ny annulleringsløype er på, hvorfor er vi her?" }
             arbeidsgiver.låsOpp(periode)
             return Behandling(
                 observatører = this.observatører,
@@ -1215,10 +1217,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             )
         }
 
-        private fun nyNoeAnnulleringBehandling(
+        private fun nyAnnulleringBehandling(
             arbeidsgiver: Arbeidsgiver,
             behandlingkilde: Behandlingkilde,
         ): Behandling {
+            check(Toggle.NyAnnulleringsløype.enabled) { "Ny annulleringsløype er ikke aktivert, hvorfor er vi her?" }
             arbeidsgiver.låsOpp(periode)
             return Behandling(
                 observatører = this.observatører,
@@ -1867,7 +1870,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandlingkilde: Behandlingkilde,
                     aktivitetslogg: IAktivitetslogg
                 ): Behandling {
-                    return behandling.nyNoeAnnulleringBehandling(
+                    return behandling.nyAnnulleringBehandling(
                         arbeidsgiver = arbeidsgiver,
                         behandlingkilde = behandlingkilde
                     )
@@ -1935,7 +1938,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandlingkilde: Behandlingkilde,
                     aktivitetslogg: IAktivitetslogg
                 ): Behandling {
-                    return behandling.nyNoeAnnulleringBehandling(
+                    return behandling.nyAnnulleringBehandling(
                         arbeidsgiver = arbeidsgiver,
                         behandlingkilde = behandlingkilde
                     )
@@ -2025,7 +2028,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandlingkilde: Behandlingkilde,
                     aktivitetslogg: IAktivitetslogg
                 ): Behandling? {
-                    return behandling.nyNoeAnnulleringBehandling(
+                    return behandling.nyAnnulleringBehandling(
                         arbeidsgiver = arbeidsgiver,
                         behandlingkilde = behandlingkilde
                     )
