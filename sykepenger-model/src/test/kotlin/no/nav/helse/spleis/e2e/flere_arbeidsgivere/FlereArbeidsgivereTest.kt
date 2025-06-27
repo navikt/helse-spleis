@@ -1,8 +1,9 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -41,6 +42,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
@@ -62,6 +64,7 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.til
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -72,8 +75,84 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
+
+    @Test
+    fun `a1 med periode tidligere utenfor AGP, men innenfor senere, skal få opprettet utbetaling av a2`() {
+        a1  {
+            nyPeriode(2.januar til 10.januar)
+            nyPeriode(11.januar til 17.januar)
+            nyPeriode(18.januar til 31.januar)
+        }
+        a2 {
+            nyPeriode(januar)
+        }
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+        }
+        a2 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+        }
+        a2 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a1 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            håndterYtelser(3.vedtaksperiode)
+            håndterSimulering(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        // endrer arbeidsgiverperioden slik at 2.vedtaksperiode er innenfor AGP
+        a1 {
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag)))
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        }
+        a1 {
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
+
+            assertForventetFeil(
+                forklaring = "a2 har laget utbetaling for a1, men anser ikke 2.vedtaksperiode som 'kandidat for utbetaling' fordi den er innenfor arbeidsgiverperioden",
+                nå = {
+                    assertEquals(listOf(Utbetalingstatus.UTBETALT), inspektør.utbetalinger(2.vedtaksperiode).map { it.status })
+                    assertEquals(listOf(Utbetalingstatus.UTBETALT,  Utbetalingstatus.IKKE_UTBETALT), inspektør.utbetalinger(3.vedtaksperiode).map { it.status })
+                    val m = assertThrows<IllegalStateException> {
+                        håndterYtelser(2.vedtaksperiode)
+                    }
+                    assertTrue(m.message!!.contains("Hvordan kan det ha seg at vi lager en ny utbetaling for 11-01-2018 til 17-01-2018 samtidig"))
+                },
+                ønsket = {
+                    assertEquals(listOf(Utbetalingstatus.UTBETALT, Utbetalingstatus.IKKE_UTBETALT), inspektør.utbetalinger(2.vedtaksperiode).map { it.status })
+                    assertEquals(listOf(Utbetalingstatus.UTBETALT,  Utbetalingstatus.FORKASTET), inspektør.utbetalinger(3.vedtaksperiode).map { it.status })
+                    håndterYtelser(2.vedtaksperiode)
+                    håndterSimulering(2.vedtaksperiode)
+                    håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+                    håndterUtbetalt()
+                    håndterYtelser(3.vedtaksperiode)
+                    håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+
+                    assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                    assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+                    assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+                }
+            )
+        }
+    }
 
     @Test
     fun `Periode som starter før en annen, men med senere skjæringstidspunkt - da må de behandles i rett rekkefølge`() {
