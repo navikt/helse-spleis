@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -75,7 +74,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
@@ -122,35 +120,23 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         }
         a1 {
+            assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
 
-            assertForventetFeil(
-                forklaring = "a2 har laget utbetaling for a1, men anser ikke 2.vedtaksperiode som 'kandidat for utbetaling' fordi den er innenfor arbeidsgiverperioden",
-                nå = {
-                    assertEquals(listOf(Utbetalingstatus.UTBETALT), inspektør.utbetalinger(2.vedtaksperiode).map { it.status })
-                    assertEquals(listOf(Utbetalingstatus.UTBETALT,  Utbetalingstatus.IKKE_UTBETALT), inspektør.utbetalinger(3.vedtaksperiode).map { it.status })
-                    val m = assertThrows<IllegalStateException> {
-                        håndterYtelser(2.vedtaksperiode)
-                    }
-                    assertTrue(m.message!!.contains("Hvordan kan det ha seg at vi lager en ny utbetaling for 11-01-2018 til 17-01-2018 samtidig"))
-                },
-                ønsket = {
-                    assertEquals(listOf(Utbetalingstatus.UTBETALT, Utbetalingstatus.IKKE_UTBETALT), inspektør.utbetalinger(2.vedtaksperiode).map { it.status })
-                    assertEquals(listOf(Utbetalingstatus.UTBETALT,  Utbetalingstatus.FORKASTET), inspektør.utbetalinger(3.vedtaksperiode).map { it.status })
-                    håndterYtelser(2.vedtaksperiode)
-                    håndterSimulering(2.vedtaksperiode)
-                    håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-                    håndterUtbetalt()
-                    håndterYtelser(3.vedtaksperiode)
-                    håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+            assertEquals(listOf(Utbetalingstatus.UTBETALT, Utbetalingstatus.IKKE_UTBETALT), inspektør.utbetalinger(2.vedtaksperiode).map { it.status })
+            assertEquals(listOf(Utbetalingstatus.UTBETALT), inspektør.utbetalinger(3.vedtaksperiode).map { it.status })
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            håndterYtelser(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
-                    assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                    assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-                    assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
-                }
-            )
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
         }
     }
 

@@ -2128,8 +2128,9 @@ internal class Vedtaksperiode private constructor(
 
     private fun perioderDetSkalBeregnesUtbetalingFor(): List<Vedtaksperiode> {
         // lag utbetaling for seg selv + andre overlappende perioder hos andre arbeidsgivere (som ikke er utbetalt/avsluttet allerede)
-        return person.nåværendeVedtaksperioder { it.erKandidatForUtbetaling(this, this.skjæringstidspunkt) }
-            .filter { it.behandlinger.klarForUtbetaling() }
+        return person
+            .nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
+            .filter { it.behandlinger.forventerUtbetaling(periode, skjæringstidspunkt, it.skalBehandlesISpeil()) }
     }
 
     private fun mursteinsperioderMedSammeSkjæringstidspunkt(): List<Vedtaksperiode> {
@@ -2148,12 +2149,6 @@ internal class Vedtaksperiode private constructor(
         // men som overlapper med en periode som overlapper med this
         return mursteinsperioderMedSammeSkjæringstidspunkt()
             .filterNot { it.periode.endInclusive < this.periode.start }
-    }
-
-    private fun erKandidatForUtbetaling(periodeSomBeregner: Vedtaksperiode, skjæringstidspunktet: LocalDate): Boolean {
-        if (this === periodeSomBeregner) return true
-        if (!skalBehandlesISpeil()) return false
-        return this.periode.overlapperMed(periodeSomBeregner.periode) && skjæringstidspunktet == this.skjæringstidspunkt && !this.tilstand.erFerdigBehandlet
     }
 
     internal fun skalBehandlesISpeil(): Boolean {

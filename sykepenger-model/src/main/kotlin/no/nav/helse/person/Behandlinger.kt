@@ -153,6 +153,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun harUtbetalinger() = siste?.harUtbetalinger() == true
     internal fun erUbetalt() = siste?.erUbetalt() == true
     internal fun kanForkastes(andreBehandlinger: List<Behandlinger>) = behandlinger.last().kanForkastes(andreBehandlinger.map { it.behandlinger.last() })
+    internal fun forventerUtbetaling(periodeSomBeregner: Periode, skjæringstidspunkt: LocalDate, skalBehandlesISpeil: Boolean) =
+        behandlinger.last().forventerUtbetaling(periodeSomBeregner, skjæringstidspunkt, skalBehandlesISpeil)
 
     internal fun harFlereSkjæringstidspunkt() = behandlinger.last().harFlereSkjæringstidspunkt()
     internal fun håndterUtbetalinghendelse(hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) = behandlinger.any { it.håndterUtbetalinghendelse(hendelse, aktivitetslogg) }
@@ -255,7 +257,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     fun avsluttUtenVedtak(arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: InntekterForBeregning) {
-        check(behandlinger.last().utbetaling() == null) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
+        check(behandlinger.last().utbetaling() == null) {
+            "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. "
+        }
         this.behandlinger.last().avsluttUtenVedtak(arbeidsgiver, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
         bekreftAvsluttetBehandling(arbeidsgiver)
     }
@@ -276,10 +280,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 "siste behandling ${behandlinger.last()} tillater ikke opprettelse av ny behandling $behandling"
             }
         this.behandlinger.add(behandling)
-    }
-
-    fun klarForUtbetaling(): Boolean {
-        return behandlinger.last().klarForUtbetaling()
     }
 
     fun bekreftÅpenBehandling(arbeidsgiver: Arbeidsgiver) {
@@ -909,10 +909,34 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         internal fun navOvertarAnsvar() = gjeldende.dagerNavOvertarAnsvar.isNotEmpty()
+        internal fun forventerUtbetaling(periodeSomBeregner: Periode, skjæringstidspunkt: LocalDate, skalBehandlesISpeil: Boolean): Boolean {
+            val skjæringstidspunktetErLikt = this.skjæringstidspunkt == skjæringstidspunkt
+            val overlapperMedDenBeregnedePerioden = this.periode.overlapperMed(periodeSomBeregner)
+            val relevantForBeregning = skjæringstidspunktetErLikt && overlapperMedDenBeregnedePerioden
+
+            if (!relevantForBeregning) return false
+            return when (this.tilstand) {
+                Tilstand.UberegnetRevurdering -> true
+
+                Tilstand.Uberegnet,
+                Tilstand.UberegnetOmgjøring -> skalBehandlesISpeil
+
+                Tilstand.AnnullertPeriode,
+                Tilstand.UberegnetAnnullering,
+                Tilstand.AvsluttetUtenVedtak,
+                Tilstand.Beregnet,
+                Tilstand.BeregnetOmgjøring,
+                Tilstand.BeregnetRevurdering,
+                Tilstand.RevurdertVedtakAvvist,
+                Tilstand.TilInfotrygd,
+                Tilstand.VedtakFattet,
+                Tilstand.VedtakIverksatt -> false
+
+            }
+        }
         internal fun erFattetVedtak() = vedtakFattet != null
         internal fun erInFlight() = erFattetVedtak() && !erAvsluttet()
         internal fun erAvsluttet() = avsluttet != null
-        internal fun klarForUtbetaling() = this.tilstand in setOf(Tilstand.Uberegnet, Tilstand.UberegnetOmgjøring, Tilstand.UberegnetRevurdering)
         internal fun harÅpenBehandling() = this.tilstand in setOf(Tilstand.UberegnetRevurdering, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd, Tilstand.UberegnetAnnullering) || (Toggle.NyAnnulleringsløype.disabled && this.tilstand == Tilstand.AnnullertPeriode)
         internal fun harIkkeUtbetaling() = this.tilstand in setOf(Tilstand.Uberegnet, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd, Tilstand.UberegnetAnnullering)
         internal fun vedtakFattet(arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
