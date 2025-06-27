@@ -153,6 +153,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun harUtbetalinger() = siste?.harUtbetalinger() == true
     internal fun erUbetalt() = siste?.erUbetalt() == true
     internal fun kanForkastes(andreBehandlinger: List<Behandlinger>) = behandlinger.last().kanForkastes(andreBehandlinger.map { it.behandlinger.last() })
+    internal fun forventerUtbetaling(periodeSomBeregner: Periode, skjæringstidspunkt: LocalDate) = behandlinger.last().forventerUtbetaling(periodeSomBeregner, skjæringstidspunkt)
 
     internal fun harFlereSkjæringstidspunkt() = behandlinger.last().harFlereSkjæringstidspunkt()
     internal fun håndterUtbetalinghendelse(hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) = behandlinger.any { it.håndterUtbetalinghendelse(hendelse, aktivitetslogg) }
@@ -255,7 +256,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     fun avsluttUtenVedtak(arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: InntekterForBeregning) {
-        check(behandlinger.last().utbetaling() == null) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
+        check(behandlinger.last().utbetaling() == null) {
+            "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. "
+        }
         this.behandlinger.last().avsluttUtenVedtak(arbeidsgiver, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
         bekreftAvsluttetBehandling(arbeidsgiver)
     }
@@ -909,6 +912,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         internal fun navOvertarAnsvar() = gjeldende.dagerNavOvertarAnsvar.isNotEmpty()
+        internal fun forventerUtbetaling(periodeSomBeregner: Periode, skjæringstidspunkt: LocalDate): Boolean {
+            val skjæringstidspunktetErLikt = this.skjæringstidspunkt == skjæringstidspunkt
+            val overlapperMedDenBeregnedePerioden = this.periode.overlapperMed(periodeSomBeregner)
+            val relevantForBeregning = skjæringstidspunktetErLikt && overlapperMedDenBeregnedePerioden
+
+            val innenforAGP = this.periode in this.arbeidsgiverperiode
+            val navOvertarAnsvar = navOvertarAnsvar()
+            val erUtenforAGPEllerNAVOvertar = !innenforAGP || navOvertarAnsvar
+            val behandlingKlarForUtbetaling = klarForUtbetaling()
+
+            return relevantForBeregning && erUtenforAGPEllerNAVOvertar && behandlingKlarForUtbetaling
+        }
         internal fun erFattetVedtak() = vedtakFattet != null
         internal fun erInFlight() = erFattetVedtak() && !erAvsluttet()
         internal fun erAvsluttet() = avsluttet != null
