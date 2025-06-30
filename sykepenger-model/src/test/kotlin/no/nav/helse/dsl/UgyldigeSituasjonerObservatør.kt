@@ -7,8 +7,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.BehandlingView
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
-import no.nav.helse.person.BehandlingView.TilstandView.UBEREGNET_ANNULLERING
-import no.nav.helse.person.BehandlingView.TilstandView.UBEREGNET_OMGJØRING
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
@@ -266,11 +264,13 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
                         when (behandling.tilstand) {
                             BehandlingView.TilstandView.BEREGNET,
                             BehandlingView.TilstandView.BEREGNET_OMGJØRING,
+                            BehandlingView.TilstandView.BEREGNET_ANNULLERING,
                             BehandlingView.TilstandView.BEREGNET_REVURDERING -> {
                                 assertNotNull(endring.utbetaling) { "forventer utbetaling i ${behandling.tilstand}" }
                                 assertNotNull(endring.grunnlagsdata) { "forventer vilkårsgrunnlag i ${behandling.tilstand}" }
                                 assertEquals(IKKE_UTBETALT, endring.utbetaling!!.inspektør.tilstand) { "forventer at utbetaling i behandlingstilstand ${behandling.tilstand} skal være IKKE_UTBETALT, men var ${endring.utbetaling.inspektør.tilstand}" }
                             }
+
                             BehandlingView.TilstandView.REVURDERT_VEDTAK_AVVIST,
                             BehandlingView.TilstandView.VEDTAK_FATTET,
                             BehandlingView.TilstandView.VEDTAK_IVERKSATT,
@@ -278,9 +278,11 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
                                 assertNotNull(endring.utbetaling) { "forventer utbetaling i ${behandling.tilstand}" }
                                 assertNotNull(endring.grunnlagsdata) { "forventer vilkårsgrunnlag i ${behandling.tilstand}" }
                             }
+
                             BehandlingView.TilstandView.TIL_INFOTRYGD,
                             BehandlingView.TilstandView.UBEREGNET,
-                            UBEREGNET_OMGJØRING,
+                            BehandlingView.TilstandView.UBEREGNET_OMGJØRING,
+                            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
                             BehandlingView.TilstandView.UBEREGNET_REVURDERING -> {
                                 assertNull(endring.utbetaling) { "forventer ingen utbetaling i ${behandling.tilstand}" }
                                 assertNull(endring.grunnlagsdata) { "forventer inget vilkårsgrunnlag i ${behandling.tilstand}" }
@@ -288,13 +290,10 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
                                 assertTrue(endring.utbetalingstidslinje.isEmpty()) { "forventer tom utbetalingstidslinje i ${behandling.tilstand}" }
                             }
 
-                            AVSLUTTET_UTEN_VEDTAK -> {
+                            BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK -> {
                                 assertNull(endring.utbetaling) { "forventer ingen utbetaling i ${behandling.tilstand}" }
                                 assertNull(endring.grunnlagsdata) { "forventer inget vilkårsgrunnlag i ${behandling.tilstand}" }
                                 assertEquals(IKKE_VURDERT, endring.maksdatoresultat.bestemmelse) { "forventer maksdatoresultat IKKE_VURDERT i ${behandling.tilstand}" }
-                            }
-                            UBEREGNET_ANNULLERING -> {
-                                assertNull(endring.utbetaling) { "forventer ingen utbetaling i ${behandling.tilstand}" }
                             }
                         }
                     }

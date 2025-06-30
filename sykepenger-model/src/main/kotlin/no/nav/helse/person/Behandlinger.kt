@@ -485,6 +485,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.VedtakFattet -> BehandlingView.TilstandView.VEDTAK_FATTET
                 Tilstand.VedtakIverksatt -> BehandlingView.TilstandView.VEDTAK_IVERKSATT
                 Tilstand.UberegnetAnnullering -> BehandlingView.TilstandView.UBEREGNET_ANNULLERING
+                Tilstand.BeregnetAnnullering -> BehandlingView.TilstandView.BEREGNET_ANNULLERING
             },
             endringer = endringer.map { it.view() },
         )
@@ -927,6 +928,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.Beregnet,
                 Tilstand.BeregnetOmgjøring,
                 Tilstand.BeregnetRevurdering,
+                Tilstand.BeregnetAnnullering,
                 Tilstand.RevurdertVedtakAvvist,
                 Tilstand.TilInfotrygd,
                 Tilstand.VedtakFattet,
@@ -1292,11 +1294,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.VedtakFattet,
                 Tilstand.VedtakIverksatt,
                 Tilstand.UberegnetRevurdering,
+                Tilstand.BeregnetAnnullering,
                 Tilstand.UberegnetAnnullering -> false
 
                 Tilstand.AvsluttetUtenVedtak,
                 Tilstand.BeregnetOmgjøring,
                 Tilstand.UberegnetOmgjøring -> hvisAUU()
+
             }
         }
 
@@ -1496,6 +1500,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         BehandlingtilstandDto.VEDTAK_FATTET -> Tilstand.VedtakFattet
                         BehandlingtilstandDto.VEDTAK_IVERKSATT -> Tilstand.VedtakIverksatt
                         BehandlingtilstandDto.UBEREGNET_ANNULLERING -> Tilstand.UberegnetAnnullering
+                        BehandlingtilstandDto.BEREGNET_ANNULLERING -> Tilstand.BeregnetAnnullering
                     },
                     endringer = dto.endringer.map { Endring.gjenopprett(it, grunnlagsdata, utbetalinger) }.toMutableList(),
                     vedtakFattet = dto.vedtakFattet,
@@ -2141,6 +2146,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun behandlingOpprettet(behandling: Behandling) = behandling.emitNyBehandlingOpprettet(PersonObserver.BehandlingOpprettetEvent.Type.Revurdering)
             }
 
+            data object BeregnetAnnullering : Tilstand {}
+
             data object TilInfotrygd : Tilstand {
                 override fun behandlingOpprettet(behandling: Behandling) = behandling.emitNyBehandlingOpprettet(PersonObserver.BehandlingOpprettetEvent.Type.Omgjøring)
                 override fun entering(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
@@ -2181,6 +2188,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.VedtakFattet -> BehandlingtilstandDto.VEDTAK_FATTET
                 Tilstand.VedtakIverksatt -> BehandlingtilstandDto.VEDTAK_IVERKSATT
                 Tilstand.UberegnetAnnullering -> BehandlingtilstandDto.UBEREGNET_ANNULLERING
+                Tilstand.BeregnetAnnullering -> BehandlingtilstandDto.BEREGNET_ANNULLERING
             },
             endringer = this.endringer.map { it.dto() },
             vedtakFattet = this.vedtakFattet,
@@ -2216,7 +2224,7 @@ internal data class BehandlingView(
         BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING,
         REVURDERT_VEDTAK_AVVIST,
         TIL_INFOTRYGD, UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING,
-        VEDTAK_FATTET, VEDTAK_IVERKSATT, UBEREGNET_ANNULLERING
+        VEDTAK_FATTET, VEDTAK_IVERKSATT, UBEREGNET_ANNULLERING, BEREGNET_ANNULLERING
     }
 }
 

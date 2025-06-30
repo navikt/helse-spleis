@@ -82,6 +82,7 @@ internal class SpeilGenerasjonerBuilder(
                 BehandlingtilstandDto.BEREGNET_REVURDERING,
                 BehandlingtilstandDto.REVURDERT_VEDTAK_AVVIST,
                 BehandlingtilstandDto.VEDTAK_FATTET,
+                BehandlingtilstandDto.BEREGNET_ANNULLERING,
                 BehandlingtilstandDto.VEDTAK_IVERKSATT -> mapBeregnetPeriode(vedtaksperiode, generasjon)
 
                 BehandlingtilstandDto.UBEREGNET,
