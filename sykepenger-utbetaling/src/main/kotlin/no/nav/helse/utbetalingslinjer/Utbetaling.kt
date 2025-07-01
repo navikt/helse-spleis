@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.KlassekodeDto
@@ -232,6 +232,12 @@ class Utbetaling private constructor(
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(sisteUtbetalteForUtbetaling)
         return sisteUtbetalteForUtbetaling.opphør(aktivitetsloggMedUtbetalingkontekst)
     }
+
+    fun leggTilVurdering(vurdering: Vurdering) {
+        this.vurdering = vurdering
+    }
+
+    fun annuller(aktivitetslogg: IAktivitetslogg) = opphør(aktivitetslogg)
 
     private fun opphør(aktivitetslogg: IAktivitetslogg) =
         tilstand.annuller(this, aktivitetslogg)

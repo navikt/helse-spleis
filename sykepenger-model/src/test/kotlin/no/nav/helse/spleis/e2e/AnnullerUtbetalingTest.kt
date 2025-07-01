@@ -382,6 +382,10 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
             BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
             inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
         )
+
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
     }
 
     @Test

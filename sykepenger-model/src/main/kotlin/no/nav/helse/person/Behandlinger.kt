@@ -85,6 +85,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     private val behandlinger = behandlinger.toMutableList()
     private val siste get() = behandlinger.lastOrNull()?.utbetaling()
 
+    internal fun sisteUtbetalteUtbetaling() = behandlinger.lastOrNull { it.erFattetVedtak() }?.utbetaling()
+
     private val observatører = mutableListOf<BehandlingObserver>()
 
     val sisteBehandlingId get() = behandlinger.last().id
@@ -2066,7 +2068,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     arbeidsgiver: Arbeidsgiver,
                     behandlingkilde: Behandlingkilde,
                     aktivitetslogg: IAktivitetslogg
-                ): Behandling? {
+                ): Behandling {
                     return behandling.nyAnnulleringBehandling(
                         arbeidsgiver = arbeidsgiver,
                         behandlingkilde = behandlingkilde

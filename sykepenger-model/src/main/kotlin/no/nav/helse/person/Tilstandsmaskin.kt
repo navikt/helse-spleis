@@ -1047,6 +1047,12 @@ internal data object AvventerAnnullering : Vedtaksperiodetilstand {
     }
 
     override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {}
+
+    override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+        val utbetalingSomSkalAnnulleres = vedtaksperiode.behandlinger.sisteUtbetalteUtbetaling()
+        checkNotNull(utbetalingSomSkalAnnulleres) { "Fant ikke en utbetaling for annullering for vedtaksperiode ${vedtaksperiode.id}" }
+        vedtaksperiode.arbeidsgiver.lagAnnulleringsutbetaling(hendelse, aktivitetslogg, utbetalingSomSkalAnnulleres)
+    }
 }
 
 internal data object TilInfotrygd : Vedtaksperiodetilstand {
