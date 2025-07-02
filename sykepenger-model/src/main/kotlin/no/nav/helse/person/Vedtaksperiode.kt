@@ -1859,6 +1859,7 @@ internal class Vedtaksperiode private constructor(
         val event = PersonObserver.VedtaksperiodeEndretEvent(
             yrkesaktivitetssporing = arbeidsgiver.yrkesaktivitetssporing,
             vedtaksperiodeId = id,
+            behandlingId = behandlinger.sisteBehandlingId,
             gjeldendeTilstand = tilstand.type,
             forrigeTilstand = previousState.type,
             hendelser = eksterneIderSet,

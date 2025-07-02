@@ -101,6 +101,7 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
         assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
         assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
+        assertTrue(melding.path("behandlingId").asText().isNotEmpty())
         assertTrue(melding.path("gjeldendeTilstand").asText().isNotEmpty())
         assertTrue(melding.path("forrigeTilstand").asText().isNotEmpty())
         assertDato(melding.path("fom").asText())

@@ -22,6 +22,7 @@ interface PersonObserver {
     data class VedtaksperiodeEndretEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
+        val behandlingId: UUID,
         val gjeldendeTilstand: TilstandType,
         val forrigeTilstand: TilstandType,
         val hendelser: Set<UUID>,

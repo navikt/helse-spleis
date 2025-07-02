@@ -424,6 +424,7 @@ internal class PersonMediator(
                     "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
                     "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
                     "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "behandlingId" to event.behandlingId,
                     "gjeldendeTilstand" to event.gjeldendeTilstand,
                     "forrigeTilstand" to event.forrigeTilstand,
                     "hendelser" to event.hendelser,
