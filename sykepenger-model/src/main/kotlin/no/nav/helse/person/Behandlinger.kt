@@ -85,6 +85,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     private val behandlinger = behandlinger.toMutableList()
     private val siste get() = behandlinger.lastOrNull()?.utbetaling()
 
+    internal fun sisteUtbetalteUtbetaling() = behandlinger.lastOrNull { it.erFattetVedtak() }?.utbetaling()
+
     private val observatører = mutableListOf<BehandlingObserver>()
 
     val sisteBehandlingId get() = behandlinger.last().id
@@ -202,6 +204,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 aktivitetslogg
             )
         )
+    }
+
+    internal fun leggTilAnnullering(annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
+        behandlinger.last().leggTilAnnullering(annullering, grunnlagsdata, aktivitetslogg)
     }
 
     private fun kobleAnnulleringTilAndre(arbeidsgiver: Arbeidsgiver, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg, annullering: Utbetaling) {
@@ -981,6 +987,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return this.tilstand.håndterAnnullering(this, arbeidsgiver, behandlingskilde, aktivitetslogg)
         }
 
+        internal fun leggTilAnnullering(annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
+            tilstand.leggTilAnnullering(this, annullering, grunnlagsdata, aktivitetslogg)
+        }
+
         private fun lagOmgjøring(
             vedtaksperiodeSomLagerUtbetaling: UUID,
             arbeidsgiver: Arbeidsgiver,
@@ -1572,6 +1582,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 error("Har ikke implementert håndtering av annullering i $this")
             }
 
+            fun leggTilAnnullering(behandling: Behandling, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
+                error("Kan ikke legge til annullering i $this")
+            }
+
             fun vedtakAvvist(
                 behandling: Behandling,
                 arbeidsgiver: Arbeidsgiver,
@@ -2066,7 +2080,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     arbeidsgiver: Arbeidsgiver,
                     behandlingkilde: Behandlingkilde,
                     aktivitetslogg: IAktivitetslogg
-                ): Behandling? {
+                ): Behandling {
                     return behandling.nyAnnulleringBehandling(
                         arbeidsgiver = arbeidsgiver,
                         behandlingkilde = behandlingkilde
@@ -2144,6 +2158,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             data object UberegnetAnnullering : Tilstand {
                 override fun behandlingOpprettet(behandling: Behandling) = behandling.emitNyBehandlingOpprettet(PersonObserver.BehandlingOpprettetEvent.Type.Revurdering)
+
+                override fun leggTilAnnullering(behandling: Behandling, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
+                    behandling.nyEndring(behandling.gjeldende.kopierMedAnnullering(grunnlagsdata, annullering))
+                    behandling.tilstand(BeregnetAnnullering, aktivitetslogg)
+                }
             }
 
             data object BeregnetAnnullering : Tilstand {}

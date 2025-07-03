@@ -51,6 +51,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SY_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.inntekt.InntekterForBeregning
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 
 // Gang of four State pattern
 internal sealed interface Vedtaksperiodetilstand {
@@ -1047,6 +1048,24 @@ internal data object AvventerAnnullering : Vedtaksperiodetilstand {
     }
 
     override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {}
+
+    override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+        val sisteUtbetalteUtbetaling = vedtaksperiode.behandlinger.sisteUtbetalteUtbetaling()
+        checkNotNull(sisteUtbetalteUtbetaling) { "Fant ikke en utbetalt utbetaling for vedtaksperiode ${vedtaksperiode.id}" }
+
+        val sisteAktiveUtbetalingMedSammeKorrelasjonsId = vedtaksperiode.arbeidsgiver.sisteAktiveUtbetalingMedSammeKorrelasjonsId(sisteUtbetalteUtbetaling)
+        val grunnlagsdata = checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Mangler vilkårsgrunnlag i pågående annullering, er ikke det litt rart?" }
+
+        if (sisteAktiveUtbetalingMedSammeKorrelasjonsId.overlapperMed(vedtaksperiode.periode)) {
+            val annullering = vedtaksperiode.arbeidsgiver.lagAnnulleringsutbetaling(hendelse, aktivitetslogg, sisteAktiveUtbetalingMedSammeKorrelasjonsId)
+            vedtaksperiode.behandlinger.leggTilAnnullering(annullering, grunnlagsdata, aktivitetslogg)
+        } else {
+            val tomAnnullering = vedtaksperiode.arbeidsgiver.lagTomUtbetaling(vedtaksperiode.periode, Utbetalingtype.ANNULLERING)
+                .also { it.opprett(aktivitetslogg) }
+            vedtaksperiode.behandlinger.leggTilAnnullering(tomAnnullering, grunnlagsdata, aktivitetslogg)
+        }
+        vedtaksperiode.tilstand(aktivitetslogg, TilAnnullering)
+    }
 }
 
 internal data object TilInfotrygd : Vedtaksperiodetilstand {

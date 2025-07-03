@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.KlassekodeDto
@@ -233,6 +233,21 @@ class Utbetaling private constructor(
         return sisteUtbetalteForUtbetaling.opphør(aktivitetsloggMedUtbetalingkontekst)
     }
 
+    fun sisteAktiveMedSammeKorrelasjonsId(utbetalinger: MutableList<Utbetaling>): Utbetaling {
+        val aktiveUtbetalinger = utbetalinger.aktive()
+        val sisteUtbetalteForUtbetaling = checkNotNull(aktiveUtbetalinger.singleOrNull { it.hørerSammen(this) }) {
+            "Finnes ingen aktive utbetalinger for korrelasjonsId ${this.korrelasjonsId}"
+        }
+
+        return sisteUtbetalteForUtbetaling
+    }
+
+    fun leggTilVurdering(vurdering: Vurdering) {
+        this.vurdering = vurdering
+    }
+
+    fun lagAnnulleringsutbetaling(aktivitetslogg: IAktivitetslogg) = opphør(aktivitetslogg)
+
     private fun opphør(aktivitetslogg: IAktivitetslogg) =
         tilstand.annuller(this, aktivitetslogg)
 
@@ -373,6 +388,18 @@ class Utbetaling private constructor(
             )
             return utbetalingen
         }
+
+        fun lagTomUtbetaling(vedtaksperiodekladd: Utbetalingkladd, periode: Periode, type: Utbetalingtype) = Utbetaling(
+            periode = periode,
+            utbetalingstidslinje = Utbetalingstidslinje(),
+            arbeidsgiverOppdrag = vedtaksperiodekladd.arbeidsgiveroppdrag,
+            personOppdrag = vedtaksperiodekladd.personoppdrag,
+            type = type,
+            maksdato = LocalDate.MAX,
+            forbrukteSykedager = null,
+            gjenståendeSykedager = null,
+            annulleringer = emptyList()
+        )
 
         fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
         fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
