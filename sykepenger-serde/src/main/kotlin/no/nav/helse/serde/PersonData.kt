@@ -973,6 +973,7 @@ data class PersonData(
                         TilstandData.TIL_INFOTRYGD -> BehandlingtilstandDto.TIL_INFOTRYGD
                         TilstandData.UBEREGNET_ANNULLERING -> BehandlingtilstandDto.UBEREGNET_ANNULLERING
                         TilstandData.BEREGNET_ANNULLERING -> BehandlingtilstandDto.BEREGNET_ANNULLERING
+                        TilstandData.OVERFØRT_ANNULLERING -> BehandlingtilstandDto.OVERFØRT_ANNULLERING
                     },
                     vedtakFattet = this.vedtakFattet,
                     avsluttet = this.avsluttet,
@@ -983,7 +984,7 @@ data class PersonData(
                 enum class TilstandData {
                     UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING,
                     VEDTAK_FATTET, REVURDERT_VEDTAK_AVVIST, VEDTAK_IVERKSATT, AVSLUTTET_UTEN_VEDTAK, ANNULLERT_PERIODE, TIL_INFOTRYGD,
-                    UBEREGNET_ANNULLERING, BEREGNET_ANNULLERING
+                    UBEREGNET_ANNULLERING, BEREGNET_ANNULLERING, OVERFØRT_ANNULLERING
                 }
 
                 enum class AvsenderData {

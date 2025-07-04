@@ -273,6 +273,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
 
                             BehandlingView.TilstandView.REVURDERT_VEDTAK_AVVIST,
                             BehandlingView.TilstandView.VEDTAK_FATTET,
+                            BehandlingView.TilstandView.OVERFØRT_ANNULLERING,
                             BehandlingView.TilstandView.VEDTAK_IVERKSATT,
                             BehandlingView.TilstandView.ANNULLERT_PERIODE -> {
                                 assertNotNull(endring.utbetaling) { "forventer utbetaling i ${behandling.tilstand}" }
