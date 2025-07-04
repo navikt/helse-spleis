@@ -214,6 +214,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         leggTilNyBehandling(behandlinger.last().annuller(arbeidsgiver, behandlingkilde, aktivitetslogg, annullering, behandlinger.toList()))
     }
 
+    internal fun sisteUtbetalingSkalOverføres(): Boolean {
+        val sisteUtbetaling = siste
+        checkNotNull(sisteUtbetaling) { "Finner ikke utbetaling i TIL_ANNULLERING, og det er ganske rart. BehandlingId ${behandlinger.last().id}" }
+        return sisteUtbetaling.harOppdragMedUtbetalinger()
+    }
+
+    internal fun overførSisteUtbetaling(aktivitetslogg: IAktivitetslogg) {
+        behandlinger.last().overførAnnullering(aktivitetslogg)
+    }
+
     internal fun nyUtbetaling(
         vedtaksperiodeSomLagerUtbetaling: UUID,
         arbeidsgiver: Arbeidsgiver,
@@ -994,6 +1004,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             tilstand.leggTilAnnullering(this, annullering, grunnlagsdata, aktivitetslogg)
         }
 
+        internal fun overførAnnullering(aktivitetslogg: IAktivitetslogg) {
+            tilstand.overførAnnullering(this, aktivitetslogg)
+        }
+
         private fun lagOmgjøring(
             vedtaksperiodeSomLagerUtbetaling: UUID,
             arbeidsgiver: Arbeidsgiver,
@@ -1591,6 +1605,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 error("Kan ikke legge til annullering i $this")
             }
 
+            fun overførAnnullering(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
+                error("Kan ikke overføre annullering i $this")
+            }
+
             fun vedtakAvvist(
                 behandling: Behandling,
                 arbeidsgiver: Arbeidsgiver,
@@ -2171,9 +2189,23 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 }
             }
 
-            data object BeregnetAnnullering : Tilstand {}
+            data object BeregnetAnnullering : Tilstand {
+                override fun overførAnnullering(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
+                    val annullering = behandling.gjeldende.utbetaling
+                    checkNotNull(annullering) { "Finner ikke utbetaling i BEREGNET_ANNULLERING, og det er ganske rart. BehandlingId ${behandling.id}" }
+                    annullering.overfør(aktivitetslogg)
+                    behandling.tilstand(OverførtAnnullering, aktivitetslogg)
+                }
+            }
 
-            data object OverførtAnnullering : Tilstand {}
+            data object OverførtAnnullering : Tilstand {
+                override fun håndterUtbetalinghendelse(behandling: Behandling, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg): Boolean {
+                    val utbetaling = checkNotNull(behandling.gjeldende.utbetaling) { "forventer utbetaling" }
+                    if (!utbetaling.gjelderFor(hendelse)) return false
+                    if (utbetaling.erAvsluttet()) behandling.tilstand(AnnullertPeriode, aktivitetslogg)
+                    return true
+                }
+            }
 
             data object TilInfotrygd : Tilstand {
                 override fun behandlingOpprettet(behandling: Behandling) = behandling.emitNyBehandlingOpprettet(PersonObserver.BehandlingOpprettetEvent.Type.Omgjøring)

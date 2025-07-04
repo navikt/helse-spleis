@@ -27,6 +27,7 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_12
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_25
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
@@ -141,7 +142,7 @@ class Utbetaling private constructor(
     fun harUtbetalinger() =
         harOppdragMedUtbetalinger() || annulleringer.any { it.harOppdragMedUtbetalinger() }
 
-    private fun harOppdragMedUtbetalinger() =
+    fun harOppdragMedUtbetalinger() =
         arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
 
     fun harDelvisRefusjon() = arbeidsgiverOppdrag.harUtbetalinger() && personOppdrag.harUtbetalinger()
@@ -266,6 +267,11 @@ class Utbetaling private constructor(
     private fun godkjenn(aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         tilstand.godkjenn(this, aktivitetsloggMedUtbetalingkontekst, vurdering)
+    }
+
+    fun overfør(aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
+        tilstand.overfør(this, aktivitetsloggMedUtbetalingkontekst)
     }
 
     private fun tilstand(neste: Tilstand, aktivitetslogg: IAktivitetslogg) {
@@ -576,6 +582,14 @@ class Utbetaling private constructor(
             aktivitetslogg.funksjonellFeil(RV_UT_7)
         }
 
+        fun overfør(
+            utbetaling: Utbetaling,
+            aktivitetslogg: IAktivitetslogg
+        ) {
+            aktivitetslogg.info("Forventet ikke å overføre utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            aktivitetslogg.funksjonellFeil(RV_UT_25)
+        }
+
         fun annuller(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg): Utbetaling? {
             aktivitetslogg.info("Forventet ikke å annullere på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
             aktivitetslogg.funksjonellFeil(RV_UT_9)
@@ -623,6 +637,10 @@ class Utbetaling private constructor(
             utbetaling.vurdering = vurdering
             utbetaling.annulleringer.forEach { it.godkjenn(aktivitetslogg, vurdering) }
             utbetaling.tilstand(vurdering.avgjør(utbetaling), aktivitetslogg)
+        }
+
+        override fun overfør(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+            utbetaling.tilstand(Overført, aktivitetslogg)
         }
 
         override fun simuler(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {

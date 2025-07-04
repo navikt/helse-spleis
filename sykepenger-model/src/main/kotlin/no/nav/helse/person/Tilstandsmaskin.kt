@@ -845,6 +845,13 @@ internal data object TilUtbetaling : Vedtaksperiodetilstand {
 
 internal data object TilAnnullering : Vedtaksperiodetilstand {
     override val type = TIL_ANNULLERING
+    override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+        if (vedtaksperiode.behandlinger.sisteUtbetalingSkalOverføres()) {
+            vedtaksperiode.behandlinger.overførSisteUtbetaling(aktivitetslogg)
+        } else {
+            // TODO kast ut vedtaksperiode ?
+        }
+    }
 
     override fun venteårsak(vedtaksperiode: Vedtaksperiode) = UTBETALING.utenBegrunnelse
 
@@ -864,7 +871,10 @@ internal data object TilAnnullering : Vedtaksperiodetilstand {
         hendelse: UtbetalingHendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        TODO("Not yet implemented")
+        vedtaksperiode.håndterUtbetalingHendelse(aktivitetslogg)
+        if (!vedtaksperiode.behandlinger.erAvsluttet()) return
+        vedtaksperiode.forkast(hendelse, aktivitetslogg)
+            .also { aktivitetslogg.info("Annulleringen fikk OK fra Oppdragssystemet") }
     }
 }
 
