@@ -224,6 +224,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.last().overførAnnullering(aktivitetslogg)
     }
 
+    internal fun avsluttTomAnnullering(aktivitetslogg: IAktivitetslogg) {
+        behandlinger.last().avsluttTomAnnullering(aktivitetslogg)
+    }
+
     internal fun nyUtbetaling(
         vedtaksperiodeSomLagerUtbetaling: UUID,
         arbeidsgiver: Arbeidsgiver,
@@ -1008,6 +1012,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             tilstand.overførAnnullering(this, aktivitetslogg)
         }
 
+        internal fun avsluttTomAnnullering(aktivitetslogg: IAktivitetslogg) {
+            tilstand.avsluttTomAnnullering(this, aktivitetslogg)
+        }
+
         private fun lagOmgjøring(
             vedtaksperiodeSomLagerUtbetaling: UUID,
             arbeidsgiver: Arbeidsgiver,
@@ -1609,6 +1617,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 error("Kan ikke overføre annullering i $this")
             }
 
+            fun avsluttTomAnnullering(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
+                error("Kan ikke avslutte tom annullering i $this")
+            }
+
             fun vedtakAvvist(
                 behandling: Behandling,
                 arbeidsgiver: Arbeidsgiver,
@@ -2195,6 +2207,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     checkNotNull(annullering) { "Finner ikke utbetaling i BEREGNET_ANNULLERING, og det er ganske rart. BehandlingId ${behandling.id}" }
                     annullering.overfør(aktivitetslogg)
                     behandling.tilstand(OverførtAnnullering, aktivitetslogg)
+                }
+
+                override fun avsluttTomAnnullering(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
+                    val annullering = behandling.gjeldende.utbetaling
+                    checkNotNull(annullering) { "Finner ikke utbetaling i BEREGNET_ANNULLERING, og det er ganske rart. BehandlingId ${behandling.id}" }
+                    check(!annullering.harOppdragMedUtbetalinger()) { "Forventet tom annullering for behandlingId ${behandling.id}" }
+                    annullering.avsluttTomAnnullering(aktivitetslogg)
+                    behandling.tilstand(AnnullertPeriode, aktivitetslogg)
                 }
             }
 

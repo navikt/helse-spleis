@@ -849,7 +849,9 @@ internal data object TilAnnullering : Vedtaksperiodetilstand {
         if (vedtaksperiode.behandlinger.sisteUtbetalingSkalOverføres()) {
             vedtaksperiode.behandlinger.overførSisteUtbetaling(aktivitetslogg)
         } else {
-            // TODO kast ut vedtaksperiode ?
+            vedtaksperiode.behandlinger.avsluttTomAnnullering(aktivitetslogg)
+            if (!vedtaksperiode.behandlinger.erAvsluttet()) return
+            vedtaksperiode.forkast(hendelse, aktivitetslogg)
         }
     }
 

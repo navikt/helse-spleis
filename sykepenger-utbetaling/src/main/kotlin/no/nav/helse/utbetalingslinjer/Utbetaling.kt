@@ -274,6 +274,11 @@ class Utbetaling private constructor(
         tilstand.overfør(this, aktivitetsloggMedUtbetalingkontekst)
     }
 
+    fun avsluttTomAnnullering(aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
+        tilstand.forkast(this, aktivitetsloggMedUtbetalingkontekst)
+    }
+
     private fun tilstand(neste: Tilstand, aktivitetslogg: IAktivitetslogg) {
         oppdatert = LocalDateTime.now()
         if (Oppdrag.ingenFeil(arbeidsgiverOppdrag, personOppdrag) && !Oppdrag.synkronisert(
