@@ -859,7 +859,7 @@ internal data object TilAnnullering : Vedtaksperiodetilstand {
     override fun venteårsak(vedtaksperiode: Vedtaksperiode) = UTBETALING.utenBegrunnelse
 
     override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
-        TODO("Not yet implemented")
+        error("Kan ikke igangsette overstyring i TilAnnullering-tilstanden")
     }
 
     override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
