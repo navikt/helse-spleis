@@ -883,6 +883,7 @@ internal data object TilAnnullering : Vedtaksperiodetilstand {
     }
 
     override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+        aktivitetslogg.info("Vi har ikke fått kvittering fra OS for annullering av vedtaksperiode ${vedtaksperiode.id}")
         sikkerLogg.warn("Vi har ikke fått kvittering fra OS for annullering av vedtaksperiode ${vedtaksperiode.id}")
     }
 }
