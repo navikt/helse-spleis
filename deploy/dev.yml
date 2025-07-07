@@ -71,6 +71,8 @@ spec:
       value: "true"
     - name: SELVSTENDIG_NAERINGSDRIVENDE
       value: "true"
+    - name: NY_ANNULLERINGSLØYPE
+      value: "true"
     - name: JAVA_TOOL_OPTIONS
       value: "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-dev-7ff9,-logtostderr,-minloglevel=1"
   observability:
