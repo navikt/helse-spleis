@@ -53,6 +53,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SY_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
+import org.slf4j.LoggerFactory
 
 // Gang of four State pattern
 internal sealed interface Vedtaksperiodetilstand {
@@ -846,6 +847,7 @@ internal data object TilUtbetaling : Vedtaksperiodetilstand {
 
 internal data object TilAnnullering : Vedtaksperiodetilstand {
     override val type = TIL_ANNULLERING
+    val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         if (vedtaksperiode.behandlinger.sisteUtbetalingSkalOverføres()) {
             vedtaksperiode.behandlinger.overførSisteUtbetaling(aktivitetslogg)
@@ -878,6 +880,10 @@ internal data object TilAnnullering : Vedtaksperiodetilstand {
         if (!vedtaksperiode.behandlinger.erAvsluttet()) return
         vedtaksperiode.forkast(hendelse, aktivitetslogg)
             .also { aktivitetslogg.info("Annulleringen fikk OK fra Oppdragssystemet") }
+    }
+
+    override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+        sikkerLogg.warn("Vi har ikke fått kvittering fra OS for annullering av vedtaksperiode ${vedtaksperiode.id}")
     }
 }
 
