@@ -627,7 +627,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVVENTER_ANNULLERING, TIL_ANNULLERING)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
 
         val annullering = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().utbetaling
 
@@ -685,8 +685,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVVENTER_ANNULLERING, TIL_ANNULLERING)
-        assertTilstander(3.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
 
         val annullering = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().utbetaling
 
@@ -1058,7 +1058,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     private fun assertTomAnnulleringsutbetaling(annullering: UtbetalingView) {
         assertEquals(true, annullering.inspektør.erAnnullering)
-        assertEquals(Utbetalingstatus.IKKE_UTBETALT, annullering.inspektør.tilstand)
+        assertEquals(Utbetalingstatus.FORKASTET, annullering.inspektør.tilstand)
         assertEquals(0, annullering.inspektør.nettobeløp)
         assertEquals(emptyList<Utbetalingslinje>(), annullering.inspektør.arbeidsgiverOppdrag.linjer)
         assertEquals(emptyList<Utbetalingslinje>(), annullering.inspektør.personOppdrag.linjer)

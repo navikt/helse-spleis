@@ -16,6 +16,7 @@ import no.nav.helse.feriepenger.Arbeidsgiverferiepengegrunnlag.Feriepengegrunnla
 import no.nav.helse.feriepenger.Feriepengeberegner
 import no.nav.helse.feriepenger.Feriepengeutbetaling
 import no.nav.helse.hendelser.AnmodningOmForkasting
+import no.nav.helse.hendelser.AnnullerTomUtbetaling
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
@@ -814,7 +815,9 @@ internal class Arbeidsgiver private constructor(
             is UtbetalingshistorikkEtterInfotrygdendring,
             is UtbetalingshistorikkForFeriepenger,
             is Vilkårsgrunnlag,
+            is AnnullerTomUtbetaling,
             is Ytelser -> Utbetaling.Vurdering(true, "Automatisk behandlet", "tbd@nav.no", LocalDateTime.now(), true)
+
         }
     }
 

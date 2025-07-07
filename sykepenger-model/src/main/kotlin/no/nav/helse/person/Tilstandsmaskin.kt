@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDateTime
 import java.time.Period
 import no.nav.helse.etterlevelse.`fvl § 35 ledd 1`
+import no.nav.helse.hendelser.AnnullerTomUtbetaling
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.DagerFraInntektsmelding
@@ -849,7 +850,9 @@ internal data object TilAnnullering : Vedtaksperiodetilstand {
         if (vedtaksperiode.behandlinger.sisteUtbetalingSkalOverføres()) {
             vedtaksperiode.behandlinger.overførSisteUtbetaling(aktivitetslogg)
         } else {
-            // TODO kast ut vedtaksperiode ?
+            vedtaksperiode.behandlinger.avsluttTomAnnullering(aktivitetslogg)
+            if (!vedtaksperiode.behandlinger.erAvsluttet()) return
+            vedtaksperiode.forkast(AnnullerTomUtbetaling(vedtaksperiode.arbeidsgiver.yrkesaktivitetssporing), aktivitetslogg)
         }
     }
 
