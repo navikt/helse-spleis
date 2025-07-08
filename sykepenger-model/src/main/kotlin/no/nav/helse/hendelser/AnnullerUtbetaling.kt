@@ -9,7 +9,7 @@ class AnnullerUtbetaling(
     meldingsreferanseId: MeldingsreferanseId,
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     override val utbetalingId: UUID,
-    private val saksbehandlerIdent: String,
+    val saksbehandlerIdent: String,
     saksbehandlerEpost: String,
     internal val opprettet: LocalDateTime
 ) : Hendelse, AnnullerUtbetalingHendelse {

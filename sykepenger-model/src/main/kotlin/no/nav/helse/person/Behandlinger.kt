@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
@@ -1283,7 +1283,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             arbeidsgiver: Arbeidsgiver,
             behandlingkilde: Behandlingkilde,
         ): Behandling {
-            check(Toggle.NyAnnulleringsløype.enabled) { "Ny annulleringsløype er ikke aktivert, hvorfor er vi her?" }
+            //check(Toggle.NyAnnulleringsløype.enabled) { "Ny annulleringsløype er ikke aktivert, hvorfor er vi her?" }
             arbeidsgiver.låsOpp(periode)
             return Behandling(
                 observatører = this.observatører,
