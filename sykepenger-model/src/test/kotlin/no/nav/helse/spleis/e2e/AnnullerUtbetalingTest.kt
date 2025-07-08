@@ -22,6 +22,7 @@ import no.nav.helse.person.BehandlingView
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
@@ -50,6 +51,21 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Annullerer en pågående revurdering`() = Toggle.NyAnnulleringsløype.enable {
+
+        nyttVedtak(januar, grad = 50.prosent)
+        forlengVedtak(februar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(23.januar, Dagtype.Sykedag, 100)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+
+        håndterAnnullerUtbetaling(a1, utbetalingId = inspektør.utbetalingId(0))
+        assertSisteTilstand(1.vedtaksperiode, TIL_ANNULLERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
+    }
 
     @Test
     fun `kun én vedtaksperiode skal annulleres`() = Toggle.NyAnnulleringsløype.enable {
