@@ -5,7 +5,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
-import com.github.navikt.tbd_libs.rapids_and_rivers.be
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
@@ -51,7 +50,7 @@ internal class NavNoInntektsmeldingMessage(
         vedtaksperiodeId = vedtaksperiodeId,
         opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
             beregnetInntekt = beregnetInntekt?.månedlig,
-            arbeidsgiverperioder = arbeidsgiverperioder,
+            arbeidsgiverperioder = arbeidsgiverperioder.sortedBy { it.start },
             refusjon = refusjon,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             opphørAvNaturalytelser = opphørAvNaturalytelser
