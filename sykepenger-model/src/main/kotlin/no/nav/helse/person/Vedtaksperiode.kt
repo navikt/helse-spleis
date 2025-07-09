@@ -2702,8 +2702,6 @@ internal class Vedtaksperiode private constructor(
             true -> FunksjonelleFeilTilVarsler(this)
             false -> this
         }
-
-    internal fun harUtbetaling(utbetalingId: UUID) = behandlinger.harUtbetaling(utbetalingId)
 }
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean

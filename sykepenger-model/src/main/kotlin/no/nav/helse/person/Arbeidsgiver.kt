@@ -384,7 +384,7 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    private fun finnVedtaksperiodeForUtbetaling(utbetalingId: UUID) = vedtaksperioder.firstOrNull { it.harUtbetaling(utbetalingId) }
+    private fun finnVedtaksperiodeForSisteUtbetalteUtbetaling(utbetalingId: UUID) = vedtaksperioder.firstOrNull { it.behandlinger.sisteUtbetalteUtbetaling()?.id == utbetalingId }
 
     internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): Boolean {
         return avklarInntekt(skjæringstidspunkt, vedtaksperioder) != null
@@ -850,7 +850,7 @@ internal class Arbeidsgiver private constructor(
         aktivitetsloggMedArbeidsgiverkontekst.info("Håndterer annullering")
         if (Toggle.NyAnnulleringsløype.enabled || hendelse.saksbehandlerIdent in listOf("S161635", "A148751")) {
             val utbetalingId = hendelse.utbetalingId
-            val vedtaksperiodeSomSkalAnnulleres = finnVedtaksperiodeForUtbetaling(utbetalingId) ?: error("Fant ikke vedtaksperiode for utbetaling $utbetalingId")
+            val vedtaksperiodeSomSkalAnnulleres = finnVedtaksperiodeForSisteUtbetalteUtbetaling(utbetalingId) ?: error("Fant ikke vedtaksperiode for utbetaling $utbetalingId")
             val annulleringskandidater = finnAnnulleringskandidater(vedtaksperiodeSomSkalAnnulleres)
             return håndter { it.håndter(hendelse, aktivitetsloggMedArbeidsgiverkontekst, annulleringskandidater.toList()) }.tidligsteEventyr()
         } else {
