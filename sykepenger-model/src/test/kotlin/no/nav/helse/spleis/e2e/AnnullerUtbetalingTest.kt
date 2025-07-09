@@ -20,6 +20,7 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.BehandlingView
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -707,6 +708,53 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         val annullering = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().utbetaling
 
         assertTomAnnulleringsutbetaling(annullering!!)
+    }
+
+    @Test
+    fun `annullering av andra periode hvor første er AUU og vedtaksperioder med samme utbetaling`() = Toggle.NyAnnulleringsløype.enable {
+        createPersonMedTreVedtakPåSammeFagsystemIdOgAuuPåFørste()
+
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(1, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.size)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(0))
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, TIL_ANNULLERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_ANNULLERING)
+
+        assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.size)
+
+        assertEquals(3, inspektør.utbetalinger.size)
+
+        assertEquals(
+            BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.OVERFØRT_ANNULLERING,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        assertEquals(
+            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
+            inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+
+        nullstillTilstandsendringer()
+        håndterUtbetalt()
+
+        assertEquals(
+            BehandlingView.TilstandView.ANNULLERT_PERIODE,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, TIL_ANNULLERING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+
     }
 
     @Test

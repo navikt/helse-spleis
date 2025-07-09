@@ -50,6 +50,7 @@ internal abstract class AbstractEndToEndTest {
         private fun pingPongPerson(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/pingpong.json", regelverkslogg)
         private fun toVedtakMedSammeFagsystemId(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/to_vedtak_samme_fagsystem_id.json", regelverkslogg)
         private fun treVedtakMedSammeFagsystemId(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/tre_vedtak_samme_fagsystem_id.json", regelverkslogg)
+        private fun treVedtakMedSammeFagsystemIdOgAuuPåFørste(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/tre_vedtak_samme_fagsystem_id_forste_periode_AUU.json", regelverkslogg)
     }
 
     internal val assertetVarsler = Varslersamler.AssertetVarsler()
@@ -113,6 +114,7 @@ internal abstract class AbstractEndToEndTest {
 
     protected fun createPersonMedToVedtakPåSammeFagsystemId() = createTestPerson { regelverkslogg -> toVedtakMedSammeFagsystemId(regelverkslogg) }
     protected fun createPersonMedTreVedtakPåSammeFagsystemId() = createTestPerson { regelverkslogg -> treVedtakMedSammeFagsystemId(regelverkslogg) }
+    protected fun createPersonMedTreVedtakPåSammeFagsystemIdOgAuuPåFørste() = createTestPerson { regelverkslogg -> treVedtakMedSammeFagsystemIdOgAuuPåFørste(regelverkslogg) }
 
     protected fun createPingPongPerson() = createTestPerson { regelverkslogg -> pingPongPerson(regelverkslogg) }.also {
         Utbetalingshistorikk(

@@ -234,12 +234,10 @@ class Utbetaling private constructor(
         return sisteUtbetalteForUtbetaling.opphør(aktivitetsloggMedUtbetalingkontekst)
     }
 
-    fun sisteAktiveMedSammeKorrelasjonsId(utbetalinger: MutableList<Utbetaling>): Utbetaling {
+    fun sisteAktiveMedSammeKorrelasjonsId(utbetalinger: MutableList<Utbetaling>): Utbetaling? {
         val aktiveUtbetalinger = utbetalinger.aktive()
-        val sisteUtbetalteForUtbetaling = checkNotNull(aktiveUtbetalinger.singleOrNull { it.hørerSammen(this) }) {
-            "Finnes ingen aktive utbetalinger for korrelasjonsId ${this.korrelasjonsId}"
-        }
 
+        val sisteUtbetalteForUtbetaling = aktiveUtbetalinger.singleOrNull { it.hørerSammen(this) }
         return sisteUtbetalteForUtbetaling
     }
 
