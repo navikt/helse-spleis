@@ -596,6 +596,31 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
         val annullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().utbetaling
         assertAnnullering(-32913, Utbetalingstatus.OVERFØRT, 19.januar, 3.januar til 20.februar, annullering!!)
+
+        håndterUtbetalt()
+
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+
+        assertEquals(
+            BehandlingView.TilstandView.ANNULLERT_PERIODE,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+
+        assertEquals(
+            BehandlingView.TilstandView.ANNULLERT_PERIODE,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
+        )
+        val forventet = setOf(
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.first().endringer.last().utbetaling,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.first().endringer.last().utbetaling,
+            inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().utbetaling,
+            inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().utbetaling,
+        )
+        assertEquals(
+            forventet,
+            inspektør.arbeidsgiver.view().utbetalinger.toSet()
+        )
     }
 
     @Test

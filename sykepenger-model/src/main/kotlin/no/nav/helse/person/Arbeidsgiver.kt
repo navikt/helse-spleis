@@ -465,11 +465,14 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun lagTomUtbetaling(periode: Periode, type: Utbetalingtype): Utbetaling {
-        return Utbetaling.lagTomUtbetaling(
+        val tomUtbetaling = Utbetaling.lagTomUtbetaling(
             vedtaksperiodekladd = lagUtbetalingkladd(Utbetalingstidslinje()),
             periode = periode,
             type = type
         )
+        check(utbetalinger.tillaterOpprettelseAvUtbetaling(tomUtbetaling)) { "Har laget en overlappende utbetaling" }
+        utbetalinger.add(tomUtbetaling)
+        return tomUtbetaling
     }
 
     private fun nyUtbetaling(
