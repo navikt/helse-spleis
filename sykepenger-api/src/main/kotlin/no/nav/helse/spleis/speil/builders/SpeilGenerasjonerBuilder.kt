@@ -367,7 +367,8 @@ internal class SpeilGenerasjonerBuilder(
                         UtbetalingTilstandDto.IKKE_UTBETALT -> Utbetalingstatus.Ubetalt
                         UtbetalingTilstandDto.OVERFØRT -> Utbetalingstatus.Overført
                         UtbetalingTilstandDto.UTBETALT -> Utbetalingstatus.Utbetalt
-                        else -> return@mapNotNull null
+                        UtbetalingTilstandDto.FORKASTET -> Utbetalingstatus.Annullert
+                        UtbetalingTilstandDto.NY -> return@mapNotNull null
                     }
                 )
             }
