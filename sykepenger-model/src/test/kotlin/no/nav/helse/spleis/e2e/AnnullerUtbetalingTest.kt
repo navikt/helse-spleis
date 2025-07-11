@@ -736,6 +736,49 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `annullering av siste periode og vedtaksperioder med samme utbetaling og vi er til revurdering`() = Toggle.NyAnnulleringsløype.enable {
+        createPersonMedTreVedtakPåSammeFagsystemId()
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.januar, Dagtype.Sykedag, 80)))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
+
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(2))
+        håndterYtelser(1.vedtaksperiode)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
+        assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.size)
+
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt() // utbetaler første revurdering
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_ANNULLERING)
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        nullstillTilstandsendringer()
+        håndterUtbetalt() // utbetaler andre revurdering
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+
+        assertEquals(6, inspektør.utbetalinger.size)
+        val annulleringsutbetaling = inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().utbetaling
+
+        assertTomAnnulleringsutbetaling(annulleringsutbetaling!!)
+    }
+
+    @Test
     fun `annullering av andra periode hvor første er AUU og vedtaksperioder med samme utbetaling`() = Toggle.NyAnnulleringsløype.enable {
         createPersonMedTreVedtakPåSammeFagsystemIdOgAuuPåFørste()
 
