@@ -1182,7 +1182,7 @@ internal class Vedtaksperiode private constructor(
         vedtaksperioder: List<Vedtaksperiode>
     ): Revurderingseventyr? {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        if (Toggle.NyAnnulleringsløype.enabled || hendelse.saksbehandlerIdent in listOf("S161635", "A148751")) {
+        if (Toggle.NyAnnulleringsløype.enabled || hendelse.saksbehandlerIdent in listOf("S161635", "A148751", "V149621")) {
             if (!vedtaksperioder.contains(this)) return null
 
             val sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling = arbeidsgiver.finnSisteVedtaksperiodeFørMedSammenhengendeUtbetaling(this)
