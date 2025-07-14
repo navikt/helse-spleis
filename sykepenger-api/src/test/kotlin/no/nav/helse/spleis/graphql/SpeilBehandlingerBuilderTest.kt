@@ -82,6 +82,19 @@ import org.junit.jupiter.api.Test
 internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
+    fun `mapper annullerte utbetalinger på beregnede annullerte perioder`() = Toggle.NyAnnulleringsløype.enable {
+        val sisteutbetaling = nyttVedtak(1.januar, 31.januar)
+        håndterAnnullerUtbetaling(sisteutbetaling)
+        generasjoner(a1) {
+            0.generasjon {
+                this.annullertPeriode(0).also {
+                    assertEquals(TilAnnullering, it.periodetilstand)
+                }
+            }
+        }
+    }
+
+    @Test
     fun `Selvstendig har pensjonsgivende inntekt også på uberegnet periode`() = Toggle.SelvstendigNæringsdrivende.enable {
         håndterSøknadSelvstendig(1.januar til 31.januar)
 
