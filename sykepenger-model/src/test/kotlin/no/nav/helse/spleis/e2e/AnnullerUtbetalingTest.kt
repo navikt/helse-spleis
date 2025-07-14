@@ -54,6 +54,19 @@ import org.junit.jupiter.api.assertThrows
 internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
+    fun `Annullerer en ikke ferdigbehandlet revurdering`() = Toggle.NyAnnulleringsløype.enable {
+        nyttVedtak(januar, grad = 50.prosent)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(23.januar, Dagtype.Sykedag, 100)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+
+        håndterAnnullerUtbetaling(a1, utbetalingId = inspektør.utbetalingId(1))
+        assertSisteTilstand(1.vedtaksperiode, TIL_ANNULLERING)
+    }
+
+
+    @Test
     fun `Annullerer en pågående revurdering`() = Toggle.NyAnnulleringsløype.enable {
 
         nyttVedtak(januar, grad = 50.prosent)

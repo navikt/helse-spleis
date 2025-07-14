@@ -86,6 +86,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     private val siste get() = behandlinger.lastOrNull()?.utbetaling()
 
     internal fun sisteUtbetalteUtbetaling() = behandlinger.lastOrNull { it.erFattetVedtak() }?.utbetaling()
+    internal fun harNoenBehandlingUtbetaling(utbetalingsId: UUID) = behandlinger.any { it.utbetaling()?.id == utbetalingsId }
 
     private val observatører = mutableListOf<BehandlingObserver>()
 
