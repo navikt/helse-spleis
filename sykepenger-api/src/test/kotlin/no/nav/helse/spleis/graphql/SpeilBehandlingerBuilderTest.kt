@@ -84,14 +84,21 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     @Test
     fun `mapper annullerte utbetalinger på beregnede annullerte perioder`() = Toggle.NyAnnulleringsløype.enable {
         val sisteutbetaling = nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
         håndterAnnullerUtbetaling(sisteutbetaling)
         generasjoner(a1) {
             0.generasjon {
-                this.annullertPeriode(0).also {
+                this.uberegnetPeriode(0).also {
+                    assertEquals(1.februar til 28.februar, it.fom til it.tom)
+                    assertEquals(TilAnnullering, it.periodetilstand)
+                }
+                this.annullertPeriode(1).also {
+                    assertEquals(1.januar til 31.januar, it.fom til it.tom)
                     assertEquals(TilAnnullering, it.periodetilstand)
                 }
             }
         }
+
     }
 
     @Test

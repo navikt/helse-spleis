@@ -127,7 +127,6 @@ internal class SpeilGenerasjonerBuilder(
                 is VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> Periodetilstand.UtbetaltVenterPåAnnenPeriode
 
                 is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
-                is VedtaksperiodetilstandDto.AVVENTER_ANNULLERING,
                 is VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> Periodetilstand.VenterPåAnnenPeriode
 
                 is VedtaksperiodetilstandDto.AVVENTER_HISTORIKK,
@@ -141,6 +140,8 @@ internal class SpeilGenerasjonerBuilder(
 
                 is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
                 is VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK -> Periodetilstand.ManglerInformasjon
+
+                is VedtaksperiodetilstandDto.AVVENTER_ANNULLERING -> Periodetilstand.TilAnnullering
 
                 else -> error("Forventer ikke mappingregel for ${vedtaksperiode.tilstand}")
             }
