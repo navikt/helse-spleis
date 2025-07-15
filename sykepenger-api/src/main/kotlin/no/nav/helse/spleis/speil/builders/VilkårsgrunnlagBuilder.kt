@@ -196,12 +196,9 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             .map { it.id }
             .toSet()
         val alderPåSkjæringstidspunktet = alderDTO.alderPåDato(grunnlagsdata.skjæringstidspunkt)
-        val minsteinntektkrav = if (alderPåSkjæringstidspunktet <= 67) 0.5 else 2.0
-        val `1g` = grunnlagsdata.inntektsgrunnlag.`6G`.årlig.beløp / 6.0
-        val minsteinntekt = `1g` * minsteinntektkrav
-        // todo: det gir ikke mye mening å si om dette kravet er oppfylt på skjæringstidspunktet når det er et dag-for-dag vilkår...
-        // dagene under kravet vil uansett avslås på utbetalingstidslinjen og varsles om...
-        val oppfyllerMinsteinntekt = (grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag.årlig.beløp >= minsteinntekt)
+        val antallGBasertPåAlder = if (alderPåSkjæringstidspunktet <= 67) Grunnbeløp.halvG else Grunnbeløp.`2G`
+        val kravTilMinsteinntekt = antallGBasertPåAlder.minsteinntekt(grunnlagsdata.skjæringstidspunkt).årlig
+        val oppfyllerMinsteinntekt = (grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag.årlig.beløp >= kravTilMinsteinntekt)
         return ISpleisGrunnlag(
             skjæringstidspunkt = grunnlagsdata.skjæringstidspunkt,
             overstyringer = overstyringer,

@@ -14,6 +14,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.juni
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
@@ -38,11 +40,33 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
+
+    @Test
+    fun `Skjæringstidspunkt er etter ny g, men før virkningstidspunkt for gyldigSomMinsteinntektKrav`() {
+        håndterSøknad(28.mai(2025) til 13.juni(2025))
+        håndterArbeidsgiveropplysninger(listOf(28.mai(2025) til 12.juni(2025)), beregnetInntekt = 64000.årlig)
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
+        val vilkårsgrunnlag = speilApi().vilkårsgrunnlag.values.first() as SpleisVilkårsgrunnlag
+        assertTrue(vilkårsgrunnlag.oppfyllerKravOmMinstelønn)
+    }
+
+    @Test
+    fun `Skjæringstidspunkt er etter ny g, og etter virkningstidspunkt for gyldigSomMinsteinntektKrav`() {
+        håndterSøknad(3.juni(2025) til 25.juni(2025))
+        håndterArbeidsgiveropplysninger(listOf(3.juni(2025) til 18.juni(2025)), beregnetInntekt = 64000.årlig)
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
+        val vilkårsgrunnlag = speilApi().vilkårsgrunnlag.values.first() as SpleisVilkårsgrunnlag
+        assertFalse(vilkårsgrunnlag.oppfyllerKravOmMinstelønn)
+    }
+
 
     @Test
     fun `mapper ut annulleringskandidater på beregnede perioder`() {
