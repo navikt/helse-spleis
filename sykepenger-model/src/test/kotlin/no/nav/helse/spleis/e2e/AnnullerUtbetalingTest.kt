@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
@@ -650,7 +651,11 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
         assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
-        assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode.filter())
+        assertForventetFeil(
+            forklaring = "Når det revurderes pga. annullering legges alltid RV_RV_7 på. Det blir feil når perioden før annulleringen revurderes. Det burde være et annet, eget varsel",
+            nå = { assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode.filter()) },
+            ønsket = { assertVarsel(Varselkode.RV_RV_8, 1.vedtaksperiode.filter()) }
+        )
 
         assertEquals(3, inspektør.utbetalinger.size)
         val utbetalingForlengelse = inspektør.utbetaling(1)
@@ -706,7 +711,11 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.size)
-        assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode.filter())
+        assertForventetFeil(
+            forklaring = "Når det revurderes pga. annullering legges alltid RV_RV_7 på. Det blir feil når perioden før annulleringen revurderes. Det burde være et annet, eget varsel",
+            nå = { assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode.filter()) },
+            ønsket = { assertVarsel(Varselkode.RV_RV_8, 1.vedtaksperiode.filter()) }
+        )
 
         assertEquals(4, inspektør.utbetalinger.size)
         val utbetalingRevurdering = inspektør.utbetaling(3)
@@ -862,6 +871,17 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
         assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode(a2).filter())
         assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode(a2).filter())
+        assertForventetFeil(
+            forklaring = "Legges på feil varsel når ag2 revurderes pga. overlappende perioder hos ag1 annulleres. Burde være eget varsel?",
+            nå = {
+                assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode(a2).filter())
+                assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode(a2).filter())
+            },
+            ønsket = {
+                assertVarsel(Varselkode.RV_RV_9, 1.vedtaksperiode(a2).filter())
+                assertVarsel(Varselkode.RV_RV_9, 1.vedtaksperiode(a2).filter())
+            }
+        )
 
         assertEquals(
             BehandlingView.TilstandView.OVERFØRT_ANNULLERING,
