@@ -855,7 +855,7 @@ internal class Arbeidsgiver private constructor(
             val utbetalingId = hendelse.utbetalingId
             val vedtaksperiodeSomSkalAnnulleres = finnVedtaksperiodeForUtbetaling(utbetalingId) ?: error("Fant ikke vedtaksperiode for utbetaling $utbetalingId")
             val annulleringskandidater = finnAnnulleringskandidater(vedtaksperiodeSomSkalAnnulleres)
-            return håndter { it.håndter(hendelse, aktivitetsloggMedArbeidsgiverkontekst, annulleringskandidater.toList()) }.tidligsteEventyr()
+            return håndter { it.håndterNyAnnulleringsUtbetaling(hendelse, aktivitetsloggMedArbeidsgiverkontekst, annulleringskandidater.toList(), vedtaksperiodeSomSkalAnnulleres) }.tidligsteEventyr()
         } else {
             return håndter { it.håndter(hendelse, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList()) }.tidligsteEventyr()
         }

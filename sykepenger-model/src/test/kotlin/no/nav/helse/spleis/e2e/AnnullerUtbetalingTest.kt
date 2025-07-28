@@ -54,6 +54,28 @@ import org.junit.jupiter.api.assertThrows
 internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
+    fun `Legger på RV_RV_8 på andre perioden for annullering med sammenhengende utbetaling når tredje perioden i løype blir annullert`() = Toggle.NyAnnulleringsløype.enable {
+        createPersonMedTreVedtakPåSammeFagsystemId()
+        nyttVedtak(1.mai til 30.mai, vedtaksperiodeIdInnhenter = 4.vedtaksperiode)
+
+        håndterAnnullerUtbetaling(a1, utbetalingId = inspektør.sisteUtbetalingId(3.vedtaksperiode))
+
+        assertVarsel(Varselkode.RV_RV_8, 2.vedtaksperiode.filter())
+        assertVarsel(Varselkode.RV_RV_7, 4.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `Legger på RV_RV_8 på første perioden for annullering med sammenhengende utbetaling når andra perioden i løype blir annullert`() = Toggle.NyAnnulleringsløype.enable {
+        createPersonMedTreVedtakPåSammeFagsystemId()
+        nyttVedtak(1.mai til 30.mai, vedtaksperiodeIdInnhenter = 4.vedtaksperiode)
+
+        håndterAnnullerUtbetaling(a1, utbetalingId = inspektør.sisteUtbetalingId(2.vedtaksperiode))
+
+        assertVarsel(Varselkode.RV_RV_8, 1.vedtaksperiode.filter())
+        assertVarsel(Varselkode.RV_RV_7, 4.vedtaksperiode.filter())
+    }
+
+    @Test
     fun `Annullerer en ikke ferdigbehandlet revurdering`() = Toggle.NyAnnulleringsløype.enable {
         nyttVedtak(januar, grad = 50.prosent)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(23.januar, Dagtype.Sykedag, 100)))
@@ -650,7 +672,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
         assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
-        assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode.filter())
+        assertVarsel(Varselkode.RV_RV_8, 1.vedtaksperiode.filter())
 
         assertEquals(3, inspektør.utbetalinger.size)
         val utbetalingForlengelse = inspektør.utbetaling(1)
@@ -706,7 +728,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
         assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.size)
-        assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode.filter())
+        assertVarsel(Varselkode.RV_RV_8, 1.vedtaksperiode.filter())
 
         assertEquals(4, inspektør.utbetalinger.size)
         val utbetalingRevurdering = inspektør.utbetaling(3)

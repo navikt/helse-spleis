@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`1G`
-import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -52,6 +51,7 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.annullering
+import no.nav.helse.hendelser.Revurderingseventyr.Companion.nyAnnullering
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
@@ -1179,69 +1179,78 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(
         hendelse: AnnullerUtbetaling,
         aktivitetslogg: IAktivitetslogg,
-        vedtaksperioder: List<Vedtaksperiode>
+        annulleringsKandidater: List<Vedtaksperiode>
     ): Revurderingseventyr? {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        if (Toggle.NyAnnulleringsløype.enabled || hendelse.saksbehandlerIdent in listOf("S161635", "A148751", "V149621", "H160235")) {
-            if (!vedtaksperioder.contains(this)) return null
+        val annullering = behandlinger.håndterAnnullering(
+            arbeidsgiver,
+            hendelse,
+            hendelse.metadata.behandlingkilde,
+            aktivitetsloggMedVedtaksperiodekontekst,
+            annulleringsKandidater.map { it.behandlinger }) ?: return null
+        aktivitetsloggMedVedtaksperiodekontekst.info("Forkaster denne, og senere perioder, som følge av annullering.")
+        forkast(hendelse, aktivitetsloggMedVedtaksperiodekontekst)
+        return annullering(hendelse, annullering.periode())
+    }
 
-            val sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling = arbeidsgiver.finnSisteVedtaksperiodeFørMedSammenhengendeUtbetaling(this)
-            val periodeForEndring = sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling?.periode ?: periode
+    internal fun håndterNyAnnulleringsUtbetaling(
+        hendelse: AnnullerUtbetaling,
+        aktivitetslogg: IAktivitetslogg,
+        annulleringsKandidater: List<Vedtaksperiode>,
+        vedtaksperiodeSomSkalAnnulleres: Vedtaksperiode
+    ): Revurderingseventyr? {
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
-            when (tilstand) {
-                Avsluttet,
-                TilUtbetaling,
-                SelvstendigTilUtbetaling,
-                SelvstendigAvsluttet,
+        val sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling = arbeidsgiver.finnSisteVedtaksperiodeFørMedSammenhengendeUtbetaling(vedtaksperiodeSomSkalAnnulleres)
+        val erJegRettFør = sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling == this
 
-                AvventerSimuleringRevurdering,
-                AvventerGodkjenningRevurdering,
-                RevurderingFeilet,
+        when (tilstand) {
+            Avsluttet,
+            TilUtbetaling,
+            SelvstendigTilUtbetaling,
+            SelvstendigAvsluttet,
 
-                AvventerVilkårsprøvingRevurdering,
-                AvventerHistorikkRevurdering,
-                AvventerRevurdering -> {
+            AvventerSimuleringRevurdering,
+            AvventerGodkjenningRevurdering,
+            RevurderingFeilet,
+
+            AvventerVilkårsprøvingRevurdering,
+            AvventerHistorikkRevurdering,
+            AvventerRevurdering -> {
+                return if (annulleringsKandidater.contains(this)) {
                     behandlinger.håndterAnnullering(
                         arbeidsgiver = arbeidsgiver,
                         behandlingkilde = hendelse.metadata.behandlingkilde,
                         aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst
                     )
                     tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
-                    return annullering(hendelse, periodeForEndring)
-                }
-
-                Start,
-                SelvstendigStart,
-                AvsluttetUtenUtbetaling,
-                AvventerAnnullering,
-                AvventerBlokkerendePeriode,
-                AvventerGodkjenning,
-                AvventerHistorikk,
-                AvventerInfotrygdHistorikk,
-                AvventerInntektsmelding,
-                AvventerSimulering,
-                AvventerVilkårsprøving,
-                SelvstendigAvventerBlokkerendePeriode,
-                SelvstendigAvventerGodkjenning,
-                SelvstendigAvventerHistorikk,
-                SelvstendigAvventerInfotrygdHistorikk,
-                SelvstendigAvventerSimulering,
-                SelvstendigAvventerVilkårsprøving,
-                TilAnnullering -> return null
-
-                SelvstendigTilInfotrygd,
-                TilInfotrygd -> error("Forventet ikke annulleringshendelse i tilstand $tilstand for vedtaksperiodeId $id")
+                    nyAnnullering(hendelse, this.periode, erJegRettFør)
+                } else if (erJegRettFør) {
+                    nyAnnullering(hendelse, sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling.periode, true)
+                } else null
             }
-        } else {
-            val annullering = behandlinger.håndterAnnullering(
-                arbeidsgiver,
-                hendelse,
-                hendelse.metadata.behandlingkilde,
-                aktivitetsloggMedVedtaksperiodekontekst,
-                vedtaksperioder.map { it.behandlinger }) ?: return null
-            aktivitetsloggMedVedtaksperiodekontekst.info("Forkaster denne, og senere perioder, som følge av annullering.")
-            forkast(hendelse, aktivitetsloggMedVedtaksperiodekontekst)
-            return annullering(hendelse, annullering.periode())
+
+            Start,
+            SelvstendigStart,
+            AvsluttetUtenUtbetaling,
+            AvventerAnnullering,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerHistorikk,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerSimulering,
+            AvventerVilkårsprøving,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            TilAnnullering -> return null
+
+            SelvstendigTilInfotrygd,
+            TilInfotrygd -> error("Forventet ikke annulleringshendelse i tilstand $tilstand for vedtaksperiodeId $id")
         }
     }
 
