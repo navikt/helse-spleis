@@ -1202,7 +1202,7 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         val sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling = arbeidsgiver.finnSisteVedtaksperiodeFørMedSammenhengendeUtbetaling(vedtaksperiodeSomSkalAnnulleres)
-        val erJegRettFør = sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling == this
+        val erJegRiktigVedtaksperiode = sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling == this
 
         when (tilstand) {
             Avsluttet,
@@ -1224,8 +1224,8 @@ internal class Vedtaksperiode private constructor(
                         aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst
                     )
                     tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
-                    nyAnnullering(hendelse, this.periode, erJegRettFør)
-                } else if (erJegRettFør) {
+                    nyAnnullering(hendelse, this.periode, erJegRiktigVedtaksperiode)
+                } else if (erJegRiktigVedtaksperiode) {
                     nyAnnullering(hendelse, sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling.periode, true)
                 } else null
             }

@@ -27,7 +27,6 @@ class Revurderingseventyr private constructor(
     private val skjæringstidspunkt: LocalDate,
     private val periodeForEndring: Periode,
     val hendelse: Hendelse,
-    val skalHaGammelUtbetalingVarsel: Boolean = false
 ) {
 
     internal companion object {
@@ -45,8 +44,8 @@ class Revurderingseventyr private constructor(
         fun refusjonsopplysninger(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periode: Periode) = Revurderingseventyr(RevurderingÅrsak.Refusjonsopplysninger, skjæringstidspunkt, periode, hendelse)
         fun inntekt(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(RevurderingÅrsak.Inntekt, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
         fun grunnbeløpsregulering(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(Grunnbeløpsregulering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
-        fun annullering(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(Annullering, periode.start, periode, hendelse)
-        fun nyAnnullering(hendelse: Hendelse, periode: Periode, skalHaGammelUtbetalingVarsel: Boolean) = Revurderingseventyr(Annullering, periode.start, periode, hendelse, skalHaGammelUtbetalingVarsel)
+        fun annullering(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(Annullering(false), periode.start, periode, hendelse)
+        fun nyAnnullering(hendelse: Hendelse, periode: Periode, erJegRiktigVedtaksperiode: Boolean) = Revurderingseventyr(Annullering(erJegRiktigVedtaksperiode), periode.start, periode, hendelse)
         fun minimumSykdomsgradVurdert(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(MinimumSykdomsgradVurdert, periode.start, periode, hendelse)
 
         fun tidligsteEventyr(a: Revurderingseventyr?, b: Revurderingseventyr?) = when {
@@ -71,8 +70,7 @@ class Revurderingseventyr private constructor(
         inngå(vedtaksperiode, aktivitetslogg, TypeEndring.ENDRING)
 
     private fun inngå(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, typeEndring: TypeEndring) {
-        val erJegRettForanAnnullertVedtaksperiodeISammenhengendeUtbetaling = skalHaGammelUtbetalingVarsel && this.periodeForEndring == vedtaksperiode.periode
-        hvorfor.dersomInngått(aktivitetslogg, vedtaksperioder.isEmpty(), erJegRettForanAnnullertVedtaksperiodeISammenhengendeUtbetaling)
+        hvorfor.dersomInngått(aktivitetslogg, vedtaksperioder.isEmpty())
         vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder, typeEndring.name)
     }
 
@@ -98,7 +96,7 @@ class Revurderingseventyr private constructor(
 
     private sealed interface RevurderingÅrsak {
 
-        fun dersomInngått(aktivitetslogg: IAktivitetslogg, ingenAndrePåmeldt: Boolean, skalHaGammelUtbetalingVarsel: Boolean) {}
+        fun dersomInngått(aktivitetslogg: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {}
 
         fun emitOverstyringIgangsattEvent(person: Person, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode, meldingsreferanseId: MeldingsreferanseId) {
             person.emitOverstyringIgangsattEvent(
@@ -146,12 +144,12 @@ class Revurderingseventyr private constructor(
             override fun navn() = "GRUNNBELØPSREGULERING"
         }
 
-        data object Annullering : RevurderingÅrsak {
+        data class Annullering(val erJegRiktigVedtaksPeriode: Boolean) : RevurderingÅrsak {
 
             override fun navn() = "ANNULLERING"
-            override fun dersomInngått(aktivitetslogg: IAktivitetslogg, ingenAndrePåmeldt: Boolean, skalHaGammelUtbetalingVarsel: Boolean) {
+            override fun dersomInngått(aktivitetslogg: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {
                 if (Toggle.NyAnnulleringsløype.enabled) {
-                    if (skalHaGammelUtbetalingVarsel) aktivitetslogg.varsel(Varselkode.RV_RV_8)
+                    if (this.erJegRiktigVedtaksPeriode && ingenAndrePåmeldt) aktivitetslogg.varsel(Varselkode.RV_RV_8)
                     else aktivitetslogg.varsel(RV_RV_7)
                 } else aktivitetslogg.varsel(RV_RV_7)
             }
