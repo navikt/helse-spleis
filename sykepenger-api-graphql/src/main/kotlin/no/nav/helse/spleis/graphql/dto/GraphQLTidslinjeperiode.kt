@@ -76,6 +76,7 @@ enum class GraphQLBegrunnelse {
 enum class GraphQLPeriodetilstand {
     TilUtbetaling,
     TilAnnullering,
+    AvventerAnnullering,
     Utbetalt,
     Annullert,
     AnnulleringFeilet,

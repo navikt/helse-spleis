@@ -432,6 +432,7 @@ private fun Set<UUID>.tilHendelseDTO(hendelser: List<HendelseDTO>): List<GraphQL
 private fun mapTilstand(tilstand: Periodetilstand) = when (tilstand) {
     Periodetilstand.TilUtbetaling -> GraphQLPeriodetilstand.TilUtbetaling
     Periodetilstand.TilAnnullering -> GraphQLPeriodetilstand.TilAnnullering
+    Periodetilstand.AvventerAnnullering -> GraphQLPeriodetilstand.AvventerAnnullering
     Periodetilstand.Utbetalt -> GraphQLPeriodetilstand.Utbetalt
     Periodetilstand.Annullert -> GraphQLPeriodetilstand.Annullert
     Periodetilstand.AnnulleringFeilet -> GraphQLPeriodetilstand.AnnulleringFeilet

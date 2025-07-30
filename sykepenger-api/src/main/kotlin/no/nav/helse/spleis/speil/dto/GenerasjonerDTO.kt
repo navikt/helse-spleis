@@ -22,6 +22,7 @@ data class SpeilGenerasjonDTO(
 enum class Periodetilstand {
     TilUtbetaling,
     TilAnnullering,
+    AvventerAnnullering,
     Utbetalt,
     Annullert,
     AnnulleringFeilet,

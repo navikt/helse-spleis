@@ -5524,6 +5524,11 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "AvventerAnnullering",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "Utbetalt",
           "description" : null,
           "isDeprecated" : false,
