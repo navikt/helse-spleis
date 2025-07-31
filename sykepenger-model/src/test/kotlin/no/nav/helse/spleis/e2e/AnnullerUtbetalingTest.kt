@@ -55,6 +55,52 @@ import org.junit.jupiter.api.assertThrows
 internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
+    fun `Vedtaksperioden skal være med i annulleringskandidater`() {
+        nyttVedtak(januar)
+
+        val annulleringskandidater = inspektør.arbeidsgiver.view().aktiveVedtaksperioder.first().annulleringskandidater.map { it.id }
+        assertEquals(listOf(1.vedtaksperiode.id(a1)), annulleringskandidater)
+    }
+
+    @Test
+    fun `Etterfølgende, utbetalte vedtaksperioder skal være med i annulleringskandidater`() {
+        nyttVedtak(januar)
+        forlengVedtak(februar)
+
+        val annulleringskandidater = inspektør.arbeidsgiver.view().aktiveVedtaksperioder.first().annulleringskandidater.map { it.id }
+        assertEquals(listOf(1.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a1)), annulleringskandidater)
+    }
+
+    @Test
+    fun `Tidligere, utbetalte vedtaksperioder skal ikke være med i annulleringskandidater`() {
+        nyttVedtak(januar)
+        forlengVedtak(februar)
+
+        val annulleringskandidater = inspektør.arbeidsgiver.view().aktiveVedtaksperioder.last().annulleringskandidater.map { it.id }
+        assertEquals(listOf(2.vedtaksperiode.id(a1)), annulleringskandidater)
+    }
+
+    @Test
+    fun `Uberegnede vedtaksperioder skal ikke være med i annulleringskandidater`() {
+        nyttVedtak(januar)
+        nyPeriode(februar)
+
+        val annulleringskandidater = inspektør.arbeidsgiver.view().aktiveVedtaksperioder.first().annulleringskandidater.map { it.id }
+        assertEquals(listOf(1.vedtaksperiode.id(a1)), annulleringskandidater)
+    }
+
+    @Test
+    fun `Bare vedtaksperioder med samme agp skal være med i annulleringskandidater`() {
+        nyttVedtak(januar)
+        forlengVedtak(februar)
+
+        nyttVedtak(april, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+
+        val annulleringskandidater = inspektør.arbeidsgiver.view().aktiveVedtaksperioder.first().annulleringskandidater.map { it.id }
+        assertEquals(listOf(1.vedtaksperiode.id(a1), 2.vedtaksperiode.id(a1)), annulleringskandidater)
+    }
+
+    @Test
     fun `Annullerer en ikke ferdigbehandlet revurdering`() = Toggle.NyAnnulleringsløype.enable {
         nyttVedtak(januar, grad = 50.prosent)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(23.januar, Dagtype.Sykedag, 100)))
