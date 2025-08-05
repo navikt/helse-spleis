@@ -35,6 +35,7 @@ internal class Utbetalingstidslinjesubsumsjon(
 
     private val tidslinjesubsumsjonsformat = sykdomstidslinje.subsumsjonsformat()
     private val arbeidsgiverperiodedager = mutableListOf<Periode>()
+    private val venteperiodedager = mutableListOf<Periode>()
     private val arbeidsgiverperiodeNavdager = mutableListOf<Periode>()
     private val helger = mutableListOf<Periode>()
     private val fridager = mutableListOf<Periode>()
@@ -96,6 +97,11 @@ internal class Utbetalingstidslinjesubsumsjon(
                 is Utbetalingsdag.Arbeidsdag,
                 is Utbetalingsdag.UkjentDag -> { /* gjør ingenting */
                 }
+
+                is Utbetalingsdag.Venteperiodedag -> {
+                    venteperiodedager.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
+                    dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
+                }
             }
         }
     }
@@ -111,6 +117,9 @@ internal class Utbetalingstidslinjesubsumsjon(
     }
 
     private fun subsummerSelvstendig(vedtaksperiode: Periode) {
+        //TODO("Implementer subsumsjon for selvstendig næringsdrivende")
+        //subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a`(false, venteperiodedager, tidslinjesubsumsjonsformat))
+
         // kap 8-34 ledd 1
         utbetalteDager
             .filter{ it.dekningsgrad == 80.0 }

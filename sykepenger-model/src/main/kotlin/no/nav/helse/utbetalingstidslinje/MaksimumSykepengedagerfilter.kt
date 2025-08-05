@@ -79,6 +79,7 @@ internal class MaksimumSykepengedagerfilter(
                     }
 
                     is UkjentDag -> state.oppholdsdag(this, dag.dato)
+                    is Utbetalingsdag.Venteperiodedag -> state.oppholdsdag(this, dag.dato)
                 }
             }
 

@@ -89,6 +89,7 @@ sealed class Dag(
                 is SykdomstidslinjeDagDto.SykHelgedagDto -> SykHelgedag.gjenopprett(dag)
                 is SykdomstidslinjeDagDto.SykedagDto -> Sykedag.gjenopprett(dag)
                 is SykdomstidslinjeDagDto.UkjentDagDto -> UkjentDag.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.VenteperiodedagDto -> Venteperiodedag.gjenopprett(dag)
             }
         }
     }
@@ -186,6 +187,24 @@ sealed class Dag(
             fun gjenopprett(dto: SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto): ArbeidIkkeGjenopptattDag {
                 return ArbeidIkkeGjenopptattDag(
                     dato = dto.dato,
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
+                )
+            }
+        }
+    }
+
+    internal class Venteperiodedag(
+        dato: LocalDate,
+        val grad: Prosentdel,
+        kilde: Hendelseskilde
+    ) : Dag(dato, kilde) {
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.VenteperiodedagDto(dato, kilde, grad.dto())
+
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.VenteperiodedagDto): Venteperiodedag {
+                return Venteperiodedag(
+                    dato = dto.dato,
+                    grad = Prosentdel.gjenopprett(dto.grad),
                     kilde = Hendelseskilde.gjenopprett(dto.kilde)
                 )
             }

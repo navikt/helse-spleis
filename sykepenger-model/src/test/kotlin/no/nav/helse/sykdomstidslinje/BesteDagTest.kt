@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.januar
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.testhelpers.TestEvent
@@ -7,6 +8,7 @@ import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class BesteDagTest {
 
@@ -28,6 +30,33 @@ internal class BesteDagTest {
         private val egenmeldingsdagFraSaksbehandler = Dag.Arbeidsgiverdag(1.januar, 100.prosent, TestEvent.saksbehandler)
         private val arbeidsdagFraSaksbehandler = Dag.Arbeidsdag(1.januar, TestEvent.saksbehandler)
         private val andreYtelser = Dag.AndreYtelser(1.januar, TestEvent.testkilde, Dag.AndreYtelser.AnnenYtelse.Foreldrepenger)
+        private val venteperiodedag = Dag.Venteperiodedag(1.januar, 100.prosent, TestEvent.søknad)
+    }
+
+    @Test
+    fun `Venteperiodedager opp mot andre dager`() {
+        venteperiodedag slår arbeidsdagFraSøknad
+
+        //Saksbehandler skal kunne overstyre venteperiodedager
+        sykedagFraSaksbehandler slår venteperiodedag
+        arbeidsdagFraSaksbehandler slår venteperiodedag
+
+        // arbeidIkkegjenopptatDag er ikke relevant for selvstendig
+        assertThrows<RuntimeException> { venteperiodedag slår arbeidIkkeGjenopptattDag }
+
+        assertForventetFeil(
+            "En saksbehandlerdag idag er mange forskjellige typer dager hvilket gjør at vi ikke kan kaste feil når de prøver overstyre til feriedager",
+            { ferieFraSaksbehandler slår venteperiodedag },
+            { assertThrows<RuntimeException> { ferieFraSaksbehandler slår venteperiodedag } })
+
+        // Selvstendig har ikke egenmeldingsdager
+        assertThrows<RuntimeException> { egenmeldingsdagFraSaksbehandler slår venteperiodedag }
+
+        // Fra Inntektsmelding, skal gi feil
+        assertThrows<RuntimeException> { venteperiodedag slår arbeidsdagFraInntektsmelding }
+        assertThrows<RuntimeException> { venteperiodedag slår ferieFraInntektsmelding }
+        assertThrows<RuntimeException> { venteperiodedag slår friskHelgFraInntektsmelding }
+        assertThrows<RuntimeException> { venteperiodedag slår arbeidsgiverdagFraInntektsmelding }
     }
 
     @Test

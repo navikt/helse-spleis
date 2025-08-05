@@ -33,6 +33,7 @@ import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
+import no.nav.helse.sykdomstidslinje.Dag.Venteperiodedag
 import no.nav.helse.økonomi.Prosentdel
 
 class Sykdomstidslinje private constructor(
@@ -168,6 +169,7 @@ class Sykdomstidslinje private constructor(
                     is FriskHelgedag -> "R"
                     is ForeldetSykedag -> "K"
                     is AndreYtelser -> "Y"
+                    is Venteperiodedag -> "V"
                 }
         }?.trim() ?: "Tom tidslinje"
     }

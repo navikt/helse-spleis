@@ -267,10 +267,11 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
     }
 
     private class Dagobservatør(utbetalingstidslinje: Utbetalingstidslinje) {
-        val dager get() = fridager + arbeidsdager + arbeidsgiverperiodedager + utbetalingsdager + foreldetdager + avvistdager
+        val dager get() = fridager + arbeidsdager + arbeidsgiverperiodedager + utbetalingsdager + foreldetdager + avvistdager + venteperioderdager
         var fridager = 0
         var arbeidsdager = 0
         var arbeidsgiverperiodedager = 0
+        var venteperioderdager = 0
         var arbeidsgiverperiodedagerNavAnsvar = 0
         var utbetalingsdager = 0
         var foreldetdager = 0
@@ -281,6 +282,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
                 when (dag) {
                     is Utbetalingsdag.Arbeidsdag -> arbeidsdager += 1
                     is Utbetalingsdag.ArbeidsgiverperiodeDag -> arbeidsgiverperiodedager += 1
+                    is Utbetalingsdag.Venteperiodedag -> venteperioderdager += 1
                     is Utbetalingsdag.ArbeidsgiverperiodedagNav -> arbeidsgiverperiodedagerNavAnsvar += 1
                     is Utbetalingsdag.AvvistDag -> avvistdager += 1
                     is Utbetalingsdag.ForeldetDag -> foreldetdager += 1

@@ -286,6 +286,7 @@ data class SpannerPersonDto(
             enum class JsonDagType {
                 ARBEIDSDAG,
                 ARBEIDSGIVERDAG,
+                VENTEPERIODEDAG,
 
                 FERIEDAG,
                 ARBEID_IKKE_GJENOPPTATT_DAG,
@@ -750,7 +751,8 @@ data class SpannerPersonDto(
             AvvistDag,
             UkjentDag,
             ForeldetDag,
-            ArbeidsgiverperiodedagNav
+            ArbeidsgiverperiodedagNav,
+            Venteperiodedag
         }
 
         data class UtbetalingsdagData(
@@ -1027,6 +1029,17 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
 
     is SykdomstidslinjeDagDto.SykedagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
+        kilde = this.kilde.tilPersonData(),
+        grad = this.grad.prosentDesimal,
+        other = null,
+        melding = null,
+        dato = dato,
+        fom = null,
+        tom = null
+    )
+
+    is SykdomstidslinjeDagDto.VenteperiodedagDto -> DagData(
+        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.VENTEPERIODEDAG,
         kilde = this.kilde.tilPersonData(),
         grad = this.grad.prosentDesimal,
         other = null,
@@ -1347,6 +1360,7 @@ private fun UtbetalingsdagUtDto.tilPersonData() =
             is UtbetalingsdagUtDto.NavDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.NavDag
             is UtbetalingsdagUtDto.NavHelgDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.NavHelgDag
             is UtbetalingsdagUtDto.UkjentDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.UkjentDag
+            is UtbetalingsdagUtDto.VenteperiodedagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.Venteperiodedag
         },
         aktuellDagsinntekt = this.økonomi.aktuellDagsinntekt.dagligDouble.beløp,
         dekingsgrad = this.økonomi.dekningsgrad.prosentDesimal,

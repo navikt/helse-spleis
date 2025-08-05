@@ -26,6 +26,7 @@ data class SammenslåttDag(
 enum class SykdomstidslinjedagType {
     ARBEIDSDAG,
     ARBEIDSGIVERDAG,
+    VENTEPERIODEDAG,
     FERIEDAG,
     ARBEID_IKKE_GJENOPPTATT_DAG,
     FORELDET_SYKEDAG,
@@ -73,7 +74,8 @@ enum class UtbetalingstidslinjedagType {
     Feriedag,   // SpeilBuilder only code breakout of Fridag
     AvvistDag,
     UkjentDag,
-    ForeldetDag
+    ForeldetDag,
+    Venteperiodedag
 }
 
 interface Utbetalingstidslinjedag {

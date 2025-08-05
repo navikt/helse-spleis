@@ -4,6 +4,8 @@ import java.time.LocalDate
 import kotlin.reflect.KClass
 import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
+import no.nav.helse.sykdomstidslinje.Dag.ArbeidIkkeGjenopptattDag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
@@ -15,6 +17,7 @@ import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
+import no.nav.helse.sykdomstidslinje.Dag.Venteperiodedag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Prosentdel
 
@@ -35,12 +38,13 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) {
             when (dag) {
                 is ArbeidsgiverHelgedag -> set(dag, dag.dato, dag.grad, dag.kilde)
                 is Arbeidsgiverdag -> set(dag, dag.dato, dag.grad, dag.kilde)
+                is Venteperiodedag -> set(dag, dag.dato, dag.grad, dag.kilde)
                 is Sykedag -> set(dag, dag.dato, dag.grad, dag.kilde)
                 is SykHelgedag -> set(dag, dag.dato, dag.grad, dag.kilde)
                 is ForeldetSykedag -> set(dag, dag.dato, dag.grad, dag.kilde)
                 is ProblemDag -> set(dag, dag.dato, dag.kilde, dag.melding)
-                is Dag.AndreYtelser,
-                is Dag.ArbeidIkkeGjenopptattDag,
+                is AndreYtelser,
+                is ArbeidIkkeGjenopptattDag,
                 is Arbeidsdag,
                 is Feriedag,
                 is FriskHelgedag,

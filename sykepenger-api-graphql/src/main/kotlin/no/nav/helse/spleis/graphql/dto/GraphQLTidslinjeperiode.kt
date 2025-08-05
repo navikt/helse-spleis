@@ -20,6 +20,7 @@ enum class GraphQLPeriodetype {
 enum class GraphQLSykdomsdagtype {
     Arbeidsdag,
     Arbeidsgiverdag,
+    Venteperiodedag,
     Feriedag,
     ArbeidIkkeGjenopptattDag,
     ForeldetSykedag,
@@ -48,7 +49,8 @@ enum class GraphQLUtbetalingsdagType {
     Feriedag,
     AvvistDag,
     UkjentDag,
-    ForeldetDag
+    ForeldetDag,
+    Venteperiodedag
 }
 
 enum class GraphQLSykdomsdagkildetype {

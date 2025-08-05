@@ -53,12 +53,20 @@ import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektskilde
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
-import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
+import no.nav.helse.sykdomstidslinje.Dag.ArbeidIkkeGjenopptattDag
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
+import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
+import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
+import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
+import no.nav.helse.sykdomstidslinje.Dag.Venteperiodedag
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -635,16 +643,17 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is Arbeidsgiverdag,
                         is ForeldetSykedag,
                         is SykHelgedag,
+                        is Venteperiodedag,
                         is Sykedag -> true
 
-                        is Dag.AndreYtelser,
-                        is Dag.ArbeidIkkeGjenopptattDag,
-                        is Dag.Arbeidsdag,
-                        is Dag.Feriedag,
-                        is Dag.FriskHelgedag,
-                        is Dag.Permisjonsdag,
-                        is Dag.ProblemDag,
-                        is Dag.UkjentDag -> false
+                        is AndreYtelser,
+                        is ArbeidIkkeGjenopptattDag,
+                        is Arbeidsdag,
+                        is Feriedag,
+                        is FriskHelgedag,
+                        is Permisjonsdag,
+                        is ProblemDag,
+                        is UkjentDag -> false
                     }
                 }?.dato
 

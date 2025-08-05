@@ -52,4 +52,9 @@ sealed class UtbetalingsdagUtDto {
         override val dato: LocalDate,
         override val økonomi: ØkonomiUtDto
     ) : UtbetalingsdagUtDto()
+
+    data class VenteperiodedagDto(
+        override val dato: LocalDate,
+        override val økonomi: ØkonomiUtDto
+    ) : UtbetalingsdagUtDto()
 }

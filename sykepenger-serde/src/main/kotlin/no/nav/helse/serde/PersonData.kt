@@ -39,6 +39,20 @@ import no.nav.helse.dto.SkatteopplysningDto
 import no.nav.helse.dto.SykdomshistorikkDto
 import no.nav.helse.dto.SykdomshistorikkElementDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.AndreYtelserDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.ArbeidsdagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.ArbeidsgiverdagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.FeriedagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.ForeldetSykedagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.FriskHelgedagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.PermisjonsdagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.ProblemDagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.SykHelgedagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.SykedagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.UkjentDagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.VenteperiodedagDto
 import no.nav.helse.dto.SykdomstidslinjeDto
 import no.nav.helse.dto.SykmeldingsperioderDto
 import no.nav.helse.dto.UtbetalingTilstandDto
@@ -78,6 +92,7 @@ import no.nav.helse.dto.deserialisering.SelvstendigInntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.SkjønnsmessigFastsattInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingsdagInnDto
+import no.nav.helse.dto.deserialisering.UtbetalingsdagInnDto.*
 import no.nav.helse.dto.deserialisering.UtbetalingslinjeInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingstidslinjeInnDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
@@ -587,31 +602,33 @@ data class PersonData(
                 }
 
                 private fun tilDto(dagen: LocalDate, kilde: HendelseskildeDto) = when (type) {
-                    JsonDagType.ARBEIDSDAG -> SykdomstidslinjeDagDto.ArbeidsdagDto(dato = dagen, kilde = kilde)
+                    JsonDagType.ARBEIDSDAG -> ArbeidsdagDto(dato = dagen, kilde = kilde)
                     JsonDagType.ARBEIDSGIVERDAG -> if (dagen.erHelg())
-                        SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                        ArbeidsgiverHelgedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                     else
-                        SykdomstidslinjeDagDto.ArbeidsgiverdagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                        ArbeidsgiverdagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
 
-                    JsonDagType.FERIEDAG -> SykdomstidslinjeDagDto.FeriedagDto(dato = dagen, kilde = kilde)
-                    JsonDagType.ARBEID_IKKE_GJENOPPTATT_DAG -> SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto(dato = dagen, kilde = kilde)
-                    JsonDagType.FRISK_HELGEDAG -> SykdomstidslinjeDagDto.FriskHelgedagDto(dato = dagen, kilde = kilde)
-                    JsonDagType.FORELDET_SYKEDAG -> SykdomstidslinjeDagDto.ForeldetSykedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
-                    JsonDagType.PERMISJONSDAG -> SykdomstidslinjeDagDto.PermisjonsdagDto(dato = dagen, kilde = kilde)
-                    JsonDagType.PROBLEMDAG -> SykdomstidslinjeDagDto.ProblemDagDto(dato = dagen, kilde = kilde, other = this.other!!.tilDto(), melding = this.melding!!)
+                    JsonDagType.FERIEDAG -> FeriedagDto(dato = dagen, kilde = kilde)
+                    JsonDagType.ARBEID_IKKE_GJENOPPTATT_DAG -> ArbeidIkkeGjenopptattDagDto(dato = dagen, kilde = kilde)
+                    JsonDagType.FRISK_HELGEDAG -> FriskHelgedagDto(dato = dagen, kilde = kilde)
+                    JsonDagType.FORELDET_SYKEDAG -> ForeldetSykedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                    JsonDagType.PERMISJONSDAG -> PermisjonsdagDto(dato = dagen, kilde = kilde)
+                    JsonDagType.PROBLEMDAG -> ProblemDagDto(dato = dagen, kilde = kilde, other = this.other!!.tilDto(), melding = this.melding!!)
                     JsonDagType.SYKEDAG -> if (dagen.erHelg())
-                        SykdomstidslinjeDagDto.SykHelgedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                        SykHelgedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                     else
-                        SykdomstidslinjeDagDto.SykedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                        SykedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
 
-                    JsonDagType.ANDRE_YTELSER_FORELDREPENGER -> SykdomstidslinjeDagDto.AndreYtelserDto(dato = dagen, kilde = kilde, SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Foreldrepenger)
-                    JsonDagType.ANDRE_YTELSER_AAP -> SykdomstidslinjeDagDto.AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.AAP)
-                    JsonDagType.ANDRE_YTELSER_OMSORGSPENGER -> SykdomstidslinjeDagDto.AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Omsorgspenger)
-                    JsonDagType.ANDRE_YTELSER_PLEIEPENGER -> SykdomstidslinjeDagDto.AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Pleiepenger)
-                    JsonDagType.ANDRE_YTELSER_SVANGERSKAPSPENGER -> SykdomstidslinjeDagDto.AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Svangerskapspenger)
-                    JsonDagType.ANDRE_YTELSER_OPPLÆRINGSPENGER -> SykdomstidslinjeDagDto.AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Opplæringspenger)
-                    JsonDagType.ANDRE_YTELSER_DAGPENGER -> SykdomstidslinjeDagDto.AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Dagpenger)
-                    JsonDagType.UKJENT_DAG -> SykdomstidslinjeDagDto.UkjentDagDto(dato = dagen, kilde = kilde)
+                    JsonDagType.ANDRE_YTELSER_FORELDREPENGER -> AndreYtelserDto(dato = dagen, kilde = kilde, AndreYtelserDto.YtelseDto.Foreldrepenger)
+                    JsonDagType.ANDRE_YTELSER_AAP -> AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = AndreYtelserDto.YtelseDto.AAP)
+                    JsonDagType.ANDRE_YTELSER_OMSORGSPENGER -> AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = AndreYtelserDto.YtelseDto.Omsorgspenger)
+                    JsonDagType.ANDRE_YTELSER_PLEIEPENGER -> AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = AndreYtelserDto.YtelseDto.Pleiepenger)
+                    JsonDagType.ANDRE_YTELSER_SVANGERSKAPSPENGER -> AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = AndreYtelserDto.YtelseDto.Svangerskapspenger)
+                    JsonDagType.ANDRE_YTELSER_OPPLÆRINGSPENGER -> AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = AndreYtelserDto.YtelseDto.Opplæringspenger)
+                    JsonDagType.ANDRE_YTELSER_DAGPENGER -> AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = AndreYtelserDto.YtelseDto.Dagpenger)
+                    JsonDagType.UKJENT_DAG -> UkjentDagDto(dato = dagen, kilde = kilde)
+
+                    JsonDagType.VENTEPERIODEDAG -> VenteperiodedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                 }
             }
 
@@ -634,6 +651,8 @@ data class PersonData(
                 ANDRE_YTELSER_SVANGERSKAPSPENGER,
                 ANDRE_YTELSER_OPPLÆRINGSPENGER,
                 ANDRE_YTELSER_DAGPENGER,
+
+                VENTEPERIODEDAG,
 
                 UKJENT_DAG
             }
@@ -1410,7 +1429,8 @@ data class PersonData(
             AvvistDag,
             UkjentDag,
             ForeldetDag,
-            ArbeidsgiverperiodedagNav
+            ArbeidsgiverperiodedagNav,
+            Venteperiodedag
         }
 
         data class UtbetalingsdagData(
@@ -1455,15 +1475,16 @@ data class PersonData(
             fun tilDto() = datoer.map { tilDto(it) }
             private fun tilDto(dato: LocalDate): UtbetalingsdagInnDto {
                 return when (type) {
-                    TypeData.ArbeidsgiverperiodeDag -> UtbetalingsdagInnDto.ArbeidsgiverperiodeDagDto(dato = dato, økonomi = økonomiDto)
-                    TypeData.NavDag -> UtbetalingsdagInnDto.NavDagDto(dato = dato, økonomi = økonomiDto)
-                    TypeData.NavHelgDag -> UtbetalingsdagInnDto.NavHelgDagDto(dato = dato, økonomi = økonomiDto)
-                    TypeData.Arbeidsdag -> UtbetalingsdagInnDto.ArbeidsdagDto(dato = dato, økonomi = økonomiDto)
-                    TypeData.Fridag -> UtbetalingsdagInnDto.FridagDto(dato = dato, økonomi = økonomiDto)
-                    TypeData.AvvistDag -> UtbetalingsdagInnDto.AvvistDagDto(dato = dato, økonomi = økonomiDto, begrunnelser = begrunnelser!!.map { it.tilDto() })
-                    TypeData.UkjentDag -> UtbetalingsdagInnDto.UkjentDagDto(dato = dato, økonomi = økonomiDto)
-                    TypeData.ForeldetDag -> UtbetalingsdagInnDto.ForeldetDagDto(dato = dato, økonomi = økonomiDto)
-                    TypeData.ArbeidsgiverperiodedagNav -> UtbetalingsdagInnDto.ArbeidsgiverperiodeDagNavDto(dato = dato, økonomi = økonomiDto)
+                    TypeData.ArbeidsgiverperiodeDag -> ArbeidsgiverperiodeDagDto(dato = dato, økonomi = økonomiDto)
+                    TypeData.NavDag -> NavDagDto(dato = dato, økonomi = økonomiDto)
+                    TypeData.NavHelgDag -> NavHelgDagDto(dato = dato, økonomi = økonomiDto)
+                    TypeData.Arbeidsdag -> ArbeidsdagDto(dato = dato, økonomi = økonomiDto)
+                    TypeData.Fridag -> FridagDto(dato = dato, økonomi = økonomiDto)
+                    TypeData.AvvistDag -> AvvistDagDto(dato = dato, økonomi = økonomiDto, begrunnelser = begrunnelser!!.map { it.tilDto() })
+                    TypeData.UkjentDag -> UkjentDagDto(dato = dato, økonomi = økonomiDto)
+                    TypeData.ForeldetDag -> ForeldetDagDto(dato = dato, økonomi = økonomiDto)
+                    TypeData.ArbeidsgiverperiodedagNav -> ArbeidsgiverperiodeDagNavDto(dato = dato, økonomi = økonomiDto)
+                    TypeData.Venteperiodedag -> VenteperiodedagDto(dato = dato, økonomi = økonomiDto)
                 }
             }
         }

@@ -176,6 +176,13 @@ internal class SykdomstidslinjeBuilder(
                 kilde = it.kilde.tilKildeDTO(),
                 grad = null
             )
+
+            is SykdomstidslinjeDagDto.VenteperiodedagDto -> Sykdomstidslinjedag(
+                dagen = it.dato,
+                type = SykdomstidslinjedagType.VENTEPERIODEDAG,
+                kilde = it.kilde.tilKildeDTO(),
+                grad = (it.grad.prosentDesimal * 100).roundToInt()
+            )
         }
 
     }
@@ -221,6 +228,7 @@ internal class UtbetalingstidslinjeBuilder(private val dto: Utbetalingstidslinje
                     dato = it.dato
                 )
 
+                is UtbetalingsdagUtDto.VenteperiodedagDto -> UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag, dato = it.dato)
             }
         }
     }

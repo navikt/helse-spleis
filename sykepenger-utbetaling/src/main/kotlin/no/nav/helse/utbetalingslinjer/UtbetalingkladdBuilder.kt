@@ -11,6 +11,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Venteperiodedag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 class UtbetalingkladdBuilder(
@@ -37,6 +38,7 @@ class UtbetalingkladdBuilder(
     init {
         tidslinje.forEach { dag ->
             when (dag) {
+                is Venteperiodedag,
                 is ArbeidsgiverperiodeDag -> {
                     arbeidsgiveroppdragBuilder.arbeidsgiverperiodedag(dag.dato, dag.økonomi.brukAvrundetGrad { grad -> grad })
                     personoppdragBuilder.arbeidsgiverperiodedag(dag.dato, dag.økonomi.brukAvrundetGrad { grad -> grad })

@@ -5268,6 +5268,11 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "Venteperiodedag",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "Feriedag",
           "description" : null,
           "isDeprecated" : false,
@@ -5403,6 +5408,11 @@
           "deprecationReason" : null
         }, {
           "name" : "ForeldetDag",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "Venteperiodedag",
           "description" : null,
           "isDeprecated" : false,
           "deprecationReason" : null

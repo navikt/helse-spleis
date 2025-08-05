@@ -58,6 +58,8 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
                     else avvistDag(builder, dag.dato, dag.grad, Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode)
                 }
 
+                is Dag.Venteperiodedag -> TODO("Venteperiode")
+
                 is Dag.Sykedag -> {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedagEllerNavAnsvar(builder, dag.dato, dag.grad)
                     else navDag(builder, dag.dato, dag.grad)

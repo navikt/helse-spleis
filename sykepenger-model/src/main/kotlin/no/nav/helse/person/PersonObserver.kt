@@ -275,7 +275,8 @@ interface PersonObserver {
             Permisjonsdag,
             Feriedag,
             ArbeidIkkeGjenopptattDag,
-            AndreYtelser
+            AndreYtelser,
+            Venteperiodedag
         }
 
         enum class EksternBegrunnelseDTO {

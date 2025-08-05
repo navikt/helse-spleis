@@ -6,7 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
-import java.util.*
+import java.util.UUID
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver
@@ -370,6 +370,7 @@ internal class PersonMediator(
                 Dagtype.Feriedag -> "Feriedag"
                 Dagtype.ArbeidIkkeGjenopptattDag -> "ArbeidIkkeGjenopptattDag"
                 Dagtype.AndreYtelser -> "AndreYtelser"
+                Dagtype.Venteperiodedag -> "Venteperiodedag"
             },
             "begrunnelser" to this.begrunnelser?.map {
                 when (it) {
