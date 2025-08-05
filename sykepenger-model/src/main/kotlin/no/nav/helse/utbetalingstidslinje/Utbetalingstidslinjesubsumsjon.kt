@@ -111,6 +111,10 @@ internal class Utbetalingstidslinjesubsumsjon(
             is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> subsummerArbeidstaker(vedtaksperiode)
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> subsummerSelvstendig(vedtaksperiode)
 
+            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> TODO("Subsumsjon for selvstendig jordbruker, fisker eller dagmamma er ikke impelementert")
+
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans -> error("Ikke implementert subsumsjon for abrbeidsledig eller frilans")
         }

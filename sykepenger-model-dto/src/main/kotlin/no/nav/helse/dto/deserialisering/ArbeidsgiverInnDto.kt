@@ -22,6 +22,9 @@ data class ArbeidsgiverInnDto(
         ARBEIDSLEDIG,
         ARBEIDSTAKER,
         FRILANS,
-        SELVSTENDIG
+        SELVSTENDIG,
+        SELVSTENDIG_JORDBRUKER,
+        SELVSTENDIG_FISKER,
+        SELVSTENDIG_DAGMAMMA
     }
 }

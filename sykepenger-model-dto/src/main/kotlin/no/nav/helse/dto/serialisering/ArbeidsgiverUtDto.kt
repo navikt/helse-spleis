@@ -21,7 +21,10 @@ data class ArbeidsgiverUtDto(
         ARBEIDSTAKER,
         ARBEIDSLEDIG,
         FRILANS,
-        SELVSTENDIG
+        SELVSTENDIG,
+        SELVSTENDIG_JORDBRUKER,
+        SELVSTENDIG_FISKER,
+        SELVSTENDIG_DAGMAMMA
     }
 }
 

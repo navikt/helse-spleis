@@ -174,7 +174,11 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiver = arbeidsgiver,
         id = UUID.randomUUID(),
         tilstand = when (arbeidsgiver.yrkesaktivitetssporing) {
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigStart
+            Behandlingsporing.Yrkesaktivitet.Selvstendig,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> SelvstendigStart
+
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             is Arbeidstaker,
             Behandlingsporing.Yrkesaktivitet.Frilans -> Start
@@ -907,8 +911,10 @@ internal class Vedtaksperiode private constructor(
                 Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
                 Behandlingsporing.Yrkesaktivitet.Frilans -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
 
-                Behandlingsporing.Yrkesaktivitet.Selvstendig ->
-                    error("Forventer ikke tilstanden AvventerInfotrygdHistorikk for vedtaksperiode opprettet av en søknad for Selvstendig næringsdrivende")
+                Behandlingsporing.Yrkesaktivitet.Selvstendig,
+                Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
+                Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+                Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> error("Forventer ikke tilstanden AvventerInfotrygdHistorikk for vedtaksperiode opprettet av en søknad for Selvstendig næringsdrivende")
             }
 
             Avsluttet,
@@ -950,7 +956,10 @@ internal class Vedtaksperiode private constructor(
                 Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
                 Behandlingsporing.Yrkesaktivitet.Frilans -> error("Forventer ikke tilstanden SelvstendigAvventerInfotrygdHistorikk for vedtaksperiode opprettet av en søknad for $yrkesaktivitet")
 
-                Behandlingsporing.Yrkesaktivitet.Selvstendig -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
+                Behandlingsporing.Yrkesaktivitet.Selvstendig,
+                Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
+                Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+                Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma-> tilstand(aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
             }
         }
     }
@@ -984,7 +993,10 @@ internal class Vedtaksperiode private constructor(
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans,
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
+            Behandlingsporing.Yrkesaktivitet.Selvstendig,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> {
             }
         }
 
@@ -1607,7 +1619,10 @@ internal class Vedtaksperiode private constructor(
             Behandlingsporing.Yrkesaktivitet.Selvstendig,
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-            Behandlingsporing.Yrkesaktivitet.Frilans -> null
+            Behandlingsporing.Yrkesaktivitet.Frilans,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> null
         }
     }
 
@@ -1617,6 +1632,10 @@ internal class Vedtaksperiode private constructor(
                 faktaavklartInntekt = inntektForSelvstendig(),
                 skjønnsmessigFastsatt = null
             )
+
+            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> TODO("Avklaring av sykepengegrunnlag for selvstendig jordbruker, fisker og dagmamma er ikke implementert")
 
             is Arbeidstaker,
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
@@ -2174,7 +2193,10 @@ internal class Vedtaksperiode private constructor(
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans,
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> return false
+            Behandlingsporing.Yrkesaktivitet.Selvstendig,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> return false
         }
     }
 

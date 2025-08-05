@@ -524,6 +524,9 @@ data class PersonData(
                 YrkesaktivitetTypeData.ARBEIDSLEDIG -> ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSLEDIG
                 YrkesaktivitetTypeData.FRILANS -> ArbeidsgiverInnDto.Yrkesaktivitetstype.FRILANS
                 YrkesaktivitetTypeData.SELVSTENDIG -> ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG
+                YrkesaktivitetTypeData.SELVSTENDIG_JORDBRUKER -> ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_JORDBRUKER
+                YrkesaktivitetTypeData.SELVSTENDIG_FISKER -> ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_FISKER
+                YrkesaktivitetTypeData.SELVSTENDIG_DAGMAMMA -> ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_DAGMAMMA
             },
             inntektshistorikk = InntektshistorikkInnDto(this.inntektshistorikk.map { it.tilDto() }),
             sykdomshistorikk = SykdomshistorikkDto(this.sykdomshistorikk.map { it.tilDto() }),
@@ -1183,6 +1186,9 @@ data class PersonData(
             ARBEIDSLEDIG,
             FRILANS,
             SELVSTENDIG,
+            SELVSTENDIG_JORDBRUKER,
+            SELVSTENDIG_FISKER,
+            SELVSTENDIG_DAGMAMMA,
         }
     }
 

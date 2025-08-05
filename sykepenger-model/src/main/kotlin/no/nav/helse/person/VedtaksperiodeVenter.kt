@@ -86,6 +86,9 @@ internal class VenterPå(
             is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> yrkesaktivitetssporing.organisasjonsnummer
             Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANDS"
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> "SELVSTENDIG_JORDBRUKER"
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> "SELVSTENDIG_FISKER"
+            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> "SELVSTENDIG_DAGMAMMA"
         },
         venteårsak = venteårsak.dto()
     )

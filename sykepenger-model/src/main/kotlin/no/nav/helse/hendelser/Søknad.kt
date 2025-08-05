@@ -183,6 +183,11 @@ class Søknad(
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
             Behandlingsporing.Yrkesaktivitet.Frilans -> null
+
+            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> TODO("Faktaavklart inntekt for selvstendige jordbrukere er ikke implementert")
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> TODO("Faktaavklart inntekt for selvstendige fiskere er ikke implementert")
+            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> TODO("Faktaavklart inntekt for selvstendige dagmammaer er ikke implementert")
+
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
                 val anvendtGrunnbeløp = `1G`.beløp(sykdomsperiode.start)
                 val avklartePensjonsgivendeInntekter = pensjonsgivendeInntekter?.map {

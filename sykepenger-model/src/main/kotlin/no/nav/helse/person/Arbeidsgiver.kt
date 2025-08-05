@@ -22,6 +22,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.*
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
@@ -163,12 +164,18 @@ internal class Arbeidsgiver private constructor(
         is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> yrkesaktivitetssporing.organisasjonsnummer
         Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANS"
         Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+        Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> "SELVSTENDIG_DAGMAMMA"
+        Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> "SELVSTENDIG_FISKER"
+        Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> "SELVSTENDIG_JORDBRUKER"
     }
     private val yrkesaktivitet = when (yrkesaktivitetssporing) {
         Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> Yrkesaktivitet.Arbeidsledig
         is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> Yrkesaktivitet.Arbeidstaker
         Behandlingsporing.Yrkesaktivitet.Frilans -> Yrkesaktivitet.Frilans
         Behandlingsporing.Yrkesaktivitet.Selvstendig -> Yrkesaktivitet.Selvstendig
+        Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> Yrkesaktivitet.SelvstendigDagmamma
+        Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> Yrkesaktivitet.SelvstendigFisker
+        Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> Yrkesaktivitet.SelvstendigJordbruker
     }
 
     init {
@@ -344,9 +351,12 @@ internal class Arbeidsgiver private constructor(
                 id = dto.id,
                 yrkesaktivitetssporing = when (dto.yrkesaktivitetstype) {
                     ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSLEDIG -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSTAKER -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(dto.organisasjonsnummer)
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSTAKER -> Arbeidstaker(dto.organisasjonsnummer)
                     ArbeidsgiverInnDto.Yrkesaktivitetstype.FRILANS -> Behandlingsporing.Yrkesaktivitet.Frilans
                     ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG -> Behandlingsporing.Yrkesaktivitet.Selvstendig
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_JORDBRUKER -> Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_FISKER -> Behandlingsporing.Yrkesaktivitet.SelvstendigFisker
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_DAGMAMMA -> Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma
                 },
                 inntektshistorikk = Inntektshistorikk.gjenopprett(dto.inntektshistorikk),
                 sykdomshistorikk = Sykdomshistorikk.gjenopprett(dto.sykdomshistorikk),
@@ -434,6 +444,9 @@ internal class Arbeidsgiver private constructor(
             klassekodeBruker = when (yrkesaktivitetssporing) {
                 is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> Klassekode.SykepengerArbeidstakerOrdinær
                 Behandlingsporing.Yrkesaktivitet.Selvstendig -> Klassekode.SelvstendigNæringsdrivendeOppgavepliktig
+                Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk
+                Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> Klassekode.SelvstendigNæringsdrivendeDagmammaOppgavepliktig
+                Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> Klassekode.SelvstendigNæringsdrivendeFisker
                 Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
                 Behandlingsporing.Yrkesaktivitet.Frilans -> error("Forventer ikke å lage utbetaling for $yrkesaktivitetssporing ennå")
             }
@@ -1071,7 +1084,10 @@ internal class Arbeidsgiver private constructor(
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans,
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> emptyList()
+            Behandlingsporing.Yrkesaktivitet.Selvstendig,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> emptyList()
         }
     }
 
@@ -1180,6 +1196,9 @@ internal class Arbeidsgiver private constructor(
                 is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> "ARBEIDSTAKER"
                 Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANS"
                 Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+                Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> "SELVSTENDIG_DAGMAMMA"
+                Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> "SELVSTENDIG_FISKER"
+                Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> "SELVSTENDIG_JORDBRUKER"
             }
         )
         )
@@ -1278,6 +1297,9 @@ internal class Arbeidsgiver private constructor(
                 is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSTAKER
                 Behandlingsporing.Yrkesaktivitet.Frilans -> ArbeidsgiverUtDto.Yrkesaktivitetstype.FRILANS
                 Behandlingsporing.Yrkesaktivitet.Selvstendig -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG
+                Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_FISKER
+                Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_JORDBRUKER
+                Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_DAGMAMMA
             },
             inntektshistorikk = inntektshistorikk.dto(),
             sykdomshistorikk = sykdomshistorikk.dto(),

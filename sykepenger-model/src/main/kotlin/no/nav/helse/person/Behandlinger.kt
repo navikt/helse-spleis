@@ -17,10 +17,7 @@ import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.*
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
@@ -565,7 +562,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     is Arbeidstaker -> 100.prosent
                     Selvstendig -> 80.prosent
                     Arbeidsledig,
-                    Frilans -> error("Dekningsgrad for arbeidsledig og frilans er ikke implementert")
+                    Frilans,
+                    SelvstendigDagmamma,
+                    SelvstendigJordbruker,
+                    SelvstendigFisker -> error("Dekningsgrad for arbeidsledig, frilans og de sære selvstendige er ikke implementert")
                 },
                 arbeidsgiverperiode = arbeidsgiverperiode,
                 dagerNavOvertarAnsvar = gjeldende.dagerNavOvertarAnsvar,

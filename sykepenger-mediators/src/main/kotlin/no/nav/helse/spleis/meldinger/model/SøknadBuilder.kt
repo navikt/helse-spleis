@@ -28,6 +28,9 @@ internal abstract class SøknadBuilder {
     internal fun arbeidsledig() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidsledig }
     internal fun selvstendig() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Selvstendig }
     internal fun frilans() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Frilans }
+    internal fun selvstendigJordbruker() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker }
+    internal fun selvstendigFisker() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.SelvstendigFisker }
+    internal fun selvstendigDagmamma() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma }
     internal fun fom(fom: LocalDate) = apply { this.fom = fom }
     internal fun tom(tom: LocalDate) = apply { this.tom = tom }
     internal fun sendt(tidspunkt: LocalDateTime) = apply { this.innsendt = tidspunkt }

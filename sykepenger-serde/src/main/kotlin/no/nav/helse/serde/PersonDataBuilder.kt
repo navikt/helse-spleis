@@ -126,6 +126,9 @@ private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
         ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSLEDIG -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.ARBEIDSLEDIG
         ArbeidsgiverUtDto.Yrkesaktivitetstype.FRILANS -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.FRILANS
         ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.SELVSTENDIG
+        ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_JORDBRUKER -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.SELVSTENDIG_JORDBRUKER
+        ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_FISKER -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.SELVSTENDIG_FISKER
+        ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_DAGMAMMA -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.SELVSTENDIG_DAGMAMMA
     },
     inntektshistorikk = this.inntektshistorikk.historikk.map { it.tilPersonData() },
     sykdomshistorikk = this.sykdomshistorikk.elementer.map { it.tilPersonData() },

@@ -242,7 +242,10 @@ data class SpannerPersonDto(
             ARBEIDSTAKER,
             ARBEIDSLEDIG,
             FRILANS,
-            SELVSTENDIG
+            SELVSTENDIG,
+            SELVSTENDIG_JORDBRUKER,
+            SELVSTENDIG_FISKER,
+            SELVSTENDIG_DAGMAMMA
         }
 
         data class InntektsmeldingData(
@@ -807,6 +810,9 @@ private fun ArbeidsgiverUtDto.tilPersonData(vilkårsgrunnlagHistorikk: List<Vilk
             ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSLEDIG -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.ARBEIDSLEDIG
             ArbeidsgiverUtDto.Yrkesaktivitetstype.FRILANS -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.FRILANS
             ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.SELVSTENDIG
+            ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_JORDBRUKER -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.SELVSTENDIG_JORDBRUKER
+            ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_FISKER -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.SELVSTENDIG_FISKER
+            ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_DAGMAMMA -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.SELVSTENDIG_DAGMAMMA
         },
         inntektshistorikk = this.inntektshistorikk.historikk.map { it.tilPersonData() },
         sykdomshistorikk = this.sykdomshistorikk.elementer.map { it.tilPersonData() },

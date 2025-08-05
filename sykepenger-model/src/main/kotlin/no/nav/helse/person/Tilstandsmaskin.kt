@@ -142,7 +142,10 @@ internal data object Start : Vedtaksperiodetilstand {
                     is Arbeidstaker -> AvventerInntektsmelding
                     Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
                     Behandlingsporing.Yrkesaktivitet.Frilans,
-                    Behandlingsporing.Yrkesaktivitet.Selvstendig -> AvventerBlokkerendePeriode
+                    Behandlingsporing.Yrkesaktivitet.Selvstendig,
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> AvventerBlokkerendePeriode
                 }
             }
         )
