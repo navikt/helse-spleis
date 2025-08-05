@@ -682,6 +682,9 @@ private fun KlassekodeDto.tilPersonData() = when (this) {
     KlassekodeDto.RefusjonIkkeOpplysningspliktig -> "SPREFAG-IOP"
     KlassekodeDto.SykepengerArbeidstakerOrdinær -> "SPATORD"
     KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig -> "SPSND-OP"
+    KlassekodeDto.SelvstendigNæringsdrivendeDagmammaOppgavepliktig -> "SPSNDDM-OP"
+    KlassekodeDto.SelvstendigNæringsdrivendeFisker -> "SPSNDFISK"
+    KlassekodeDto.SelvstendigNæringsdrivendeJordbrukOgSkogbruk -> "SPSNDJORD"
 }
 
 private fun SimuleringResultatDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData(

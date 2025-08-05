@@ -921,7 +921,10 @@ enum class Endringskode {
 enum class Klassekode(val verdi: String) {
     RefusjonIkkeOpplysningspliktig(verdi = "SPREFAG-IOP"),
     SykepengerArbeidstakerOrdinær(verdi = "SPATORD"),
-    SelvstendigNæringsdrivendeOppgavepliktig(verdi = "SPSND-OP");
+    SelvstendigNæringsdrivendeOppgavepliktig(verdi = "SPSND-OP"),
+    SelvstendigNæringsdrivendeFisker(verdi = "SPSNDFISK"),
+    SelvstendigNæringsdrivendeJordbrukOgSkogbruk(verdi = "SPSNDJORD"),
+    SelvstendigNæringsdrivendeDagmammaOppgavepliktig(verdi = "SPSNDDM-OP");
 
     companion object {
         private val map = entries.associateBy(Klassekode::verdi)
@@ -930,6 +933,9 @@ enum class Klassekode(val verdi: String) {
             KlassekodeDto.RefusjonIkkeOpplysningspliktig -> RefusjonIkkeOpplysningspliktig
             KlassekodeDto.SykepengerArbeidstakerOrdinær -> SykepengerArbeidstakerOrdinær
             KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig -> SelvstendigNæringsdrivendeOppgavepliktig
+            KlassekodeDto.SelvstendigNæringsdrivendeDagmammaOppgavepliktig -> SelvstendigNæringsdrivendeDagmammaOppgavepliktig
+            KlassekodeDto.SelvstendigNæringsdrivendeFisker -> SelvstendigNæringsdrivendeFisker
+            KlassekodeDto.SelvstendigNæringsdrivendeJordbrukOgSkogbruk -> SelvstendigNæringsdrivendeJordbrukOgSkogbruk
         }
     }
 }

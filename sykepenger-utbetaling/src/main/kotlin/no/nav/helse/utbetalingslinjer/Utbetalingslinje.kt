@@ -251,6 +251,9 @@ data class Utbetalingslinje(
             RefusjonIkkeOpplysningspliktig -> KlassekodeDto.RefusjonIkkeOpplysningspliktig
             Klassekode.SykepengerArbeidstakerOrdinær -> KlassekodeDto.SykepengerArbeidstakerOrdinær
             Klassekode.SelvstendigNæringsdrivendeOppgavepliktig -> KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig
+            Klassekode.SelvstendigNæringsdrivendeFisker -> KlassekodeDto.SelvstendigNæringsdrivendeFisker
+            Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk -> KlassekodeDto.SelvstendigNæringsdrivendeJordbrukOgSkogbruk
+            Klassekode.SelvstendigNæringsdrivendeDagmammaOppgavepliktig -> KlassekodeDto.SelvstendigNæringsdrivendeDagmammaOppgavepliktig
         },
         datoStatusFom = this.datoStatusFom,
         statuskode = this.statuskode
