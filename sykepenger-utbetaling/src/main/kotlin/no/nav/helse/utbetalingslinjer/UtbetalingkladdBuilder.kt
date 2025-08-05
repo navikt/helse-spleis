@@ -38,7 +38,6 @@ class UtbetalingkladdBuilder(
     init {
         tidslinje.forEach { dag ->
             when (dag) {
-                is Venteperiodedag,
                 is ArbeidsgiverperiodeDag -> {
                     arbeidsgiveroppdragBuilder.arbeidsgiverperiodedag(dag.dato, dag.økonomi.brukAvrundetGrad { grad -> grad })
                     personoppdragBuilder.arbeidsgiverperiodedag(dag.dato, dag.økonomi.brukAvrundetGrad { grad -> grad })
@@ -48,6 +47,7 @@ class UtbetalingkladdBuilder(
                 is Arbeidsdag,
                 is AvvistDag,
                 is ForeldetDag,
+                is Venteperiodedag,
                 is Fridag -> {
                     arbeidsgiveroppdragBuilder.ikkeBetalingsdag()
                     personoppdragBuilder.ikkeBetalingsdag()

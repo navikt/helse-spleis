@@ -174,7 +174,7 @@ sealed class Utbetalingsdag(
 
     class Venteperiodedag(dato: LocalDate, økonomi: Økonomi) :
         Utbetalingsdag(dato, økonomi) {
-        override val prioritet = 45 // Mellom ArbeidsgiverperiodeDag og NavDag
+        override val prioritet = 25
         override fun kopierMed(økonomi: Økonomi) = Venteperiodedag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiUtDto) =
             UtbetalingsdagUtDto.VenteperiodedagDto(dato, økonomi)
