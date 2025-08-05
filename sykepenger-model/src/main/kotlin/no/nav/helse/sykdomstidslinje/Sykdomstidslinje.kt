@@ -190,6 +190,20 @@ class Sykdomstidslinje private constructor(
         internal fun arbeidsdager(førsteDato: LocalDate, sisteDato: LocalDate, kilde: Hendelseskilde) =
             arbeidsdager(Periode(førsteDato, sisteDato), kilde)
 
+        internal fun venteperiodedager(
+            førsteDato: LocalDate,
+            sisteDato: LocalDate,
+            kilde: Hendelseskilde
+        ): Sykdomstidslinje {
+            val periode = førsteDato til sisteDato
+            return Sykdomstidslinje(dager = periode.associateWith { dato ->
+                Venteperiodedag(
+                    dato = dato,
+                    kilde = kilde
+                )
+            })
+        }
+
         internal fun sykedager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,

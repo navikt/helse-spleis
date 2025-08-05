@@ -23,6 +23,7 @@ import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Opplæringspen
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Pleiepenger
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger
 import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal typealias BesteStrategy = (Dag, Dag) -> Dag
 
@@ -195,7 +196,7 @@ sealed class Dag(
 
     internal class Venteperiodedag(
         dato: LocalDate,
-        val grad: Prosentdel,
+        val grad: Prosentdel = 100.prosent,
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.VenteperiodedagDto(dato, kilde, grad.dto())

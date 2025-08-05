@@ -295,6 +295,7 @@ class Søknad(
                             is Permisjon -> "permisjon"
                             is Sykdom -> "sykdom"
                             is Utlandsopphold -> "utlandsopphold"
+                            is Venteperiode -> "venteperiode"
                         }
                     )
                 }
@@ -367,6 +368,11 @@ class Søknad(
 
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.arbeidsdager(periode.start, periode.endInclusive, kilde)
+        }
+
+        class Venteperiode(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
+            override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
+                Sykdomstidslinje.venteperiodedager(periode.start, periode.endInclusive, kilde)
         }
 
         class Utlandsopphold(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
