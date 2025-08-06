@@ -84,7 +84,6 @@ internal class SelvstendigHendelsefabrikk() {
         søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker, // Todo dette skal vel ikke være arbeidstaker
         registrert: LocalDateTime = LocalDateTime.now(),
         inntekterFraNyeArbeidsforhold: Boolean = false,
-        venteperiode: Periode? = null,
         pensjonsgivendeInntekter: List<PensjonsgivendeInntekt> = emptyList()
     ): Søknad {
         return Søknad(
@@ -106,8 +105,7 @@ internal class SelvstendigHendelsefabrikk() {
             søknadstype = søknadstype,
             registrert = registrert,
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
-            pensjonsgivendeInntekter = pensjonsgivendeInntekter,
-            venteperiode = venteperiode
+            pensjonsgivendeInntekter = pensjonsgivendeInntekter
         ).apply {
             søknader.add(this)
         }

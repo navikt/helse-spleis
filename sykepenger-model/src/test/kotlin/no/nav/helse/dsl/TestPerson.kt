@@ -179,15 +179,13 @@ internal class TestPerson(
             inntekterFraNyeArbeidsforhold: Boolean = false,
             sendTilGosys: Boolean = false,
             egenmeldinger: List<Periode> = emptyList(),
-            pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>? = null,
-            venteperiode: Periode? = null
+            pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>? = null
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, 100.prosent),
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
             sendTilGosys = sendTilGosys,
             egenmeldinger = egenmeldinger,
-            pensjonsgivendeInntekter = pensjonsgivendeInntekter,
-            venteperiode = venteperiode
+            pensjonsgivendeInntekter = pensjonsgivendeInntekter
         )
 
         internal fun håndterArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning): UUID {
@@ -219,8 +217,7 @@ internal class TestPerson(
             registrert: LocalDateTime = LocalDateTime.now(),
             merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
             inntekterFraNyeArbeidsforhold: Boolean = false,
-            pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>? = null,
-            venteperiode: Periode? = null
+            pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>? = null
         ) =
             behovsamler.fangInntektsmeldingReplay({
                 vedtaksperiodesamler.fangVedtaksperiode(this.orgnummer) {
@@ -239,8 +236,7 @@ internal class TestPerson(
                         registrert = registrert,
                         merknaderFraSykmelding = merknaderFraSykmelding,
                         inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
-                        pensjonsgivendeInntekter = pensjonsgivendeInntekter,
-                        venteperiode = venteperiode
+                        pensjonsgivendeInntekter = pensjonsgivendeInntekter
                     ).håndter(Person::håndter)
                 }?.also {
                     if (behovsamler.harBehov(it, Sykepengehistorikk)) {

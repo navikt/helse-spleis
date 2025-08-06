@@ -122,6 +122,7 @@ internal abstract class AbstractSpeilBuilderTest {
 
     protected fun håndterSøknadSelvstendig(
         periode: Periode,
+        venteperiode: Periode,
         pensjonsgivendeInntekter: List<PensjonsgivendeInntekt> = listOf(
             PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
             PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
@@ -131,6 +132,7 @@ internal abstract class AbstractSpeilBuilderTest {
         val søknadId = UUID.randomUUID()
         val søknad = selvstendigFabrikk.lagSøknad(
             Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent),
+            Søknad.Søknadsperiode.Venteperiode(venteperiode),
             sykmeldingSkrevet = 1.januar.atStartOfDay(),
             sendtTilNAVEllerArbeidsgiver = 1.januar.atStartOfDay(),
             id = søknadId,

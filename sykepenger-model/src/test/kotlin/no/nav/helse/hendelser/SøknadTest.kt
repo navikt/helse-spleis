@@ -63,7 +63,7 @@ internal class SøknadTest {
 
     @Test
     fun `søknad med selvstendig og venteperiode`() {
-        søknad(Sykdom(1.januar, 31.januar, 100.prosent), Venteperiode(1.januar, 16.januar))
+        søknad(Sykdom(1.januar, 31.januar, 100.prosent), Venteperiode(1.januar til 16.januar))
 
         assertEquals(16, søknad.sykdomstidslinje.filterIsInstance<Venteperiodedag>().size)
         assertEquals(11, søknad.sykdomstidslinje.filterIsInstance<Sykedag>().size)

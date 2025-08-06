@@ -76,7 +76,6 @@ class Søknad(
     registrert: LocalDateTime,
     private val inntekterFraNyeArbeidsforhold: Boolean,
     private val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>?,
-    private val venteperiode: Periode?
 ) : Hendelse {
 
     override val metadata = HendelseMetadata(
@@ -209,6 +208,21 @@ class Søknad(
                 )
             }
         }
+
+        val venteperiode = when (behandlingsporing) {
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
+                val venteperiode = perioder.filterIsInstance<Søknadsperiode.Venteperiode>().first()
+                Periode(venteperiode.periode.start, venteperiode.periode.endInclusive)
+            }
+
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
+            Behandlingsporing.Yrkesaktivitet.Frilans,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> null
+        }
+
         return Vedtaksperiode(
             egenmeldingsperioder = egenmeldingsperioder(),
             metadata = metadata,
@@ -375,7 +389,7 @@ class Søknad(
                 Sykdomstidslinje.arbeidsdager(periode.start, periode.endInclusive, kilde)
         }
 
-        class Venteperiode(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
+        class Venteperiode(periode: Periode) : Søknadsperiode(periode.start, periode.endInclusive) {
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.venteperiodedager(periode.start, periode.endInclusive, kilde)
         }
@@ -403,5 +417,4 @@ class Søknad(
     }
 
     data class PensjonsgivendeInntekt(val inntektsår: Year, val næringsinntekt: Inntekt)
-
 }

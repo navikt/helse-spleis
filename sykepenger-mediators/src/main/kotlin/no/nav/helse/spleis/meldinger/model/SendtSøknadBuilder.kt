@@ -45,8 +45,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         registrert = registrert,
         søknadstype = søknadstype,
         inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
-        pensjonsgivendeInntekter = pensjonsgivendeInntekter,
-        venteperiode = venteperiode
+        pensjonsgivendeInntekter = pensjonsgivendeInntekter
     )
 
     fun arbeidsledigsøknad() {
@@ -58,7 +57,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
     }
 
     internal fun venteperiode(venteperiode: Periode?) = apply {
-        this.venteperiode = venteperiode
+        venteperiode?.let { perioder.add(Søknadsperiode.Venteperiode(venteperiode)) }
     }
 
     override fun inntektskilde(andreInntektskilder: Boolean) = apply {
