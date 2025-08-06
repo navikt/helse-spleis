@@ -60,6 +60,7 @@ import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.fail
@@ -370,7 +371,7 @@ internal class TestPerson(
             arbeidsforhold: List<Triple<String, LocalDate, LocalDate?>> = skatteinntekter.map { (orgnr, _) -> Triple(orgnr, LocalDate.EPOCH, null) },
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
-            orgnummer: String = a1
+            orgnummer: String = this.orgnummer
         ) {
             val skjæringstidspunkt = inspektør.skjæringstidspunkt(vedtaksperiodeId)
             val opptjeningsinntekter = inntekterForOpptjeningsvurdering?.let {
@@ -460,6 +461,14 @@ internal class TestPerson(
             skjæringstidspunkt: LocalDate = inspektør.skjæringstidspunkt(vedtaksperiodeId),
             orgnummer: String = "aa"
         ) {
+            val inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering ?: run {
+                if (this.orgnummer in listOf(selvstendig, frilans)) {
+                    lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, 0.månedlig, skjæringstidspunkt)
+                } else {
+                    lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, INNTEKT, skjæringstidspunkt)
+                }
+            }
+
             behovsamler.bekreftBehov(vedtaksperiodeId, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
             arbeidsgiverHendelsefabrikk.lagVilkårsgrunnlag(
                 vedtaksperiodeId,
@@ -467,7 +476,7 @@ internal class TestPerson(
                 medlemskapstatus,
                 arbeidsforhold,
                 inntektsvurderingForSykepengegrunnlag,
-                inntekterForOpptjeningsvurdering ?: lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, INNTEKT, skjæringstidspunkt)
+                inntekterForOpptjeningsvurdering
             ).håndter(Person::håndter)
         }
 
