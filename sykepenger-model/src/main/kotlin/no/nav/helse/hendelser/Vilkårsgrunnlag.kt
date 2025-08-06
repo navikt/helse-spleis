@@ -8,6 +8,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektFor
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektI
 import no.nav.helse.hendelser.Avsender.SYSTEM
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsgrunnlag
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
@@ -87,10 +88,12 @@ class Vilkårsgrunnlag(
         val opptjening = opptjening()
         subsumsjonslogg.logg(opptjening.subsumsjon)
 
-        if (!harInntektMånedenFørSkjæringstidspunkt) {
-            aktivitetslogg.varsel(Varselkode.RV_OV_3)
-        } else if (!inntektsvurderingForSykepengegrunnlag.inntekter.harInntektI(YearMonth.from(skjæringstidspunkt.minusMonths(1)))) {
-            aktivitetslogg.info("Har inntekt måneden før skjæringstidspunkt med inntekter for opptjeningsvurdering, men ikke med inntekter for sykepengegrunnlag")
+        if (behandlingsporing is Arbeidstaker) {
+            if (!harInntektMånedenFørSkjæringstidspunkt) {
+                aktivitetslogg.varsel(Varselkode.RV_OV_3)
+            } else if (!inntektsvurderingForSykepengegrunnlag.inntekter.harInntektI(YearMonth.from(skjæringstidspunkt.minusMonths(1)))) {
+                aktivitetslogg.info("Har inntekt måneden før skjæringstidspunkt med inntekter for opptjeningsvurdering, men ikke med inntekter for sykepengegrunnlag")
+            }
         }
 
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(aktivitetslogg)
@@ -105,7 +108,6 @@ class Vilkårsgrunnlag(
         )
         return aktivitetslogg
     }
-
 
     internal fun grunnlagsdata() = requireNotNull(grunnlagsdata) { "Må kalle valider() først" }
 
