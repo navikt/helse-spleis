@@ -56,8 +56,8 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         this.pensjonsgivendeInntekter = pensjonsgivendeInntekter
     }
 
-    internal fun venteperiode(venteperiode: Periode?) = apply {
-        venteperiode?.let { perioder.add(Søknadsperiode.Venteperiode(venteperiode)) }
+    internal fun venteperiode(venteperiode: Periode) = apply {
+        perioder.add(Søknadsperiode.Venteperiode(venteperiode))
     }
 
     override fun inntektskilde(andreInntektskilder: Boolean) = apply {
