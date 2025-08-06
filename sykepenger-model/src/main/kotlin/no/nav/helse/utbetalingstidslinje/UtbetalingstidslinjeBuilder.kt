@@ -58,7 +58,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
                     else avvistDag(builder, dag.dato, dag.grad, Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode)
                 }
 
-                is Dag.Venteperiodedag -> TODO("Venteperiode")
+                is Dag.Venteperiodedag -> venteperiodedag(builder, dag.dato)
 
                 is Dag.Sykedag -> {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedagEllerNavAnsvar(builder, dag.dato, dag.grad)
@@ -160,5 +160,9 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiode(
 
     private fun arbeidsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
         builder.addArbeidsdag(dato, medInntektHvisFinnes(dato, 0.prosent).ikkeBetalt())
+    }
+
+    private fun venteperiodedag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
+        builder.addVenteperiodedag(dato, medInntektHvisFinnes(dato, 0.prosent).ikkeBetalt())
     }
 }

@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.Year
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.selvstendig
@@ -26,7 +27,9 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Klassekode
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -35,9 +38,15 @@ internal class SelvstendigTest : AbstractDslTest() {
     @Test
     fun `venteperiode fra søknad lagres på behandlingen`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknad(januar, venteperiode = 1.januar til 16.januar)
-
-            assertEquals(1.januar til 16.januar, inspektør.venteperiode(1.vedtaksperiode))
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+                Søknad.Søknadsperiode.Venteperiode(1.januar, 16.januar),
+            )
+            assertForventetFeil(
+                "Vi har dobbelt opp med venteperiode, både på søknadsperiode og som en egen parameter",
+                { assertEquals(null, inspektør.venteperiode(1.vedtaksperiode)) },
+                { assertEquals(1.januar til 16.januar, inspektør.venteperiode(1.vedtaksperiode)) }
+            )
         }
     }
 
@@ -45,7 +54,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     fun `selvstendigsøknad med færre inntekter enn 3 år gir varsel`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
             håndterSøknad(
-                januar,
+                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Venteperiode(1.januar, 16.januar),
                 pensjonsgivendeInntekter = listOf(
                     Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
                     Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
@@ -58,7 +67,9 @@ internal class SelvstendigTest : AbstractDslTest() {
     @Test
     fun `selvstendigsøknad kastes ut frem til vi støtter det`() = Toggle.SelvstendigNæringsdrivende.disable {
         selvstendig {
-            håndterSøknad(januar)
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Venteperiode(1.januar, 16.januar)
+            )
             assertFunksjonelleFeil()
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
         }
@@ -68,24 +79,31 @@ internal class SelvstendigTest : AbstractDslTest() {
     fun `beregner korrekt utbetaling for selvstendig med inntekt under 6G og uten forskring`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
             håndterSøknad(
-                januar,
+                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+                Søknad.Søknadsperiode.Venteperiode(1.januar, 16.januar),
                 pensjonsgivendeInntekter = listOf(
                     Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
                     Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
                     Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig),
+                ),
+
                 )
-            )
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
             håndterYtelser(1.vedtaksperiode)
 
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 0) {
                 assertSelvstendigInntektsgrunnlag(460589.årlig)
             }
+            val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
+            assertEquals(16, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.Venteperiodedag>().size)
+            assertEquals(11, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.NavDag>().size)
+            assertEquals(4, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.NavHelgDag>().size)
+
             inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
                 assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
                 assertEquals(1, utbetalinginspektør.personOppdrag.size)
                 utbetalinginspektør.personOppdrag.single().inspektør.also { linje ->
-                    assertEquals(januar, linje.periode)
+                    assertEquals(17.januar til 31.januar, linje.periode)
                     assertEquals(1417, linje.beløp)
                     assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
                 }
@@ -113,7 +131,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     fun `beregner korrekt utbetaling for selvstendig med inntekt over 6G og uten forsikring`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
             håndterSøknad(
-                januar,
+                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Venteperiode(1.januar, 16.januar),
                 pensjonsgivendeInntekter = listOf(
                     Søknad.PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig),
                     Søknad.PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig),
@@ -126,11 +144,17 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 0) {
                 assertSelvstendigInntektsgrunnlag(715713.årlig)
             }
+
+            val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
+            assertEquals(16, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.Venteperiodedag>().size)
+            assertEquals(11, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.NavDag>().size)
+            assertEquals(4, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.NavHelgDag>().size)
+
             inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
                 assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
                 assertEquals(1, utbetalinginspektør.personOppdrag.size)
                 utbetalinginspektør.personOppdrag.single().inspektør.also { linje ->
-                    assertEquals(januar, linje.periode)
+                    assertEquals(17.januar til 31.januar, linje.periode)
                     assertEquals(1729, linje.beløp)
                     assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
                 }
@@ -158,7 +182,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     fun `Subsumerer 8-34 ledd 1 for selvstendig uten forsikring`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
             håndterSøknad(
-                januar,
+                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Venteperiode(1.januar, 16.januar),
                 pensjonsgivendeInntekter = listOf(
                     Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
                     Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
@@ -184,8 +208,13 @@ internal class SelvstendigTest : AbstractDslTest() {
     @Test
     fun `To selvstendigsøknader`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknad(januar)
-            håndterSøknad(mars)
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Venteperiode(1.januar, 16.januar)
+            )
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent),
+                Søknad.Søknadsperiode.Venteperiode(1.mars, 16.mars),
+            )
 
             assertTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
             assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))

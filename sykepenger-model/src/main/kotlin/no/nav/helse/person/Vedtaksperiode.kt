@@ -959,7 +959,7 @@ internal class Vedtaksperiode private constructor(
                 Behandlingsporing.Yrkesaktivitet.Selvstendig,
                 Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
                 Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-                Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma-> tilstand(aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
+                Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
             }
         }
     }
@@ -2180,7 +2180,15 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun forventerInntekt(): Boolean {
-        return arbeidsgiver.arbeidsgiverperiode(periode)?.forventerInntekt(periode) == true
+        return when (arbeidsgiver.yrkesaktivitetssporing) {
+            is Arbeidstaker -> arbeidsgiver.arbeidsgiverperiode(periode)?.forventerInntekt(periode) == true
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> true
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.Frilans,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> false
+        }
     }
 
     internal fun måInnhenteInntektEllerRefusjon(): Boolean {
