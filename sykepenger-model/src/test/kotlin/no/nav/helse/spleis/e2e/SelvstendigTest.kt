@@ -91,7 +91,10 @@ internal class SelvstendigTest : AbstractDslTest() {
                 assertSelvstendigInntektsgrunnlag(460589.årlig)
             }
             val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
-            assertEquals(16, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.Venteperiodedag>().size)
+            val venteperiodedager = utbetalingstidslinje.filterIsInstance<Utbetalingsdag.Venteperiodedag>()
+
+            assertEquals(16, venteperiodedager.size)
+            assertEquals(true, venteperiodedager.all { it.økonomi.utbetalingsgrad == 0.prosent && it.økonomi.sykdomsgrad == 100.prosent })
             assertEquals(11, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.NavDag>().size)
             assertEquals(4, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.NavHelgDag>().size)
 
