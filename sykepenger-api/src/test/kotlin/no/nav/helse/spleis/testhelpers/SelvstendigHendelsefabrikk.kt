@@ -81,7 +81,6 @@ internal class SelvstendigHendelsefabrikk() {
         opprinneligSendt: LocalDate? = null,
         yrkesskade: Boolean = false,
         egenmeldinger: List<Periode> = emptyList(),
-        søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker, // Todo dette skal vel ikke være arbeidstaker
         registrert: LocalDateTime = LocalDateTime.now(),
         inntekterFraNyeArbeidsforhold: Boolean = false,
         pensjonsgivendeInntekter: List<PensjonsgivendeInntekt> = emptyList()
@@ -102,7 +101,7 @@ internal class SelvstendigHendelsefabrikk() {
             sendTilGosys = sendTilGosys,
             yrkesskade = yrkesskade,
             egenmeldinger = egenmeldinger,
-            søknadstype = søknadstype,
+            erArbeidsledig = false,
             registrert = registrert,
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter
