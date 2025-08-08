@@ -1,7 +1,7 @@
 package no.nav.helse.person.beløp
 
 import java.time.LocalDate
-import java.util.*
+import java.util.SortedMap
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -89,6 +89,12 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
         val tom = setOfNotNull(periode?.endInclusive, other.periode?.endInclusive).max()
         return (fom til tom).firstOrNull { this.dager[it]?.beløp != other.dager[it]?.beløp }
     }
+
+    internal fun kunIngenRefusjon() =
+        filterIsInstance<Beløpsdag>().let { beløpsdager ->
+            if (beløpsdager.isEmpty()) false
+            else beløpsdager.all { it.beløp == INGEN }
+        }
 
     internal fun dto() = BeløpstidslinjeDto(
         perioder = dager

@@ -27,7 +27,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøknad er lagt til grunn`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`
-import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som ikke støttes`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som støttes`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_3
@@ -44,7 +43,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_YS_1
-import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
@@ -53,7 +51,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
 
 class Søknad(
@@ -72,7 +69,7 @@ class Søknad(
     private val sendTilGosys: Boolean,
     private val yrkesskade: Boolean,
     private val egenmeldinger: List<Periode>,
-    private val søknadstype: Søknadstype,
+    private val erArbeidsledig: Boolean,
     registrert: LocalDateTime,
     private val inntekterFraNyeArbeidsforhold: Boolean,
     private val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>?,
@@ -122,8 +119,17 @@ class Søknad(
         valider(aktivitetslogg, subsumsjonslogg)
         validerInntektskilder(aktivitetslogg, vilkårsgrunnlag)
         validerPensjonsgivendeInntekter(aktivitetslogg)
-        søknadstype.valider(aktivitetslogg, vilkårsgrunnlag, sykdomstidslinje.periode(), refusjonstidslinje)
+        if (erArbeidsledig) validerArbeidsledig(aktivitetslogg, vilkårsgrunnlag, sykdomstidslinje.periode(), refusjonstidslinje)
         return aktivitetslogg
+    }
+
+    private fun validerArbeidsledig(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, periode: Periode?, refusjonstidslinje: Beløpstidslinje) {
+        if (vilkårsgrunnlag == null) return aktivitetslogg.funksjonellFeil(`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`)
+
+        if (periode != null && refusjonstidslinje.kunIngenRefusjon()) {
+            return aktivitetslogg.info("Arbeidsledigsøknad lagt til grunn og vi har ikke registrert refusjon i søknadstidsrommet")
+        }
+        aktivitetslogg.varsel(`Arbeidsledigsøknad er lagt til grunn`)
     }
 
     private fun validerPensjonsgivendeInntekter(aktivitetslogg: IAktivitetslogg) {
@@ -254,41 +260,6 @@ class Søknad(
         internal fun valider(aktivitetslogg: IAktivitetslogg) {
             if (type !in tilbakedateringer) return
             aktivitetslogg.varsel(RV_SØ_3)
-        }
-    }
-
-    class Søknadstype(private val type: String) {
-        internal fun valider(
-            aktivitetslogg: IAktivitetslogg,
-            vilkårsgrunnlag: VilkårsgrunnlagElement?,
-            periode: Periode?,
-            refusjonstidslinje: Beløpstidslinje
-        ) {
-            if (this == Arbeidstaker) return
-            if (this != Arbeidsledig) return aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
-            if (vilkårsgrunnlag == null) return aktivitetslogg.funksjonellFeil(`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`)
-            if (periode != null && refusjonstidslinje.kunIngenRefusjon()) {
-                return aktivitetslogg.info("Arbeidsledigsøknad lagt til grunn og vi har ikke registrert refusjon i søknadstidsrommet")
-            }
-            aktivitetslogg.varsel(`Arbeidsledigsøknad er lagt til grunn`)
-        }
-
-        private fun Beløpstidslinje.kunIngenRefusjon() =
-            filterIsInstance<Beløpsdag>().let { beløpsdager ->
-                if (beløpsdager.isEmpty()) false
-                else beløpsdager.all { it.beløp == INGEN }
-            }
-
-        override fun equals(other: Any?): Boolean {
-            if (other !is Søknadstype) return false
-            return this.type == other.type
-        }
-
-        override fun hashCode() = type.hashCode()
-
-        companion object {
-            val Arbeidstaker = Søknadstype("ARBEIDSTAKERE")
-            val Arbeidsledig = Søknadstype("ARBEIDSLEDIG")
         }
     }
 

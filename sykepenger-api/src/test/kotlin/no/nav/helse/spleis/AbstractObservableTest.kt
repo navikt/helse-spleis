@@ -100,7 +100,7 @@ internal abstract class AbstractObservableTest {
         sendTilGosys = false,
         yrkesskade = false,
         egenmeldinger = egenmeldinger,
-        søknadstype = Søknad.Søknadstype.Arbeidstaker,
+        erArbeidsledig = false,
         registrert = LocalDateTime.now(),
         inntekterFraNyeArbeidsforhold = false,
         pensjonsgivendeInntekter = null
