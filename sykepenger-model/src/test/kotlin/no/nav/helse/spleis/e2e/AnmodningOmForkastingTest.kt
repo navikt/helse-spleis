@@ -1,11 +1,13 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.til
@@ -13,6 +15,7 @@ import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -21,6 +24,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class AnmodningOmForkastingTest : AbstractDslTest() {
@@ -115,6 +120,62 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
             assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `forkasting uten force påvirker ikke vedtaksperioder som ikke kan forkastes`() {
+        medJSONPerson("/personer/auu-med-utbetalt-vedtak-etter.json")
+        a1 {
+            håndterOverstyrTidslinje((1.januar til 16.januar).map {
+                ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100)
+            })
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+
+            håndterAnmodningOmForkasting(1.vedtaksperiode)
+
+            inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
+                assertEquals(1, utbetalinger.size)
+                assertEquals(Utbetalingstatus.IKKE_UTBETALT, utbetalinger.single().status)
+            }
+
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        }
+    }
+
+    @Test
+    fun `forkasting med force påvirker bare vedtaksperioden som forces`() {
+        medJSONPerson("/personer/auu-med-utbetalt-vedtak-etter.json")
+        a1 {
+            håndterOverstyrTidslinje((1.januar til 16.januar).map {
+                ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100)
+            })
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+
+            håndterAnmodningOmForkasting(1.vedtaksperiode, force = true)
+
+            inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
+                assertEquals(1, utbetalinger.size)
+                assertEquals(Utbetalingstatus.FORKASTET, utbetalinger.single().status)
+            }
+            inspektør.utbetalinger(2.vedtaksperiode).also { utbetalinger ->
+                assertEquals(1, utbetalinger.size)
+                assertEquals(Utbetalingstatus.UTBETALT, utbetalinger.single().status)
+            }
+
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertForventetFeil(
+                forklaring = "force-flagget burde ikke kaste ut senere vedtak",
+                nå = {
+                    assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+                },
+                ønsket = {
+                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+                }
+            )
         }
     }
 }

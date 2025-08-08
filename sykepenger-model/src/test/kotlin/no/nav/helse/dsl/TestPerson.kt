@@ -67,11 +67,18 @@ import org.junit.jupiter.api.fail
 
 internal class TestPerson(
     private val observatør: TestObservatør,
-    personidentifikator: Personidentifikator = UNG_PERSON_FNR_2018,
-    fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
-    deferredLog: DeferredLog = DeferredLog(),
-    jurist: SubsumsjonsListLog
+    person: Person,
+    deferredLog: DeferredLog = DeferredLog()
 ) {
+
+    constructor(
+        observatør: TestObservatør,
+        personidentifikator: Personidentifikator = UNG_PERSON_FNR_2018,
+        fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
+        jurist: SubsumsjonsListLog,
+        deferredLog: DeferredLog = DeferredLog()
+    ) : this(observatør, Person(personidentifikator, fødselsdato.alder, jurist), deferredLog)
+
     internal companion object {
         internal operator fun <R> String.invoke(testPerson: TestPerson, testblokk: TestArbeidsgiver.() -> R) =
             testPerson.arbeidsgiver(this, testblokk)
@@ -83,7 +90,7 @@ internal class TestPerson(
     private val varslersamler = Varslersamler()
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk()
-    internal val person = Person(personidentifikator, fødselsdato.alder, jurist).also {
+    internal val person = person.also {
         it.addObserver(vedtaksperiodesamler)
         it.addObserver(behovsamler)
         it.addObserver(observatør)
@@ -311,8 +318,8 @@ internal class TestPerson(
         internal fun håndterForkastSykmeldingsperioder(periode: Periode) =
             arbeidsgiverHendelsefabrikk.lagHåndterForkastSykmeldingsperioder(periode).håndter(Person::håndter)
 
-        internal fun håndterAnmodningOmForkasting(vedtaksperiodeId: UUID) =
-            arbeidsgiverHendelsefabrikk.lagAnmodningOmForkasting(vedtaksperiodeId).håndter(Person::håndter)
+        internal fun håndterAnmodningOmForkasting(vedtaksperiodeId: UUID, force: Boolean = false) =
+            arbeidsgiverHendelsefabrikk.lagAnmodningOmForkasting(vedtaksperiodeId, force).håndter(Person::håndter)
 
         private fun håndterInntektsmeldingReplay(forespørsel: Forespørsel) {
             val håndterteInntektsmeldinger = behovsamler.håndterteInntektsmeldinger()
