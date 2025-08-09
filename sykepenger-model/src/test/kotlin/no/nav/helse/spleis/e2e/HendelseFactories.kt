@@ -11,6 +11,7 @@ import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.dsl.a1
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.etterspurteBehov
+import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Behandlingsporing
@@ -283,6 +284,19 @@ internal fun påminnelse(
         nestePåminnelsestidspunkt = LocalDateTime.now(),
         flagg = flagg,
         opprettet = LocalDateTime.now()
+    )
+}
+
+internal fun anmodningOmForkasting(
+    vedtaksperiodeId: UUID,
+    force: Boolean = false,
+    orgnummer: String = a1
+): AnmodningOmForkasting {
+    return AnmodningOmForkasting(
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
+        vedtaksperiodeId = vedtaksperiodeId,
+        force = force
     )
 }
 

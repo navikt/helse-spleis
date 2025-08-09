@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
@@ -22,7 +22,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.*
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
@@ -330,9 +330,9 @@ internal class Arbeidsgiver private constructor(
             arbeidsgivere: List<Arbeidsgiver>,
             hendelse: Hendelse,
             aktivitetslogg: IAktivitetslogg,
-            filter: VedtaksperiodeFilter
+            vedtaksperioderSomSkalForkastes: List<Vedtaksperiode>
         ) {
-            arbeidsgivere.flatMap { it.søppelbøtte(hendelse, aktivitetslogg, filter) }.forEach { it.buildAndEmit() }
+            arbeidsgivere.flatMap { it.søppelbøtte(hendelse, aktivitetslogg, vedtaksperioderSomSkalForkastes) }.forEach { it.buildAndEmit() }
         }
 
         internal fun gjenopprett(
@@ -1146,13 +1146,13 @@ internal class Arbeidsgiver private constructor(
     private fun søppelbøtte(
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg,
-        filter: VedtaksperiodeFilter
+        vedtaksperioderSomSkalForkastes: List<Vedtaksperiode>
     ): List<VedtaksperiodeForkastetEventBuilder> {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        val perioder: List<Pair<Vedtaksperiode, VedtaksperiodeForkastetEventBuilder>> = vedtaksperioder
-            .filter(filter)
-            .mapNotNull { vedtaksperiode ->
-                vedtaksperiode.forkast(hendelse, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList())?.let { vedtaksperiode to it }
+        val perioder: List<Pair<Vedtaksperiode, VedtaksperiodeForkastetEventBuilder>> = vedtaksperioderSomSkalForkastes
+            .filter { it.arbeidsgiver === this }
+            .map { vedtaksperiode ->
+                vedtaksperiode to vedtaksperiode.utførForkasting(hendelse, aktivitetsloggMedArbeidsgiverkontekst)
             }
 
         vedtaksperioder.removeAll(perioder.map { it.first })
@@ -1172,8 +1172,8 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogg: IAktivitetslogg
     ) {
         aktivitetslogg.info("Oppretter forkastet vedtaksperiode ettersom Søknad inneholder errors")
-        val vedtaksperiodeForkastetEventBuilder = vedtaksperiode.forkast(hendelse, aktivitetslogg, vedtaksperioder.toList())
-        vedtaksperiodeForkastetEventBuilder!!.buildAndEmit()
+        val vedtaksperiodeForkastetEventBuilder = vedtaksperiode.utførForkasting(hendelse, aktivitetslogg)
+        vedtaksperiodeForkastetEventBuilder.buildAndEmit()
         forkastede.add(ForkastetVedtaksperiode(vedtaksperiode, organisasjonsnummer, vedtaksperiode.periode))
     }
 
@@ -1273,8 +1273,8 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun kanForkastes(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) =
-        vedtaksperiode.kanForkastes(vedtaksperioder.toList(), aktivitetslogg)
+    internal fun kanForkastes(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, tvingForkasting: Boolean = false) =
+        vedtaksperiode.kanForkastes(vedtaksperioder.toList(), aktivitetslogg, tvingForkasting)
 
     fun vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode: Periode): List<Vedtaksperiode> {
         return vedtaksperioder.filter(SAMME_ARBEIDSGIVERPERIODE(this, arbeidsgiverperiode))

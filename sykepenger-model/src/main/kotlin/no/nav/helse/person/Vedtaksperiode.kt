@@ -3,7 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
@@ -408,7 +408,7 @@ internal class Vedtaksperiode private constructor(
             AvventerAnnullering,
             TilAnnullering,
             TilUtbetaling -> {
-                if (anmodningOmForkasting.force) return forkast(anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst)
+                if (anmodningOmForkasting.force) return forkast(anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst, true)
                 aktivitetsloggMedVedtaksperiodekontekst.info("Avslår anmodning om forkasting i $tilstand")
             }
 
@@ -423,7 +423,7 @@ internal class Vedtaksperiode private constructor(
             SelvstendigStart,
             SelvstendigTilInfotrygd,
             SelvstendigTilUtbetaling -> {
-                if (anmodningOmForkasting.force) return forkast(anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst)
+                if (anmodningOmForkasting.force) return forkast(anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst, true)
                 aktivitetsloggMedVedtaksperiodekontekst.info("Avslår anmodning om forkasting i $tilstand")
             }
         }
@@ -1357,13 +1357,22 @@ internal class Vedtaksperiode private constructor(
         return vilkårsgrunnlag?.harNødvendigInntektForVilkårsprøving(arbeidsgiver.organisasjonsnummer) == false
     }
 
-    internal fun kanForkastes(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg, hendelse: Hendelse? = null): Boolean {
+    internal fun forkast(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, tvingForkasting: Boolean = false) {
+        val filter = OVERLAPPENDE_OG_ETTERGØLGENDE(this)
+        val forkastingskandidater = person.vedtaksperioder(filter)
+        aktivitetslogg.info("Potensielt ${forkastingskandidater.size} vedtaksperioder vil bli forkastes")
+        val forkastinger = forkastingskandidater
+            .filter { kandidat -> kandidat.arbeidsgiver.kanForkastes(kandidat, aktivitetslogg, tvingForkasting) }
+        person.søppelbøtte(hendelse, aktivitetslogg, forkastinger)
+    }
+
+    internal fun kanForkastes(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg, tvingForkasting: Boolean = false): Boolean {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (behandlinger.kanForkastes(vedtaksperioder.map { it.behandlinger })) {
             aktivitetsloggMedVedtaksperiodekontekst.info("Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet")
             return true
         }
-        if (hendelse is AnmodningOmForkasting && hendelse.force) {
+        if (tvingForkasting) {
             aktivitetsloggMedVedtaksperiodekontekst.info("Behandlingene sier at denne _ikke_ kan forkastes. Men ettersom 'force'-flagget i anmodningen er satt forkastes perioden læll. Ta en god titt på at det ikke blir hengende noen utbetalinger her!")
             return true
         }
@@ -1371,13 +1380,11 @@ internal class Vedtaksperiode private constructor(
         return false
     }
 
-    internal fun forkast(
+    internal fun utførForkasting(
         hendelse: Hendelse,
-        aktivitetslogg: IAktivitetslogg,
-        vedtaksperioder: List<Vedtaksperiode>
-    ): VedtaksperiodeForkastetEventBuilder? {
+        aktivitetslogg: IAktivitetslogg
+    ): VedtaksperiodeForkastetEventBuilder {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        if (!kanForkastes(vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst, hendelse)) return null
         aktivitetsloggMedVedtaksperiodekontekst.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.behandlinger.forkast(arbeidsgiver, hendelse.metadata.behandlingkilde, hendelse.metadata.automatiskBehandling, aktivitetsloggMedVedtaksperiodekontekst)
         val vedtaksperiodeForkastetEventBuilder = when (tilstand) {
@@ -1444,10 +1451,6 @@ internal class Vedtaksperiode private constructor(
                 )
             )
         }
-    }
-
-    internal fun forkast(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-        person.søppelbøtte(hendelse, aktivitetslogg, OVERLAPPENDE_OG_ETTERGØLGENDE(this))
     }
 
     private fun registrerKontekst(aktivitetslogg: IAktivitetslogg): IAktivitetslogg {

@@ -55,7 +55,6 @@ import no.nav.helse.januar
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -837,6 +836,18 @@ internal fun AbstractEndToEndTest.håndterPåminnelse(
     ).håndter(Person::håndter)
 }
 
+internal fun AbstractEndToEndTest.håndterAnmodningOmForkasting(
+    vedtaksperiodeIdInnhenter: IdInnhenter,
+    force: Boolean = false,
+    orgnummer: String = a1
+) {
+    anmodningOmForkasting(
+        vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer),
+        force = force,
+        orgnummer = orgnummer,
+    ).håndter(Person::håndter)
+}
+
 internal fun AbstractEndToEndTest.håndterUtbetalingsgodkjenning(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     utbetalingGodkjent: Boolean = true,
@@ -1085,5 +1096,3 @@ internal fun AbstractEndToEndTest.nyPeriode(periode: Periode, orgnummer: String 
     håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = orgnummer)
     håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, grad), orgnummer = orgnummer)
 }
-
-internal fun AbstractEndToEndTest.forkastAlle() = person.søppelbøtte(forrigeHendelse, Aktivitetslogg()) { true }

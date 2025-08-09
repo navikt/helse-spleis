@@ -40,8 +40,8 @@ import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
-import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.forlengVedtak
+import no.nav.helse.spleis.e2e.håndterAnmodningOmForkasting
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
@@ -815,7 +815,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
-        forkastAlle()
+        håndterAnmodningOmForkasting(1.vedtaksperiode, force = true)
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,

@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.math.roundToInt
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
@@ -635,9 +635,10 @@ class Person private constructor(
         arbeidsgivere.beregnSkjæringstidspunkter(infotrygdhistorikk)
     }
 
-    internal fun søppelbøtte(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, filter: VedtaksperiodeFilter) {
+    internal fun søppelbøtte(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, vedtaksperioderSomSkalForkastes: List<Vedtaksperiode>) {
+        aktivitetslogg.info("Forkaster ${vedtaksperioderSomSkalForkastes.size} vedtaksperioder")
         infotrygdhistorikk.tøm()
-        Arbeidsgiver.søppelbøtte(arbeidsgivere, hendelse, aktivitetslogg, filter)
+        Arbeidsgiver.søppelbøtte(arbeidsgivere, hendelse, aktivitetslogg, vedtaksperioderSomSkalForkastes)
         sykdomshistorikkEndret()
         ryddOppVilkårsgrunnlag(aktivitetslogg)
         gjenopptaBehandling(aktivitetslogg)

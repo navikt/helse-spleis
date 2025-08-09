@@ -255,7 +255,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar)
         )
         nyPeriode(januar)
-        forkastAlle()
+        håndterAnmodningOmForkasting(1.vedtaksperiode, force = true)
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         assertFalse(observatør.forkastet(1.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
         assertEquals(emptyList<Periode>(), observatør.forkastet(1.vedtaksperiode.id(a1)).sykmeldingsperioder)
@@ -264,7 +264,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forventer ikke arbeidsgiveropplysninger fra periode med utbetaling som mottar overlappende søknad`() {
         nyPeriode(januar)
-        forkastAlle()
+        håndterAnmodningOmForkasting(1.vedtaksperiode)
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         nyPeriode(31.januar til 31.januar)
@@ -276,7 +276,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     fun `Sender ikke med senere sykmeldingsperioder enn vedtaksperioden som forkastes`() {
         håndterSøknad(januar, sendTilGosys = true)
         nyPeriode(februar)
-        forkastAlle()
+        håndterAnmodningOmForkasting(1.vedtaksperiode)
         assertEquals(listOf(januar), observatør.forkastet(1.vedtaksperiode.id(a1)).sykmeldingsperioder)
         assertTrue(observatør.forkastet(1.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)

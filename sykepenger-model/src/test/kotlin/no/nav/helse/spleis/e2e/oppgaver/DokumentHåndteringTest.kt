@@ -35,7 +35,7 @@ import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
-import no.nav.helse.spleis.e2e.forkastAlle
+import no.nav.helse.spleis.e2e.håndterAnmodningOmForkasting
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -508,7 +508,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     fun `sender ut søknad håndtert for forlengelse av forkastet periode`() {
         håndterSykmelding(januar)
         val søknadId1 = håndterSøknad(januar)
-        forkastAlle()
+        håndterAnmodningOmForkasting(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         val søknadId2 = håndterSøknad(februar)
