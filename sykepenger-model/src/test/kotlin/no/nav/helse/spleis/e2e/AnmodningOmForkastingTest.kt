@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -167,15 +166,7 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
             }
 
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertForventetFeil(
-                forklaring = "force-flagget burde ikke kaste ut senere vedtak",
-                nå = {
-                    assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-                },
-                ønsket = {
-                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-                }
-            )
+            assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING)
         }
     }
 }

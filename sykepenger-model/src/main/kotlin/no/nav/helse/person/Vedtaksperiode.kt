@@ -1358,22 +1358,28 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun forkast(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, tvingForkasting: Boolean = false) {
-        val filter = OVERLAPPENDE_OG_ETTERGØLGENDE(this)
-        val forkastingskandidater = person.vedtaksperioder(filter)
-        aktivitetslogg.info("Potensielt ${forkastingskandidater.size} vedtaksperioder vil bli forkastes")
-        val forkastinger = forkastingskandidater
-            .filter { kandidat -> kandidat.arbeidsgiver.kanForkastes(kandidat, aktivitetslogg, tvingForkasting) }
+        val forkastinger = forkastingskandidater(aktivitetslogg, tvingForkasting)
         person.søppelbøtte(hendelse, aktivitetslogg, forkastinger)
     }
 
-    internal fun kanForkastes(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg, tvingForkasting: Boolean = false): Boolean {
+    private fun forkastingskandidater(aktivitetslogg: IAktivitetslogg, tvingForkasting: Boolean): List<Vedtaksperiode> {
+        val potensielle = person.vedtaksperioder(OVERLAPPENDE_OG_ETTERGØLGENDE(this))
+        aktivitetslogg.info("Potensielt ${potensielle.size} vedtaksperioder vil bli forkastes")
+
+        val vedtaksperioderSomSkalForkastes = potensielle
+            .filter { kandidat -> kandidat.arbeidsgiver.kanForkastes(kandidat, aktivitetslogg) }
+
+        if (tvingForkasting && this !in vedtaksperioderSomSkalForkastes) {
+            aktivitetslogg.info("Behandlingene sier at denne _ikke_ kan forkastes. Men ettersom 'force'-flagget i anmodningen er satt forkastes perioden læll. Ta en god titt på at det ikke blir hengende noen utbetalinger her!")
+            return listOf(this) + vedtaksperioderSomSkalForkastes
+        }
+        return vedtaksperioderSomSkalForkastes
+    }
+
+    internal fun kanForkastes(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): Boolean {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (behandlinger.kanForkastes(vedtaksperioder.map { it.behandlinger })) {
             aktivitetsloggMedVedtaksperiodekontekst.info("Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet")
-            return true
-        }
-        if (tvingForkasting) {
-            aktivitetsloggMedVedtaksperiodekontekst.info("Behandlingene sier at denne _ikke_ kan forkastes. Men ettersom 'force'-flagget i anmodningen er satt forkastes perioden læll. Ta en god titt på at det ikke blir hengende noen utbetalinger her!")
             return true
         }
         aktivitetsloggMedVedtaksperiodekontekst.info("Kan ikke forkastes fordi behandlinger nekter det")

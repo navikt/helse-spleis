@@ -1273,8 +1273,8 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun kanForkastes(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, tvingForkasting: Boolean = false) =
-        vedtaksperiode.kanForkastes(vedtaksperioder.toList(), aktivitetslogg, tvingForkasting)
+    internal fun kanForkastes(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) =
+        vedtaksperiode.kanForkastes(vedtaksperioder.toList(), aktivitetslogg)
 
     fun vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode: Periode): List<Vedtaksperiode> {
         return vedtaksperioder.filter(SAMME_ARBEIDSGIVERPERIODE(this, arbeidsgiverperiode))
