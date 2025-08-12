@@ -45,7 +45,6 @@ import no.nav.helse.person.Venteårsak.Hva.SØKNAD
 import no.nav.helse.person.Venteårsak.Hva.UTBETALING
 import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
@@ -968,7 +967,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         vedtaksperiode.håndterDager(dager, aktivitetslogg)
 
         if (!aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
-        if (!vedtaksperiode.kanForkastes(aktivitetslogg)) return
+        if (!vedtaksperiode.kanForkastes()) return
         vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
     }
 
@@ -1032,7 +1031,7 @@ internal data object RevurderingFeilet : Vedtaksperiodetilstand {
     }
 
     override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak? {
-        if (vedtaksperiode.kanForkastes(Aktivitetslogg())) return null
+        if (vedtaksperiode.kanForkastes()) return null
         return HJELP.utenBegrunnelse
     }
 
@@ -1044,7 +1043,7 @@ internal data object RevurderingFeilet : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        if (!vedtaksperiode.kanForkastes(Aktivitetslogg())) return aktivitetslogg.info(
+        if (!vedtaksperiode.kanForkastes()) return aktivitetslogg.info(
             "Gjenopptar ikke revurdering feilet fordi perioden har tidligere avsluttede utbetalinger. Må behandles manuelt vha annullering."
         )
         aktivitetslogg.funksjonellFeil(RV_RV_2)
