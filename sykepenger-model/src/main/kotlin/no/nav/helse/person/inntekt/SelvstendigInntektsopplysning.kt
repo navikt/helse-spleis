@@ -13,8 +13,8 @@ internal data class SelvstendigInntektsopplysning(
     val faktaavklartInntekt: SelvstendigFaktaavklartInntekt,
     val skjønnsmessigFastsatt: SkjønnsmessigFastsatt?
 ) {
-    val omregnetÅrsinntekt = faktaavklartInntekt.inntektsdata
-    private val fastsattÅrsinntektInntektsdata = skjønnsmessigFastsatt?.inntektsdata ?: omregnetÅrsinntekt
+    val inntektsgrunnlag = faktaavklartInntekt.inntektsdata
+    private val fastsattÅrsinntektInntektsdata = skjønnsmessigFastsatt?.inntektsdata ?: inntektsgrunnlag
     val fastsattÅrsinntekt = fastsattÅrsinntektInntektsdata.beløp
 
     internal companion object {
@@ -41,12 +41,12 @@ internal data class SelvstendigInntektsopplysning(
         }
 
         private fun SelvstendigInntektsopplysning.skalSkjønnsmessigFastsattRullesTilbake(etter: SelvstendigInntektsopplysning) =
-            this.omregnetÅrsinntekt.beløp != etter.omregnetÅrsinntekt.beløp
+            this.inntektsgrunnlag.beløp != etter.inntektsgrunnlag.beløp
 
         internal fun SelvstendigInntektsopplysning.berik(builder: UtkastTilVedtakBuilder) =
             builder.arbeidsgiverinntekt(
                 arbeidsgiver = "SELVSTENDIG",
-                omregnedeÅrsinntekt = this.omregnetÅrsinntekt.beløp,
+                omregnedeÅrsinntekt = this.inntektsgrunnlag.beløp,
                 skjønnsfastsatt = this.skjønnsmessigFastsatt?.inntektsdata?.beløp,
                 inntektskilde = if (this.skjønnsmessigFastsatt != null) Inntektskilde.Saksbehandler else Inntektskilde.AOrdningen
             )
