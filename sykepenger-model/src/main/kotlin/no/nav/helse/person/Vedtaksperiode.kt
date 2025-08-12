@@ -1026,7 +1026,7 @@ internal class Vedtaksperiode private constructor(
 
         val erAvvist = behandlinger.erAvvist()
         if (erAvvist) {
-            if (arbeidsgiver.kanForkastes(this, aktivitetsloggMedVedtaksperiodekontekst)) return forkast(utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst)
+            if (kanForkastes(aktivitetsloggMedVedtaksperiodekontekst)) return forkast(utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst)
             if (utbetalingsavgjørelse.automatisert) aktivitetsloggMedVedtaksperiodekontekst.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
             aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_UT_24)
         }
@@ -1367,7 +1367,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg.info("Potensielt ${potensielle.size} vedtaksperioder vil bli forkastes")
 
         val vedtaksperioderSomSkalForkastes = potensielle
-            .filter { kandidat -> kandidat.arbeidsgiver.kanForkastes(kandidat, aktivitetslogg) }
+            .filter { kandidat -> kandidat.kanForkastes(aktivitetslogg) }
 
         if (tvingForkasting && this !in vedtaksperioderSomSkalForkastes) {
             aktivitetslogg.info("Behandlingene sier at denne _ikke_ kan forkastes. Men ettersom 'force'-flagget i anmodningen er satt forkastes perioden læll. Ta en god titt på at det ikke blir hengende noen utbetalinger her!")
@@ -1376,7 +1376,10 @@ internal class Vedtaksperiode private constructor(
         return vedtaksperioderSomSkalForkastes
     }
 
-    internal fun kanForkastes(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): Boolean {
+    internal fun kanForkastes(aktivitetslogg: IAktivitetslogg) =
+        arbeidsgiver.kanForkastes(this, aktivitetslogg)
+
+    internal fun tillaterBehandlingForkasting(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): Boolean {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (behandlinger.kanForkastes(vedtaksperioder.map { it.behandlinger })) {
             aktivitetsloggMedVedtaksperiodekontekst.info("Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet")
@@ -2052,7 +2055,7 @@ internal class Vedtaksperiode private constructor(
         val builder = UtkastTilVedtakBuilder(
             yrkesaktivitetssporing = arbeidsgiver.yrkesaktivitetssporing,
             vedtaksperiodeId = id,
-            kanForkastes = arbeidsgiver.kanForkastes(this, Aktivitetslogg()),
+            kanForkastes = kanForkastes(Aktivitetslogg()),
             erForlengelse = erForlengelse(),
             harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null,
             overlapperMedInfotrygd = person.erBehandletIInfotrygd(periode)
@@ -2657,7 +2660,7 @@ internal class Vedtaksperiode private constructor(
                 PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
                     yrkesaktivitetssporing = arbeidsgiver.yrkesaktivitetssporing,
                     vedtaksperiodeId = this.id,
-                    kanForkastes = arbeidsgiver.kanForkastes(this, Aktivitetslogg()),
+                    kanForkastes = kanForkastes(Aktivitetslogg()),
                     vedtaksperiodeFom = this.periode.start,
                     vedtaksperiodeTom = this.periode.endInclusive,
                     vedtaksperiodetilstand = tilstand.type.name,
@@ -2737,7 +2740,7 @@ internal class Vedtaksperiode private constructor(
     )
 
     private fun IAktivitetslogg.medFeilSomVarslerHvisNødvendig() =
-        when (!arbeidsgiver.kanForkastes(this@Vedtaksperiode, this)) {
+        when (!kanForkastes(this)) {
             true -> FunksjonelleFeilTilVarsler(this)
             false -> this
         }

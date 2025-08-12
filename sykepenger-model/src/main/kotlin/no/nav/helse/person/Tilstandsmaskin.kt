@@ -968,7 +968,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         vedtaksperiode.håndterDager(dager, aktivitetslogg)
 
         if (!aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
-        if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, aktivitetslogg)) return
+        if (!vedtaksperiode.kanForkastes(aktivitetslogg)) return
         vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
     }
 
@@ -1032,7 +1032,7 @@ internal data object RevurderingFeilet : Vedtaksperiodetilstand {
     }
 
     override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak? {
-        if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, Aktivitetslogg())) return null
+        if (vedtaksperiode.kanForkastes(Aktivitetslogg())) return null
         return HJELP.utenBegrunnelse
     }
 
@@ -1044,7 +1044,7 @@ internal data object RevurderingFeilet : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, Aktivitetslogg())) return aktivitetslogg.info(
+        if (!vedtaksperiode.kanForkastes(Aktivitetslogg())) return aktivitetslogg.info(
             "Gjenopptar ikke revurdering feilet fordi perioden har tidligere avsluttede utbetalinger. Må behandles manuelt vha annullering."
         )
         aktivitetslogg.funksjonellFeil(RV_RV_2)
