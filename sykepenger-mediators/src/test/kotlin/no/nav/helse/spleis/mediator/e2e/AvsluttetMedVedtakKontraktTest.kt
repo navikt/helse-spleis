@@ -103,6 +103,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
                 "omregnetÅrsinntekt": 540000.0,
                 "omregnetÅrsinntektTotalt": 540000.0,
                 "skjønnsfastsatt": 570000.0,
+                "sykepengegrunnlag": 561804.0,
                 "6G": 561804.0,
                 "arbeidsgivere": [
                   {

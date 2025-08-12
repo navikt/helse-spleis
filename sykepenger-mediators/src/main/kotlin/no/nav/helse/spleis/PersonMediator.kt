@@ -620,6 +620,8 @@ internal class PersonMediator(
                             "fastsatt" to fakta.fastsatt,
                             "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
                             "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt,
+                            "skjønnsfastsatt" to fakta.skjønnsfastsatt,
+                            "sykepengegrunnlag" to fakta.sykepengegrunnlag,
                             "6G" to fakta.`6G`,
                             "arbeidsgivere" to fakta.arbeidsgivere.map { arbeidsgiver ->
                                 mapOf(
@@ -628,8 +630,7 @@ internal class PersonMediator(
                                     "skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt,
                                     "inntektskilde" to arbeidsgiver.inntektskilde
                                 )
-                            },
-                            "skjønnsfastsatt" to fakta.skjønnsfastsatt
+                            }
                         )
 
                         is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> mapOf(
