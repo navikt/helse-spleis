@@ -252,6 +252,8 @@ internal class UtkastTilVedtakBuilder(
 
                 is FastsattEtterSkjønn -> mapOf(
                     "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
+                    "sykepengegrunnlag" to sykepengegrunnlag,
+                    "skjønnsfastsatt" to sykepengegrunnlagsfakta.skjønnsfastsatt,
                     "6G" to seksG,
                     "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
                     "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map {
@@ -261,8 +263,7 @@ internal class UtkastTilVedtakBuilder(
                             "skjønnsfastsatt" to it.skjønnsfastsatt,
                             "inntektskilde" to Inntektskilde.Saksbehandler,
                         )
-                    },
-                    "skjønnsfastsatt" to sykepengegrunnlagsfakta.skjønnsfastsatt
+                    }
                 )
             }
         )

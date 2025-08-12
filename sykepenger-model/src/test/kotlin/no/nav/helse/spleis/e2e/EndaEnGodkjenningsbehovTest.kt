@@ -620,6 +620,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 "omregnetÅrsinntektTotalt" to 480000.0,
                 "6G" to 561804.0,
                 "fastsatt" to "EtterSkjønn",
+                "skjønnsfastsatt" to 852000.0,
+                "sykepengegrunnlag" to 561804.0,
                 "arbeidsgivere" to listOf(
                     mapOf(
                         "arbeidsgiver" to a1,
@@ -633,8 +635,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                         "inntektskilde" to Inntektskilde.Saksbehandler,
                         "skjønnsfastsatt" to 360000.0
                     )
-                ),
-                "skjønnsfastsatt" to 852000.0
+                )
             )
         )
     }
