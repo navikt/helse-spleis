@@ -7,7 +7,7 @@ import no.nav.helse.dto.InntektbeløpDto
 data class SelvstendigFaktaavklartInntektInnDto(
     val id: UUID,
     val inntektsdata: InntektsdataInnDto,
-    val pensjonsgivendeInntekt: List<PensjonsgivendeInntektDto>,
+    val pensjonsgivendeInntekter: List<PensjonsgivendeInntektDto>,
     val anvendtGrunnbeløp: InntektbeløpDto.Årlig
 ) {
     data class PensjonsgivendeInntektDto(val årstall: Year, val beløp: InntektbeløpDto.Årlig)

@@ -980,7 +980,7 @@ fun SelvstendigFaktaavklartInntektUtDto.tilPersonData(): PersonData.Vilkårsgrun
     beløp = this.inntektsdata.beløp.månedligDouble.beløp,
     tidsstempel = this.inntektsdata.tidsstempel,
     skatteopplysninger = null,
-    pensjonsgivendeInntekter = this.pensjonsgivendeInntekt.map {
+    pensjonsgivendeInntekter = this.pensjonsgivendeInntekter.map {
         PersonData.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.InntektsopplysningData.PensjonsgivendeInntektData(
             årstall = it.årstall.value,
             årligBeløp = it.beløp.årlig.beløp

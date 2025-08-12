@@ -209,7 +209,7 @@ class Søknad(
                         beløp = SelvstendigFaktaavklartInntekt.beregnInntektsgrunnlag(avklartePensjonsgivendeInntekter, anvendtGrunnbeløp),
                         tidsstempel = LocalDateTime.now()
                     ),
-                    pensjonsgivendeInntekt = avklartePensjonsgivendeInntekter,
+                    pensjonsgivendeInntekter = avklartePensjonsgivendeInntekter,
                     anvendtGrunnbeløp = anvendtGrunnbeløp
                 )
             }

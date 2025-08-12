@@ -446,7 +446,7 @@ data class PersonData(
                     return SelvstendigFaktaavklartInntektInnDto(
                         id = this.id,
                         inntektsdata = inntektsdata,
-                        pensjonsgivendeInntekt = this.pensjonsgivendeInntekter!!.map { SelvstendigFaktaavklartInntektInnDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) },
+                        pensjonsgivendeInntekter = this.pensjonsgivendeInntekter!!.map { SelvstendigFaktaavklartInntektInnDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) },
                         anvendtGrunnbeløp = InntektbeløpDto.Årlig(this.anvendtÅrligGrunnbeløp!!),
                     )
                 }

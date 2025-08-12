@@ -122,7 +122,7 @@ internal class SpeilGenerasjonerBuilder(
             oppdatert = sisteEndring.tidsstempel,
             skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
             hendelser = dokumenterTilOgMedDenneGenerasjonen(vedtaksperiode, generasjon),
-            pensjonsgivendeInntekter = sisteEndring.faktaavklartInntekt?.pensjonsgivendeInntekt ?: emptyList(),
+            pensjonsgivendeInntekter = sisteEndring.faktaavklartInntekt?.pensjonsgivendeInntekter ?: emptyList(),
             periodetilstand = periodetilstand ?: generasjon.avsluttet?.let { Periodetilstand.IngenUtbetaling } ?: when (vedtaksperiode.tilstand) {
                 is VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> Periodetilstand.UtbetaltVenterPåAnnenPeriode
 
@@ -177,7 +177,7 @@ internal class SpeilGenerasjonerBuilder(
             periodevilkår = periodevilkår(sisteSykepengedag, utbetaling, alder, skjæringstidspunkt),
             vilkårsgrunnlagId = sisteEndring.vilkårsgrunnlagId!!,
             refusjonstidslinje = mapRefusjonstidslinje(arbeidsgiverUtDto.ubrukteRefusjonsopplysninger, generasjon.id, sisteEndring.refusjonstidslinje),
-            pensjonsgivendeInntekter = sisteEndring.faktaavklartInntekt?.pensjonsgivendeInntekt ?: emptyList(),
+            pensjonsgivendeInntekter = sisteEndring.faktaavklartInntekt?.pensjonsgivendeInntekter ?: emptyList(),
             annulleringskandidater = vedtaksperiode.annulleringskandidater
         )
     }
@@ -205,7 +205,7 @@ internal class SpeilGenerasjonerBuilder(
             periodetilstand = annulleringen.periodetilstand,
             hendelser = dokumenterTilOgMedDenneGenerasjonen(vedtaksperiode, generasjon),
             beregningId = annulleringen.id,
-            pensjonsgivendeInntekter = sisteEndring.faktaavklartInntekt?.pensjonsgivendeInntekt ?: emptyList(),
+            pensjonsgivendeInntekter = sisteEndring.faktaavklartInntekt?.pensjonsgivendeInntekter ?: emptyList(),
             utbetaling = Utbetaling(
                 annulleringen.id,
                 Utbetalingtype.ANNULLERING,

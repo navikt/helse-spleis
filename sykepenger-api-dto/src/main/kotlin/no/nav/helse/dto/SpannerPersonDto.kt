@@ -1716,7 +1716,7 @@ private fun SelvstendigFaktaavklartInntektUtDto.tilPersonData() =
         hendelseId = this.inntektsdata.hendelseId.id,
         beløp = this.inntektsdata.beløp.tilPersonData(),
         tidsstempel = this.inntektsdata.tidsstempel,
-        pensjonsgivendeInntekter = this.pensjonsgivendeInntekt.map {
+        pensjonsgivendeInntekter = this.pensjonsgivendeInntekter.map {
             PensjonsgivendeInntektData(
                 årstall = it.årstall,
                 beløp = it.beløp.tilPersonData()

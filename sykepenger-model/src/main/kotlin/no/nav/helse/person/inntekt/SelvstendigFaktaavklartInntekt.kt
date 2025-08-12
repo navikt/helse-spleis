@@ -12,17 +12,17 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 internal data class SelvstendigFaktaavklartInntekt(
     val id: UUID,
     val inntektsdata: Inntektsdata,
-    val pensjonsgivendeInntekt: List<PensjonsgivendeInntekt>,
+    val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>,
     val anvendtGrunnbeløp: Inntekt
 ) {
     init {
-        check(pensjonsgivendeInntekt.size <= 3) {
+        check(pensjonsgivendeInntekter.size <= 3) {
             "Selvstendig kan ikke ha mer enn tre inntekter"
         }
-        check(pensjonsgivendeInntekt.distinctBy { it.årstall }.size == pensjonsgivendeInntekt.size) {
+        check(pensjonsgivendeInntekter.distinctBy { it.årstall }.size == pensjonsgivendeInntekter.size) {
             "Selvstendig kan ikke ha flere inntekter med samme årstall"
         }
-        pensjonsgivendeInntekt
+        pensjonsgivendeInntekter
             .sortedBy { it.årstall }
             .also { sortertListe ->
                 sortertListe.forEachIndexed { index, pgi ->
@@ -39,26 +39,26 @@ internal data class SelvstendigFaktaavklartInntekt(
 
     internal fun funksjoneltLik(other: SelvstendigFaktaavklartInntekt): Boolean {
         if (!this.inntektsdata.funksjoneltLik(other.inntektsdata)) return false
-        return this.pensjonsgivendeInntekt == other.pensjonsgivendeInntekt
+        return this.pensjonsgivendeInntekter == other.pensjonsgivendeInntekter
     }
 
     internal fun dto() = SelvstendigFaktaavklartInntektUtDto(
         id = this.id,
         inntektsdata = this.inntektsdata.dto(),
-        pensjonsgivendeInntekt = this.pensjonsgivendeInntekt.map {
+        pensjonsgivendeInntekter = this.pensjonsgivendeInntekter.map {
             SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto(it.årstall, it.beløp.dto())
         },
         anvendtGrunnbeløp = this.anvendtGrunnbeløp.dto()
     )
 
     fun beregnInntektsgrunnlag(anvendtGrunnbeløp: Inntekt) =
-        Companion.beregnInntektsgrunnlag(pensjonsgivendeInntekt, anvendtGrunnbeløp)
+        Companion.beregnInntektsgrunnlag(pensjonsgivendeInntekter, anvendtGrunnbeløp)
 
     internal companion object {
         internal fun gjenopprett(dto: SelvstendigFaktaavklartInntektInnDto) = SelvstendigFaktaavklartInntekt(
             id = dto.id,
             inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata),
-            pensjonsgivendeInntekt = dto.pensjonsgivendeInntekt.map {
+            pensjonsgivendeInntekter = dto.pensjonsgivendeInntekter.map {
                 PensjonsgivendeInntekt(it.årstall, Inntekt.gjenopprett(it.beløp))
             },
             anvendtGrunnbeløp = Inntekt.gjenopprett(dto.anvendtGrunnbeløp)
