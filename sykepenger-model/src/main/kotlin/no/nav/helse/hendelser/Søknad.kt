@@ -133,7 +133,7 @@ class Søknad(
     }
 
     private fun validerPensjonsgivendeInntekter(aktivitetslogg: IAktivitetslogg) {
-        if (pensjonsgivendeInntekter?.size != null && pensjonsgivendeInntekter.size < 3) aktivitetslogg.varsel(Varselkode.RV_IV_12)
+        if (pensjonsgivendeInntekter?.size != null && pensjonsgivendeInntekter.size < 3) aktivitetslogg.funksjonellFeil(Varselkode.RV_IV_12)
     }
 
     private fun valider(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {

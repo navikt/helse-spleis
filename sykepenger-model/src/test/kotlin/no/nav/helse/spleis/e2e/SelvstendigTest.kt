@@ -23,7 +23,6 @@ import no.nav.helse.person.TilstandType.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.SELVSTENDIG_START
 import no.nav.helse.person.TilstandType.SELVSTENDIG_TIL_UTBETALING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -47,7 +46,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `selvstendigsøknad med færre inntekter enn 3 år gir varsel`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `selvstendigsøknad med færre inntekter enn 3 år kastes ut`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
             håndterSøknad(
                 Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
@@ -56,7 +55,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                     Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
                 )
             )
-            assertVarsel(Varselkode.RV_IV_12, 1.vedtaksperiode.filter())
+            assertFunksjonelleFeil(1.vedtaksperiode.filter())
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
         }
     }
 
