@@ -259,9 +259,12 @@ interface PersonObserver {
     data class Utbetalingsdag(
         val dato: LocalDate,
         val type: Dagtype,
+        val beløpTilArbeidsgiver: Int,
+        val beløpTilBruker: Int,
+        val sykdomsgrad: Int,
         val begrunnelser: List<EksternBegrunnelseDTO>?
     ) {
-        constructor(dato: LocalDate, type: Dagtype) : this(dato, type, null)
+        constructor(dato: LocalDate, type: Dagtype) : this(dato, type, 0, 0, 0, null)
 
         enum class Dagtype {
             ArbeidsgiverperiodeDag,
@@ -461,7 +464,12 @@ interface PersonObserver {
         val sykepengegrunnlag: Double,
         val utbetalingId: UUID,
         val vedtakFattetTidspunkt: LocalDateTime,
-        val sykepengegrunnlagsfakta: UtkastTilVedtakEvent.Sykepengegrunnlagsfakta
+        val sykepengegrunnlagsfakta: UtkastTilVedtakEvent.Sykepengegrunnlagsfakta,
+        val automatiskBehandling: Boolean,
+        val forbrukteSykedager: Int,
+        val gjenståendeSykedager: Int,
+        val foreløpigBeregnetSluttPåSykepenger: LocalDate,
+        val utbetalingsdager: List<Utbetalingsdag>,
     )
 
     data class OverstyringIgangsatt(

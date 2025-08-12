@@ -513,98 +513,170 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
             "utbetalingsdager": [{
                 "dato": "2018-01-03",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-04",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-05",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-06",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-07",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-08",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-09",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-10",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-11",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-12",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-13",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-14",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-15",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-16",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-17",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-18",
                 "type": "ArbeidsgiverperiodeDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-19",
                 "type": "NavDag",
+                "beløpTilArbeidsgiver": 1431,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-20",
                 "type": "NavHelgDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-21",
                 "type": "NavHelgDag",
+                "beløpTilArbeidsgiver": 0,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-22",
                 "type": "NavDag",
+                "beløpTilArbeidsgiver": 1431,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-23",
                 "type": "NavDag",
+                "beløpTilArbeidsgiver": 1431,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-24",
                 "type": "NavDag",
+                "beløpTilArbeidsgiver": 1431,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-25",
                 "type": "NavDag",
+                "beløpTilArbeidsgiver": 1431,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }, {
                 "dato": "2018-01-26",
                 "type": "NavDag",
+                "beløpTilArbeidsgiver": 1431,
+                "beløpTilBruker": 0,
+                "sykdomsgrad": 100,
                 "begrunnelser": null
             }],
             "fødselsnummer": "12029240045"

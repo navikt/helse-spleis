@@ -34,6 +34,11 @@ internal class UtkastTilVedtakBuilder(
     private val harPeriodeRettFør: Boolean,
     overlapperMedInfotrygd: Boolean
 ) {
+    private var automatiskBehandling by Delegates.notNull<Boolean>()
+    private var forbrukteSykedager by Delegates.notNull<Int>()
+    private var gjenståendeSykedager by Delegates.notNull<Int>()
+    private lateinit var foreløpigBeregnetSluttPåSykepenger: LocalDate
+    private lateinit var utbetalingsdager: List<PersonObserver.Utbetalingsdag>
     private val tags = mutableSetOf<Tag>()
 
     init {
@@ -80,7 +85,8 @@ internal class UtkastTilVedtakBuilder(
     private lateinit var vilkårsgrunnlagId: UUID
     internal fun vilkårsgrunnlagId(vilkårsgrunnlagId: UUID) = apply { this.vilkårsgrunnlagId = vilkårsgrunnlagId }
     private lateinit var utbetalingId: UUID
-    internal fun utbetaling(utbetaling: Utbetaling) = apply {
+
+    private fun utbetaling(utbetaling: Utbetaling) = apply {
         this.utbetalingId = utbetaling.id
 
         check(utbetaling.type == UTBETALING || utbetaling.type == REVURDERING) {
@@ -108,8 +114,28 @@ internal class UtkastTilVedtakBuilder(
         }
     }
 
-    internal fun utbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) = apply {
+    internal fun automatiskBehandling(erAutomatiskBehandlet: Boolean) = apply {
+        this.automatiskBehandling = erAutomatiskBehandlet
+    }
+
+    internal fun sykepengerettighet(forbrukteSykedager: Int, gjenståendeSykedager: Int, foreløpigBeregnetSluttPåSykepenger: LocalDate) = apply {
+        this.forbrukteSykedager = forbrukteSykedager
+        this.gjenståendeSykedager = gjenståendeSykedager
+        this.foreløpigBeregnetSluttPåSykepenger = foreløpigBeregnetSluttPåSykepenger
+    }
+
+    internal fun utbetalingsinformasjon(
+        utbetaling: Utbetaling,
+        utbetalingstidslinje: Utbetalingstidslinje,
+        sykdomstidslinje: Sykdomstidslinje,
+        refusjonstidslinje: Beløpstidslinje
+    ) = apply {
+        this.utbetaling(utbetaling)
+        this.sykdomstidslinje(sykdomstidslinje)
+        this.refusjonstidslinje(refusjonstidslinje)
+
         tags.add(utbetalingstidslinje.behandlingsresultat)
+        this.utbetalingsdager = UtbetalingsdagerBuilder(sykdomstidslinje, utbetalingstidslinje).result()
     }
 
     private val Utbetalingstidslinje.behandlingsresultat
@@ -124,11 +150,11 @@ internal class UtkastTilVedtakBuilder(
             }
         }
 
-    internal fun sykdomstidslinje(sykdomstidslinje: Sykdomstidslinje) = apply {
+    private fun sykdomstidslinje(sykdomstidslinje: Sykdomstidslinje) = apply {
         if (sykdomstidslinje.any { it is Dag.Feriedag }) tags.add(Tag.Ferie)
     }
 
-    internal fun refusjonstidslinje(refusjonstidslinje: Beløpstidslinje) = apply {
+    private fun refusjonstidslinje(refusjonstidslinje: Beløpstidslinje) = apply {
         if (refusjonstidslinje.sumOf { it.beløp.årlig } > 0) tags.add(Tag.ArbeidsgiverØnskerRefusjon)
     }
 
@@ -310,7 +336,12 @@ internal class UtkastTilVedtakBuilder(
                     `6G` = fakta.`6G`.toDesimaler,
                     arbeidsgivere = fakta.arbeidsgivere.map { it.copy(omregnetÅrsinntekt = it.omregnetÅrsinntekt.toDesimaler, skjønnsfastsatt = it.skjønnsfastsatt.toDesimaler) }
                 )
-            }
+            },
+            automatiskBehandling = automatiskBehandling,
+            forbrukteSykedager = forbrukteSykedager,
+            gjenståendeSykedager = gjenståendeSykedager,
+            foreløpigBeregnetSluttPåSykepenger = foreløpigBeregnetSluttPåSykepenger,
+            utbetalingsdager = utbetalingsdager
         )
     }
 

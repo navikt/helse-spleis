@@ -58,7 +58,7 @@ class Utbetaling private constructor(
     private var avsluttet: LocalDateTime?,
     private var oppdatert: LocalDateTime = tidsstempel
 ) : Aktivitetskontekst {
-
+    val automatiskBehandling = vurdering?.automatiskBehandling ?: false
     val view
         get() = UtbetalingView(
             id = id,
@@ -761,7 +761,7 @@ class Utbetaling private constructor(
         private val ident: String,
         private val epost: String,
         private val tidspunkt: LocalDateTime,
-        private val automatiskBehandling: Boolean
+        val automatiskBehandling: Boolean
     ) {
         fun annullert(utbetaling: Utbetaling) {
             utbetaling.observers.forEach {

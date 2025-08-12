@@ -31,36 +31,236 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
         @Language("JSON")
-        val forventet = """
-        {
-            "@event_name": "avsluttet_med_vedtak",
-            "vedtakFattetTidspunkt": "<timestamp>",
-            "vedtaksperiodeId": "<uuid>",
-            "behandlingId": "<uuid>",
-            "utbetalingId": "<uuid>",
-            "fødselsnummer": "$UNG_PERSON_FNR_2018",
-            "organisasjonsnummer": "$ORGNUMMER",
-            "yrkesaktivitetstype": "ARBEIDSTAKER",
-            "fom": "2018-01-03",
-            "tom": "2018-01-26",
-            "skjæringstidspunkt": "2018-01-03",
-            "sykepengegrunnlag": 372000.0,
-            "hendelser": ["$søknadId", "$inntektsmeldingId"],
-            "sykepengegrunnlagsfakta": {
-              "fastsatt": "EtterHovedregel",
-              "omregnetÅrsinntekt": 372000.0,
-              "omregnetÅrsinntektTotalt": 372000.0,
-              "sykepengegrunnlag": 372000.0,
-              "6G": 561804.0,
-              "arbeidsgivere": [
-                {
-                  "arbeidsgiver": "987654321",
-                  "omregnetÅrsinntekt": 372000.0,
-                  "inntektskilde": "Arbeidsgiver"
-                }
-              ]
-            }
-        }
+        val forventet = """{
+  "@event_name": "avsluttet_med_vedtak",
+  "vedtakFattetTidspunkt": "<timestamp>",
+  "vedtaksperiodeId": "<uuid>",
+  "behandlingId": "<uuid>",
+  "utbetalingId": "<uuid>",
+  "fødselsnummer": "$UNG_PERSON_FNR_2018",
+  "organisasjonsnummer": "$ORGNUMMER",
+  "yrkesaktivitetstype": "ARBEIDSTAKER",
+  "fom": "2018-01-03",
+  "tom": "2018-01-26",
+  "skjæringstidspunkt": "2018-01-03",
+  "sykepengegrunnlag": 372000.0,
+  "hendelser": [
+    "$søknadId",
+    "$inntektsmeldingId"
+  ],
+  "sykepengegrunnlagsfakta": {
+    "fastsatt": "EtterHovedregel",
+    "omregnetÅrsinntekt": 372000.0,
+    "omregnetÅrsinntektTotalt": 372000.0,
+    "sykepengegrunnlag": 372000.0,
+    "6G": 561804.0,
+    "arbeidsgivere": [
+      {
+        "arbeidsgiver": "987654321",
+        "omregnetÅrsinntekt": 372000.0,
+        "inntektskilde": "Arbeidsgiver"
+      }
+    ]
+  },
+  "automatiskBehandling": false,
+  "forbrukteSykedager": 6,
+  "gjenståendeSykedager": 242,
+  "foreløpigBeregnetSluttPåSykepenger": "2019-01-01",
+  "utbetalingsdager": [
+    {
+      "dato": "2018-01-03",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-04",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-05",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-06",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-07",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-08",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-09",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-10",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-11",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-12",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-13",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-14",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-15",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-16",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-17",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-18",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-19",
+      "type": "NavDag",
+      "beløpTilArbeidsgiver": 1431,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-20",
+      "type": "NavHelgDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-21",
+      "type": "NavHelgDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-22",
+      "type": "NavDag",
+      "beløpTilArbeidsgiver": 1431,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-23",
+      "type": "NavDag",
+      "beløpTilArbeidsgiver": 1431,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-24",
+      "type": "NavDag",
+      "beløpTilArbeidsgiver": 1431,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-25",
+      "type": "NavDag",
+      "beløpTilArbeidsgiver": 1431,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-26",
+      "type": "NavDag",
+      "beløpTilArbeidsgiver": 1431,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    }
+  ]
+}
         """
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_utbetalt")
     }
@@ -83,38 +283,238 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
         @Language("JSON")
-        val forventet = """
-        {
-            "@event_name": "avsluttet_med_vedtak",
-            "vedtakFattetTidspunkt": "<timestamp>",
-            "vedtaksperiodeId": "<uuid>",
-            "behandlingId": "<uuid>",
-            "utbetalingId": "<uuid>",
-            "fødselsnummer": "$UNG_PERSON_FNR_2018",
-            "organisasjonsnummer": "$ORGNUMMER",
-            "yrkesaktivitetstype": "ARBEIDSTAKER",
-            "fom": "2018-01-03",
-            "tom": "2018-01-26",
-            "skjæringstidspunkt": "2018-01-03",
-            "sykepengegrunnlag": 561804.0,
-            "hendelser": ["$søknadId", "$inntektsmeldingId"],
-            "sykepengegrunnlagsfakta": {
-                "fastsatt": "EtterSkjønn",
-                "omregnetÅrsinntekt": 540000.0,
-                "omregnetÅrsinntektTotalt": 540000.0,
-                "skjønnsfastsatt": 570000.0,
-                "sykepengegrunnlag": 561804.0,
-                "6G": 561804.0,
-                "arbeidsgivere": [
-                  {
-                    "arbeidsgiver": "987654321",
-                    "omregnetÅrsinntekt": 540000.0,
-                    "skjønnsfastsatt": 570000.0,
-                    "inntektskilde": "Saksbehandler"
-                  }
-                ]
-            }
-        }
+        val forventet = """{
+  "@event_name": "avsluttet_med_vedtak",
+  "vedtakFattetTidspunkt": "<timestamp>",
+  "vedtaksperiodeId": "<uuid>",
+  "behandlingId": "<uuid>",
+  "utbetalingId": "<uuid>",
+  "fødselsnummer": "$UNG_PERSON_FNR_2018",
+  "organisasjonsnummer": "$ORGNUMMER",
+  "yrkesaktivitetstype": "ARBEIDSTAKER",
+  "fom": "2018-01-03",
+  "tom": "2018-01-26",
+  "skjæringstidspunkt": "2018-01-03",
+  "sykepengegrunnlag": 561804.0,
+  "hendelser": [
+    "$søknadId",
+    "$inntektsmeldingId"
+  ],
+  "sykepengegrunnlagsfakta": {
+    "fastsatt": "EtterSkjønn",
+    "omregnetÅrsinntekt": 540000.0,
+    "omregnetÅrsinntektTotalt": 540000.0,
+    "skjønnsfastsatt": 570000.0,
+    "sykepengegrunnlag": 561804.0,
+    "6G": 561804.0,
+    "arbeidsgivere": [
+      {
+        "arbeidsgiver": "987654321",
+        "omregnetÅrsinntekt": 540000.0,
+        "skjønnsfastsatt": 570000.0,
+        "inntektskilde": "Saksbehandler"
+      }
+    ]
+  },
+  "automatiskBehandling": false,
+  "forbrukteSykedager": 6,
+  "gjenståendeSykedager": 242,
+  "foreløpigBeregnetSluttPåSykepenger": "2019-01-01",
+  "utbetalingsdager": [
+    {
+      "dato": "2018-01-03",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-04",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-05",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-06",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-07",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-08",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-09",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-10",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-11",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-12",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-13",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-14",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-15",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-16",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-17",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-18",
+      "type": "ArbeidsgiverperiodeDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-19",
+      "type": "NavDag",
+      "beløpTilArbeidsgiver": 2077,
+      "beløpTilBruker": 84,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-20",
+      "type": "NavHelgDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-21",
+      "type": "NavHelgDag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-22",
+      "type": "NavDag",
+      "beløpTilArbeidsgiver": 2077,
+      "beløpTilBruker": 84,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-23",
+      "type": "NavDag",
+      "beløpTilArbeidsgiver": 2077,
+      "beløpTilBruker": 84,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-24",
+      "type": "NavDag",
+      "beløpTilArbeidsgiver": 2077,
+      "beløpTilBruker": 84,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-25",
+      "type": "NavDag",
+      "beløpTilArbeidsgiver": 2077,
+      "beløpTilBruker": 84,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-26",
+      "type": "NavDag",
+      "beløpTilArbeidsgiver": 2077,
+      "beløpTilBruker": 84,
+      "sykdomsgrad": 100,
+      "begrunnelser": null
+    }
+  ]
+}
         """
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_utbetalt")
     }
@@ -171,36 +571,83 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         sendYtelser(1)
         sendUtbetalingsgodkjenning(1)
         @Language("JSON")
-        val forventet = """
-        {
-            "@event_name": "avsluttet_med_vedtak",
-            "vedtakFattetTidspunkt": "<timestamp>",
-            "vedtaksperiodeId": "<uuid>",
-            "behandlingId": "<uuid>",
-            "utbetalingId": "<uuid>",
-            "fødselsnummer": "$UNG_PERSON_FNR_2018",
-            "organisasjonsnummer": "$ORGNUMMER",
-            "yrkesaktivitetstype": "ARBEIDSTAKER",
-            "fom" : "2018-01-27",
-            "tom" : "2018-01-31",
-            "skjæringstidspunkt": "2018-01-03",
-            "sykepengegrunnlag": 372000.0,
-            "hendelser": ["$søknadId"],
-            "sykepengegrunnlagsfakta": {
-              "fastsatt": "EtterHovedregel",
-              "omregnetÅrsinntekt": 372000.0,
-              "omregnetÅrsinntektTotalt": 372000.0,
-              "sykepengegrunnlag": 372000.0,
-              "6G": 561804.0,
-              "arbeidsgivere": [
-                {
-                  "arbeidsgiver": "987654321",
-                  "omregnetÅrsinntekt": 372000.0,
-                  "inntektskilde": "Arbeidsgiver"
-                }
-              ]
-            }
-        }
+        val forventet = """{
+  "@event_name": "avsluttet_med_vedtak",
+  "vedtakFattetTidspunkt": "<timestamp>",
+  "vedtaksperiodeId": "<uuid>",
+  "behandlingId": "<uuid>",
+  "utbetalingId": "<uuid>",
+  "fødselsnummer": "$UNG_PERSON_FNR_2018",
+  "organisasjonsnummer": "$ORGNUMMER",
+  "yrkesaktivitetstype": "ARBEIDSTAKER",
+  "fom": "2018-01-27",
+  "tom": "2018-01-31",
+  "skjæringstidspunkt": "2018-01-03",
+  "sykepengegrunnlag": 372000.0,
+  "hendelser": [
+    "$søknadId"
+  ],
+  "sykepengegrunnlagsfakta": {
+    "fastsatt": "EtterHovedregel",
+    "omregnetÅrsinntekt": 372000.0,
+    "omregnetÅrsinntektTotalt": 372000.0,
+    "sykepengegrunnlag": 372000.0,
+    "6G": 561804.0,
+    "arbeidsgivere": [
+      {
+        "arbeidsgiver": "987654321",
+        "omregnetÅrsinntekt": 372000.0,
+        "inntektskilde": "Arbeidsgiver"
+      }
+    ]
+  },
+  "automatiskBehandling": false,
+  "forbrukteSykedager": 6,
+  "gjenståendeSykedager": 242,
+  "foreløpigBeregnetSluttPåSykepenger": "2019-01-04",
+  "utbetalingsdager": [
+    {
+      "dato": "2018-01-27",
+      "type": "Feriedag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 0,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-28",
+      "type": "Feriedag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 0,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-29",
+      "type": "Feriedag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 0,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-30",
+      "type": "Feriedag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 0,
+      "begrunnelser": null
+    },
+    {
+      "dato": "2018-01-31",
+      "type": "Feriedag",
+      "beløpTilArbeidsgiver": 0,
+      "beløpTilBruker": 0,
+      "sykdomsgrad": 0,
+      "begrunnelser": null
+    }
+  ]
+}
         """
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_uten_utbetaling")
     }

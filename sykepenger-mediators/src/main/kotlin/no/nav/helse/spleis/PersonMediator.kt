@@ -378,6 +378,9 @@ internal class PersonMediator(
                 Dagtype.AndreYtelser -> "AndreYtelser"
                 Dagtype.Venteperiodedag -> "Venteperiodedag"
             },
+            "beløpTilArbeidsgiver" to this.beløpTilArbeidsgiver,
+            "beløpTilBruker" to this.beløpTilBruker,
+            "sykdomsgrad" to this.sykdomsgrad,
             "begrunnelser" to this.begrunnelser?.map {
                 when (it) {
                     EksternBegrunnelseDTO.SykepengedagerOppbrukt -> "SykepengedagerOppbrukt"
@@ -638,6 +641,13 @@ internal class PersonMediator(
                             "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
                             "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt
                         )
+                    },
+                    "automatiskBehandling" to event.automatiskBehandling,
+                    "forbrukteSykedager" to event.forbrukteSykedager,
+                    "gjenståendeSykedager" to event.gjenståendeSykedager,
+                    "foreløpigBeregnetSluttPåSykepenger" to event.foreløpigBeregnetSluttPåSykepenger,
+                    "utbetalingsdager" to event.utbetalingsdager.map {
+                        it.tilJsonMap()
                     }
                 )
             )
