@@ -61,16 +61,16 @@ jobs:
                 RESOURCE: deploy/dev-avstemming-job.yml
                 IMAGE: ${{ needs.build.outputs.image }}
 
-#  deployProd:
-#      name: deploy to prod
-#      needs: build
-#      runs-on: ubuntu-latest
-#      permissions:
-#        id-token: write
-#      steps:
-#          - uses: actions/checkout@v4
-#          - uses: nais/deploy/actions/deploy@v2
-#            env:
-#                CLUSTER: prod-gcp
-#                RESOURCE: deploy/prod-avstemming-job.yml
-#                IMAGE: ${{ needs.build.outputs.image }}
+  deployProd:
+      name: deploy to prod
+      needs: build
+      runs-on: ubuntu-latest
+      permissions:
+        id-token: write
+      steps:
+          - uses: actions/checkout@v4
+          - uses: nais/deploy/actions/deploy@v2
+            env:
+                CLUSTER: prod-gcp
+                RESOURCE: deploy/prod-avstemming-job.yml
+                IMAGE: ${{ needs.build.outputs.image }}
