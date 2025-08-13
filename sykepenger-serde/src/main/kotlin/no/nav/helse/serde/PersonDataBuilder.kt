@@ -400,8 +400,8 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
         VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING -> SELVSTENDIG_AVVENTER_GODKJENNING
 
         VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING -> SELVSTENDIG_TIL_UTBETALING
-        VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET -> SELVSTENDIG_TIL_INFOTRYGD
-        VedtaksperiodetilstandDto.SELVSTENDIG_TIL_INFOTRYGD -> SELVSTENDIG_AVSLUTTET
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET -> SELVSTENDIG_AVSLUTTET
+        VedtaksperiodetilstandDto.SELVSTENDIG_TIL_INFOTRYGD -> SELVSTENDIG_TIL_INFOTRYGD
 
     },
     skjæringstidspunkt = skjæringstidspunkt,
