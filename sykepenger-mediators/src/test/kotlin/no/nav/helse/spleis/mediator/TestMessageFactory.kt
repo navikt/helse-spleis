@@ -18,6 +18,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.MerknadDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.NaringsdrivendeInntektDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.NaringsdrivendeInntektsAarDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SelvstendigNaringsdrivendeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
@@ -405,7 +406,6 @@ internal class TestMessageFactory(
         )
     }
 
-    //TODO Ta i bruk venteperiode når flex oppdaterer sin datastruktur for selvstendig næringsdrivende
     private fun selvstendigNæringsdrivende(venteperiode: HendelsePeriode): SelvstendigNaringsdrivendeDTO = SelvstendigNaringsdrivendeDTO(
         roller = emptyList(),
         naringsdrivendeInntekt = NaringsdrivendeInntektDTO(
@@ -439,7 +439,8 @@ internal class TestMessageFactory(
                     )
                 )
             )
-        )
+        ),
+        naringsdrivendeVenteperiode = PeriodeDTO(fom = venteperiode.start, tom = venteperiode.endInclusive)
     )
 
     fun lagSøknadArbeidsledig(
@@ -1137,12 +1138,14 @@ internal class TestMessageFactory(
         utbetalingId: UUID,
         fagsystemId: String = "fagsystemid",
         fagområde: String = "SPREF",
-        orgnummer: String = organisasjonsnummer
+        orgnummer: String = organisasjonsnummer,
+        yrkesaktivitetstype: String = "ARBEIDSTAKER"
     ): Pair<String, String> {
         return lagBehovMedLøsning(
             behov = listOf("Simulering"),
             vedtaksperiodeId = vedtaksperiodeId,
             orgnummer = orgnummer,
+            yrkesaktivitetstype = yrkesaktivitetstype,
             løsninger = mapOf(
                 "Simulering" to mapOf(
                     "fagsystemId" to fagsystemId,
@@ -1240,11 +1243,13 @@ internal class TestMessageFactory(
         automatiskBehandling: Boolean,
         makstidOppnådd: Boolean,
         godkjenttidspunkt: LocalDateTime,
-        orgnummer: String = organisasjonsnummer
+        orgnummer: String = organisasjonsnummer,
+        yrkesaktivitetstype: String = "ARBEIDSTAKER"
     ): Pair<String, String> {
         return lagBehovMedLøsning(
             behov = listOf("Godkjenning"),
             orgnummer = orgnummer,
+            yrkesaktivitetstype = yrkesaktivitetstype,
             vedtaksperiodeId = vedtaksperiodeId,
             løsninger = mapOf(
                 "Godkjenning" to mapOf(
@@ -1345,10 +1350,12 @@ internal class TestMessageFactory(
         utbetalingId: String,
         utbetalingOK: Boolean = true,
         avstemmingsnøkkel: Long = 123456L,
-        overføringstidspunkt: LocalDateTime = LocalDateTime.now()
+        overføringstidspunkt: LocalDateTime = LocalDateTime.now(),
+        yrkesaktivitetstype: String = "ARBEIDSTAKER"
     ): Pair<String, String> {
         return lagBehovMedLøsning(
             behov = listOf("Utbetaling"),
+            yrkesaktivitetstype = yrkesaktivitetstype,
             vedtaksperiodeId = null,
             løsninger = mapOf(
                 "Utbetaling" to mapOf(

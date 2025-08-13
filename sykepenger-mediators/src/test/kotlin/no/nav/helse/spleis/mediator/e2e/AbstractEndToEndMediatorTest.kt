@@ -435,9 +435,11 @@ internal abstract class AbstractEndToEndMediatorTest {
         orgnummer: String = ORGNUMMER
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Godkjenning))
+        val yrkesaktivitetstype = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Godkjenning).path("yrkesaktivitetstype").asText()
         val (_, message) = meldingsfabrikk.lagUtbetalingsgodkjenning(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             orgnummer = orgnummer,
+            yrkesaktivitetstype = yrkesaktivitetstype,
             utbetalingId = UUID.fromString(testRapid.inspektør.etterspurteBehov(Godkjenning).path("utbetalingId").asText()),
             utbetalingGodkjent = godkjent,
             saksbehandlerIdent = saksbehandlerIdent,
@@ -447,6 +449,18 @@ internal abstract class AbstractEndToEndMediatorTest {
             godkjenttidspunkt = godkjenttidspunkt
         )
         testRapid.sendTestMessage(message)
+    }
+
+    protected fun sendUtbetalingsgodkjenningSelvstendig(
+        vedtaksperiodeIndeks: Int,
+        godkjent: Boolean = true,
+        saksbehandlerIdent: String = "O123456",
+        saksbehandlerEpost: String = "jan@banan.no",
+        automatiskBehandling: Boolean = false,
+        makstidOppnådd: Boolean = false,
+        godkjenttidspunkt: LocalDateTime = LocalDateTime.now()
+    ) {
+        sendUtbetalingsgodkjenning(vedtaksperiodeIndeks, godkjent, saksbehandlerIdent, saksbehandlerEpost, automatiskBehandling, makstidOppnådd, godkjenttidspunkt, "SELVSTENDIG")
     }
 
     protected fun sendYtelser(
@@ -482,6 +496,19 @@ internal abstract class AbstractEndToEndMediatorTest {
             yrkesaktivitetstype = yrkesaktivitetstype
         )
         testRapid.sendTestMessage(message)
+    }
+
+    protected fun sendYtelserSelvstendig(
+        vedtaksperiodeIndeks: Int,
+        pleiepenger: List<PleiepengerTestdata> = emptyList(),
+        omsorgspenger: List<OmsorgspengerTestdata> = emptyList(),
+        opplæringspenger: List<OpplæringspengerTestdata> = emptyList(),
+        institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
+        arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList(),
+        dagpenger: List<DagpengerTestdata> = emptyList(),
+        inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
+    ) {
+        sendYtelser(vedtaksperiodeIndeks, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, dagpenger, inntekterForBeregning, "SELVSTENDIG")
     }
 
     private fun sendUtbetalingshistorikk(
@@ -527,6 +554,28 @@ internal abstract class AbstractEndToEndMediatorTest {
             orgnummer = orgnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag
+        )
+        testRapid.sendTestMessage(message)
+    }
+
+    protected fun sendVilkårsgrunnlagSelvstendig(
+        vedtaksperiodeIndeks: Int,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
+    ) {
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsforholdV2))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag))
+        val skjæringstidspunktFraBehov = testRapid.inspektør.etterspurteBehov(Medlemskap).path("Medlemskap").path("skjæringstidspunkt").asLocalDate()
+        val yrkesaktivitetstypeFraBehov = testRapid.inspektør.etterspurteBehov(Medlemskap).path("yrkesaktivitetstype").asText()
+        val (_, message) = meldingsfabrikk.lagVilkårsgrunnlag(
+            vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+            skjæringstidspunkt = skjæringstidspunktFraBehov,
+            inntekterForSykepengegrunnlag = emptyList(),
+            inntekterForOpptjeningsvurdering = emptyList(),
+            arbeidsforhold = emptyList(),
+            medlemskapstatus = medlemskapstatus,
+            orgnummer = "SELVSTENDIG",
+            yrkesaktivitetstype = yrkesaktivitetstypeFraBehov
         )
         testRapid.sendTestMessage(message)
     }
@@ -585,10 +634,12 @@ internal abstract class AbstractEndToEndMediatorTest {
     ) {
         val fagområder = mutableSetOf<String>()
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Simulering))
+        val yrkesaktivitetstype = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Simulering).path("yrkesaktivitetstype").asText()
         testRapid.inspektør.alleEtterspurteBehov(Simulering).forEach { behov ->
             val (_, message) = meldingsfabrikk.lagSimulering(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
                 orgnummer = orgnummer,
+                yrkesaktivitetstype = yrkesaktivitetstype,
                 status = status,
                 utbetalingId = UUID.fromString(behov.path("utbetalingId").asText()),
                 fagsystemId = behov.path("Simulering").path("fagsystemId").asText(),
@@ -599,6 +650,14 @@ internal abstract class AbstractEndToEndMediatorTest {
             testRapid.sendTestMessage(message)
         }
         assertEquals(forventedeFagområder, fagområder)
+    }
+
+    protected fun sendSimuleringSelvstendig(
+        vedtaksperiodeIndeks: Int,
+        status: SimuleringMessage.Simuleringstatus = SimuleringMessage.Simuleringstatus.OK,
+        forventedeFagområder: Set<String> = setOf("SP")
+    ) {
+        sendSimulering(vedtaksperiodeIndeks, status, forventedeFagområder, "SELVSTENDIG")
     }
 
     protected fun sendEtterbetaling(
@@ -630,7 +689,8 @@ internal abstract class AbstractEndToEndMediatorTest {
             val (_, message) = meldingsfabrikk.lagUtbetaling(
                 fagsystemId = behov.path("fagsystemId").asText(),
                 utbetalingId = behov.path("utbetalingId").asText(),
-                utbetalingOK = utbetalingOK
+                utbetalingOK = utbetalingOK,
+                yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText()
             )
             testRapid.sendTestMessage(message)
         }
