@@ -48,7 +48,7 @@ internal data class SelvstendigInntektsopplysning(
                 arbeidsgiver = "SELVSTENDIG",
                 omregnedeÅrsinntekt = this.inntektsgrunnlag.beløp,
                 skjønnsfastsatt = this.skjønnsmessigFastsatt?.inntektsdata?.beløp,
-                inntektskilde = if (this.skjønnsmessigFastsatt != null) Inntektskilde.Saksbehandler else Inntektskilde.AOrdningen
+                inntektskilde = if (this.skjønnsmessigFastsatt != null) Inntektskilde.Saksbehandler else Inntektskilde.Sigrun
             )
 
         private fun SelvstendigInntektsopplysning.harFunksjonellEndring(other: SelvstendigInntektsopplysning): Boolean {
