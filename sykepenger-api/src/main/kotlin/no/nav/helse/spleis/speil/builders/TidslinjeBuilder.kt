@@ -228,7 +228,7 @@ internal class UtbetalingstidslinjeBuilder(private val dto: Utbetalingstidslinje
                     dato = it.dato
                 )
 
-                is UtbetalingsdagUtDto.VenteperiodedagDto -> UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag, dato = it.dato)
+                is UtbetalingsdagUtDto.VenteperiodedagDto -> UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.Venteperiodedag, dato = it.dato)
             }
         }
     }
