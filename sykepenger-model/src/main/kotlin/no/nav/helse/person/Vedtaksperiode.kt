@@ -275,16 +275,7 @@ internal class Vedtaksperiode private constructor(
             AvventerGodkjenning,
             AvventerHistorikk,
             AvventerSimulering,
-            AvventerVilkårsprøving -> {
-                val nesteTilstand = when (tilstand) {
-                    AvventerBlokkerendePeriode,
-                    AvventerInfotrygdHistorikk,
-                    AvventerInntektsmelding -> null
-
-                    else -> AvventerBlokkerendePeriode
-                }
-                håndterOverlappendeSøknad(søknad, aktivitetsloggMedVedtaksperiodekontekst, nesteTilstand)
-            }
+            AvventerVilkårsprøving -> håndterOverlappendeSøknad(søknad, aktivitetsloggMedVedtaksperiodekontekst)
 
             AvsluttetUtenUtbetaling,
             Avsluttet,
@@ -313,15 +304,7 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerInfotrygdHistorikk,
             SelvstendigAvventerSimulering,
             SelvstendigAvventerVilkårsprøving,
-            SelvstendigTilUtbetaling -> {
-                val nesteTilstand = when (tilstand) {
-                    SelvstendigAvventerBlokkerendePeriode,
-                    SelvstendigAvventerInfotrygdHistorikk -> null
-
-                    else -> SelvstendigAvventerBlokkerendePeriode
-                }
-                håndterOverlappendeSøknad(søknad, aktivitetsloggMedVedtaksperiodekontekst, nesteTilstand)
-            }
+            SelvstendigTilUtbetaling -> håndterOverlappendeSøknad(søknad, aktivitetsloggMedVedtaksperiodekontekst)
         }
         if (aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeilEllerVerre()) forkast(søknad, aktivitetsloggMedVedtaksperiodekontekst)
         return Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode)
@@ -1542,12 +1525,11 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterOverlappendeSøknad(
         søknad: Søknad,
-        aktivitetslogg: IAktivitetslogg,
-        nesteTilstand: Vedtaksperiodetilstand? = null
+        aktivitetslogg: IAktivitetslogg
     ) {
         if (søknad.delvisOverlappende) return aktivitetslogg.funksjonellFeil(`Mottatt søknad som delvis overlapper`)
         aktivitetslogg.info("Håndterer overlappende søknad")
-        håndterSøknad(søknad, aktivitetslogg) { nesteTilstand }
+        håndterSøknad(søknad, aktivitetslogg)
     }
 
     private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad, aktivitetslogg: IAktivitetslogg) {

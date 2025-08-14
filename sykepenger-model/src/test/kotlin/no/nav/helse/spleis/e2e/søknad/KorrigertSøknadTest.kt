@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.søknad
 
+import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -12,6 +13,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.november
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -36,9 +38,12 @@ import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
+import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -60,6 +65,48 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class KorrigertSøknadTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Avventer inntektsmelding når korrigerende søknad flytter skjæringstidspunkt - brukt inntekter fra a-ordningen`() {
+        nyttVedtak(januar)
+        forlengVedtak(februar)
+        forlengVedtak(mars)
+
+        håndterSøknad(10.april til 30.april)
+        håndterPåminnelse(
+            4.vedtaksperiode,
+            AVVENTER_INNTEKTSMELDING,
+            tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
+            nå = 10.februar(2025).atStartOfDay()
+        )
+        håndterSykepengegrunnlagForArbeidsgiver(10.april)
+        håndterVilkårsgrunnlag(4.vedtaksperiode)
+        håndterYtelser(4.vedtaksperiode)
+        håndterSimulering(4.vedtaksperiode)
+        assertVarsel(Varselkode.RV_IV_10, 4.vedtaksperiode.filter())
+        assertSisteTilstand(4.vedtaksperiode, AVVENTER_GODKJENNING)
+
+        håndterSøknad(Sykdom(10.april, 30.april, 100.prosent), Ferie(10.april, 10.april))
+        assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+    }
+
+    @Test
+    fun `Gjenbruker inntekt når korrigerende søknad flytter skjæringstidspunkt - fått IM for originalt skjæringstidspunkt`() {
+        nyttVedtak(januar)
+        forlengVedtak(februar)
+        forlengVedtak(mars)
+
+        håndterSøknad(10.april til 30.april)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.april)
+        håndterVilkårsgrunnlag(4.vedtaksperiode)
+        håndterYtelser(4.vedtaksperiode)
+        håndterSimulering(4.vedtaksperiode)
+
+        assertSisteTilstand(4.vedtaksperiode, AVVENTER_GODKJENNING)
+
+        håndterSøknad(Sykdom(10.april, 30.april, 100.prosent), Ferie(10.april, 10.april))
+        assertSisteTilstand(4.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+    }
 
     @Test
     fun `korrigerer med arbeid gjenopptatt etter utbetalt`() {
