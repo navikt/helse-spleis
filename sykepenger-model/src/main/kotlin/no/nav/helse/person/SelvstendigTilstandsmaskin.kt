@@ -210,7 +210,7 @@ internal data object SelvstendigAvventerGodkjenning : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.håndterOverstyringIgangsattFørstegangsvurdering(revurdering, aktivitetslogg)
+        vedtaksperiode.håndterSelvstendigOverstyringIgangsattFørstegangsvurdering(revurdering, aktivitetslogg)
     }
 }
 

@@ -3,7 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
@@ -332,7 +332,14 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
             AvventerVilkårsprøvingRevurdering,
-            TilUtbetaling -> {
+            TilUtbetaling,
+
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving -> {
                 val dagerNavOvertarAnsvar = behandlinger.dagerNavOvertarAnsvar
                 oppdaterHistorikk(hendelse.metadata.behandlingkilde, overstyrTidslinje(hendelse.metadata.meldingsreferanseId), hendelse.sykdomstidslinje, aktivitetsloggMedVedtaksperiodekontekst, hendelse.dagerNavOvertarAnsvar(dagerNavOvertarAnsvar)) {
                     // ingen validering å gjøre :(
@@ -349,12 +356,6 @@ internal class Vedtaksperiode private constructor(
             TilInfotrygd -> error("Kan ikke overstyre tidslinjen i $tilstand")
 
             SelvstendigAvsluttet,
-            SelvstendigAvventerBlokkerendePeriode,
-            SelvstendigAvventerGodkjenning,
-            SelvstendigAvventerHistorikk,
-            SelvstendigAvventerInfotrygdHistorikk,
-            SelvstendigAvventerSimulering,
-            SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
             SelvstendigTilInfotrygd,
             SelvstendigTilUtbetaling -> error("Kan ikke overstyre tidslinjen i $tilstand")
@@ -2381,6 +2382,15 @@ internal class Vedtaksperiode private constructor(
         behandlinger.forkastUtbetaling(aktivitetslogg)
         if (måInnhenteInntektEllerRefusjon()) return tilstand(aktivitetslogg, AvventerInntektsmelding)
         tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
+    }
+
+    internal fun håndterSelvstendigOverstyringIgangsattFørstegangsvurdering(
+        revurdering: Revurderingseventyr,
+        aktivitetslogg: IAktivitetslogg
+    ) {
+        revurdering.inngåSomEndring(this, aktivitetslogg)
+        behandlinger.forkastUtbetaling(aktivitetslogg)
+        tilstand(aktivitetslogg, SelvstendigAvventerBlokkerendePeriode)
     }
 
     internal fun sikreRefusjonsopplysningerHvisTomt(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {

@@ -7,6 +7,8 @@ import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.SubsumsjonInspektør
@@ -32,6 +34,31 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SelvstendigTest : AbstractDslTest() {
+
+    @Test
+    fun `Overstyrer tidslinje i avventer godkjenning`() = Toggle.SelvstendigNæringsdrivende.enable {
+        selvstendig {
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig),
+                ),
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+
+            håndterOverstyrTidslinje((25.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+            assertEquals("VVVVVVV VVVVVVV VVSSSHH SSSYYYY YYY", inspektør(1.vedtaksperiode).sykdomstidslinje.toShortString())
+        }
+    }
 
     @Test
     fun `venteperiode fra søknad lagres på behandlingen`() = Toggle.SelvstendigNæringsdrivende.enable {

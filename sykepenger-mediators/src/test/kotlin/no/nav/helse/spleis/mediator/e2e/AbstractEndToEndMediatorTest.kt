@@ -711,6 +711,11 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(message)
     }
 
+    protected fun sendOverstyringTidslinjeSelvstendig(dager: List<ManuellOverskrivingDag>) {
+        val (_, message) = meldingsfabrikk.lagOverstyringTidslinjeSelvstendig(dager)
+        testRapid.sendTestMessage(message)
+    }
+
     protected fun sendOverstyringArbeidsforhold(
         skjæringstidspunkt: LocalDate,
         overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>

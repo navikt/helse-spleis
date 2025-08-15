@@ -1415,6 +1415,22 @@ internal class TestMessageFactory(
         ))
     }
 
+    fun lagOverstyringTidslinjeSelvstendig(dager: List<ManuellOverskrivingDag>): Pair<String, String> {
+        return nyHendelse(
+            "overstyr_tidslinje", mutableMapOf(
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to "SELVSTENDIG",
+            "yrkesaktivitetstype" to "SELVSTENDIG",
+            "dager" to dager.map {
+                mapOf(
+                    "dato" to it.dato,
+                    "type" to it.type,
+                    "grad" to it.grad
+                )
+            }
+        ))
+    }
+
     fun lagOverstyrArbeidsforhold(
         skjæringstidspunkt: LocalDate,
         overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>

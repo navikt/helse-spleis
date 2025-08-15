@@ -22,6 +22,7 @@ internal class OverstyrTidlinjeRiver(
             interestedIn("grad", "tom")
         }
         message.require("dager") { require(!it.isEmpty) }
+        message.interestedIn("yrkesaktivitetstype")
     }
 
     override fun createMessage(packet: JsonMessage) = OverstyrTidslinjeMessage(
