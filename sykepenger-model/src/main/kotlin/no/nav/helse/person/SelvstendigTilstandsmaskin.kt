@@ -127,7 +127,7 @@ internal data object SelvstendigAvventerVilkårsprøving : Vedtaksperiodetilstan
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.håndterOverstyringIgangsattFørstegangsvurdering(revurdering, aktivitetslogg)
+        vedtaksperiode.håndterSelvstendigOverstyringIgangsattFørstegangsvurdering(revurdering, aktivitetslogg)
     }
 }
 
@@ -152,7 +152,7 @@ internal data object SelvstendigAvventerHistorikk : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.håndterOverstyringIgangsattFørstegangsvurdering(revurdering, aktivitetslogg)
+        vedtaksperiode.håndterSelvstendigOverstyringIgangsattFørstegangsvurdering(revurdering, aktivitetslogg)
     }
 }
 
@@ -171,7 +171,7 @@ internal data object SelvstendigAvventerSimulering : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.håndterOverstyringIgangsattFørstegangsvurdering(revurdering, aktivitetslogg)
+        vedtaksperiode.håndterSelvstendigOverstyringIgangsattFørstegangsvurdering(revurdering, aktivitetslogg)
     }
 
     override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
@@ -223,7 +223,7 @@ internal data object SelvstendigTilUtbetaling : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.håndterOverstyringIgangsattRevurdering(revurdering, aktivitetslogg)
+        error("Kan ikke håndtere overstyring i tilstand $this for vedtaksperiode ${vedtaksperiode.id}")
     }
 
     override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
@@ -274,6 +274,7 @@ internal data object SelvstendigAvsluttet : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
+        error("Kan ikke håndtere overstyring i tilstand $this for vedtaksperiode ${vedtaksperiode.id}")
     }
 }
 
