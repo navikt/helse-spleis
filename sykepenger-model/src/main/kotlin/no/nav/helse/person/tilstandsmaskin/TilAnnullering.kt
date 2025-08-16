@@ -1,0 +1,55 @@
+package no.nav.helse.person.tilstandsmaskin
+
+import no.nav.helse.hendelser.AnnullerTomUtbetaling
+import no.nav.helse.hendelser.Hendelse
+import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.Venteårsak
+import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import org.slf4j.LoggerFactory
+
+internal data object TilAnnullering : Vedtaksperiodetilstand {
+    override val type = TilstandType.TIL_ANNULLERING
+    val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+    override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+        if (vedtaksperiode.behandlinger.sisteUtbetalingSkalOverføres()) {
+            vedtaksperiode.behandlinger.overførSisteUtbetaling(aktivitetslogg)
+        } else {
+            vedtaksperiode.behandlinger.avsluttTomAnnullering(aktivitetslogg)
+            if (!vedtaksperiode.behandlinger.erAvsluttet()) return
+            vedtaksperiode.forkast(AnnullerTomUtbetaling(vedtaksperiode.arbeidsgiver.yrkesaktivitetssporing), aktivitetslogg)
+        }
+    }
+
+    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = Venteårsak.Hva.UTBETALING.utenBegrunnelse
+
+    override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
+        error("Kan ikke igangsette overstyring i TilAnnullering-tilstanden")
+    }
+
+    override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+        aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående annullering")
+    }
+
+    override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) =
+        vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
+
+    override fun håndter(
+        vedtaksperiode: Vedtaksperiode,
+        hendelse: UtbetalingHendelse,
+        aktivitetslogg: IAktivitetslogg
+    ) {
+        vedtaksperiode.håndterUtbetalingHendelse(aktivitetslogg)
+        if (!vedtaksperiode.behandlinger.erAvsluttet()) return
+        vedtaksperiode.forkast(hendelse, aktivitetslogg)
+            .also { aktivitetslogg.info("Annulleringen fikk OK fra Oppdragssystemet") }
+    }
+
+    override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+        aktivitetslogg.info("Vi har ikke fått kvittering fra OS for annullering av vedtaksperiode ${vedtaksperiode.id}")
+        sikkerLogg.warn("Vi har ikke fått kvittering fra OS for annullering av vedtaksperiode ${vedtaksperiode.id}")
+    }
+}
