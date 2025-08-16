@@ -29,7 +29,7 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
     }
 
     fun venterpå(vedtaksperiode: Vedtaksperiode) = when (val t = tilstand(vedtaksperiode)) {
-        is TrengerInntektsopplysningerAnnenArbeidsgiver -> VenterPå.AnnenPeriode(t.trengerInntektsmelding)
+        is TrengerInntektsopplysningerAnnenArbeidsgiver -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.vedtaksperiodeVenter!!)
 
         HarPågåendeUtbetaling -> VenterPå.SegSelv(Venteårsak.Hva.UTBETALING.utenBegrunnelse)
 

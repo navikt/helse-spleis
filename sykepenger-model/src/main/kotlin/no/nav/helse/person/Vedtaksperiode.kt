@@ -2111,76 +2111,77 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    // Hvem venter jeg på? Og hvorfor?
-    internal val vedtaksperiodeVenter: VedtaksperiodeVenter? get() {
-        // gitt at du står i tilstand X, hva/hvem henter du på og hvorfor?
-        val venterpå = when (val t = tilstand) {
-            AvsluttetUtenUtbetaling -> when (skalOmgjøres()) {
-                true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP fordi Venteårsak.Hvorfor.VIL_OMGJØRES)
-                false -> return null
-            }
-            AvventerGodkjenning -> when (behandlinger.erAvvist()) {
-                true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
-                false -> VenterPå.SegSelv(Venteårsak.Hva.GODKJENNING.utenBegrunnelse)
-            }
-            AvventerGodkjenningRevurdering -> when (behandlinger.erAvvist()) {
-                true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
-                false -> VenterPå.SegSelv(Venteårsak.Hva.GODKJENNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
-            }
-            RevurderingFeilet -> when (kanForkastes()) {
-                true -> return null
-                false -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
-            }
-            SelvstendigAvventerGodkjenning -> when (behandlinger.erAvvist()) {
-                true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
-                false -> VenterPå.SegSelv(Venteårsak.Hva.GODKJENNING.utenBegrunnelse)
-            }
-
-            // disse to er litt spesielle, fordi tilstanden er både en ventetilstand og en "det er min tur"-tilstand
-            is AvventerBlokkerendePeriode -> t.venterpå(this)
-            is AvventerRevurdering -> t.venterpå(this)
-
-            AvventerAnnullering,
-            SelvstendigAvventerBlokkerendePeriode -> VenterPå.Nestemann
-
-            AvventerInntektsmelding -> VenterPå.SegSelv(Venteårsak.Hva.INNTEKTSMELDING.utenBegrunnelse)
-
-            AvventerHistorikk,
-            SelvstendigAvventerHistorikk -> VenterPå.SegSelv(Venteårsak.Hva.BEREGNING.utenBegrunnelse)
-
-            AvventerHistorikkRevurdering -> VenterPå.SegSelv(Venteårsak.Hva.BEREGNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
-            AvventerSimuleringRevurdering -> VenterPå.SegSelv(Venteårsak.Hva.UTBETALING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
-
-            AvventerSimulering,
-            SelvstendigAvventerSimulering,
-            SelvstendigTilUtbetaling,
-            TilAnnullering,
-            TilUtbetaling -> VenterPå.SegSelv(Venteårsak.Hva.UTBETALING.utenBegrunnelse)
-
-            AvventerInfotrygdHistorikk,
-            AvventerVilkårsprøving,
-            AvventerVilkårsprøvingRevurdering,
-            SelvstendigAvventerInfotrygdHistorikk,
-            SelvstendigAvventerVilkårsprøving,
-            Start,
-            SelvstendigStart,
-            Avsluttet,
-            SelvstendigAvsluttet,
-            SelvstendigTilInfotrygd,
-            TilInfotrygd -> return null
+    // gitt at du står i tilstand X, hva/hvem henter du på og hvorfor?
+    internal val venterPå get() = when (val t = tilstand) {
+        AvsluttetUtenUtbetaling -> when (skalOmgjøres()) {
+            true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP fordi Venteårsak.Hvorfor.VIL_OMGJØRES)
+            false -> null
+        }
+        AvventerGodkjenning -> when (behandlinger.erAvvist()) {
+            true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
+            false -> VenterPå.SegSelv(Venteårsak.Hva.GODKJENNING.utenBegrunnelse)
+        }
+        AvventerGodkjenningRevurdering -> when (behandlinger.erAvvist()) {
+            true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
+            false -> VenterPå.SegSelv(Venteårsak.Hva.GODKJENNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
+        }
+        RevurderingFeilet -> when (kanForkastes()) {
+            true -> null
+            false -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
+        }
+        SelvstendigAvventerGodkjenning -> when (behandlinger.erAvvist()) {
+            true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
+            false -> VenterPå.SegSelv(Venteårsak.Hva.GODKJENNING.utenBegrunnelse)
         }
 
-        return VedtaksperiodeVenter(
+        // disse to er litt spesielle, fordi tilstanden er både en ventetilstand og en "det er min tur"-tilstand
+        is AvventerBlokkerendePeriode -> t.venterpå(this)
+        is AvventerRevurdering -> t.venterpå(this)
+
+        AvventerAnnullering,
+        SelvstendigAvventerBlokkerendePeriode -> VenterPå.Nestemann
+
+        AvventerInntektsmelding -> VenterPå.SegSelv(Venteårsak.Hva.INNTEKTSMELDING.utenBegrunnelse)
+
+        AvventerHistorikk,
+        SelvstendigAvventerHistorikk -> VenterPå.SegSelv(Venteårsak.Hva.BEREGNING.utenBegrunnelse)
+
+        AvventerHistorikkRevurdering -> VenterPå.SegSelv(Venteårsak.Hva.BEREGNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
+        AvventerSimuleringRevurdering -> VenterPå.SegSelv(Venteårsak.Hva.UTBETALING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
+
+        AvventerSimulering,
+        SelvstendigAvventerSimulering,
+        SelvstendigTilUtbetaling,
+        TilAnnullering,
+        TilUtbetaling -> VenterPå.SegSelv(Venteårsak.Hva.UTBETALING.utenBegrunnelse)
+
+        AvventerInfotrygdHistorikk,
+        AvventerVilkårsprøving,
+        AvventerVilkårsprøvingRevurdering,
+        SelvstendigAvventerInfotrygdHistorikk,
+        SelvstendigAvventerVilkårsprøving,
+        Start,
+        SelvstendigStart,
+        Avsluttet,
+        SelvstendigAvsluttet,
+        SelvstendigTilInfotrygd,
+        TilInfotrygd -> null
+    }
+
+    // Hvem venter jeg på? Og hvorfor?
+    internal val vedtaksperiodeVenter: VedtaksperiodeVenter? get() = venterPå?.let { venter(it) }
+
+    private fun venter(venterPå: VenterPå) =
+        VedtaksperiodeVenter(
+            yrkesaktivitetssporing = arbeidsgiver.yrkesaktivitetssporing,
             vedtaksperiodeId = id,
             behandlingId = behandlinger.sisteBehandlingId,
             skjæringstidspunkt = skjæringstidspunkt,
+            hendelseIder = eksterneIderSet,
             ventetSiden = oppdatert,
             venterTil = makstid(),
-            venterPå = venterpå,
-            yrkesaktivitetssporing = arbeidsgiver.yrkesaktivitetssporing,
-            hendelseIder = eksterneIderSet
+            venterPå = venterPå
         )
-    }
 
     private fun makstid(tilstandsendringstidspunkt: LocalDateTime = oppdatert) =
         tilstand.makstid(this, tilstandsendringstidspunkt)

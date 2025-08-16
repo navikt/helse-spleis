@@ -10,56 +10,38 @@ import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.person.PersonObserver.VedtaksperiodeVenterEvent
 
 internal data class VedtaksperiodeVenter(
+    val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
     val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
     val skjæringstidspunkt: LocalDate,
+    val hendelseIder: Set<UUID>,
     val ventetSiden: LocalDateTime,
     val venterTil: LocalDateTime,
-    val venterPå: VenterPå,
-    val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
-    val hendelseIder: Set<UUID>
+    val venterPå: VenterPå
 ) {
 
-    fun venterPå() = when (venterPå) {
-        is VenterPå.AnnenPeriode -> {
-            var faktiskVenterPå: Pair<VedtaksperiodeVenterEvent.VenterPå, LocalDateTime>? = null
-            var peker: VedtaksperiodeVenter? = this
-            while (peker != null) {
-                when (peker.venterPå) {
-                    is VenterPå.AnnenPeriode -> peker = peker.venterPå.vedtaksperiode.vedtaksperiodeVenter
-                    VenterPå.Nestemann -> {
-                        error("støtter ikke at annen periode venter på nestemann!")
-                    }
-                    is VenterPå.SegSelv -> {
-                        faktiskVenterPå = Pair(VedtaksperiodeVenterEvent.VenterPå(
-                            vedtaksperiodeId = peker.vedtaksperiodeId,
-                            skjæringstidspunkt = peker.skjæringstidspunkt,
-                            yrkesaktivitetssporing = peker.yrkesaktivitetssporing,
-                            venteårsak = peker.venterPå.venteårsak.event()
-                        ), peker.venterTil)
-                        peker = null
-                    }
-                }
-            }
+    fun event(venteårsak: Venteårsak) = VedtaksperiodeVenterEvent.VenterPå(
+        vedtaksperiodeId = vedtaksperiodeId,
+        skjæringstidspunkt = skjæringstidspunkt,
+        yrkesaktivitetssporing = yrkesaktivitetssporing,
+        venteårsak = venteårsak.event()
+    )
 
-            checkNotNull(faktiskVenterPå) {
-                "Venter på annen periode, men annen periode venter ikke på noe!"
-            }
-        }
+    fun venterPå() = when (venterPå) {
+        is VenterPå.AnnenPeriode -> venterPå.annenPeriode.event(when (val årsak = venterPå.annenPeriode.venterPå) {
+            is VenterPå.AnnenPeriode -> error("støtter ikke at annen periode venter på annen periode")
+            VenterPå.Nestemann -> error("støtter ikke at annen periode venter på nestemann")
+            is VenterPå.SegSelv -> årsak.venteårsak
+        })
 
         // nestemann venter på nestemann ...
         VenterPå.Nestemann -> null
 
-        is VenterPå.SegSelv -> VedtaksperiodeVenterEvent.VenterPå(
-            vedtaksperiodeId = vedtaksperiodeId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            yrkesaktivitetssporing = yrkesaktivitetssporing,
-            venteårsak = venterPå.venteårsak.event()
-        ) to venterTil
+        is VenterPå.SegSelv -> event(venterPå.venteårsak)
     }
 
     fun event(nestemann: VedtaksperiodeVenter): VedtaksperiodeVenterEvent? {
-        val (venterPåEvent, venterTil) = when (venterPå) {
+        val venterPåEvent = when (venterPå) {
             VenterPå.Nestemann -> when {
                 // vedtaksperioden venter på nestemann, og den er nestemann ...
                 nestemann.vedtaksperiodeId == this.vedtaksperiodeId -> return null
@@ -68,6 +50,12 @@ internal data class VedtaksperiodeVenter(
             else -> this.venterPå()
         } ?: return null
 
+        val venterTil = when (venterPå) {
+            is VenterPå.AnnenPeriode -> minOf(venterTil, venterPå.annenPeriode.venterTil)
+            VenterPå.Nestemann -> minOf(venterTil, nestemann.venterTil)
+            is VenterPå.SegSelv -> venterTil
+        }
+
         return VedtaksperiodeVenterEvent(
             yrkesaktivitetssporing = yrkesaktivitetssporing,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -75,7 +63,7 @@ internal data class VedtaksperiodeVenter(
             skjæringstidspunkt = skjæringstidspunkt,
             hendelser = hendelseIder,
             ventetSiden = ventetSiden,
-            venterTil = minOf(this.venterTil, venterTil),
+            venterTil = venterTil,
             venterPå = venterPåEvent
         )
     }
@@ -103,7 +91,7 @@ internal data class VedtaksperiodeVenter(
 
 internal sealed interface VenterPå {
     data class SegSelv(val venteårsak: Venteårsak) : VenterPå
-    data class AnnenPeriode(val vedtaksperiode: Vedtaksperiode) : VenterPå
+    data class AnnenPeriode(val annenPeriode: VedtaksperiodeVenter) : VenterPå
     data object Nestemann : VenterPå
 }
 
@@ -111,7 +99,7 @@ internal class Venteårsak private constructor(
     private val hva: Hva,
     private val hvorfor: Hvorfor?,
 ) {
-    internal fun event() = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
+    internal fun event() = VedtaksperiodeVenterEvent.Venteårsak(
         hva = hva.name,
         hvorfor = hvorfor?.name
     )

@@ -29,7 +29,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
 
         AvventerTidligereEllerOverlappendeSøknad -> VenterPå.SegSelv(Venteårsak.Hva.SØKNAD.utenBegrunnelse)
         is TrengerInntektsmelding -> VenterPå.SegSelv(Venteårsak.Hva.INNTEKTSMELDING.utenBegrunnelse)
-        is TrengerInntektsmeldingAnnenPeriode -> VenterPå.AnnenPeriode(t.trengerInntektsmelding)
+        is TrengerInntektsmeldingAnnenPeriode -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.vedtaksperiodeVenter!!)
     }
 
     override fun håndter(
