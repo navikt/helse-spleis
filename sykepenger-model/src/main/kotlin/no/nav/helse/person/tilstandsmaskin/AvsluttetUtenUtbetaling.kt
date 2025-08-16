@@ -4,9 +4,6 @@ import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.Venteårsak
-import no.nav.helse.person.Venteårsak.Companion.fordi
-import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.behandlingkilde
 import no.nav.helse.person.inntekt.InntekterForBeregning
@@ -39,15 +36,6 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
     override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.behandlinger.bekreftÅpenBehandling(vedtaksperiode.arbeidsgiver)
     }
-
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak {
-        if (!vedtaksperiode.skalOmgjøres()) return Venteårsak.Hva.HJELP.utenBegrunnelse
-        return Venteårsak.Hva.HJELP fordi Venteårsak.Hvorfor.VIL_OMGJØRES
-    }
-
-    override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) =
-        if (!vedtaksperiode.skalOmgjøres()) null
-        else vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
 
     override fun igangsettOverstyring(
         vedtaksperiode: Vedtaksperiode,

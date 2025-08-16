@@ -3,11 +3,10 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
-import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
@@ -74,6 +73,8 @@ import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingInntekt
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrTidslinje
 import no.nav.helse.person.Dokumentsporing.Companion.søknad
+import no.nav.helse.person.Venteårsak.Companion.fordi
+import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -2110,32 +2111,77 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    internal fun vedtaksperiodeVenter(venterPå: Vedtaksperiode): VedtaksperiodeVenter? {
-        val venteårsak = venterPå.venteårsak() ?: return null
-        val builder = VedtaksperiodeVenter.Builder()
-        builder.venterPå(
-            venterPå.id,
-            venterPå.skjæringstidspunkt,
-            venterPå.arbeidsgiver.yrkesaktivitetssporing,
-            venteårsak
-        )
-        builder.venter(
+    // Hvem venter jeg på? Og hvorfor?
+    internal val vedtaksperiodeVenter: VedtaksperiodeVenter? get() {
+        // gitt at du står i tilstand X, hva/hvem henter du på og hvorfor?
+        val venterpå = when (val t = tilstand) {
+            AvsluttetUtenUtbetaling -> when (skalOmgjøres()) {
+                true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP fordi Venteårsak.Hvorfor.VIL_OMGJØRES)
+                false -> return null
+            }
+            AvventerGodkjenning -> when (behandlinger.erAvvist()) {
+                true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
+                false -> VenterPå.SegSelv(Venteårsak.Hva.GODKJENNING.utenBegrunnelse)
+            }
+            AvventerGodkjenningRevurdering -> when (behandlinger.erAvvist()) {
+                true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
+                false -> VenterPå.SegSelv(Venteårsak.Hva.GODKJENNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
+            }
+            RevurderingFeilet -> when (kanForkastes()) {
+                true -> return null
+                false -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
+            }
+            SelvstendigAvventerGodkjenning -> when (behandlinger.erAvvist()) {
+                true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
+                false -> VenterPå.SegSelv(Venteårsak.Hva.GODKJENNING.utenBegrunnelse)
+            }
+
+            // disse to er litt spesielle, fordi tilstanden er både en ventetilstand og en "det er min tur"-tilstand
+            is AvventerBlokkerendePeriode -> t.venterpå(this)
+            is AvventerRevurdering -> t.venterpå(this)
+
+            AvventerAnnullering,
+            SelvstendigAvventerBlokkerendePeriode -> VenterPå.Nestemann
+
+            AvventerInntektsmelding -> VenterPå.SegSelv(Venteårsak.Hva.INNTEKTSMELDING.utenBegrunnelse)
+
+            AvventerHistorikk,
+            SelvstendigAvventerHistorikk -> VenterPå.SegSelv(Venteårsak.Hva.BEREGNING.utenBegrunnelse)
+
+            AvventerHistorikkRevurdering -> VenterPå.SegSelv(Venteårsak.Hva.BEREGNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
+            AvventerSimuleringRevurdering -> VenterPå.SegSelv(Venteårsak.Hva.UTBETALING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
+
+            AvventerSimulering,
+            SelvstendigAvventerSimulering,
+            SelvstendigTilUtbetaling,
+            TilAnnullering,
+            TilUtbetaling -> VenterPå.SegSelv(Venteårsak.Hva.UTBETALING.utenBegrunnelse)
+
+            AvventerInfotrygdHistorikk,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerVilkårsprøving,
+            Start,
+            SelvstendigStart,
+            Avsluttet,
+            SelvstendigAvsluttet,
+            SelvstendigTilInfotrygd,
+            TilInfotrygd -> return null
+        }
+
+        return VedtaksperiodeVenter(
             vedtaksperiodeId = id,
+            behandlingId = behandlinger.sisteBehandlingId,
             skjæringstidspunkt = skjæringstidspunkt,
-            yrkesaktivitetssporing = arbeidsgiver.yrkesaktivitetssporing,
             ventetSiden = oppdatert,
-            venterTil = venterTil(venterPå)
+            venterTil = makstid(),
+            venterPå = venterpå,
+            yrkesaktivitetssporing = arbeidsgiver.yrkesaktivitetssporing,
+            hendelseIder = eksterneIderSet
         )
-        behandlinger.behandlingVenter(builder)
-        builder.hendelseIder(eksterneIder)
-        return builder.build()
     }
 
-    private fun venterTil(venterPå: Vedtaksperiode) =
-        if (id == venterPå.id) makstid()
-        else minOf(makstid(), venterPå.makstid())
-
-    private fun venteårsak() = tilstand.venteårsak(this)
     private fun makstid(tilstandsendringstidspunkt: LocalDateTime = oppdatert) =
         tilstand.makstid(this, tilstandsendringstidspunkt)
 
@@ -2607,8 +2653,8 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        internal fun List<Vedtaksperiode>.venter(nestemann: Vedtaksperiode) =
-            mapNotNull { vedtaksperiode -> vedtaksperiode.tilstand.venter(vedtaksperiode, nestemann) }
+        internal fun List<Vedtaksperiode>.venter() =
+            mapNotNull { vedtaksperiode -> vedtaksperiode.vedtaksperiodeVenter }
 
         internal fun List<Vedtaksperiode>.validerTilstand(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) =
             forEach { it.validerTilstand(hendelse, aktivitetslogg) }
@@ -2751,7 +2797,7 @@ internal class Vedtaksperiode private constructor(
         sykmeldingFom = this.sykmeldingsperiode.start,
         sykmeldingTom = this.sykmeldingsperiode.endInclusive,
         behandlinger = behandlinger.dto(),
-        venteårsak = LazyVedtaksperiodeVenterDto { nestemann?.let { tilstand.venter(this, it)?.dto() } },
+        venteårsak = nestemann?.vedtaksperiodeVenter?.let { this.vedtaksperiodeVenter?.dto(it) },
         opprettet = opprettet,
         oppdatert = oppdatert,
         annulleringskandidater = person.finnAnnulleringskandidater(this).map { AnnulleringskandidatDto(it.id, it.arbeidsgiver.organisasjonsnummer, it.periode.start, it.periode.endInclusive) }

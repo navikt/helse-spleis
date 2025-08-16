@@ -166,9 +166,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun harFlereSkjæringstidspunkt() = behandlinger.last().harFlereSkjæringstidspunkt()
     internal fun håndterUtbetalinghendelse(hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) = behandlinger.any { it.håndterUtbetalinghendelse(hendelse, aktivitetslogg) }
-    internal fun behandlingVenter(builder: VedtaksperiodeVenter.Builder) {
-        behandlinger.last().behandlingVenter(builder)
-    }
 
     internal fun validerFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
     internal fun validerIkkeFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerIkkeFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
@@ -519,9 +516,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         fun sykmeldingsperiode() = endringer.first().sykmeldingsperiode
         fun periode() = periode
-        fun behandlingVenter(builder: VedtaksperiodeVenter.Builder) {
-            builder.behandlingVenter(id)
-        }
 
         fun analytiskDatapakke(
             forrigeBehandling: Behandling?,

@@ -5,8 +5,6 @@ import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.Venteårsak
-import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.behandlingkilde
 
@@ -18,9 +16,6 @@ internal data object Avsluttet : Vedtaksperiodetilstand {
         vedtaksperiode.behandlinger.bekreftAvsluttetBehandlingMedVedtak(vedtaksperiode.arbeidsgiver)
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
-
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode) =
-        Venteårsak.Hva.HJELP.utenBegrunnelse
 
     override fun håndter(
         vedtaksperiode: Vedtaksperiode,

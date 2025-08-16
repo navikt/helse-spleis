@@ -7,8 +7,6 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VedtaksperiodeVenter
-import no.nav.helse.person.Venteårsak
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import java.time.LocalDateTime
@@ -26,12 +24,6 @@ internal sealed interface Vedtaksperiodetilstand {
         aktivitetslogg.funksjonellFeil(Varselkode.RV_VT_1)
         vedtaksperiode.forkast(påminnelse, aktivitetslogg)
     }
-
-    // Gitt at du er nestemann som skal behandles - hva venter du på?
-    fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak?
-
-    // venter du på noe?
-    fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode): VedtaksperiodeVenter? = null
 
     fun replayUtført(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {}
     fun inntektsmeldingFerdigbehandlet(

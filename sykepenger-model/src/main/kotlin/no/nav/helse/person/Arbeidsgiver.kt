@@ -216,8 +216,8 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.finnAnnulleringskandidater(vedtaksperiode: Vedtaksperiode) = flatMap { it.finnAnnulleringskandidater(vedtaksperiode) }.toSet()
 
-        internal fun List<Arbeidsgiver>.venter(nestemann: Vedtaksperiode) =
-            flatMap { arbeidsgiver -> arbeidsgiver.vedtaksperioder.venter(nestemann) }
+        internal fun List<Arbeidsgiver>.venter() =
+            flatMap { arbeidsgiver -> arbeidsgiver.vedtaksperioder.venter() }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk): () -> Skjæringstidspunkt =
             {

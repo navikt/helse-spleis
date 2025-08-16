@@ -5,12 +5,12 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VedtaksperiodeVenter
 import no.nav.helse.person.Venteårsak
 import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import java.time.Period
+import no.nav.helse.person.VenterPå
 
 internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -21,13 +21,15 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak? {
-        return tilstand(vedtaksperiode).venteårsak()
-    }
+    fun venterpå(vedtaksperiode: Vedtaksperiode) = when (val t = tilstand(vedtaksperiode)) {
+        ForventerIkkeInntekt,
+        KlarForBeregning,
+        KlarForVilkårsprøving,
+        ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag -> VenterPå.Nestemann
 
-    override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode): VedtaksperiodeVenter? {
-        val venterPå = tilstand(vedtaksperiode).venterPå() ?: nestemann
-        return vedtaksperiode.vedtaksperiodeVenter(venterPå)
+        AvventerTidligereEllerOverlappendeSøknad -> VenterPå.SegSelv(Venteårsak.Hva.SØKNAD.utenBegrunnelse)
+        is TrengerInntektsmelding -> VenterPå.SegSelv(Venteårsak.Hva.INNTEKTSMELDING.utenBegrunnelse)
+        is TrengerInntektsmeldingAnnenPeriode -> VenterPå.AnnenPeriode(t.trengerInntektsmelding)
     }
 
     override fun håndter(
@@ -89,14 +91,11 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     }
 
     private sealed interface Tilstand {
-        fun venteårsak(): Venteårsak? = null
-        fun venterPå(): Vedtaksperiode? = null
         fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg)
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
     }
 
     private data object AvventerTidligereEllerOverlappendeSøknad : Tilstand {
-        override fun venteårsak() = Venteårsak.Hva.SØKNAD.utenBegrunnelse
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden")
         }
@@ -135,8 +134,6 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     }
 
     private data class TrengerInntektsmelding(val segSelv: Vedtaksperiode) : Tilstand {
-        override fun venteårsak() = Venteårsak.Hva.INNTEKTSMELDING.utenBegrunnelse
-        override fun venterPå() = segSelv
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
             hendelse: Hendelse,
@@ -147,10 +144,8 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         }
     }
 
-    private data class TrengerInntektsmeldingAnnenPeriode(private val trengerInntektsmelding: Vedtaksperiode) :
+    private data class TrengerInntektsmeldingAnnenPeriode(val trengerInntektsmelding: Vedtaksperiode) :
         Tilstand {
-        override fun venteårsak() = Venteårsak.Hva.INNTEKTSMELDING.utenBegrunnelse
-        override fun venterPå() = trengerInntektsmelding
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
             hendelse: Hendelse,

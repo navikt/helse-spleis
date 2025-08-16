@@ -6,7 +6,7 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VedtaksperiodeVenter
+import no.nav.helse.person.VenterPå
 import no.nav.helse.person.Venteårsak
 import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -19,10 +19,6 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak? {
-        return tilstand(vedtaksperiode).venteårsak()
-    }
-
     override fun igangsettOverstyring(
         vedtaksperiode: Vedtaksperiode,
         revurdering: Revurderingseventyr,
@@ -32,9 +28,14 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
         vedtaksperiode.behandlinger.forkastUtbetaling(aktivitetslogg)
     }
 
-    override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode): VedtaksperiodeVenter? {
-        val venterPå = tilstand(vedtaksperiode).venterPå() ?: nestemann
-        return vedtaksperiode.vedtaksperiodeVenter(venterPå)
+    fun venterpå(vedtaksperiode: Vedtaksperiode) = when (val t = tilstand(vedtaksperiode)) {
+        is TrengerInntektsopplysningerAnnenArbeidsgiver -> VenterPå.AnnenPeriode(t.trengerInntektsmelding)
+
+        HarPågåendeUtbetaling -> VenterPå.SegSelv(Venteårsak.Hva.UTBETALING.utenBegrunnelse)
+
+        is TrengerInnteksopplysninger,
+        KlarForVilkårsprøving,
+        KlarForBeregning -> VenterPå.Nestemann
     }
 
     override fun gjenopptaBehandling(
@@ -83,13 +84,10 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
     }
 
     private sealed interface Tilstand {
-        fun venteårsak(): Venteårsak? = null
-        fun venterPå(): Vedtaksperiode? = null
         fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg)
     }
 
     private data class TrengerInnteksopplysninger(private val vedtaksperiode: Vedtaksperiode) : Tilstand {
-        override fun venterPå() = vedtaksperiode
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Trenger inntektsopplysninger etter igangsatt revurdering. Etterspør inntekt fra skatt")
             vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
@@ -97,14 +95,12 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
     }
 
     private data object HarPågåendeUtbetaling : Tilstand {
-        override fun venteårsak() = Venteårsak.Hva.UTBETALING.utenBegrunnelse
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
         }
     }
 
-    private data class TrengerInntektsopplysningerAnnenArbeidsgiver(private val trengerInntektsmelding: Vedtaksperiode) : Tilstand {
-        override fun venterPå() = trengerInntektsmelding
+    private data class TrengerInntektsopplysningerAnnenArbeidsgiver(val trengerInntektsmelding: Vedtaksperiode) : Tilstand {
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Trenger inntektsopplysninger etter igangsatt revurdering på annen arbeidsgiver.")
         }

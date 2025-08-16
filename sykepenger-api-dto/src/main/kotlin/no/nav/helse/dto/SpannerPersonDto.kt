@@ -1128,9 +1128,9 @@ private fun VedtaksperiodeUtDto.tilPersonData(
     annulleringskandidater = annulleringskandidater.map { SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.AnnulleringskandidatDto(it.vedtaksperiodeId, it.organisasjonsnummer, it.fom, it.tom) }
 )
 
-private fun utledVenteårsak(venteårsak: LazyVedtaksperiodeVenterDto): SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeVenterDto? {
+private fun utledVenteårsak(venteårsak: VedtaksperiodeVenterDto?): SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeVenterDto? {
     try {
-        return venteårsak.value?.tilPersonData()
+        return venteårsak?.tilPersonData()
     } catch (_: Exception) {
         return SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeVenterDto(
             ventetSiden = LocalDateTime.now(),

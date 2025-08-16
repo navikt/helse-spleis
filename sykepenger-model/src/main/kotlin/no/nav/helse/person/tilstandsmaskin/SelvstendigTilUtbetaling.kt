@@ -5,14 +5,11 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.Venteårsak
-import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal data object SelvstendigTilUtbetaling : Vedtaksperiodetilstand {
     override val type = TilstandType.SELVSTENDIG_TIL_UTBETALING
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = Venteårsak.Hva.UTBETALING.utenBegrunnelse
     override fun igangsettOverstyring(
         vedtaksperiode: Vedtaksperiode,
         revurdering: Revurderingseventyr,
@@ -24,9 +21,6 @@ internal data object SelvstendigTilUtbetaling : Vedtaksperiodetilstand {
     override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
     }
-
-    override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) =
-        vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
 
     override fun håndter(
         vedtaksperiode: Vedtaksperiode,

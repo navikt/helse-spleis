@@ -3,7 +3,6 @@ package no.nav.helse.person.tilstandsmaskin
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.Venteårsak
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 
@@ -12,10 +11,6 @@ internal data object AvventerAnnullering : Vedtaksperiodetilstand {
 
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
-    }
-
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak? {
-        return null
     }
 
     override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {}

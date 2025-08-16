@@ -11,7 +11,6 @@ internal data object AvventerVilkårsprøving : Vedtaksperiodetilstand {
         vedtaksperiode.trengerVilkårsgrunnlag(aktivitetslogg)
     }
 
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = null
     override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.trengerVilkårsgrunnlag(aktivitetslogg)
     }

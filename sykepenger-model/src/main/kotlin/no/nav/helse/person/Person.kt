@@ -699,12 +699,18 @@ class Person private constructor(
 
     private fun håndterVedtaksperiodeVenter(hendelse: Hendelse) {
         when (hendelse) {
-            is Sykmelding -> { /* Sykmelding fører ikke til endringer i tiltander, så sender ikke signal etter håndtering av den */
+            is Sykmelding -> {
+                /* Sykmelding fører ikke til endringer i tiltander, så sender ikke signal etter håndtering av den */
             }
             else -> {
-                val eventer = arbeidsgivere.nestemann()?.let { nestemann ->
-                    arbeidsgivere.venter(nestemann).map { it.event() }
-                } ?: emptyList()
+                val eventer = arbeidsgivere
+                    .nestemann()
+                    ?.vedtaksperiodeVenter
+                    ?.let { nestemannVenter ->
+                        arbeidsgivere
+                            .venter()
+                            .mapNotNull { it.event(nestemannVenter) }
+                    } ?: emptyList()
                 observers.forEach { it.vedtaksperioderVenter(eventer) }
             }
         }

@@ -13,7 +13,6 @@ internal data object SelvstendigAvventerInfotrygdHistorikk : Vedtaksperiodetilst
         vedtaksperiode.person.trengerHistorikkFraInfotrygd(aktivitetslogg)
     }
 
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = null
     override fun gjenopptaBehandling(
         vedtaksperiode: Vedtaksperiode,
         hendelse: Hendelse,

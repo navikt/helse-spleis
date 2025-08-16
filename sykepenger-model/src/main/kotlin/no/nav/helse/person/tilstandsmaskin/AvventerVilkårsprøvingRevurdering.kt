@@ -12,7 +12,6 @@ internal data object AvventerVilkårsprøvingRevurdering : Vedtaksperiodetilstan
         vedtaksperiode.trengerVilkårsgrunnlag(aktivitetslogg)
     }
 
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = null
     override fun igangsettOverstyring(
         vedtaksperiode: Vedtaksperiode,
         revurdering: Revurderingseventyr,

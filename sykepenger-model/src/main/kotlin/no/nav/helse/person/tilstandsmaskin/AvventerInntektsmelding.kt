@@ -6,8 +6,6 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.Venteårsak
-import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.behandlingkilde
@@ -23,13 +21,6 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         check(vedtaksperiode.arbeidsgiver.yrkesaktivitetssporing is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) { "Forventer kun arbeidstakere her" }
         vedtaksperiode.trengerInntektsmeldingReplay()
     }
-
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = Venteårsak.Hva.INNTEKTSMELDING.utenBegrunnelse
-
-    override fun venter(
-        vedtaksperiode: Vedtaksperiode,
-        nestemann: Vedtaksperiode
-    ) = vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
 
     override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         check(vedtaksperiode.behandlinger.harIkkeUtbetaling()) {
