@@ -2173,14 +2173,18 @@ internal class Vedtaksperiode private constructor(
 
     private fun venter(venterPå: VenterPå) =
         VedtaksperiodeVenter(
+            vedtaksperiodedata = venter(),
+            venterPå = venterPå
+        )
+
+    internal fun venter() = VedtaksperiodeVenterdata(
             yrkesaktivitetssporing = arbeidsgiver.yrkesaktivitetssporing,
             vedtaksperiodeId = id,
             behandlingId = behandlinger.sisteBehandlingId,
             skjæringstidspunkt = skjæringstidspunkt,
             hendelseIder = eksterneIderSet,
             ventetSiden = oppdatert,
-            venterTil = makstid(),
-            venterPå = venterPå
+            venterTil = makstid()
         )
 
     private fun makstid(tilstandsendringstidspunkt: LocalDateTime = oppdatert) =
