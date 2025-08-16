@@ -6,7 +6,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spill_av_im.Forespørsel
 import org.junit.jupiter.api.fail

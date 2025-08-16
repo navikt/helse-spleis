@@ -7,7 +7,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering.Medlemskapstatus.Nei
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter

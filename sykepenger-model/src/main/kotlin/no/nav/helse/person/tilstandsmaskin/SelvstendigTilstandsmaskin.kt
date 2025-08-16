@@ -1,30 +1,19 @@
-package no.nav.helse.person
+package no.nav.helse.person.tilstandsmaskin
 
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.person.TilstandType.SELVSTENDIG_AVSLUTTET
-import no.nav.helse.person.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.SELVSTENDIG_AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.TilstandType.SELVSTENDIG_AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.SELVSTENDIG_START
-import no.nav.helse.person.TilstandType.SELVSTENDIG_TIL_INFOTRYGD
-import no.nav.helse.person.TilstandType.SELVSTENDIG_TIL_UTBETALING
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VedtaksperiodeVenter
+import no.nav.helse.person.Venteårsak
 import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
-import no.nav.helse.person.Venteårsak.Hva.BEREGNING
-import no.nav.helse.person.Venteårsak.Hva.GODKJENNING
-import no.nav.helse.person.Venteårsak.Hva.HJELP
-import no.nav.helse.person.Venteårsak.Hva.UTBETALING
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal data object SelvstendigStart : Vedtaksperiodetilstand {
-    override val type = SELVSTENDIG_START
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = HJELP.utenBegrunnelse
+    override val type = TilstandType.SELVSTENDIG_START
+    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = Venteårsak.Hva.HJELP.utenBegrunnelse
 
     override fun igangsettOverstyring(
         vedtaksperiode: Vedtaksperiode,
@@ -42,7 +31,7 @@ internal data object SelvstendigStart : Vedtaksperiodetilstand {
 }
 
 internal data object SelvstendigAvventerInfotrygdHistorikk : Vedtaksperiodetilstand {
-    override val type = SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK
+    override val type = TilstandType.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.person.trengerHistorikkFraInfotrygd(aktivitetslogg)
     }
@@ -76,7 +65,7 @@ internal data object SelvstendigAvventerInfotrygdHistorikk : Vedtaksperiodetilst
 }
 
 internal data object SelvstendigAvventerBlokkerendePeriode : Vedtaksperiodetilstand {
-    override val type: TilstandType = SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
+    override val type: TilstandType = TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
@@ -112,7 +101,7 @@ internal data object SelvstendigAvventerBlokkerendePeriode : Vedtaksperiodetilst
 }
 
 internal data object SelvstendigAvventerVilkårsprøving : Vedtaksperiodetilstand {
-    override val type = SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
+    override val type = TilstandType.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.trengerVilkårsgrunnlag(aktivitetslogg)
     }
@@ -132,14 +121,14 @@ internal data object SelvstendigAvventerVilkårsprøving : Vedtaksperiodetilstan
 }
 
 internal data object SelvstendigAvventerHistorikk : Vedtaksperiodetilstand {
-    override val type = SELVSTENDIG_AVVENTER_HISTORIKK
+    override val type = TilstandType.SELVSTENDIG_AVVENTER_HISTORIKK
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Forventer vilkårsgrunnlag for å beregne utbetaling" }
         vedtaksperiode.trengerYtelser(aktivitetslogg)
         aktivitetslogg.info("Forespør sykdoms- og inntektshistorikk")
     }
 
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = BEREGNING.utenBegrunnelse
+    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = Venteårsak.Hva.BEREGNING.utenBegrunnelse
     override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) =
         vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
 
@@ -157,12 +146,12 @@ internal data object SelvstendigAvventerHistorikk : Vedtaksperiodetilstand {
 }
 
 internal data object SelvstendigAvventerSimulering : Vedtaksperiodetilstand {
-    override val type: TilstandType = SELVSTENDIG_AVVENTER_SIMULERING
+    override val type: TilstandType = TilstandType.SELVSTENDIG_AVVENTER_SIMULERING
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         trengerSimulering(vedtaksperiode, aktivitetslogg)
     }
 
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = UTBETALING.utenBegrunnelse
+    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = Venteårsak.Hva.UTBETALING.utenBegrunnelse
     override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) =
         vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
 
@@ -184,14 +173,14 @@ internal data object SelvstendigAvventerSimulering : Vedtaksperiodetilstand {
 }
 
 internal data object SelvstendigAvventerGodkjenning : Vedtaksperiodetilstand {
-    override val type = SELVSTENDIG_AVVENTER_GODKJENNING
+    override val type = TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.trengerGodkjenning(aktivitetslogg)
     }
 
     override fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak {
-        if (vedtaksperiode.behandlinger.erAvvist()) return HJELP.utenBegrunnelse
-        return GODKJENNING.utenBegrunnelse
+        if (vedtaksperiode.behandlinger.erAvvist()) return Venteårsak.Hva.HJELP.utenBegrunnelse
+        return Venteårsak.Hva.GODKJENNING.utenBegrunnelse
     }
 
     override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) =
@@ -215,9 +204,9 @@ internal data object SelvstendigAvventerGodkjenning : Vedtaksperiodetilstand {
 }
 
 internal data object SelvstendigTilUtbetaling : Vedtaksperiodetilstand {
-    override val type = SELVSTENDIG_TIL_UTBETALING
+    override val type = TilstandType.SELVSTENDIG_TIL_UTBETALING
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = UTBETALING.utenBegrunnelse
+    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = Venteårsak.Hva.UTBETALING.utenBegrunnelse
     override fun igangsettOverstyring(
         vedtaksperiode: Vedtaksperiode,
         revurdering: Revurderingseventyr,
@@ -254,7 +243,7 @@ internal data object SelvstendigTilUtbetaling : Vedtaksperiodetilstand {
 }
 
 internal data object SelvstendigAvsluttet : Vedtaksperiodetilstand {
-    override val type = SELVSTENDIG_AVSLUTTET
+    override val type = TilstandType.SELVSTENDIG_AVSLUTTET
 
     override val erFerdigBehandlet = true
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
@@ -263,7 +252,7 @@ internal data object SelvstendigAvsluttet : Vedtaksperiodetilstand {
     }
 
     override fun venteårsak(vedtaksperiode: Vedtaksperiode) =
-        HJELP.utenBegrunnelse
+        Venteårsak.Hva.HJELP.utenBegrunnelse
 
     override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.behandlinger.bekreftÅpenBehandling(vedtaksperiode.arbeidsgiver)
@@ -279,13 +268,13 @@ internal data object SelvstendigAvsluttet : Vedtaksperiodetilstand {
 }
 
 internal data object SelvstendigTilInfotrygd : Vedtaksperiodetilstand {
-    override val type = SELVSTENDIG_TIL_INFOTRYGD
+    override val type = TilstandType.SELVSTENDIG_TIL_INFOTRYGD
     override val erFerdigBehandlet = true
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Vedtaksperioden kan ikke behandles i Spleis.")
     }
 
-    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = HJELP.utenBegrunnelse
+    override fun venteårsak(vedtaksperiode: Vedtaksperiode) = Venteårsak.Hva.HJELP.utenBegrunnelse
 
     override fun igangsettOverstyring(
         vedtaksperiode: Vedtaksperiode,

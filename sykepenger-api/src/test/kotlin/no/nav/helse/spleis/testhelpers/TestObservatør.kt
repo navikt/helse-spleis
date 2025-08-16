@@ -3,7 +3,7 @@ package no.nav.helse.spleis.testhelpers
 import java.util.UUID
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.IdInnhenter
 import org.junit.jupiter.api.fail
 

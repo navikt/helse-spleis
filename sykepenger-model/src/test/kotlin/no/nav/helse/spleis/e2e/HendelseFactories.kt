@@ -52,7 +52,7 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode

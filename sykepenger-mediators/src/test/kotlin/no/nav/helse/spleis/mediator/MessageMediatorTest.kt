@@ -9,7 +9,7 @@ import no.nav.helse.desember
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest
 import no.nav.helse.spleis.mediator.meldinger.TestRapid

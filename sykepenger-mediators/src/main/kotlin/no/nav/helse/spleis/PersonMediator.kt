@@ -15,7 +15,7 @@ import no.nav.helse.person.PersonObserver.Inntekt
 import no.nav.helse.person.PersonObserver.Refusjon
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 

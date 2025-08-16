@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import no.nav.helse.dsl.a1
 import no.nav.helse.gjenopprettFraJSON
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.håndterPåminnelse
 import org.junit.jupiter.api.Assertions.assertTrue

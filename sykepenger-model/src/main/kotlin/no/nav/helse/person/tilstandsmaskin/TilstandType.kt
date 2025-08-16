@@ -1,4 +1,4 @@
-package no.nav.helse.person
+package no.nav.helse.person.tilstandsmaskin
 
 enum class TilstandType {
     START,

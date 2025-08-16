@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
 import no.nav.helse.utbetalingstidslinje.Begrunnelse

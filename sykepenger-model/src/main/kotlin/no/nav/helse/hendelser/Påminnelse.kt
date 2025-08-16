@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.Period
 import java.util.*
 import no.nav.helse.hendelser.Avsender.SYSTEM
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Påminnelse(
