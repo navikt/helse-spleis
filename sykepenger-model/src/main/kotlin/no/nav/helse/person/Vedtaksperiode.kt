@@ -74,7 +74,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrTidslinje
 import no.nav.helse.person.Dokumentsporing.Companion.søknad
 import no.nav.helse.person.Venteårsak.Companion.fordi
-import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -2114,24 +2113,24 @@ internal class Vedtaksperiode private constructor(
     // gitt at du står i tilstand X, hva/hvem henter du på og hvorfor?
     internal val venterPå get() = when (val t = tilstand) {
         AvsluttetUtenUtbetaling -> when (skalOmgjøres()) {
-            true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP fordi Venteårsak.Hvorfor.VIL_OMGJØRES)
+            true -> VenterPå.SegSelv(Venteårsak.HJELP fordi Venteårsak.Hvorfor.VIL_OMGJØRES)
             false -> null
         }
         AvventerGodkjenning -> when (behandlinger.erAvvist()) {
-            true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
-            false -> VenterPå.SegSelv(Venteårsak.Hva.GODKJENNING.utenBegrunnelse)
+            true -> VenterPå.SegSelv(Venteårsak.HJELP)
+            false -> VenterPå.SegSelv(Venteårsak.GODKJENNING)
         }
         AvventerGodkjenningRevurdering -> when (behandlinger.erAvvist()) {
-            true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
-            false -> VenterPå.SegSelv(Venteårsak.Hva.GODKJENNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
+            true -> VenterPå.SegSelv(Venteårsak.HJELP)
+            false -> VenterPå.SegSelv(Venteårsak.GODKJENNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
         }
         RevurderingFeilet -> when (kanForkastes()) {
             true -> null
-            false -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
+            false -> VenterPå.SegSelv(Venteårsak.HJELP)
         }
         SelvstendigAvventerGodkjenning -> when (behandlinger.erAvvist()) {
-            true -> VenterPå.SegSelv(Venteårsak.Hva.HJELP.utenBegrunnelse)
-            false -> VenterPå.SegSelv(Venteårsak.Hva.GODKJENNING.utenBegrunnelse)
+            true -> VenterPå.SegSelv(Venteårsak.HJELP)
+            false -> VenterPå.SegSelv(Venteårsak.GODKJENNING)
         }
 
         // disse to er litt spesielle, fordi tilstanden er både en ventetilstand og en "det er min tur"-tilstand
@@ -2141,19 +2140,19 @@ internal class Vedtaksperiode private constructor(
         AvventerAnnullering,
         SelvstendigAvventerBlokkerendePeriode -> VenterPå.Nestemann
 
-        AvventerInntektsmelding -> VenterPå.SegSelv(Venteårsak.Hva.INNTEKTSMELDING.utenBegrunnelse)
+        AvventerInntektsmelding -> VenterPå.SegSelv(Venteårsak.INNTEKTSMELDING)
 
         AvventerHistorikk,
-        SelvstendigAvventerHistorikk -> VenterPå.SegSelv(Venteårsak.Hva.BEREGNING.utenBegrunnelse)
+        SelvstendigAvventerHistorikk -> VenterPå.SegSelv(Venteårsak.BEREGNING)
 
-        AvventerHistorikkRevurdering -> VenterPå.SegSelv(Venteårsak.Hva.BEREGNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
-        AvventerSimuleringRevurdering -> VenterPå.SegSelv(Venteårsak.Hva.UTBETALING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
+        AvventerHistorikkRevurdering -> VenterPå.SegSelv(Venteårsak.BEREGNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
+        AvventerSimuleringRevurdering -> VenterPå.SegSelv(Venteårsak.UTBETALING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
 
         AvventerSimulering,
         SelvstendigAvventerSimulering,
         SelvstendigTilUtbetaling,
         TilAnnullering,
-        TilUtbetaling -> VenterPå.SegSelv(Venteårsak.Hva.UTBETALING.utenBegrunnelse)
+        TilUtbetaling -> VenterPå.SegSelv(Venteårsak.UTBETALING)
 
         AvventerInfotrygdHistorikk,
         AvventerVilkårsprøving,

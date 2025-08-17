@@ -13,12 +13,13 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.Venteårsak
+import no.nav.helse.person.Venteårsak.Companion.INNTEKTSMELDING
+import no.nav.helse.person.Venteårsak.Companion.SØKNAD
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.Venteårsak.Hva
-import no.nav.helse.person.Venteårsak.Hvorfor
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -133,34 +134,34 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
 
             assertVenterPå(
                 listOf(
-                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    1.vedtaksperiode to Hva.INNTEKTSMELDING
+                    1.vedtaksperiode to INNTEKTSMELDING,
+                    1.vedtaksperiode to INNTEKTSMELDING
                 )
             )
             val søknadIdMars = UUID.randomUUID()
             nyPeriode(mars, søknadId = søknadIdMars)
             assertVenterPå(
                 listOf(
-                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    2.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    2.vedtaksperiode to Hva.INNTEKTSMELDING
+                    1.vedtaksperiode to INNTEKTSMELDING,
+                    1.vedtaksperiode to INNTEKTSMELDING,
+                    1.vedtaksperiode to INNTEKTSMELDING,
+                    2.vedtaksperiode to INNTEKTSMELDING,
+                    1.vedtaksperiode to INNTEKTSMELDING,
+                    2.vedtaksperiode to INNTEKTSMELDING
                 )
             )
 
             val inntektsmeldingIdMars = håndterInntektsmelding(listOf(1.mars til 16.mars))
             assertVenterPå(
                 listOf(
-                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    2.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    2.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    2.vedtaksperiode to Hva.INNTEKTSMELDING
+                    1.vedtaksperiode to INNTEKTSMELDING,
+                    1.vedtaksperiode to INNTEKTSMELDING,
+                    1.vedtaksperiode to INNTEKTSMELDING,
+                    2.vedtaksperiode to INNTEKTSMELDING,
+                    1.vedtaksperiode to INNTEKTSMELDING,
+                    2.vedtaksperiode to INNTEKTSMELDING,
+                    1.vedtaksperiode to INNTEKTSMELDING,
+                    2.vedtaksperiode to INNTEKTSMELDING
                 )
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -221,8 +222,8 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
             nyPeriode(januar, søknadId = søknadId)
             assertVenterPå(
                 listOf(
-                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    1.vedtaksperiode to Hva.INNTEKTSMELDING
+                    1.vedtaksperiode to INNTEKTSMELDING,
+                    1.vedtaksperiode to INNTEKTSMELDING
                 )
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -230,9 +231,9 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertVenterPå(
                 listOf(
-                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    1.vedtaksperiode to Hva.INNTEKTSMELDING,
-                    1.vedtaksperiode to Hva.SØKNAD
+                    1.vedtaksperiode to INNTEKTSMELDING,
+                    1.vedtaksperiode to INNTEKTSMELDING,
+                    1.vedtaksperiode to SØKNAD
                 )
             )
 
@@ -316,25 +317,24 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
         }
     }
 
-    private fun assertVenterPå(expected: List<Pair<UUID, Hva>>) {
+    private fun assertVenterPå(expected: List<Pair<UUID, Venteårsak>>) {
         val actual = observatør.vedtaksperiodeVenter.map { it.vedtaksperiodeId to it.venterPå.venteårsak.hva }
         assertEquals(expected.map { it.first to it.second.toString() }, actual)
         assertEquals(expected.size, observatør.vedtaksperiodeVenter.size)
     }
 
     internal companion object {
-        internal fun TestObservatør.assertVenter(venterVedtaksperiodeId: UUID, venterPåVedtaksperiodeId: UUID = venterVedtaksperiodeId, venterPåOrgnr: String? = null, venterPåHva: Hva, fordi: Hvorfor? = null) {
-            vedtaksperiodeVenter.last { it.vedtaksperiodeId == venterVedtaksperiodeId }.venterPå.assertVenterPå(venterPåVedtaksperiodeId, venterPåOrgnr, venterPåHva, fordi)
+        internal fun TestObservatør.assertVenter(venterVedtaksperiodeId: UUID, venterPåVedtaksperiodeId: UUID = venterVedtaksperiodeId, venterPåOrgnr: String? = null, venterPåHva: Venteårsak) {
+            vedtaksperiodeVenter.last { it.vedtaksperiodeId == venterVedtaksperiodeId }.venterPå.assertVenterPå(venterPåVedtaksperiodeId, venterPåOrgnr, venterPåHva)
             if (venterVedtaksperiodeId == venterPåVedtaksperiodeId) return
             // Om periode A venter på en annen periode B så burde også B vente på B (vente på seg selv)
-            vedtaksperiodeVenter.last { it.vedtaksperiodeId == venterPåVedtaksperiodeId }.venterPå.assertVenterPå(venterPåVedtaksperiodeId, venterPåOrgnr, venterPåHva, fordi)
+            vedtaksperiodeVenter.last { it.vedtaksperiodeId == venterPåVedtaksperiodeId }.venterPå.assertVenterPå(venterPåVedtaksperiodeId, venterPåOrgnr, venterPåHva)
         }
 
-        private fun PersonObserver.VedtaksperiodeVenterEvent.VenterPå.assertVenterPå(venterPåVedtaksperiodeId: UUID, venterPåOrgnr: String?, venterPåHva: Hva, fordi: Hvorfor?) {
+        private fun PersonObserver.VedtaksperiodeVenterEvent.VenterPå.assertVenterPå(venterPåVedtaksperiodeId: UUID, venterPåOrgnr: String?, venterPåHva: Venteårsak) {
             venterPåOrgnr?.let { assertEquals(it, this.yrkesaktivitetssporing.somOrganisasjonsnummer) }
             assertEquals(venterPåVedtaksperiodeId, this.vedtaksperiodeId)
-            assertEquals(venterPåHva.name, this.venteårsak.hva)
-            assertEquals(fordi?.name, this.venteårsak.hvorfor)
+            assertEquals(venterPåHva.event(), this.venteårsak)
         }
     }
 }

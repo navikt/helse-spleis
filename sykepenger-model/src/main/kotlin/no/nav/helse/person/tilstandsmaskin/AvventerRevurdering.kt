@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VenterPå
 import no.nav.helse.person.Venteårsak
-import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.behandlingkilde
 
@@ -29,9 +28,9 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
     }
 
     fun venterpå(vedtaksperiode: Vedtaksperiode) = when (val t = tilstand(vedtaksperiode)) {
-        is TrengerInntektsopplysningerAnnenArbeidsgiver -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.venter(), Venteårsak.Hva.INNTEKTSMELDING.utenBegrunnelse)
+        is TrengerInntektsopplysningerAnnenArbeidsgiver -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.venter(), Venteårsak.INNTEKTSMELDING)
 
-        HarPågåendeUtbetaling -> VenterPå.SegSelv(Venteårsak.Hva.UTBETALING.utenBegrunnelse)
+        HarPågåendeUtbetaling -> VenterPå.SegSelv(Venteårsak.UTBETALING)
 
         is TrengerInnteksopplysninger,
         KlarForVilkårsprøving,

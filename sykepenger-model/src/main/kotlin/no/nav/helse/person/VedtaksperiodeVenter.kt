@@ -93,26 +93,17 @@ internal sealed interface VenterPå {
     data object Nestemann : VenterPå
 }
 
-internal class Venteårsak private constructor(
-    private val hva: Hva,
-    private val hvorfor: Hvorfor?,
+internal data class Venteårsak(
+    private val hva: String,
+    private val hvorfor: String?,
 ) {
     internal fun event() = VedtaksperiodeVenterEvent.Venteårsak(
-        hva = hva.name,
-        hvorfor = hvorfor?.name
+        hva = hva,
+        hvorfor = hvorfor
     )
 
     override fun toString() =
-        hva.name + if (hvorfor == null) "" else " fordi ${hvorfor.name}"
-
-    enum class Hva {
-        GODKJENNING,
-        SØKNAD,
-        INNTEKTSMELDING,
-        BEREGNING,
-        UTBETALING,
-        HJELP
-    }
+        hva + if (hvorfor == null) "" else " fordi $hvorfor"
 
     enum class Hvorfor {
         OVERSTYRING_IGANGSATT,
@@ -120,8 +111,14 @@ internal class Venteårsak private constructor(
     }
 
     internal companion object {
-        internal infix fun Hva.fordi(hvorfor: Hvorfor) = Venteårsak(this, hvorfor)
-        internal val Hva.utenBegrunnelse get() = Venteårsak(this, null)
+        val GODKJENNING = Venteårsak("GODKJENNING", null)
+        val SØKNAD = Venteårsak("SØKNAD", null)
+        val INNTEKTSMELDING = Venteårsak("INNTEKTSMELDING", null)
+        val BEREGNING = Venteårsak("BEREGNING", null)
+        val UTBETALING = Venteårsak("UTBETALING", null)
+        val HJELP = Venteårsak("HJELP", null)
+
+        internal infix fun Venteårsak.fordi(hvorfor: Hvorfor) = copy(hvorfor = hvorfor.name)
     }
 }
 

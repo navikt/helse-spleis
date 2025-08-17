@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Venteårsak
-import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import java.time.Period
@@ -27,9 +26,9 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         KlarForVilkårsprøving,
         ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag -> VenterPå.Nestemann
 
-        AvventerTidligereEllerOverlappendeSøknad -> VenterPå.SegSelv(Venteårsak.Hva.SØKNAD.utenBegrunnelse)
-        is TrengerInntektsmelding -> VenterPå.SegSelv(Venteårsak.Hva.INNTEKTSMELDING.utenBegrunnelse)
-        is TrengerInntektsmeldingAnnenPeriode -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.venter(), Venteårsak.Hva.INNTEKTSMELDING.utenBegrunnelse)
+        AvventerTidligereEllerOverlappendeSøknad -> VenterPå.SegSelv(Venteårsak.SØKNAD)
+        is TrengerInntektsmelding -> VenterPå.SegSelv(Venteårsak.INNTEKTSMELDING)
+        is TrengerInntektsmeldingAnnenPeriode -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.venter(), Venteårsak.INNTEKTSMELDING)
     }
 
     override fun håndter(
