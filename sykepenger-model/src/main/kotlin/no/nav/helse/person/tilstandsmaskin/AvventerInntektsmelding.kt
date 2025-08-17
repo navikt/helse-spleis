@@ -50,11 +50,8 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vurderOmKanGåVidere(vedtaksperiode, revurdering.hendelse, aktivitetslogg)
-        if (vedtaksperiode.tilstand !in setOf(AvventerInntektsmelding, AvventerBlokkerendePeriode)) return
-        if (vedtaksperiode.tilstand == AvventerInntektsmelding) {
-            vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
-        }
+        if (vurderOmKanGåVidere(vedtaksperiode, revurdering.hendelse, aktivitetslogg)) return
+        vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
     }
 
     override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
