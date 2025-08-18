@@ -4,8 +4,10 @@ import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
+import no.nav.helse.etterlevelse.PensjonsgivendeInntektSubsumsjon
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-10 ledd 2 punktum 1`
+import no.nav.helse.etterlevelse.`§ 8-35 ledd 2`
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
@@ -77,6 +79,25 @@ internal class Inntektsgrunnlag(
                     beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig
                 )
             )
+        }
+
+        if (selvstendigInntektsopplysning != null) {
+            subsumsjonslogg.apply {
+                logg(
+                    `§ 8-35 ledd 2`(
+                        pensjonsgivendeInntekter = selvstendigInntektsopplysning.faktaavklartInntekt.pensjonsgivendeInntekter.map {
+                            PensjonsgivendeInntektSubsumsjon(
+                                årstall = it.årstall,
+                                pensjonsgivendeInntekt = it.beløp.årlig,
+                                gjennomsnittligG = it.snitt.årlig
+                            )
+                        },
+                        nåværendeGrunnbeløp = selvstendigInntektsopplysning.faktaavklartInntekt.anvendtGrunnbeløp.årlig,
+                        skjæringstidspunkt = skjæringstidspunkt,
+                        sykepengegrunnlag = sykepengegrunnlag.årlig
+                    )
+                )
+            }
         }
     }
 

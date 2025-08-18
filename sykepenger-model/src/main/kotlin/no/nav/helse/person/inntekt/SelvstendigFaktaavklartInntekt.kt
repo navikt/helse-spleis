@@ -76,7 +76,7 @@ internal data class SelvstendigFaktaavklartInntekt(
     }
 
     data class PensjonsgivendeInntekt(val årstall: Year, val beløp: Inntekt) {
-        private val snitt = `1G`.snitt(årstall.value)
+        internal val snitt = `1G`.snitt(årstall.value)
 
         // hvor mange G inntekten utgjør
         private val antallG = beløp.årlig / snitt.årlig

@@ -13,6 +13,8 @@ import no.nav.helse.etterlevelse.Ledd.LEDD_2
 import no.nav.helse.etterlevelse.Ledd.LEDD_3
 import no.nav.helse.etterlevelse.Ledd.LEDD_5
 import no.nav.helse.etterlevelse.Paragraf.KJENNELSE_2006_4023
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_22_13
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_35
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_10
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_11
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_12
@@ -26,6 +28,7 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_28
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_29
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_3
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_34
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_35
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_48
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
@@ -241,7 +244,6 @@ fun `§ 8-11 ledd 1`(vedtaksperiode: ClosedRange<LocalDate>, dato: Collection<Cl
         versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
         input = mapOf("periode" to mapOf("fom" to vedtaksperiode.start, "tom" to vedtaksperiode.endInclusive))
     )
-
 
 /**
  * Vurdering av maksimalt antall sykepengedager
@@ -828,6 +830,30 @@ fun `§ 8-34 ledd 1`(dagsats: Double, utbetaltePerioder: List<ClosedRange<LocalD
 )
 
 /**
+ * Sykepengegrunnlaget skal svare til den pensjonsgivende årsinntekten som beregnes på grunnlag av gjennomsnittet av den pensjonsgivende årsinntekten som er fastsatt for de tre siste årene.
+ * Den pensjonsgivende årsinntekten for det enkelte året skal reguleres i samsvar med grunnbeløpet på sykmeldingstidspunktet.
+ * Ved beregningen skal det for det enkelte året bare tas med en tredel av inntekten mellom seks og tolv ganger grunnbeløpet. Inntekt over tolv ganger grunnbeløpet tas ikke med.
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§8-35)
+ */
+
+fun `§ 8-35 ledd 2`(pensjonsgivendeInntekter: List<PensjonsgivendeInntektSubsumsjon>, nåværendeGrunnbeløp: Double, skjæringstidspunkt: LocalDate, sykepengegrunnlag: Double) = Subsumsjon.enkelSubsumsjon(
+    utfall = VILKAR_BEREGNET,
+    lovverk = "folketrygdloven",
+    versjon = LocalDate.of(2018, 12, 20),
+    paragraf = PARAGRAF_8_35,
+    ledd = LEDD_2,
+    input = mapOf(
+        "pensjonsgivendeInntekter" to pensjonsgivendeInntekter.subsumsjonsformat(),
+        "nåværendeGrunnbeløp" to nåværendeGrunnbeløp,
+        "skjæringstidspunkt" to skjæringstidspunkt
+    ),
+    output = mapOf(
+        "sykepengegrunnlag" to sykepengegrunnlag
+    )
+)
+
+/**
  * Vurdering av krav til minimum inntekt ved alder mellom 67 og 70 år
  *
  * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-51)
@@ -964,7 +990,7 @@ fun `§ 22-13 ledd 3`(avskjæringsdato: LocalDate, perioder: Collection<ClosedRa
         utfall = VILKAR_IKKE_OPPFYLT,
         lovverk = "folketrygdloven",
         versjon = LocalDate.of(2011, 12, 16),
-        paragraf = Paragraf.PARAGRAF_22_13,
+        paragraf = PARAGRAF_22_13,
         ledd = LEDD_3,
         input = mapOf(
             "avskjæringsdato" to avskjæringsdato
@@ -981,7 +1007,7 @@ fun `fvl § 35 ledd 1`() =
         utfall = VILKAR_OPPFYLT,
         lovverk = "forvaltningsloven",
         versjon = LocalDate.of(2021, 6, 1),
-        paragraf = Paragraf.PARAGRAF_35,
+        paragraf = PARAGRAF_35,
         ledd = LEDD_1,
         input = mapOf(
             "stadfesting" to true
