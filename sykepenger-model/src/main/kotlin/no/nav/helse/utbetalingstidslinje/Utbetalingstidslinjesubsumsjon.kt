@@ -5,7 +5,7 @@ import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`Trygderettens kjennelse 2006-4023`
-import no.nav.helse.etterlevelse.`§ 8-11 ledd 1`
+import no.nav.helse.etterlevelse.`§ 8-11`
 import no.nav.helse.etterlevelse.`§ 8-16 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a`
@@ -121,8 +121,7 @@ internal class Utbetalingstidslinjesubsumsjon(
     }
 
     private fun subsummerSelvstendig(vedtaksperiode: Periode) {
-        //TODO("Implementer subsumsjon for selvstendig næringsdrivende")
-        //subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a`(false, venteperiodedager, tidslinjesubsumsjonsformat))
+        subsumsjonslogg.logg(`§ 8-11`(vedtaksperiode, helger))
 
         // kap 8-34 ledd 1
         utbetalteDager
@@ -143,7 +142,7 @@ internal class Utbetalingstidslinjesubsumsjon(
         }
         subsumsjonslogg.logg(`§ 8-19 andre ledd`(arbeidsgiverperiodedager, tidslinjesubsumsjonsformat))
         subsumsjonslogg.logg(`§ 8-17 ledd 1`(arbeidsgiverperiodeNavdager))
-        subsumsjonslogg.logg(`§ 8-11 ledd 1`(vedtaksperiode, helger))
+        subsumsjonslogg.logg(`§ 8-11`(vedtaksperiode, helger))
         subsumsjonslogg.logg(`§ 8-17 ledd 2`(fridager, tidslinjesubsumsjonsformat))
         subsumsjonslogg.logg(`§ 8-48 ledd 2 punktum 2`(aap, tidslinjesubsumsjonsformat))
         subsumsjonslogg.logg(`Trygderettens kjennelse 2006-4023`(andreYtelser, tidslinjesubsumsjonsformat))

@@ -234,12 +234,12 @@ fun `§ 8-10 ledd 3`(årsinntekt: Double, inntektOmregnetTilDaglig: Double) =
  *
  * @param dato dagen vilkåret ikke er oppfylt for
  */
-fun `§ 8-11 ledd 1`(vedtaksperiode: ClosedRange<LocalDate>, dato: Collection<ClosedRange<LocalDate>>) =
+fun `§ 8-11`(vedtaksperiode: ClosedRange<LocalDate>, dato: Collection<ClosedRange<LocalDate>>) =
     Subsumsjon.periodisertSubsumsjon(
         lovverk = "folketrygdloven",
         perioder = dato,
         paragraf = PARAGRAF_8_11,
-        ledd = 1.ledd,
+        ledd = null,
         utfall = VILKAR_IKKE_OPPFYLT,
         versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
         input = mapOf("periode" to mapOf("fom" to vedtaksperiode.start, "tom" to vedtaksperiode.endInclusive))
@@ -927,7 +927,7 @@ fun `§ 8-51 ledd 2`(
 )
 
 /**
- * Vurdering av maksimalt antall sykepengedager ved fytle 67 år
+ * Vurdering av maksimalt antall sykepengedager ved fylte 67 år
  *
  * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-51)
  *

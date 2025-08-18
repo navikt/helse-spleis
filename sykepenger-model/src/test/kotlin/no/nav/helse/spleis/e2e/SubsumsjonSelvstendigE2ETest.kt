@@ -5,9 +5,11 @@ import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.selvstendig
+import no.nav.helse.etterlevelse.FOLKETRYGDLOVENS_OPPRINNELSESDATO
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Ledd.LEDD_2
 import no.nav.helse.etterlevelse.Paragraf
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_11
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_35
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
@@ -51,6 +53,39 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                     "nåværendeGrunnbeløp" to 93634.0
                 ),
                 output = mapOf("sykepengegrunnlag" to 460589.0)
+            )
+
+            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `Subsumerer § 8-11 - utbetaler ikke helg`() = Toggle.SelvstendigNæringsdrivende.enable {
+        selvstendig {
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig)
+                )
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                paragraf = PARAGRAF_8_11,
+                versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+                input = mapOf(
+                    "periode" to mapOf("fom" to 1.januar, "tom" to 31.januar)
+                ),
+                output = mapOf(
+                    "perioder" to listOf(
+                        mapOf("fom" to 20.januar, "tom" to 21.januar),
+                        mapOf("fom" to 27.januar, "tom" to 28.januar)
+                    )
+                )
             )
 
             assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())

@@ -628,7 +628,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
         SubsumsjonInspektør(regelverkslogg).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_11,
-            ledd = LEDD_1,
             versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
             input = mapOf(
                 "periode" to mapOf("fom" to 1.januar, "tom" to 31.januar)
