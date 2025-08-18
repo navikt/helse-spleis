@@ -9,10 +9,13 @@ import no.nav.helse.dsl.selvstendig
 import no.nav.helse.etterlevelse.FOLKETRYGDLOVENS_OPPRINNELSESDATO
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Ledd.LEDD_2
+import no.nav.helse.etterlevelse.Ledd.LEDD_3
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_22_13
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_11
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_12
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_34
-import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_11
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_35
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.SubsumsjonInspektør
@@ -27,6 +30,50 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
+
+    @Test
+    fun `22-13 ledd 3 - Vurdering av foreldelse`() = Toggle.SelvstendigNæringsdrivende.enable {
+        selvstendig {
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig)
+                ),
+                sendtTilNAVEllerArbeidsgiver = LocalDate.of(2018, 5, 1).atStartOfDay(),
+            )
+
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                paragraf = PARAGRAF_22_13,
+                ledd = LEDD_3,
+                versjon = LocalDate.of(2011, 12, 16),
+                input = mapOf("avskjæringsdato" to 1.februar),
+                output = mapOf(
+                    "perioder" to
+                        listOf(
+                            mapOf(
+                                "fom" to 17.januar,
+                                "tom" to 19.januar,
+                            ),
+                            mapOf(
+                                "fom" to 22.januar,
+                                "tom" to 26.januar,
+                            ),
+                            mapOf(
+                                "fom" to 29.januar,
+                                "tom" to 31.januar,
+                            ),
+                        )
+                ),
+                organisasjonsnummer = selvstendig
+            )
+            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
+        }
+
+    }
 
     @Test
     fun `§ 8-12 ledd 2 - Vurdering av ny rett til sykepenger`() = Toggle.SelvstendigNæringsdrivende.enable {
