@@ -27,7 +27,7 @@ internal class MaksimumSykepengedagerfilter(
     private val infotrygdtidslinje: Utbetalingstidslinje
 ) : UtbetalingstidslinjerFilter {
 
-    private companion object {
+    internal companion object {
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26 * 7
         private const val HISTORISK_PERIODE_I_ÅR: Long = 3
     }

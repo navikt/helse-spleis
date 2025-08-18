@@ -39,6 +39,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbe
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.NyVilkårsprøvingNødvendig
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
+import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -268,7 +269,7 @@ internal class MaksimumSykepengedagerfilterTest {
 
     @Test
     fun `26 uker arbeid resetter utbetalingsgrense`() {
-        val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, (26 * 7).ARB, 10.NAV)
+        val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).ARB, 10.NAV)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
@@ -320,7 +321,7 @@ internal class MaksimumSykepengedagerfilterTest {
 
     @Test
     fun `en ubetalt sykedag før opphold`() {
-        val tidslinje = tidslinjeOf(16.AP, 249.NAVDAGER, (26 * 7).ARB, 10.NAV)
+        val tidslinje = tidslinjeOf(16.AP, 249.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).ARB, 10.NAV)
         assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
@@ -356,7 +357,7 @@ internal class MaksimumSykepengedagerfilterTest {
 
     @Test
     fun `opphold på mindre enn 26 uker skal ikke nullstille telleren`() {
-        val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, (26 * 7 - 1).FRI, 1.NAVDAGER)
+        val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER - 1).FRI, 1.NAVDAGER)
         assertEquals(listOf(28.juni(2019)), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
@@ -382,20 +383,20 @@ internal class MaksimumSykepengedagerfilterTest {
 
     @Test
     fun `sjekk 60 dagers grense for 67 åringer med 26 ukers opphold`() {
-        val tidslinje = tidslinjeOf(10.NAV, 60.NAVDAGER, (26 * 7).ARB, 60.NAVDAGER)
+        val tidslinje = tidslinjeOf(10.NAV, 60.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).ARB, 60.NAVDAGER)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
     }
 
     @Test
     fun `sjekk at 26 uker med syk etter karantene ikke starter utbetaling`() {
-        val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, (26 * 7).NAVDAGER, 60.NAVDAGER)
-        assertEquals(26 * 7 + 60, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
+        val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).NAVDAGER, 60.NAVDAGER)
+        assertEquals(TILSTREKKELIG_OPPHOLD_I_SYKEDAGER + 60, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
     }
 
     @Test
     fun `sjekk at 26 uker med syk etter karantene starter utbetaling etter første arbeidsdag`() {
-        val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, (26 * 7).NAVDAGER, 1.ARB, 60.NAVDAGER)
-        assertEquals(26 * 7, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
+        val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).NAVDAGER, 1.ARB, 60.NAVDAGER)
+        assertEquals(TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
     }
 
     @Test
@@ -420,7 +421,7 @@ internal class MaksimumSykepengedagerfilterTest {
 
     @Test
     fun `bruke opp alt fom 67 år`() {
-        val tidslinje = tidslinjeOf(188.NAVDAGER, 61.NAVDAGER, (26 * 7).ARB, 61.NAVDAGER, 36.ARB, 365.ARB, 365.ARB, 1.NAVDAGER, startDato = 30.mars(2017))
+        val tidslinje = tidslinjeOf(188.NAVDAGER, 61.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).ARB, 61.NAVDAGER, 36.ARB, 365.ARB, 365.ARB, 1.NAVDAGER, startDato = 30.mars(2017))
         assertEquals(listOf(13.mars, 5.desember, 11.januar(2021)), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
         val inspektør = avvisteTidslinjer.single().inspektør
         assertEquals(listOf(SykepengedagerOppbrukt), inspektør.begrunnelse(13.mars))
@@ -446,7 +447,7 @@ internal class MaksimumSykepengedagerfilterTest {
 
     @Test
     fun `begrunnelse ved flere oppbrukte rettigheter - hel tidslinje`() {
-        val tidslinje = tidslinjeOf(248.NAVDAGER, 1.NAVDAGER, (26 * 7).ARB, 60.NAVDAGER, 1.NAVDAGER, startDato = 23.februar(2017))
+        val tidslinje = tidslinjeOf(248.NAVDAGER, 1.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).ARB, 60.NAVDAGER, 1.NAVDAGER, startDato = 23.februar(2017))
         val avvisteDager = tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018)
         assertEquals(2, avvisteDager.size)
         assertEquals(SykepengedagerOppbrukt, avvisteTidslinjer.first().inspektør.avvistedager.first().begrunnelser.single())
@@ -462,31 +463,31 @@ internal class MaksimumSykepengedagerfilterTest {
 
     @Test
     fun `sjekk at 26 uker med syk etter karantene ikke starter utbetaling gammel person`() {
-        val tidslinje = tidslinjeOf(11.NAV, 60.NAVDAGER, (26 * 7).NAVDAGER, 60.NAVDAGER)
-        assertEquals(26 * 7 + 60, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018).size)
+        val tidslinje = tidslinjeOf(11.NAV, 60.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).NAVDAGER, 60.NAVDAGER)
+        assertEquals(TILSTREKKELIG_OPPHOLD_I_SYKEDAGER + 60, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018).size)
     }
 
     @Test
     fun `sjekk at 26 uker med syk etter karantene starter utbetaling for gammel person etter første arbeidsdag`() {
-        val tidslinje = tidslinjeOf(11.NAV, 60.NAVDAGER, (26 * 7).NAVDAGER, 1.ARB, 60.NAVDAGER)
-        assertEquals(26 * 7, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018).size)
+        val tidslinje = tidslinjeOf(11.NAV, 60.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).NAVDAGER, 1.ARB, 60.NAVDAGER)
+        assertEquals(TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018).size)
     }
 
     @Test
     fun `helgedager teller ikke som opphold`() {
-        val tidslinje = tidslinjeOf(248.NAVDAGER, (26 * 7).HELG, 60.NAVDAGER)
+        val tidslinje = tidslinjeOf(248.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).HELG, 60.NAVDAGER)
         assertEquals(60, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
     }
 
     @Test
     fun `helgedager teller som opphold hvis før av arbeidsdag`() {
-        val tidslinje = tidslinjeOf(248.NAVDAGER, (26 * 7 - 1).HELG, 1.ARB, 60.NAVDAGER)
+        val tidslinje = tidslinjeOf(248.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER - 1).HELG, 1.ARB, 60.NAVDAGER)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
     @Test
     fun `helgedager før sykdom er ikke opphold`() {
-        val tidslinje = tidslinjeOf(248.NAVDAGER, 1.ARB, (26 * 7 - 1).HELG, 60.NAVDAGER)
+        val tidslinje = tidslinjeOf(248.NAVDAGER, 1.ARB, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER - 1).HELG, 60.NAVDAGER)
         assertEquals(60, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
     }
 
@@ -517,7 +518,7 @@ internal class MaksimumSykepengedagerfilterTest {
 
     @Test
     fun `helgedager teller som opphold hvis før og etter arbeidsdag`() {
-        val tidslinje = tidslinjeOf(248.NAVDAGER, 1.ARB, (26 * 7 - 2).HELG, 1.ARB, 60.NAVDAGER)
+        val tidslinje = tidslinjeOf(248.NAVDAGER, 1.ARB, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER - 2).HELG, 1.ARB, 60.NAVDAGER)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
@@ -542,7 +543,7 @@ internal class MaksimumSykepengedagerfilterTest {
     @Test
     fun `ukjente dager generert når du legger til to utbetalingstidslinjer teller som ikke-utbetalingsdager`() {
         val tidslinje1 = tidslinjeOf(50.NAVDAGER)
-        val tidslinje2 = tidslinjeOf((26 * 7).UTELATE, 248.NAVDAGER, startDato = tidslinje1.periode().endInclusive.plusDays(1))
+        val tidslinje2 = tidslinjeOf((TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).UTELATE, 248.NAVDAGER, startDato = tidslinje1.periode().endInclusive.plusDays(1))
         val tidslinje = tidslinje1 + tidslinje2
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
