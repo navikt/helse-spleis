@@ -10,6 +10,8 @@ import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd
@@ -34,11 +36,10 @@ internal class UtkastTilVedtakBuilder(
     private val harPeriodeRettFør: Boolean,
     overlapperMedInfotrygd: Boolean
 ) {
-    private var automatiskBehandling by Delegates.notNull<Boolean>()
     private var forbrukteSykedager by Delegates.notNull<Int>()
     private var gjenståendeSykedager by Delegates.notNull<Int>()
     private lateinit var foreløpigBeregnetSluttPåSykepenger: LocalDate
-    private lateinit var utbetalingsdager: List<PersonObserver.Utbetalingsdag>
+    private lateinit var utbetalingsdager: List<Map<String, Any>>
     private val tags = mutableSetOf<Tag>()
 
     init {
@@ -114,10 +115,6 @@ internal class UtkastTilVedtakBuilder(
         }
     }
 
-    internal fun automatiskBehandling(erAutomatiskBehandlet: Boolean) = apply {
-        this.automatiskBehandling = erAutomatiskBehandlet
-    }
-
     internal fun sykepengerettighet(forbrukteSykedager: Int, gjenståendeSykedager: Int, foreløpigBeregnetSluttPåSykepenger: LocalDate) = apply {
         this.forbrukteSykedager = forbrukteSykedager
         this.gjenståendeSykedager = gjenståendeSykedager
@@ -135,7 +132,9 @@ internal class UtkastTilVedtakBuilder(
         this.refusjonstidslinje(refusjonstidslinje)
 
         tags.add(utbetalingstidslinje.behandlingsresultat)
-        this.utbetalingsdager = UtbetalingsdagerBuilder(sykdomstidslinje, utbetalingstidslinje).result()
+        this.utbetalingsdager = UtbetalingsdagerBuilder(sykdomstidslinje, utbetalingstidslinje)
+            .result()
+            .map { dag -> dag.tilBehovMap() }
     }
 
     private val Utbetalingstidslinje.behandlingsresultat
@@ -256,6 +255,10 @@ internal class UtkastTilVedtakBuilder(
                     "tom" to "${it.periode.endInclusive}"
                 )
             },
+            "forbrukteSykedager" to forbrukteSykedager,
+            "gjenståendeSykedager" to gjenståendeSykedager,
+            "foreløpigBeregnetSluttPåSykepenger" to "$foreløpigBeregnetSluttPåSykepenger",
+            "utbetalingsdager" to utbetalingsdager,
             "sykepengegrunnlagsfakta" to when (sykepengegrunnlagsfakta) {
                 is FastsattIInfotrygd -> mapOf(
                     "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
@@ -336,12 +339,7 @@ internal class UtkastTilVedtakBuilder(
                     `6G` = fakta.`6G`.toDesimaler,
                     arbeidsgivere = fakta.arbeidsgivere.map { it.copy(omregnetÅrsinntekt = it.omregnetÅrsinntekt.toDesimaler, skjønnsfastsatt = it.skjønnsfastsatt.toDesimaler) }
                 )
-            },
-            automatiskBehandling = automatiskBehandling,
-            forbrukteSykedager = forbrukteSykedager,
-            gjenståendeSykedager = gjenståendeSykedager,
-            foreløpigBeregnetSluttPåSykepenger = foreløpigBeregnetSluttPåSykepenger,
-            utbetalingsdager = utbetalingsdager
+            }
         )
     }
 
@@ -389,3 +387,47 @@ internal class UtkastTilVedtakBuilder(
         }
     }
 }
+
+private fun PersonObserver.Utbetalingsdag.tilBehovMap() =
+    mapOf(
+        "dato" to "${this.dato}",
+        "type" to when (this.type) {
+            Dagtype.ArbeidsgiverperiodeDag -> "ArbeidsgiverperiodeDag"
+            Dagtype.NavDag -> "NavDag"
+            Dagtype.NavHelgDag -> "NavHelgDag"
+            Dagtype.Arbeidsdag -> "Arbeidsdag"
+            Dagtype.Fridag -> "Fridag"
+            Dagtype.AvvistDag -> "AvvistDag"
+            Dagtype.UkjentDag -> "UkjentDag"
+            Dagtype.ForeldetDag -> "ForeldetDag"
+            Dagtype.Permisjonsdag -> "Permisjonsdag"
+            Dagtype.Feriedag -> "Feriedag"
+            Dagtype.ArbeidIkkeGjenopptattDag -> "ArbeidIkkeGjenopptattDag"
+            Dagtype.AndreYtelser -> "AndreYtelser"
+            Dagtype.Venteperiodedag -> "Venteperiodedag"
+        },
+        "beløpTilArbeidsgiver" to this.beløpTilArbeidsgiver,
+        "beløpTilBruker" to this.beløpTilBruker,
+        "sykdomsgrad" to this.sykdomsgrad,
+        "begrunnelser" to (this.begrunnelser?.map {
+            when (it) {
+                EksternBegrunnelseDTO.SykepengedagerOppbrukt -> "SykepengedagerOppbrukt"
+                EksternBegrunnelseDTO.SykepengedagerOppbruktOver67 -> "SykepengedagerOppbruktOver67"
+                EksternBegrunnelseDTO.MinimumInntekt -> "MinimumInntekt"
+                EksternBegrunnelseDTO.MinimumInntektOver67 -> "MinimumInntektOver67"
+                EksternBegrunnelseDTO.EgenmeldingUtenforArbeidsgiverperiode -> "EgenmeldingUtenforArbeidsgiverperiode"
+                EksternBegrunnelseDTO.AndreYtelserAap -> "AndreYtelserAap"
+                EksternBegrunnelseDTO.AndreYtelserDagpenger -> "AndreYtelserDagpenger"
+                EksternBegrunnelseDTO.AndreYtelserForeldrepenger -> "AndreYtelserForeldrepenger"
+                EksternBegrunnelseDTO.AndreYtelserOmsorgspenger -> "AndreYtelserOmsorgspenger"
+                EksternBegrunnelseDTO.AndreYtelserOpplaringspenger -> "AndreYtelserOpplaringspenger"
+                EksternBegrunnelseDTO.AndreYtelserPleiepenger -> "AndreYtelserPleiepenger"
+                EksternBegrunnelseDTO.AndreYtelserSvangerskapspenger -> "AndreYtelserSvangerskapspenger"
+                EksternBegrunnelseDTO.MinimumSykdomsgrad -> "MinimumSykdomsgrad"
+                EksternBegrunnelseDTO.EtterDødsdato -> "EtterDødsdato"
+                EksternBegrunnelseDTO.ManglerMedlemskap -> "ManglerMedlemskap"
+                EksternBegrunnelseDTO.ManglerOpptjening -> "ManglerOpptjening"
+                EksternBegrunnelseDTO.Over70 -> "Over70"
+            }
+        } ?: emptyList())
+    )

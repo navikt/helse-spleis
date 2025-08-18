@@ -879,7 +879,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utkastTilVedtakBuilder
                     .utbetalingsinformasjon(utbetaling, utbetalingstidslinje, sykdomstidslinje, refusjonstidslinje)
                     .sykepengerettighet(maksdatoresultat.antallForbrukteDager, maksdatoresultat.gjenståendeDager, maksdatoresultat.maksdato)
-                    .automatiskBehandling(utbetaling.automatiskBehandling)
                 grunnlagsdata.berik(utkastTilVedtakBuilder)
                 behandling.observatører.forEach { it.utkastTilVedtak(utkastTilVedtakBuilder.buildUtkastTilVedtak()) }
                 Aktivitet.Behov.godkjenning(aktivitetsloggMedUtbetalingkontekst, utkastTilVedtakBuilder.buildGodkjenningsbehov())
@@ -891,7 +890,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 builder
                     .utbetalingsinformasjon(utbetaling, utbetalingstidslinje, sykdomstidslinje, refusjonstidslinje)
                     .sykepengerettighet(maksdatoresultat.antallForbrukteDager, maksdatoresultat.gjenståendeDager, maksdatoresultat.maksdato)
-                    .automatiskBehandling(utbetaling.automatiskBehandling)
                 grunnlagsdata.berik(builder)
             }
 

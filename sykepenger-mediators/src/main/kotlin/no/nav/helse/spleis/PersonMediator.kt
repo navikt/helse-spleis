@@ -641,13 +641,6 @@ internal class PersonMediator(
                             "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
                             "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt
                         )
-                    },
-                    "automatiskBehandling" to event.automatiskBehandling,
-                    "forbrukteSykedager" to event.forbrukteSykedager,
-                    "gjenståendeSykedager" to event.gjenståendeSykedager,
-                    "foreløpigBeregnetSluttPåSykepenger" to event.foreløpigBeregnetSluttPåSykepenger,
-                    "utbetalingsdager" to event.utbetalingsdager.map {
-                        it.tilJsonMap()
                     }
                 )
             )

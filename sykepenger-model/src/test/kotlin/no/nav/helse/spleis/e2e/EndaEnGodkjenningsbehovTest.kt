@@ -4,16 +4,20 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.august
+import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hentFeltFraBehov
 import no.nav.helse.inspectors.inspektør
@@ -53,7 +57,45 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterSimulering()
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-        assertGodkjenningsbehov(tags = setOf("Førstegangsbehandling", "DelvisInnvilget", "Arbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"))
+        assertGodkjenningsbehov(
+            tags = setOf("Førstegangsbehandling", "DelvisInnvilget", "Arbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"),
+            forbrukteSykedager = 10,
+            gjenståendeSykedager = 238,
+            foreløpigBeregnetSluttPåSykepenger = 31.desember,
+            utbetalingsdager = listOf(
+                utbetalingsdag(1.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(2.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(3.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(4.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(5.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(6.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(7.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(8.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(9.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(10.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(11.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(12.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(13.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(14.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(15.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(16.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(17.januar, "NavDag", 1431, 0, 100),
+                utbetalingsdag(18.januar, "NavDag", 1431, 0, 100),
+                utbetalingsdag(19.januar, "NavDag", 1431, 0, 100),
+                utbetalingsdag(20.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(21.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(22.januar, "NavDag", 1431, 0, 100),
+                utbetalingsdag(23.januar, "NavDag", 1431, 0, 100),
+                utbetalingsdag(24.januar, "NavDag", 1431, 0, 100),
+                utbetalingsdag(25.januar, "NavDag", 1431, 0, 100),
+                utbetalingsdag(26.januar, "NavDag", 1431, 0, 100),
+                utbetalingsdag(27.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(28.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(29.januar, "NavDag", 1431, 0, 100),
+                utbetalingsdag(30.januar, "NavDag", 1431, 0, 100),
+                utbetalingsdag(31.januar, "AvvistDag", 0, 0, 0, listOf("MinimumSykdomsgrad"))
+            )
+        )
         assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
     }
 
@@ -65,14 +107,55 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterYtelser()
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-        assertGodkjenningsbehov(tags = setOf("Førstegangsbehandling", "Avslag", "IngenUtbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"))
+        assertGodkjenningsbehov(
+            tags = setOf("Førstegangsbehandling", "Avslag", "IngenUtbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"),
+            forbrukteSykedager = 0,
+            gjenståendeSykedager = 248,
+            foreløpigBeregnetSluttPåSykepenger = 14.januar(2019),
+            utbetalingsdager = listOf(
+                utbetalingsdag(1.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(2.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(3.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(4.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(5.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(6.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(7.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(8.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(9.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(10.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(11.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(12.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(13.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(14.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(15.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(16.januar, "ArbeidsgiverperiodeDag", 0, 0, 19),
+                utbetalingsdag(17.januar, "AvvistDag", 0, 0, 0, listOf("MinimumSykdomsgrad")),
+                utbetalingsdag(18.januar, "AvvistDag", 0, 0, 0, listOf("MinimumSykdomsgrad")),
+                utbetalingsdag(19.januar, "AvvistDag", 0, 0, 0, listOf("MinimumSykdomsgrad")),
+                utbetalingsdag(20.januar, "NavHelgDag", 0, 0, 19),
+                utbetalingsdag(21.januar, "NavHelgDag", 0, 0, 19),
+                utbetalingsdag(22.januar, "AvvistDag", 0, 0, 0, listOf("MinimumSykdomsgrad")),
+                utbetalingsdag(23.januar, "AvvistDag", 0, 0, 0, listOf("MinimumSykdomsgrad")),
+                utbetalingsdag(24.januar, "AvvistDag", 0, 0, 0, listOf("MinimumSykdomsgrad")),
+                utbetalingsdag(25.januar, "AvvistDag", 0, 0, 0, listOf("MinimumSykdomsgrad")),
+                utbetalingsdag(26.januar, "AvvistDag", 0, 0, 0, listOf("MinimumSykdomsgrad")),
+                utbetalingsdag(27.januar, "NavHelgDag", 0, 0, 19),
+                utbetalingsdag(28.januar, "NavHelgDag", 0, 0, 19),
+                utbetalingsdag(29.januar, "AvvistDag", 0, 0, 0, listOf("MinimumSykdomsgrad")),
+                utbetalingsdag(30.januar, "AvvistDag", 0, 0, 0, listOf("MinimumSykdomsgrad")),
+                utbetalingsdag(31.januar, "AvvistDag", 0, 0, 0, listOf("MinimumSykdomsgrad"))
+            )
+        )
         assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
     }
 
     @Test
     fun `Arbeidsgiver ønsker refusjon for én dag i perioden`() {
         tilGodkjenning(januar, refusjon = Inntektsmelding.Refusjon(INGEN, null, listOf(Inntektsmelding.Refusjon.EndringIRefusjon(1.daglig, 31.januar))), organisasjonsnummere = arrayOf(a1))
-        assertGodkjenningsbehov(tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "Personutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"))
+        assertGodkjenningsbehov(
+            tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "Personutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"),
+            utbetalingsdager = standardUtbetalingsdager(0, 1431).dropLast(1) + 31.januar.somPeriode().utbetalingsdager(1, 1430)
+        )
     }
 
     @Test
@@ -95,7 +178,10 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             perioderMedSammeSkjæringstidspunkt = listOf(
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
                 mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
-            )
+            ),
+            forbrukteSykedager = 31,
+            gjenståendeSykedager = 217,
+            utbetalingsdager = (1.februar til 28.februar).utbetalingsdager(0, 1431),
         )
     }
 
@@ -117,6 +203,10 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 mapOf("organisasjonsnummer" to a1, "beløp" to 240000.0),
                 mapOf("organisasjonsnummer" to a2, "beløp" to 240000.0)
             ),
+            forbrukteSykedager = 18,
+            gjenståendeSykedager = 230,
+            foreløpigBeregnetSluttPåSykepenger = 28.desember,
+            utbetalingsdager = (1.februar til 10.februar).utbetalingsdager(923, 0),
             perioderMedSammeSkjæringstidspunkt = listOf(
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
@@ -172,7 +262,13 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag()
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertGodkjenningsbehov(tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "Ferie", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"))
+        assertGodkjenningsbehov(
+            tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "Ferie", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+            forbrukteSykedager = 10,
+            gjenståendeSykedager = 238,
+            foreløpigBeregnetSluttPåSykepenger = 31.desember,
+            utbetalingsdager = standardUtbetalingsdager(1431, 0).dropLast(1) + 31.januar.somPeriode().feriedager()
+        )
         val utkastTilvedtak = observatør.utkastTilVedtakEventer.last()
         assertTrue(utkastTilvedtak.tags.contains("Ferie"))
     }
@@ -183,6 +279,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         assertGodkjenningsbehov(
             tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "6GBegrenset", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
             omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 1_200_000.0)),
+            utbetalingsdager = standardUtbetalingsdager(2161, 0),
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to 1_200_000.0,
                 "sykepengegrunnlag" to 561_804.0,
@@ -219,6 +316,10 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                     "tom" to 20.februar.toString()
                 ),
             ),
+            forbrukteSykedager = 18,
+            gjenståendeSykedager = 230,
+            foreløpigBeregnetSluttPåSykepenger = 8.januar(2019),
+            utbetalingsdager = (10.februar til 20.februar).utbetalingsdager(462, 0),
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to 10000.månedlig.årlig,
                 "6G" to 561_804.0,
@@ -353,7 +454,10 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertGodkjenningsbehov(tags = setOf("Førstegangsbehandling", "Innvilget", "Personutbetaling", "EnArbeidsgiver"))
+        assertGodkjenningsbehov(
+            tags = setOf("Førstegangsbehandling", "Innvilget", "Personutbetaling", "EnArbeidsgiver"),
+            utbetalingsdager = standardUtbetalingsdager(0, 1431)
+        )
     }
 
     @Test
@@ -367,7 +471,10 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertGodkjenningsbehov(tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "Personutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"))
+        assertGodkjenningsbehov(
+            tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "Personutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+            utbetalingsdager = standardUtbetalingsdager(715, 716)
+        )
     }
 
     @Test
@@ -387,6 +494,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
                 mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
             ),
+            foreløpigBeregnetSluttPåSykepenger = 25.januar(2019),
+            utbetalingsdager = (1.februar til 28.februar).feriedager(),
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to INNTEKT.årlig,
                 "sykepengegrunnlag" to INNTEKT.årlig,
@@ -423,6 +532,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             omregnedeÅrsinntekter = listOf(
                 mapOf("organisasjonsnummer" to a1, "beløp" to (INNTEKT/2).årlig)
             ),
+            utbetalingsdager = standardUtbetalingsdager(715, 0),
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to (INNTEKT/2).årlig,
                 "sykepengegrunnlag" to (INNTEKT/2).årlig,
@@ -448,7 +558,12 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertGodkjenningsbehov(tags = setOf("Førstegangsbehandling", "Innvilget", "Revurdering", "NegativArbeidsgiverutbetaling", "Personutbetaling", "EnArbeidsgiver"), kanAvvises = false, utbetalingstype = "REVURDERING")
+        assertGodkjenningsbehov(
+            tags = setOf("Førstegangsbehandling", "Innvilget", "Revurdering", "NegativArbeidsgiverutbetaling", "Personutbetaling", "EnArbeidsgiver"),
+            kanAvvises = false,
+            utbetalingstype = "REVURDERING",
+            utbetalingsdager = standardUtbetalingsdager(0, 1431),
+        )
     }
 
     @Test
@@ -479,6 +594,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString())
             ),
+            utbetalingsdager = standardUtbetalingsdager(1081, 0),
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to 744000.årlig.årlig,
                 "sykepengegrunnlag" to 561_804.0,
@@ -510,7 +626,45 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     fun `Periode med minst én navdag og minst én avslagsdag får DelvisInnvilget-tag`() {
         createTestPerson(Personidentifikator("18.01.1948"), 18.januar(1948))
         tilGodkjenning(januar, a1, beregnetInntekt = INNTEKT)
-        assertGodkjenningsbehov(tags = setOf("Førstegangsbehandling", "DelvisInnvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"))
+        assertGodkjenningsbehov(
+            tags = setOf("Førstegangsbehandling", "DelvisInnvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+            forbrukteSykedager = 1,
+            gjenståendeSykedager = 0,
+            foreløpigBeregnetSluttPåSykepenger = 17.januar,
+            utbetalingsdager = listOf(
+                utbetalingsdag(1.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(2.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(3.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(4.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(5.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(6.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(7.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(8.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(9.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(10.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(11.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(12.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(13.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(14.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(15.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(16.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(17.januar, "NavDag", 1431, 0, 100),
+                utbetalingsdag(18.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(19.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(20.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(21.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(22.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(23.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(24.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(25.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(26.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(27.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(28.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(29.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(30.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(31.januar, "AvvistDag", 0, 0, 0, listOf("Over70"))
+            )
+        )
     }
 
     @Test
@@ -524,7 +678,45 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertGodkjenningsbehov(tags = setOf("Førstegangsbehandling", "Avslag", "IngenUtbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"))
+        assertGodkjenningsbehov(
+            tags = setOf("Førstegangsbehandling", "Avslag", "IngenUtbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+            forbrukteSykedager = 0,
+            gjenståendeSykedager = 0,
+            foreløpigBeregnetSluttPåSykepenger = 15.januar,
+            utbetalingsdager = listOf(
+                utbetalingsdag(1.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(2.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(3.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(4.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(5.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(6.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(7.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(8.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(9.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(10.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(11.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(12.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(13.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(14.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(15.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(16.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(17.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(18.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(19.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(20.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(21.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(22.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(23.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(24.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(25.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(26.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(27.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(28.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(29.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(30.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(31.januar, "AvvistDag", 0, 0, 0, listOf("Over70"))
+            )
+        )
     }
 
     @Test
@@ -538,7 +730,45 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertGodkjenningsbehov(tags = setOf("Førstegangsbehandling", "Avslag", "IngenUtbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"))
+        assertGodkjenningsbehov(
+            tags = setOf("Førstegangsbehandling", "Avslag", "IngenUtbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+            forbrukteSykedager = 0,
+            gjenståendeSykedager = 0,
+            foreløpigBeregnetSluttPåSykepenger = 15.januar(2016),
+            utbetalingsdager = listOf(
+                utbetalingsdag(1.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(2.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(3.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(4.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(5.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(6.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(7.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(8.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(9.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(10.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(11.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(12.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(13.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(14.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(15.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(16.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+                utbetalingsdag(17.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(18.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(19.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(20.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(21.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(22.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(23.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(24.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(25.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(26.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(27.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(28.januar, "NavHelgDag", 0, 0, 100),
+                utbetalingsdag(29.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(30.januar, "AvvistDag", 0, 0, 0, listOf("Over70")),
+                utbetalingsdag(31.januar, "AvvistDag", 0, 0, 0, listOf("Over70"))
+            )
+        )
     }
 
     @Test
@@ -558,7 +788,9 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             perioderMedSammeSkjæringstidspunkt = listOf(
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
                 mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
-            )
+            ),
+            foreløpigBeregnetSluttPåSykepenger = 25.januar(2019),
+            utbetalingsdager = (1.februar til 28.februar).feriedager(),
         )
     }
 
@@ -580,7 +812,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             perioderMedSammeSkjæringstidspunkt = listOf(
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
                 mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
-            )
+            ),
+            forbrukteSykedager = 31,
+            gjenståendeSykedager = 217,
+            foreløpigBeregnetSluttPåSykepenger = 28.desember,
+            utbetalingsdager = (1.februar til 28.februar).utbetalingsdager(1431, 0)
         )
     }
 
@@ -685,6 +921,10 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         perioderMedSammeSkjæringstidspunkt: List<Map<String, String>> = listOf(
             mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
         ),
+        forbrukteSykedager: Int = 11,
+        gjenståendeSykedager: Int = 237,
+        foreløpigBeregnetSluttPåSykepenger: LocalDate = 28.desember,
+        utbetalingsdager: List<Map<String, Any>> = standardUtbetalingsdager(1431, 0),
         sykepengegrunnlagsfakta: Map<String, Any> = mapOf(
             "omregnetÅrsinntektTotalt" to INNTEKT.årlig,
             "sykepengegrunnlag" to 372_000.0,
@@ -712,6 +952,10 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         val actualOmregnedeÅrsinntekter = hentFelt<List<Map<String, String>>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "omregnedeÅrsinntekter")!!
         val actualBehandlingId = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "behandlingId")!!
         val actualPerioderMedSammeSkjæringstidspunkt = hentFelt<Any>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "perioderMedSammeSkjæringstidspunkt")!!
+        val actualForbrukteSykedager = hentFelt<Int>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "forbrukteSykedager")!!
+        val actualGjenståendeSykedager = hentFelt<Int>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "gjenståendeSykedager")!!
+        val actualForeløpigBeregnetSluttPåSykepenger = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "foreløpigBeregnetSluttPåSykepenger")!!
+        val actualUtbetalingsdager = hentFelt<List<Map<String, Any>>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "utbetalingsdager")!!
 
         hendelser?.let { assertHendelser(it, vedtaksperiodeId) }
         assertSykepengegrunnlagsfakta(vedtaksperiodeId, sykepengegrunnlagsfakta)
@@ -728,6 +972,10 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         assertEquals(omregnedeÅrsinntekter, actualOmregnedeÅrsinntekter)
         assertEquals(behandlingId.toString(), actualBehandlingId)
         assertEquals(perioderMedSammeSkjæringstidspunkt, actualPerioderMedSammeSkjæringstidspunkt)
+        assertEquals(forbrukteSykedager, actualForbrukteSykedager)
+        assertEquals(gjenståendeSykedager, actualGjenståendeSykedager)
+        assertEquals(foreløpigBeregnetSluttPåSykepenger.toString(), actualForeløpigBeregnetSluttPåSykepenger)
+        assertEquals(utbetalingsdager, actualUtbetalingsdager)
 
         val utkastTilVedtak = observatør.utkastTilVedtakEventer.last()
         assertEquals(actualtags, utkastTilVedtak.tags)
@@ -742,3 +990,56 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             felt = feltNavn
         )
 }
+
+private fun Periode.utbetalingsdager(beløpTilArbeidsgiver: Int, beløpTilBruker: Int) = map { dato ->
+    if (dato.erHelg()) utbetalingsdag(dato, "NavHelgDag", 0, 0, 100)
+    else utbetalingsdag(dato, "NavDag", beløpTilArbeidsgiver, beløpTilBruker, 100)
+}
+
+private fun Periode.feriedager() = map { dato ->
+    utbetalingsdag(dato, "Feriedag", 0, 0, 0)
+}
+
+private fun standardUtbetalingsdager(beløpTilArbeidsgiver: Int, beløpTilBruker: Int) =
+    listOf(
+        utbetalingsdag(1.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(2.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(3.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(4.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(5.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(6.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(7.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(8.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(9.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(10.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(11.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(12.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(13.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(14.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(15.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(16.januar, "ArbeidsgiverperiodeDag", 0, 0, 100),
+        utbetalingsdag(17.januar, "NavDag", beløpTilArbeidsgiver, beløpTilBruker, 100),
+        utbetalingsdag(18.januar, "NavDag", beløpTilArbeidsgiver, beløpTilBruker, 100),
+        utbetalingsdag(19.januar, "NavDag", beløpTilArbeidsgiver, beløpTilBruker, 100),
+        utbetalingsdag(20.januar, "NavHelgDag", 0, 0, 100),
+        utbetalingsdag(21.januar, "NavHelgDag", 0, 0, 100),
+        utbetalingsdag(22.januar, "NavDag", beløpTilArbeidsgiver, beløpTilBruker, 100),
+        utbetalingsdag(23.januar, "NavDag", beløpTilArbeidsgiver, beløpTilBruker, 100),
+        utbetalingsdag(24.januar, "NavDag", beløpTilArbeidsgiver, beløpTilBruker, 100),
+        utbetalingsdag(25.januar, "NavDag", beløpTilArbeidsgiver, beløpTilBruker, 100),
+        utbetalingsdag(26.januar, "NavDag", beløpTilArbeidsgiver, beløpTilBruker, 100),
+        utbetalingsdag(27.januar, "NavHelgDag", 0, 0, 100),
+        utbetalingsdag(28.januar, "NavHelgDag", 0, 0, 100),
+        utbetalingsdag(29.januar, "NavDag", beløpTilArbeidsgiver, beløpTilBruker, 100),
+        utbetalingsdag(30.januar, "NavDag", beløpTilArbeidsgiver, beløpTilBruker, 100),
+        utbetalingsdag(31.januar, "NavDag", beløpTilArbeidsgiver, beløpTilBruker, 100)
+    )
+
+private fun utbetalingsdag(dato: LocalDate, type: String, beløpTilArbeidsgiver: Int, beløpTilBruker: Int, sykdomsgrad: Int, begrunnelser: List<String> = emptyList()) = mapOf(
+    "dato" to dato.toString(),
+    "type" to type,
+    "beløpTilArbeidsgiver" to beløpTilArbeidsgiver,
+    "beløpTilBruker" to beløpTilBruker,
+    "sykdomsgrad" to sykdomsgrad,
+    "begrunnelser" to begrunnelser
+)

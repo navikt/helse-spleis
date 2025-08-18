@@ -466,12 +466,7 @@ interface PersonObserver {
         val sykepengegrunnlag: Double,
         val utbetalingId: UUID,
         val vedtakFattetTidspunkt: LocalDateTime,
-        val sykepengegrunnlagsfakta: UtkastTilVedtakEvent.Sykepengegrunnlagsfakta,
-        val automatiskBehandling: Boolean,
-        val forbrukteSykedager: Int,
-        val gjenståendeSykedager: Int,
-        val foreløpigBeregnetSluttPåSykepenger: LocalDate,
-        val utbetalingsdager: List<Utbetalingsdag>,
+        val sykepengegrunnlagsfakta: UtkastTilVedtakEvent.Sykepengegrunnlagsfakta
     )
 
     data class OverstyringIgangsatt(
