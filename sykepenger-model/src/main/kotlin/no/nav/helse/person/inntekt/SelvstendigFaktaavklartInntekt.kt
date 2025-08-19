@@ -102,4 +102,12 @@ internal data class SelvstendigFaktaavklartInntekt(
             private const val EN_TREDJEDEL = 1 / 3.0
         }
     }
+
+    internal fun view() = SelvstendigFaktaavklartInntektView(id, inntektsgrunnlag)
+
+    internal data class SelvstendigFaktaavklartInntektView(
+        val id: UUID,
+        val inntektsgrunnlag: Inntekt
+    )
+
 }

@@ -13,14 +13,19 @@ import no.nav.helse.etterlevelse.Ledd.LEDD_3
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_22_13
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_11
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_12
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_3
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_34
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_35
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
+import no.nav.helse.etterlevelse.Punktum.Companion.punktum
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
+import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
@@ -30,6 +35,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
+    private val FYLLER_68_1_JANUAR = 1.januar(1950)
 
     @Test
     fun `22-13 ledd 3 - Vurdering av foreldelse`() = Toggle.SelvstendigNæringsdrivende.enable {
@@ -216,6 +222,195 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             }
             assertSubsumsjoner { assertEquals(1, antallSubsumsjoner(this)) }
             assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `§ 8-51 ledd 2 - er ikke over 67 år`() = Toggle.SelvstendigNæringsdrivende.enable {
+        selvstendig {
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig)
+                )
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+
+            SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_51, ledd = LEDD_2)
+            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `§ 8-51 ledd 2 - har minimum inntekt over 2G - over 67 år`() = Toggle.SelvstendigNæringsdrivende.enable {
+        medFødselsdato(FYLLER_68_1_JANUAR)
+        selvstendig {
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig)
+                )
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterYtelser(1.vedtaksperiode)
+
+            SubsumsjonInspektør(jurist).assertOppfylt(
+                paragraf = PARAGRAF_8_51, ledd = LEDD_2, versjon = 16.desember(2011), input = mapOf(
+                "sekstisyvårsdag" to 1.januar(2017),
+                "utfallFom" to 1.januar,
+                "utfallTom" to 31.januar,
+                "periodeFom" to 1.januar,
+                "periodeTom" to 31.januar,
+                "grunnlagForSykepengegrunnlag" to 460589.0,
+                "minimumInntekt" to 187268.0
+            ), output = emptyMap()
+            )
+            SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
+            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `§ 8-51 ledd 2 - har minimum inntekt under 2G - over 67 år`() = Toggle.SelvstendigNæringsdrivende.enable {
+        medFødselsdato(FYLLER_68_1_JANUAR)
+        selvstendig {
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig)
+                )
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterYtelser(1.vedtaksperiode)
+
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                paragraf = PARAGRAF_8_51, ledd = LEDD_2, versjon = 16.desember(2011), input = mapOf(
+                "sekstisyvårsdag" to 1.januar(2017),
+                "utfallFom" to 1.januar,
+                "utfallTom" to 31.januar,
+                "periodeFom" to 1.januar,
+                "periodeTom" to 31.januar,
+                "grunnlagForSykepengegrunnlag" to 102353.0,
+                "minimumInntekt" to 187268.0
+            ), output = emptyMap()
+            )
+            SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_SØ_45, Varselkode.RV_SV_1)
+        }
+    }
+
+    @Test
+    fun `§ 8-51 ledd 2 - avslag subsumeres når person blir 67 år underveis i sykefraværstilfellet og tjener mindre enn 2G`() = Toggle.SelvstendigNæringsdrivende.enable {
+        val blir67Underveis = 5.februar(1951)
+        medFødselsdato(blir67Underveis)
+        selvstendig {
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
+                pensjonsgivendeInntekter = listOf(
+                    // inntekt mellom 0.5G og 2G - slik at kravet er oppfylt før personen fylte 67, men ikke etter
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig)
+                )
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
+            SubsumsjonInspektør(jurist).assertOppfylt(
+                paragraf = PARAGRAF_8_3,
+                ledd = LEDD_2,
+                punktum = 1.punktum,
+                input = null,
+                versjon = 16.desember(2011)
+            )
+
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent),
+                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
+                pensjonsgivendeInntekter = listOf(
+                    // inntekt mellom 0.5G og 2G - slik at kravet er oppfylt før personen fylte 67, men ikke etter
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig)
+                )
+            )
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            assertVarsler(2.vedtaksperiode, Varselkode.RV_SV_1, Varselkode.RV_SØ_45)
+
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_2,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "sekstisyvårsdag" to 5.februar(2018),
+                    "utfallFom" to 6.februar,
+                    "utfallTom" to 28.februar,
+                    "periodeFom" to 1.februar,
+                    "periodeTom" to 28.februar,
+                    "grunnlagForSykepengegrunnlag" to 102353.0,
+                    "minimumInntekt" to 187268.0
+                ),
+                output = emptyMap()
+            )
+
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent),
+                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
+                pensjonsgivendeInntekter = listOf(
+                    // inntekt mellom 0.5G og 2G - slik at kravet er oppfylt før personen fylte 67, men ikke etter
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig)
+                )
+            )
+            håndterYtelser(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+            assertVarsler(3.vedtaksperiode, Varselkode.RV_SV_1, Varselkode.RV_SØ_45)
+
+            assertEquals(
+                2, SubsumsjonInspektør(jurist).antallSubsumsjoner(
+                paragraf = PARAGRAF_8_3,
+                ledd = LEDD_2,
+                punktum = 1.punktum,
+                versjon = 16.desember(2011),
+                bokstav = null
+            )
+            )
+            SubsumsjonInspektør(jurist).assertPaaIndeks(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_2,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "sekstisyvårsdag" to 5.februar(2018),
+                    "utfallFom" to 1.mars,
+                    "utfallTom" to 31.mars,
+                    "periodeFom" to 1.mars,
+                    "periodeTom" to 31.mars,
+                    "grunnlagForSykepengegrunnlag" to 102353.0,
+                    "minimumInntekt" to 187268.0
+                ),
+                index = 1,
+                output = emptyMap(),
+                forventetAntall = 2,
+                utfall = VILKAR_IKKE_OPPFYLT
+            )
         }
     }
 }

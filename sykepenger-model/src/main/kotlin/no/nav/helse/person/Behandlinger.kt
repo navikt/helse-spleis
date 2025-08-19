@@ -56,6 +56,7 @@ import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektskilde
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
+import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt.SelvstendigFaktaavklartInntektView
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidIkkeGjenopptattDag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
@@ -518,6 +519,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.OverførtAnnullering -> BehandlingView.TilstandView.OVERFØRT_ANNULLERING
             },
             endringer = endringer.map { it.view() },
+            faktaavklartInntekt = faktaavklartInntekt?.view()
         )
 
         fun sykmeldingsperiode() = endringer.first().sykmeldingsperiode
@@ -2310,7 +2312,8 @@ internal data class BehandlingView(
     val avsluttet: LocalDateTime?,
     val kilde: BehandlingkildeView,
     val tilstand: TilstandView,
-    val endringer: List<BehandlingendringView>
+    val endringer: List<BehandlingendringView>,
+    val faktaavklartInntekt: SelvstendigFaktaavklartInntektView?
 ) {
     enum class TilstandView {
         ANNULLERT_PERIODE, AVSLUTTET_UTEN_VEDTAK,
