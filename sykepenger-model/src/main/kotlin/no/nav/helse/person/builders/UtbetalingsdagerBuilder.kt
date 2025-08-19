@@ -26,7 +26,14 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                 begrunnelser = null
             )
 
-            is Utbetalingsdag.Venteperiodedag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.Venteperiodedag)
+            is Utbetalingsdag.Venteperiodedag -> PersonObserver.Utbetalingsdag(
+                dag.dato,
+                PersonObserver.Utbetalingsdag.Dagtype.Venteperiodedag,
+                beløpTilArbeidsgiver = 0,
+                beløpTilBruker = dag.økonomi.personbeløp?.dagligInt ?: 0,
+                sykdomsgrad = dag.økonomi.sykdomsgrad.toDouble().toInt(),
+                begrunnelser = null
+            )
 
             is Utbetalingsdag.NavDag -> PersonObserver.Utbetalingsdag(
                 dato = dag.dato,
@@ -36,6 +43,7 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                 sykdomsgrad = dag.økonomi.sykdomsgrad.toDouble().toInt(),
                 begrunnelser = null
             )
+
             is Utbetalingsdag.NavHelgDag -> PersonObserver.Utbetalingsdag(
                 dato = dag.dato,
                 type = PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag,
@@ -44,6 +52,7 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                 sykdomsgrad = dag.økonomi.sykdomsgrad.toDouble().toInt(),
                 begrunnelser = null
             )
+
             is Utbetalingsdag.Fridag -> {
                 when (val sykdomsdag = sykdomstidslinje[dag.dato]) {
                     is Dag.AndreYtelser -> PersonObserver.Utbetalingsdag(

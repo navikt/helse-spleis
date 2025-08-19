@@ -18,6 +18,7 @@ import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattIInfotryg
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -41,6 +42,7 @@ internal class UtkastTilVedtakBuilder(
     private lateinit var foreløpigBeregnetSluttPåSykepenger: LocalDate
     private lateinit var utbetalingsdager: List<Map<String, Any>>
     private val tags = mutableSetOf<Tag>()
+    private val pensjonsgivendeInntekter = mutableListOf<SelvstendigFaktaavklartInntekt.PensjonsgivendeInntekt>()
 
     init {
         if (erForlengelse) tags.add(Tag.Forlengelse)
@@ -48,6 +50,9 @@ internal class UtkastTilVedtakBuilder(
 
         if (overlapperMedInfotrygd) tags.add(Tag.OverlapperMedInfotrygd)
     }
+
+    internal fun pensjonsgivendeInntekter(pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntekt.PensjonsgivendeInntekt>) =
+        apply { this.pensjonsgivendeInntekter.addAll(pensjonsgivendeInntekter) }
 
     internal fun grunnbeløpsregulert() = apply { tags.add(Tag.Grunnbeløpsregulering) }
     private data class RelevantPeriode(val vedtaksperiodeId: UUID, val behandlingId: UUID, val skjæringstidspunkt: LocalDate, val periode: Periode)
@@ -294,6 +299,17 @@ internal class UtkastTilVedtakBuilder(
                         )
                     }
                 )
+            }.apply {
+                if (pensjonsgivendeInntekter.isNotEmpty()) {
+                    this.plus(
+                        "pensjonsgivendeInntekter" to pensjonsgivendeInntekter.map {
+                            mapOf(
+                                "årstall" to it.årstall.value,
+                                "beløp" to it.beløp.årlig.toDesimaler
+                            )
+                        }
+                    )
+                }
             }
         )
 

@@ -17,7 +17,13 @@ import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.*
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.SelvstendigFisker
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
@@ -879,6 +885,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utkastTilVedtakBuilder
                     .utbetalingsinformasjon(utbetaling, utbetalingstidslinje, sykdomstidslinje, refusjonstidslinje)
                     .sykepengerettighet(maksdatoresultat.antallForbrukteDager, maksdatoresultat.gjenståendeDager, maksdatoresultat.maksdato)
+                faktaavklartInntekt?.let {
+                    utkastTilVedtakBuilder.pensjonsgivendeInntekter(it.pensjonsgivendeInntekter)
+                }
                 grunnlagsdata.berik(utkastTilVedtakBuilder)
                 behandling.observatører.forEach { it.utkastTilVedtak(utkastTilVedtakBuilder.buildUtkastTilVedtak()) }
                 Aktivitet.Behov.godkjenning(aktivitetsloggMedUtbetalingkontekst, utkastTilVedtakBuilder.buildGodkjenningsbehov())
