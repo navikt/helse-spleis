@@ -1,7 +1,7 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.dsl.a1
 import no.nav.helse.etterlevelse.Bokstav
@@ -128,10 +128,9 @@ internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
         bokstav: Bokstav? = null,
         input: Map<String, Any>? = null,
         output: Map<String, Any>? = null,
-        vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: String = a1
+        vedtaksperiodeId: UUID? = null
     ) {
-        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId)
         assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
         val subsumsjon = resultat.first()
         assertEquals(VILKAR_OPPFYLT, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
@@ -150,11 +149,10 @@ internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
         bokstav: Bokstav? = null,
         input: Map<String, Any>? = null,
         output: Map<String, Any>? = null,
-        vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: String = a1,
+        vedtaksperiodeId: UUID? = null,
         utfall: Utfall
     ) {
-        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, utfall, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, utfall, vedtaksperiodeId = vedtaksperiodeId)
         val subsumsjon = resultat[index]
         assertEquals(forventetAntall, resultat.size, "Forventer $forventetAntall subsumsjoner for vilkåret. Subsumsjoner funnet: ${resultat.size}")
         assertEquals(utfall, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
@@ -170,11 +168,10 @@ internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
         bokstav: Bokstav? = null,
         input: Map<String, Any>? = null,
         output: Map<String, Any>? = null,
-        vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: String = a1
+        vedtaksperiodeId: UUID? = null
     ) {
         val resultat =
-            finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
+            finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId)
         assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
         val subsumsjon = resultat.first()
         assertEquals(VILKAR_IKKE_OPPFYLT, subsumsjon.utfall) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }

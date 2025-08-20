@@ -835,7 +835,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 )
             ),
             output = emptyMap(),
-            vedtaksperiodeId = 2.vedtaksperiode
+            vedtaksperiodeId = 2.vedtaksperiode.id(a1)
         )
     }
 
@@ -892,7 +892,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 )
             ),
             output = emptyMap(),
-            vedtaksperiodeId = 2.vedtaksperiode
+            vedtaksperiodeId = 2.vedtaksperiode.id(a1)
         )
     }
 
@@ -2018,13 +2018,13 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "minimumInntekt" to 187268.0
             ),
             output = emptyMap(),
-            vedtaksperiodeId = 3.vedtaksperiode,
+            vedtaksperiodeId = 3.vedtaksperiode.id(a1),
             utfall = VILKAR_IKKE_OPPFYLT
         )
     }
 
     @Test
-    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk på 60-årsdagen så total sykedager blir en dag mindre uten at maksdato endres`() {
+    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk på 67-årsdagen så total sykedager blir en dag mindre uten at maksdato endres`() {
         val personOver67år = Personidentifikator("01025100065")
         createTestPerson(personOver67år, 1.februar(1951))
 
@@ -2084,7 +2084,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 11,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 1.vedtaksperiode,
+            vedtaksperiodeId = 1.vedtaksperiode.id(a1),
             utfall = VILKAR_OPPFYLT
         )
 
@@ -2116,7 +2116,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 11,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 1.vedtaksperiode,
+            vedtaksperiodeId = 1.vedtaksperiode.id(a1),
             utfall = VILKAR_OPPFYLT
         )
 
@@ -2149,7 +2149,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 30,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 2.vedtaksperiode
+            vedtaksperiodeId = 2.vedtaksperiode.id(a1)
         )
     }
 
@@ -2214,7 +2214,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 12,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 1.vedtaksperiode,
+            vedtaksperiodeId = 1.vedtaksperiode.id(a1),
             utfall = VILKAR_OPPFYLT
         )
 
@@ -2245,7 +2245,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 12,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 1.vedtaksperiode,
+            vedtaksperiodeId = 1.vedtaksperiode.id(a1),
             utfall = VILKAR_OPPFYLT
         )
 
@@ -2278,7 +2278,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 30,
                 "maksdato" to 27.april
             ),
-            vedtaksperiodeId = 2.vedtaksperiode
+            vedtaksperiodeId = 2.vedtaksperiode.id(a1)
         )
     }
 
@@ -2316,7 +2316,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 11,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 1.vedtaksperiode
+            vedtaksperiodeId = 1.vedtaksperiode.id(a1)
         )
 
         SubsumsjonInspektør(regelverkslogg).assertOppfylt(
@@ -2347,7 +2347,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 31,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 2.vedtaksperiode
+            vedtaksperiodeId = 2.vedtaksperiode.id(a1)
         )
 
         SubsumsjonInspektør(regelverkslogg).assertOppfylt(
@@ -2378,7 +2378,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 53,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 3.vedtaksperiode
+            vedtaksperiodeId = 3.vedtaksperiode.id(a1)
         )
 
         SubsumsjonInspektør(regelverkslogg).assertOppfylt(
@@ -2409,7 +2409,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 72,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 4.vedtaksperiode
+            vedtaksperiodeId = 4.vedtaksperiode.id(a1)
         )
     }
 
@@ -2447,7 +2447,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 11,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 1.vedtaksperiode
+            vedtaksperiodeId = 1.vedtaksperiode.id(a1)
         )
 
         SubsumsjonInspektør(regelverkslogg).assertOppfylt(
@@ -2478,7 +2478,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 31,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 2.vedtaksperiode
+            vedtaksperiodeId = 2.vedtaksperiode.id(a1)
         )
 
         SubsumsjonInspektør(regelverkslogg).assertOppfylt(
@@ -2509,7 +2509,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 53,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 3.vedtaksperiode
+            vedtaksperiodeId = 3.vedtaksperiode.id(a1)
         )
 
         SubsumsjonInspektør(regelverkslogg).assertOppfylt(
@@ -2540,7 +2540,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 72,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 4.vedtaksperiode
+            vedtaksperiodeId = 4.vedtaksperiode.id(a1)
         )
 
         SubsumsjonInspektør(regelverkslogg).assertIkkeOppfylt(
@@ -2571,7 +2571,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 72,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 4.vedtaksperiode
+            vedtaksperiodeId = 4.vedtaksperiode.id(a1)
         )
     }
 
@@ -2601,7 +2601,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                     )
                 )
             ),
-            vedtaksperiodeId = 1.vedtaksperiode
+            vedtaksperiodeId = 1.vedtaksperiode.id(a1)
         )
         assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
     }
@@ -2619,7 +2619,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "stadfesting" to true
             ),
             output = emptyMap(),
-            vedtaksperiodeId = 1.vedtaksperiode
+            vedtaksperiodeId = 1.vedtaksperiode.id(a1)
         )
     }
 
