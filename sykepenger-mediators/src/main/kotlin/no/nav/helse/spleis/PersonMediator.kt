@@ -782,7 +782,8 @@ internal class PersonMediator(
             "vedtaksperiodeId" to event.vedtaksperiodeId,
             "behandlingId" to event.behandlingId,
             "skjæringstidspunkt" to event.skjæringstidspunkt,
-            "tags" to event.tags
+            "tags" to event.tags,
+            "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
         )
         if (event.`6G` != null) utkastTilVedtak["sykepengegrunnlagsfakta"] = mapOf("6G" to event.`6G`)
         queueMessage(JsonMessage.newMessage("utkast_til_vedtak", utkastTilVedtak.toMap()))

@@ -424,7 +424,8 @@ interface PersonObserver {
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
         val tags: Set<String>,
-        val `6G`: Double?
+        val `6G`: Double?,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
     ) {
         sealed interface Sykepengegrunnlagsfakta {
             val fastsatt: String

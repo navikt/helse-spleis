@@ -25,7 +25,8 @@ internal class UtkastTilVedtakKontraktTest : AbstractEndToEndMediatorTest() {
                 "Arbeidsgiverutbetaling",
                 "EnArbeidsgiver",
                 "ArbeidsgiverØnskerRefusjon"
-            ]
+            ],
+            "yrkesaktivitetstype": "ARBEIDSTAKER"
         }
         """
         nyttVedtak()

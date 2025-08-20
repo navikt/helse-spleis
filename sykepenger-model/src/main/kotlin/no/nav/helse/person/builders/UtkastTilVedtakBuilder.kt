@@ -327,7 +327,8 @@ internal class UtkastTilVedtakBuilder(
                 is FastsattIInfotrygd -> null
                 is FastsattEtterHovedregel -> fakta.`6G`
                 is FastsattEtterSkjønn -> fakta.`6G`
-            }
+            },
+            yrkesaktivitetssporing = yrkesaktivitetssporing
         )
 
         fun avsluttetMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<MeldingsreferanseId>) = PersonObserver.AvsluttetMedVedtakEvent(
