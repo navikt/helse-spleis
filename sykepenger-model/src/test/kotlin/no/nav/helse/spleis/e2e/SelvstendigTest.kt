@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.Year
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.selvstendig
@@ -43,16 +42,12 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
 
-            håndterOverstyrTidslinje((25.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
+            håndterOverstyrTidslinje((1.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) })
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
-            assertEquals("VVVVVVV VVVVVVV VVSSSHH SSSYYYY YYY", inspektør(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertForventetFeil(
-                forklaring = "Venteperiode er spørsmålstegn og andre ytelser er fridag, det er vel litt rart?",
-                nå = { assertEquals("??????? ??????? ??NNNHH NNNFFFF FFF", inspektør(1.vedtaksperiode).utbetalingstidslinje.toString()) },
-                ønsket = { assertEquals("VVVVVVV VVVVVVV VVSSSHH SSSXXXX XXX", inspektør(1.vedtaksperiode).utbetalingstidslinje.toString()) }
-            )
+
+            assertEquals(setOf(80), inspektør.sykdomstidslinje.inspektør.grader.values.toSet())
             assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
         }
     }

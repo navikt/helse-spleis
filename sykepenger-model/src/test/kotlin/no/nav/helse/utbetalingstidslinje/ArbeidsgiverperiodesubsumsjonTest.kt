@@ -28,7 +28,6 @@ import no.nav.helse.testhelpers.UK
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -197,7 +196,6 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller)
         val arbeidsgiverperioder = arbeidsgiverperiodeberegner.resultat(tidslinje, infotrygdBetalteDager, infotrygdFerieperioder)
         val builder = ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
-            dekningsgrad = 100.prosent,
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
             dagerNavOvertarAnsvar = emptyList(),
             refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje(),

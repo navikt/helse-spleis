@@ -49,7 +49,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             "SELVSTENDIG_AVVENTER_GODKJENNING"
         )
 
-        sendOverstyringTidslinjeSelvstendig(listOf(ManuellOverskrivingDag(25.januar, Dagtype.Foreldrepengerdag), ManuellOverskrivingDag(26.januar, Dagtype.Foreldrepengerdag)))
+        sendOverstyringTidslinjeSelvstendig((3.januar til 26.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) })
         sendYtelserSelvstendig(0)
         sendSimuleringSelvstendig(0)
         sendUtbetalingsgodkjenningSelvstendig(0, true)

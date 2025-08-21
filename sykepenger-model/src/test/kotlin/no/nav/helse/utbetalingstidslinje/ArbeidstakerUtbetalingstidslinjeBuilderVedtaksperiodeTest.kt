@@ -40,7 +40,6 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiodeTest {
         inntekt: Inntekt = 21000.månedlig,
         fastsattÅrsinntekt: Inntekt? = inntekt
     ) = ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
-        dekningsgrad = 100.prosent,
         arbeidsgiverperiode = listOf(1.januar til 16.januar),
         dagerNavOvertarAnsvar = emptyList(),
         refusjonstidslinje = Beløpstidslinje(),

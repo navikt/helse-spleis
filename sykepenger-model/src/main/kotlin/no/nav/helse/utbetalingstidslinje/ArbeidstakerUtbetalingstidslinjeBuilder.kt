@@ -19,7 +19,6 @@ internal data class ArbeidsgiverperiodeForVedtaksperiode(
 )
 
 internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
-    private val dekningsgrad: Prosentdel,
     private val arbeidsgiverperiode: List<Periode>,
     private val dagerNavOvertarAnsvar: List<Periode>,
     private val refusjonstidslinje: Beløpstidslinje,
@@ -37,7 +36,7 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
         return Økonomi.inntekt(
             sykdomsgrad = grad,
             aktuellDagsinntekt = fastsattÅrsinntekt,
-            dekningsgrad = dekningsgrad,
+            dekningsgrad = 100.prosent,
             refusjonsbeløp = (refusjonstidslinje[dato] as? Beløpsdag)?.beløp ?: INGEN,
             inntektjustering = (inntektjusteringer[dato] as? Beløpsdag)?.beløp ?: INGEN,
         )
@@ -57,8 +56,6 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
                     if (erAGP(dag.dato)) arbeidsgiverperiodedagEllerNavAnsvar(builder, dag.dato, dag.grad)
                     else avvistDag(builder, dag.dato, dag.grad, Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode)
                 }
-
-                is Dag.Venteperiodedag -> venteperiodedag(builder, dag.dato, dag.grad)
 
                 is Dag.Sykedag -> {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedagEllerNavAnsvar(builder, dag.dato, dag.grad)
@@ -124,6 +121,8 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
                         false -> arbeidsdag(builder, dag.dato)
                     }
                 }
+
+                is Dag.Venteperiodedag -> error("Forventer ikke venteperiodedag for arbeidstaker")
             }
         }
         return builder.build()
@@ -160,9 +159,5 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
 
     private fun arbeidsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
         builder.addArbeidsdag(dato, medInntektHvisFinnes(dato, 0.prosent).ikkeBetalt())
-    }
-
-    private fun venteperiodedag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel) {
-        builder.addVenteperiodedag(dato, medInntektHvisFinnes(dato, sykdomsgrad).ikkeBetalt())
     }
 }

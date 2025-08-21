@@ -80,9 +80,9 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
+import no.nav.helse.utbetalingstidslinje.SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class Behandlinger private constructor(behandlinger: List<Behandling>) : Aktivitetskontekst {
     internal constructor() : this(emptyList())
@@ -559,23 +559,27 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         fun utbetalingstidslinje() = gjeldende.utbetalingstidslinje
         fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet): Utbetalingstidslinje {
-            val builder = ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
-                dekningsgrad = when (yrkesaktivitet) {
-                    is Arbeidstaker -> 100.prosent
-                    Selvstendig -> 80.prosent
-                    Arbeidsledig,
-                    Frilans,
-                    SelvstendigDagmamma,
-                    SelvstendigJordbruker,
-                    SelvstendigFisker -> error("Dekningsgrad for arbeidsledig, frilans og de sære selvstendige er ikke implementert")
-                },
-                arbeidsgiverperiode = arbeidsgiverperiode,
-                dagerNavOvertarAnsvar = gjeldende.dagerNavOvertarAnsvar,
-                refusjonstidslinje = refusjonstidslinje,
-                fastsattÅrsinntekt = fastsattÅrsinntekt,
-                inntektjusteringer = inntektjusteringer
-            )
-            return builder.result(sykdomstidslinje)
+            return when (yrkesaktivitet) {
+                is Arbeidstaker -> {
+                    ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
+                        arbeidsgiverperiode = arbeidsgiverperiode,
+                        dagerNavOvertarAnsvar = gjeldende.dagerNavOvertarAnsvar,
+                        refusjonstidslinje = refusjonstidslinje,
+                        fastsattÅrsinntekt = fastsattÅrsinntekt,
+                        inntektjusteringer = inntektjusteringer
+                    ).result(sykdomstidslinje)
+                }
+
+                Selvstendig -> {
+                    SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(fastsattÅrsinntekt).result(sykdomstidslinje)
+                }
+
+                Arbeidsledig,
+                Frilans,
+                SelvstendigDagmamma,
+                SelvstendigFisker,
+                SelvstendigJordbruker -> error("Forventer ikke å lage utbetalingstidslinje for ${yrkesaktivitet::class.simpleName}")
+            }
         }
 
         internal fun håndterRefusjonsopplysninger(
