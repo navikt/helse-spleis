@@ -1017,7 +1017,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         val arbeidsgiverperioder = arbeidsgiverperiodeberegner.resultat(tidslinje, infotrygdBetalteDager, infotrygdFerieperioder)
         perioder.addAll(arbeidsgiverperioder)
 
-        val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
+        val builder = ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
             dekningsgrad = 100.prosent,
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,

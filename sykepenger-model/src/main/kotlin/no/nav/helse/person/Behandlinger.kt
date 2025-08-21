@@ -77,10 +77,10 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingView
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
+import no.nav.helse.utbetalingstidslinje.ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderVedtaksperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
@@ -559,7 +559,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         fun utbetalingstidslinje() = gjeldende.utbetalingstidslinje
         fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet): Utbetalingstidslinje {
-            val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
+            val builder = ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
                 dekningsgrad = when (yrkesaktivitet) {
                     is Arbeidstaker -> 100.prosent
                     Selvstendig -> 80.prosent

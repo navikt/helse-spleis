@@ -12,7 +12,7 @@ import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class UtbetalingstidslinjeBuilderVedtaksperiodeTest {
+internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiodeTest {
 
     @Test
     fun `setter inntekt på økonomi`() {
@@ -39,7 +39,7 @@ internal class UtbetalingstidslinjeBuilderVedtaksperiodeTest {
     private fun utbetalingstidslinjeBuilderVedtaksperiode(
         inntekt: Inntekt = 21000.månedlig,
         fastsattÅrsinntekt: Inntekt? = inntekt
-    ) = UtbetalingstidslinjeBuilderVedtaksperiode(
+    ) = ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
         dekningsgrad = 100.prosent,
         arbeidsgiverperiode = listOf(1.januar til 16.januar),
         dagerNavOvertarAnsvar = emptyList(),

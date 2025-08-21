@@ -18,7 +18,7 @@ internal data class ArbeidsgiverperiodeForVedtaksperiode(
     val arbeidsgiverperioder: List<Periode>
 )
 
-internal class UtbetalingstidslinjeBuilderVedtaksperiode(
+internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
     private val dekningsgrad: Prosentdel,
     private val arbeidsgiverperiode: List<Periode>,
     private val dagerNavOvertarAnsvar: List<Periode>,
