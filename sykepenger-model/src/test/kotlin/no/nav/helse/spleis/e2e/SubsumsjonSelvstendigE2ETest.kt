@@ -41,16 +41,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     @Test
     fun `22-13 ledd 3 - Vurdering av foreldelse`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig)
-                ),
-                sendtTilNAVEllerArbeidsgiver = LocalDate.of(2018, 5, 1).atStartOfDay(),
-            )
+            håndterSøknadSelvstendig(januar, sendtTilNAVEllerArbeidsgiver = LocalDate.of(2018, 5, 1).atStartOfDay())
 
             SubsumsjonInspektør(jurist).assertIkkeOppfylt(
                 paragraf = PARAGRAF_22_13,
@@ -78,23 +69,14 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
         }
-
     }
 
     @Test
     fun `§ 8-12 ledd 2 - Vurdering av ny rett til sykepenger`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
             nyttVedtak(1.mai(2017) til 31.mai(2017))
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig)
-                )
-            )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterSøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
             SubsumsjonInspektør(jurist).assertOppfylt(
@@ -131,16 +113,8 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     @Test
     fun `§ 8-35 ledd 2 - selvstendignæringsdrivende sykepengegrunnlag`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig)
-                )
-            )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterSøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             SubsumsjonInspektør(jurist).assertBeregnet(
@@ -166,16 +140,8 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     @Test
     fun `Subsumerer § 8-11 - utbetaler ikke helg`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig)
-                )
-            )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterSøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             SubsumsjonInspektør(jurist).assertIkkeOppfylt(
@@ -199,16 +165,8 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     @Test
     fun `Subsumerer 8-34 ledd 1 for selvstendig uten forsikring`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig)
-                )
-            )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterSøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
             val antallSubsumsjoner = { subsumsjonInspektør: SubsumsjonInspektør ->
@@ -228,16 +186,8 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     @Test
     fun `§ 8-51 ledd 2 - er ikke over 67 år`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig)
-                )
-            )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterSøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
 
             SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_51, ledd = LEDD_2)
             assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
@@ -248,16 +198,8 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     fun `§ 8-51 ledd 2 - har minimum inntekt over 2G - over 67 år`() = Toggle.SelvstendigNæringsdrivende.enable {
         medFødselsdato(FYLLER_68_1_JANUAR)
         selvstendig {
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig)
-                )
-            )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterSøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
             SubsumsjonInspektør(jurist).assertOppfylt(
@@ -284,16 +226,15 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     fun `§ 8-51 ledd 2 - har minimum inntekt under 2G - over 67 år`() = Toggle.SelvstendigNæringsdrivende.enable {
         medFødselsdato(FYLLER_68_1_JANUAR)
         selvstendig {
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
+            håndterSøknadSelvstendig(
+                periode = januar,
                 pensjonsgivendeInntekter = listOf(
                     Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig),
                     Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig),
                     Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig)
                 )
             )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
             SubsumsjonInspektør(jurist).assertIkkeOppfylt(
@@ -321,17 +262,16 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
         val blir67Underveis = 5.februar(1951)
         medFødselsdato(blir67Underveis)
         selvstendig {
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
+            // inntekt mellom 0.5G og 2G - slik at kravet er oppfylt før personen fylte 67, men ikke etter
+            håndterSøknadSelvstendig(
+                periode = januar,
                 pensjonsgivendeInntekter = listOf(
-                    // inntekt mellom 0.5G og 2G - slik at kravet er oppfylt før personen fylte 67, men ikke etter
                     Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig),
                     Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig),
                     Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig)
                 )
             )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -346,16 +286,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                 versjon = 16.desember(2011)
             )
 
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    // inntekt mellom 0.5G og 2G - slik at kravet er oppfylt før personen fylte 67, men ikke etter
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig)
-                )
-            )
+            håndterSøknadSelvstendig(februar)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -378,16 +309,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                 output = emptyMap()
             )
 
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    // inntekt mellom 0.5G og 2G - slik at kravet er oppfylt før personen fylte 67, men ikke etter
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig)
-                )
-            )
+            håndterSøknadSelvstendig(mars)
             håndterYtelser(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
             assertVarsler(3.vedtaksperiode, Varselkode.RV_SV_1, Varselkode.RV_SØ_45)
@@ -427,22 +349,15 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
         val blir67Underveis = 1.februar(1951)
         medFødselsdato(blir67Underveis)
         selvstendig {
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450_000.årlig)
-                )
-            )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterSøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
 
+            håndterSøknadSelvstendig(2.februar til 28.februar)
             håndterSøknad(
                 Søknad.Søknadsperiode.Sykdom(2.februar, 28.februar, 100.prosent),
                 Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
@@ -526,31 +441,15 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
         val blir67Underveis = 1.februar(1951)
         medFødselsdato(blir67Underveis)
         selvstendig {
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.januar, 1.februar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450_000.årlig)
-                )
-            )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterSøknadSelvstendig(1.januar til 1.februar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
 
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(3.februar, 28.februar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450_000.årlig)
-                )
-            )
+            håndterSøknadSelvstendig(3.februar til 28.februar)
             håndterVilkårsgrunnlag(2.vedtaksperiode, skatteinntekter = emptyList())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -625,31 +524,15 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
         val blir67Underveis = 1.februar(1951)
         medFødselsdato(blir67Underveis)
         selvstendig {
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450_000.årlig)
-                )
-            )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterSøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
 
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450_000.årlig)
-                )
-            )
+            håndterSøknadSelvstendig(februar)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -671,15 +554,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterUtbetalt()
             assertVarsel(Varselkode.RV_SØ_45, 3.vedtaksperiode.filter())
 
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.april, 26.april, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450_000.årlig)
-                )
-            )
+            håndterSøknadSelvstendig(1.april til 26.april)
             håndterYtelser(4.vedtaksperiode)
             håndterSimulering(4.vedtaksperiode)
             håndterUtbetalingsgodkjenning(4.vedtaksperiode)
@@ -814,61 +689,29 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
         val blir67Underveis = 1.februar(1951)
         medFødselsdato(blir67Underveis)
         selvstendig {
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450_000.årlig)
-                )
-            )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            håndterSøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
 
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450_000.årlig)
-                )
-            )
+            håndterSøknadSelvstendig(februar)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
             assertVarsel(Varselkode.RV_SØ_45, 2.vedtaksperiode.filter())
 
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450_000.årlig)
-                )
-            )
+            håndterSøknadSelvstendig(mars)
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
             håndterUtbetalt()
             assertVarsel(Varselkode.RV_SØ_45, 3.vedtaksperiode.filter())
 
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.april, 27.april, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450_000.årlig)
-                )
-            )
+            håndterSøknadSelvstendig(1.april til 27.april)
             håndterYtelser(4.vedtaksperiode)
             håndterSimulering(4.vedtaksperiode)
             håndterUtbetalingsgodkjenning(4.vedtaksperiode)

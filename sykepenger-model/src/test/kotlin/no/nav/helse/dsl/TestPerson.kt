@@ -29,6 +29,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Venteperiode
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
@@ -36,7 +37,6 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Person
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
@@ -55,12 +55,14 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spill_av_im.Forespørsel
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.fail
@@ -257,6 +259,22 @@ internal class TestPerson(
                 }
             }
 
+        internal fun håndterSøknadSelvstendig(
+            periode: Periode,
+            venteperiode: Periode = 1.januar til 16.januar,
+            pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt> = listOf(
+                Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
+                Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
+                Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig)
+            ),
+            sendtTilNAVEllerArbeidsgiver: Temporal? = null
+        ) = håndterSøknad(
+            Sykdom(periode.start, periode.endInclusive, 100.prosent),
+            Venteperiode(venteperiode),
+            pensjonsgivendeInntekter = pensjonsgivendeInntekter,
+            sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver
+        )
+
         internal fun håndterInntektsmelding(
             arbeidsgiverperioder: List<Periode>,
             beregnetInntekt: Inntekt = INNTEKT,
@@ -394,6 +412,10 @@ internal class TestPerson(
                 },
                 skjæringstidspunkt = skjæringstidspunkt
             )
+        }
+
+        internal fun håndterVilkårsgrunnlagSelvstendig(vedtaksperiodeId: UUID = 1.vedtaksperiode) {
+            håndterVilkårsgrunnlag(vedtaksperiodeId, skatteinntekter = emptyList())
         }
 
         /**
