@@ -35,7 +35,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                 is Dag.FriskHelgedag -> arbeidsdag(builder, dag.dato)
                 is Dag.SykHelgedag -> helg(builder, dag.dato, dag.grad)
                 is Dag.Sykedag -> navDag(builder, dag.dato, dag.grad)
-                is Dag.Venteperiodedag -> venteperiodedag(builder, dag.dato, dag.grad)
+                is Dag.Ventetidsdag -> ventetidsdag(builder, dag.dato, dag.grad)
 
                 is Dag.ArbeidIkkeGjenopptattDag,
                 is Dag.AndreYtelser,
@@ -62,8 +62,8 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         builder.addArbeidsdag(dato, medInntektHvisFinnes(0.prosent).ikkeBetalt())
     }
 
-    private fun venteperiodedag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel) {
-        builder.addVenteperiodedag(dato, medInntektHvisFinnes(sykdomsgrad).ikkeBetalt())
+    private fun ventetidsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel) {
+        builder.addVentetidsdag(dato, medInntektHvisFinnes(sykdomsgrad).ikkeBetalt())
     }
 
     private fun foreldetdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel) {

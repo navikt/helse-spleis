@@ -1,4 +1,4 @@
-,UkjentDag,Arbeidsdag_SØ,Sykedag_SØ,ForeldetSykedag,Feriedag_SØ,Permisjonsdag_SØ,SykHelgedag_SØ,Arbeidsgiverdag_SØ,ArbeidsgiverHelgedag_SØ,UbestemtDag,Venteperiodedag
+,UkjentDag,Arbeidsdag_SØ,Sykedag_SØ,ForeldetSykedag,Feriedag_SØ,Permisjonsdag_SØ,SykHelgedag_SØ,Arbeidsgiverdag_SØ,ArbeidsgiverHelgedag_SØ,UbestemtDag,Ventetidsdag
 UkjentDag,L,,,,,,,,,,
 Arbeidsdag_SØ,R,L,,,,,,,,,
 Sykedag_SØ,R,C,L,,,,,,,,
@@ -9,4 +9,4 @@ SykHelgedag_SØ,R,C,R,R,C,C,L,,,,
 Arbeidsgiverdag_SØ,R,L,C,C,U,L,C,L,,,
 ArbeidsgiverHelgedag_SØ,R,L,C,C,U,L,C,L,L,,
 UbestemtDag,U,U,U,U,U,U,U,U,U,U,
-Venteperiodedag,R,R,R,R,R,R,R,R,R,R,L
+Ventetidsdag,R,R,R,R,R,R,R,R,R,R,L

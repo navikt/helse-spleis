@@ -30,33 +30,33 @@ internal class BesteDagTest {
         private val egenmeldingsdagFraSaksbehandler = Dag.Arbeidsgiverdag(1.januar, 100.prosent, TestEvent.saksbehandler)
         private val arbeidsdagFraSaksbehandler = Dag.Arbeidsdag(1.januar, TestEvent.saksbehandler)
         private val andreYtelser = Dag.AndreYtelser(1.januar, TestEvent.testkilde, Dag.AndreYtelser.AnnenYtelse.Foreldrepenger)
-        private val venteperiodedag = Dag.Venteperiodedag(1.januar, 100.prosent, TestEvent.søknad)
+        private val ventetidsdag = Dag.Ventetidsdag(1.januar, 100.prosent, TestEvent.søknad)
     }
 
     @Test
-    fun `Venteperiodedager opp mot andre dager`() {
-        venteperiodedag slår arbeidsdagFraSøknad
+    fun `Ventetidsdager opp mot andre dager`() {
+        ventetidsdag slår arbeidsdagFraSøknad
 
-        //Saksbehandler skal kunne overstyre venteperiodedager
-        sykedagFraSaksbehandler slår venteperiodedag
-        arbeidsdagFraSaksbehandler slår venteperiodedag
+        //Saksbehandler skal kunne overstyre ventetidsdager
+        sykedagFraSaksbehandler slår ventetidsdag
+        arbeidsdagFraSaksbehandler slår ventetidsdag
 
         // arbeidIkkegjenopptatDag er ikke relevant for selvstendig
-        assertThrows<RuntimeException> { venteperiodedag slår arbeidIkkeGjenopptattDag }
+        assertThrows<RuntimeException> { ventetidsdag slår arbeidIkkeGjenopptattDag }
 
         assertForventetFeil(
             "En saksbehandlerdag idag er mange forskjellige typer dager hvilket gjør at vi ikke kan kaste feil når de prøver overstyre til feriedager",
-            { ferieFraSaksbehandler slår venteperiodedag },
-            { assertThrows<RuntimeException> { ferieFraSaksbehandler slår venteperiodedag } })
+            { ferieFraSaksbehandler slår ventetidsdag },
+            { assertThrows<RuntimeException> { ferieFraSaksbehandler slår ventetidsdag } })
 
         // Selvstendig har ikke egenmeldingsdager
-        assertThrows<RuntimeException> { egenmeldingsdagFraSaksbehandler slår venteperiodedag }
+        assertThrows<RuntimeException> { egenmeldingsdagFraSaksbehandler slår ventetidsdag }
 
         // Fra Inntektsmelding, skal gi feil
-        assertThrows<RuntimeException> { venteperiodedag slår arbeidsdagFraInntektsmelding }
-        assertThrows<RuntimeException> { venteperiodedag slår ferieFraInntektsmelding }
-        assertThrows<RuntimeException> { venteperiodedag slår friskHelgFraInntektsmelding }
-        assertThrows<RuntimeException> { venteperiodedag slår arbeidsgiverdagFraInntektsmelding }
+        assertThrows<RuntimeException> { ventetidsdag slår arbeidsdagFraInntektsmelding }
+        assertThrows<RuntimeException> { ventetidsdag slår ferieFraInntektsmelding }
+        assertThrows<RuntimeException> { ventetidsdag slår friskHelgFraInntektsmelding }
+        assertThrows<RuntimeException> { ventetidsdag slår arbeidsgiverdagFraInntektsmelding }
     }
 
     @Test

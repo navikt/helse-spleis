@@ -122,7 +122,7 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
                     }
                 }
 
-                is Dag.Venteperiodedag -> error("Forventer ikke venteperiodedag for arbeidstaker")
+                is Dag.Ventetidsdag -> error("Forventer ikke ventetidsdag for arbeidstaker")
             }
         }
         return builder.build()

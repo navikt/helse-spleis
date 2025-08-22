@@ -20,7 +20,7 @@ internal class VedtaksperiodeInspektør(view: VedtaksperiodeView) {
     internal val egenmeldingsperioder = view.egenmeldingsdager
 
     internal val arbeidsgiverperiode get() = behandlinger.last().endringer.last().arbeidsgiverperiode
-    internal val venteperiode get() = behandlinger.last().endringer.last().venteperiode
+    internal val ventetid get() = behandlinger.last().endringer.last().ventetid
 
     internal val sykdomstidslinje get() = behandlinger.last().endringer.last().sykdomstidslinje
     internal val inntektsendringer get() = behandlinger.last().endringer.last().inntektsendringer

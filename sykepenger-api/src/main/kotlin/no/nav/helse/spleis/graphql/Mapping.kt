@@ -93,7 +93,7 @@ private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
         SykdomstidslinjedagType.ANDRE_YTELSER_OPPLÆRINGSPENGER -> GraphQLSykdomsdagtype.AndreYtelserOpplaringspenger
         SykdomstidslinjedagType.ANDRE_YTELSER_DAGPENGER -> GraphQLSykdomsdagtype.AndreYtelserDagpenger
         SykdomstidslinjedagType.UBESTEMTDAG -> GraphQLSykdomsdagtype.Ubestemtdag
-        SykdomstidslinjedagType.VENTEPERIODEDAG -> GraphQLSykdomsdagtype.Venteperiodedag
+        SykdomstidslinjedagType.VENTETIDSDAG -> GraphQLSykdomsdagtype.Ventetidsdag
     },
     utbetalingsdagtype = when (dag.utbetalingstidslinjedagtype) {
         UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag -> GraphQLUtbetalingsdagType.ArbeidsgiverperiodeDag
@@ -105,7 +105,7 @@ private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
         UtbetalingstidslinjedagType.AvvistDag -> GraphQLUtbetalingsdagType.AvvistDag
         UtbetalingstidslinjedagType.UkjentDag -> GraphQLUtbetalingsdagType.UkjentDag
         UtbetalingstidslinjedagType.ForeldetDag -> GraphQLUtbetalingsdagType.ForeldetDag
-        UtbetalingstidslinjedagType.Venteperiodedag -> GraphQLUtbetalingsdagType.Venteperiodedag
+        UtbetalingstidslinjedagType.Ventetidsdag -> GraphQLUtbetalingsdagType.Ventetidsdag
     },
     kilde = GraphQLSykdomsdagkilde(
         id = dag.kilde.id,

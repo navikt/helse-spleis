@@ -326,7 +326,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         historiskeFolkeregisteridenter: List<String> = emptyList(),
         sendTilGosys: Boolean? = false,
         egenmeldingerFraSykmelding: List<LocalDate> = emptyList(),
-        venteperiode: Hendelseperiode
+        ventetid: Hendelseperiode
     ): UUID {
         val (id, message) = meldingsfabrikk.lagSøknadSelvstendig(
             fnr = fnr,
@@ -338,7 +338,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
             sendTilGosys = sendTilGosys,
             egenmeldingerFraSykmelding = egenmeldingerFraSykmelding,
-            venteperiode = venteperiode
+            ventetid = ventetid
         )
 
         val antallVedtaksperioderFørSøknad = testRapid.inspektør.vedtaksperiodeteller

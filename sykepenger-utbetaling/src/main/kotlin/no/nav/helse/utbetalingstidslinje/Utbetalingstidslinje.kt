@@ -19,7 +19,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Venteperiodedag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Ventetidsdag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.betal
@@ -204,8 +204,8 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
             add(Arbeidsdag(dato, økonomi))
         }
 
-        fun addVenteperiodedag(dato: LocalDate, økonomi: Økonomi) {
-            add(Venteperiodedag(dato, økonomi))
+        fun addVentetidsdag(dato: LocalDate, økonomi: Økonomi) {
+            add(Ventetidsdag(dato, økonomi))
         }
 
         fun addFridag(dato: LocalDate, økonomi: Økonomi) {

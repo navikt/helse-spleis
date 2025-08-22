@@ -5268,7 +5268,7 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "Venteperiodedag",
+          "name" : "Ventetidsdag",
           "description" : null,
           "isDeprecated" : false,
           "deprecationReason" : null
@@ -5412,7 +5412,7 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "Venteperiodedag",
+          "name" : "Ventetidsdag",
           "description" : null,
           "isDeprecated" : false,
           "deprecationReason" : null

@@ -29,7 +29,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Venteperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ventetid
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
@@ -261,7 +261,7 @@ internal class TestPerson(
 
         internal fun håndterSøknadSelvstendig(
             periode: Periode,
-            venteperiode: Periode = 1.januar til 16.januar,
+            ventetid: Periode = 1.januar til 16.januar,
             pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt> = listOf(
                 Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
                 Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
@@ -270,7 +270,7 @@ internal class TestPerson(
             sendtTilNAVEllerArbeidsgiver: Temporal? = null
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, 100.prosent),
-            Venteperiode(venteperiode),
+            Ventetid(ventetid),
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,
             sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver
         )

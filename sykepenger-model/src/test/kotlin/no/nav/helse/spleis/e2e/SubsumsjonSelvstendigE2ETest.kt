@@ -88,7 +88,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                     "tilstrekkeligOppholdISykedager" to TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
                     "tidslinjegrunnlag" to listOf(
                         listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100),
                         ),
                         listOf(
@@ -99,7 +99,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                     "beregnetTidslinje" to listOf(
                         mapOf("fom" to 1.mai(2017), "tom" to 16.mai(2017), "dagtype" to "AGPDAG", "grad" to 100),
                         mapOf("fom" to 17.mai(2017), "tom" to 31.mai(2017), "dagtype" to "NAVDAG", "grad" to 100),
-                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                         mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),
@@ -360,7 +360,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterSøknadSelvstendig(2.februar til 28.februar)
             håndterSøknad(
                 Søknad.Søknadsperiode.Sykdom(2.februar, 28.februar, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
+                Søknad.Søknadsperiode.Ventetid(1.januar til 16.januar),
                 pensjonsgivendeInntekter = listOf(
                     Søknad.PensjonsgivendeInntekt(Year.of(2017), 450_000.årlig),
                     Søknad.PensjonsgivendeInntekt(Year.of(2016), 450_000.årlig),
@@ -385,12 +385,12 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                     "utfallTom" to 31.januar,
                     "tidslinjegrunnlag" to listOf(
                         listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
                     "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                         mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),
@@ -416,12 +416,12 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                             mapOf("fom" to 2.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                         ),
                         listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
                     "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                         mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100),
                         mapOf("fom" to 2.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                     )
@@ -468,12 +468,12 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                     "utfallTom" to 1.februar,
                     "tidslinjegrunnlag" to listOf(
                         listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
                     "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                         mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),
@@ -499,12 +499,12 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                             mapOf("fom" to 3.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                         ),
                         listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100),
                         )
                     ),
                     "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                         mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100),
                         mapOf("fom" to 3.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                     )
@@ -541,7 +541,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
 
             håndterSøknad(
                 Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent),
-                Søknad.Søknadsperiode.Venteperiode(1.januar til 16.januar),
+                Søknad.Søknadsperiode.Ventetid(1.januar til 16.januar),
                 pensjonsgivendeInntekter = listOf(
                     Søknad.PensjonsgivendeInntekt(Year.of(2017), 450_000.årlig),
                     Søknad.PensjonsgivendeInntekt(Year.of(2016), 450_000.årlig),
@@ -572,12 +572,12 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                     "utfallTom" to 31.januar,
                     "tidslinjegrunnlag" to listOf(
                         listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
                     "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                         mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),
@@ -603,12 +603,12 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                             mapOf("fom" to 1.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                         ),
                         listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100),
                         )
                     ),
                     "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                         mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),
@@ -634,12 +634,12 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                             mapOf("fom" to 1.mars, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
                         ),
                         listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
                     "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                         mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),
@@ -665,12 +665,12 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                             mapOf("fom" to 1.april, "tom" to 26.april, "dagtype" to "NAVDAG", "grad" to 100)
                         ),
                         listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
                     "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                         mapOf("fom" to 17.januar, "tom" to 26.april, "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),
@@ -729,12 +729,12 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                     "utfallTom" to 31.januar,
                     "tidslinjegrunnlag" to listOf(
                         listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
                     "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                         mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),
@@ -760,12 +760,12 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                             mapOf("fom" to 1.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                         ),
                         listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
                     "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                         mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),
@@ -791,12 +791,12 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                             mapOf("fom" to 1.mars, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
                         ),
                         listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
                     "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                         mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),
@@ -822,12 +822,12 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                             mapOf("fom" to 1.april, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
                         ),
                         listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
                     "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                         mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),
@@ -853,12 +853,12 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                             mapOf("fom" to 1.april, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
                         ),
                         listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
                     "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTEPERIODEDAG", "grad" to 100),
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "VENTETIDSDAG", "grad" to 100),
                         mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),

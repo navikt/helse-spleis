@@ -27,7 +27,7 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
 
     var arbeidsdagTeller = 0
     var arbeidsgiverperiodeDagTeller = 0
-    var venteperiodeDagTeller = 0
+    var ventetidDagTeller = 0
     var arbeidsgiverperiodedagNavTeller = 0
     var avvistDagTeller = 0
     var fridagTeller = 0
@@ -42,7 +42,7 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     val arbeidsdager = mutableListOf<Arbeidsdag>()
     val arbeidsgiverdager = mutableListOf<ArbeidsgiverperiodeDag>()
     val arbeidsgiverperiodedagerNavAnsvar = mutableListOf<ArbeidsgiverperiodedagNav>()
-    val venteperiodedager = mutableListOf<Utbetalingsdag.Venteperiodedag>()
+    val ventetidsdager = mutableListOf<Utbetalingsdag.Ventetidsdag>()
     val fridager = mutableListOf<Fridag>()
     val avvistedatoer = mutableListOf<LocalDate>()
     val avvistedager = mutableListOf<AvvistDag>()
@@ -65,7 +65,7 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
                 foreldetDagTeller +
                 ukjentDagTeller +
                 arbeidsgiverperiodedagNavTeller +
-                venteperiodeDagTeller
+                ventetidDagTeller
 
     init {
         arbeidsdagTeller = 0
@@ -75,7 +75,7 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
         navDagTeller = 0
         navHelgDagTeller = 0
         ukjentDagTeller = 0
-        venteperiodeDagTeller = 0
+        ventetidDagTeller = 0
         totalUtbetaling = 0.0
 
         utbetalingstidslinje.forEach { dag ->
@@ -136,9 +136,9 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
                     collect(dag, dag.dato, dag.økonomi)
                 }
 
-                is Utbetalingsdag.Venteperiodedag -> {
-                    venteperiodeDagTeller += 1
-                    venteperiodedager.add(dag)
+                is Utbetalingsdag.Ventetidsdag -> {
+                    ventetidDagTeller += 1
+                    ventetidsdager.add(dag)
                     collect(dag, dag.dato, dag.økonomi)
                 }
             }

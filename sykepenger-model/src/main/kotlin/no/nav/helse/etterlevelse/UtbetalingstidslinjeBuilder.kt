@@ -11,7 +11,7 @@ internal class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstids
         when (dag) {
             is Utbetalingsdag.Arbeidsdag -> null
             is Utbetalingsdag.ArbeidsgiverperiodeDag -> visit(dag.dato, "AGPDAG", dag.økonomi)
-            is Utbetalingsdag.Venteperiodedag -> visit(dag.dato, "VENTEPERIODEDAG", dag.økonomi)
+            is Utbetalingsdag.Ventetidsdag -> visit(dag.dato, "VENTETIDSDAG", dag.økonomi)
             is Utbetalingsdag.ArbeidsgiverperiodedagNav -> null
             is Utbetalingsdag.AvvistDag -> visit(dag.dato, "AVVISTDAG", dag.økonomi)
             is Utbetalingsdag.ForeldetDag -> null

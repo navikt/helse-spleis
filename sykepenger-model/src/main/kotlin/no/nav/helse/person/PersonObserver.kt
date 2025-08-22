@@ -280,7 +280,7 @@ interface PersonObserver {
             Feriedag,
             ArbeidIkkeGjenopptattDag,
             AndreYtelser,
-            Venteperiodedag
+            Ventetidsdag
         }
 
         enum class EksternBegrunnelseDTO {

@@ -53,11 +53,11 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `venteperiode fra søknad lagres på behandlingen`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `ventetid fra søknad lagres på behandlingen`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
             håndterSøknadSelvstendig(januar)
 
-            assertEquals(1.januar til 16.januar, inspektør.venteperiode(1.vedtaksperiode))
+            assertEquals(1.januar til 16.januar, inspektør.ventetid(1.vedtaksperiode))
             assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
         }
     }
@@ -99,10 +99,10 @@ internal class SelvstendigTest : AbstractDslTest() {
                 assertSelvstendigInntektsgrunnlag(460589.årlig)
             }
             val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
-            val venteperiodedager = utbetalingstidslinje.filterIsInstance<Utbetalingsdag.Venteperiodedag>()
+            val ventetidsdager = utbetalingstidslinje.filterIsInstance<Utbetalingsdag.Ventetidsdag>()
 
-            assertEquals(16, venteperiodedager.size)
-            assertEquals(true, venteperiodedager.all { it.økonomi.utbetalingsgrad == 0.prosent && it.økonomi.sykdomsgrad == 100.prosent })
+            assertEquals(16, ventetidsdager.size)
+            assertEquals(true, ventetidsdager.all { it.økonomi.utbetalingsgrad == 0.prosent && it.økonomi.sykdomsgrad == 100.prosent })
             assertEquals(11, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.NavDag>().size)
             assertEquals(4, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.NavHelgDag>().size)
 
@@ -154,7 +154,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             }
 
             val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
-            assertEquals(16, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.Venteperiodedag>().size)
+            assertEquals(16, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.Ventetidsdag>().size)
             assertEquals(11, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.NavDag>().size)
             assertEquals(4, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.NavHelgDag>().size)
 

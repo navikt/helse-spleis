@@ -11,7 +11,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Venteperiodedag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Ventetidsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 class UtbetalingkladdBuilder(
@@ -47,7 +47,7 @@ class UtbetalingkladdBuilder(
                 is Arbeidsdag,
                 is AvvistDag,
                 is ForeldetDag,
-                is Venteperiodedag,
+                is Ventetidsdag,
                 is Fridag -> {
                     arbeidsgiveroppdragBuilder.ikkeBetalingsdag()
                     personoppdragBuilder.ikkeBetalingsdag()

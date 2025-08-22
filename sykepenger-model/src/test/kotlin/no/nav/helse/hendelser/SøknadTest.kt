@@ -17,7 +17,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Venteperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ventetid
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.november
@@ -33,7 +33,7 @@ import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.sykdomstidslinje.Dag.Venteperiodedag
+import no.nav.helse.sykdomstidslinje.Dag.Ventetidsdag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -62,13 +62,13 @@ internal class SøknadTest {
     private val subsumsjonslogg = BehandlingSubsumsjonslogg(Regelverkslogg.EmptyLog, "fnr", "orgnr", UUID.randomUUID(), UUID.randomUUID())
 
     @Test
-    fun `søknad med selvstendig og venteperiode`() {
-        søknad(Sykdom(1.januar, 31.januar, 100.prosent), Venteperiode(1.januar til 16.januar))
+    fun `søknad med selvstendig og ventetid`() {
+        søknad(Sykdom(1.januar, 31.januar, 100.prosent), Ventetid(1.januar til 16.januar))
 
-        assertEquals(16, søknad.sykdomstidslinje.filterIsInstance<Venteperiodedag>().size)
+        assertEquals(16, søknad.sykdomstidslinje.filterIsInstance<Ventetidsdag>().size)
         assertEquals(11, søknad.sykdomstidslinje.filterIsInstance<Sykedag>().size)
         assertEquals(4, søknad.sykdomstidslinje.filterIsInstance<SykHelgedag>().size)
-        assertEquals(100.prosent, søknad.sykdomstidslinje.filterIsInstance<Venteperiodedag>()[0].grad)
+        assertEquals(100.prosent, søknad.sykdomstidslinje.filterIsInstance<Ventetidsdag>()[0].grad)
     }
 
     @Test

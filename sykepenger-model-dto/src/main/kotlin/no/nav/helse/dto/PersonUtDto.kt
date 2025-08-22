@@ -49,7 +49,7 @@ sealed class SykdomstidslinjeDagDto {
         val other: HendelseskildeDto,
         val melding: String
     ) : SykdomstidslinjeDagDto()
-    data class VenteperiodedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val grad: ProsentdelDto) : SykdomstidslinjeDagDto()
+    data class VentetidsdagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val grad: ProsentdelDto) : SykdomstidslinjeDagDto()
 
     data class AndreYtelserDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val ytelse: YtelseDto) : SykdomstidslinjeDagDto() {
         enum class YtelseDto {

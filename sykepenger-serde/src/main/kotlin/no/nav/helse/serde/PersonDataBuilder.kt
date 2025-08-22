@@ -340,8 +340,8 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
-    is SykdomstidslinjeDagDto.VenteperiodedagDto -> DagData(
-        type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.VENTEPERIODEDAG,
+    is SykdomstidslinjeDagDto.VentetidsdagDto -> DagData(
+        type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.VENTETIDSDAG,
         kilde = this.kilde.tilPersonData(),
         grad = this.grad.prosentDesimal,
         other = null,
@@ -473,7 +473,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
         inntektskilde.id to beløpstidslinje.tilPersonData()
     }.toMap(),
     faktaavklartInntekt = faktaavklartInntekt?.tilPersonData(),
-    venteperiode = venteperiode?.let { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
+    ventetid = ventetid?.let { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
 )
 
 private fun MaksdatoresultatUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.MaksdatoresultatData(
@@ -586,7 +586,7 @@ private fun UtbetalingsdagUtDto.tilPersonData() = UtbetalingsdagData(
         is UtbetalingsdagUtDto.NavDagDto -> PersonData.UtbetalingstidslinjeData.TypeData.NavDag
         is UtbetalingsdagUtDto.NavHelgDagDto -> PersonData.UtbetalingstidslinjeData.TypeData.NavHelgDag
         is UtbetalingsdagUtDto.UkjentDagDto -> PersonData.UtbetalingstidslinjeData.TypeData.UkjentDag
-        is UtbetalingsdagUtDto.VenteperiodedagDto -> PersonData.UtbetalingstidslinjeData.TypeData.Venteperiodedag
+        is UtbetalingsdagUtDto.VentetidsdagDto -> PersonData.UtbetalingstidslinjeData.TypeData.Ventetidsdag
     },
     aktuellDagsinntekt = this.økonomi.aktuellDagsinntekt.dagligDouble.beløp,
     inntektjustering = this.økonomi.inntektjustering.dagligDouble.beløp,

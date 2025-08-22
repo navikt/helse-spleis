@@ -52,7 +52,7 @@ import no.nav.helse.dto.SykdomstidslinjeDagDto.ProblemDagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.SykHelgedagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.SykedagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.UkjentDagDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto.VenteperiodedagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.VentetidsdagDto
 import no.nav.helse.dto.SykdomstidslinjeDto
 import no.nav.helse.dto.SykmeldingsperioderDto
 import no.nav.helse.dto.UtbetalingTilstandDto
@@ -631,7 +631,7 @@ data class PersonData(
                     JsonDagType.ANDRE_YTELSER_DAGPENGER -> AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = AndreYtelserDto.YtelseDto.Dagpenger)
                     JsonDagType.UKJENT_DAG -> UkjentDagDto(dato = dagen, kilde = kilde)
 
-                    JsonDagType.VENTEPERIODEDAG -> VenteperiodedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                    JsonDagType.VENTETIDSDAG -> VentetidsdagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                 }
             }
 
@@ -655,7 +655,7 @@ data class PersonData(
                 ANDRE_YTELSER_OPPLÆRINGSPENGER,
                 ANDRE_YTELSER_DAGPENGER,
 
-                VENTEPERIODEDAG,
+                VENTETIDSDAG,
 
                 UKJENT_DAG
             }
@@ -1056,7 +1056,7 @@ data class PersonData(
                     val maksdatoresultat: MaksdatoresultatData,
                     val inntektjusteringer: Map<String, BeløpstidslinjeData>,
                     val faktaavklartInntekt: VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.InntektsopplysningData?,
-                    val venteperiode: PeriodeData?,
+                    val ventetid: PeriodeData?,
                 ) {
                     fun tilDto() = BehandlingendringInnDto(
                         id = this.id,
@@ -1080,7 +1080,7 @@ data class PersonData(
                             InntektskildeDto(inntektskilde) to beløpstidslinje.tilDto()
                         }.toMap(),
                         faktaavklartInntekt = faktaavklartInntekt?.tilDto(),
-                        venteperiode = venteperiode?.tilDto()
+                        ventetid = ventetid?.tilDto()
                     )
                 }
             }
@@ -1436,7 +1436,7 @@ data class PersonData(
             UkjentDag,
             ForeldetDag,
             ArbeidsgiverperiodedagNav,
-            Venteperiodedag
+            Ventetidsdag
         }
 
         data class UtbetalingsdagData(
@@ -1490,7 +1490,7 @@ data class PersonData(
                     TypeData.UkjentDag -> UkjentDagDto(dato = dato, økonomi = økonomiDto)
                     TypeData.ForeldetDag -> ForeldetDagDto(dato = dato, økonomi = økonomiDto)
                     TypeData.ArbeidsgiverperiodedagNav -> ArbeidsgiverperiodeDagNavDto(dato = dato, økonomi = økonomiDto)
-                    TypeData.Venteperiodedag -> VenteperiodedagDto(dato = dato, økonomi = økonomiDto)
+                    TypeData.Ventetidsdag -> VentetidsdagDto(dato = dato, økonomi = økonomiDto)
                 }
             }
         }

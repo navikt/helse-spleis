@@ -27,7 +27,7 @@ internal class EtterlevelseSykdomstidslinjeTest {
             10.januar.ikkeSubsummérbar { Dag.ProblemDag(it, INGEN, "Melding") },
             11.januar.subsummérbar { Dag.SykHelgedag(it, 100.prosent, INGEN) },
             12.januar.subsummérbar { Dag.Sykedag(it, 100.prosent, INGEN) },
-            13.januar.ikkeSubsummérbar { Dag.Venteperiodedag(it, 100.prosent, INGEN) },
+            13.januar.ikkeSubsummérbar { Dag.Ventetidsdag(it, 100.prosent, INGEN) },
             14.januar.ikkeSubsummérbar { Dag.UkjentDag(it, INGEN) }
         ).sortedBy { it.second::class.simpleName }
 

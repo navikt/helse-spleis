@@ -76,7 +76,7 @@ internal class Arbeidsgiverperiodeberegner(
                     håndterUkjentDag(dag.dato, gjenståendeInfotrygdBetalteDager, gjenståendeInfotrygdFerieperioder)
                 }
 
-                is Dag.Venteperiodedag -> error("Venteperiodedager skal ikke være en del av arbeidsgiverperioden")
+                is Dag.Ventetidsdag -> error("Ventetidsdager skal ikke være en del av arbeidsgiverperioden")
             }
         }
         fridager.somFerieOppholdsdager()

@@ -365,8 +365,8 @@ internal class TestMessageFactory(
         historiskeFolkeregisteridenter: List<String> = emptyList(),
         sendTilGosys: Boolean? = false,
         egenmeldingerFraSykmelding: List<LocalDate> = emptyList(),
-        venteperiode: HendelsePeriode,
-        selvstendigNaringsdrivende: SelvstendigNaringsdrivendeDTO? = selvstendigNæringsdrivende(venteperiode),
+        ventetid: HendelsePeriode,
+        selvstendigNaringsdrivende: SelvstendigNaringsdrivendeDTO? = selvstendigNæringsdrivende(ventetid),
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }
         val sendtSøknad = SykepengesoknadDTO(
@@ -406,7 +406,7 @@ internal class TestMessageFactory(
         )
     }
 
-    private fun selvstendigNæringsdrivende(venteperiode: HendelsePeriode): SelvstendigNaringsdrivendeDTO = SelvstendigNaringsdrivendeDTO(
+    private fun selvstendigNæringsdrivende(ventetid: HendelsePeriode): SelvstendigNaringsdrivendeDTO = SelvstendigNaringsdrivendeDTO(
         roller = emptyList(),
         naringsdrivendeInntekt = NaringsdrivendeInntektDTO(
             norskPersonidentifikator = "12345678912",
@@ -440,7 +440,7 @@ internal class TestMessageFactory(
                 )
             )
         ),
-        naringsdrivendeVenteperiode = PeriodeDTO(fom = venteperiode.start, tom = venteperiode.endInclusive)
+        naringsdrivendeVenteperiode = PeriodeDTO(fom = ventetid.start, tom = ventetid.endInclusive)
     )
 
     fun lagSøknadArbeidsledig(

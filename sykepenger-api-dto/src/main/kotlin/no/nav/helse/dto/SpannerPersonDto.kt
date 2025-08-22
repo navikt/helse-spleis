@@ -289,7 +289,7 @@ data class SpannerPersonDto(
             enum class JsonDagType {
                 ARBEIDSDAG,
                 ARBEIDSGIVERDAG,
-                VENTEPERIODEDAG,
+                VENTETIDSDAG,
 
                 FERIEDAG,
                 ARBEID_IKKE_GJENOPPTATT_DAG,
@@ -380,7 +380,7 @@ data class SpannerPersonDto(
             val egenmeldingsdager: List<PeriodeData>,
             val utbetalingstidslinje: List<Any>,
             val arbeidsgiverperiode: List<PeriodeData>,
-            val venteperiode: PeriodeData?,
+            val ventetid: PeriodeData?,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             val forbrukteDager: Long,
             val gjenståendeDager: Int,
@@ -414,7 +414,7 @@ data class SpannerPersonDto(
                     Gjeldende(
                         skjæringstidspunkt = skjæringstidspunkt,
                         arbeidsgiverperiode = gjeldendeEndring.arbeidsgiverperiode,
-                        venteperiode = gjeldendeEndring.venteperiode,
+                        ventetid = gjeldendeEndring.ventetid,
                         refusjonstidslinje = gjeldendeEndring.refusjonstidslinje.perioder,
                         inntektsendringer = gjeldendeEndring.inntektsendringer.perioder,
                         refusjonstidslinjeHensyntattUbrukteRefusjonsopplysninger = if (behandling.id == sisteBehandlingId) sisteRefusjonstidslinje!!.perioder else emptyList(),
@@ -575,7 +575,7 @@ data class SpannerPersonDto(
                     val inntektsendringer: BeløpstidslinjeData,
                     val dokumentsporing: DokumentsporingData,
                     val arbeidsgiverperiode: List<PeriodeData>,
-                    val venteperiode: PeriodeData?,
+                    val ventetid: PeriodeData?,
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
                     val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
@@ -755,7 +755,7 @@ data class SpannerPersonDto(
             UkjentDag,
             ForeldetDag,
             ArbeidsgiverperiodedagNav,
-            Venteperiodedag
+            Ventetidsdag
         }
 
         data class UtbetalingsdagData(
@@ -1044,8 +1044,8 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
-    is SykdomstidslinjeDagDto.VenteperiodedagDto -> DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.VENTEPERIODEDAG,
+    is SykdomstidslinjeDagDto.VentetidsdagDto -> DagData(
+        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.VENTETIDSDAG,
         kilde = this.kilde.tilPersonData(),
         grad = this.grad.prosentDesimal,
         other = null,
@@ -1249,7 +1249,7 @@ private fun BehandlingendringUtDto.tilPersonData() =
             inntektskilde.id to beløpstidslinje.tilPersonData()
         }.toMap(),
         faktaavklartInntekt = faktaavklartInntekt?.tilPersonData(),
-        venteperiode = venteperiode?.let { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
+        ventetid = ventetid?.let { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
     )
 
 private fun MaksdatoresultatUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatoresultatData(
@@ -1366,7 +1366,7 @@ private fun UtbetalingsdagUtDto.tilPersonData() =
             is UtbetalingsdagUtDto.NavDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.NavDag
             is UtbetalingsdagUtDto.NavHelgDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.NavHelgDag
             is UtbetalingsdagUtDto.UkjentDagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.UkjentDag
-            is UtbetalingsdagUtDto.VenteperiodedagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.Venteperiodedag
+            is UtbetalingsdagUtDto.VentetidsdagDto -> SpannerPersonDto.UtbetalingstidslinjeData.TypeData.Ventetidsdag
         },
         aktuellDagsinntekt = this.økonomi.aktuellDagsinntekt.dagligDouble.beløp,
         dekingsgrad = this.økonomi.dekningsgrad.prosentDesimal,

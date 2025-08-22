@@ -35,7 +35,7 @@ internal class Utbetalingstidslinjesubsumsjon(
 
     private val tidslinjesubsumsjonsformat = sykdomstidslinje.subsumsjonsformat()
     private val arbeidsgiverperiodedager = mutableListOf<Periode>()
-    private val venteperiodedager = mutableListOf<Periode>()
+    private val ventetidsdager = mutableListOf<Periode>()
     private val arbeidsgiverperiodeNavdager = mutableListOf<Periode>()
     private val helger = mutableListOf<Periode>()
     private val fridager = mutableListOf<Periode>()
@@ -98,8 +98,8 @@ internal class Utbetalingstidslinjesubsumsjon(
                 is Utbetalingsdag.UkjentDag -> { /* gjør ingenting */
                 }
 
-                is Utbetalingsdag.Venteperiodedag -> {
-                    venteperiodedager.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
+                is Utbetalingsdag.Ventetidsdag -> {
+                    ventetidsdager.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
                     dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
                 }
             }

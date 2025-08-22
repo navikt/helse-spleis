@@ -13,7 +13,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun selvstendigsøknad() = Toggle.SelvstendigNæringsdrivende.enable {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), venteperiode = 3.januar til 18.januar)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar)
         sendVilkårsgrunnlagSelvstendig(0)
         sendYtelserSelvstendig(0)
         sendSimuleringSelvstendig(0)
@@ -35,7 +35,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `overstyrer tidslinje i avventer godkjenning`() = Toggle.SelvstendigNæringsdrivende.enable {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), venteperiode = 3.januar til 18.januar)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar)
         sendVilkårsgrunnlagSelvstendig(0)
         sendYtelserSelvstendig(0)
         sendSimuleringSelvstendig(0)

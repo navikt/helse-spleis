@@ -70,7 +70,7 @@ import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
-import no.nav.helse.sykdomstidslinje.Dag.Venteperiodedag
+import no.nav.helse.sykdomstidslinje.Dag.Ventetidsdag
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -112,7 +112,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         egenmeldingsdager: List<Periode>,
         faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
         inntektsendringer: Beløpstidslinje,
-        venteperiode: Periode?,
+        ventetid: Periode?,
         dokumentsporing: Dokumentsporing,
         behandlingkilde: Behandlingkilde
     ) {
@@ -125,7 +125,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             inntektsendringer = inntektsendringer,
             dokumentsporing = dokumentsporing,
             sykmeldingsperiode = sykmeldingsperiode,
-            venteperiode = venteperiode,
+            ventetid = ventetid,
             behandlingkilde = behandlingkilde
         )
         leggTilNyBehandling(behandling)
@@ -613,7 +613,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val skjæringstidspunkter: List<LocalDate>,
             val egenmeldingsdager: List<Periode>,
             val arbeidsgiverperiode: List<Periode>,
-            val venteperiode: Periode?,
+            val ventetid: Periode?,
             val dagerNavOvertarAnsvar: List<Periode>,
             val maksdatoresultat: Maksdatoresultat,
             val inntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
@@ -637,7 +637,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 egenmeldingsdager = egenmeldingsdager,
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                 maksdatoresultat = maksdatoresultat,
-                venteperiode = venteperiode
+                ventetid = ventetid
             )
 
             private fun skjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje, periode: Periode = this.periode): Pair<LocalDate, List<LocalDate>> {
@@ -649,7 +649,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is Arbeidsgiverdag,
                         is ForeldetSykedag,
                         is SykHelgedag,
-                        is Venteperiodedag,
+                        is Ventetidsdag,
                         is Sykedag -> true
 
                         is AndreYtelser,
@@ -692,7 +692,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         skjæringstidspunkt = dto.skjæringstidspunkt,
                         skjæringstidspunkter = dto.skjæringstidspunkter,
                         arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) },
-                        venteperiode = dto.venteperiode?.let { Periode.gjenopprett(it) },
+                        ventetid = dto.ventetid?.let { Periode.gjenopprett(it) },
                         egenmeldingsdager = dto.egenmeldingsdager.map { Periode.gjenopprett(it) },
                         dagerNavOvertarAnsvar = dto.dagerNavOvertarAnsvar.map { Periode.gjenopprett(it) },
                         maksdatoresultat = dto.maksdatoresultat.let { Maksdatoresultat.gjenopprett(it) },
@@ -934,7 +934,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         inntektskilde.dto() to beløpstidslinje.dto()
                     }.toMap(),
                     faktaavklartInntekt = faktaavklartInntekt?.dto(),
-                    venteperiode = venteperiode?.dto()
+                    ventetid = ventetid?.dto()
                 )
             }
         }
@@ -1474,7 +1474,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 inntektsendringer: Beløpstidslinje,
                 dokumentsporing: Dokumentsporing,
                 sykmeldingsperiode: Periode,
-                venteperiode: Periode?,
+                ventetid: Periode?,
                 behandlingkilde: Behandlingkilde
             ) =
                 Behandling(
@@ -1496,7 +1496,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             skjæringstidspunkt = IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT,
                             skjæringstidspunkter = emptyList(),
                             arbeidsgiverperiode = emptyList(),
-                            venteperiode = venteperiode,
+                            ventetid = ventetid,
                             egenmeldingsdager = egenmeldingsdager,
                             dagerNavOvertarAnsvar = emptyList(),
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert,
@@ -2343,7 +2343,7 @@ internal data class BehandlingendringView(
     val skjæringstidspunkter: List<LocalDate>,
     val dagerNavOvertarAnsvar: List<Periode>,
     val arbeidsgiverperiode: List<Periode>,
-    val venteperiode: Periode?,
+    val ventetid: Periode?,
     val egenmeldingsdager: List<Periode>,
     val maksdatoresultat: Maksdatoresultat
 )

@@ -31,5 +31,5 @@ data class BehandlingendringUtDto(
     val maksdatoresultat: MaksdatoresultatUtDto,
     val inntektjusteringer: Map<InntektskildeDto, BeløpstidslinjeDto>,
     val faktaavklartInntekt: SelvstendigFaktaavklartInntektUtDto?,
-    val venteperiode: PeriodeDto?
+    val ventetid: PeriodeDto?
 )

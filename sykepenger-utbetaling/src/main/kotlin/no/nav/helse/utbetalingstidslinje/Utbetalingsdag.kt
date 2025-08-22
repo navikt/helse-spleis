@@ -172,16 +172,16 @@ sealed class Utbetalingsdag(
         }
     }
 
-    class Venteperiodedag(dato: LocalDate, økonomi: Økonomi) :
+    class Ventetidsdag(dato: LocalDate, økonomi: Økonomi) :
         Utbetalingsdag(dato, økonomi) {
         override val prioritet = 25
-        override fun kopierMed(økonomi: Økonomi) = Venteperiodedag(dato, økonomi)
+        override fun kopierMed(økonomi: Økonomi) = Ventetidsdag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiUtDto) =
-            UtbetalingsdagUtDto.VenteperiodedagDto(dato, økonomi)
+            UtbetalingsdagUtDto.VentetidsdagDto(dato, økonomi)
 
         internal companion object {
-            fun gjenopprett(dto: UtbetalingsdagInnDto.VenteperiodedagDto): Venteperiodedag {
-                return Venteperiodedag(
+            fun gjenopprett(dto: UtbetalingsdagInnDto.VentetidsdagDto): Ventetidsdag {
+                return Ventetidsdag(
                     dato = dto.dato,
                     økonomi = Økonomi.gjenopprett(dto.økonomi)
                 )
@@ -225,10 +225,10 @@ sealed class Utbetalingsdag(
                 is UtbetalingsdagInnDto.NavDagDto -> NavDag.gjenopprett(dto)
                 is UtbetalingsdagInnDto.NavHelgDagDto -> NavHelgDag.gjenopprett(dto)
                 is UtbetalingsdagInnDto.UkjentDagDto -> UkjentDag.gjenopprett(dto)
-                is UtbetalingsdagInnDto.VenteperiodedagDto -> Venteperiodedag.gjenopprett(dto)
+                is UtbetalingsdagInnDto.VentetidsdagDto -> Ventetidsdag.gjenopprett(dto)
             }
         }
-    }
+    }///Users/h131243/src/tbd-spleiselaget-meta/meta-helse-spleis/sykepenger-model/src/main/kotlin/no/nav/helse/utbetalingstidslinje/ArbeidstakerUtbetalingstidslinjeBuilder.kt
 
     fun dto() = dto(this.dato, this.økonomi.dto())
     protected abstract fun dto(dato: LocalDate, økonomi: ØkonomiUtDto): UtbetalingsdagUtDto

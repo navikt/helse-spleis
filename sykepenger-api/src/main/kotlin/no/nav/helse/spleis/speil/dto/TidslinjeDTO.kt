@@ -26,7 +26,7 @@ data class SammenslåttDag(
 enum class SykdomstidslinjedagType {
     ARBEIDSDAG,
     ARBEIDSGIVERDAG,
-    VENTEPERIODEDAG,
+    VENTETIDSDAG,
     FERIEDAG,
     ARBEID_IKKE_GJENOPPTATT_DAG,
     FORELDET_SYKEDAG,
@@ -75,7 +75,7 @@ enum class UtbetalingstidslinjedagType {
     AvvistDag,
     UkjentDag,
     ForeldetDag,
-    Venteperiodedag
+    Ventetidsdag
 }
 
 interface Utbetalingstidslinjedag {

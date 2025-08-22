@@ -376,7 +376,7 @@ internal class PersonMediator(
                 Dagtype.Feriedag -> "Feriedag"
                 Dagtype.ArbeidIkkeGjenopptattDag -> "ArbeidIkkeGjenopptattDag"
                 Dagtype.AndreYtelser -> "AndreYtelser"
-                Dagtype.Venteperiodedag -> "Venteperiodedag"
+                Dagtype.Ventetidsdag -> "Ventetidsdag"
             },
             "beløpTilArbeidsgiver" to this.beløpTilArbeidsgiver,
             "beløpTilBruker" to this.beløpTilBruker,

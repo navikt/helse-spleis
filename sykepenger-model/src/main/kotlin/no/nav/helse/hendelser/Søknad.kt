@@ -218,10 +218,10 @@ class Søknad(
             }
         }
 
-        val venteperiode = when (behandlingsporing) {
+        val ventetid = when (behandlingsporing) {
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
-                val venteperiode = perioder.filterIsInstance<Søknadsperiode.Venteperiode>().first()
-                Periode(venteperiode.periode.start, venteperiode.periode.endInclusive)
+                val ventetid = perioder.filterIsInstance<Søknadsperiode.Ventetid>().first()
+                Periode(ventetid.periode.start, ventetid.periode.endInclusive)
             }
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
@@ -239,7 +239,7 @@ class Søknad(
             arbeidsgiver = arbeidsgiver,
             sykdomstidslinje = sykdomstidslinje,
             faktaavklartInntekt = faktaavklartInntekt,
-            venteperiode = venteperiode,
+            ventetid = ventetid,
             dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
             sykmeldingsperiode = sykdomsperiode,
             regelverkslogg = regelverkslogg
@@ -288,7 +288,7 @@ class Søknad(
                             is Permisjon -> "permisjon"
                             is Sykdom -> "sykdom"
                             is Utlandsopphold -> "utlandsopphold"
-                            is Venteperiode -> "venteperiode"
+                            is Ventetid -> "ventetid"
                         }
                     )
                 }
@@ -363,9 +363,9 @@ class Søknad(
                 Sykdomstidslinje.arbeidsdager(periode.start, periode.endInclusive, kilde)
         }
 
-        class Venteperiode(periode: Periode) : Søknadsperiode(periode.start, periode.endInclusive) {
+        class Ventetid(periode: Periode) : Søknadsperiode(periode.start, periode.endInclusive) {
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
-                Sykdomstidslinje.venteperiodedager(periode.start, periode.endInclusive, kilde)
+                Sykdomstidslinje.ventetidsdager(periode.start, periode.endInclusive, kilde)
         }
 
         class Utlandsopphold(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
