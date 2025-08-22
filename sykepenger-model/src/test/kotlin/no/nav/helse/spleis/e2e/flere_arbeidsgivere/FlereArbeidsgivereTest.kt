@@ -1628,9 +1628,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 {
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
         }
 

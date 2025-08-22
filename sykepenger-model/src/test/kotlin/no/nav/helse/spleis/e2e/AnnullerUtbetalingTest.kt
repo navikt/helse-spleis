@@ -927,7 +927,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         )
 
         val annullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().utbetaling
-        assertAnnullering(-11891, Utbetalingstatus.OVERFØRT, 17.januar, 1.januar til 31.januar, annullering!!)
+        assertAnnullering(-11880, Utbetalingstatus.OVERFØRT, 17.januar, 1.januar til 31.januar, annullering!!)
     }
 
     @Test

@@ -173,7 +173,7 @@ internal class ØkonomiTest {
                     assertEquals(100.0, økonomi.inspektør.grad.toDouble())
                     assertEquals(499.5.daglig, økonomi.inspektør.arbeidsgiverRefusjonsbeløp)
                     assertEquals(500.daglig, økonomi.inspektør.arbeidsgiverbeløp)
-                    assertEquals(499.daglig, økonomi.inspektør.personbeløp)
+                    assertEquals(500.daglig, økonomi.inspektør.personbeløp)
                 }
             }
     }
@@ -214,8 +214,8 @@ internal class ØkonomiTest {
         val b = 50.prosent.inntekt(10000.månedlig, refusjonsbeløp = 10000.månedlig)
         val c = 70.prosent.inntekt(15000.månedlig, refusjonsbeløp = 15000.månedlig)
         val betalte = listOf(a, b, c).betal(561804.årlig)
-        assertUtbetaling(betalte[0], 396.0, 0.0)
-        assertUtbetaling(betalte[1], 221.0, 0.0)
+        assertUtbetaling(betalte[0], 397.0, 0.0)
+        assertUtbetaling(betalte[1], 220.0, 0.0)
         assertUtbetaling(betalte[2], 463.0, 0.0)
     }
 
@@ -245,8 +245,8 @@ internal class ØkonomiTest {
         assertEquals(forventet, faktisk)
         // grense = 864
         assertUtbetaling(betalte[0], 470.0, 0.0)
-        assertUtbetaling(betalte[1], 321.0, 0.0)
-        assertUtbetaling(betalte[2], 70.0, 0.0)
+        assertUtbetaling(betalte[1], 322.0, 0.0)
+        assertUtbetaling(betalte[2], 69.0, 0.0)
     }
 
     @Test
@@ -324,7 +324,7 @@ internal class ØkonomiTest {
             assertEquals(100.prosent, it.totalSykdomsgrad())
         }
         assertUtbetaling(betalte[0], 358.0, 0.0)
-        assertUtbetaling(betalte[1], 357.0, 0.0)
+        assertUtbetaling(betalte[1], 358.0, 0.0)
     }
 
     @Test
@@ -334,16 +334,8 @@ internal class ØkonomiTest {
         val betalte = listOf(a, b).betal(15750.månedlig).also {
             assertEquals(100.prosent, it.totalSykdomsgrad())
         }
-        assertForventetFeil(
-            nå = {
-                assertUtbetaling(betalte[0], 358.0, 11.0)
-                assertUtbetaling(betalte[1], 358.0, 0.0)
-            },
-            ønsket = {
-                assertUtbetaling(betalte[0], 358.0, 12.0)
-                assertUtbetaling(betalte[1], 357.0, 0.0)
-            }
-        )
+        assertUtbetaling(betalte[0], 358.0, 12.0)
+        assertUtbetaling(betalte[1], 358.0, 0.0)
     }
 
     @Test
@@ -372,9 +364,13 @@ internal class ØkonomiTest {
     fun `Tilkommen inntekt - fordeler ikke personbeløp ved avsluttet arbeidsforhold`() {
         val a = 0.prosent.inntekt(INGEN)
         val b = 100.prosent.inntekt(10000.månedlig)
-        val betalte = listOf(a, b).betal(31000.månedlig)
-        assertUtbetaling(betalte[0], 0.0, 0.0)
-        assertUtbetaling(betalte[1], 462.0, 969.0)
+        val m = assertThrows<IllegalStateException> {
+            val betalte = listOf(a, b).betal(31000.månedlig)
+            // hvis restbeløpet ble fordelt, så kanskje resultatet ville vært noe slikt:
+            // assertUtbetaling(betalte[0], 0.0, 0.0)
+            // assertUtbetaling(betalte[1], 462.0, 969.0)
+        }
+        assertEquals("Det er et restbeløp på kr [Årlig: 252000.0, Månedlig: 21000.0, Daglig: 969.2307692307693] etter all fordeling", m.message)
     }
 
     @Test
@@ -384,20 +380,9 @@ internal class ØkonomiTest {
         val betalte = listOf(a, b).betal(561804.årlig).also {
             assertEquals(100.prosent, it.totalSykdomsgrad())
         }
-        assertEquals(2161, betalte.mapNotNull { it.inspektør.arbeidsgiverbeløp }.summer().dagligInt)
-        assertForventetFeil(
-            forklaring = "arbeidsgiver 2 har høyere avrundingsdifferanse enn arbeidsgiver 1, og bør få den 1 kr diffen." +
-                "sykepengegrunnlaget er 561 860 kr (6G). Arbeidsgiver 1 sin andel utgjør (30,000 / (30,000 + 35,000 kr)) * 561 860 kr = 997,38 kr daglig." +
-                "Arbeidsgiver 2 sin andel utgjør  (35,000 / (30,000 + 35,000 kr)) * 561 860 kr = 1163,62 kr daglig, og har med dette en større avrundingsdifferanse.",
-            nå = {
-                assertUtbetaling(betalte[0], 998.0, 0.0)
-                assertUtbetaling(betalte[1], 1163.0, 0.0)
-            },
-            ønsket = {
-                assertUtbetaling(betalte[0], 997.0, 0.0)
-                assertUtbetaling(betalte[1], 1164.0, 0.0)
-            }
-        )
+        assertEquals(2160, betalte.mapNotNull { it.inspektør.arbeidsgiverbeløp }.summer().dagligInt)
+        assertUtbetaling(betalte[0], 997.0, 0.0)
+        assertUtbetaling(betalte[1], 1163.0, 0.0)
     }
 
     private fun List<Økonomi>.totalSykdomsgrad(): Prosentdel {

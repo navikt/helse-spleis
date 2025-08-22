@@ -163,7 +163,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
             }
             assertEquals(1, utbetaling.personOppdrag.size)
             utbetaling.personOppdrag[0].inspektør.also { linje ->
-                assertEquals(11, linje.beløp)
+                assertEquals(12, linje.beløp)
                 assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
             }
         }

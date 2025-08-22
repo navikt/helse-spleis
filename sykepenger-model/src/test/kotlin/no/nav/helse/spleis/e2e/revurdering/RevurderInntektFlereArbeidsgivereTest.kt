@@ -42,7 +42,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
     fun `over 6G -- revurder inntekt ned på a1 når begge er i Avsluttet`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 32000.månedlig)
         nullstillTilstandsendringer()
-        a1 { assertDag(17.januar, 1081.0.daglig, aktuellDagsinntekt = 32000.månedlig) }
+        a1 { assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig) }
         a2 { assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig) }
 
         a1 {
@@ -86,14 +86,14 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
     @Test
     fun `over 6G -- revurder inntekt opp på a1 påvirker ikke utbetaling når refusjon er uendret`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 32000.månedlig)
-        a1 { assertDag(17.januar, 1081.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN) }
+        a1 { assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN) }
         a2 { assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN) }
 
         a1 {
             håndterOverstyrInntekt(1.januar, 33000.månedlig)
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            assertDag(17.januar, 1081.0.daglig, aktuellDagsinntekt = 33000.månedlig, personbeløp = INGEN)
+            assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 33000.månedlig, personbeløp = INGEN)
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
@@ -106,7 +106,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
     @Test
     fun `over 6G -- revurder inntekt opp på a1 påvirker utbetaling når refusjon er endret`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 32000.månedlig)
-        a1 { assertDag(17.januar, 1081.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN) }
+        a1 { assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN) }
         a2 { assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN) }
 
         a1 {
@@ -164,7 +164,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 16500.månedlig, personbeløp = 70.daglig)
+            assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 16500.månedlig, personbeløp = 69.daglig)
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
@@ -201,7 +201,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
     fun `3 arbeidsgivere -- justerer inntekten ned på a1`() {
         (a1 og a2 og a3).nyeVedtak(januar, inntekt = 32000.månedlig)
         nullstillTilstandsendringer()
-        a1 { assertDag(17.januar, 721.0.daglig, aktuellDagsinntekt = 32000.månedlig) }
+        a1 { assertDag(17.januar, 720.0.daglig, aktuellDagsinntekt = 32000.månedlig) }
         (a2 og a3) { assertDag(17.januar, 720.0.daglig, aktuellDagsinntekt = 32000.månedlig) }
 
         a1 {
@@ -270,7 +270,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             val arbeidsgiverOppdrag = utbetalinger.last().inspektør.arbeidsgiverOppdrag
             assertEquals(1, arbeidsgiverOppdrag.size)
             assertEquals(Endringskode.UEND, arbeidsgiverOppdrag[0].inspektør.endringskode)
-            assertDag(17.januar, 1081.daglig, aktuellDagsinntekt = 32000.månedlig)
+            assertDag(17.januar, 1080.daglig, aktuellDagsinntekt = 32000.månedlig)
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,

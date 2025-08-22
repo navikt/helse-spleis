@@ -111,7 +111,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             opptjeningsår = Year.of(2022)
         )
 
-        assertEquals(803.352, inspektør.spleisFeriepengebeløpPerson.first())
+        assertEquals(802.2299999999999, inspektør.spleisFeriepengebeløpPerson.first())
         assertEquals(802.2299999999999, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
         assertEquals(0.0, inspektør.infotrygdFeriepengebeløpPerson.first())
         assertEquals(0.0, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
@@ -137,7 +137,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             )
         )
 
-        assertEquals(803.352, inspektør.spleisFeriepengebeløpPerson.first())
+        assertEquals(802.2299999999999, inspektør.spleisFeriepengebeløpPerson.first())
         assertEquals(802.2299999999999, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
         assertEquals(802.2299999999999, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
         assertEquals(802.2299999999999, inspektør.infotrygdFeriepengebeløpPerson.first())

@@ -3,7 +3,6 @@ package no.nav.helse.økonomi
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosentdel.Companion.NullProsent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -74,82 +73,46 @@ data class Økonomi(
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.map { it.reserver() }
 
         private fun fordelBeløp(økonomiList: List<Økonomi>, sykepengegrunnlagBegrenset6G: Inntekt, utbetalingsgrad: Prosentdel): List<Økonomi> {
-            val totalArbeidsgiver = totalArbeidsgiver(økonomiList)
-            val totalPerson = totalPerson(økonomiList)
-            val total = totalArbeidsgiver + totalPerson
+            val totalArbeidsgiverFør6GBegrensning = totalArbeidsgiver(økonomiList)
+            val totalPersonFør6GBegrensning = totalPerson(økonomiList)
+            val total = totalArbeidsgiverFør6GBegrensning + totalPersonFør6GBegrensning
             if (total == INGEN) return økonomiList
 
-            val inntektstapSomSkalDekkesAvNAV = maxOf(INGEN, (sykepengegrunnlagBegrenset6G * utbetalingsgrad).rundTilDaglig())
-            val fordelingRefusjon = fordel(
+            val inntektstapSomSkalDekkesAvNAV = maxOf(INGEN, sykepengegrunnlagBegrenset6G * utbetalingsgrad)
+            val ratio = reduksjon(inntektstapSomSkalDekkesAvNAV, totalArbeidsgiverFør6GBegrensning)
+            val totalArbeidsgiverEtter6GBegrensning1 = totalArbeidsgiverFør6GBegrensning * ratio
+
+            val fordelingRefusjon = reduserBeløpTilTotal(
                 økonomiList = økonomiList,
-                total = totalArbeidsgiver,
+                total = totalArbeidsgiverFør6GBegrensning,
                 grense = inntektstapSomSkalDekkesAvNAV,
                 setter = { økonomi, inntekt -> økonomi.copy(reservertArbeidsgiverbeløp = inntekt) },
                 getter = { it.reservertArbeidsgiverbeløp!! }
             )
-            val totalArbeidsgiverrefusjon = totalArbeidsgiver(fordelingRefusjon)
-            val fordelingPerson = fordel(
+            val totalArbeidsgiverEtter6GBegrensning = totalArbeidsgiver(fordelingRefusjon)
+            check(totalArbeidsgiverEtter6GBegrensning1.rundTilDaglig() == totalArbeidsgiverEtter6GBegrensning.rundTilDaglig()) {
+                "WHAAAAT! De skal jo være helt like"
+            }
+            val fordelingPersonOgRefusjon = reduserBeløpTilTotal(
                 økonomiList = fordelingRefusjon,
-                total = total - totalArbeidsgiverrefusjon,
-                grense = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon,
+                total = total - totalArbeidsgiverEtter6GBegrensning,
+                grense = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverEtter6GBegrensning,
                 setter = { økonomi, inntekt -> økonomi.copy(reservertPersonbeløp = inntekt) },
                 getter = { it.reservertPersonbeløp!! }
             )
-            val totalPersonbeløp = totalPerson(fordelingPerson)
-            val restbeløp = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverrefusjon - totalPersonbeløp
-            val restfordeling = restfordeling(fordelingPerson, restbeløp)
-            return restfordeling
-        }
-
-        private fun restfordeling(økonomiList: List<Økonomi>, grense: Inntekt): List<Økonomi> {
-            // På grunn av ulike avrundinger mellom arbeidsgiverrefusjon og sykepengegrunnlag kan det oppstå
-            // differanse på 1 krone som da ville vært dumt å fordele på personbeløp
-            // TODO: Finn en måte å fordele denne ene kronen på arbeidsgivere
-            if (grense == 1.daglig) return økonomiList.also {
-                sikkerlogg.info("Restbeløp på 1 krone")
+            val totalPersonbeløpEtter6GBegrensning = totalPerson(fordelingPersonOgRefusjon)
+            val restbeløp = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverEtter6GBegrensning - totalPersonbeløpEtter6GBegrensning
+            check(restbeløp.rundTilDaglig() == INGEN) {
+                "Det er et restbeløp på kr $restbeløp etter all fordeling"
             }
-            var budsjett = grense
-            var list = økonomiList
-            // Fordeler 1 krone per arbeidsforhold som skal ha en utbetaling uansett frem til hele potten er fordelt
-            while (budsjett > INGEN) {
-                list = list.map {
-                    val reservertPersonbeløp = it.reservertPersonbeløp!!
-                    if (budsjett > INGEN && (it.reservertArbeidsgiverbeløp!! > INGEN || reservertPersonbeløp > INGEN)) {
-                        budsjett -= 1.daglig
-                        it.copy(reservertPersonbeløp = reservertPersonbeløp + 1.daglig)
-                    } else {
-                        it
-                    }
-                }
-            }
-            return list
-
+            return fordelingPersonOgRefusjon
         }
 
-        private fun fordel(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt, setter: (Økonomi, Inntekt) -> Økonomi, getter: (Økonomi) -> Inntekt): List<Økonomi> {
-            return økonomiList
-                .reduserOver6G(grense, total, getter)
-                .fordel1Kr(grense, total, setter)
-        }
-
-        private fun List<Økonomi>.reduserOver6G(grense: Inntekt, total: Inntekt, getter: (Økonomi) -> Inntekt): List<Triple<Økonomi, Inntekt, Double>> {
+        private fun reduserBeløpTilTotal(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt, setter: (Økonomi, Inntekt) -> Økonomi, getter: (Økonomi) -> Inntekt): List<Økonomi> {
             val ratio = reduksjon(grense, total)
-            return map {
+            return økonomiList.map {
                 val redusertBeløp = getter(it).times(ratio)
-                val rundetNed = redusertBeløp.rundNedTilDaglig()
-                val differanse = (redusertBeløp - rundetNed).daglig
-                Triple(it, rundetNed, differanse)
-            }
-        }
-
-        // fordeler 1 kr til hver av arbeidsgiverne som har mest i differanse i beløp
-        private fun List<Triple<Økonomi, Inntekt, Double>>.fordel1Kr(grense: Inntekt, total: Inntekt, setter: (Økonomi, Inntekt) -> Økonomi): List<Økonomi> {
-            val maksimalt = total.coerceAtMost(grense)
-            val rest = (maksimalt - map { it.second }.summer()).dagligInt
-            val sortertEtterTap = sortedByDescending { (_, _, differanse) -> differanse }.take(rest)
-            return map { (økonomi, beløp) ->
-                val ekstra = if (sortertEtterTap.any { (other) -> other === økonomi }) 1.daglig else INGEN
-                setter(økonomi, beløp + ekstra)
+                setter(it, redusertBeløp)
             }
         }
 
@@ -195,8 +158,8 @@ data class Økonomi(
     fun <R> brukTotalGrad(block: (totalGrad: Int) -> R) = block(totalSykdomsgrad.toDouble().toInt())
 
     private fun reserver(): Økonomi {
-        val total = (aktuellDagsinntekt * utbetalingsgrad).rundTilDaglig()
-        val gradertArbeidsgiverRefusjonsbeløp = (refusjonsbeløp * utbetalingsgrad).rundTilDaglig()
+        val total = aktuellDagsinntekt * utbetalingsgrad
+        val gradertArbeidsgiverRefusjonsbeløp = refusjonsbeløp * utbetalingsgrad
         val arbeidsgiverbeløp = gradertArbeidsgiverRefusjonsbeløp.coerceAtMost(total)
         return copy(
             reservertArbeidsgiverbeløp = arbeidsgiverbeløp,

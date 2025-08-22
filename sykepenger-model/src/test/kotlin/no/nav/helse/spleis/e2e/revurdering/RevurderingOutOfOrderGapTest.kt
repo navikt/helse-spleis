@@ -114,9 +114,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), orgnummer = a2, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt()
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
@@ -128,9 +126,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt()
     }
 
     @Test

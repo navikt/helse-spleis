@@ -229,9 +229,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = ghost)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, a1)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, a1)
@@ -436,9 +434,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, INNTEKT)

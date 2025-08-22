@@ -271,6 +271,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             val overstyringId = UUID.randomUUID()
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(1.januar, null, INNTEKT / 2)))), hendelseId = overstyringId)
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -1088,6 +1089,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                 )
             )
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterSøknad(februar)
 
@@ -1124,6 +1126,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                 )
             )
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             assertEquals(INNTEKT, inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje[1.februar].beløp)
         }

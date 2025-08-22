@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class MaksimumUtbetalingFilterTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
@@ -41,12 +42,11 @@ internal class MaksimumUtbetalingFilterTest {
     @Test
     fun `utbetaling for tidslinje med ulike daginntekter blir kalkulert per dag`() {
         val sykepengegrunnlag= 3500.daglig
-        val tidslinje = tidslinjeOf(12.NAV(3500.0), 14.NAV(1200.0)).betal(sykepengegrunnlag)
-        val forventetNavdager = 20
-        assertEquals(forventetNavdager, tidslinje.inspektør.navDagTeller)
-        assertEquals((sykepengegrunnlag * forventetNavdager).daglig, tidslinje.inspektør.totalUtbetaling())
-        assertTrue(aktivitetslogg.aktiviteter.isNotEmpty())
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        val tidslinje = tidslinjeOf(12.NAV(3500.0), 14.NAV(1200.0))
+        val m = assertThrows<IllegalStateException> {
+            tidslinje.betal(sykepengegrunnlag)
+        }
+        assertEquals("Det er et restbeløp på kr [Årlig: 598000.0, Månedlig: 49833.333333333336, Daglig: 2300.0] etter all fordeling", m.message)
     }
 
     @Test

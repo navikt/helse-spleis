@@ -229,9 +229,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt()
 
         assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter(a2))
         assertTilstander(
@@ -241,9 +239,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
-            TIL_UTBETALING,
             AVSLUTTET,
             orgnummer = a1
         )
@@ -294,9 +290,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         )
         assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter(a2))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt()
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,
@@ -304,9 +298,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
-            TIL_UTBETALING,
             AVSLUTTET,
             orgnummer = a1
         )

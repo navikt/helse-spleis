@@ -101,12 +101,12 @@ internal class UtbetalingstidslinjeTest {
     @Test
     fun betale() {
         val `6G`= 2161.daglig
-        val input = listOf(tidslinjeOf(1.NAV(1000)), tidslinjeOf(1.NAV(1000)))
+        val input = listOf(tidslinjeOf(1.NAV(1081)), tidslinjeOf(1.NAV(1081)))
         val result = Utbetalingstidslinje.betale(`6G`, input)
 
         input.forEachIndexed { index, input ->
             assertNull(input[1.januar].økonomi.inspektør.arbeidsgiverbeløp) { "den uberegnede listen skal ikke modifiseres" }
-            assertEquals(1000, result[index][1.januar].økonomi.inspektør.arbeidsgiverbeløp?.dagligInt)
+            assertEquals(1081, result[index][1.januar].økonomi.inspektør.arbeidsgiverbeløp?.dagligInt)
         }
     }
 

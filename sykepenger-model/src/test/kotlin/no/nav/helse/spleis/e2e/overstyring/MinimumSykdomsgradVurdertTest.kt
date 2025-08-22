@@ -75,9 +75,7 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
 
         assertEquals(19, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].økonomi.inspektør.totalGrad)
 
-        håndterSimulering(orgnummer = a1)
         håndterUtbetalingsgodkjenning(orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(orgnummer = a2)
         håndterSimulering(orgnummer = a2)

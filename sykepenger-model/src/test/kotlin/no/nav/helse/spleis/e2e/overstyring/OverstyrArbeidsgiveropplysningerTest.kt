@@ -27,6 +27,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpsti
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -45,6 +46,8 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilYtelser
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -99,11 +102,13 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
         )
         håndterYtelser(1.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         assertEquals(INNTEKT / 2, inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje[1.februar].beløp)
         håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -255,6 +260,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             meldingsreferanseId = overstyringId
         )
         håndterYtelser(3.vedtaksperiode)
+        assertVarsel(Varselkode.RV_UT_23, 3.vedtaksperiode.filter())
         håndterSimulering(3.vedtaksperiode)
 
         val førsteMarsUtbetaling = inspektør.utbetaling(2)
@@ -270,7 +276,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         revurderingMarsUtbetaling.personOppdrag.also { oppdrag ->
             assertEquals(1.mars, oppdrag[0].inspektør.fom)
             assertEquals(30.mars, oppdrag[0].inspektør.tom)
-            assertEquals(716, oppdrag[0].inspektør.beløp)
+            assertEquals(715, oppdrag[0].inspektør.beløp)
             assertEquals(NY, oppdrag[0].inspektør.endringskode)
         }
         assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
@@ -605,7 +611,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             revurdering.personOppdrag[0].let { utbetalingslinje ->
                 assertEquals(17.januar, utbetalingslinje.inspektør.fom)
                 assertEquals(31.januar, utbetalingslinje.inspektør.tom)
-                assertEquals(230, utbetalingslinje.inspektør.beløp)
+                assertEquals(231, utbetalingslinje.inspektør.beløp)
                 assertEquals(NY, utbetalingslinje.inspektør.endringskode)
             }
         }
@@ -616,7 +622,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             opprinneligUtbetaling.arbeidsgiverOppdrag[0].let { utbetalingslinje ->
                 assertEquals(17.januar, utbetalingslinje.inspektør.fom)
                 assertEquals(31.januar, utbetalingslinje.inspektør.tom)
-                assertEquals(461, utbetalingslinje.inspektør.beløp)
+                assertEquals(462, utbetalingslinje.inspektør.beløp)
                 assertEquals(NY, utbetalingslinje.inspektør.endringskode)
             }
         }
@@ -627,7 +633,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 assertEquals(17.januar, utbetalingslinje.inspektør.fom)
                 assertEquals(19.januar, utbetalingslinje.inspektør.tom)
                 assertEquals(462, utbetalingslinje.inspektør.beløp)
-                assertEquals(NY, utbetalingslinje.inspektør.endringskode)
+                assertEquals(ENDR, utbetalingslinje.inspektør.endringskode)
             }
             revurdering.personOppdrag[0].let { utbetalingslinje ->
                 assertEquals(22.januar, utbetalingslinje.inspektør.fom)

@@ -70,7 +70,7 @@ internal class ØkonomiDagTest {
         assertØkonomi(b, 115.0, 0.0)
         val c1 = tidslinjeOf(1.NAV(inntekt, refusjonsbeløp = inntekt / 2))
         val (c) = listOf(c1).betal(inntekt)
-        assertØkonomi(c, 115.0, 116.0)
+        assertØkonomi(c, 115.0, 115.0)
     }
 
     @Test
@@ -80,7 +80,7 @@ internal class ØkonomiDagTest {
         val b1 = tidslinjeOf(2.NAV(1200))
         val c1 = tidslinjeOf(2.NAV(1200))
         val (a, b, c) = listOf(a1, b1, c1).betal(sykepengegrunnlag)
-        assertØkonomi(a, 721.0)
+        assertØkonomi(a, 720.0)
         assertØkonomi(b, 720.0)
         assertØkonomi(c, 720.0)
     }
@@ -92,7 +92,7 @@ internal class ØkonomiDagTest {
         val b1 = tidslinjeOf(2.NAV(1200))
         val c1 = tidslinjeOf(2.ARB(1200))
         val (a, b, c) = listOf(a1, b1, c1).betal(sykepengegrunnlag)
-        assertØkonomi(a, 721.0)
+        assertØkonomi(a, 720.0)
         assertØkonomi(b, 720.0)
         assertØkonomi(c, 0.0)
     }
@@ -105,7 +105,7 @@ internal class ØkonomiDagTest {
         val c = tidslinjeOf(2.NAV(1200)).avvis(listOf(januar), Begrunnelse.MinimumInntekt)
         val (a1, b1, c1) = listOf(a, b, c).betal(sykepengegrunnlag)
         assertØkonomi(a, null, null)
-        assertØkonomi(a1, 721.0, 0.0)
+        assertØkonomi(a1, 720.0, 0.0)
         assertØkonomi(b, null, null)
         assertØkonomi(b1, 720.0, 0.0)
         assertØkonomi(c, null, null)
@@ -119,7 +119,7 @@ internal class ØkonomiDagTest {
         val b1 = tidslinjeOf(2.NAV(1200))
         val c1 = tidslinjeOf(2.AVV(1200, 100))
         val (a, b, c) = listOf(a1, b1, c1).betal(sykepengegrunnlag)
-        assertØkonomi(a, 721.0)
+        assertØkonomi(a, 720.0)
         assertØkonomi(b, 720.0)
         assertØkonomi(c, 0.0)
     }

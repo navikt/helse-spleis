@@ -428,15 +428,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
 
         val arbeidsgiverOppdrag = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag
-        assertEquals(2, arbeidsgiverOppdrag.size)
+        assertEquals(1, arbeidsgiverOppdrag.size)
         val a1Linje1 = arbeidsgiverOppdrag[0]
         assertEquals(16.mars, a1Linje1.fom)
-        assertEquals(20.mars, a1Linje1.tom)
+        assertEquals(30.mars, a1Linje1.tom)
         assertEquals(997, a1Linje1.beløp)
-        val a1Linje2 = arbeidsgiverOppdrag[1]
-        assertEquals(21.mars, a1Linje2.fom)
-        assertEquals(30.mars, a1Linje2.tom)
-        assertEquals(998, a1Linje2.beløp)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
@@ -714,14 +710,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(15.mars, a2Linje.tom)
         assertEquals(532, a2Linje.beløp)
 
-        val a3Linje1 = inspektør(a3).sisteUtbetaling().arbeidsgiverOppdrag[0]
+        assertEquals(1, inspektør(a3).sisteUtbetaling().arbeidsgiverOppdrag.size)
+        val a3Linje1 = inspektør(a3).sisteUtbetaling().arbeidsgiverOppdrag.single()
         assertEquals(19.januar, a3Linje1.fom)
-        assertEquals(15.februar, a3Linje1.tom)
+        assertEquals(28.februar, a3Linje1.tom)
         assertEquals(549, a3Linje1.beløp)
-        val a3Linje2 = inspektør(a3).sisteUtbetaling().arbeidsgiverOppdrag[1]
-        assertEquals(16.februar, a3Linje2.fom)
-        assertEquals(28.februar, a3Linje2.tom)
-        assertEquals(548, a3Linje2.beløp)
 
         val a4Linje = inspektør(a4).sisteUtbetaling().arbeidsgiverOppdrag.single()
         assertEquals(20.januar, a4Linje.fom)
@@ -880,16 +873,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(15.mars, a2Linje.tom)
         assertEquals(532, a2Linje.beløp)
 
-        // Siden maksbeløpet blir større når vi får inn flere arbeidsgivere vil vi få en ekstra krone som blir med i kronerulleringen(avrunning), det fører
-        // til at vi fordeler den til den arbeidsgiveren som tapte mest på avrunningen
-        val a3Linje = inspektør(a3).sisteUtbetaling().arbeidsgiverOppdrag[0]
+        val arbeidsgiver3Oppdrag = inspektør(a3).sisteUtbetaling().arbeidsgiverOppdrag
+        assertEquals(1, arbeidsgiver3Oppdrag.size)
+        val a3Linje = arbeidsgiver3Oppdrag.single()
         assertEquals(19.januar, a3Linje.fom)
-        assertEquals(21.januar, a3Linje.tom)
+        assertEquals(15.mars, a3Linje.tom)
         assertEquals(274, a3Linje.beløp)
-        val a3Linje2 = inspektør(a3).sisteUtbetaling().arbeidsgiverOppdrag[1]
-        assertEquals(22.januar, a3Linje2.fom)
-        assertEquals(15.mars, a3Linje2.tom)
-        assertEquals(275, a3Linje2.beløp)
 
         val a4Linje = inspektør(a4).sisteUtbetaling().arbeidsgiverOppdrag.single()
         assertEquals(20.januar, a4Linje.fom)
@@ -970,7 +959,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         val a3Linje = inspektør(a3).sisteUtbetaling().arbeidsgiverOppdrag.single()
         assertEquals(19.januar, a3Linje.fom)
         assertEquals(15.mars, a3Linje.tom)
-        assertEquals(231, a3Linje.beløp)
+        assertEquals(230, a3Linje.beløp)
 
         val a4Linje = inspektør(a4).sisteUtbetaling().arbeidsgiverOppdrag.single()
         assertEquals(20.januar, a4Linje.fom)
@@ -1309,9 +1298,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -1320,18 +1307,14 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET, orgnummer = a1)
 
         val revurderingen = inspektør(a1).sisteUtbetaling()
-        assertEquals(2, revurderingen.arbeidsgiverOppdrag.size)
+        assertEquals(1, revurderingen.arbeidsgiverOppdrag.size)
         assertEquals(0, revurderingen.personOppdrag.size)
         revurderingen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(1.februar til 18.februar, linje.fom til linje.tom)
+            assertEquals(1.februar til 28.februar, linje.fom til linje.tom)
             assertEquals(1080, linje.beløp)
-        }
-        revurderingen.arbeidsgiverOppdrag[1].inspektør.also { linje ->
-            assertEquals(19.februar til 28.februar, linje.fom til linje.tom)
-            assertEquals(1081, linje.beløp)
         }
 
         val førstegangsutbetalingen = inspektør(a2).sisteUtbetaling()
@@ -1389,24 +1372,18 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET, orgnummer = a1)
 
         val revurderingen = inspektør(a1).sisteUtbetaling()
-        assertEquals(2, revurderingen.arbeidsgiverOppdrag.size)
+        assertEquals(1, revurderingen.arbeidsgiverOppdrag.size)
         assertEquals(0, revurderingen.personOppdrag.size)
         revurderingen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(1.februar til 4.februar, linje.fom til linje.tom)
+            assertEquals(1.februar til 28.februar, linje.fom til linje.tom)
             assertEquals(1080, linje.beløp)
-        }
-        revurderingen.arbeidsgiverOppdrag[1].inspektør.also { linje ->
-            assertEquals(5.februar til 28.februar, linje.fom til linje.tom)
-            assertEquals(1081, linje.beløp)
         }
 
         val førstegangsutbetalingen = inspektør(a2).sisteUtbetaling()

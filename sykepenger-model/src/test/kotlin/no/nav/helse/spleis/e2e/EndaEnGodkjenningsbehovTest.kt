@@ -473,7 +473,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         assertGodkjenningsbehov(
             tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "Personutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
-            utbetalingsdager = standardUtbetalingsdager(715, 716)
+            utbetalingsdager = standardUtbetalingsdager(715, 715)
         )
     }
 
@@ -594,7 +594,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString())
             ),
-            utbetalingsdager = standardUtbetalingsdager(1081, 0),
+            utbetalingsdager = standardUtbetalingsdager(1080, 0),
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to 744000.årlig.årlig,
                 "sykepengegrunnlag" to 561_804.0,

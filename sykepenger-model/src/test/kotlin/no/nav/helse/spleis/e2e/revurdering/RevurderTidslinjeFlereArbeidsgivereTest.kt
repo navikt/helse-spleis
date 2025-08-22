@@ -161,10 +161,8 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
-        assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a2))
-        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         inspektør(a2) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertIngenFunksjonelleFeil()
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
@@ -187,7 +185,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
     @Test
     fun `Revurdering til ferie på a1 skal ikke påvirke utbetalingen til a2`() {
         nyeVedtak(januar, a1, a2, inntekt = 32000.månedlig)
-        assertPeriode(17.januar til 31.januar, a1, 1081.daglig)
+        assertPeriode(17.januar til 31.januar, a1, 1080.daglig)
         assertPeriode(17.januar til 31.januar, a2, 1080.daglig)
 
         håndterOverstyrTidslinje((17.januar til 21.januar).map { ManuellOverskrivingDag(it, Feriedag) }, orgnummer = a1)
@@ -202,7 +200,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
 
         assertPeriode(17.januar til 21.januar, a1, INGEN)
-        assertPeriode(22.januar til 31.januar, a1, 1081.daglig)
+        assertPeriode(22.januar til 31.januar, a1, 1080.daglig)
 
         assertPeriode(17.januar til 31.januar, a2, 1080.daglig)
     }
