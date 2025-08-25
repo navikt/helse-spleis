@@ -26,14 +26,13 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
-import no.nav.helse.person.tilstandsmaskin.TilstandType
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -199,10 +198,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             førstegangsbehandling = false,
             inntektskilde = "FLERE_ARBEIDSGIVERE",
             orgnummere = setOf(a1, a2),
-            omregnedeÅrsinntekter = listOf(
-                mapOf("organisasjonsnummer" to a1, "beløp" to 240000.0),
-                mapOf("organisasjonsnummer" to a2, "beløp" to 240000.0)
-            ),
             forbrukteSykedager = 18,
             gjenståendeSykedager = 230,
             foreløpigBeregnetSluttPåSykepenger = 28.desember,
@@ -214,7 +209,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a2).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.februar.toString(), "tom" to 10.februar.toString()),
             ),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to 480_000.0,
                 "sykepengegrunnlag" to 480_000.0,
                 "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
@@ -228,7 +222,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                     "omregnetÅrsinntekt" to 240000.0,
                     "inntektskilde" to Inntektskilde.Arbeidsgiver
                 )
-                )
+                ),
+                "selvstendig" to null
             )
         )
     }
@@ -238,9 +233,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         tilGodkjenning(januar, a1)
         assertGodkjenningsbehov(
             tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
-            omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to INNTEKT.årlig)),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to INNTEKT.årlig,
                 "sykepengegrunnlag" to INNTEKT.årlig,
                 "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
@@ -250,7 +243,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                         "omregnetÅrsinntekt" to INNTEKT.årlig,
                         "inntektskilde" to Inntektskilde.Arbeidsgiver
                     )
-                )
+                ),
+                "selvstendig" to null
             )
         )
     }
@@ -278,10 +272,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         tilGodkjenning(januar, a1, beregnetInntekt = 100000.månedlig)
         assertGodkjenningsbehov(
             tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "6GBegrenset", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
-            omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 1_200_000.0)),
             utbetalingsdager = standardUtbetalingsdager(2161, 0),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to 1_200_000.0,
                 "sykepengegrunnlag" to 561_804.0,
                 "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
@@ -291,7 +283,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                         "omregnetÅrsinntekt" to 1200000.0,
                         "inntektskilde" to Inntektskilde.Arbeidsgiver
                     )
-                )
+                ),
+                "selvstendig" to null
             )
         )
     }
@@ -305,7 +298,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             periodeFom = 10.februar,
             periodeTom = 20.februar,
             vedtaksperiodeId = 2.vedtaksperiode.id(a1),
-            omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 10000.månedlig.årlig)),
             behandlingId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().id,
             tags = setOf("Førstegangsbehandling", "IngenNyArbeidsgiverperiode", "Innvilget", "Arbeidsgiverutbetaling", "SykepengegrunnlagUnder2G", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
             perioderMedSammeSkjæringstidspunkt = listOf(
@@ -321,7 +313,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             foreløpigBeregnetSluttPåSykepenger = 8.januar(2019),
             utbetalingsdager = (10.februar til 20.februar).utbetalingsdager(462, 0),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to 10000.månedlig.årlig,
                 "6G" to 561_804.0,
                 "sykepengegrunnlag" to 10000.månedlig.årlig,
                 "fastsatt" to "EtterHovedregel",
@@ -331,7 +322,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                         "omregnetÅrsinntekt" to 120000.0,
                         "inntektskilde" to Inntektskilde.Arbeidsgiver
                     )
-                )
+                ),
+                "selvstendig" to null
             )
 
         )
@@ -385,8 +377,10 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode.id(a1))
         assertSykepengegrunnlagsfakta(
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to INNTEKT.årlig,
-                "fastsatt" to "IInfotrygd"
+                "sykepengegrunnlag" to 372_000.0,
+                "6G" to 561_804.0,
+                "fastsatt" to "IInfotrygd",
+                "selvstendig" to null
             ),
             vedtaksperiodeId = 2.vedtaksperiode.id(a1)
         )
@@ -497,7 +491,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             foreløpigBeregnetSluttPåSykepenger = 25.januar(2019),
             utbetalingsdager = (1.februar til 28.februar).feriedager(),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to INNTEKT.årlig,
                 "sykepengegrunnlag" to INNTEKT.årlig,
                 "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
@@ -507,7 +500,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                         "omregnetÅrsinntekt" to INNTEKT.årlig,
                         "inntektskilde" to Inntektskilde.Arbeidsgiver,
                     )
-                )
+                ),
+                "selvstendig" to null
             )
         )
     }
@@ -529,12 +523,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             perioderMedSammeSkjæringstidspunkt = listOf(
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
             ),
-            omregnedeÅrsinntekter = listOf(
-                mapOf("organisasjonsnummer" to a1, "beløp" to (INNTEKT/2).årlig)
-            ),
             utbetalingsdager = standardUtbetalingsdager(715, 0),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to (INNTEKT/2).årlig,
                 "sykepengegrunnlag" to (INNTEKT/2).årlig,
                 "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
@@ -544,7 +534,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                         "omregnetÅrsinntekt" to (INNTEKT/2).årlig,
                         "inntektskilde" to Inntektskilde.Saksbehandler,
                     )
-                )
+                ),
+                "selvstendig" to null
             )
         )
     }
@@ -586,17 +577,12 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "6GBegrenset", "FlereArbeidsgivere", "ArbeidsgiverØnskerRefusjon"),
             inntektskilde = "FLERE_ARBEIDSGIVERE",
             orgnummere = setOf(a1, a2),
-            omregnedeÅrsinntekter = listOf(
-                mapOf("organisasjonsnummer" to a1, "beløp" to INNTEKT.årlig),
-                mapOf("organisasjonsnummer" to a2, "beløp" to INNTEKT.årlig)
-            ),
             perioderMedSammeSkjæringstidspunkt = listOf(
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString())
             ),
             utbetalingsdager = standardUtbetalingsdager(1080, 0),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to 744000.årlig.årlig,
                 "sykepengegrunnlag" to 561_804.0,
                 "6G" to 561_804.0,
                 "fastsatt" to "EtterHovedregel",
@@ -611,7 +597,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                         "omregnetÅrsinntekt" to INNTEKT.årlig,
                         "inntektskilde" to Inntektskilde.Arbeidsgiver,
                     )
-                )
+                ),
+                "selvstendig" to null
             )
         )
     }
@@ -853,10 +840,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         assertSykepengegrunnlagsfakta(
             vedtaksperiodeId = 1.vedtaksperiode.id(a1),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to 480000.0,
                 "6G" to 561804.0,
                 "fastsatt" to "EtterSkjønn",
-                "skjønnsfastsatt" to 852000.0,
                 "sykepengegrunnlag" to 561804.0,
                 "arbeidsgivere" to listOf(
                     mapOf(
@@ -871,7 +856,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                         "inntektskilde" to Inntektskilde.Saksbehandler,
                         "skjønnsfastsatt" to 360000.0
                     )
-                )
+                ),
+                "selvstendig" to null
             )
         )
     }
@@ -892,7 +878,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
 
     private fun assertSykepengegrunnlagsfakta(
         vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1),
-        sykepengegrunnlagsfakta: Map<String, Any>
+        sykepengegrunnlagsfakta: Map<String, Any?>
     ) {
         val actualSykepengegrunnlagsfakta = hentFelt<Any>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "sykepengegrunnlagsfakta")!!
         assertEquals(sykepengegrunnlagsfakta, actualSykepengegrunnlagsfakta)
@@ -916,7 +902,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         førstegangsbehandling: Boolean = true,
         utbetalingstype: String = "UTBETALING",
         inntektskilde: String = "EN_ARBEIDSGIVER",
-        omregnedeÅrsinntekter: List<Map<String, Any>> = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to INNTEKT.årlig)),
         behandlingId: UUID = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().id,
         perioderMedSammeSkjæringstidspunkt: List<Map<String, String>> = listOf(
             mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
@@ -925,8 +910,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         gjenståendeSykedager: Int = 237,
         foreløpigBeregnetSluttPåSykepenger: LocalDate = 28.desember,
         utbetalingsdager: List<Map<String, Any>> = standardUtbetalingsdager(1431, 0),
-        sykepengegrunnlagsfakta: Map<String, Any> = mapOf(
-            "omregnetÅrsinntektTotalt" to INNTEKT.årlig,
+        sykepengegrunnlagsfakta: Map<String, Any?> = mapOf(
             "sykepengegrunnlag" to 372_000.0,
             "6G" to 561_804.0,
             "fastsatt" to "EtterHovedregel",
@@ -936,7 +920,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                     "omregnetÅrsinntekt" to INNTEKT.årlig,
                     "inntektskilde" to Inntektskilde.Arbeidsgiver
                 )
-            )
+            ),
+            "selvstendig" to null
         )
     ) {
         val actualtags = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "tags") ?: emptySet()
@@ -949,7 +934,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         val actualUtbetalingtype = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "utbetalingtype")!!
         val actualOrgnummereMedRelevanteArbeidsforhold = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "orgnummereMedRelevanteArbeidsforhold")!!
         val actualKanAvises = hentFelt<Boolean>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "kanAvvises")!!
-        val actualOmregnedeÅrsinntekter = hentFelt<List<Map<String, String>>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "omregnedeÅrsinntekter")!!
         val actualBehandlingId = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "behandlingId")!!
         val actualPerioderMedSammeSkjæringstidspunkt = hentFelt<Any>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "perioderMedSammeSkjæringstidspunkt")!!
         val actualForbrukteSykedager = hentFelt<Int>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "forbrukteSykedager")!!
@@ -969,7 +953,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         assertEquals(utbetalingstype, actualUtbetalingtype)
         assertEquals(orgnummere, actualOrgnummereMedRelevanteArbeidsforhold)
         assertEquals(kanAvvises, actualKanAvises)
-        assertEquals(omregnedeÅrsinntekter, actualOmregnedeÅrsinntekter)
         assertEquals(behandlingId.toString(), actualBehandlingId)
         assertEquals(perioderMedSammeSkjæringstidspunkt, actualPerioderMedSammeSkjæringstidspunkt)
         assertEquals(forbrukteSykedager, actualForbrukteSykedager)
