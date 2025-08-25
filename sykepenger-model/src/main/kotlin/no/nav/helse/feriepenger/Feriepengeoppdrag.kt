@@ -46,6 +46,7 @@ data class Feriepengeoppdrag(
         aktivitetsloggMedOppdragkontekst.behov(Behovtype.Feriepengeutbetaling, "Trenger å sende utbetaling til Oppdrag", behovdetaljer(saksbehandler))
     }
 
+    // obs: vi setter ikke nye tidsstempel
     fun endreBeløp(beløp: Int): Feriepengeoppdrag {
         if (beløp == 0) return this.annuller()
         if (beløp == this.linje?.beløp) return this.utenEndring()
@@ -62,7 +63,8 @@ data class Feriepengeoppdrag(
                 refFagsystemId = null,
                 refDelytelseId = null,
                 datoStatusFom = linje.fom
-            )
+            ),
+            tidsstempel = LocalDateTime.now()
         )
     }
 
@@ -70,7 +72,8 @@ data class Feriepengeoppdrag(
         checkNotNull(linje) { "forventer at oppdraget har en linje" }
         return this.copy(
             endringskode = Feriepengerendringskode.UEND,
-            linje = this.linje.copy(endringskode = Feriepengerendringskode.UEND)
+            linje = this.linje.copy(endringskode = Feriepengerendringskode.UEND),
+            tidsstempel = LocalDateTime.now()
         )
     }
 
@@ -85,7 +88,8 @@ data class Feriepengeoppdrag(
                 refDelytelseId = this.linje.delytelseId,
                 refFagsystemId = this.fagsystemId,
                 datoStatusFom = null
-            )
+            ),
+            tidsstempel = LocalDateTime.now()
         )
     }
 
