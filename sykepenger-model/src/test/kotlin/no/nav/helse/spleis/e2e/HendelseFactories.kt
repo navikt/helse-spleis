@@ -51,7 +51,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.mai
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -348,6 +347,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkForFeriepenger(
             )
         ),
     opptjeningsår: Year = Year.of(2017),
+    datoForSisteFeriepengekjøringIInfotrygd: LocalDate,
     skalBeregnesManuelt: Boolean
 ): UtbetalingshistorikkForFeriepenger {
     return UtbetalingshistorikkForFeriepenger(
@@ -357,7 +357,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkForFeriepenger(
         arbeidskategorikoder = arbeidskategorikoder,
         opptjeningsår = opptjeningsår,
         skalBeregnesManuelt = skalBeregnesManuelt,
-        datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2025)
+        datoForSisteFeriepengekjøringIInfotrygd = datoForSisteFeriepengekjøringIInfotrygd
     )
 }
 

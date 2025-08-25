@@ -1066,12 +1066,14 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkForFeriepenger(
     opptjeningsår: Year,
     utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = listOf(),
     feriepengehistorikk: List<UtbetalingshistorikkForFeriepenger.Feriepenger> = listOf(),
+    datoForSisteFeriepengekjøringIInfotrygd: LocalDate,
     skalBeregnesManuelt: Boolean = false
 ) {
     utbetalingshistorikkForFeriepenger(
         opptjeningsår = opptjeningsår,
         utbetalinger = utbetalinger,
         feriepengehistorikk = feriepengehistorikk,
+        datoForSisteFeriepengekjøringIInfotrygd = datoForSisteFeriepengekjøringIInfotrygd,
         skalBeregnesManuelt = skalBeregnesManuelt
     ).håndter(Person::håndter)
 }

@@ -4,10 +4,12 @@ import java.time.Year
 import kotlin.math.roundToInt
 import no.nav.helse.EnableFeriepenger
 import no.nav.helse.Toggle
+import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
+import no.nav.helse.februar
 import no.nav.helse.feriepenger.Feriepengerendringskode
 import no.nav.helse.feriepenger.Feriepengerklassekode
 import no.nav.helse.harBehov
@@ -67,7 +69,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
         }
         håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2022)
+            opptjeningsår = Year.of(2022),
+            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2023)
         )
 
         assertEquals(1605.5819999999999, inspektør.spleisFeriepengebeløpPerson.first())
@@ -93,7 +96,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             }
         }
         håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2018)
+            opptjeningsår = Year.of(2018),
+            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2019)
         )
 
         assertEquals(0.0, inspektør.spleisFeriepengebeløpPerson.first())
@@ -108,7 +112,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
         }
         håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2022)
+            opptjeningsår = Year.of(2022),
+            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2023)
         )
 
         assertEquals(802.2299999999999, inspektør.spleisFeriepengebeløpPerson.first())
@@ -134,7 +139,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             feriepengehistorikk = listOf(
                 UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 802, 1.mai(2023), 31.mai(2023)),
                 UtbetalingshistorikkForFeriepenger.Feriepenger("0", 802, 1.mai(2023), 31.mai(2023))
-            )
+            ),
+            datoForSisteFeriepengekjøringIInfotrygd = 31.mai(2023)
         )
 
         assertEquals(802.2299999999999, inspektør.spleisFeriepengebeløpPerson.first())
@@ -156,7 +162,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             utbetalinger = listOf(
                 Arbeidsgiverutbetalingsperiode(a1, 17.mars(2022), 31.desember(2022), dagsatsIT, 31.mars(2022)),
                 Personutbetalingsperiode(a1, 17.mars(2022), 31.desember(2022), dagsatsIT, 31.mars(2022))
-            )
+            ),
+            datoForSisteFeriepengekjøringIInfotrygd = 1.april(2022)
         )
 
         assertEquals(1070.388, inspektør.spleisFeriepengebeløpPerson.first())
@@ -191,7 +198,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             opptjeningsår = Year.of(2022),
             utbetalinger = listOf(
                 Personutbetalingsperiode(a1, 1.august(2022), 31.oktober(2022), dagsatsIT, 31.mars(2022))
-            )
+            ),
+            datoForSisteFeriepengekjøringIInfotrygd = 31.mars(2023)
         )
         assertEquals(0.0, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
         assertEquals(0.0, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
@@ -220,7 +228,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             opptjeningsår = Year.of(2022),
             utbetalinger = listOf(
                 Personutbetalingsperiode(a1, 1.august(2022), 31.oktober(2022), dagsatsIT, 31.mars(2022))
-            )
+            ),
+            datoForSisteFeriepengekjøringIInfotrygd = 1.april(2022)
         )
         assertEquals(0.0, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
         assertEquals(0.0, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
@@ -248,7 +257,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             utbetalinger = listOf(
                 Personutbetalingsperiode(a1, 17.januar(2022), 31.mars(2022), dagsatsIT, 31.mars(2022)),
                 Personutbetalingsperiode(a1, 1.august(2022), 31.oktober(2022), dagsatsIT, 31.oktober(2022))
-            )
+            ),
+            datoForSisteFeriepengekjøringIInfotrygd = 1.november(2022)
         )
 
         val utbetalingslinjerAndreKjøring = listOf(
@@ -268,7 +278,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `serialiserer og deserialiserer Spleis feriepengebeløp for person`() {
         nyttVedtak(1.januar(2022) til 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
         håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2022)
+            opptjeningsår = Year.of(2022),
+            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2023)
         )
         assertEquals(1605.5819999999999, inspektør.spleisFeriepengebeløpPerson.first())
         reserialiser()
@@ -290,7 +301,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020)
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
 
         assertEquals(0.0, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
@@ -332,7 +344,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                     31.mars(2020)
                 )
             ),
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 3211, 1.mai(2021), 31.mai(2021)))
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 3211, 1.mai(2021), 31.mai(2021))),
+            datoForSisteFeriepengekjøringIInfotrygd = 1.april(2020)
         )
 
         assertEquals(1431 * 22 * 0.102, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
@@ -377,7 +390,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                     31.januar(2020)
                 )
             ),
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 3357, 1.mai(2021), 31.mai(2021)))
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 3357, 1.mai(2021), 31.mai(2021))),
+            datoForSisteFeriepengekjøringIInfotrygd = 1.februar(2020)
         )
 
         assertEquals(1431 * 23 * 0.102, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
@@ -410,6 +424,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021),
             skalBeregnesManuelt = true
         )
 
@@ -442,7 +457,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                     1.desember(2020)
                 )
             ),
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 2142, 1.mai(2021), 31.mai(2021)))
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 2142, 1.mai(2021), 31.mai(2021))),
+            datoForSisteFeriepengekjøringIInfotrygd = 1.desember(2020)
         )
         assertEquals(2, inspektør.feriepengeoppdrag.size)
         assertEquals(1, engangsutbetalinger().size)
@@ -458,7 +474,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                     1.desember(2020)
                 )
             ),
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 2142, 1.mai(2021), 31.mai(2021)))
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 2142, 1.mai(2021), 31.mai(2021))),
+            datoForSisteFeriepengekjøringIInfotrygd = 1.desember(2020)
         )
 
         assertEquals(4, inspektør.feriepengeoppdrag.size)
@@ -491,7 +508,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                     1.desember(2020)
                 )
             ),
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER2, 2142, 1.mai(2021), 31.mai(2021)))
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER2, 2142, 1.mai(2021), 31.mai(2021))),
+            datoForSisteFeriepengekjøringIInfotrygd = 2.desember(2020)
         )
 
         assertEquals(2, inspektør.feriepengeoppdrag.size)
@@ -514,7 +532,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                     1.desember(2020)
                 )
             ),
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER2, 2142, 1.mai(2021), 31.mai(2021)))
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER2, 2142, 1.mai(2021), 31.mai(2021))),
+            datoForSisteFeriepengekjøringIInfotrygd = 1.desember(2020)
         )
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.august(2020)))
         håndterSøknad(1.juni(2020) til 30.august(2020))
@@ -563,7 +582,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 feriepengehistorikk = listOf(
                     UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 3357, 1.mai(2021), 31.mai(2021)),
                     UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 4000, 1.mai(2021), 31.mai(2021))
-                )
+                ),
+                datoForSisteFeriepengekjøringIInfotrygd = 31.januar(2020)
             )
         }.also { loggmeldinger ->
             assertTrue(loggmeldinger.isEmpty())
@@ -600,7 +620,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 feriepengehistorikk = listOf(
                     UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 3356, 1.mai(2021), 31.mai(2021)),
                     UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 4000, 1.mai(2021), 31.mai(2021))
-                )
+                ),
+                datoForSisteFeriepengekjøringIInfotrygd = 1.februar(2020)
             )
         }.also { loggmeldinger ->
             assertTrue(loggmeldinger.isNotEmpty())
@@ -627,7 +648,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 opptjeningsår = Year.of(2020),
                 feriepengehistorikk = listOf(
                     UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 4000, 1.mai(2021), 31.mai(2021))
-                )
+                ),
+                datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2022)
             )
         }.also { loggmeldinger ->
             assertTrue(loggmeldinger.isEmpty())
@@ -651,7 +673,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020)
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
 
         assertTrue(personlogg.toString().contains("Trenger å sende utbetaling til Oppdrag"))
@@ -679,7 +702,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020)
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
 
         val fagsystemIdFeriepenger = personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Feriepengeutbetaling).detaljer()["fagsystemId"] as String
@@ -710,7 +734,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020)
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
 
         val fagsystemIdFeriepenger = personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Feriepengeutbetaling).detaljer()["fagsystemId"] as String
@@ -724,7 +749,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020)
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
 
         håndterFeriepengerUtbetalt(fagsystemId = fagsystemIdFeriepenger)
@@ -758,7 +784,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             )
 
             håndterUtbetalingshistorikkForFeriepenger(
-                opptjeningsår = Year.of(2020)
+                opptjeningsår = Year.of(2020),
+                datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
             )
             assertFalse(personlogg.harBehov(Aktivitet.Behov.Behovtype.Feriepengeutbetaling))
         }
@@ -779,7 +806,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020)
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
         håndterUtbetalingshistorikkForFeriepenger(
             utbetalinger = listOf(
@@ -792,7 +820,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 )
             ),
             feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
-            opptjeningsår = Year.of(2020)
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
         )
 
         assertEquals(1, engangsutbetalinger().size)
@@ -813,7 +842,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020)
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
         val førsteUtbetaling = engangsutbetalinger().last()
         val fagsystemId = førsteUtbetaling.detaljer()["fagsystemId"]
@@ -828,7 +858,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 )
             ), // 10 dager
             feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
-            opptjeningsår = Year.of(2020)
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 1.juli(2020)
         )
 
         assertEquals(2, engangsutbetalinger().size)
@@ -866,7 +897,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 )
             ), // 10 dager
             feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
-            opptjeningsår = Year.of(2020)
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 1.juli(2020)
         )
         håndterUtbetalingshistorikkForFeriepenger(
             utbetalinger = listOf(
@@ -879,7 +911,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 )
             ), // 10 dager
             feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
-            opptjeningsår = Year.of(2020)
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 1.juli(2020)
         )
 
         assertEquals(1, engangsutbetalinger().size)
@@ -904,13 +937,15 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020)
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
         )
         val førsteUtbetaling = engangsutbetalinger().last()
         val fagsystemId = førsteUtbetaling.detaljer()["fagsystemId"]
 
         håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020)
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
         )
         assertEquals(4, inspektør.feriepengeoppdrag.size)
         assertEquals(1, engangsutbetalinger().size)
@@ -926,7 +961,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 )
             ), // 10 dager
             feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
-            opptjeningsår = Year.of(2020)
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 1.juli(2020)
         )
 
         assertEquals(6, inspektør.feriepengeoppdrag.size)
@@ -955,7 +991,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterUtbetalt()
 
             håndterUtbetalingshistorikkForFeriepenger(
-                opptjeningsår = Year.of(2020)
+                opptjeningsår = Year.of(2020),
+                datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
             )
             val førsteUtbetaling = engangsutbetalinger()
 
@@ -971,7 +1008,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                         )
                     ), // 10 dager
                     feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
-                    opptjeningsår = Year.of(2020)
+                    opptjeningsår = Year.of(2020),
+                    datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
                 )
             }
 
@@ -995,7 +1033,10 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020))
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
+        )
 
         val førsteUtbetaling = engangsutbetalinger().last()
         val fagsystemId = førsteUtbetaling.detaljer()["fagsystemId"]
@@ -1003,7 +1044,10 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020))
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
+        )
 
         assertEquals(4, inspektør.feriepengeoppdrag.size)
         assertEquals(2, engangsutbetalinger().size)
@@ -1028,7 +1072,10 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020))
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
+        )
 
         val førsteUtbetaling = engangsutbetalinger().last()
         val fagsystemId1FraBehov = førsteUtbetaling.detaljer()["fagsystemId"]
@@ -1036,9 +1083,15 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020))
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
+        )
 
-        håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020))
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
+        )
 
         assertEquals(6, inspektør.feriepengeoppdrag.size)
         assertEquals(2, engangsutbetalinger().size)
@@ -1069,7 +1122,10 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020))
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
+        )
 
         val førsteUtbetaling = engangsutbetalinger().last()
         val fagsystemId1FraBehov = førsteUtbetaling.detaljer()["fagsystemId"]
@@ -1077,7 +1133,10 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020))
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
+        )
 
         håndterSykmelding(Sykmeldingsperiode(1.oktober(2020), 14.desember(2020)))
         håndterSøknad(1.oktober(2020) til 14.desember(2020)) // 41 dager
@@ -1091,7 +1150,10 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020))
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020),
+            datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
+        )
 
         assertEquals(6, inspektør.feriepengeoppdrag.size)
         assertEquals(3, engangsutbetalinger().size)
@@ -1134,7 +1196,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 utbetalinger = listOf(
                     Personutbetalingsperiode(a1, 1.september(2020), 15.september(2020), 1172, 20.september(2020)),
                 ),
-                feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 3211, 1.mai(2021), 31.mai(2021)))
+                feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 3211, 1.mai(2021), 31.mai(2021))),
+                datoForSisteFeriepengekjøringIInfotrygd = 21.september(2020)
             )
         }.also { loggmeldinger ->
             assertTrue(loggmeldinger.isNotEmpty())
@@ -1167,7 +1230,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 utbetalinger = listOf(
                     Personutbetalingsperiode(a1, 1.januar(2020), 6.mars(2020), 1172, 20.mars(2020)),
                 ),
-                feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 5738, 1.mai(2021), 31.mai(2021)))
+                feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 5738, 1.mai(2021), 31.mai(2021))),
+                datoForSisteFeriepengekjøringIInfotrygd = 21.mars(2020)
             )
         }.also { loggmeldinger ->
             assertTrue(loggmeldinger.isEmpty())
@@ -1195,7 +1259,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 utbetalinger = listOf(
                     Personutbetalingsperiode("0", 1.september(2020), 15.september(2020), 1172, 20.september(2020)),
                 ),
-                feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger("0", 3211, 1.mai(2021), 31.mai(2021)))
+                feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger("0", 3211, 1.mai(2021), 31.mai(2021))),
+                datoForSisteFeriepengekjøringIInfotrygd = 21.september(2020)
             )
         }.also { loggmeldinger ->
             assertTrue(loggmeldinger.isNotEmpty())
@@ -1229,7 +1294,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                     // Ikke funksjonelt gyldig med refusjon til orgnr 0
                     Arbeidsgiverutbetalingsperiode("0", 1.september(2020), 15.september(2020), 1172, 20.september(2020)),
                 ),
-                feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger("0", 3211, 1.mai(2021), 31.mai(2021)))
+                feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger("0", 3211, 1.mai(2021), 31.mai(2021))),
+                datoForSisteFeriepengekjøringIInfotrygd = 21.september(2020)
             )
         }.also { loggmeldinger ->
             assertTrue(loggmeldinger.isNotEmpty())
