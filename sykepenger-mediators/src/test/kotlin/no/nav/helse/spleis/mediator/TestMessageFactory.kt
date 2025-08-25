@@ -13,25 +13,24 @@ import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.InntektDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.InntektsAarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.MerknadDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.NaringsdrivendeInntektDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.NaringsdrivendeInntektsAarDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.PensjonsgivendeInntektDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SelvstendigNaringsdrivendeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SporsmalDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.SummertPensjonsgivendeInntektDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SvarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.VentetidDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as HendelsePeriode
 import no.nav.helse.januar
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
@@ -39,6 +38,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterFor
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForOpptjeningsvurdering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata.Companion.toJson
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -408,30 +408,30 @@ internal class TestMessageFactory(
 
     private fun selvstendigNæringsdrivende(ventetid: HendelsePeriode): SelvstendigNaringsdrivendeDTO = SelvstendigNaringsdrivendeDTO(
         roller = emptyList(),
-        naringsdrivendeInntekt = NaringsdrivendeInntektDTO(
+        inntekt = InntektDTO(
             norskPersonidentifikator = "12345678912",
-            inntekt = listOf(
-                NaringsdrivendeInntektsAarDTO(
-                    inntektsaar = "2017",
-                    pensjonsgivendeInntekt = SummertPensjonsgivendeInntektDTO(
+            inntektsAar = listOf(
+                InntektsAarDTO(
+                    aar = "2017",
+                    pensjonsgivendeInntekt = PensjonsgivendeInntektDTO(
                         pensjonsgivendeInntektAvLoennsinntekt = 0,
                         pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
                         pensjonsgivendeInntektAvNaeringsinntekt = 400_000,
                         pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0
                     )
                 ),
-                NaringsdrivendeInntektsAarDTO(
-                    inntektsaar = "2016",
-                    pensjonsgivendeInntekt = SummertPensjonsgivendeInntektDTO(
+                InntektsAarDTO(
+                    aar = "2016",
+                    pensjonsgivendeInntekt = PensjonsgivendeInntektDTO(
                         pensjonsgivendeInntektAvLoennsinntekt = 0,
                         pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
                         pensjonsgivendeInntektAvNaeringsinntekt = 800_000,
                         pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0
                     )
                 ),
-                NaringsdrivendeInntektsAarDTO(
-                    inntektsaar = "2015",
-                    pensjonsgivendeInntekt = SummertPensjonsgivendeInntektDTO(
+                InntektsAarDTO(
+                    aar = "2015",
+                    pensjonsgivendeInntekt = PensjonsgivendeInntektDTO(
                         pensjonsgivendeInntektAvLoennsinntekt = 0,
                         pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
                         pensjonsgivendeInntektAvNaeringsinntekt = 0,
@@ -440,7 +440,7 @@ internal class TestMessageFactory(
                 )
             )
         ),
-        naringsdrivendeVenteperiode = PeriodeDTO(fom = ventetid.start, tom = ventetid.endInclusive)
+        ventetid = VentetidDTO(fom = ventetid.start, tom = ventetid.endInclusive)
     )
 
     fun lagSøknadArbeidsledig(
@@ -708,6 +708,7 @@ internal class TestMessageFactory(
         )
 
     class UtbetalingshistorikkForFeriepengerTestdata(
+
         val fom: LocalDate,
         val tom: LocalDate,
         val feriepengerSkalBeregnesManuelt: Boolean = false,

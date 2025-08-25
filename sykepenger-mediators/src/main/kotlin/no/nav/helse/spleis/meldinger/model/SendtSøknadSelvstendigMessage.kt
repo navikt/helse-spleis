@@ -17,14 +17,14 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, private val builder: SendtSøknadBuilder = SendtSøknadBuilder()) : SøknadMessage(packet, builder.selvstendig()) {
     override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: MessageContext) {
         builder.sendt(packet["sendtNav"].asLocalDateTime())
-        val pensjonsgivendeInntekter = packet["selvstendigNaringsdrivende"]["naringsdrivendeInntekt"]["inntekt"].map {
+        val pensjonsgivendeInntekter = packet["selvstendigNaringsdrivende"]["inntekt"]["inntektsAar"].map {
             Søknad.PensjonsgivendeInntekt(
-                inntektsår = Year.parse(it["inntektsaar"].asText()),
+                inntektsår = Year.parse(it["aar"].asText()),
                 næringsinntekt = it["pensjonsgivendeInntekt"]["pensjonsgivendeInntektAvNaeringsinntekt"].asInt().årlig
             )
         }
         builder.pensjonsgivendeInntekter(pensjonsgivendeInntekter)
-        val ventetid = Periode(packet["selvstendigNaringsdrivende.naringsdrivendeVenteperiode.fom"].asLocalDate(), packet["selvstendigNaringsdrivende.naringsdrivendeVenteperiode.tom"].asLocalDate())
+        val ventetid = Periode(packet["selvstendigNaringsdrivende.ventetid.fom"].asLocalDate(), packet["selvstendigNaringsdrivende.ventetid.tom"].asLocalDate())
         builder.ventetid(ventetid)
         SendtSøknadNavMessage.byggSendtSøknad(builder, packet)
         mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())

@@ -20,9 +20,9 @@ internal class SendtSelvstendigSøknaderRiver(
         message.requireKey("id", "selvstendigNaringsdrivende")
         message.forbid("arbeidsgiver.orgnummer")
         message.require("sendtNav", JsonNode::asLocalDateTime)
-        message.requireArray("selvstendigNaringsdrivende.naringsdrivendeInntekt.inntekt")
-        message.require("selvstendigNaringsdrivende.naringsdrivendeVenteperiode.fom", JsonNode::asLocalDate)
-        message.require("selvstendigNaringsdrivende.naringsdrivendeVenteperiode.tom", JsonNode::asLocalDate)
+        message.requireArray("selvstendigNaringsdrivende.inntekt.inntektsAar")
+        message.require("selvstendigNaringsdrivende.ventetid.fom", JsonNode::asLocalDate)
+        message.require("selvstendigNaringsdrivende.ventetid.tom", JsonNode::asLocalDate)
         message.interestedIn("egenmeldingsdagerFraSykmelding") { egenmeldinger -> egenmeldinger.map { it.asLocalDate() } }
         message.interestedIn("sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys", "fravar", "papirsykmeldinger", "inntektFraNyttArbeidsforhold")
     }
