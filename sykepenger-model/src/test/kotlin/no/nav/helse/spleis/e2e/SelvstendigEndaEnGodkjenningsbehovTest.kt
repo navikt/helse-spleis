@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.hentFeltFraBehov
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -75,20 +74,30 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     utbetalingsdag(31.januar, "NavDag", 1417, 100)
                 ),
                 sykepengegrunnlagsfakta = mapOf(
-                    "omregnetÅrsinntektTotalt" to 0.0,
                     "sykepengegrunnlag" to 460_589.0,
                     "6G" to 561_804.0,
                     "fastsatt" to "EtterHovedregel",
-                    "arbeidsgivere" to listOf(
-                        mapOf(
-                            "arbeidsgiver" to "SELVSTENDIG",
-                            "omregnetÅrsinntekt" to 460589.0,
-                            "inntektskilde" to Inntektskilde.Sigrun
-                        )
-                    )
+                    "arbeidsgivere" to emptyList<Map<String, Any>>(),
+                    "selvstendig" to mapOf(
+                        "pensjonsgivendeInntekter" to listOf(
+                            mapOf(
+                                "årstall" to 2017,
+                                "beløp" to 450_000.0
+                            ),
+                            mapOf(
+                                "årstall" to 2016,
+                                "beløp" to 450_000.0
+                            ),
+                            mapOf(
+                                "årstall" to 2015,
+                                "beløp" to 450_000.0
+                            )
+                        ),
+                        "beregningsgrunnlag" to 460589.0,
+
+                        ),
                 ),
-                inntektskilde = "EN_ARBEIDSGIVER",
-                omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to selvstendig, "beløp" to 460589.0))
+                inntektskilde = "EN_ARBEIDSGIVER"
             )
 
         }
@@ -107,7 +116,6 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
         førstegangsbehandling: Boolean = true,
         utbetalingstype: String = "UTBETALING",
         inntektskilde: String,
-        omregnedeÅrsinntekter: List<Map<String, Any>>,
         behandlingId: UUID = inspektør(selvstendig).vedtaksperioder(1.vedtaksperiode(selvstendig)).behandlinger.behandlinger.last().id,
         perioderMedSammeSkjæringstidspunkt: List<Map<String, String>> = listOf(
             mapOf("vedtaksperiodeId" to 1.vedtaksperiode(selvstendig).toString(), "behandlingId" to 1.vedtaksperiode(selvstendig).sisteBehandlingId().toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
@@ -128,7 +136,6 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
         val actualUtbetalingtype = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "utbetalingtype")!!
         val actualOrgnummereMedRelevanteArbeidsforhold = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "orgnummereMedRelevanteArbeidsforhold")!!
         val actualKanAvises = hentFelt<Boolean>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "kanAvvises")!!
-        val actualOmregnedeÅrsinntekter = hentFelt<List<Map<String, String>>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "omregnedeÅrsinntekter")!!
         val actualBehandlingId = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "behandlingId")!!
         val actualPerioderMedSammeSkjæringstidspunkt = hentFelt<Any>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "perioderMedSammeSkjæringstidspunkt")!!
         val actualForbrukteSykedager = hentFelt<Int>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "forbrukteSykedager")!!
@@ -148,7 +155,6 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
         assertEquals(utbetalingstype, actualUtbetalingtype)
         assertEquals(orgnummere, actualOrgnummereMedRelevanteArbeidsforhold)
         assertEquals(kanAvvises, actualKanAvises)
-        assertEquals(omregnedeÅrsinntekter, actualOmregnedeÅrsinntekter)
         assertEquals(behandlingId.toString(), actualBehandlingId)
         assertEquals(perioderMedSammeSkjæringstidspunkt, actualPerioderMedSammeSkjæringstidspunkt)
         assertEquals(forbrukteSykedager, actualForbrukteSykedager)
