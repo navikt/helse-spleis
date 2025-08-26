@@ -36,9 +36,20 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                 is Dag.SykHelgedag -> helg(builder, dag.dato, dag.grad)
                 is Dag.Sykedag -> navDag(builder, dag.dato, dag.grad)
                 is Dag.Ventetidsdag -> ventetidsdag(builder, dag.dato, dag.grad)
+                is Dag.AndreYtelser -> {
+                    val begrunnelse = when (dag.ytelse) {
+                        Dag.AndreYtelser.AnnenYtelse.AAP -> Begrunnelse.AndreYtelserAap
+                        Dag.AndreYtelser.AnnenYtelse.Dagpenger -> Begrunnelse.AndreYtelserDagpenger
+                        Dag.AndreYtelser.AnnenYtelse.Foreldrepenger -> Begrunnelse.AndreYtelserForeldrepenger
+                        Dag.AndreYtelser.AnnenYtelse.Omsorgspenger -> Begrunnelse.AndreYtelserOmsorgspenger
+                        Dag.AndreYtelser.AnnenYtelse.Opplæringspenger -> Begrunnelse.AndreYtelserOpplaringspenger
+                        Dag.AndreYtelser.AnnenYtelse.Pleiepenger -> Begrunnelse.AndreYtelserPleiepenger
+                        Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger -> Begrunnelse.AndreYtelserSvangerskapspenger
+                    }
+                    avvistDag(builder, dag.dato, 0.prosent, begrunnelse)
+                }
 
                 is Dag.ArbeidIkkeGjenopptattDag,
-                is Dag.AndreYtelser,
                 is Dag.Arbeidsgiverdag,
                 is Dag.ArbeidsgiverHelgedag,
                 is Dag.Permisjonsdag,
@@ -68,5 +79,9 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
 
     private fun foreldetdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel) {
         builder.addForeldetDag(dato, medInntektHvisFinnes(sykdomsgrad).ikkeBetalt())
+    }
+
+    private fun avvistDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel, begrunnelse: Begrunnelse) {
+        builder.addAvvistDag(dato, medInntektHvisFinnes(grad).ikkeBetalt(), listOf(begrunnelse))
     }
 }

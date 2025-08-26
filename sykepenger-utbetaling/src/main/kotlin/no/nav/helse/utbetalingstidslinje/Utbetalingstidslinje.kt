@@ -169,6 +169,7 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
                     AvvistDag::class -> "X"
                     UkjentDag::class -> "U"
                     ForeldetDag::class -> "O"
+                    Ventetidsdag::class -> "V"
                     else -> "?"
                 }
         }.trim()
