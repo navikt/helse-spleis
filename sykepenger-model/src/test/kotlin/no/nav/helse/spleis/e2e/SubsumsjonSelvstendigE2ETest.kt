@@ -11,16 +11,20 @@ import no.nav.helse.etterlevelse.FOLKETRYGDLOVENS_OPPRINNELSESDATO
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Ledd.LEDD_2
 import no.nav.helse.etterlevelse.Ledd.LEDD_3
+import no.nav.helse.etterlevelse.Paragraf.KJENNELSE_2006_4023
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_22_13
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_11
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_12
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_3
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_34
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_35
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_48
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
 import no.nav.helse.etterlevelse.Punktum.Companion.punktum
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.SubsumsjonInspektør
@@ -868,6 +872,70 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                     "maksdato" to 26.april
                 ),
                 vedtaksperiodeId = 4.vedtaksperiode
+            )
+        }
+    }
+
+    @Test
+    fun `andre ytelser i halen`() = Toggle.SelvstendigNæringsdrivende.enable {
+        selvstendig {
+            håndterSøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
+            håndterOverstyrTidslinje(
+                overstyringsdager = listOf(
+                    ManuellOverskrivingDag(24.januar, Dagtype.Foreldrepengerdag),
+                    ManuellOverskrivingDag(25.januar, Dagtype.Pleiepengerdag),
+                    ManuellOverskrivingDag(26.januar, Dagtype.Omsorgspengerdag),
+                    ManuellOverskrivingDag(27.januar, Dagtype.Svangerskapspengerdag),
+                    ManuellOverskrivingDag(28.januar, Dagtype.Opplaringspengerdag),
+                    ManuellOverskrivingDag(29.januar, Dagtype.AAPdag),
+                    ManuellOverskrivingDag(30.januar, Dagtype.Dagpengerdag),
+                    ManuellOverskrivingDag(31.januar, Dagtype.AAPdag),
+                )
+            )
+            håndterYtelser(1.vedtaksperiode)
+            val forventetInput = mapOf(
+                "sykdomstidslinje" to listOf(
+                    mapOf("fom" to 17.januar, "tom" to 23.januar, "dagtype" to "SYKEDAG", "grad" to 100), // 1.-16. er ventetidsdag, burde være sykedag ?
+                    mapOf("fom" to 24.januar, "tom" to 24.januar, "dagtype" to "FORELDREPENGER", "grad" to null),
+                    mapOf("fom" to 25.januar, "tom" to 25.januar, "dagtype" to "PLEIEPENGER", "grad" to null),
+                    mapOf("fom" to 26.januar, "tom" to 26.januar, "dagtype" to "OMSORGSPENGER", "grad" to null),
+                    mapOf("fom" to 27.januar, "tom" to 27.januar, "dagtype" to "SVANGERSKAPSPENGER", "grad" to null),
+                    mapOf("fom" to 28.januar, "tom" to 28.januar, "dagtype" to "OPPLÆRINGSPENGER", "grad" to null),
+                    mapOf("fom" to 29.januar, "tom" to 29.januar, "dagtype" to "ARBEIDSAVKLARINGSPENGER", "grad" to null),
+                    mapOf("fom" to 30.januar, "tom" to 30.januar, "dagtype" to "DAGPENGER", "grad" to null),
+                    mapOf("fom" to 31.januar, "tom" to 31.januar, "dagtype" to "ARBEIDSAVKLARINGSPENGER", "grad" to null)
+                ),
+            )
+            // Alt utenom Arbeidsavklaringspenger
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                lovverk = "trygderetten",
+                versjon = 2.mars(2007),
+                paragraf = KJENNELSE_2006_4023,
+                input = forventetInput,
+                output = mapOf(
+                    "perioder" to listOf(
+                        mapOf("fom" to 24.januar, "tom" to 28.januar),
+                        mapOf("fom" to 30.januar, "tom" to 30.januar),
+                    )
+                )
+            )
+            // Arbeidsavklaringspenger
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                lovverk = "folketrygdloven",
+                versjon = 21.mai(2021),
+                paragraf = PARAGRAF_8_48,
+                input = forventetInput,
+                output = mapOf(
+                    "perioder" to listOf(
+                        mapOf("fom" to 29.januar, "tom" to 29.januar),
+                        mapOf("fom" to 31.januar, "tom" to 31.januar),
+                    )
+                )
             )
         }
     }

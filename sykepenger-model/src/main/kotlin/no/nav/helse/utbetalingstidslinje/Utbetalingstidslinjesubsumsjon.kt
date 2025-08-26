@@ -122,6 +122,8 @@ internal class Utbetalingstidslinjesubsumsjon(
 
     private fun subsummerSelvstendig(vedtaksperiode: Periode) {
         subsumsjonslogg.logg(`§ 8-11`(vedtaksperiode, helger))
+        subsumsjonslogg.logg(`Trygderettens kjennelse 2006-4023`(andreYtelser, tidslinjesubsumsjonsformat))
+        subsumsjonslogg.logg(`§ 8-48 ledd 2 punktum 2`(aap, tidslinjesubsumsjonsformat))
 
         // kap 8-34 ledd 1
         utbetalteDager
