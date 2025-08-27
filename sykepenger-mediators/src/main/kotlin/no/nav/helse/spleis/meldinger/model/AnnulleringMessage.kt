@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.hendelser.AnnullerUtbetaling
@@ -14,6 +15,8 @@ internal class AnnulleringMessage(packet: JsonMessage, override val meldingspori
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val utbetalingId = packet["utbetalingId"].asText().trim().toUUID()
     private val saksbehandler = Saksbehandler.fraJson(packet["saksbehandler"])
+    private val årsaker = packet["begrunnelser"].map { it.asText() }
+    private val begrunnelse = packet["kommentar"].takeUnless { it.isMissingOrNull() }?.asText() ?: ""
     private val annullerUtbetaling
         get() = AnnullerUtbetaling(
             meldingsporing.id,
@@ -23,7 +26,9 @@ internal class AnnulleringMessage(packet: JsonMessage, override val meldingspori
             utbetalingId,
             saksbehandler.ident,
             saksbehandler.epostadresse,
-            opprettet
+            opprettet,
+            årsaker,
+            begrunnelse
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

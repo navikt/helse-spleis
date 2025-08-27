@@ -44,6 +44,17 @@ sealed interface Behandlingsporing {
         data object SelvstendigFisker : Yrkesaktivitet
         data object SelvstendigDagmamma : Yrkesaktivitet
 
+        val Yrkesaktivitet.somOrganisasjonsnummer
+            get() = when (this) {
+                Arbeidsledig -> "ARBEIDSLEDIG"
+                is Arbeidstaker -> organisasjonsnummer
+                Frilans -> "FRILANS"
+                Selvstendig -> "SELVSTENDIG"
+                SelvstendigJordbruker -> "SELVSTENDIG_JORDBRUKER"
+                SelvstendigFisker -> "SELVSTENDIG_FISKER"
+                SelvstendigDagmamma -> "SELVSTENDIG_DAGMAMMA"
+            }
+
     }
 }
 

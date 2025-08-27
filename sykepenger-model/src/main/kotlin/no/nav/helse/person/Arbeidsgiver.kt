@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
@@ -869,6 +869,8 @@ internal class Arbeidsgiver private constructor(
             val utbetalingId = hendelse.utbetalingId
             val vedtaksperiodeSomSkalAnnulleres = finnVedtaksperiodeForUtbetaling(utbetalingId) ?: error("Fant ikke vedtaksperiode for utbetaling $utbetalingId")
             val annulleringskandidater = finnAnnulleringskandidater(vedtaksperiodeSomSkalAnnulleres)
+
+            person.emitPlanlagtAnnullering(annulleringskandidater, hendelse)
             return håndter { it.håndter(hendelse, aktivitetsloggMedArbeidsgiverkontekst, annulleringskandidater.toList()) }.tidligsteEventyr()
         } else {
             return håndter { it.håndter(hendelse, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList()) }.tidligsteEventyr()

@@ -223,6 +223,23 @@ internal class PersonMediator(
         )
     }
 
+    override fun planlagtAnnullering(event: PersonObserver.PlanlagtAnnulleringEvent) {
+        queueMessage(
+            JsonMessage.newMessage(
+                "planlagt_annullering",
+                mutableMapOf(
+                    "yrkesaktivitet" to event.yrkesaktivitet,
+                    "vedtaksperioder" to event.vedtaksperioder,
+                    "fom" to event.fom,
+                    "tom" to event.tom,
+                    "ident" to event.saksbehandlerIdent,
+                    "årsaker" to event.årsaker,
+                    "begrunnelse" to event.begrunnelse
+                )
+            )
+        )
+    }
+
     override fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
         queueMessage(
             JsonMessage.newMessage(

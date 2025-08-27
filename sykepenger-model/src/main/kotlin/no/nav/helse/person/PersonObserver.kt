@@ -16,6 +16,17 @@ import no.nav.helse.utbetalingslinjer.OppdragDetaljer
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 
 interface PersonObserver {
+
+    data class PlanlagtAnnulleringEvent(
+        val yrkesaktivitet: String,
+        val vedtaksperioder: List<UUID>,
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val saksbehandlerIdent: String,
+        val årsaker: List<String>,
+        val begrunnelse: String
+    )
+
     data class SykefraværstilfelleIkkeFunnet(
         val skjæringstidspunkt: LocalDate
     )
@@ -519,6 +530,7 @@ interface PersonObserver {
     fun utbetalingUtenUtbetaling(event: UtbetalingUtbetaltEvent) {}
     fun feriepengerUtbetalt(event: FeriepengerUtbetaltEvent) {}
     fun annullering(event: UtbetalingAnnullertEvent) {}
+    fun planlagtAnnullering(event: PlanlagtAnnulleringEvent) {}
     fun avsluttetMedVedtak(event: AvsluttetMedVedtakEvent) {}
     fun analytiskDatapakke(event: AnalytiskDatapakkeEvent) {}
 

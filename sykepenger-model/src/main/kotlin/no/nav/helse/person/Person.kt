@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import kotlin.math.roundToInt
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.SelvstendigFisker.somOrganisasjonsnummer
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
@@ -576,6 +577,20 @@ class Person private constructor(
     internal fun utkastTilVedtak(event: PersonObserver.UtkastTilVedtakEvent) {
         observers.forEach { it.utkastTilVedtak(event) }
     }
+
+    internal fun emitPlanlagtAnnullering(annulleringskandidater: Set<Vedtaksperiode>, hendelse: AnnullerUtbetaling) {
+        val planlagtAnnullering = PersonObserver.PlanlagtAnnulleringEvent(
+            yrkesaktivitet = hendelse.behandlingsporing.somOrganisasjonsnummer,
+            vedtaksperioder = annulleringskandidater.map { it.id },
+            fom = annulleringskandidater.minOf { it.periode.start },
+            tom = annulleringskandidater.maxOf { it.periode.endInclusive },
+            saksbehandlerIdent = hendelse.saksbehandlerIdent,
+            årsaker = hendelse.årsaker,
+            begrunnelse = hendelse.begrunnelse
+        )
+        observers.forEach { it.planlagtAnnullering(planlagtAnnullering) }
+    }
+
 
     internal fun emitOverstyringIgangsattEvent(event: PersonObserver.OverstyringIgangsatt) {
         observers.forEach { it.overstyringIgangsatt(event) }

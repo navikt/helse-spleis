@@ -36,7 +36,8 @@ internal class AnnullerUtbetalingerRiverRiverTest : RiverTest() {
         "epostaddresse": "siri.saksbehandler@nav.no",
         "oid": "${UUID.randomUUID()}",
         "ident": "S1234567"
-    }
+    },
+    "begrunnelser": ["Annet"]
 }
 """.trimIndent()
 

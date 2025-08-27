@@ -11,7 +11,9 @@ class AnnullerUtbetaling(
     override val utbetalingId: UUID,
     val saksbehandlerIdent: String,
     saksbehandlerEpost: String,
-    internal val opprettet: LocalDateTime
+    internal val opprettet: LocalDateTime,
+    internal val årsaker: List<String>,
+    internal val begrunnelse: String
 ) : Hendelse, AnnullerUtbetalingHendelse {
     override val metadata = HendelseMetadata(
         meldingsreferanseId = meldingsreferanseId,

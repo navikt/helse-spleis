@@ -49,12 +49,11 @@ import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
-
 
 internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: String) {
 
@@ -408,7 +407,9 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             utbetalingId = utbetalingId,
             saksbehandlerIdent = "Ola Nordmann",
             saksbehandlerEpost = "tbd@nav.no",
-            opprettet = LocalDateTime.now()
+            opprettet = LocalDateTime.now(),
+            årsaker = listOf("Annet"),
+            begrunnelse = ""
         )
 
     internal fun lagIdentOpphørt() =

@@ -53,12 +53,12 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Person
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.inntekt.Inntektsdata
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.refusjonstidslinjer
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.tilOverstyrt
@@ -923,7 +923,9 @@ internal fun AbstractEndToEndTest.håndterAnnullerUtbetaling(
         utbetalingId = utbetalingId,
         saksbehandlerIdent = "Ola Nordmann",
         saksbehandlerEpost = "tbd@nav.no",
-        opprettet = opprettet
+        opprettet = opprettet,
+        årsaker = listOf("Annet"),
+        begrunnelse = ""
     ).håndter(Person::håndter)
 }
 
