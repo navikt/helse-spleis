@@ -1,10 +1,8 @@
 package no.nav.helse.økonomi
 
-import kotlin.math.abs
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosentdel.Companion.NullProsent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -95,14 +93,10 @@ data class Økonomi(
             check(totalArbeidsgiverEtter6GBegrensning1.rundTilDaglig() == totalArbeidsgiverEtter6GBegrensning.rundTilDaglig()) {
                 "WHAAAAT! De skal jo være helt like"
             }
-
-            val grenseForPersonUtbetaling = inntektstapSomSkalDekkesAvNAV.minus(totalArbeidsgiverEtter6GBegrensning)
-            val sikkerGrenseForPersonUtbetaling = if (erDoublePresisjonsfeil(grenseForPersonUtbetaling)) INGEN else grenseForPersonUtbetaling
-
             val fordelingPersonOgRefusjon = reduserBeløpTilTotal(
                 økonomiList = fordelingRefusjon,
                 total = total - totalArbeidsgiverEtter6GBegrensning,
-                grense = sikkerGrenseForPersonUtbetaling,
+                grense = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverEtter6GBegrensning1,
                 setter = { økonomi, inntekt -> økonomi.copy(reservertPersonbeløp = inntekt) },
                 getter = { it.reservertPersonbeløp!! }
             )
@@ -112,10 +106,6 @@ data class Økonomi(
                 "Det er et restbeløp på kr $restbeløp etter all fordeling"
             }
             return fordelingPersonOgRefusjon
-        }
-
-        internal fun erDoublePresisjonsfeil(inntekt: Inntekt): Boolean {
-            return inntekt < INGEN && abs(inntekt.daglig) < 1e-6
         }
 
         private fun reduserBeløpTilTotal(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt, setter: (Økonomi, Inntekt) -> Økonomi, getter: (Økonomi) -> Inntekt): List<Økonomi> {

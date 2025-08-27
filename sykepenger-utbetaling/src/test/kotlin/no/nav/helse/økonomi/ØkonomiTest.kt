@@ -164,6 +164,21 @@ internal class ØkonomiTest {
     }
 
     @Test
+    fun `6g begrensning av beløp som kan gi flyttalfeil`() {
+        val a = 100.prosent.inntekt(18973.8.månedlig)
+        val b = 70.prosent.inntekt(45936.93.månedlig)
+        val betalte = listOf(a, b).betal(744168.årlig)
+        betalte.first().also { økonomi ->
+            assertEquals(837.daglig, økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(INGEN, økonomi.inspektør.personbeløp)
+        }
+        betalte.last().also { økonomi ->
+            assertEquals(1418.daglig, økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(INGEN, økonomi.inspektør.personbeløp)
+        }
+    }
+
+    @Test
     fun `arbeidsgiver og person splittes tilsvarer totalt`() {
         100.prosent
             .inntekt(999.daglig, refusjonsbeløp = 499.5.daglig)
@@ -383,15 +398,6 @@ internal class ØkonomiTest {
         assertEquals(2160, betalte.mapNotNull { it.inspektør.arbeidsgiverbeløp }.summer().dagligInt)
         assertUtbetaling(betalte[0], 997.0, 0.0)
         assertUtbetaling(betalte[1], 1163.0, 0.0)
-    }
-
-    @Test
-    fun `Negative tall under 1e-6 er double presisjonsfeil`() {
-        assertFalse(Økonomi.erDoublePresisjonsfeil(1e-5.daglig))
-        assertFalse(Økonomi.erDoublePresisjonsfeil((-10).daglig))
-        assertFalse(Økonomi.erDoublePresisjonsfeil(10.daglig))
-        assertTrue(Økonomi.erDoublePresisjonsfeil((-1e-7).daglig))
-        assertFalse(Økonomi.erDoublePresisjonsfeil(1e-7.daglig))
     }
 
     private fun List<Økonomi>.totalSykdomsgrad(): Prosentdel {
