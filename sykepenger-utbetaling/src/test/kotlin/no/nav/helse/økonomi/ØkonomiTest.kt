@@ -385,6 +385,15 @@ internal class ØkonomiTest {
         assertUtbetaling(betalte[1], 1163.0, 0.0)
     }
 
+    @Test
+    fun `Negative tall under 1e-6 er double presisjonsfeil`() {
+        assertFalse(Økonomi.erDoublePresisjonsfeil(1e-5.daglig))
+        assertFalse(Økonomi.erDoublePresisjonsfeil((-10).daglig))
+        assertFalse(Økonomi.erDoublePresisjonsfeil(10.daglig))
+        assertTrue(Økonomi.erDoublePresisjonsfeil((-1e-7).daglig))
+        assertFalse(Økonomi.erDoublePresisjonsfeil(1e-7.daglig))
+    }
+
     private fun List<Økonomi>.totalSykdomsgrad(): Prosentdel {
         return totalSykdomsgrad(this).first().totalSykdomsgrad
     }
