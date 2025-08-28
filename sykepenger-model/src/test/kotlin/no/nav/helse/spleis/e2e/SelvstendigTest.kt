@@ -34,6 +34,15 @@ import org.junit.jupiter.api.Test
 internal class SelvstendigTest : AbstractDslTest() {
 
     @Test
+    fun `Verifiserer sykdomstidslinje for selvstendig`() = Toggle.SelvstendigNæringsdrivende.enable {
+        selvstendig {
+            håndterSøknadSelvstendig(januar)
+            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
+            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
     fun `Overstyrer tidslinje i halen i avventer godkjenning`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
             håndterSøknadSelvstendig(januar)

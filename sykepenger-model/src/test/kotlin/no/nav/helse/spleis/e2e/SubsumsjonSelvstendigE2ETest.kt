@@ -56,7 +56,15 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                     "perioder" to
                         listOf(
                             mapOf(
-                                "fom" to 17.januar,
+                                "fom" to 1.januar,
+                                "tom" to 5.januar,
+                            ),
+                            mapOf(
+                                "fom" to 8.januar,
+                                "tom" to 12.januar,
+                            ),
+                            mapOf(
+                                "fom" to 15.januar,
                                 "tom" to 19.januar,
                             ),
                             mapOf(
@@ -900,7 +908,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             val forventetInput = mapOf(
                 "sykdomstidslinje" to listOf(
-                    mapOf("fom" to 17.januar, "tom" to 23.januar, "dagtype" to "SYKEDAG", "grad" to 100), // 1.-16. er ventetidsdag, burde være sykedag ?
+                    mapOf("fom" to 1.januar, "tom" to 23.januar, "dagtype" to "SYKEDAG", "grad" to 100),
                     mapOf("fom" to 24.januar, "tom" to 24.januar, "dagtype" to "FORELDREPENGER", "grad" to null),
                     mapOf("fom" to 25.januar, "tom" to 25.januar, "dagtype" to "PLEIEPENGER", "grad" to null),
                     mapOf("fom" to 26.januar, "tom" to 26.januar, "dagtype" to "OMSORGSPENGER", "grad" to null),

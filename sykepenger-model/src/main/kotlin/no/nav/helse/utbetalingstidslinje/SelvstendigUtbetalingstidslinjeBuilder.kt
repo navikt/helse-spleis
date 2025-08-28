@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -26,16 +27,16 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         )
     }
 
-    internal fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje {
+    internal fun result(sykdomstidslinje: Sykdomstidslinje, ventetid: Periode): Utbetalingstidslinje {
         val builder = Utbetalingstidslinje.Builder()
         sykdomstidslinje.forEach { dag ->
             when (dag) {
                 is Dag.Arbeidsdag -> arbeidsdag(builder, dag.dato)
                 is Dag.ForeldetSykedag -> foreldetdag(builder, dag.dato, dag.grad)
                 is Dag.FriskHelgedag -> arbeidsdag(builder, dag.dato)
-                is Dag.SykHelgedag -> helg(builder, dag.dato, dag.grad)
-                is Dag.Sykedag -> navDag(builder, dag.dato, dag.grad)
-                is Dag.Ventetidsdag -> ventetidsdag(builder, dag.dato, dag.grad)
+                is Dag.SykHelgedag -> if (dag.dato in ventetid) ventetidsdag(builder, dag.dato, dag.grad) else helg(builder, dag.dato, dag.grad)
+                is Dag.Sykedag -> if (dag.dato in ventetid) ventetidsdag(builder, dag.dato, dag.grad) else navDag(builder, dag.dato, dag.grad)
+                is Dag.Ventetidsdag -> error("Hej vi hade en ventetidsdag")
                 is Dag.AndreYtelser -> {
                     val begrunnelse = when (dag.ytelse) {
                         Dag.AndreYtelser.AnnenYtelse.AAP -> Begrunnelse.AndreYtelserAap

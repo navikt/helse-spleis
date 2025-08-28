@@ -571,7 +571,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 }
 
                 Selvstendig -> {
-                    SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(fastsattÅrsinntekt).result(sykdomstidslinje)
+                    SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(fastsattÅrsinntekt).result(sykdomstidslinje, gjeldende.ventetid!!)
                 }
 
                 Arbeidsledig,

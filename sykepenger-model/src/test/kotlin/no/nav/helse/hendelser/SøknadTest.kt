@@ -33,7 +33,6 @@ import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.sykdomstidslinje.Dag.Ventetidsdag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -65,10 +64,8 @@ internal class SøknadTest {
     fun `søknad med selvstendig og ventetid`() {
         søknad(Sykdom(1.januar, 31.januar, 100.prosent), Ventetid(1.januar til 16.januar))
 
-        assertEquals(16, søknad.sykdomstidslinje.filterIsInstance<Ventetidsdag>().size)
-        assertEquals(11, søknad.sykdomstidslinje.filterIsInstance<Sykedag>().size)
-        assertEquals(4, søknad.sykdomstidslinje.filterIsInstance<SykHelgedag>().size)
-        assertEquals(100.prosent, søknad.sykdomstidslinje.filterIsInstance<Ventetidsdag>()[0].grad)
+        assertEquals(23, søknad.sykdomstidslinje.filterIsInstance<Sykedag>().size)
+        assertEquals(8, søknad.sykdomstidslinje.filterIsInstance<SykHelgedag>().size)
     }
 
     @Test

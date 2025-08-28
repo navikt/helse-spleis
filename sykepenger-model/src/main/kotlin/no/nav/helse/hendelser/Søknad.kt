@@ -53,6 +53,7 @@ import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 class Søknad(
     meldingsreferanseId: MeldingsreferanseId,
@@ -365,7 +366,7 @@ class Søknad(
 
         class Ventetid(periode: Periode) : Søknadsperiode(periode.start, periode.endInclusive) {
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
-                Sykdomstidslinje.ventetidsdager(periode.start, periode.endInclusive, kilde)
+                Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, avskjæringsdato, 100.prosent, kilde)
         }
 
         class Utlandsopphold(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
