@@ -1,6 +1,7 @@
 package no.nav.helse.feriepenger
 
 import java.time.Year
+import kotlin.math.roundToInt
 import no.nav.helse.Alder
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.april
@@ -188,7 +189,7 @@ internal class FeriepengeberegnerTest {
             infotrygdArbeidsgiver = "456789123".itArbeidsgiver(1.januar til 14.januar) + "789123456".itArbeidsgiver(1.januar til 16.januar)
         )
 
-        assertEquals(((10 + 12) * InfotrygdPersonbeløp + (14 + 16) * InfotrygdArbeidsgiverbeløp) * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd())
+        assertEquals(3876, feriepengeberegner.beregnFeriepengerForInfotrygd())
         assertEquals((10 * InfotrygdPersonbeløp + 14 * InfotrygdArbeidsgiverbeløp) * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd("456789123"))
         assertEquals((12 * InfotrygdPersonbeløp + 16 * InfotrygdArbeidsgiverbeløp) * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd("789123456"))
     }
@@ -235,7 +236,7 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
         )
 
-        assertEquals(10 * SpleisArbeidsgiverbeløp * UNG_SATS, feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(ORGNUMMER))
+        assertEquals(3060, feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(ORGNUMMER))
     }
 
     @Test
@@ -246,7 +247,7 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
         )
 
-        assertEquals((10 * SpleisArbeidsgiverbeløp - 10 * InfotrygdArbeidsgiverbeløp) * UNG_SATS, feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(ORGNUMMER))
+        assertEquals(1020, feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(ORGNUMMER))
     }
 
     @Test

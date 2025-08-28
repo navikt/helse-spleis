@@ -153,7 +153,7 @@ internal class Feriepengeutbetaling private constructor(
             return forrigeOppdrag.endreBeløp(beløp)
         }
 
-        private val Double.finere get() = "$this".padStart(10, ' ')
+        private val Number.finere get() = "$this".padStart(10, ' ')
         private val List<Periode>.finere get() = joinToString(separator = "\n\t\t\t\t\t", prefix = "\n\t\t\t\t\t") { "$it (${it.count()} dager)" }
 
         internal fun build(aktivitetslogg: IAktivitetslogg): Feriepengeutbetaling {
@@ -183,10 +183,10 @@ internal class Feriepengeutbetaling private constructor(
                 fagområde = Feriepengerfagområde.SykepengerRefusjon,
                 klassekode = Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
                 forrigeOppdrag = forrigeSendteArbeidsgiverOppdrag,
-                beløp = feriepengeberegningsresultat.arbeidsgiver.beløp
+                beløp = feriepengeberegningsresultat.arbeidsgiver.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd
             )
 
-            if (feriepengeberegningsresultat.arbeidsgiver.beløp != 0 && orgnummer == "0") aktivitetslogg.info("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\".")
+            if (feriepengeberegningsresultat.arbeidsgiver.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd != 0 && orgnummer == "0") aktivitetslogg.info("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\".")
 
             val sendArbeidsgiveroppdrag = arbeidsgiveroppdrag.skalSendeOppdrag
 
@@ -215,7 +215,7 @@ internal class Feriepengeutbetaling private constructor(
                 fagområde = Feriepengerfagområde.Sykepenger,
                 klassekode = Feriepengerklassekode.SykepengerArbeidstakerFeriepenger,
                 forrigeOppdrag = forrigeSendtePersonOppdrag,
-                beløp = feriepengeberegningsresultat.person.beløp
+                beløp = feriepengeberegningsresultat.person.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd
             )
 
             val sendPersonoppdrag = personoppdrag.skalSendeOppdrag
@@ -275,7 +275,7 @@ internal class Feriepengeutbetaling private constructor(
                 ${if (arbeidsgiver) "Arbeidsgiveroppdrag" else "Personoppdrag"}: $oppdragdetaljer"""
         }
 
-        private fun oppsummering(infotrygdHarUtbetalt: List<Int>, hvaViHarBeregnetAtInfotrygdHarUtbetaltForDenneAktuelleArbeidsgiver: Int, infotrygdFeriepengebeløp: Double, spleisFeriepengebeløp: Double, totaltFeriepengebeløp: Double, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTil: Double): String {
+        private fun oppsummering(infotrygdHarUtbetalt: List<Int>, hvaViHarBeregnetAtInfotrygdHarUtbetaltForDenneAktuelleArbeidsgiver: Int, infotrygdFeriepengebeløp: Double, spleisFeriepengebeløp: Double, totaltFeriepengebeløp: Double, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTil: Int): String {
             return """Alle feriepengeutbetalinger fra Infotrygd (alle ytelser): $infotrygdHarUtbetalt (NB! Dette bruks ikke i beregning, bare til logging)
                 Vår beregning av hva Infotrygd ville utbetalt i en verden uten Spleis: $hvaViHarBeregnetAtInfotrygdHarUtbetaltForDenneAktuelleArbeidsgiver
                 Men siden Spleis finnes:
@@ -329,11 +329,10 @@ internal data class Feriepengeberegningsresultatsverdier(
     val infotrygdFeriepengebeløp: Double,
     val spleisFeriepengebeløp: Double,
     val totaltFeriepengebeløp: Double,
-    val differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd: Double,
+    val differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd: Int,
     val hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble: Double
 ) {
     val hvaViHarBeregnetAtInfotrygdHarUtbetalt: Int = hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble.roundToInt()
-    val beløp = differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd.roundToInt()
 }
 
 internal data class FeriepengeutbetalingView(
