@@ -16,6 +16,7 @@ import java.util.UUID
 import kotlin.collections.component1
 import kotlin.collections.component2
 import no.nav.helse.dto.UtbetalingTilstandDto
+import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
@@ -51,9 +52,19 @@ fun startFeriepenger(factory: ConsumerProducerFactory, arbeidId: String, datoFor
 
 private fun PersonInnDto.potensiellFeriepengekjøring(opptjeningsår: Year): Boolean {
     return arbeidsgivere.any { arbeidsgiver ->
-        arbeidsgiver.utbetalinger.aktive().any { utbetaling ->
-            utbetaling.arbeidsgiverOppdrag.harUtbetalt(opptjeningsår) || utbetaling.personOppdrag.harUtbetalt(opptjeningsår)
-        }
+        arbeidsgiver.harAktivUtbetalingIOpptjeningsår(opptjeningsår) || arbeidsgiver.harBeregnetFeriepengerTidligere(opptjeningsår)
+    }
+}
+
+private fun ArbeidsgiverInnDto.harAktivUtbetalingIOpptjeningsår(opptjeningsår: Year): Boolean {
+    return this.utbetalinger.aktive().any { utbetaling ->
+        utbetaling.arbeidsgiverOppdrag.harUtbetalt(opptjeningsår) || utbetaling.personOppdrag.harUtbetalt(opptjeningsår)
+    }
+}
+
+private fun ArbeidsgiverInnDto.harBeregnetFeriepengerTidligere(opptjeningsår: Year): Boolean {
+    return this.feriepengeutbetalinger.any { utbetaling ->
+        utbetaling.feriepengeberegner.opptjeningsår == opptjeningsår
     }
 }
 
