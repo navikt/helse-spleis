@@ -189,7 +189,7 @@ internal class FeriepengeberegnerTest {
         )
 
         assertEquals(8364.0, feriepengeberegner.beregnFeriepengerForInfotrygd())
-        assertEquals(3875.9999999999995, feriepengeberegner.beregnFeriepengerForInfotrygd(a2))
+        assertEquals(3876.0, feriepengeberegner.beregnFeriepengerForInfotrygd(a2))
         assertEquals(4488.0, feriepengeberegner.beregnFeriepengerForInfotrygd(a3))
     }
 
@@ -224,6 +224,9 @@ internal class FeriepengeberegnerTest {
             spleisPerson = spleisPerson(1.januar til 10.januar)
         )
 
+        assertEquals(0, feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(a1))
+        assertEquals(4080, feriepengeberegner.beregnFeriepengedifferansenForPerson(a1))
+
         assertEquals(6120.0, feriepengeberegner.beregnFeriepengerForPerson(a1))
     }
 
@@ -235,7 +238,8 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
         )
 
-        assertEquals(3060.0, feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(a1))
+        assertEquals(3060, feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(a1))
+        assertEquals(0, feriepengeberegner.beregnFeriepengedifferansenForPerson(a1))
     }
 
     @Test
@@ -246,7 +250,8 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
         )
 
-        assertEquals(1019.9999999999999, feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(a1))
+        assertEquals(1020, feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(a1))
+        assertEquals(0, feriepengeberegner.beregnFeriepengedifferansenForPerson(a1))
     }
 
     @Test
