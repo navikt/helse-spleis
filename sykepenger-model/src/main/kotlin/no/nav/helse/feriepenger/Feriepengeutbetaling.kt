@@ -253,16 +253,20 @@ internal class Feriepengeutbetaling private constructor(
                 Nøkkelverdier om feriepengeberegning
                 Arbeidsgiver: $orgnummer
                 
-                ${oppsummeringArbeidsgiver(infotrygdHarUtbetaltTilArbeidsgiver, hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver, infotrygdFeriepengebeløpArbeidsgiver, spleisFeriepengebeløpArbeidsgiver, totaltFeriepengebeløpArbeidsgiver, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd)}
+                - ARBEIDSGIVER:
+                ${oppsummering(infotrygdHarUtbetaltTilArbeidsgiver, hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver, infotrygdFeriepengebeløpArbeidsgiver, spleisFeriepengebeløpArbeidsgiver, totaltFeriepengebeløpArbeidsgiver, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd)}
                 
-                ${oppsummeringPerson(infotrygdHarUtbetaltTilPerson, hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver, infotrygdFeriepengebeløpPerson, spleisFeriepengebeløpPerson, totaltFeriepengebeløpPerson, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson)}
+                - PERSON:
+                ${oppsummering(infotrygdHarUtbetaltTilPerson, hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver, infotrygdFeriepengebeløpPerson, spleisFeriepengebeløpPerson, totaltFeriepengebeløpPerson, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson)}
 
                 - GENERELT:         
                 ${feriepengeberegner.feriepengedatoer().let { datoer -> "Datoer vi skal utbetale feriepenger for (${datoer.size}): ${datoer.grupperSammenhengendePerioder().finere}" }}
                 
-                ${oppsummeringArbeidsgiveroppdrag(sendArbeidsgiveroppdrag, forrigeSendteArbeidsgiverOppdrag, arbeidsgiveroppdrag, arbeidsgiveroppdragdetaljer)}
+                - ARBEIDSGIVEROPPDRAG:
+                ${oppdragoppsummering(true, sendArbeidsgiveroppdrag, forrigeSendteArbeidsgiverOppdrag, arbeidsgiveroppdrag, arbeidsgiveroppdragdetaljer)}
                 
-                ${oppsummeringPersonoppdrag(sendPersonoppdrag, forrigeSendtePersonOppdrag, personoppdrag, personoppdragdetaljer)}
+                - PERSONOPPDRAG:
+                ${oppdragoppsummering(false, sendPersonoppdrag, forrigeSendtePersonOppdrag, personoppdrag, personoppdragdetaljer)}
                 """
             )
 
@@ -280,28 +284,10 @@ internal class Feriepengeutbetaling private constructor(
             )
         }
 
-        private fun oppsummeringArbeidsgiveroppdrag(sendArbeidsgiveroppdrag: Boolean, forrigeSendteArbeidsgiverOppdrag: Feriepengeoppdrag?, arbeidsgiveroppdrag: Feriepengeoppdrag, arbeidsgiveroppdragdetaljer: String): String {
-            return """- ARBEIDSGIVEROPPDRAG:
-                Skal sende arbeidsgiveroppdrag til OS: $sendArbeidsgiveroppdrag
-                Differanse fra forrige sendte arbeidsgoiveroppdrag: ${forrigeSendteArbeidsgiverOppdrag?.totalbeløp?.minus(arbeidsgiveroppdrag.totalbeløp)}
-                Arbeidsgiveroppdrag: $arbeidsgiveroppdragdetaljer"""
-        }
-
-        private fun oppsummeringPersonoppdrag(sendPersonoppdrag: Boolean, forrigeSendtePersonOppdrag: Feriepengeoppdrag?, personoppdrag: Feriepengeoppdrag, personoppdragdetaljer: String): String {
-            return """- PERSONOPPDRAG:
-                Skal sende personoppdrag til OS: $sendPersonoppdrag
-                Differanse fra forrige sendte personoppdrag: ${forrigeSendtePersonOppdrag?.totalbeløp?.minus(personoppdrag.totalbeløp)}
-                Personoppdrag: $personoppdragdetaljer"""
-        }
-
-        private fun oppsummeringArbeidsgiver(infotrygdHarUtbetaltTilArbeidsgiver: List<Int>, hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver: Double, infotrygdFeriepengebeløpArbeidsgiver: Double, spleisFeriepengebeløpArbeidsgiver: Double, totaltFeriepengebeløpArbeidsgiver: Double, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd: Double): String {
-            return """- ARBEIDSGIVER:
-                ${oppsummering(infotrygdHarUtbetaltTilArbeidsgiver, hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver, infotrygdFeriepengebeløpArbeidsgiver, spleisFeriepengebeløpArbeidsgiver, totaltFeriepengebeløpArbeidsgiver, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd)}"""
-        }
-
-        private fun oppsummeringPerson(infotrygdHarUtbetaltTilPerson: List<Int>, hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver: Double, infotrygdFeriepengebeløpPerson: Double, spleisFeriepengebeløpPerson: Double, totaltFeriepengebeløpPerson: Double, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson: Double): String {
-            return """- PERSON:
-                ${oppsummering(infotrygdHarUtbetaltTilPerson, hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver, infotrygdFeriepengebeløpPerson, spleisFeriepengebeløpPerson, totaltFeriepengebeløpPerson, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson)}"""
+        private fun oppdragoppsummering(arbeidsgiver: Boolean, sendOppdrag: Boolean, forrigeSendteOppdrag: Feriepengeoppdrag?, oppdrag: Feriepengeoppdrag, oppdragdetaljer: String): String {
+            return """Skal sende ${if (arbeidsgiver) "arbeidsgiveroppdrag" else "personoppdrag"} til OS: $sendOppdrag
+                Differanse fra forrige sendte ${if (arbeidsgiver) "arbeidsgiveroppdrag" else "personoppdrag"}: ${forrigeSendteOppdrag?.totalbeløp?.minus(oppdrag.totalbeløp)}
+                ${if (arbeidsgiver) "Arbeidsgiveroppdrag" else "Personoppdrag"}: $oppdragdetaljer"""
         }
 
         private fun oppsummering(infotrygdHarUtbetalt: List<Int>, hvaViHarBeregnetAtInfotrygdHarUtbetaltForDenneAktuelleArbeidsgiver: Double, infotrygdFeriepengebeløp: Double, spleisFeriepengebeløp: Double, totaltFeriepengebeløp: Double, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTil: Double): String {
