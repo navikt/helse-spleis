@@ -234,8 +234,6 @@ internal class UtkastTilVedtakBuilder(
 
         private val periodetypeForGodkjenningsbehov = sykepengegrunnlagsfakta.periodetypeForGodkjenningsbehov(tags)
 
-        private val omregnedeÅrsinntekterForGodkjenningsbehov = sykepengegrunnlagsfakta.omregnedeÅrsinntekterForGodkjenningsbehov()
-
         val godkjenningsbehov = mapOf(
             "periodeFom" to "${periode.start}",
             "periodeTom" to "${periode.endInclusive}",
@@ -249,7 +247,6 @@ internal class UtkastTilVedtakBuilder(
             "orgnummereMedRelevanteArbeidsforhold" to (arbeidsgiverinntekter.map { it.arbeidsgiver }).toSet(),
             "tags" to tags.utgående,
             "kanAvvises" to kanForkastes,
-            "omregnedeÅrsinntekter" to omregnedeÅrsinntekterForGodkjenningsbehov,
             "behandlingId" to "$behandlingId",
             "hendelser" to hendelseIder,
             "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt.map {
@@ -264,53 +261,60 @@ internal class UtkastTilVedtakBuilder(
             "gjenståendeSykedager" to gjenståendeSykedager,
             "foreløpigBeregnetSluttPåSykepenger" to "$foreløpigBeregnetSluttPåSykepenger",
             "utbetalingsdager" to utbetalingsdager,
-            "sykepengegrunnlagsfakta" to when (sykepengegrunnlagsfakta) {
-                is FastsattIInfotrygd -> mapOf(
-                    "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
-                    "fastsatt" to sykepengegrunnlagsfakta.fastsatt
-                )
-
-                is FastsattEtterHovedregel -> mapOf(
-                    "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
-                    "sykepengegrunnlag" to sykepengegrunnlag,
-                    "6G" to seksG,
-                    "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
-                    "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map {
-                        mapOf(
-                            "arbeidsgiver" to it.arbeidsgiver,
-                            "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                            "inntektskilde" to it.inntektskilde
+            "sykepengegrunnlagsfakta" to mapOf(
+                "sykepengegrunnlag" to sykepengegrunnlag,
+                "6G" to seksG,
+            ).plus(
+                if (yrkesaktivitetssporing is Behandlingsporing.Yrkesaktivitet.Selvstendig) {
+                    selvstendigMap()
+                } else {
+                    when (sykepengegrunnlagsfakta) {
+                        is FastsattIInfotrygd -> mapOf(
+                            "fastsatt" to sykepengegrunnlagsfakta.fastsatt
                         )
-                    }
-                )
 
-                is FastsattEtterSkjønn -> mapOf(
-                    "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
-                    "sykepengegrunnlag" to sykepengegrunnlag,
-                    "skjønnsfastsatt" to sykepengegrunnlagsfakta.skjønnsfastsatt,
-                    "6G" to seksG,
-                    "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
-                    "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map {
-                        mapOf(
-                            "arbeidsgiver" to it.arbeidsgiver,
-                            "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                            "skjønnsfastsatt" to it.skjønnsfastsatt,
-                            "inntektskilde" to Inntektskilde.Saksbehandler,
-                        )
-                    }
-                )
-            }.apply {
-                if (pensjonsgivendeInntekter.isNotEmpty()) {
-                    this.plus(
-                        "pensjonsgivendeInntekter" to pensjonsgivendeInntekter.map {
-                            mapOf(
-                                "årstall" to it.årstall.value,
-                                "beløp" to it.beløp.årlig.toDesimaler
-                            )
-                        }
-                    )
+                        is FastsattEtterHovedregel -> arbeidstakerHovedregelMap(sykepengegrunnlagsfakta)
+                        is FastsattEtterSkjønn -> arbeidstakerEtterSkjønnMap(sykepengegrunnlagsfakta)
+                    }.plus("selvstendig" to null)
                 }
+            ),
+        )
+
+        private fun arbeidstakerEtterSkjønnMap(sykepengegrunnlagsfakta: FastsattEtterSkjønn): Map<String, Any> = mapOf(
+            "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
+            "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map {
+                mapOf(
+                    "arbeidsgiver" to it.arbeidsgiver,
+                    "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
+                    "skjønnsfastsatt" to it.skjønnsfastsatt,
+                    "inntektskilde" to Inntektskilde.Saksbehandler,
+                )
             }
+        )
+
+        private fun arbeidstakerHovedregelMap(sykepengegrunnlagsfakta: FastsattEtterHovedregel): Map<String, Any> = mapOf(
+            "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
+            "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map {
+                mapOf(
+                    "arbeidsgiver" to it.arbeidsgiver,
+                    "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
+                    "inntektskilde" to it.inntektskilde
+                )
+            }
+        )
+
+        private fun selvstendigMap(): Map<String, Any> = mapOf(
+            "selvstendig" to mapOf(
+                "pensjonsgivendeInntekter" to pensjonsgivendeInntekter.map {
+                    mapOf(
+                        "årstall" to it.årstall.value,
+                        "beløp" to it.beløp.årlig.toDesimaler
+                    )
+                },
+                "beregningsgrunnlag" to beregningsgrunnlag.årlig.toDesimaler,
+            ),
+            "arbeidsgivere" to emptyList<Map<String, Any>>(), // Selvstendig har ingen arbeidsgivere i sykepengegrunnlaget
+            "fastsatt" to "EtterHovedregel"
         )
 
         // TODO: 10.12.24 Rename skjønssfastsatt til fastsattÅrsinntekt (som er lik omregnet for hovedregel med forskjellige beløp på skjønn)
@@ -395,12 +399,6 @@ internal class UtkastTilVedtakBuilder(
                 this is FastsattIInfotrygd -> if (erForlengelse) "INFOTRYGDFORLENGELSE" else "OVERGANG_FRA_IT"
                 else -> if (erForlengelse) "FORLENGELSE" else "FØRSTEGANGSBEHANDLING"
             }
-        }
-
-        private fun Sykepengegrunnlagsfakta.omregnedeÅrsinntekterForGodkjenningsbehov(): List<Map<String, Any>> = when (val fakta = this) {
-            is FastsattIInfotrygd -> listOf(mapOf("organisasjonsnummer" to fakta.arbeidsgiver, "beløp" to fakta.omregnetÅrsinntekt))
-            is FastsattEtterHovedregel -> fakta.arbeidsgivere.map { mapOf("organisasjonsnummer" to it.arbeidsgiver, "beløp" to it.omregnetÅrsinntekt) }
-            is FastsattEtterSkjønn -> fakta.arbeidsgivere.map { mapOf("organisasjonsnummer" to it.arbeidsgiver, "beløp" to it.omregnetÅrsinntekt) } // Nei, ikke bug at det er omregnetÅrsinntekt
         }
     }
 }

@@ -4,14 +4,34 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.*
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForOpptjeningsvurdering
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
@@ -86,6 +106,22 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
+    fun `godkjenning - selvstendig`() = Toggle.SelvstendigNæringsdrivende.enable {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSelvstendigsøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            ventetid = 3.januar til 18.januar
+        )
+
+        sendVilkårsgrunnlagSelvstendig(0)
+        sendYtelserSelvstendig(0)
+        sendSimuleringSelvstendig(0, SimuleringMessage.Simuleringstatus.OK)
+        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        assertVedtaksperiodeBehov(behov, Godkjenning)
+        assertGodkjenningdetaljer(behov, erSelvstendig = true)
+    }
+
+    @Test
     fun godkjenning() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
@@ -97,7 +133,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
         assertVedtaksperiodeBehov(behov, Godkjenning)
-        assertGodkjenningdetaljer(behov)
+        assertGodkjenningdetaljer(behov, erSelvstendig = false)
     }
 
     @Test
@@ -231,7 +267,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertOppdragdetaljer(simulering, false)
     }
 
-    private fun assertGodkjenningdetaljer(behov: JsonNode) {
+    private fun assertGodkjenningdetaljer(behov: JsonNode, erSelvstendig: Boolean) {
         val godkjenning = behov.path(Godkjenning.name)
         assertTrue(behov.path("utbetalingId").asText().isNotEmpty())
         assertDato(godkjenning.path("periodeFom").asText())
@@ -246,10 +282,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertFalse(godkjenning.path("orgnummereMedRelevanteArbeidsforhold").isEmpty)
         assertTrue(godkjenning.path("tags").isArray)
         assertTrue(godkjenning.path("kanAvvises").isBoolean)
-        assertTrue(godkjenning.path("omregnedeÅrsinntekter").isArray)
-        assertFalse(godkjenning.path("omregnedeÅrsinntekter").isEmpty)
-        assertTrue(godkjenning.path("omregnedeÅrsinntekter").path(0).path("organisasjonsnummer").asText().isNotEmpty())
-        assertTrue(godkjenning.path("omregnedeÅrsinntekter").path(0).path("beløp").isDouble)
         assertTrue(godkjenning.path("behandlingId").asText().isNotEmpty())
         assertTrue(godkjenning.path("perioderMedSammeSkjæringstidspunkt").isArray)
         assertFalse(godkjenning.path("perioderMedSammeSkjæringstidspunkt").isEmpty)
@@ -261,66 +293,79 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         }
         godkjenning.path("sykepengegrunnlagsfakta").also {
             it.path("fastsatt").asText() in listOf("EtterSkjønn", "EtterHovedregel", "IInfotrygd")
-            assertTrue(it.path("omregnetÅrsinntektTotalt").isDouble)
             assertTrue(it.path("6G").isDouble)
-            assertTrue(it.path("skjønnsfastsatt").isMissingNode)
-            assertTrue(it.path("arbeidsgivere").isArray)
-            it.path("arbeidsgivere").path(0)?.also { arbeidsgiver ->
-                assertTrue(arbeidsgiver.path("arbeidsgiver").isTextual)
-                assertTrue(arbeidsgiver.path("omregnetÅrsinntekt").isDouble)
-                assertTrue(arbeidsgiver.path("skjønnsfastsatt").isMissingNode)
-            }
-        }
-    }
-
-    private fun assertUtbetalingdetaljer(behov: JsonNode, erAnnullering: Boolean = false) {
-        val utbetaling = behov.path(Utbetaling.name)
-        if (!erAnnullering) assertDato(utbetaling.path("maksdato").asText())
-        assertTrue(utbetaling.path("saksbehandler").asText().isNotEmpty())
-        assertOppdragdetaljer(utbetaling, erAnnullering)
-    }
-
-    private fun assertOppdragdetaljer(oppdrag: JsonNode, erAnnullering: Boolean) {
-        assertTrue(oppdrag.path("mottaker").asText().isNotEmpty())
-        assertTrue(oppdrag.path("fagsystemId").asText().isNotEmpty())
-        assertTrue(oppdrag.path("fagområde").asText().isNotEmpty())
-        assertTrue(oppdrag.path("endringskode").asText().isNotEmpty())
-        val linjer = oppdrag.path("linjer")
-        assertTrue(linjer.isArray)
-        linjer.forEach { linje ->
-            assertDato(linje.path("fom").asText())
-            assertDato(linje.path("tom").asText())
-            assertTrue(linje.path("sats").isInt)
-            assertTrue(linje.path("grad").isDouble)
-            assertTrue(linje.path("delytelseId").isInt)
-            assertTrue(linje.has("refFagsystemId"))
-            assertTrue(linje.has("refDelytelseId"))
-            if (!erAnnullering) {
-                assertTrue(linje.has("datoStatusFom"))
-                assertTrue(linje.has("statuskode"))
+            if (!erSelvstendig) {
+                assertTrue(it.path("arbeidsgivere").isArray)
+                assertTrue(it.path("selvstendig").isNull)
+                it.path("arbeidsgivere").path(0)?.also { arbeidsgiver ->
+                    assertTrue(arbeidsgiver.path("arbeidsgiver").isTextual)
+                    assertTrue(arbeidsgiver.path("omregnetÅrsinntekt").isDouble)
+                    assertTrue(arbeidsgiver.path("skjønnsfastsatt").isMissingNode)
+                }
             } else {
-                assertDato(linje.path("datoStatusFom").asText())
-                assertTrue(linje.path("statuskode").asText().isNotEmpty())
+                assertTrue(it.path("arbeidsgivere").isArray)
+                assertTrue(it.path("arbeidsgivere").isEmpty)
+                it.path("selvstendig").also { selvstendig ->
+                    selvstendig.path("pensjonsgivendeInntekter").isArray
+                    selvstendig.path("pensjonsgivendeInntekter").forEach { pensjonsinntekt ->
+                        assertTrue(pensjonsinntekt.path("beløp").isDouble)
+                        assertTrue(pensjonsinntekt.path("årstall").isInt)
+                    }
+                    selvstendig.path("beregningsgrunnlag").isDouble
+                }
             }
-            assertTrue(linje.path("endringskode").asText().isNotEmpty())
-            assertTrue(linje.path("klassekode").asText().isNotEmpty())
         }
-    }
-
-    private fun assertÅrMåned(tekst: String) {
-        assertTrue(tekst.isNotEmpty())
-        assertDoesNotThrow { YearMonth.parse(tekst) }
-    }
-
-    private fun assertDato(tekst: String) {
-        assertTrue(tekst.isNotEmpty())
-        assertDoesNotThrow { LocalDate.parse(tekst) }
-    }
-
-    private fun assertDatotid(tekst: String) {
-        assertTrue(tekst.isNotEmpty())
-        assertDoesNotThrow { LocalDateTime.parse(tekst) }
     }
 }
+
+private fun assertUtbetalingdetaljer(behov: JsonNode, erAnnullering: Boolean = false) {
+    val utbetaling = behov.path(Utbetaling.name)
+    if (!erAnnullering) assertDato(utbetaling.path("maksdato").asText())
+    assertTrue(utbetaling.path("saksbehandler").asText().isNotEmpty())
+    assertOppdragdetaljer(utbetaling, erAnnullering)
+}
+
+private fun assertOppdragdetaljer(oppdrag: JsonNode, erAnnullering: Boolean) {
+    assertTrue(oppdrag.path("mottaker").asText().isNotEmpty())
+    assertTrue(oppdrag.path("fagsystemId").asText().isNotEmpty())
+    assertTrue(oppdrag.path("fagområde").asText().isNotEmpty())
+    assertTrue(oppdrag.path("endringskode").asText().isNotEmpty())
+    val linjer = oppdrag.path("linjer")
+    assertTrue(linjer.isArray)
+    linjer.forEach { linje ->
+        assertDato(linje.path("fom").asText())
+        assertDato(linje.path("tom").asText())
+        assertTrue(linje.path("sats").isInt)
+        assertTrue(linje.path("grad").isDouble)
+        assertTrue(linje.path("delytelseId").isInt)
+        assertTrue(linje.has("refFagsystemId"))
+        assertTrue(linje.has("refDelytelseId"))
+        if (!erAnnullering) {
+            assertTrue(linje.has("datoStatusFom"))
+            assertTrue(linje.has("statuskode"))
+        } else {
+            assertDato(linje.path("datoStatusFom").asText())
+            assertTrue(linje.path("statuskode").asText().isNotEmpty())
+        }
+        assertTrue(linje.path("endringskode").asText().isNotEmpty())
+        assertTrue(linje.path("klassekode").asText().isNotEmpty())
+    }
+}
+
+private fun assertÅrMåned(tekst: String) {
+    assertTrue(tekst.isNotEmpty())
+    assertDoesNotThrow { YearMonth.parse(tekst) }
+}
+
+private fun assertDato(tekst: String) {
+    assertTrue(tekst.isNotEmpty())
+    assertDoesNotThrow { LocalDate.parse(tekst) }
+}
+
+private fun assertDatotid(tekst: String) {
+    assertTrue(tekst.isNotEmpty())
+    assertDoesNotThrow { LocalDateTime.parse(tekst) }
+}
+
 
 
