@@ -172,7 +172,23 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
         )
 
         val beregner = feriepengerFor(Year.of(2018), historikk)
-        assertEquals(0.0, beregner.beregnFeriepengerForInfotrygdPerson())
+        assertEquals(Feriepengeberegningsresultat(
+            orgnummer = a1,
+            arbeidsgiver = Feriepengeberegningsresultat.Beregningsverdier(
+                infotrygdFeriepengebeløp = 2346.0,
+                spleisFeriepengebeløp = 0.0,
+                totaltFeriepengebeløp = 2346.0,
+                differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
+                hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 2346.0
+            ),
+            person = Feriepengeberegningsresultat.Beregningsverdier(
+                infotrygdFeriepengebeløp = 0.0,
+                spleisFeriepengebeløp = 0.0,
+                totaltFeriepengebeløp = 0.0,
+                differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
+                hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 0.0
+            )
+        ), beregner.beregnFeriepenger(a1))
     }
 
     @Test
@@ -211,7 +227,23 @@ internal class FeriepengedatoerTest : AbstractEndToEndTest() {
 
         val beregner = feriepengerFor(Year.of(2018), historikk)
         assertEquals((17.januar(2018) til 23.mars(2018)).filterNot { it.erHelg() }, beregner.feriepengedatoer())
-        assertEquals(0.0, beregner.beregnFeriepengerForInfotrygdPerson())
+        assertEquals(Feriepengeberegningsresultat(
+            orgnummer = a1,
+            arbeidsgiver = Feriepengeberegningsresultat.Beregningsverdier(
+                infotrygdFeriepengebeløp = 0.0,
+                spleisFeriepengebeløp = 7006.1759999999995,
+                totaltFeriepengebeløp = 7006.1759999999995,
+                differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 4864,
+                hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 2142.0
+            ),
+            person = Feriepengeberegningsresultat.Beregningsverdier(
+                infotrygdFeriepengebeløp = 0.0,
+                spleisFeriepengebeløp = 0.0,
+                totaltFeriepengebeløp = 0.0,
+                differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
+                hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 0.0
+            )
+        ), beregner.beregnFeriepenger(a1))
     }
 
     @Test
