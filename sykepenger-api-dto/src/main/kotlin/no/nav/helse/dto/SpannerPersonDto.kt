@@ -289,7 +289,6 @@ data class SpannerPersonDto(
             enum class JsonDagType {
                 ARBEIDSDAG,
                 ARBEIDSGIVERDAG,
-                VENTETIDSDAG,
 
                 FERIEDAG,
                 ARBEID_IKKE_GJENOPPTATT_DAG,
@@ -1043,17 +1042,6 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         fom = null,
         tom = null
     )
-
-    is SykdomstidslinjeDagDto.VentetidsdagDto -> DagData(
-        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.VENTETIDSDAG,
-        kilde = this.kilde.tilPersonData(),
-        grad = this.grad.prosentDesimal,
-        other = null,
-        melding = null,
-        dato = dato,
-        fom = null,
-        tom = null
-    )
 }
 
 private fun HendelseskildeDto.tilPersonData() =
@@ -1697,13 +1685,13 @@ private fun ArbeidstakerFaktaavklartInntektUtDto.tilPersonData() =
         tidsstempel = this.inntektsdata.tidsstempel,
         type = InntektsopplysningstypeData.ARBEIDSTAKER,
         kilde = when (this.inntektsopplysningskilde) {
-                is ArbeidstakerinntektskildeUtDto.InfotrygdDto -> "INFOTRYGD"
-                is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> "INNTEKTSMELDING"
-                is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> "SKATT_SYKEPENGEGRUNNLAG"
+            is ArbeidstakerinntektskildeUtDto.InfotrygdDto -> "INFOTRYGD"
+            is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> "INNTEKTSMELDING"
+            is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> "SKATT_SYKEPENGEGRUNNLAG"
         },
         skatteopplysninger = when (val kilde = this.inntektsopplysningskilde) {
-                is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> kilde.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
-                else -> null
+            is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> kilde.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
+            else -> null
         },
         pensjonsgivendeInntekter = null,
         anvendtGrunnbeløp = null

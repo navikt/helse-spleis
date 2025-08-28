@@ -33,7 +33,6 @@ import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
-import no.nav.helse.sykdomstidslinje.Dag.Ventetidsdag
 import no.nav.helse.økonomi.Prosentdel
 
 class Sykdomstidslinje private constructor(
@@ -169,7 +168,6 @@ class Sykdomstidslinje private constructor(
                     is FriskHelgedag -> "R"
                     is ForeldetSykedag -> "K"
                     is AndreYtelser -> "Y"
-                    is Ventetidsdag -> "V"
                 }
         }?.trim() ?: "Tom tidslinje"
     }
@@ -189,20 +187,6 @@ class Sykdomstidslinje private constructor(
 
         internal fun arbeidsdager(førsteDato: LocalDate, sisteDato: LocalDate, kilde: Hendelseskilde) =
             arbeidsdager(Periode(førsteDato, sisteDato), kilde)
-
-        internal fun ventetidsdager(
-            førsteDato: LocalDate,
-            sisteDato: LocalDate,
-            kilde: Hendelseskilde
-        ): Sykdomstidslinje {
-            val periode = førsteDato til sisteDato
-            return Sykdomstidslinje(dager = periode.associateWith { dato ->
-                Ventetidsdag(
-                    dato = dato,
-                    kilde = kilde
-                )
-            })
-        }
 
         internal fun sykedager(
             førsteDato: LocalDate,

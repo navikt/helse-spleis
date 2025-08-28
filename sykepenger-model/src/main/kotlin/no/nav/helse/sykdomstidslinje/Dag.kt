@@ -23,7 +23,6 @@ import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Opplæringspen
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Pleiepenger
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger
 import no.nav.helse.økonomi.Prosentdel
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal typealias BesteStrategy = (Dag, Dag) -> Dag
 
@@ -90,7 +89,6 @@ sealed class Dag(
                 is SykdomstidslinjeDagDto.SykHelgedagDto -> SykHelgedag.gjenopprett(dag)
                 is SykdomstidslinjeDagDto.SykedagDto -> Sykedag.gjenopprett(dag)
                 is SykdomstidslinjeDagDto.UkjentDagDto -> UkjentDag.gjenopprett(dag)
-                is SykdomstidslinjeDagDto.VentetidsdagDto -> Ventetidsdag.gjenopprett(dag)
             }
         }
     }
@@ -188,24 +186,6 @@ sealed class Dag(
             fun gjenopprett(dto: SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto): ArbeidIkkeGjenopptattDag {
                 return ArbeidIkkeGjenopptattDag(
                     dato = dto.dato,
-                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
-                )
-            }
-        }
-    }
-
-    internal class Ventetidsdag(
-        dato: LocalDate,
-        val grad: Prosentdel = 100.prosent,
-        kilde: Hendelseskilde
-    ) : Dag(dato, kilde) {
-        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.VentetidsdagDto(dato, kilde, grad.dto())
-
-        internal companion object {
-            fun gjenopprett(dto: SykdomstidslinjeDagDto.VentetidsdagDto): Ventetidsdag {
-                return Ventetidsdag(
-                    dato = dto.dato,
-                    grad = Prosentdel.gjenopprett(dto.grad),
                     kilde = Hendelseskilde.gjenopprett(dto.kilde)
                 )
             }

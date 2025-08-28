@@ -26,7 +26,6 @@ data class SammenslåttDag(
 enum class SykdomstidslinjedagType {
     ARBEIDSDAG,
     ARBEIDSGIVERDAG,
-    VENTETIDSDAG,
     FERIEDAG,
     ARBEID_IKKE_GJENOPPTATT_DAG,
     FORELDET_SYKEDAG,

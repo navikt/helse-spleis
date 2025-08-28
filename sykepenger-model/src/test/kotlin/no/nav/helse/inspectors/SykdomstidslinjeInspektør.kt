@@ -17,7 +17,6 @@ import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
-import no.nav.helse.sykdomstidslinje.Dag.Ventetidsdag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Prosentdel
 
@@ -38,7 +37,6 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) {
             when (dag) {
                 is ArbeidsgiverHelgedag -> set(dag, dag.dato, dag.grad, dag.kilde)
                 is Arbeidsgiverdag -> set(dag, dag.dato, dag.grad, dag.kilde)
-                is Ventetidsdag -> set(dag, dag.dato, dag.grad, dag.kilde)
                 is Sykedag -> set(dag, dag.dato, dag.grad, dag.kilde)
                 is SykHelgedag -> set(dag, dag.dato, dag.grad, dag.kilde)
                 is ForeldetSykedag -> set(dag, dag.dato, dag.grad, dag.kilde)

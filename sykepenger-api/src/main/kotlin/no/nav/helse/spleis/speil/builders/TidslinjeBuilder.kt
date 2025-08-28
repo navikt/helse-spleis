@@ -176,13 +176,6 @@ internal class SykdomstidslinjeBuilder(
                 kilde = it.kilde.tilKildeDTO(),
                 grad = null
             )
-
-            is SykdomstidslinjeDagDto.VentetidsdagDto -> Sykdomstidslinjedag(
-                dagen = it.dato,
-                    type = SykdomstidslinjedagType.VENTETIDSDAG,
-                kilde = it.kilde.tilKildeDTO(),
-                grad = (it.grad.prosentDesimal * 100).roundToInt()
-            )
         }
 
     }

@@ -20,7 +20,6 @@ enum class GraphQLPeriodetype {
 enum class GraphQLSykdomsdagtype {
     Arbeidsdag,
     Arbeidsgiverdag,
-    Ventetidsdag,
     Feriedag,
     ArbeidIkkeGjenopptattDag,
     ForeldetSykedag,

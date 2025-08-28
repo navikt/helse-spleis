@@ -5268,11 +5268,6 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "Ventetidsdag",
-          "description" : null,
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
           "name" : "Feriedag",
           "description" : null,
           "isDeprecated" : false,

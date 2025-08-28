@@ -70,7 +70,6 @@ import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
-import no.nav.helse.sykdomstidslinje.Dag.Ventetidsdag
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -649,7 +648,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is Arbeidsgiverdag,
                         is ForeldetSykedag,
                         is SykHelgedag,
-                        is Ventetidsdag,
                         is Sykedag -> true
 
                         is AndreYtelser,

@@ -52,7 +52,6 @@ import no.nav.helse.dto.SykdomstidslinjeDagDto.ProblemDagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.SykHelgedagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.SykedagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.UkjentDagDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto.VentetidsdagDto
 import no.nav.helse.dto.SykdomstidslinjeDto
 import no.nav.helse.dto.SykmeldingsperioderDto
 import no.nav.helse.dto.UtbetalingTilstandDto
@@ -630,8 +629,6 @@ data class PersonData(
                     JsonDagType.ANDRE_YTELSER_OPPLÆRINGSPENGER -> AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = AndreYtelserDto.YtelseDto.Opplæringspenger)
                     JsonDagType.ANDRE_YTELSER_DAGPENGER -> AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = AndreYtelserDto.YtelseDto.Dagpenger)
                     JsonDagType.UKJENT_DAG -> UkjentDagDto(dato = dagen, kilde = kilde)
-
-                    JsonDagType.VENTETIDSDAG -> VentetidsdagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                 }
             }
 
@@ -654,8 +651,6 @@ data class PersonData(
                 ANDRE_YTELSER_SVANGERSKAPSPENGER,
                 ANDRE_YTELSER_OPPLÆRINGSPENGER,
                 ANDRE_YTELSER_DAGPENGER,
-
-                VENTETIDSDAG,
 
                 UKJENT_DAG
             }
