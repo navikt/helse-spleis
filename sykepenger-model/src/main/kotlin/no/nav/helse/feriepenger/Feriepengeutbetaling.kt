@@ -253,35 +253,16 @@ internal class Feriepengeutbetaling private constructor(
                 Nøkkelverdier om feriepengeberegning
                 Arbeidsgiver: $orgnummer
                 
-                - ARBEIDSGIVER:
-                Alle feriepengeutbetalinger fra Infotrygd (alle ytelser): $infotrygdHarUtbetaltTilArbeidsgiver (NB! Dette bruks ikke i beregning, bare til logging)
-                Vår beregning av hva Infotrygd ville utbetalt i en verden uten Spleis: $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver
-                Men siden Spleis finnes:
-                    Infotrygd skal betale:                      ${infotrygdFeriepengebeløpArbeidsgiver.finere}
-                    Spleis skal betale:                         ${spleisFeriepengebeløpArbeidsgiver.finere}
-                    Totalt feriepengebeløp:                     ${totaltFeriepengebeløpArbeidsgiver.finere}
-                    Infotrygd-utbetalingen må korrigeres med:   ${differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd.finere}
+                ${oppsummeringArbeidsgiver(infotrygdHarUtbetaltTilArbeidsgiver, hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver, infotrygdFeriepengebeløpArbeidsgiver, spleisFeriepengebeløpArbeidsgiver, totaltFeriepengebeløpArbeidsgiver, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd)}
                 
-                - PERSON:
-                Alle feriepengeutbetalinger fra Infotrygd (alle ytelser): $infotrygdHarUtbetaltTilPerson (NB! Dette bruks ikke i beregning, bare til logging)
-                Vår beregning av hva Infotrygd ville utbetalt i en verden uten Spleis: $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver
-                Men siden Spleis finnes:
-                    Infotrygd skal betale:                      ${infotrygdFeriepengebeløpPerson.finere}
-                    Spleis skal betale:                         ${spleisFeriepengebeløpPerson.finere}
-                    Totalt feriepengebeløp:                     ${totaltFeriepengebeløpPerson.finere}
-                    Infotrygd-utbetalingen må korrigeres med:   ${differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson.finere}
+                ${oppsummeringPerson(hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver, infotrygdHarUtbetaltTilPerson, infotrygdFeriepengebeløpPerson, spleisFeriepengebeløpPerson, totaltFeriepengebeløpPerson, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson)}
 
                 - GENERELT:         
                 ${feriepengeberegner.feriepengedatoer().let { datoer -> "Datoer vi skal utbetale feriepenger for (${datoer.size}): ${datoer.grupperSammenhengendePerioder().finere}" }}
                 
-                - OPPDRAG:
-                Skal sende arbeidsgiveroppdrag til OS: $sendArbeidsgiveroppdrag
-                Differanse fra forrige sendte arbeidsgoiveroppdrag: ${forrigeSendteArbeidsgiverOppdrag?.totalbeløp?.minus(arbeidsgiveroppdrag.totalbeløp)}
-                Arbeidsgiveroppdrag: $arbeidsgiveroppdragdetaljer
+                ${oppsummeringArbeidsgiveroppdrag(sendArbeidsgiveroppdrag, forrigeSendteArbeidsgiverOppdrag, arbeidsgiveroppdrag, arbeidsgiveroppdragdetaljer)}
                 
-                Skal sende personoppdrag til OS: $sendPersonoppdrag
-                Differanse fra forrige sendte personoppdrag: ${forrigeSendtePersonOppdrag?.totalbeløp?.minus(personoppdrag.totalbeløp)}
-                Personoppdrag: $personoppdragdetaljer
+                ${oppsummeringPersonoppdrag(sendPersonoppdrag, forrigeSendtePersonOppdrag, personoppdrag, personoppdragdetaljer)}
                 """
             )
 
@@ -298,6 +279,43 @@ internal class Feriepengeutbetaling private constructor(
                 sendPersonoppdragTilOS = sendPersonoppdrag,
             )
         }
+
+        private fun oppsummeringArbeidsgiveroppdrag(sendArbeidsgiveroppdrag: Boolean, forrigeSendteArbeidsgiverOppdrag: Feriepengeoppdrag?, arbeidsgiveroppdrag: Feriepengeoppdrag, arbeidsgiveroppdragdetaljer: String): String {
+            return """- ARBEIDSGIVEROPPDRAG:
+                Skal sende arbeidsgiveroppdrag til OS: $sendArbeidsgiveroppdrag
+                Differanse fra forrige sendte arbeidsgoiveroppdrag: ${forrigeSendteArbeidsgiverOppdrag?.totalbeløp?.minus(arbeidsgiveroppdrag.totalbeløp)}
+                Arbeidsgiveroppdrag: $arbeidsgiveroppdragdetaljer"""
+        }
+
+        private fun oppsummeringPersonoppdrag(sendPersonoppdrag: Boolean, forrigeSendtePersonOppdrag: Feriepengeoppdrag?, personoppdrag: Feriepengeoppdrag, personoppdragdetaljer: String): String {
+            return """- PERSONOPPDRAG:
+                Skal sende personoppdrag til OS: $sendPersonoppdrag
+                Differanse fra forrige sendte personoppdrag: ${forrigeSendtePersonOppdrag?.totalbeløp?.minus(personoppdrag.totalbeløp)}
+                Personoppdrag: $personoppdragdetaljer"""
+        }
+
+        private fun oppsummeringArbeidsgiver(infotrygdHarUtbetaltTilArbeidsgiver: List<Int>, hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver: Double, infotrygdFeriepengebeløpArbeidsgiver: Double, spleisFeriepengebeløpArbeidsgiver: Double, totaltFeriepengebeløpArbeidsgiver: Double, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd: Double): String {
+            return """- ARBEIDSGIVER:
+                Alle feriepengeutbetalinger fra Infotrygd (alle ytelser): $infotrygdHarUtbetaltTilArbeidsgiver (NB! Dette bruks ikke i beregning, bare til logging)
+                Vår beregning av hva Infotrygd ville utbetalt i en verden uten Spleis: $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver
+                Men siden Spleis finnes:
+                    Infotrygd skal betale:                      ${infotrygdFeriepengebeløpArbeidsgiver.finere}
+                    Spleis skal betale:                         ${spleisFeriepengebeløpArbeidsgiver.finere}
+                    Totalt feriepengebeløp:                     ${totaltFeriepengebeløpArbeidsgiver.finere}
+                    Infotrygd-utbetalingen må korrigeres med:   ${differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd.finere}"""
+        }
+
+        private fun oppsummeringPerson(hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver: Double, infotrygdHarUtbetaltTilPerson: List<Int>, infotrygdFeriepengebeløpPerson: Double, spleisFeriepengebeløpPerson: Double, totaltFeriepengebeløpPerson: Double, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson: Double): String {
+            return """- PERSON:
+                Alle feriepengeutbetalinger fra Infotrygd (alle ytelser): $infotrygdHarUtbetaltTilPerson (NB! Dette bruks ikke i beregning, bare til logging)
+                Vår beregning av hva Infotrygd ville utbetalt i en verden uten Spleis: $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver
+                Men siden Spleis finnes:
+                    Infotrygd skal betale:                      ${infotrygdFeriepengebeløpPerson.finere}
+                    Spleis skal betale:                         ${spleisFeriepengebeløpPerson.finere}
+                    Totalt feriepengebeløp:                     ${totaltFeriepengebeløpPerson.finere}
+                    Infotrygd-utbetalingen må korrigeres med:   ${differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson.finere}"""
+        }
+
     }
 
     internal fun dto() = FeriepengeUtDto(
