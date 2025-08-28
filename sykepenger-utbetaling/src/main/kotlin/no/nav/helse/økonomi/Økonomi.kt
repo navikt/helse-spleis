@@ -79,33 +79,42 @@ data class Økonomi(
             if (total == INGEN) return økonomiList
 
             val inntektstapSomSkalDekkesAvNAV = maxOf(INGEN, sykepengegrunnlagBegrenset6G * utbetalingsgrad)
-            val ratio = reduksjon(inntektstapSomSkalDekkesAvNAV, totalArbeidsgiverFør6GBegrensning)
-            val totalArbeidsgiverEtter6GBegrensning1 = totalArbeidsgiverFør6GBegrensning * ratio
 
-            val fordelingRefusjon = reduserBeløpTilTotal(
-                økonomiList = økonomiList,
+            return økonomiList
+                .fordelRefusjon(totalArbeidsgiverFør6GBegrensning, inntektstapSomSkalDekkesAvNAV)
+                .fordelBruker(totalArbeidsgiverFør6GBegrensning, total, inntektstapSomSkalDekkesAvNAV)
+                .sjekkRestbeløp(inntektstapSomSkalDekkesAvNAV)
+        }
+        
+        private fun List<Økonomi>.fordelRefusjon(totalArbeidsgiverFør6GBegrensning: Inntekt, inntektstapSomSkalDekkesAvNAV: Inntekt): List<Økonomi> {
+            return reduserBeløpTilTotal(
+                økonomiList = this,
                 total = totalArbeidsgiverFør6GBegrensning,
                 grense = inntektstapSomSkalDekkesAvNAV,
                 setter = { økonomi, inntekt -> økonomi.copy(reservertArbeidsgiverbeløp = inntekt) },
                 getter = { it.reservertArbeidsgiverbeløp!! }
             )
-            val totalArbeidsgiverEtter6GBegrensning = totalArbeidsgiver(fordelingRefusjon)
-            check(totalArbeidsgiverEtter6GBegrensning1.rundTilDaglig() == totalArbeidsgiverEtter6GBegrensning.rundTilDaglig()) {
-                "WHAAAAT! De skal jo være helt like"
-            }
-            val fordelingPersonOgRefusjon = reduserBeløpTilTotal(
-                økonomiList = fordelingRefusjon,
+        }
+        
+        private fun List<Økonomi>.fordelBruker(totalArbeidsgiverFør6GBegrensning: Inntekt, total: Inntekt, inntektstapSomSkalDekkesAvNAV: Inntekt): List<Økonomi> {
+            val ratio = reduksjon(inntektstapSomSkalDekkesAvNAV, totalArbeidsgiverFør6GBegrensning)
+            val totalArbeidsgiverEtter6GBegrensning = totalArbeidsgiverFør6GBegrensning * ratio
+
+            return reduserBeløpTilTotal(
+                økonomiList = this,
                 total = total - totalArbeidsgiverEtter6GBegrensning,
-                grense = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverEtter6GBegrensning1,
+                grense = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverEtter6GBegrensning,
                 setter = { økonomi, inntekt -> økonomi.copy(reservertPersonbeløp = inntekt) },
                 getter = { it.reservertPersonbeløp!! }
             )
-            val totalPersonbeløpEtter6GBegrensning = totalPerson(fordelingPersonOgRefusjon)
-            val restbeløp = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverEtter6GBegrensning - totalPersonbeløpEtter6GBegrensning
+        }
+
+        private fun List<Økonomi>.sjekkRestbeløp(inntektstapSomSkalDekkesAvNAV: Inntekt): List<Økonomi> {
+            val restbeløp = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiver(this) - totalPerson(this)
             check(restbeløp.rundTilDaglig() == INGEN) {
                 "Det er et restbeløp på kr $restbeløp etter all fordeling"
             }
-            return fordelingPersonOgRefusjon
+            return this
         }
 
         private fun reduserBeløpTilTotal(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt, setter: (Økonomi, Inntekt) -> Økonomi, getter: (Økonomi) -> Inntekt): List<Økonomi> {
