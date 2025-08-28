@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.math.roundToInt
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
@@ -345,20 +344,6 @@ class Person private constructor(
             grunnlagFraInfotrygd = utbetalingshistorikk.grunnlagForFeriepenger(utbetalingshistorikk.datoForSisteFeriepengekjøringIInfotrygd),
             grunnlagFraSpleis = grunnlagForFeriepenger()
         )
-
-        val feriepengepengebeløpPersonUtbetaltAvInfotrygd = utbetalingshistorikk.utbetalteFeriepengerTilPerson()
-        val beregnetFeriepengebeløpPersonInfotrygd =
-            feriepengeberegner.beregnFeriepengerForInfotrygdPerson().roundToInt()
-
-        if (beregnetFeriepengebeløpPersonInfotrygd != 0 && beregnetFeriepengebeløpPersonInfotrygd !in feriepengepengebeløpPersonUtbetaltAvInfotrygd) {
-            aktivitetsloggMedPersonkontekst.info(
-                """
-                Beregnet feriepengebeløp til person i IT samsvarer ikke med faktisk utbetalt beløp
-                Faktisk utbetalt beløp: $feriepengepengebeløpPersonUtbetaltAvInfotrygd
-                Beregnet beløp: $beregnetFeriepengebeløpPersonInfotrygd
-                """.trimIndent()
-            )
-        }
 
         utbetalingshistorikk.sikreAtArbeidsgivereEksisterer {
             _arbeidsgivere.finnEllerOpprett(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(it), aktivitetsloggMedPersonkontekst)

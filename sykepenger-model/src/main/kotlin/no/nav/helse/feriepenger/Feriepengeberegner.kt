@@ -102,7 +102,6 @@ internal class Feriepengeberegner(
     )
 
     internal fun feriepengedatoer() = feriepengedager.dager.tilDato()
-    internal fun beregnFeriepengerForInfotrygdPerson() = feriepengedagerInfotrygddel.persongrunnlag.personresultat.utbetalingsgrunnlag
 
     fun beregnFeriepenger(orgnummer: String): Feriepengeberegningsresultat {
         // de første 48 dagene, infotrygd + spleis samlet
