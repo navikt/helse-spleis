@@ -1,90 +1,62 @@
 package no.nav.helse.feriepenger
 
+import java.time.LocalDate
 import java.time.Month.DECEMBER
 import java.time.Year
 import kotlin.math.roundToInt
 import no.nav.helse.Alder
 import no.nav.helse.feriepenger.Feriepengeberegner.Companion.ARBEIDSGIVER
 import no.nav.helse.feriepenger.Feriepengeberegner.Companion.PERSON
-import no.nav.helse.feriepenger.Feriepengeberegner.Companion.summer
 import no.nav.helse.feriepenger.Feriepengeberegningsresultat.Beregningsverdier
-import no.nav.helse.feriepenger.Feriepengedager.DagerForArbeidsgiver.BeregnetResultat.Companion.grunnlag
-import no.nav.helse.feriepenger.Feriepengeutbetalinggrunnlag.UtbetaltDag
-import no.nav.helse.feriepenger.Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdArbeidsgiver
-import no.nav.helse.feriepenger.Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdPerson
-import no.nav.helse.feriepenger.Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisArbeidsgiver
-import no.nav.helse.feriepenger.Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisPerson
+import no.nav.helse.feriepenger.Feriepengegrunnlagsdag.Kilde
+import no.nav.helse.feriepenger.Feriepengegrunnlagstidslinje.DagerForArbeidsgiver.BeregnetResultat.Companion.grunnlag
 
-private typealias UtbetaltDagSelector = (UtbetaltDag) -> Boolean
+private typealias UtbetaltDagSelector = (Feriepengegrunnlagsdag.UtbetaltDag) -> Boolean
 
 internal class Feriepengeberegner(
     alder: Alder,
     val opptjeningsår: Year,
-    val utbetalteDager: List<UtbetaltDag>
+    utbetalteDager: Feriepengegrunnlagstidslinje
 ) {
+    val utbetalteDager = utbetalteDager.fra(opptjeningsår)
+
     val alderVedSluttenAvÅret = alder.alderPåDato(opptjeningsår.atMonth(DECEMBER).atEndOfMonth())
     val prosentsats = if (alderVedSluttenAvÅret < ALDER_FOR_FORHØYET_FERIEPENGESATS) 0.102 else 0.125
 
-    val feriepengedager = utbetalteDager.feriepengedager(prosentsats)
-    val feriepengedagerInfotrygddel = feriepengedager.dager.filter(INFOTRYGD).feriepengedager(prosentsats)
-    val feriepengedagerSpleisdel = feriepengedager.dager.filter(SPLEIS).feriepengedager(prosentsats)
+    // de første 48 dagene, infotrygd + spleis samlet
+    val feriepengedager = this.utbetalteDager.feriepengegrunnlag()
+    // av de første 48 dagene (samlet sett), infotrygd sin del
+    val feriepengedagerInfotrygddel = feriepengedager.kun(Kilde.INFOTRYGD)
+    // av de første 48 dagene (samlet sett), spleis sin del
+    val feriepengedagerSpleisdel = feriepengedager.kun(Kilde.SPLEIS)
 
-    val feriepengedagerInfotrygd = utbetalteDager.filter(INFOTRYGD).feriepengedager(prosentsats)
+    // de første 48 dagene i infotrygd
+    val feriepengedagerInfotrygd = this.utbetalteDager.kun(Kilde.INFOTRYGD).feriepengegrunnlag()
 
     internal companion object {
         private const val ALDER_FOR_FORHØYET_FERIEPENGESATS = 59
-        private const val ANTALL_FERIEPENGEDAGER_I_OPPTJENINGSÅRET = 48
 
-        internal fun List<UtbetaltDag>.tilDato() = map { it.dato }.distinct()
-        internal fun List<UtbetaltDag>.feriepengedager(prosentsats: Double): Feriepengedager {
-            //TODO: subsumsjonObserver.`§8-33 ledd 1`() //TODO: Finne ut hvordan vi løser denne mtp. input Infotrygd/Spleis og pr. arbeidsgiver
-            return Feriepengedager(
-                prosentsats = prosentsats,
-                dager = this
-                    .sortedBy { it.dato }
-                    .groupBy { it.dato }
-                    .entries
-                    .take(ANTALL_FERIEPENGEDAGER_I_OPPTJENINGSÅRET)
-                    .flatMap { (_, v) -> v }
-            )
+        internal val ARBEIDSGIVER: UtbetaltDagSelector = { it.mottaker == Feriepengegrunnlagsdag.Mottaker.ARBEIDSGIVER }
+        internal val PERSON: UtbetaltDagSelector = { it.mottaker == Feriepengegrunnlagsdag.Mottaker.PERSON }
+
+        private fun leggTilGrunnlag(builder: Feriepengegrunnlagstidslinje.Builder, liste: List<Arbeidsgiverferiepengegrunnlag>, kilde: Kilde) {
+            liste.forEach { grunnlag ->
+                grunnlag.utbetalinger.forEach { utbetaling ->
+                    utbetaling.arbeidsgiverUtbetalteDager.forEach {
+                        builder.leggTilUtbetaling(it.dato, grunnlag.orgnummer, Feriepengegrunnlagsdag.Mottaker.ARBEIDSGIVER, kilde, it.beløp)
+                    }
+                    utbetaling.personUtbetalteDager.forEach {
+                        builder.leggTilUtbetaling(it.dato, grunnlag.orgnummer, Feriepengegrunnlagsdag.Mottaker.PERSON, kilde, it.beløp)
+                    }
+                }
+            }
         }
 
-        internal fun List<UtbetaltDag>.summer() = sumOf { it.beløp }
-
-        internal val INFOTRYGD_PERSON: UtbetaltDagSelector = { it is InfotrygdPerson }
-        internal val INFOTRYGD_ARBEIDSGIVER: UtbetaltDagSelector = { it is InfotrygdArbeidsgiver }
-        internal val INFOTRYGD: UtbetaltDagSelector = INFOTRYGD_PERSON or INFOTRYGD_ARBEIDSGIVER
-        internal val SPLEIS_ARBEIDSGIVER: UtbetaltDagSelector = { it is SpleisArbeidsgiver }
-        internal val SPLEIS_PERSON: UtbetaltDagSelector = { it is SpleisPerson }
-        internal val SPLEIS: UtbetaltDagSelector = SPLEIS_PERSON or SPLEIS_ARBEIDSGIVER
-        internal val ARBEIDSGIVER: UtbetaltDagSelector = INFOTRYGD_ARBEIDSGIVER or SPLEIS_ARBEIDSGIVER
-        internal val PERSON: UtbetaltDagSelector = INFOTRYGD_PERSON or SPLEIS_PERSON
-        internal fun opptjeningsårFilter(opptjeningsår: Year): UtbetaltDagSelector = { Year.from(it.dato) == opptjeningsår }
-        private infix fun (UtbetaltDagSelector).or(other: UtbetaltDagSelector): UtbetaltDagSelector = { this(it) || other(it) }
-        internal infix fun (UtbetaltDagSelector).and(other: UtbetaltDagSelector): UtbetaltDagSelector = { this(it) && other(it) }
-
-        private fun utbetalteDager(grunnlagFraInfotrygd: List<Arbeidsgiverferiepengegrunnlag>, grunnlagFraSpleisPerson: List<Arbeidsgiverferiepengegrunnlag>, opptjeningsår: Year): List<UtbetaltDag> {
-            val infotrygd = grunnlagFraInfotrygd.flatMap { arbeidsgiver ->
-                arbeidsgiver.utbetalinger.flatMap { utbetaling ->
-                    utbetaling.arbeidsgiverUtbetalteDager.map { dag ->
-                        InfotrygdArbeidsgiver(orgnummer = arbeidsgiver.orgnummer, dato = dag.dato, beløp = dag.beløp)
-                    } + utbetaling.personUtbetalteDager.map { dag ->
-                        InfotrygdPerson(orgnummer = arbeidsgiver.orgnummer, dato = dag.dato, beløp = dag.beløp)
-                    }
-                }
-            }
-
-            val spleis = grunnlagFraSpleisPerson.flatMap { arbeidsgiver ->
-                arbeidsgiver.utbetalinger.flatMap { utbetaling ->
-                    utbetaling.arbeidsgiverUtbetalteDager.map { dag ->
-                        SpleisArbeidsgiver(orgnummer = arbeidsgiver.orgnummer, dato = dag.dato, beløp = dag.beløp)
-                    } + utbetaling.personUtbetalteDager.map { dag ->
-                        SpleisPerson(orgnummer = arbeidsgiver.orgnummer, dato = dag.dato, beløp = dag.beløp)
-                    }
-                }
-            }
-
-            return (infotrygd + spleis).filter(opptjeningsårFilter(opptjeningsår))
+        private fun utbetalteDager(grunnlagFraInfotrygd: List<Arbeidsgiverferiepengegrunnlag>, grunnlagFraSpleisPerson: List<Arbeidsgiverferiepengegrunnlag>): Feriepengegrunnlagstidslinje {
+            val builder = Feriepengegrunnlagstidslinje.Builder()
+            leggTilGrunnlag(builder, grunnlagFraInfotrygd, Kilde.INFOTRYGD)
+            leggTilGrunnlag(builder, grunnlagFraSpleisPerson, Kilde.SPLEIS)
+            return builder.build()
         }
     }
 
@@ -93,29 +65,25 @@ internal class Feriepengeberegner(
         opptjeningsår: Year,
         grunnlagFraInfotrygd: List<Arbeidsgiverferiepengegrunnlag>,
         grunnlagFraSpleis: List<Arbeidsgiverferiepengegrunnlag>
-    ) : this(alder, opptjeningsår, utbetalteDager(grunnlagFraInfotrygd, grunnlagFraSpleis, opptjeningsår))
+    ) : this(alder, opptjeningsår, utbetalteDager(grunnlagFraInfotrygd, grunnlagFraSpleis))
 
     fun grunnlag() = Feriepengeutbetalinggrunnlag(
         opptjeningsår = opptjeningsår,
-        utbetalteDager = utbetalteDager,
-        feriepengedager = feriepengedager.dager
+        utbetalteDager = utbetalteDager.utbetalteDager(),
+        feriepengedager = feriepengedager.utbetalteDager()
     )
 
-    internal fun feriepengedatoer() = feriepengedager.dager.tilDato()
+    internal fun feriepengedatoer() = feriepengedager.datoer
 
     fun beregnFeriepenger(orgnummer: String): Feriepengeberegningsresultat {
-        // de første 48 dagene, infotrygd + spleis samlet
-        val faktiskFeriepengegrunnlag = feriepengedager.grunnlagFor(orgnummer)
-        // de første 48 dagene i infotrygd
-        val infotrygdFeriepengegrunnlag = feriepengedagerInfotrygd.grunnlagFor(orgnummer)
+        val faktiskFeriepengegrunnlag = feriepengedager.grunnlagFor(orgnummer, prosentsats)
+        val infotrygdFeriepengegrunnlag = feriepengedagerInfotrygd.grunnlagFor(orgnummer, prosentsats)
 
         val arbeidsgiverrefusjon = faktiskFeriepengegrunnlag.refusjonsresultat - infotrygdFeriepengegrunnlag.refusjonsresultat
         val brukerutbetaling = faktiskFeriepengegrunnlag.personresultat - infotrygdFeriepengegrunnlag.personresultat
 
-        // av de første 48 dagene (samlet sett), spleis sin del
-        val spleisdel = feriepengedagerSpleisdel.grunnlagFor(orgnummer)
-        // av de første 48 dagene (samlet sett), infotrygd sin del
-        val infotrygddel = feriepengedagerInfotrygddel.grunnlagFor(orgnummer)
+        val spleisdel = feriepengedagerSpleisdel.grunnlagFor(orgnummer, prosentsats)
+        val infotrygddel = feriepengedagerInfotrygddel.grunnlagFor(orgnummer, prosentsats)
 
         val refusjon = Beregningsverdier(
             infotrygdFeriepengebeløp = infotrygddel.refusjonsresultat.utbetalingsgrunnlag,
@@ -159,23 +127,85 @@ internal data class Feriepengeberegningsresultat(
     }
 }
 
-internal data class Feriepengedager(
-    val prosentsats: Double,
-    val dager: List<UtbetaltDag>
+internal data class Feriepengegrunnlagsdag(
+    val dato: LocalDate,
+    val utbetalinger: List<UtbetaltDag>
 ) {
-    val dagerForArbeidsgivere = dager
-        .groupBy { it.orgnummer }
-        .mapValues { DagerForArbeidsgiver(prosentsats, it.value) }
+    fun fra(opptjeningsår: Year) = takeIf { it.dato.year == opptjeningsår.value }
 
-    val persongrunnlag = DagerForArbeidsgiver(prosentsats, dager)
+    fun kun(kilde: Kilde) = this
+        .copy(utbetalinger = utbetalinger.filter { it.kilde == kilde })
+        .takeIf { it.utbetalinger.isNotEmpty() }
 
-    internal fun grunnlagFor(orgnummer: String) = dagerForArbeidsgivere[orgnummer] ?: DagerForArbeidsgiver(0.0, emptyList())
+    fun grunnlagFor(orgnummer: String) = this
+        .copy(utbetalinger = utbetalinger.filter { it.orgnummer == orgnummer })
+        .takeIf { it.utbetalinger.isNotEmpty() }
+
+    data class UtbetaltDag(
+        val orgnummer: String,
+        val mottaker: Mottaker,
+        val kilde: Kilde,
+        val beløp: Int
+    )
+    enum class Mottaker {
+        ARBEIDSGIVER, PERSON
+    }
+    enum class Kilde {
+        INFOTRYGD, SPLEIS
+    }
+}
+
+internal class Feriepengegrunnlagstidslinje(dager: Collection<Feriepengegrunnlagsdag>) {
+    private val dager = dager.sortedBy { it.dato }
+    val datoer = dager.map { it.dato }
+
+    fun fra(opptjeningsår: Year): Feriepengegrunnlagstidslinje {
+        return Feriepengegrunnlagstidslinje(
+            dager = dager.mapNotNull { it.fra(opptjeningsår) }
+        )
+    }
+
+    fun kun(kilde: Kilde): Feriepengegrunnlagstidslinje {
+        return Feriepengegrunnlagstidslinje(
+            dager = dager.mapNotNull { it.kun(kilde) }
+        )
+    }
+
+    fun grunnlagFor(orgnummer: String, prosentsats: Double): DagerForArbeidsgiver {
+        return DagerForArbeidsgiver(
+            prosentsats = prosentsats,
+            dager = this
+                .dager
+                .mapNotNull { it.grunnlagFor(orgnummer) }
+        )
+    }
+
+    fun feriepengegrunnlag() = Feriepengegrunnlagstidslinje(
+        dager = dager.take(ANTALL_FERIEPENGEDAGER_I_OPPTJENINGSÅRET)
+    )
+
+    fun utbetalteDager(): List<Feriepengeutbetalinggrunnlag.UtbetaltDag> {
+        return dager.flatMap {
+            it.utbetalinger.map { utbetaltDag ->
+                when (utbetaltDag.mottaker) {
+                    Feriepengegrunnlagsdag.Mottaker.ARBEIDSGIVER -> when (utbetaltDag.kilde) {
+                        Kilde.INFOTRYGD -> Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdArbeidsgiver(utbetaltDag.orgnummer, it.dato, utbetaltDag.beløp)
+                        Kilde.SPLEIS -> Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisArbeidsgiver(utbetaltDag.orgnummer, it.dato, utbetaltDag.beløp)
+                    }
+                    Feriepengegrunnlagsdag.Mottaker.PERSON -> when (utbetaltDag.kilde) {
+                        Kilde.INFOTRYGD -> Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdPerson(utbetaltDag.orgnummer, it.dato, utbetaltDag.beløp)
+                        Kilde.SPLEIS -> Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisPerson(utbetaltDag.orgnummer, it.dato, utbetaltDag.beløp)
+                    }
+                }
+            }
+        }
+    }
 
     data class DagerForArbeidsgiver(
-        val prosentsats: Double, val dager: List<UtbetaltDag>
+        val prosentsats: Double, val dager: List<Feriepengegrunnlagsdag>
     ) {
-        val refusjonsresultat = dager.filter(ARBEIDSGIVER).grunnlag(prosentsats)
-        val personresultat = dager.filter(PERSON).grunnlag(prosentsats)
+        val refusjonsresultat = dager.flatMap { it.utbetalinger }.filter(ARBEIDSGIVER).grunnlag(prosentsats)
+        val personresultat = dager.flatMap { it.utbetalinger }.filter(PERSON).grunnlag(prosentsats)
 
         data class BeregnetResultat(
             val feriepengegrunnlag: Int,
@@ -188,8 +218,8 @@ internal data class Feriepengedager(
             }
 
             companion object {
-                fun List<UtbetaltDag>.grunnlag(prosentsats: Double): BeregnetResultat {
-                    val grunnlag = this.summer()
+                fun List<Feriepengegrunnlagsdag.UtbetaltDag>.grunnlag(prosentsats: Double): BeregnetResultat {
+                    val grunnlag = this.sumOf { it.beløp }
                     return BeregnetResultat(
                         feriepengegrunnlag = grunnlag,
                         utbetalingsgrunnlag = grunnlag * prosentsats
@@ -197,5 +227,21 @@ internal data class Feriepengedager(
                 }
             }
         }
+    }
+
+    class Builder {
+        private val dager = mutableMapOf<LocalDate, Feriepengegrunnlagsdag>()
+
+        fun leggTilUtbetaling(dag: LocalDate, orgnummer: String, mottaker: Feriepengegrunnlagsdag.Mottaker, kilde: Kilde, beløp: Int) {
+            val nyDag = Feriepengegrunnlagsdag.UtbetaltDag(orgnummer = orgnummer, mottaker = mottaker, kilde = kilde, beløp = beløp)
+            dager.compute(dag) { _, eksisterende ->
+                eksisterende?.copy(utbetalinger = eksisterende.utbetalinger + nyDag) ?: Feriepengegrunnlagsdag(dato = dag, utbetalinger = listOf(nyDag))
+            }
+        }
+        fun build() = Feriepengegrunnlagstidslinje(dager.values)
+    }
+
+    private companion object {
+        private const val ANTALL_FERIEPENGEDAGER_I_OPPTJENINGSÅRET = 48
     }
 }

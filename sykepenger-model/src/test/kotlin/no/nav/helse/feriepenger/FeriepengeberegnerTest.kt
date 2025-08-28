@@ -1,5 +1,6 @@
 package no.nav.helse.feriepenger
 
+import java.time.LocalDate
 import java.time.Year
 import no.nav.helse.Alder
 import no.nav.helse.Alder.Companion.alder
@@ -586,13 +587,13 @@ internal class FeriepengeberegnerTest {
         a1.itPerson(periode)
 
     private fun String.itPerson(periode: Periode) =
-        periode.map { Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdPerson(this, it, InfotrygdPersonbeløp) }
+        periode.map { Triple(it, this, InfotrygdPersonbeløp) }
 
     private fun itArbeidsgiver(periode: Periode) =
         a1.itArbeidsgiver(periode)
 
     private fun String.itArbeidsgiver(periode: Periode) =
-        periode.map { Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdArbeidsgiver(this, it, InfotrygdArbeidsgiverbeløp) }
+        periode.map { Triple(it, this, InfotrygdArbeidsgiverbeløp) }
 
     private fun spleisArbeidsgiver(periode: Periode) =
         a1.spleisArbeidsgiver(periode)
@@ -601,21 +602,36 @@ internal class FeriepengeberegnerTest {
         a1.spleisPerson(periode)
 
     private fun String.spleisArbeidsgiver(periode: Periode) =
-        periode.map { Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisArbeidsgiver(this, it, SpleisArbeidsgiverbeløp) }
+        periode.map { Triple(it, this, SpleisArbeidsgiverbeløp) }
 
     private fun String.spleisPerson(periode: Periode) =
-        periode.map { Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisPerson(this, it, SpleisPersonbeløp) }
+        periode.map { Triple(it, this, SpleisPersonbeløp) }
 
     private fun feriepengeberegner(
         alder: Alder = UNG,
         opptjeningsår: Year = Year.of(2018),
-        infotrygdPerson: List<Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdPerson> = emptyList(),
-        infotrygdArbeidsgiver: List<Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdArbeidsgiver> = emptyList(),
-        spleisArbeidsgiver: List<Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisArbeidsgiver> = emptyList(),
-        spleisPerson: List<Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisPerson> = emptyList()
-    ) = Feriepengeberegner(
-        alder,
-        opptjeningsår,
-        infotrygdPerson + infotrygdArbeidsgiver + spleisArbeidsgiver + spleisPerson
-    )
+        infotrygdPerson: List<Triple<LocalDate, String, Int>> = emptyList(),
+        infotrygdArbeidsgiver: List<Triple<LocalDate, String, Int>> = emptyList(),
+        spleisArbeidsgiver: List<Triple<LocalDate, String, Int>> = emptyList(),
+        spleisPerson: List<Triple<LocalDate, String, Int>> = emptyList()
+    ): Feriepengeberegner {
+        val builder = Feriepengegrunnlagstidslinje.Builder()
+        leggTilGrunnlag(builder, infotrygdPerson, Feriepengegrunnlagsdag.Mottaker.PERSON, Feriepengegrunnlagsdag.Kilde.INFOTRYGD)
+        leggTilGrunnlag(builder, infotrygdArbeidsgiver, Feriepengegrunnlagsdag.Mottaker.ARBEIDSGIVER, Feriepengegrunnlagsdag.Kilde.INFOTRYGD)
+        leggTilGrunnlag(builder, spleisArbeidsgiver, Feriepengegrunnlagsdag.Mottaker.ARBEIDSGIVER, Feriepengegrunnlagsdag.Kilde.SPLEIS)
+        leggTilGrunnlag(builder, spleisPerson, Feriepengegrunnlagsdag.Mottaker.PERSON, Feriepengegrunnlagsdag.Kilde.SPLEIS)
+        val tidslinje = builder.build()
+
+        return Feriepengeberegner(
+            alder = alder,
+            opptjeningsår = opptjeningsår,
+            utbetalteDager = tidslinje
+        )
+    }
+
+    private fun leggTilGrunnlag(builder: Feriepengegrunnlagstidslinje.Builder, liste: List<Triple<LocalDate, String, Int>>, mottaker: Feriepengegrunnlagsdag.Mottaker, kilde: Feriepengegrunnlagsdag.Kilde) {
+        liste.forEach { (dato, orgnummer, beløp) ->
+            builder.leggTilUtbetaling(dato, orgnummer, mottaker, kilde, beløp)
+        }
+    }
 }
