@@ -151,6 +151,12 @@ internal data class Feriepengegrunnlagsdag(
 internal class Feriepengegrunnlagstidslinje(dager: Collection<Feriepengegrunnlagsdag>) {
     private val dager = dager.sortedBy { it.dato }
 
+    init {
+        require(dager.distinctBy { it.dato }.size == dager.size) {
+            "Dager i en Feriepengegrunnlagstidslinje må være unike på dato"
+        }
+    }
+
     fun fra(opptjeningsår: Year): Feriepengegrunnlagstidslinje {
         return Feriepengegrunnlagstidslinje(
             dager = dager.mapNotNull { it.fra(opptjeningsår) }

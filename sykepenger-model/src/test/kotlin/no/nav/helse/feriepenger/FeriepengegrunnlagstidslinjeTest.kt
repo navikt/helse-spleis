@@ -7,6 +7,7 @@ import no.nav.helse.feriepenger.Feriepengegrunnlagsdag.Mottaker
 import no.nav.helse.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class FeriepengegrunnlagstidslinjeTest {
 
@@ -59,6 +60,18 @@ class FeriepengegrunnlagstidslinjeTest {
             assertEquals(2, grunnlag.dager.size)
             assertEquals(1234, grunnlag.refusjonsresultat.feriepengegrunnlag)
             assertEquals(766, grunnlag.personresultat.feriepengegrunnlag)
+        }
+    }
+
+    @Test
+    fun `tidslinjen kan kun bestå av en unik dato`() {
+        assertThrows<IllegalArgumentException> {
+            Feriepengegrunnlagstidslinje(
+                dager = listOf(
+                    Feriepengegrunnlagsdag(1.januar, emptyList()),
+                    Feriepengegrunnlagsdag(1.januar, emptyList())
+                )
+            )
         }
     }
 }
