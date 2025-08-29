@@ -33,7 +33,7 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 17.januar)
         )
 
-        assertEquals((1.januar til 17.januar).toList(), feriepengeberegner.feriepengedatoer())
+        assertEquals((1.januar til 17.januar).toList(), feriepengeberegner.beregnFeriepenger(a1).second.datoer)
     }
 
     @Test
@@ -42,7 +42,7 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 18.februar)
         )
 
-        assertEquals((1.januar til 17.februar).toList(), feriepengeberegner.feriepengedatoer())
+        assertEquals((1.januar til 17.februar).toList(), feriepengeberegner.beregnFeriepenger(a1).second.datoer)
     }
 
     @Test
@@ -52,7 +52,7 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 17.februar)
         )
 
-        assertEquals((1.januar til 17.februar).toList(), feriepengeberegner.feriepengedatoer())
+        assertEquals((1.januar til 17.februar).toList(), feriepengeberegner.beregnFeriepenger(a1).second.datoer)
     }
 
     @Test
@@ -62,7 +62,7 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.februar)
         )
 
-        assertEquals((1.januar til 10.februar).toList() + (1.mars til 7.mars).toList(), feriepengeberegner.feriepengedatoer())
+        assertEquals((1.januar til 10.februar).toList() + (1.mars til 7.mars).toList(), feriepengeberegner.beregnFeriepenger(a1).second.datoer)
     }
 
     @Test
@@ -88,7 +88,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 0.0
             )
-        ), feriepengeberegner.beregnFeriepenger(a1))
+        ), feriepengeberegner.beregnFeriepenger(a1).first)
     }
 
     @Test
@@ -115,7 +115,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = -1224,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 1224.0
             )
-        ), feriepengeberegner.beregnFeriepenger(a1))
+        ), feriepengeberegner.beregnFeriepenger(a1).first)
     }
 
     @Test
@@ -142,7 +142,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 1224.0
             )
-        ), feriepengeberegner.beregnFeriepenger(a1))
+        ), feriepengeberegner.beregnFeriepenger(a1).first)
     }
 
     @Test
@@ -167,7 +167,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 0.0
             )
-        ), feriepengeberegner.beregnFeriepenger(a1))
+        ), feriepengeberegner.beregnFeriepenger(a1).first)
     }
 
     @Test
@@ -192,7 +192,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 0.0
             )
-        ), feriepengeberegner.beregnFeriepenger(a2))
+        ), feriepengeberegner.beregnFeriepenger(a2).first)
 
         assertEquals(Feriepengeberegningsresultat(
             orgnummer = a3,
@@ -210,7 +210,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 0.0
             )
-        ), feriepengeberegner.beregnFeriepenger(a3))
+        ), feriepengeberegner.beregnFeriepenger(a3).first)
     }
 
     @Test
@@ -235,7 +235,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 1019.9999999999999
             )
-        ), feriepengeberegner.beregnFeriepenger(a1))
+        ), feriepengeberegner.beregnFeriepenger(a1).first)
     }
 
     @Test
@@ -260,7 +260,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 1019.9999999999999
             )
-        ), feriepengeberegner.beregnFeriepenger(a2))
+        ), feriepengeberegner.beregnFeriepenger(a2).first)
 
         assertEquals(Feriepengeberegningsresultat(
             orgnummer = a3,
@@ -278,7 +278,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 1224.0
             )
-        ), feriepengeberegner.beregnFeriepenger(a3))
+        ), feriepengeberegner.beregnFeriepenger(a3).first)
     }
 
     @Test
@@ -303,7 +303,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 0.0
             )
-        ), feriepengeberegner.beregnFeriepenger(a1))
+        ), feriepengeberegner.beregnFeriepenger(a1).first)
     }
 
     @Test
@@ -328,7 +328,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 0.0
             )
-        ), feriepengeberegner.beregnFeriepenger(a2))
+        ), feriepengeberegner.beregnFeriepenger(a2).first)
 
         assertEquals(Feriepengeberegningsresultat(
             orgnummer = a3,
@@ -346,7 +346,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 0.0
             )
-        ), feriepengeberegner.beregnFeriepenger(a3))
+        ), feriepengeberegner.beregnFeriepenger(a3).first)
     }
 
     @Test
@@ -372,7 +372,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 1019.9999999999999
             )
-        ), feriepengeberegner.beregnFeriepenger(a1))
+        ), feriepengeberegner.beregnFeriepenger(a1).first)
     }
 
     @Test
@@ -398,7 +398,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 0.0
             )
-        ), feriepengeberegner.beregnFeriepenger(a1))
+        ), feriepengeberegner.beregnFeriepenger(a1).first)
 
         assertEquals(Feriepengeberegningsresultat(
             orgnummer = a2,
@@ -416,7 +416,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 1019.9999999999999
             )
-        ), feriepengeberegner.beregnFeriepenger(a2))
+        ), feriepengeberegner.beregnFeriepenger(a2).first)
 
         assertEquals(Feriepengeberegningsresultat(
             orgnummer = a3,
@@ -434,7 +434,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 1224.0
             )
-        ), feriepengeberegner.beregnFeriepenger(a3))
+        ), feriepengeberegner.beregnFeriepenger(a3).first)
     }
 
     @Test
@@ -462,7 +462,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 1250.0
             )
-        ), feriepengeberegner.beregnFeriepenger(a1))
+        ), feriepengeberegner.beregnFeriepenger(a1).first)
     }
 
     @Test
@@ -489,7 +489,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 1224.0
             )
-        ), feriepengeberegner.beregnFeriepenger(a1))
+        ), feriepengeberegner.beregnFeriepenger(a1).first)
     }
 
     @Test
@@ -515,7 +515,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 4080,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 2039.9999999999998
             )
-        ), feriepengeberegner.beregnFeriepenger(a1))
+        ), feriepengeberegner.beregnFeriepenger(a1).first)
     }
 
     @Test
@@ -542,7 +542,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 1224.0
             )
-        ), feriepengeberegner.beregnFeriepenger(a1))
+        ), feriepengeberegner.beregnFeriepenger(a1).first)
     }
 
     @Test
@@ -569,18 +569,7 @@ internal class FeriepengeberegnerTest {
                 differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = 0,
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = 1019.9999999999999
             )
-        ), feriepengeberegner.beregnFeriepenger(a1))
-    }
-
-    @Test
-    fun `beregner utbetalte feriepenger i infotrygd for en arbeidsgiver`() {
-        val feriepengeberegner = feriepengeberegner(
-            infotrygdPerson = itPerson(1.februar til 10.februar),
-            infotrygdArbeidsgiver = itArbeidsgiver(1.mars til 17.april),
-            spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
-        )
-
-        assertEquals(7751.999999999999, feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(a1))
+        ), feriepengeberegner.beregnFeriepenger(a1).first)
     }
 
     private fun itPerson(periode: Periode) =

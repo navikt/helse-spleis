@@ -11,6 +11,8 @@ internal data class Feriepengeutbetalinggrunnlag(
     val utbetalteDager: List<UtbetaltDag>,
     val feriepengedager: List<UtbetaltDag>
 ) {
+    val datoer = feriepengedager.map { it.dato }.distinct()
+
     internal fun dto() = FeriepengeutbetalinggrunnlagUtDto(
         opptjeningsår = this.opptjeningsår,
         utbetalteDager = this.utbetalteDager.map { it.dto() },

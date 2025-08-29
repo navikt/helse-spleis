@@ -67,15 +67,7 @@ internal class Feriepengeberegner(
         grunnlagFraSpleis: List<Arbeidsgiverferiepengegrunnlag>
     ) : this(alder, opptjeningsår, utbetalteDager(grunnlagFraInfotrygd, grunnlagFraSpleis))
 
-    fun grunnlag() = Feriepengeutbetalinggrunnlag(
-        opptjeningsår = opptjeningsår,
-        utbetalteDager = utbetalteDager.utbetalteDager(),
-        feriepengedager = feriepengedager.utbetalteDager()
-    )
-
-    internal fun feriepengedatoer() = feriepengedager.datoer
-
-    fun beregnFeriepenger(orgnummer: String): Feriepengeberegningsresultat {
+    fun beregnFeriepenger(orgnummer: String): Pair<Feriepengeberegningsresultat, Feriepengeutbetalinggrunnlag> {
         val faktiskFeriepengegrunnlag = feriepengedager.grunnlagFor(orgnummer, prosentsats)
         val infotrygdFeriepengegrunnlag = feriepengedagerInfotrygd.grunnlagFor(orgnummer, prosentsats)
 
@@ -99,15 +91,16 @@ internal class Feriepengeberegner(
             differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd = brukerutbetaling,
             hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble = infotrygdFeriepengegrunnlag.personresultat.utbetalingsgrunnlag
         )
+        val grunnlag = Feriepengeutbetalinggrunnlag(
+            opptjeningsår = opptjeningsår,
+            utbetalteDager = utbetalteDager.utbetalteDager(),
+            feriepengedager = feriepengedager.utbetalteDager()
+        )
         return Feriepengeberegningsresultat(
             orgnummer = orgnummer,
             arbeidsgiver = refusjon,
             person = person
-        )
-    }
-
-    internal fun beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(orgnummer: String): Double {
-        return beregnFeriepenger(orgnummer).arbeidsgiver.hvaViHarBeregnetAtInfotrygdHarUtbetaltDouble
+        )  to grunnlag
     }
 }
 
@@ -157,7 +150,6 @@ internal data class Feriepengegrunnlagsdag(
 
 internal class Feriepengegrunnlagstidslinje(dager: Collection<Feriepengegrunnlagsdag>) {
     private val dager = dager.sortedBy { it.dato }
-    val datoer = dager.map { it.dato }
 
     fun fra(opptjeningsår: Year): Feriepengegrunnlagstidslinje {
         return Feriepengegrunnlagstidslinje(

@@ -159,7 +159,7 @@ internal class Feriepengeutbetaling private constructor(
             // Arbeidsgiver
             val infotrygdHarUtbetaltTilArbeidsgiver = utbetalingshistorikkForFeriepenger.utbetalteFeriepengerTilArbeidsgiver(orgnummer)
 
-            val feriepengeberegningsresultat = feriepengeberegner.beregnFeriepenger(orgnummer)
+            val (feriepengeberegningsresultat, grunnlag) = feriepengeberegner.beregnFeriepenger(orgnummer)
 
             if (feriepengeberegningsresultat.arbeidsgiver.hvaViHarBeregnetAtInfotrygdHarUtbetalt != 0 && feriepengeberegningsresultat.arbeidsgiver.hvaViHarBeregnetAtInfotrygdHarUtbetalt !in infotrygdHarUtbetaltTilArbeidsgiver) {
                 aktivitetslogg.info(
@@ -242,7 +242,7 @@ internal class Feriepengeutbetaling private constructor(
                 ${oppsummering(infotrygdHarUtbetaltTilPerson, feriepengeberegningsresultat.person.hvaViHarBeregnetAtInfotrygdHarUtbetalt, feriepengeberegningsresultat.person.infotrygdFeriepengebeløp, feriepengeberegningsresultat.person.spleisFeriepengebeløp, feriepengeberegningsresultat.person.totaltFeriepengebeløp, feriepengeberegningsresultat.person.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd)}
 
                 - GENERELT:         
-                ${feriepengeberegner.feriepengedatoer().let { datoer -> "Datoer vi skal utbetale feriepenger for (${datoer.size}): ${datoer.grupperSammenhengendePerioder().finere}" }}
+                ${grunnlag.datoer.let { datoer -> "Datoer vi skal utbetale feriepenger for (${datoer.size}): ${datoer.grupperSammenhengendePerioder().finere}" }}
                 
                 - ARBEIDSGIVEROPPDRAG:
                 ${oppdragoppsummering(true, sendArbeidsgiveroppdrag, forrigeSendteArbeidsgiverOppdrag, arbeidsgiveroppdrag, arbeidsgiveroppdragdetaljer)}
@@ -253,7 +253,7 @@ internal class Feriepengeutbetaling private constructor(
             )
 
             return Feriepengeutbetaling(
-                feriepengegrunnlag = feriepengeberegner.grunnlag(),
+                feriepengegrunnlag = grunnlag,
                 infotrygdFeriepengebeløpPerson = feriepengeberegningsresultat.person.infotrygdFeriepengebeløp,
                 infotrygdFeriepengebeløpArbeidsgiver = feriepengeberegningsresultat.arbeidsgiver.infotrygdFeriepengebeløp,
                 spleisFeriepengebeløpArbeidsgiver = feriepengeberegningsresultat.arbeidsgiver.spleisFeriepengebeløp,
