@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
@@ -10,10 +10,10 @@ import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.UbrukteRefusjonsopplysningerUtDto
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.Regelverkslogg
-import no.nav.helse.feriepenger.Arbeidsgiverferiepengegrunnlag
-import no.nav.helse.feriepenger.Arbeidsgiverferiepengegrunnlag.Feriepengegrunnlag
-import no.nav.helse.feriepenger.Arbeidsgiverferiepengegrunnlag.Feriepengegrunnlag.UtbetaltDag
 import no.nav.helse.feriepenger.Feriepengeberegner
+import no.nav.helse.feriepenger.Feriepengegrunnlagsdag
+import no.nav.helse.feriepenger.Feriepengegrunnlagsdag.Mottaker
+import no.nav.helse.feriepenger.Feriepengegrunnlagstidslinje
 import no.nav.helse.feriepenger.Feriepengeutbetaling
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerTomUtbetaling
@@ -413,27 +413,24 @@ internal class Arbeidsgiver private constructor(
 
     internal fun organisasjonsnummer() = organisasjonsnummer
     internal fun utbetaling() = utbetalinger.lastOrNull()
-    internal fun grunnlagForFeriepenger(): Arbeidsgiverferiepengegrunnlag {
-        val utbetalteDager = fun(oppdrag: Oppdrag): List<UtbetaltDag> {
-            return oppdrag
-                .linjerUtenOpphør()
-                .flatMap { linje ->
-                    linje
-                        .filterNot { it.erHelg() }
-                        .map { UtbetaltDag(it, linje.beløp) }
-                }
+    internal fun grunnlagForFeriepenger(): Feriepengegrunnlagstidslinje {
+        val feriepengetidslinje = fun(oppdrag: Oppdrag, mottaker: Mottaker): Feriepengegrunnlagstidslinje {
+            return Feriepengegrunnlagstidslinje.Builder().apply {
+                oppdrag
+                    .linjerUtenOpphør()
+                    .forEach { linje ->
+                        linje
+                            .filterNot { it.erHelg() }
+                            .forEach {
+                                leggTilUtbetaling(it, organisasjonsnummer, mottaker, Feriepengegrunnlagsdag.Kilde.SPLEIS, linje.beløp)
+                            }
+                    }
+            }.build()
         }
-        return Arbeidsgiverferiepengegrunnlag(
-            orgnummer = organisasjonsnummer,
-            utbetalinger = utbetalinger
-                .aktive()
-                .map {
-                    Feriepengegrunnlag(
-                        arbeidsgiverUtbetalteDager = utbetalteDager(it.arbeidsgiverOppdrag),
-                        personUtbetalteDager = utbetalteDager(it.personOppdrag)
-                    )
-                }
-        )
+        return utbetalinger
+            .aktive()
+            .map { feriepengetidslinje(it.arbeidsgiverOppdrag, Mottaker.ARBEIDSGIVER) + feriepengetidslinje(it.personOppdrag, Mottaker.PERSON) }
+            .fold(Feriepengegrunnlagstidslinje(emptyList()), Feriepengegrunnlagstidslinje::plus)
     }
 
     private fun lagUtbetalingkladd(utbetalingstidslinje: Utbetalingstidslinje): Utbetalingkladd {

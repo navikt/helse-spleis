@@ -10,6 +10,7 @@ import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.feriepenger.Feriepengeberegner
+import no.nav.helse.feriepenger.Feriepengegrunnlagstidslinje
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
@@ -585,7 +586,10 @@ class Person private constructor(
         observers.forEach { it.feriepengerUtbetalt(feriepengerUtbetaltEvent) }
     }
 
-    internal fun grunnlagForFeriepenger() = arbeidsgivere.map { it.grunnlagForFeriepenger() }
+    internal fun grunnlagForFeriepenger() = arbeidsgivere
+        .map { it.grunnlagForFeriepenger() }
+        .fold(Feriepengegrunnlagstidslinje(emptyList()), Feriepengegrunnlagstidslinje::plus)
+
     internal fun trengerHistorikkFraInfotrygd(aktivitetslogg: IAktivitetslogg) {
         infotrygdhistorikk.oppfriskNødvendig(aktivitetslogg, arbeidsgivere.tidligsteDato())
     }

@@ -4,8 +4,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import no.nav.helse.erHelg
-import no.nav.helse.feriepenger.Arbeidsgiverferiepengegrunnlag
-import no.nav.helse.feriepenger.Arbeidsgiverferiepengegrunnlag.Feriepengegrunnlag
+import no.nav.helse.feriepenger.Feriepengegrunnlagsdag.Kilde
+import no.nav.helse.feriepenger.Feriepengegrunnlagsdag.Mottaker
+import no.nav.helse.feriepenger.Feriepengegrunnlagstidslinje
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode.Companion.kodeForDato
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilArbeidsgiver
@@ -45,37 +46,22 @@ class UtbetalingshistorikkForFeriepenger(
 
     private fun erUtbetaltEtterFeriepengekjøringIT(sisteKjøringIInfotrygd: LocalDate, utbetalt: LocalDate) = sisteKjøringIInfotrygd <= utbetalt
 
-    internal fun grunnlagForFeriepenger(sisteKjøringIInfotrygd: LocalDate): List<Arbeidsgiverferiepengegrunnlag> {
-        return utbetalinger
-            .filterNot { dag -> erUtbetaltEtterFeriepengekjøringIT(sisteKjøringIInfotrygd, dag.utbetalt) }
-            .groupBy { it.orgnr }
-            .map { (arbeidsgiver, dager) ->
-                val arbeidsgiverdager = dager.filterIsInstance<Utbetalingsperiode.Arbeidsgiverutbetalingsperiode>()
-                val persondager = dager.filterIsInstance<Utbetalingsperiode.Personutbetalingsperiode>()
-
-                val grunnlag = Feriepengegrunnlag(
-                    arbeidsgiverUtbetalteDager = arbeidsgiverdager.flatMap { periode ->
-                        periode.periode
-                            .asSequence()
-                            .filterNot { it.erHelg() }
-                            .filter { harRettPåFeriepenger(it, periode.orgnr) }
-                            .map { dato -> Feriepengegrunnlag.UtbetaltDag(dato, periode.beløp) }
-                    },
-                    personUtbetalteDager = persondager.flatMap { periode ->
-                        periode.periode
-                            .asSequence()
-                            .filterNot { it.erHelg() }
-                            .filter { harRettPåFeriepenger(it, periode.orgnr) }
-                            .map { dato -> Feriepengegrunnlag.UtbetaltDag(dato, periode.beløp) }
-
-                    }
-                )
-
-                Arbeidsgiverferiepengegrunnlag(
-                    orgnummer = arbeidsgiver,
-                    utbetalinger = listOf(grunnlag)
-                )
-            }
+    internal fun grunnlagForFeriepenger(sisteKjøringIInfotrygd: LocalDate): Feriepengegrunnlagstidslinje {
+        return Feriepengegrunnlagstidslinje.Builder().apply {
+            utbetalinger
+                .filterNot { dag -> erUtbetaltEtterFeriepengekjøringIT(sisteKjøringIInfotrygd, dag.utbetalt) }
+                .forEach { dag ->
+                    dag.periode
+                        .filterNot { it.erHelg() }
+                        .filter { harRettPåFeriepenger(it, dag.orgnr) }
+                        .forEach { dato ->
+                            when (dag) {
+                                is Utbetalingsperiode.Arbeidsgiverutbetalingsperiode -> leggTilUtbetaling(dato, dag.orgnr, Mottaker.ARBEIDSGIVER, Kilde.INFOTRYGD, dag.beløp)
+                                is Utbetalingsperiode.Personutbetalingsperiode -> leggTilUtbetaling(dato, dag.orgnr, Mottaker.PERSON, Kilde.INFOTRYGD, dag.beløp)
+                            }
+                        }
+                }
+        }.build()
     }
 
     class Feriepenger(

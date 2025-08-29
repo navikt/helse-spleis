@@ -38,34 +38,14 @@ internal class Feriepengeberegner(
 
         internal val ARBEIDSGIVER: UtbetaltDagSelector = { it.mottaker == Feriepengegrunnlagsdag.Mottaker.ARBEIDSGIVER }
         internal val PERSON: UtbetaltDagSelector = { it.mottaker == Feriepengegrunnlagsdag.Mottaker.PERSON }
-
-        private fun leggTilGrunnlag(builder: Feriepengegrunnlagstidslinje.Builder, liste: List<Arbeidsgiverferiepengegrunnlag>, kilde: Kilde) {
-            liste.forEach { grunnlag ->
-                grunnlag.utbetalinger.forEach { utbetaling ->
-                    utbetaling.arbeidsgiverUtbetalteDager.forEach {
-                        builder.leggTilUtbetaling(it.dato, grunnlag.orgnummer, Feriepengegrunnlagsdag.Mottaker.ARBEIDSGIVER, kilde, it.beløp)
-                    }
-                    utbetaling.personUtbetalteDager.forEach {
-                        builder.leggTilUtbetaling(it.dato, grunnlag.orgnummer, Feriepengegrunnlagsdag.Mottaker.PERSON, kilde, it.beløp)
-                    }
-                }
-            }
-        }
-
-        private fun utbetalteDager(grunnlagFraInfotrygd: List<Arbeidsgiverferiepengegrunnlag>, grunnlagFraSpleisPerson: List<Arbeidsgiverferiepengegrunnlag>): Feriepengegrunnlagstidslinje {
-            val builder = Feriepengegrunnlagstidslinje.Builder()
-            leggTilGrunnlag(builder, grunnlagFraInfotrygd, Kilde.INFOTRYGD)
-            leggTilGrunnlag(builder, grunnlagFraSpleisPerson, Kilde.SPLEIS)
-            return builder.build()
-        }
     }
 
     internal constructor(
         alder: Alder,
         opptjeningsår: Year,
-        grunnlagFraInfotrygd: List<Arbeidsgiverferiepengegrunnlag>,
-        grunnlagFraSpleis: List<Arbeidsgiverferiepengegrunnlag>
-    ) : this(alder, opptjeningsår, utbetalteDager(grunnlagFraInfotrygd, grunnlagFraSpleis))
+        grunnlagFraInfotrygd: Feriepengegrunnlagstidslinje,
+        grunnlagFraSpleis: Feriepengegrunnlagstidslinje
+    ) : this(alder, opptjeningsår, grunnlagFraInfotrygd + grunnlagFraSpleis)
 
     fun beregnFeriepenger(orgnummer: String): Pair<Feriepengeberegningsresultat, Feriepengeutbetalinggrunnlag> {
         val faktiskFeriepengegrunnlag = feriepengedager.grunnlagFor(orgnummer, prosentsats)
