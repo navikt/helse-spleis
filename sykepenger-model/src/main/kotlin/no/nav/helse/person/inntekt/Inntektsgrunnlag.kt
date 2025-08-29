@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.Opptjening
+import no.nav.helse.person.SelstendigNæringsdrivendeOpptjening
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
@@ -166,6 +167,7 @@ internal class Inntektsgrunnlag(
         if (opptjening == null) return
         when (opptjening) {
             is ArbeidstakerOpptjening -> arbeidsgiverInntektsopplysninger.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, orgnummer)
+            is SelstendigNæringsdrivendeOpptjening -> TODO()
         }
     }
 
@@ -173,6 +175,7 @@ internal class Inntektsgrunnlag(
         if (opptjening == null) return
         when (opptjening) {
             is ArbeidstakerOpptjening -> arbeidsgiverInntektsopplysninger.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
+            is SelstendigNæringsdrivendeOpptjening -> TODO()
         }
     }
 

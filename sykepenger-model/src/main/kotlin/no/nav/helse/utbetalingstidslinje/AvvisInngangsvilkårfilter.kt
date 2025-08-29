@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.Opptjening
+import no.nav.helse.person.SelstendigNæringsdrivendeOpptjening
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
@@ -104,6 +105,7 @@ internal class AvvisInngangsvilkårfilter(
         if (opptjening == null) return this
         when (opptjening) {
             is ArbeidstakerOpptjening -> if (opptjening.harTilstrekkeligAntallOpptjeningsdager()) return this
+            is SelstendigNæringsdrivendeOpptjening -> TODO()
         }
         return avvis(listOf(LocalDate.MIN til LocalDate.MAX), Begrunnelse.ManglerOpptjening)
     }

@@ -8,8 +8,10 @@ import no.nav.helse.dto.deserialisering.OpptjeningInnDto
 import no.nav.helse.dto.deserialisering.SelvstendigOpptjeningInnDto
 import no.nav.helse.dto.serialisering.ArbeidstakerOpptjeningUtDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
+import no.nav.helse.dto.serialisering.SelvstendigOpptjeningUtDto
 import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.`§ 8-2 ledd 1`
+import no.nav.helse.etterlevelse.`§ 8-2 ledd 1 - selvstendig næringsdrivende`
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
@@ -25,12 +27,13 @@ import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnla
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.inngårIOpptjening
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiode
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.startdatoFor
+import no.nav.helse.person.Opptjening.Companion.TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 
 internal sealed interface Opptjening {
     val subsumsjon: Subsumsjon
-    fun view(): ArbeidstakerOpptjeningView
+    fun view(): OpptjeningView
     fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold): Opptjening {
         return hendelse.overstyr(this)
     }
@@ -40,11 +43,32 @@ internal sealed interface Opptjening {
     fun dto(): OpptjeningUtDto
 
     companion object {
+        const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
         fun gjenopprett(skjæringstidspunkt: LocalDate, opptjening: OpptjeningInnDto): Opptjening = when (opptjening) {
             is ArbeidstakerOpptjeningInnDto -> ArbeidstakerOpptjening.gjenopprett(skjæringstidspunkt, opptjening)
             is SelvstendigOpptjeningInnDto -> TODO()
         }
     }
+}
+
+internal class SelstendigNæringsdrivendeOpptjening(private val skjæringstidspunkt: LocalDate) : Opptjening {
+    override val subsumsjon = `§ 8-2 ledd 1 - selvstendig næringsdrivende`(
+        skjæringstidspunkt = skjæringstidspunkt,
+    )
+
+    override fun view() = SelvstendigOpptjeningView
+    override fun deaktiver(orgnummer: String): Opptjening {
+        TODO("Not yet implemented")
+    }
+
+    override fun aktiver(orgnummer: String): Opptjening {
+        TODO("Not yet implemented")
+    }
+
+    override fun dto(): OpptjeningUtDto = SelvstendigOpptjeningUtDto(
+        opptjeningsperiode = (LocalDate.MIN til LocalDate.MAX).dto(),
+        erOppfylt = true
+    )
 }
 
 internal class ArbeidstakerOpptjening private constructor(
@@ -205,7 +229,6 @@ internal class ArbeidstakerOpptjening private constructor(
     }
 
     companion object {
-        private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
 
         internal fun gjenopprett(skjæringstidspunkt: LocalDate, dto: ArbeidstakerOpptjeningInnDto): Opptjening {
             return ArbeidstakerOpptjening(
@@ -233,4 +256,4 @@ internal class ArbeidstakerOpptjening private constructor(
 
 internal sealed interface OpptjeningView
 internal data class ArbeidstakerOpptjeningView(val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, val opptjeningsdager: Int, val erOppfylt: Boolean) : OpptjeningView
-internal data class SelvstendigOpptjeningView(val erOppfylt: Boolean) : OpptjeningView
+internal object SelvstendigOpptjeningView : OpptjeningView

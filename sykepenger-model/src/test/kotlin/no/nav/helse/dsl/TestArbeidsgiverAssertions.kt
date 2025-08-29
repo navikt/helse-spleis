@@ -7,6 +7,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.person.ArbeidstakerOpptjening
+import no.nav.helse.person.ArbeidstakerOpptjeningView
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -54,17 +56,17 @@ internal class TestArbeidsgiverAssertions(
     }
 
     internal fun assertAntallOpptjeningsdager(forventet: Int, skjæringstidspunkt: LocalDate) {
-        val opptjening = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).opptjening!!
+        val opptjening = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).opptjening!! as ArbeidstakerOpptjeningView
         assertEquals(forventet, opptjening.opptjeningsdager)
     }
 
     internal fun assertErOppfylt(skjæringstidspunkt: LocalDate) {
-        val opptjening = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).opptjening!!
+        val opptjening = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).opptjening!! as ArbeidstakerOpptjeningView
         assertTrue(opptjening.erOppfylt)
     }
 
     internal fun assertErIkkeOppfylt(skjæringstidspunkt: LocalDate) {
-        val opptjening = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).opptjening!!
+        val opptjening = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).opptjening!! as ArbeidstakerOpptjeningView
         assertFalse(opptjening.erOppfylt)
     }
 

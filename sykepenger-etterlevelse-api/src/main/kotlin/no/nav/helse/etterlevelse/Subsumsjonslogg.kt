@@ -92,6 +92,34 @@ fun `§ 8-2 ledd 1`(
 )
 
 /**
+ * Vurdering av opptjeningstid for selvstendig næringsdrivende
+ *
+ * Vi sjekker per dags dato ikke opptjening, setter den derfor til uavklart,
+ * og prøver å unngå å ta med noe mer data
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-2)
+ *
+ * @param oppfylt hvorvidt sykmeldte har oppfylt krav om opptjeningstid
+ * @param skjæringstidspunkt dato som antall opptjeningsdager regnes mot
+ * @param tilstrekkeligAntallOpptjeningsdager antall opptjeningsdager som kreves for at vilkåret skal være [oppfylt]
+ * @param arbeidsforhold hvilke arbeidsforhold det er tatt utgangspunkt i ved beregning av opptjeningstid
+ * @param antallOpptjeningsdager antall opptjeningsdager sykmeldte faktisk har på [skjæringstidspunkt]
+ */
+fun `§ 8-2 ledd 1 - selvstendig næringsdrivende`(
+    skjæringstidspunkt: LocalDate,
+) = Subsumsjon.enkelSubsumsjon(
+    lovverk = "folketrygdloven",
+    utfall = Utfall.VILKAR_UAVKLART,
+    versjon = LocalDate.of(2020, 6, 12),
+    paragraf = PARAGRAF_8_2,
+    ledd = 1.ledd,
+    input = mapOf(
+        "skjæringstidspunkt" to skjæringstidspunkt,
+    ),
+    output = emptyMap()
+)
+
+/**
  * Vurdering av rett til sykepenger ved fylte 70 år
  *
  * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-3)
