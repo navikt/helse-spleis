@@ -66,7 +66,7 @@ internal class SelvstendigNæringsdrivendeOpptjening(private val skjæringstidsp
     }
 
     override fun dto(): OpptjeningUtDto = SelvstendigOpptjeningUtDto(
-        opptjeningsperiode = (LocalDate.MIN til LocalDate.MAX).dto(),
+        opptjeningsperiode = (LocalDate.MIN til LocalDate.MIN).dto(),
         erOppfylt = true
     )
 }
