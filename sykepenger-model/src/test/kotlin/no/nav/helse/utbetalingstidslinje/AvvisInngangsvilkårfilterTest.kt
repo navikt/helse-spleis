@@ -10,7 +10,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.Opptjening
+import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
@@ -98,14 +98,14 @@ class AvvisInngangsvilkårfilterTest {
             vurdertInfotrygd = false
         )
         val medlemskapstatus = if (manglerMedlemskap) Medlemskapsvurdering.Medlemskapstatus.Nei else Medlemskapsvurdering.Medlemskapstatus.Ja
-        val opptjening = Opptjening.nyOpptjening(
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(
             grunnlag =
                 if (manglerOpptjening) emptyList()
                 else listOf(
-                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                    ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                         orgnummer = "a1",
                         ansattPerioder = listOf(
-                            Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(
+                            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(
                                 ansattFom = skjæringstidspunkt.minusYears(1),
                                 ansattTom = null,
                                 deaktivert = false

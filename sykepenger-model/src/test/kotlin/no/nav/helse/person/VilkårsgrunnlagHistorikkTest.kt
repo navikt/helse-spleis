@@ -23,7 +23,7 @@ import no.nav.helse.inspectors.Vilkårgrunnlagsinspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.sykepengegrunnlag
@@ -47,7 +47,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         private const val ORGNR = "123456789"
         private val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.desember(2017), type = Arbeidsforholdtype.ORDINÆRT))
         private val arbeidsforholdFraHistorikk = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(ORGNR, listOf(Arbeidsforhold(1.desember(2017), null, false)))
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(ORGNR, listOf(Arbeidsforhold(1.desember(2017), null, false)))
         )
     }
 
@@ -63,7 +63,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
                 inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
-                opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, skjæringstidspunkt),
+                opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforholdFraHistorikk, skjæringstidspunkt),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 vurdertOk = true,
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -92,7 +92,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = gammeltSkjæringstidspunkt,
                 inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
-                opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt),
+                opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 vurdertOk = true,
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),

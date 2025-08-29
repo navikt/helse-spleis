@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
+import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
@@ -100,7 +101,10 @@ internal class AvvisInngangsvilkårfilter(
     }
 
     private fun List<Arbeidsgiverberegning>.avvisOpptjening(): List<Arbeidsgiverberegning> {
-        if (opptjening == null || opptjening.harTilstrekkeligAntallOpptjeningsdager()) return this
+        if (opptjening == null) return this
+        when (opptjening) {
+            is ArbeidstakerOpptjening -> if (opptjening.harTilstrekkeligAntallOpptjeningsdager()) return this
+        }
         return avvis(listOf(LocalDate.MIN til LocalDate.MAX), Begrunnelse.ManglerOpptjening)
     }
 }

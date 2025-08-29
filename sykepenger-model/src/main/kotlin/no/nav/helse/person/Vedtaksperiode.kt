@@ -1003,7 +1003,7 @@ internal class Vedtaksperiode private constructor(
         when (arbeidsgiver.yrkesaktivitetssporing) {
             is Arbeidstaker -> {
                 checkNotNull(vilkårsgrunnlag).valider(aktivitetslogg, arbeidsgiver.organisasjonsnummer)
-                checkNotNull(vilkårsgrunnlag).opptjening?.validerOpptjeningsdager(aktivitetslogg)
+                (checkNotNull(vilkårsgrunnlag).opptjening as ArbeidstakerOpptjening?)?.validerOpptjeningsdager(aktivitetslogg)
             }
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
@@ -1294,7 +1294,8 @@ internal class Vedtaksperiode private constructor(
 
         endretInntektsgrunnlag.inntekter
             .forEach {
-                val opptjeningFom = nyttGrunnlag.opptjening!!.startdatoFor(it.inntektEtter.orgnummer)
+                val opptjening = nyttGrunnlag.opptjening!! as ArbeidstakerOpptjening
+                val opptjeningFom = opptjening.startdatoFor(it.inntektEtter.orgnummer)
                 overstyrArbeidsgiveropplysninger.subsummer(subsumsjonslogg, opptjeningFom, it.inntektEtter.orgnummer)
             }
 

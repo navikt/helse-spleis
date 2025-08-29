@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektI
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsgrunnlag
+import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -53,9 +54,9 @@ class Vilkårsgrunnlag(
     }
 
     private fun opptjening(): Opptjening {
-        return Opptjening.nyOpptjening(
+        return ArbeidstakerOpptjening.nyOpptjening(
             grunnlag = opptjeningsgrunnlag.map { (orgnummer, ansattPerioder) ->
-                Opptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.tilDomeneobjekt() })
+                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.tilDomeneobjekt() })
             },
             skjæringstidspunkt = skjæringstidspunkt
         )
@@ -159,7 +160,7 @@ class Vilkårsgrunnlag(
             }
         }
 
-        internal fun tilDomeneobjekt() = Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(
+        internal fun tilDomeneobjekt() = ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(
             ansattFom = ansettelseperiode.start,
             ansattTom = ansettelseperiode.endInclusive.takeUnless { it == LocalDate.MAX },
             deaktivert = false

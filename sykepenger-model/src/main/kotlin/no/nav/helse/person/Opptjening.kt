@@ -3,41 +3,65 @@ package no.nav.helse.person
 import java.time.LocalDate
 import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
+import no.nav.helse.dto.deserialisering.ArbeidstakerOpptjeningInnDto
 import no.nav.helse.dto.deserialisering.OpptjeningInnDto
+import no.nav.helse.dto.deserialisering.SelvstendigOpptjeningInnDto
+import no.nav.helse.dto.serialisering.ArbeidstakerOpptjeningUtDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
+import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.`§ 8-2 ledd 1`
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.toEtterlevelseMap
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.aktiver
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.arbeidsforholdForJurist
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.deaktiver
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.inngårIOpptjening
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiode
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.startdatoFor
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.toEtterlevelseMap
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.aktiver
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.arbeidsforholdForJurist
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.deaktiver
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.inngårIOpptjening
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiode
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.startdatoFor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 
-internal class Opptjening private constructor(
+internal sealed interface Opptjening {
+    val subsumsjon: Subsumsjon
+    fun view(): ArbeidstakerOpptjeningView
+    fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold): Opptjening {
+        return hendelse.overstyr(this)
+    }
+
+    fun deaktiver(orgnummer: String): Opptjening
+    fun aktiver(orgnummer: String): Opptjening
+    fun dto(): OpptjeningUtDto
+
+    companion object {
+        fun gjenopprett(skjæringstidspunkt: LocalDate, opptjening: OpptjeningInnDto): Opptjening = when (opptjening) {
+            is ArbeidstakerOpptjeningInnDto -> ArbeidstakerOpptjening.gjenopprett(skjæringstidspunkt, opptjening)
+            is SelvstendigOpptjeningInnDto -> TODO()
+        }
+    }
+}
+
+internal class ArbeidstakerOpptjening private constructor(
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>,
     private val opptjeningsperiode: Periode
-) {
+) : Opptjening {
     private val opptjeningsdager by lazy { opptjeningsperiode.count() }
-    val subsumsjon = `§ 8-2 ledd 1`(
+    override val subsumsjon = `§ 8-2 ledd 1`(
         oppfylt = harTilstrekkeligAntallOpptjeningsdager(),
         skjæringstidspunkt = skjæringstidspunkt,
         tilstrekkeligAntallOpptjeningsdager = TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER,
         arbeidsforhold = arbeidsforhold.arbeidsforholdForJurist(),
         antallOpptjeningsdager = opptjeningsdager
     )
-    internal fun view() = OpptjeningView(arbeidsforhold = arbeidsforhold, opptjeningsdager = opptjeningsdager, erOppfylt = erOppfylt())
+
+    override fun view() = ArbeidstakerOpptjeningView(arbeidsforhold = arbeidsforhold, opptjeningsdager = opptjeningsdager, erOppfylt = erOppfylt())
 
     internal fun ansattVedSkjæringstidspunkt(orgnummer: String) =
         arbeidsforhold.any { it.ansattVedSkjæringstidspunkt(orgnummer, skjæringstidspunkt) }
@@ -55,15 +79,12 @@ internal class Opptjening private constructor(
 
     internal fun opptjeningFom() = opptjeningsperiode.start
     internal fun startdatoFor(orgnummer: String) = arbeidsforhold.startdatoFor(orgnummer, skjæringstidspunkt)
-    internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold): Opptjening {
-        return hendelse.overstyr(this)
-    }
 
-    internal fun deaktiver(orgnummer: String): Opptjening {
+    override fun deaktiver(orgnummer: String): Opptjening {
         return nyOpptjening(arbeidsforhold.deaktiver(orgnummer), skjæringstidspunkt)
     }
 
-    internal fun aktiver(orgnummer: String): Opptjening {
+    override fun aktiver(orgnummer: String): Opptjening {
         return nyOpptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt)
     }
 
@@ -186,23 +207,23 @@ internal class Opptjening private constructor(
     companion object {
         private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
 
-        internal fun gjenopprett(skjæringstidspunkt: LocalDate, dto: OpptjeningInnDto): Opptjening {
-            return Opptjening(
+        internal fun gjenopprett(skjæringstidspunkt: LocalDate, dto: ArbeidstakerOpptjeningInnDto): Opptjening {
+            return ArbeidstakerOpptjening(
                 skjæringstidspunkt = skjæringstidspunkt,
                 dto.arbeidsforhold.map { ArbeidsgiverOpptjeningsgrunnlag.gjenopprett(it) },
                 opptjeningsperiode = Periode.gjenopprett(dto.opptjeningsperiode)
             )
         }
 
-        internal fun nyOpptjening(grunnlag: List<ArbeidsgiverOpptjeningsgrunnlag>, skjæringstidspunkt: LocalDate): Opptjening {
+        internal fun nyOpptjening(grunnlag: List<ArbeidsgiverOpptjeningsgrunnlag>, skjæringstidspunkt: LocalDate): ArbeidstakerOpptjening {
             val opptjeningsperiode = grunnlag.opptjeningsperiode(skjæringstidspunkt)
             val arbeidsforhold = grunnlag.inngårIOpptjening(opptjeningsperiode)
-            val opptjening = Opptjening(skjæringstidspunkt, arbeidsforhold, opptjeningsperiode)
+            val opptjening = ArbeidstakerOpptjening(skjæringstidspunkt, arbeidsforhold, opptjeningsperiode)
             return opptjening
         }
     }
 
-    internal fun dto() = OpptjeningUtDto(
+    override fun dto(): OpptjeningUtDto = ArbeidstakerOpptjeningUtDto(
         arbeidsforhold = this.arbeidsforhold.map { it.dto() },
         opptjeningsperiode = this.opptjeningsperiode.dto(),
         opptjeningsdager = opptjeningsdager,
@@ -210,4 +231,6 @@ internal class Opptjening private constructor(
     )
 }
 
-internal data class OpptjeningView(val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, val opptjeningsdager: Int, val erOppfylt: Boolean)
+internal sealed interface OpptjeningView
+internal data class ArbeidstakerOpptjeningView(val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, val opptjeningsdager: Int, val erOppfylt: Boolean) : OpptjeningView
+internal data class SelvstendigOpptjeningView(val erOppfylt: Boolean) : OpptjeningView

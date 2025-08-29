@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
@@ -163,12 +164,16 @@ internal class Inntektsgrunnlag(
 
     internal fun sjekkForNyArbeidsgiver(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening?, orgnummer: String) {
         if (opptjening == null) return
-        arbeidsgiverInntektsopplysninger.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, orgnummer)
+        when (opptjening) {
+            is ArbeidstakerOpptjening -> arbeidsgiverInntektsopplysninger.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, orgnummer)
+        }
     }
 
     internal fun måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening?) {
         if (opptjening == null) return
-        arbeidsgiverInntektsopplysninger.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
+        when (opptjening) {
+            is ArbeidstakerOpptjening -> arbeidsgiverInntektsopplysninger.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
+        }
     }
 
     internal fun aktiver(orgnummer: String, forklaring: String, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {

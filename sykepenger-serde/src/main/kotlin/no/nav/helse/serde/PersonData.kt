@@ -83,7 +83,7 @@ import no.nav.helse.dto.deserialisering.InntektsmeldingInnDto
 import no.nav.helse.dto.deserialisering.MaksdatoresultatInnDto
 import no.nav.helse.dto.deserialisering.MinimumSykdomsgradVurderingInnDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
-import no.nav.helse.dto.deserialisering.OpptjeningInnDto
+import no.nav.helse.dto.deserialisering.ArbeidstakerOpptjeningInnDto
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.deserialisering.SaksbehandlerInnDto
 import no.nav.helse.dto.deserialisering.SelvstendigFaktaavklartInntektInnDto
@@ -475,7 +475,7 @@ data class PersonData(
             val opptjeningTom: LocalDate,
             val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlagData>
         ) {
-            fun tilDto() = OpptjeningInnDto(
+            fun tilDto() = ArbeidstakerOpptjeningInnDto(
                 arbeidsforhold = this.arbeidsforhold.map { it.tilDto() },
                 opptjeningsperiode = PeriodeDto(fom = this.opptjeningFom, tom = this.opptjeningTom)
             )

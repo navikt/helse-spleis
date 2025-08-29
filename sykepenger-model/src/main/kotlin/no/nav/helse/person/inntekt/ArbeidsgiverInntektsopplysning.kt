@@ -10,7 +10,7 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Opptjening
+import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -189,7 +189,7 @@ internal data class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.sjekkForNyArbeidsgiver(
             aktivitetslogg: IAktivitetslogg,
-            opptjening: Opptjening,
+            opptjening: ArbeidstakerOpptjening,
             orgnummer: String
         ) {
             val arbeidsforholdAktivePåSkjæringstidspunktet =
@@ -200,7 +200,7 @@ internal data class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.måHaRegistrertOpptjeningForArbeidsgivere(
             aktivitetslogg: IAktivitetslogg,
-            opptjening: Opptjening
+            opptjening: ArbeidstakerOpptjening
         ) {
             if (none { opptjening.startdatoFor(it.orgnummer) == null }) return
             aktivitetslogg.varsel(Varselkode.RV_VV_1)

@@ -399,7 +399,7 @@ internal data class VilkårsgrunnlagView(
     val type: VilkårsgrunnlagTypeView,
     val meldingsreferanseId: MeldingsreferanseId?,
     val inntektsgrunnlag: InntektsgrunnlagView,
-    val opptjening: OpptjeningView?
+    val opptjening: ArbeidstakerOpptjeningView?
 ) {
     enum class VilkårsgrunnlagTypeView { INFOTRYGD, SPLEIS }
 }

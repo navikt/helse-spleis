@@ -12,8 +12,8 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
+import no.nav.helse.person.ArbeidstakerOpptjening
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
@@ -103,9 +103,9 @@ internal class InntektsgrunnlagTest {
             vurdertInfotrygd = false
         )
 
-        val opptjening = Opptjening.nyOpptjening(
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(
             listOf(
-                Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                     a1, listOf(
                     Arbeidsforhold(
                         ansattFom = LocalDate.EPOCH,
@@ -114,7 +114,7 @@ internal class InntektsgrunnlagTest {
                     )
                 )
                 ),
-                Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                     a2, listOf(
                     Arbeidsforhold(
                         ansattFom = startdatoA2,
@@ -167,9 +167,9 @@ internal class InntektsgrunnlagTest {
             vurdertInfotrygd = false
         )
 
-        val opptjeningUtenA2 = Opptjening.nyOpptjening(
+        val opptjeningUtenA2 = ArbeidstakerOpptjening.nyOpptjening(
             listOf(
-                Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                     a1, listOf(
                     Arbeidsforhold(
                         ansattFom = LocalDate.EPOCH,
@@ -180,9 +180,9 @@ internal class InntektsgrunnlagTest {
                 )
             ), skjæringstidspunkt
         )
-        val opptjeningMedA2 = Opptjening.nyOpptjening(
+        val opptjeningMedA2 = ArbeidstakerOpptjening.nyOpptjening(
             listOf(
-                Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                     a1, listOf(
                     Arbeidsforhold(
                         ansattFom = LocalDate.EPOCH,
@@ -191,7 +191,7 @@ internal class InntektsgrunnlagTest {
                     )
                 )
                 ),
-                Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                     a2, listOf(
                     Arbeidsforhold(
                         ansattFom = LocalDate.EPOCH,

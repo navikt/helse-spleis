@@ -20,8 +20,8 @@ import no.nav.helse.mai
 import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.oktober
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
 import no.nav.helse.søndag
 import no.nav.helse.tirsdag
 import no.nav.helse.torsdag
@@ -77,47 +77,47 @@ internal class OpptjeningTest {
     @Test
     fun `startdato for manglende arbeidsforhold`() {
         val arbeidsforhold = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "a1", listOf(
                 Arbeidsforhold(1.januar, null, false)
             )
             )
         )
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.mars)
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 1.mars)
         assertNull(opptjening.startdatoFor("a2"))
     }
 
     @Test
     fun `startdato for deaktivert arbeidsforhold`() {
         val arbeidsforhold = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "a1", listOf(
                 Arbeidsforhold(1.januar, null, true)
             )
             )
         )
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.mars)
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 1.mars)
         assertEquals(28.februar, opptjening.startdatoFor("a1"))
     }
 
     @Test
     fun `startdato for aktivt arbeidsforhold`() {
         val arbeidsforhold = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "a1", listOf(
                 Arbeidsforhold(1.februar, null, false),
                 Arbeidsforhold(1.januar, 31.januar, false),
             )
             )
         )
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.mars)
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 1.mars)
         assertEquals(1.januar, opptjening.startdatoFor("a1"))
     }
 
     @Test
     fun `Tom liste med arbeidsforhold betyr at du ikke oppfyller opptjeningskrav`() {
-        val arbeidsforhold = emptyList<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>()
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar)
+        val arbeidsforhold = emptyList<ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag>()
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 1.januar)
 
         assertFalse(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
@@ -125,7 +125,7 @@ internal class OpptjeningTest {
     @Test
     fun `Én dags opptjening oppfyller ikke krav til opptjening`() {
         val arbeidsforhold = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
                     Arbeidsforhold(
@@ -136,7 +136,7 @@ internal class OpptjeningTest {
                 )
             )
         )
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 2.januar)
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 2.januar)
 
         assertFalse(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
@@ -144,7 +144,7 @@ internal class OpptjeningTest {
     @Test
     fun `27 dager opptjening oppfyller ikke krav til opptjening`() {
         val arbeidsforhold = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
                     Arbeidsforhold(
@@ -155,7 +155,7 @@ internal class OpptjeningTest {
                 )
             )
         )
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(27))
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(27))
 
         assertFalse(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
@@ -163,7 +163,7 @@ internal class OpptjeningTest {
     @Test
     fun `28 dager opptjening oppfyller krav til opptjening`() {
         val arbeidsforhold = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
                     Arbeidsforhold(
@@ -174,7 +174,7 @@ internal class OpptjeningTest {
                 )
             )
         )
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28))
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28))
 
         assertTrue(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
@@ -182,7 +182,7 @@ internal class OpptjeningTest {
     @Test
     fun `Opptjening skal ikke bruke deaktiverte arbeidsforhold`() {
         val arbeidsforhold = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
                     Arbeidsforhold(
@@ -193,7 +193,7 @@ internal class OpptjeningTest {
                 )
             )
         )
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28))
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28))
 
         assertFalse(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
@@ -201,7 +201,7 @@ internal class OpptjeningTest {
     @Test
     fun `Opptjening skal ikke koble sammen om deaktiverte arbeidsforhold fører til gap`() {
         val arbeidsforhold = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
                     Arbeidsforhold(
@@ -219,7 +219,7 @@ internal class OpptjeningTest {
             )
         )
 
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28))
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28))
 
         assertFalse(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
@@ -227,7 +227,7 @@ internal class OpptjeningTest {
     @Test
     fun `to tilstøtende arbeidsforhold`() {
         val arbeidsforhold = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
                     Arbeidsforhold(
@@ -240,7 +240,7 @@ internal class OpptjeningTest {
             )
         )
 
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28))
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28))
 
         assertTrue(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
@@ -248,7 +248,7 @@ internal class OpptjeningTest {
     @Test
     fun `Opptjening kobler sammen gap selvom rekkefølgen ikke er kronologisk`() {
         val arbeidsforhold = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer", listOf(
                 Arbeidsforhold(ansattFom = 1.januar, ansattTom = 10.januar, deaktivert = false),
                 Arbeidsforhold(ansattFom = 15.januar, ansattTom = null, deaktivert = false),
@@ -257,7 +257,7 @@ internal class OpptjeningTest {
             )
         )
 
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28))
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28))
 
         assertTrue(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
@@ -265,11 +265,11 @@ internal class OpptjeningTest {
     @Test
     fun `slutter på lørdag, starter på mandag`() {
         val arbeidsforhold = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(Arbeidsforhold(ansattFom = søndag den 1.oktober(2017), ansattTom = lørdag den 30.april(2022), deaktivert = false))),
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a2", listOf(Arbeidsforhold(ansattFom = mandag den 2.mai(2022), ansattTom = null, deaktivert = false)))
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(Arbeidsforhold(ansattFom = søndag den 1.oktober(2017), ansattTom = lørdag den 30.april(2022), deaktivert = false))),
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag("a2", listOf(Arbeidsforhold(ansattFom = mandag den 2.mai(2022), ansattTom = null, deaktivert = false)))
         )
 
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 2.mai(2022))
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 2.mai(2022))
 
         assertTrue(opptjening.harTilstrekkeligAntallOpptjeningsdager())
         assertEquals(1.oktober(2017), opptjening.opptjeningFom())
@@ -278,11 +278,11 @@ internal class OpptjeningTest {
     @Test
     fun `slutter på fredag, starter på mandag`() {
         val arbeidsforhold = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(Arbeidsforhold(ansattFom = søndag den 1.oktober(2017), ansattTom = fredag den 29.april(2022), deaktivert = false))),
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a2", listOf(Arbeidsforhold(ansattFom = mandag den 2.mai(2022), ansattTom = null, deaktivert = false)))
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(Arbeidsforhold(ansattFom = søndag den 1.oktober(2017), ansattTom = fredag den 29.april(2022), deaktivert = false))),
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag("a2", listOf(Arbeidsforhold(ansattFom = mandag den 2.mai(2022), ansattTom = null, deaktivert = false)))
         )
 
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 3.mai(2022))
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 3.mai(2022))
 
         assertTrue(opptjening.harTilstrekkeligAntallOpptjeningsdager())
         assertEquals(1.oktober(2017), opptjening.opptjeningFom())
@@ -291,11 +291,11 @@ internal class OpptjeningTest {
     @Test
     fun `slutter på torsdag, starter på mandag`() {
         val arbeidsforhold = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(Arbeidsforhold(ansattFom = søndag den 1.oktober(2017), ansattTom = torsdag den 28.april(2022), deaktivert = false))),
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a2", listOf(Arbeidsforhold(ansattFom = mandag den 2.mai(2022), ansattTom = null, deaktivert = false)))
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(Arbeidsforhold(ansattFom = søndag den 1.oktober(2017), ansattTom = torsdag den 28.april(2022), deaktivert = false))),
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag("a2", listOf(Arbeidsforhold(ansattFom = mandag den 2.mai(2022), ansattTom = null, deaktivert = false)))
         )
 
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, tirsdag den 3.mai(2022))
+        val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, tirsdag den 3.mai(2022))
 
         assertFalse(opptjening.harTilstrekkeligAntallOpptjeningsdager())
         assertEquals(2.mai(2022), opptjening.opptjeningFom())
@@ -304,12 +304,12 @@ internal class OpptjeningTest {
     @Test
     fun `§ 8-2 ledd 1 - opptjeningstid tilfredstilt`() {
         val arbeidsforhold = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 a1,
                 listOf(Arbeidsforhold(4.desember(2017), 31.januar, deaktivert = false))
             )
         )
-        val subsumsjon = Opptjening.nyOpptjening(arbeidsforhold, 1.januar).subsumsjon
+        val subsumsjon = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 1.januar).subsumsjon
         assertEquals(
             Subsumsjon.enkelSubsumsjon(
                 lovverk = "folketrygdloven",
@@ -336,12 +336,12 @@ internal class OpptjeningTest {
     @Test
     fun `§ 8-2 ledd 1 - opptjeningstid ikke tilfredstilt`() {
         val arbeidsforhold = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 a1,
                 listOf(Arbeidsforhold(5.desember(2017), 31.januar, deaktivert = false))
             )
         )
-        val subsumsjon = Opptjening.nyOpptjening(arbeidsforhold, 1.januar).subsumsjon
+        val subsumsjon = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 1.januar).subsumsjon
         assertEquals(
             Subsumsjon.enkelSubsumsjon(
                 lovverk = "folketrygdloven",
