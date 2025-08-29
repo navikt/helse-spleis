@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsgrunnlag
 import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.Opptjening
+import no.nav.helse.person.SelvstendigNæringsdrivendeOpptjening
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -53,13 +54,20 @@ class Vilkårsgrunnlag(
         return false
     }
 
-    private fun opptjening(): Opptjening {
-        return ArbeidstakerOpptjening.nyOpptjening(
+    private fun opptjening(): Opptjening = when (behandlingsporing) {
+        is Arbeidstaker -> ArbeidstakerOpptjening.nyOpptjening(
             grunnlag = opptjeningsgrunnlag.map { (orgnummer, ansattPerioder) ->
                 ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.tilDomeneobjekt() })
             },
             skjæringstidspunkt = skjæringstidspunkt
         )
+
+        Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigNæringsdrivendeOpptjening(skjæringstidspunkt)
+        Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> TODO()
+        Behandlingsporing.Yrkesaktivitet.Frilans -> TODO()
+        Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> TODO()
+        Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> TODO()
+        Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> TODO()
     }
 
     internal fun skatteopplysninger(): List<SkatteopplysningerForSykepengegrunnlag> {

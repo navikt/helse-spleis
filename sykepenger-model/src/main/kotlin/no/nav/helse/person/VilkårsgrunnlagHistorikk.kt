@@ -259,7 +259,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjening) {
         internal fun validerFørstegangsvurdering(aktivitetslogg: IAktivitetslogg) {
-            inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
+            when (opptjening) {
+                is ArbeidstakerOpptjening -> inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
+                is SelvstendigNæringsdrivendeOpptjening -> {}
+                null -> {}
+            }
+
         }
 
         override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String): Boolean {

@@ -51,7 +51,7 @@ internal sealed interface Opptjening {
     }
 }
 
-internal class SelstendigNæringsdrivendeOpptjening(private val skjæringstidspunkt: LocalDate) : Opptjening {
+internal class SelvstendigNæringsdrivendeOpptjening(private val skjæringstidspunkt: LocalDate) : Opptjening {
     override val subsumsjon = `§ 8-2 ledd 1 - selvstendig næringsdrivende`(
         skjæringstidspunkt = skjæringstidspunkt,
     )
@@ -230,7 +230,7 @@ internal class ArbeidstakerOpptjening private constructor(
 
     companion object {
 
-        internal fun gjenopprett(skjæringstidspunkt: LocalDate, dto: ArbeidstakerOpptjeningInnDto): Opptjening {
+        internal fun gjenopprett(skjæringstidspunkt: LocalDate, dto: ArbeidstakerOpptjeningInnDto): ArbeidstakerOpptjening {
             return ArbeidstakerOpptjening(
                 skjæringstidspunkt = skjæringstidspunkt,
                 dto.arbeidsforhold.map { ArbeidsgiverOpptjeningsgrunnlag.gjenopprett(it) },

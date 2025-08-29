@@ -84,10 +84,12 @@ import no.nav.helse.dto.deserialisering.MaksdatoresultatInnDto
 import no.nav.helse.dto.deserialisering.MinimumSykdomsgradVurderingInnDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.deserialisering.ArbeidstakerOpptjeningInnDto
+import no.nav.helse.dto.deserialisering.OpptjeningInnDto
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.deserialisering.SaksbehandlerInnDto
 import no.nav.helse.dto.deserialisering.SelvstendigFaktaavklartInntektInnDto
 import no.nav.helse.dto.deserialisering.SelvstendigInntektsopplysningInnDto
+import no.nav.helse.dto.deserialisering.SelvstendigOpptjeningInnDto
 import no.nav.helse.dto.deserialisering.SkjønnsmessigFastsattInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingsdagInnDto
