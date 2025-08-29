@@ -267,8 +267,16 @@ internal class Feriepengeutbetaling private constructor(
         }
 
         private fun oppdragoppsummering(arbeidsgiver: Boolean, sendOppdrag: Boolean, forrigeSendteOppdrag: Feriepengeoppdrag?, oppdrag: Feriepengeoppdrag, oppdragdetaljer: String): String {
+            val nettobeløp = oppdrag.totalbeløp - (forrigeSendteOppdrag?.totalbeløp ?: 0)
+            val label = if (nettobeløp < 0)
+                "(kreve tilbake fra ${if (arbeidsgiver) "arbeidsgiver" else "person"})"
+            else if (nettobeløp == 0)
+                "(ingen endring)"
+            else
+                "(betale mer til ${if (arbeidsgiver) "arbeidsgiver" else "person"})"
+
             return """Skal sende ${if (arbeidsgiver) "arbeidsgiveroppdrag" else "personoppdrag"} til OS: $sendOppdrag
-                Differanse fra forrige sendte ${if (arbeidsgiver) "arbeidsgiveroppdrag" else "personoppdrag"}: ${forrigeSendteOppdrag?.totalbeløp?.minus(oppdrag.totalbeløp)}
+                Differanse fra forrige sendte ${if (arbeidsgiver) "arbeidsgiveroppdrag" else "personoppdrag"}: $nettobeløp $label
                 ${if (arbeidsgiver) "Arbeidsgiveroppdrag" else "Personoppdrag"}: $oppdragdetaljer"""
         }
 
