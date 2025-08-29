@@ -182,6 +182,18 @@ internal class Feriepengegrunnlagstidslinje(dager: Collection<Feriepengegrunnlag
         dager = dager.take(ANTALL_FERIEPENGEDAGER_I_OPPTJENINGSÅRET)
     )
 
+    operator fun plus(other: Feriepengegrunnlagstidslinje): Feriepengegrunnlagstidslinje {
+        val resultat = (this.dager + other.dager)
+            .groupBy { it.dato }
+            .map { (dato, dager) ->
+                Feriepengegrunnlagsdag(
+                    dato = dato,
+                    utbetalinger = dager.flatMap { it.utbetalinger }
+                )
+            }
+        return Feriepengegrunnlagstidslinje(dager = resultat)
+    }
+
     fun utbetalteDager(): List<Feriepengeutbetalinggrunnlag.UtbetaltDag> {
         return dager.flatMap {
             it.utbetalinger.map { utbetaltDag ->
