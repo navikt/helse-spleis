@@ -3,12 +3,8 @@ package no.nav.helse.person
 import java.time.LocalDate
 import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
-import no.nav.helse.dto.deserialisering.ArbeidstakerOpptjeningInnDto
 import no.nav.helse.dto.deserialisering.OpptjeningInnDto
-import no.nav.helse.dto.deserialisering.SelvstendigOpptjeningInnDto
-import no.nav.helse.dto.serialisering.ArbeidstakerOpptjeningUtDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
-import no.nav.helse.dto.serialisering.SelvstendigOpptjeningUtDto
 import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.`§ 8-2 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-2 ledd 1 - selvstendig næringsdrivende`
@@ -40,13 +36,13 @@ internal sealed interface Opptjening {
 
     fun deaktiver(orgnummer: String): Opptjening
     fun aktiver(orgnummer: String): Opptjening
-    fun dto(): OpptjeningUtDto
+    fun dto(): OpptjeningUtDto?
 
     companion object {
         const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
-        fun gjenopprett(skjæringstidspunkt: LocalDate, opptjening: OpptjeningInnDto): Opptjening = when (opptjening) {
-            is ArbeidstakerOpptjeningInnDto -> ArbeidstakerOpptjening.gjenopprett(skjæringstidspunkt, opptjening)
-            is SelvstendigOpptjeningInnDto -> TODO()
+        fun gjenopprett(skjæringstidspunkt: LocalDate, opptjening: OpptjeningInnDto?): Opptjening = when (opptjening) {
+            is OpptjeningInnDto -> ArbeidstakerOpptjening.gjenopprett(skjæringstidspunkt, opptjening)
+            null -> SelvstendigNæringsdrivendeOpptjening(skjæringstidspunkt)
         }
     }
 }
@@ -65,10 +61,7 @@ internal class SelvstendigNæringsdrivendeOpptjening(private val skjæringstidsp
         TODO("Not yet implemented")
     }
 
-    override fun dto(): OpptjeningUtDto = SelvstendigOpptjeningUtDto(
-        opptjeningsperiode = (skjæringstidspunkt til skjæringstidspunkt).dto(),
-        erOppfylt = true
-    )
+    override fun dto(): OpptjeningUtDto? = null
 }
 
 internal class ArbeidstakerOpptjening private constructor(
@@ -230,7 +223,7 @@ internal class ArbeidstakerOpptjening private constructor(
 
     companion object {
 
-        internal fun gjenopprett(skjæringstidspunkt: LocalDate, dto: ArbeidstakerOpptjeningInnDto): ArbeidstakerOpptjening {
+        internal fun gjenopprett(skjæringstidspunkt: LocalDate, dto: OpptjeningInnDto): ArbeidstakerOpptjening {
             return ArbeidstakerOpptjening(
                 skjæringstidspunkt = skjæringstidspunkt,
                 dto.arbeidsforhold.map { ArbeidsgiverOpptjeningsgrunnlag.gjenopprett(it) },
@@ -246,7 +239,7 @@ internal class ArbeidstakerOpptjening private constructor(
         }
     }
 
-    override fun dto(): OpptjeningUtDto = ArbeidstakerOpptjeningUtDto(
+    override fun dto(): OpptjeningUtDto = OpptjeningUtDto(
         arbeidsforhold = this.arbeidsforhold.map { it.dto() },
         opptjeningsperiode = this.opptjeningsperiode.dto(),
         opptjeningsdager = opptjeningsdager,

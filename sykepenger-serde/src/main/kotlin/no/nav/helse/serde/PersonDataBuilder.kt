@@ -49,13 +49,11 @@ import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.InntektsmeldingUtDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
-import no.nav.helse.dto.serialisering.ArbeidstakerOpptjeningUtDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.dto.serialisering.SaksbehandlerUtDto
 import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.SelvstendigInntektsopplysningUtDto
-import no.nav.helse.dto.serialisering.SelvstendigOpptjeningUtDto
 import no.nav.helse.dto.serialisering.SkjønnsmessigFastsattUtDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
@@ -826,7 +824,7 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagE
     },
     inntektsgrunnlag = this.inntektsgrunnlag.tilPersonData(),
     opptjening = when (this) {
-        is VilkårsgrunnlagUtDto.Spleis -> this.opptjening.tilPersonData()
+        is VilkårsgrunnlagUtDto.Spleis -> this.opptjening?.tilPersonData()
         is VilkårsgrunnlagUtDto.Infotrygd -> null
     },
     medlemskapstatus = when (this) {
@@ -850,18 +848,7 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagE
     vilkårsgrunnlagId = this.vilkårsgrunnlagId
 )
 
-private fun OpptjeningUtDto.tilPersonData() = when (this) {
-    is ArbeidstakerOpptjeningUtDto -> this.tilPersonData()
-    is SelvstendigOpptjeningUtDto -> this.tilPersonData()
-}
-
-private fun SelvstendigOpptjeningUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.OpptjeningData(
-    opptjeningFom = this.opptjeningsperiode.fom,
-    opptjeningTom = this.opptjeningsperiode.tom,
-    arbeidsforhold = emptyList()
-)
-
-private fun ArbeidstakerOpptjeningUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.OpptjeningData(
+private fun OpptjeningUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.OpptjeningData(
     opptjeningFom = this.opptjeningsperiode.fom,
     opptjeningTom = this.opptjeningsperiode.tom,
     arbeidsforhold = this.arbeidsforhold.map {

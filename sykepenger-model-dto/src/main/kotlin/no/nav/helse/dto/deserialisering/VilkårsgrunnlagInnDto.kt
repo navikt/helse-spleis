@@ -14,7 +14,7 @@ sealed class VilkårsgrunnlagInnDto {
         override val vilkårsgrunnlagId: UUID,
         override val skjæringstidspunkt: LocalDate,
         override val inntektsgrunnlag: InntektsgrunnlagInnDto,
-        val opptjening: OpptjeningInnDto,
+        val opptjening: OpptjeningInnDto?,
         val medlemskapstatus: MedlemskapsvurderingDto,
         val vurdertOk: Boolean,
         val meldingsreferanseId: MeldingsreferanseDto?

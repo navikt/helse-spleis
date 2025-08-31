@@ -8,11 +8,10 @@ import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.ArbeidstakerFaktaavklartInntektUtDto
-import no.nav.helse.dto.serialisering.ArbeidstakerOpptjeningUtDto
 import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
+import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.dto.serialisering.SaksbehandlerUtDto
-import no.nav.helse.dto.serialisering.SelvstendigOpptjeningUtDto
 import no.nav.helse.dto.serialisering.SkjønnsmessigFastsattUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
@@ -212,11 +211,11 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             sykepengegrunnlagsgrense = begrensning,
             meldingsreferanseId = grunnlagsdata.meldingsreferanseId?.id,
             antallOpptjeningsdagerErMinst = when (grunnlagsdata.opptjening) {
-                is ArbeidstakerOpptjeningUtDto -> (grunnlagsdata.opptjening as ArbeidstakerOpptjeningUtDto).opptjeningsdager
-                is SelvstendigOpptjeningUtDto -> 0
+                is OpptjeningUtDto -> (grunnlagsdata.opptjening as OpptjeningUtDto).opptjeningsdager
+                null -> 0
             },
             oppfyllerKravOmMinstelønn = oppfyllerMinsteinntekt,
-            oppfyllerKravOmOpptjening = grunnlagsdata.opptjening.erOppfylt,
+            oppfyllerKravOmOpptjening = grunnlagsdata.opptjening?.erOppfylt ?: true,
             oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
             id = grunnlagsdata.vilkårsgrunnlagId
         )

@@ -33,12 +33,10 @@ import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.InntektsmeldingUtDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
-import no.nav.helse.dto.serialisering.ArbeidstakerOpptjeningUtDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.dto.serialisering.SaksbehandlerUtDto
 import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
-import no.nav.helse.dto.serialisering.SelvstendigOpptjeningUtDto
 import no.nav.helse.dto.serialisering.SkjønnsmessigFastsattUtDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
@@ -1617,7 +1615,7 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = VilkårsgrunnlagElementData(
     },
     inntektsgrunnlag = this.inntektsgrunnlag.tilPersonData(),
     opptjening = when (this) {
-        is VilkårsgrunnlagUtDto.Spleis -> this.opptjening.tilPersonData()
+        is VilkårsgrunnlagUtDto.Spleis -> this.opptjening?.tilPersonData()
         is VilkårsgrunnlagUtDto.Infotrygd -> null
     },
     medlemskapstatus = when (this) {
@@ -1641,18 +1639,7 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = VilkårsgrunnlagElementData(
     vilkårsgrunnlagId = this.vilkårsgrunnlagId
 )
 
-private fun OpptjeningUtDto.tilPersonData() = when (this) {
-    is ArbeidstakerOpptjeningUtDto -> this.tilPersonData()
-    is SelvstendigOpptjeningUtDto -> this.tilPersonData()
-}
-
-private fun SelvstendigOpptjeningUtDto.tilPersonData() = VilkårsgrunnlagElementData.OpptjeningData(
-    opptjeningFom = this.opptjeningsperiode.fom,
-    opptjeningTom = this.opptjeningsperiode.tom,
-    arbeidsforhold = emptyList()
-)
-
-private fun ArbeidstakerOpptjeningUtDto.tilPersonData() =
+private fun OpptjeningUtDto.tilPersonData() =
     VilkårsgrunnlagElementData.OpptjeningData(
         opptjeningFom = this.opptjeningsperiode.fom,
         opptjeningTom = this.opptjeningsperiode.tom,
