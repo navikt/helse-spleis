@@ -7,6 +7,7 @@ dependencies {
 
     api(project(":sykepenger-primitiver"))
     api(project(":sykepenger-utbetaling"))
+    api(project(":sykepenger-økonomi"))
     api(project(":sykepenger-aktivitetslogg"))
     api(project(":sykepenger-etterlevelse-api"))
 

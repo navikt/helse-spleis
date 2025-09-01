@@ -1,6 +1,5 @@
 package no.nav.helse.økonomi
 
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -8,6 +7,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.ratio
+import no.nav.helse.økonomi.inspectors.inspektør
 import no.nav.helse.økonomi.Økonomi.Companion.totalSykdomsgrad
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

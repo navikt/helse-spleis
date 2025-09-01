@@ -4,7 +4,6 @@ import java.math.BigDecimal
 import java.math.MathContext
 import kotlin.math.roundToInt
 import no.nav.helse.dto.ProsentdelDto
-import no.nav.helse.etterlevelse.Subsumsjonslogg
 
 class Prosentdel private constructor(private val brøkdel: BigDecimal) : Comparable<Prosentdel> {
     init {
@@ -20,15 +19,11 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal) : Compara
         private val mc = MathContext.DECIMAL128
         private val SIKKER_BRØK = 1.0.toBigDecimal(mc)
         private val HUNDRE_PROSENT = 100.0.toBigDecimal(mc)
-        private val GRENSE = 20.prosent
+        val GRENSE = 20.prosent
         private val EPSILON = BigDecimal("0.00001")
 
         internal fun ratio(a: Double, b: Double) =
             Prosentdel(if (a < b) a.toBigDecimal(mc).divide(b.toBigDecimal(mc), mc) else SIKKER_BRØK)
-
-        fun subsumsjon(subsumsjonslogg: Subsumsjonslogg, block: Subsumsjonslogg.(Double) -> Unit) {
-            subsumsjonslogg.block(GRENSE.toDouble())
-        }
 
         internal fun Collection<Pair<Prosentdel, Double>>.average(inntektjustering: Double): Prosentdel {
             return map { it.first to it.second.toBigDecimal(mc) }.average(inntektjustering.toBigDecimal(mc))
