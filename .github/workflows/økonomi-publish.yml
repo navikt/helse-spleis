@@ -1,0 +1,36 @@
+name: publish økonomi artifacts
+on:
+  push:
+    paths:
+      - 'sykepenger-økonomi/**'
+      - 'sykepenger-økonomi-dto/**'
+      - '.github/workflows/økonomi-publish.yml'
+    branches:
+      - master
+jobs:
+  publish:
+    permissions:
+      packages: write
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Genererer versjon
+        run: |
+          TIME=$(TZ="Europe/Oslo" date +%Y.%m.%d-%H.%M)
+          COMMIT=$(git rev-parse --short=8 HEAD)
+          VERSION=$TIME-$COMMIT
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: upload artifacts
+        run: ./gradlew -Pversion="$(echo $VERSION)" :sykepenger-økonomi-dto:publish :sykepenger-økonomi:publish
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
