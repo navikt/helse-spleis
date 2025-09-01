@@ -1,3 +1,7 @@
+plugins {
+    `maven-publish`
+}
+
 val commonsCodecVersion = "1.15"
 
 dependencies {

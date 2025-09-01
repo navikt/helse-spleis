@@ -1,3 +1,7 @@
+plugins {
+    `maven-publish`
+}
+
 dependencies {
     // bruker "implementation" fremfor "api" for å unngå
     // at avhengigheten blir transitiv, altså kopiert ut, til de som bruker denne modulen.

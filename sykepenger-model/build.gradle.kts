@@ -1,3 +1,7 @@
+plugins {
+    `maven-publish`
+}
+
 val jsonassertVersion = "1.5.0"
 val tbdSpillAvImMatchingVersion = "2025.04.08-12.41-e519e1f8"
 

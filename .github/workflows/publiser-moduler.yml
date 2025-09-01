@@ -1,0 +1,40 @@
+name: Publiser moduler
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Generer versjon
+        run: |
+          TIME=$(TZ="Europe/Oslo" date +%Y.%m.%d-%H.%M)
+          COMMIT=$(git rev-parse --short=8 HEAD)
+          VERSION=$TIME-$COMMIT
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Publish with Gradle
+        run: ./gradlew -Pversion="$(echo $VERSION)" publish
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
