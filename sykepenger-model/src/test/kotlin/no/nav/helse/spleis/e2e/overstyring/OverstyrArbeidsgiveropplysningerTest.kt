@@ -58,6 +58,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import no.nav.helse.økonomi.inspectors.inspektør
 
 internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 

@@ -12,6 +12,7 @@ dependencies {
     api(project(":sykepenger-etterlevelse-api"))
 
     testImplementation(kotlin("reflect"))
+    testImplementation(testFixtures(project(":sykepenger-økonomi")))
     testImplementation(testFixtures(project(":sykepenger-utbetaling")))
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
     testImplementation("com.github.navikt.spill_av_im:matching:$tbdSpillAvImMatchingVersion")
