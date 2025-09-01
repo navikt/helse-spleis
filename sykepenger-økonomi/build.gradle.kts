@@ -15,8 +15,8 @@ configure<PublishingExtension> {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
-            groupId = "com.github.navikt.spleis.økonomi"
-            artifactId = project.name
+            groupId = "com.github.navikt.spleis"
+            artifactId = "sykepenger-okonomi"
         }
     }
     repositories {
