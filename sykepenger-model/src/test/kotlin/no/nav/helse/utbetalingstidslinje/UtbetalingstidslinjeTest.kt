@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import no.nav.helse.økonomi.inspectors.inspektør
 
 internal class UtbetalingstidslinjeTest {
 

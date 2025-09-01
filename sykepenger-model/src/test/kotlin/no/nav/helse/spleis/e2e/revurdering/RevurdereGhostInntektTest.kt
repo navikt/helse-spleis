@@ -31,6 +31,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import no.nav.helse.økonomi.inspectors.inspektør
 
 internal class RevurderGhostInntektTest : AbstractDslTest() {
 

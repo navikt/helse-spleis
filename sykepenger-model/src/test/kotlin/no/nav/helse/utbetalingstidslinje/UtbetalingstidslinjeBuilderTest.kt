@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import no.nav.helse.økonomi.inspectors.inspektør
 
 internal class UtbetalingstidslinjeBuilderTest {
     @Test

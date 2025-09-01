@@ -6,8 +6,6 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
-import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.ArbeidstakerOpptjeningView
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
@@ -16,6 +14,7 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

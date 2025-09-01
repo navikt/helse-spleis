@@ -60,6 +60,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
+import no.nav.helse.økonomi.inspectors.inspektør
 
 internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 

@@ -11,6 +11,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import no.nav.helse.økonomi.inspectors.inspektør
 
 internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiodeTest {
 

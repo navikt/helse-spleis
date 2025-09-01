@@ -74,6 +74,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import no.nav.helse.økonomi.inspectors.inspektør
 
 internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     
