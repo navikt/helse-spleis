@@ -13,6 +13,7 @@ dependencies {
     testFixturesImplementation(project(":sykepenger-aktivitetslogg"))
     testFixturesImplementation(project(":sykepenger-primitiver"))
     testFixturesImplementation(project(":sykepenger-økonomi"))
+    testFixturesImplementation(testFixtures(project(":sykepenger-økonomi")))
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {
         exclude("com.fasterxml.jackson.core")
