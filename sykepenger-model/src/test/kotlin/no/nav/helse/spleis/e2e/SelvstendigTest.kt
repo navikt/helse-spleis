@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING
@@ -38,7 +37,7 @@ internal class SelvstendigTest : AbstractDslTest() {
         selvstendig {
             håndterSøknadSelvstendig(januar)
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
         }
     }
 
@@ -57,7 +56,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
 
             assertEquals(setOf(80), inspektør.sykdomstidslinje.inspektør.grader.values.toSet())
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
         }
     }
 
@@ -76,7 +75,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
 
             assertEquals("VVVVVVV VVVVVVV VVNNNHH NNNXXXX XXX", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
         }
     }
 
@@ -94,7 +93,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
 
             assertEquals("XXXXXXX XXXXXXX XXXXXXX XXXXXXX XXX", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
         }
     }
 
@@ -104,7 +103,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterSøknadSelvstendig(januar)
 
             assertEquals(1.januar til 16.januar, inspektør.ventetid(1.vedtaksperiode))
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
         }
     }
 
@@ -120,7 +119,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             )
             assertFunksjonelleFeil(1.vedtaksperiode.filter())
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
         }
     }
 
@@ -130,7 +129,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterSøknadSelvstendig(januar)
             assertFunksjonelleFeil()
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
         }
     }
 
@@ -177,7 +176,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                 SELVSTENDIG_AVSLUTTET
             )
             assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
         }
     }
 
@@ -229,7 +228,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                 SELVSTENDIG_AVSLUTTET
             )
             assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
         }
     }
 
@@ -243,8 +242,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
             assertTilstander(2.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE)
             assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
-            assertVarsel(Varselkode.RV_SØ_45, 2.vedtaksperiode.filter())
+
         }
     }
 }

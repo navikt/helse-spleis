@@ -78,7 +78,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                         )
                 )
             )
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
             assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
         }
     }
@@ -118,7 +118,6 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                 output = emptyMap()
             )
 
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
         }
     }
 
@@ -145,7 +144,6 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                 output = mapOf("sykepengegrunnlag" to 460589.0)
             )
 
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
         }
     }
 
@@ -170,7 +168,6 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                 )
             )
 
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
         }
     }
 
@@ -191,7 +188,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                 )
             }
             assertSubsumsjoner { assertEquals(1, antallSubsumsjoner(this)) }
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
         }
     }
 
@@ -202,7 +199,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
 
             SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_51, ledd = LEDD_2)
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
         }
     }
 
@@ -230,7 +227,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                 output = emptyMap()
             )
             SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
         }
     }
 
@@ -265,7 +262,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                 output = emptyMap()
             )
             SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
-            assertVarsler(1.vedtaksperiode, Varselkode.RV_SØ_45, Varselkode.RV_SV_1)
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_SV_1)
         }
     }
 
@@ -288,7 +285,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
 
             SubsumsjonInspektør(jurist).assertOppfylt(
                 paragraf = PARAGRAF_8_3,
@@ -303,7 +300,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsler(2.vedtaksperiode, Varselkode.RV_SV_1, Varselkode.RV_SØ_45)
+            assertVarsler(2.vedtaksperiode, Varselkode.RV_SV_1)
 
             SubsumsjonInspektør(jurist).assertIkkeOppfylt(
                 paragraf = PARAGRAF_8_51,
@@ -324,7 +321,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterSøknadSelvstendig(mars)
             håndterYtelser(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-            assertVarsler(3.vedtaksperiode, Varselkode.RV_SV_1, Varselkode.RV_SØ_45)
+            assertVarsler(3.vedtaksperiode, Varselkode.RV_SV_1)
 
             assertEquals(
                 2, SubsumsjonInspektør(jurist).antallSubsumsjoner(
@@ -367,7 +364,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
 
             håndterSøknadSelvstendig(2.februar til 28.februar)
             håndterSøknad(
@@ -384,7 +381,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsel(Varselkode.RV_SØ_45, 2.vedtaksperiode.filter())
+
 
             SubsumsjonInspektør(jurist).assertOppfylt(
                 paragraf = PARAGRAF_8_51,
@@ -459,7 +456,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
 
             håndterSøknadSelvstendig(3.februar til 28.februar)
             håndterVilkårsgrunnlag(2.vedtaksperiode, skatteinntekter = emptyList())
@@ -467,7 +464,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsel(Varselkode.RV_SØ_45, 2.vedtaksperiode.filter())
+
 
             SubsumsjonInspektør(jurist).assertOppfylt(
                 paragraf = PARAGRAF_8_51,
@@ -542,14 +539,14 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
 
             håndterSøknadSelvstendig(februar)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsel(Varselkode.RV_SØ_45, 2.vedtaksperiode.filter())
+
 
             håndterSøknad(
                 Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent),
@@ -564,14 +561,12 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterSimulering(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsel(Varselkode.RV_SØ_45, 3.vedtaksperiode.filter())
 
             håndterSøknadSelvstendig(1.april til 26.april)
             håndterYtelser(4.vedtaksperiode)
             håndterSimulering(4.vedtaksperiode)
             håndterUtbetalingsgodkjenning(4.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsel(Varselkode.RV_SØ_45, 4.vedtaksperiode.filter())
 
             SubsumsjonInspektør(jurist).assertOppfylt(
                 paragraf = PARAGRAF_8_51,
@@ -707,28 +702,26 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
 
             håndterSøknadSelvstendig(februar)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsel(Varselkode.RV_SØ_45, 2.vedtaksperiode.filter())
+
 
             håndterSøknadSelvstendig(mars)
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsel(Varselkode.RV_SØ_45, 3.vedtaksperiode.filter())
 
             håndterSøknadSelvstendig(1.april til 27.april)
             håndterYtelser(4.vedtaksperiode)
             håndterSimulering(4.vedtaksperiode)
             håndterUtbetalingsgodkjenning(4.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsel(Varselkode.RV_SØ_45, 4.vedtaksperiode.filter())
 
             SubsumsjonInspektør(jurist).assertOppfylt(
                 paragraf = PARAGRAF_8_51,
@@ -891,7 +884,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
 
             håndterOverstyrTidslinje(
                 overstyringsdager = listOf(

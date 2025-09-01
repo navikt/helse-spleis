@@ -26,7 +26,6 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøknad er lagt til grunn`
-import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad er lagt til grunn`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som ikke støttes`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som støttes`
@@ -136,8 +135,6 @@ class Søknad(
 
     private fun validerSelvstendig(aktivitetslogg: IAktivitetslogg) {
         if (pensjonsgivendeInntekter?.size != null && pensjonsgivendeInntekter.size < 3) aktivitetslogg.funksjonellFeil(Varselkode.RV_IV_12)
-
-        aktivitetslogg.varsel(`Selvstendigsøknad er lagt til grunn`)
     }
 
     private fun valider(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {

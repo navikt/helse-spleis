@@ -14,8 +14,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -92,7 +90,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 inntektskilde = "EN_ARBEIDSGIVER",
                 omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to selvstendig, "beløp" to 460589.0))
             )
-            assertVarsel(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+
         }
     }
 
