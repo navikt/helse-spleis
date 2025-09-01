@@ -1,4 +1,4 @@
-package no.nav.helse.inspectors
+package no.nav.helse.økonomi.inspectors
 
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent

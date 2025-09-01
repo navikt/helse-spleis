@@ -17,6 +17,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
+import no.nav.helse.økonomi.inspectors.inspektør
 
 val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
 

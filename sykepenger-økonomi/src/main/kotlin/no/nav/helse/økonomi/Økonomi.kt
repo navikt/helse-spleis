@@ -6,7 +6,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosentdel.Companion.NullProsent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.slf4j.LoggerFactory
 
 data class Økonomi(
     val sykdomsgrad: Prosentdel,
@@ -22,8 +21,6 @@ data class Økonomi(
     private val reservertPersonbeløp: Inntekt? = null
 ) {
     companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-
         fun inntekt(sykdomsgrad: Prosentdel, aktuellDagsinntekt: Inntekt, dekningsgrad: Prosentdel, refusjonsbeløp: Inntekt, inntektjustering: Inntekt) =
             Økonomi(
                 sykdomsgrad = sykdomsgrad,

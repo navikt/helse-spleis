@@ -46,9 +46,7 @@ internal class Sykdomsgradfilter(
         val avvisteTidslinjer = oppdaterte.avvis(avvistePerioder, Begrunnelse.MinimumSykdomsgrad)
 
         val tidslinjerForSubsumsjon = arbeidsgivere.map { it.samletVedtaksperiodetidslinje }.subsumsjonsformat()
-        Prosentdel.subsumsjon(subsumsjonslogg) { grense ->
-            logg(`§ 8-13 ledd 2`(vedtaksperiode, tidslinjerForSubsumsjon, grense, avvistePerioder))
-        }
+        subsumsjonslogg.logg(`§ 8-13 ledd 2`(vedtaksperiode, tidslinjerForSubsumsjon, Prosentdel.GRENSE.toDouble(), avvistePerioder))
         val avvisteDager = avvisteDager(avvisteTidslinjer.map { it.samletVedtaksperiodetidslinje }, vedtaksperiode, Begrunnelse.MinimumSykdomsgrad)
         val harAvvisteDager = avvisteDager.isNotEmpty()
         `§ 8-13 ledd 1`(vedtaksperiode, avvisteDager.map { it.dato }.grupperSammenhengendePerioderMedHensynTilHelg(), tidslinjerForSubsumsjon).forEach {

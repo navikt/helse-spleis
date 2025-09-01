@@ -9,8 +9,10 @@ dependencies {
     implementation(project(":sykepenger-etterlevelse-api"))
     implementation(project(":sykepenger-primitiver"))
     implementation(project(":sykepenger-aktivitetslogg"))
+    implementation(project(":sykepenger-økonomi"))
     testFixturesImplementation(project(":sykepenger-aktivitetslogg"))
     testFixturesImplementation(project(":sykepenger-primitiver"))
+    testFixturesImplementation(project(":sykepenger-økonomi"))
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {
         exclude("com.fasterxml.jackson.core")
