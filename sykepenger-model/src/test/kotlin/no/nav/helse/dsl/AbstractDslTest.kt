@@ -25,10 +25,10 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Person
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.serde.assertPersonEquals
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
@@ -166,8 +166,8 @@ internal abstract class AbstractDslTest {
         assertSisteTilstand(id, tilstand)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertSisteTilstand(id: UUID, tilstand: TilstandType) {
-        testArbeidsgiverAsserter.assertSisteTilstand(id, tilstand)
+    protected fun TestPerson.TestArbeidsgiver.assertSisteTilstand(id: UUID, tilstand: TilstandType, errortekst: (() -> String)? = null) {
+        testArbeidsgiverAsserter.assertSisteTilstand(id, tilstand, errortekst)
     }
 
     protected fun TestPerson.TestArbeidsgiver.assertUtbetalingsbeløp(
