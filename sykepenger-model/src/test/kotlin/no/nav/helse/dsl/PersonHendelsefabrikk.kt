@@ -3,7 +3,7 @@ package no.nav.helse.dsl
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.medSaksbehandlerinntekt
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.medSkjønnsmessigFastsattInntekt
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.refusjonstidslinjer
@@ -79,7 +79,11 @@ internal class PersonHendelsefabrikk {
 internal class OverstyrtArbeidsgiveropplysning(
     private val orgnummer: String,
     private val inntekt: Inntekt,
-    private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>? = null
+    private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>? = null,
+    private val overstyringbegrunnelse: OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(
+        forklaring = "forklaring",
+        begrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.VARIG_LØNNSENDRING
+    ),
 ) {
     private fun refusjonsopplysninger(førsteDag: LocalDate) = refusjonsopplysninger ?: listOf(Triple(førsteDag, null, inntekt))
 
@@ -94,10 +98,7 @@ internal class OverstyrtArbeidsgiveropplysning(
                         beløp = it.inntekt,
                         tidsstempel = tidsstempel
                     ),
-                    begrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(
-                        forklaring = "forklaring",
-                        begrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.VARIG_LØNNSENDRING
-                    )
+                    begrunnelse = it.overstyringbegrunnelse
                 )
             }
 

@@ -205,12 +205,11 @@ internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
         ledd: Ledd? = null,
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
-        vedtaksperiodeId: IdInnhenter? = null,
+        vedtaksperiodeId: UUID? = null,
         versjon: LocalDate? = null,
-        organisasjonsnummer: String = a1,
         lovverk: String = "folketrygdloven"
     ) {
-        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId)
         assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
     }
 
@@ -219,12 +218,11 @@ internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
         ledd: Ledd? = null,
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
-        vedtaksperiodeId: IdInnhenter? = null,
+        vedtaksperiodeId: UUID? = null,
         versjon: LocalDate? = null,
-        organisasjonsnummer: String = a1,
         lovverk: String = "folketrygdloven"
     ) {
-        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId)
         assertEquals(0, resultat.size, "Forventer ingen subsumsjoner. Subsumsjoner funnet: $resultat")
     }
 
