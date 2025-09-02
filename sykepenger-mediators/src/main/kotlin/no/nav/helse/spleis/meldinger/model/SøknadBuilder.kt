@@ -20,7 +20,6 @@ internal abstract class SøknadBuilder {
     protected var yrkesskade by Delegates.notNull<Boolean>()
     protected var innsendt: LocalDateTime? = null
     protected var pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>? = null
-    protected var ventetid: Periode? = null
 
     internal fun sykmeldingSkrevet(sykmeldingSkrevet: LocalDateTime) = apply { this.sykmeldingSkrevet = sykmeldingSkrevet }
     internal fun fødselsdato(fødselsdato: LocalDate) = apply { this.fødselsdato = fødselsdato }
