@@ -1,5 +1,5 @@
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import java.io.PrintWriter
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
     kotlin("jvm") version "2.2.10"
@@ -52,7 +52,10 @@ allprojects {
         withType<Jar> {
             duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
-
+        test {
+            environment("FRA_DATO", "1")
+            environment("TIL_DATO", "31")
+        }
     }
 }
 

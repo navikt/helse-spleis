@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
 import java.time.Year
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
@@ -28,9 +29,28 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class SelvstendigTest : AbstractDslTest() {
+
+    @BeforeEach
+    fun resetToggles() {
+        Toggle.FraDato = 1
+        Toggle.TilDato = 31
+    }
+
+    @Test
+    fun `slipper ikke igjennom selvstendig med dato utenfor 12-13`() = Toggle.SelvstendigNæringsdrivende.enable {
+        Toggle.FraDato = 12
+        Toggle.TilDato = 13
+        medFødselsdato(LocalDate.of(1995, 1, 28))
+        selvstendig {
+            håndterSøknadSelvstendig(3.januar til 26.januar)
+            assertFunksjonelleFeil(1.vedtaksperiode.filter())
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
+        }
+    }
 
     @Test
     fun `Verifiserer sykdomstidslinje for selvstendig`() = Toggle.SelvstendigNæringsdrivende.enable {
