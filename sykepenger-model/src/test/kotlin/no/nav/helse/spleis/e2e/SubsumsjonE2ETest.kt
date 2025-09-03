@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.YearMonth
-import no.nav.helse.Personidentifikator
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -13,6 +12,7 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_B
@@ -1467,1495 +1467,1523 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
             }
 
         }
+    }
 
-        @Test
-        fun `§ 8-16 ledd 1 - dekningsgrad`() {
-            a1 {
-                håndterSykmelding(januar)
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
-                håndterVilkårsgrunnlag(1.vedtaksperiode)
-                håndterYtelser(1.vedtaksperiode)
+    @Test
+    fun `§ 8-16 ledd 1 - dekningsgrad`() {
+        a1 {
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
 
-                SubsumsjonInspektør(jurist).assertBeregnet(
-                    paragraf = PARAGRAF_8_16,
-                    ledd = 1.ledd,
-                    versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-                    input = mapOf(
-                        "dekningsgrad" to 1.0,
-                        "inntekt" to 372000.0,
-                    ),
-                    output = mapOf(
-                        "dekningsgrunnlag" to 372000.0,
-                        "perioder" to listOf(
-                            mapOf(
-                                "fom" to 1.januar,
-                                "tom" to 31.januar,
-                            )
+            SubsumsjonInspektør(jurist).assertBeregnet(
+                paragraf = PARAGRAF_8_16,
+                ledd = 1.ledd,
+                versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+                input = mapOf(
+                    "dekningsgrad" to 1.0,
+                    "inntekt" to 372000.0,
+                ),
+                output = mapOf(
+                    "dekningsgrunnlag" to 372000.0,
+                    "perioder" to listOf(
+                        mapOf(
+                            "fom" to 1.januar,
+                            "tom" to 31.januar,
                         )
                     )
                 )
-            }
+            )
         }
+    }
 
-        @Test
-        fun `§ 8-17 ledd 1 bokstav a - trygden yter sykepenger ved utløp av arbeidsgiverperioden`() {
-            a1 {
-                håndterSykmelding(januar)
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(
-                    listOf(1.januar til 16.januar),
-                    beregnetInntekt = INNTEKT,
-                    vedtaksperiodeId = 1.vedtaksperiode
-                )
-                håndterVilkårsgrunnlag(1.vedtaksperiode)
-                håndterYtelser(1.vedtaksperiode)
+    @Test
+    fun `§ 8-17 ledd 1 bokstav a - trygden yter sykepenger ved utløp av arbeidsgiverperioden`() {
+        a1 {
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
 
-                SubsumsjonInspektør(jurist).assertPaaIndeks(
-                    paragraf = PARAGRAF_8_17,
-                    index = 0,
-                    forventetAntall = 1,
-                    ledd = 1.ledd,
-                    bokstav = BOKSTAV_A,
-                    versjon = 1.januar,
-                    input = mapOf(
-                        "sykdomstidslinje" to listOf(
-                            mapOf(
-                                "fom" to 1.januar,
-                                "tom" to 31.januar,
-                                "dagtype" to "SYKEDAG",
-                                "grad" to 100
-                            )
-                        )
-                    ),
-                    output = mapOf(
-                        "perioder" to listOf(mapOf("fom" to 17.januar, "tom" to 17.januar))
-                    ),
-                    utfall = VILKAR_OPPFYLT
-                )
-                SubsumsjonInspektør(jurist).assertPaaIndeks(
-                    paragraf = PARAGRAF_8_17,
-                    index = 0,
-                    forventetAntall = 1,
-                    ledd = 1.ledd,
-                    bokstav = BOKSTAV_A,
-                    versjon = 1.januar,
-                    input = mapOf(
-                        "sykdomstidslinje" to listOf(
-                            mapOf(
-                                "fom" to 1.januar,
-                                "tom" to 31.januar,
-                                "dagtype" to "SYKEDAG",
-                                "grad" to 100
-                            )
-                        )
-                    ),
-                    output = mapOf(
-                        "perioder" to listOf(mapOf("fom" to 17.januar, "tom" to 17.januar))
-                    ),
-                    utfall = VILKAR_OPPFYLT
-                )
-            }
-        }
-
-        @Test
-        fun `§ 8-17 ledd 1 bokstav a - trygden yter sykepenger dersom arbeidsgiverperioden avslutter på en fredag`() {
-            a1 {
-                håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar))
-                håndterSøknad(4.januar til 22.januar)
-                håndterArbeidsgiveropplysninger(
-                    listOf(4.januar til 19.januar),
-                    beregnetInntekt = INNTEKT,
-                    vedtaksperiodeId = 1.vedtaksperiode
-                )
-                håndterVilkårsgrunnlag(1.vedtaksperiode)
-                håndterYtelser(1.vedtaksperiode)
-
-                SubsumsjonInspektør(jurist).assertPaaIndeks(
-                    paragraf = PARAGRAF_8_17,
-                    index = 0,
-                    forventetAntall = 1,
-                    ledd = 1.ledd,
-                    bokstav = BOKSTAV_A,
-                    versjon = 1.januar,
-                    input = mapOf(
-                        "sykdomstidslinje" to listOf(
-                            mapOf(
-                                "fom" to 4.januar,
-                                "tom" to 22.januar,
-                                "dagtype" to "SYKEDAG",
-                                "grad" to 100
-                            )
-                        )
-                    ),
-                    output = mapOf(
-                        "perioder" to listOf(mapOf("fom" to 22.januar, "tom" to 22.januar))
-                    ),
-                    utfall = VILKAR_OPPFYLT,
-                )
-                SubsumsjonInspektør(jurist).assertPaaIndeks(
-                    paragraf = PARAGRAF_8_17,
-                    index = 0,
-                    forventetAntall = 1,
-                    ledd = 1.ledd,
-                    bokstav = BOKSTAV_A,
-                    versjon = 1.januar,
-                    input = mapOf(
-                        "sykdomstidslinje" to listOf(
-                            mapOf(
-                                "fom" to 4.januar,
-                                "tom" to 22.januar,
-                                "dagtype" to "SYKEDAG",
-                                "grad" to 100
-                            )
-                        )
-                    ),
-                    output = mapOf(
-                        "perioder" to listOf(mapOf("fom" to 22.januar, "tom" to 22.januar))
-                    ),
-                    utfall = VILKAR_OPPFYLT,
-                )
-            }
-        }
-
-        @Test
-        fun `§ 8-17 ledd 1 bokstav a - trygden yter ikke sykepenger dersom arbeidsgiverperioden ikke er fullført`() {
-            a1 {
-                håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
-                håndterSøknad(1.januar til 16.januar)
-                håndterInntektsmelding(
-                    listOf(1.januar til 16.januar),
-                    beregnetInntekt = INNTEKT
-                )
-                assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
-                SubsumsjonInspektør(jurist).assertFlereIkkeOppfylt(
-                    antall = 2,
-                    lovverk = "folketrygdloven",
-                    paragraf = PARAGRAF_8_17,
-                    ledd = 1.ledd,
-                    bokstav = BOKSTAV_A,
-                    versjon = 1.januar(2018),
-                    input = mapOf(
-                        "sykdomstidslinje" to listOf(
-                            mapOf(
-                                "fom" to 1.januar,
-                                "tom" to 16.januar,
-                                "dagtype" to "SYKEDAG",
-                                "grad" to 100
-                            )
-                        )
-                    ),
-                    output = mapOf("perioder" to listOf(mapOf("fom" to 1.januar, "tom" to 16.januar)))
-                )
-            }
-        }
-
-        @Test
-        fun `§ 8-17 ledd 1 bokstav a - trygden yter ikke sykepenger dersom arbeidsgiverperioden ikke er påstartet`() {
-            a1 {
-                håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), Arbeid(1.januar, 10.januar))
-                assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
-                SubsumsjonInspektør(jurist).assertFlereIkkeOppfylt(
-                    antall = 1,
-                    lovverk = "folketrygdloven",
-                    paragraf = PARAGRAF_8_17,
-                    ledd = 1.ledd,
-                    bokstav = BOKSTAV_A,
-                    versjon = 1.januar(2018),
-                    input = mapOf(
-                        "sykdomstidslinje" to emptyList<Any>()
-                    ),
-                    output = mapOf("perioder" to listOf(mapOf("fom" to 1.januar, "tom" to 10.januar)))
-                )
-            }
-        }
-
-        @Test
-        fun `§ 8-17 ledd 1 bokstav a - ikke-oppfylt innenfor arbeidsgiverperioden`() {
-            a1 {
-                håndterSykmelding(januar)
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(
-                    listOf(1.januar til 16.januar),
-                    beregnetInntekt = INNTEKT,
-                    vedtaksperiodeId = 1.vedtaksperiode
-                )
-                håndterVilkårsgrunnlag(1.vedtaksperiode)
-                håndterYtelser(1.vedtaksperiode)
-                SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-                    paragraf = PARAGRAF_8_17,
-                    ledd = 1.ledd,
-                    bokstav = BOKSTAV_A,
-                    versjon = 1.januar(2018),
-                    input = mapOf(
-                        "sykdomstidslinje" to listOf(
-                            mapOf(
-                                "fom" to 1.januar,
-                                "tom" to 31.januar,
-                                "dagtype" to "SYKEDAG",
-                                "grad" to 100
-                            )
-                        )
-                    ),
-                    output = mapOf(
-                        "perioder" to listOf(mapOf("fom" to 1.januar, "tom" to 16.januar))
-                    )
-                )
-            }
-        }
-
-        @Test
-        fun `§ 8-17 ledd 1 bokstav a - opphold inne i arbeidsgiverperioden`() {
-            a1 {
-                håndterSykmelding(januar)
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(
-                    listOf(1.januar til 10.januar, 12.januar til 17.januar),
-                    beregnetInntekt = INNTEKT,
-                    vedtaksperiodeId = 1.vedtaksperiode
-                )
-                håndterVilkårsgrunnlag(1.vedtaksperiode)
-                håndterYtelser(1.vedtaksperiode)
-                SubsumsjonInspektør(jurist).assertPaaIndeks(
-                    index = 0,
-                    utfall = VILKAR_IKKE_OPPFYLT,
-                    forventetAntall = 1,
-                    lovverk = "folketrygdloven",
-                    paragraf = PARAGRAF_8_17,
-                    ledd = 1.ledd,
-                    bokstav = BOKSTAV_A,
-                    versjon = 1.januar(2018),
-                    input = mapOf(
-                        "sykdomstidslinje" to listOf(
-                            mapOf("fom" to 1.januar, "tom" to 10.januar, "dagtype" to "SYKEDAG", "grad" to 100),
-                            mapOf("fom" to 12.januar, "tom" to 31.januar, "dagtype" to "SYKEDAG", "grad" to 100)
-                        )
-                    ),
-                    output = mapOf(
-                        "perioder" to listOf(
-                            mapOf("fom" to 1.januar, "tom" to 10.januar),
-                            mapOf("fom" to 12.januar, "tom" to 17.januar)
+            SubsumsjonInspektør(jurist).assertPaaIndeks(
+                paragraf = PARAGRAF_8_17,
+                index = 0,
+                forventetAntall = 1,
+                ledd = 1.ledd,
+                bokstav = BOKSTAV_A,
+                versjon = 1.januar,
+                input = mapOf(
+                    "sykdomstidslinje" to listOf(
+                        mapOf(
+                            "fom" to 1.januar,
+                            "tom" to 31.januar,
+                            "dagtype" to "SYKEDAG",
+                            "grad" to 100
                         )
                     )
-                )
-            }
+                ),
+                output = mapOf(
+                    "perioder" to listOf(mapOf("fom" to 17.januar, "tom" to 17.januar))
+                ),
+                utfall = VILKAR_OPPFYLT
+            )
+            SubsumsjonInspektør(jurist).assertPaaIndeks(
+                paragraf = PARAGRAF_8_17,
+                index = 0,
+                forventetAntall = 1,
+                ledd = 1.ledd,
+                bokstav = BOKSTAV_A,
+                versjon = 1.januar,
+                input = mapOf(
+                    "sykdomstidslinje" to listOf(
+                        mapOf(
+                            "fom" to 1.januar,
+                            "tom" to 31.januar,
+                            "dagtype" to "SYKEDAG",
+                            "grad" to 100
+                        )
+                    )
+                ),
+                output = mapOf(
+                    "perioder" to listOf(mapOf("fom" to 17.januar, "tom" to 17.januar))
+                ),
+                utfall = VILKAR_OPPFYLT
+            )
         }
+    }
 
-        @Test
-        fun `§ 8-17 ledd 2 - trygden yter ikke sykepenger for feriedager og permisjonsdager`() {
-            a1 {
-                håndterSykmelding(januar)
-                håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(30.januar, 31.januar))
-                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
-                håndterVilkårsgrunnlag(1.vedtaksperiode)
-                håndterYtelser(1.vedtaksperiode)
-                SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-                    versjon = 1.januar(2018),
-                    paragraf = PARAGRAF_8_17,
-                    ledd = 2.ledd,
-                    input = mapOf(
-                        "beregnetTidslinje" to listOf(
-                            mapOf("fom" to 1.januar, "tom" to 29.januar, "dagtype" to "SYKEDAG", "grad" to 100),
-                            mapOf("fom" to 30.januar, "tom" to 31.januar, "dagtype" to "FERIEDAG", "grad" to null)
+    @Test
+    fun `§ 8-17 ledd 1 bokstav a - trygden yter sykepenger dersom arbeidsgiverperioden avslutter på en fredag`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar))
+            håndterSøknad(4.januar til 22.januar)
+            håndterArbeidsgiveropplysninger(
+                listOf(4.januar til 19.januar),
+                beregnetInntekt = INNTEKT,
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+
+            SubsumsjonInspektør(jurist).assertPaaIndeks(
+                paragraf = PARAGRAF_8_17,
+                index = 0,
+                forventetAntall = 1,
+                ledd = 1.ledd,
+                bokstav = BOKSTAV_A,
+                versjon = 1.januar,
+                input = mapOf(
+                    "sykdomstidslinje" to listOf(
+                        mapOf(
+                            "fom" to 4.januar,
+                            "tom" to 22.januar,
+                            "dagtype" to "SYKEDAG",
+                            "grad" to 100
+                        )
+                    )
+                ),
+                output = mapOf(
+                    "perioder" to listOf(mapOf("fom" to 22.januar, "tom" to 22.januar))
+                ),
+                utfall = VILKAR_OPPFYLT,
+            )
+            SubsumsjonInspektør(jurist).assertPaaIndeks(
+                paragraf = PARAGRAF_8_17,
+                index = 0,
+                forventetAntall = 1,
+                ledd = 1.ledd,
+                bokstav = BOKSTAV_A,
+                versjon = 1.januar,
+                input = mapOf(
+                    "sykdomstidslinje" to listOf(
+                        mapOf(
+                            "fom" to 4.januar,
+                            "tom" to 22.januar,
+                            "dagtype" to "SYKEDAG",
+                            "grad" to 100
+                        )
+                    )
+                ),
+                output = mapOf(
+                    "perioder" to listOf(mapOf("fom" to 22.januar, "tom" to 22.januar))
+                ),
+                utfall = VILKAR_OPPFYLT,
+            )
+        }
+    }
+
+    @Test
+    fun `§ 8-17 ledd 1 bokstav a - trygden yter ikke sykepenger dersom arbeidsgiverperioden ikke er fullført`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
+            håndterSøknad(1.januar til 16.januar)
+            håndterInntektsmelding(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT
+            )
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
+            SubsumsjonInspektør(jurist).assertFlereIkkeOppfylt(
+                antall = 2,
+                lovverk = "folketrygdloven",
+                paragraf = PARAGRAF_8_17,
+                ledd = 1.ledd,
+                bokstav = BOKSTAV_A,
+                versjon = 1.januar(2018),
+                input = mapOf(
+                    "sykdomstidslinje" to listOf(
+                        mapOf(
+                            "fom" to 1.januar,
+                            "tom" to 16.januar,
+                            "dagtype" to "SYKEDAG",
+                            "grad" to 100
+                        )
+                    )
+                ),
+                output = mapOf("perioder" to listOf(mapOf("fom" to 1.januar, "tom" to 16.januar)))
+            )
+        }
+    }
+
+    @Test
+    fun `§ 8-17 ledd 1 bokstav a - trygden yter ikke sykepenger dersom arbeidsgiverperioden ikke er påstartet`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), Arbeid(1.januar, 10.januar))
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
+            SubsumsjonInspektør(jurist).assertFlereIkkeOppfylt(
+                antall = 1,
+                lovverk = "folketrygdloven",
+                paragraf = PARAGRAF_8_17,
+                ledd = 1.ledd,
+                bokstav = BOKSTAV_A,
+                versjon = 1.januar(2018),
+                input = mapOf(
+                    "sykdomstidslinje" to emptyList<Any>()
+                ),
+                output = mapOf("perioder" to listOf(mapOf("fom" to 1.januar, "tom" to 10.januar)))
+            )
+        }
+    }
+
+    @Test
+    fun `§ 8-17 ledd 1 bokstav a - ikke-oppfylt innenfor arbeidsgiverperioden`() {
+        a1 {
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                paragraf = PARAGRAF_8_17,
+                ledd = 1.ledd,
+                bokstav = BOKSTAV_A,
+                versjon = 1.januar(2018),
+                input = mapOf(
+                    "sykdomstidslinje" to listOf(
+                        mapOf(
+                            "fom" to 1.januar,
+                            "tom" to 31.januar,
+                            "dagtype" to "SYKEDAG",
+                            "grad" to 100
+                        )
+                    )
+                ),
+                output = mapOf(
+                    "perioder" to listOf(mapOf("fom" to 1.januar, "tom" to 16.januar))
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `§ 8-17 ledd 1 bokstav a - opphold inne i arbeidsgiverperioden`() {
+        a1 {
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 10.januar, 12.januar til 17.januar),
+                beregnetInntekt = INNTEKT,
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            SubsumsjonInspektør(jurist).assertPaaIndeks(
+                index = 0,
+                utfall = VILKAR_IKKE_OPPFYLT,
+                forventetAntall = 1,
+                lovverk = "folketrygdloven",
+                paragraf = PARAGRAF_8_17,
+                ledd = 1.ledd,
+                bokstav = BOKSTAV_A,
+                versjon = 1.januar(2018),
+                input = mapOf(
+                    "sykdomstidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 10.januar, "dagtype" to "SYKEDAG", "grad" to 100),
+                        mapOf("fom" to 12.januar, "tom" to 31.januar, "dagtype" to "SYKEDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "perioder" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 10.januar),
+                        mapOf("fom" to 12.januar, "tom" to 17.januar)
+                    )
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `§ 8-17 ledd 2 - trygden yter ikke sykepenger for feriedager og permisjonsdager`() {
+        a1 {
+            håndterSykmelding(januar)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(30.januar, 31.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                versjon = 1.januar(2018),
+                paragraf = PARAGRAF_8_17,
+                ledd = 2.ledd,
+                input = mapOf(
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 29.januar, "dagtype" to "SYKEDAG", "grad" to 100),
+                        mapOf("fom" to 30.januar, "tom" to 31.januar, "dagtype" to "FERIEDAG", "grad" to null)
+                    ),
+                ),
+                output = mapOf(
+                    "perioder" to listOf(mapOf("fom" to 30.januar, "tom" to 31.januar))
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `§ 8-19 andre ledd - arbeidsgiverperioden regnes fra og med første hele fraværsdag`() {
+        a1 {
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            SubsumsjonInspektør(jurist).assertBeregnet(
+                paragraf = PARAGRAF_8_19,
+                ledd = 2.ledd,
+                versjon = 1.januar(2001),
+                input = mapOf(
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 31.januar, "dagtype" to "SYKEDAG", "grad" to 100),
+                    ),
+                ),
+                output = mapOf(
+                    "perioder" to listOf(
+                        mapOf(
+                            "fom" to 1.januar,
+                            "tom" to 16.januar
+                        )
+                    ),
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `§ 8-28 tredje ledd bokstav a - legger tre siste innraporterte inntekter til grunn for andre arbeidsgivere`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
+            håndterSøknad(1.januar til 15.mars)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+            håndterVilkårsgrunnlagFlereArbeidsgivere(
+                vedtaksperiodeId = 1.vedtaksperiode,
+                a1, a2,
+                orgnummer = a1
+            )
+            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
+
+            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+            SubsumsjonInspektør(jurist).assertBeregnet(
+                versjon = 1.januar(2019),
+                paragraf = PARAGRAF_8_28,
+                ledd = 3.ledd,
+                bokstav = BOKSTAV_A,
+                input = mapOf(
+                    "organisasjonsnummer" to a2,
+                    "skjæringstidspunkt" to 1.januar,
+                    "inntekterSisteTreMåneder" to listOf(
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 10),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
                         ),
-                    ),
-                    output = mapOf(
-                        "perioder" to listOf(mapOf("fom" to 30.januar, "tom" to 31.januar))
-                    )
-                )
-            }
-        }
-
-        @Test
-        fun `§ 8-19 andre ledd - arbeidsgiverperioden regnes fra og med første hele fraværsdag`() {
-            a1 {
-                håndterSykmelding(januar)
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(
-                    listOf(1.januar til 16.januar),
-                    beregnetInntekt = INNTEKT,
-                    vedtaksperiodeId = 1.vedtaksperiode
-                )
-                håndterVilkårsgrunnlag(1.vedtaksperiode)
-                håndterYtelser(1.vedtaksperiode)
-                SubsumsjonInspektør(jurist).assertBeregnet(
-                    paragraf = PARAGRAF_8_19,
-                    ledd = 2.ledd,
-                    versjon = 1.januar(2001),
-                    input = mapOf(
-                        "beregnetTidslinje" to listOf(
-                            mapOf("fom" to 1.januar, "tom" to 31.januar, "dagtype" to "SYKEDAG", "grad" to 100),
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 11),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
                         ),
-                    ),
-                    output = mapOf(
-                        "perioder" to listOf(
-                            mapOf(
-                                "fom" to 1.januar,
-                                "tom" to 16.januar
-                            )
-                        ),
-                    )
-                )
-            }
-        }
-
-        @Test
-        fun `§ 8-28 tredje ledd bokstav a - legger tre siste innraporterte inntekter til grunn for andre arbeidsgivere`() {
-            a1 {
-                håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
-                håndterSøknad(1.januar til 15.mars)
-                håndterArbeidsgiveropplysninger(
-                    listOf(1.januar til 16.januar),
-                    refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                )
-                håndterVilkårsgrunnlagFlereArbeidsgivere(
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                    a1, a2,
-                    orgnummer = a1
-                )
-                assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
-
-                håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-                SubsumsjonInspektør(jurist).assertBeregnet(
-                    versjon = 1.januar(2019),
-                    paragraf = PARAGRAF_8_28,
-                    ledd = 3.ledd,
-                    bokstav = BOKSTAV_A,
-                    input = mapOf(
-                        "organisasjonsnummer" to a2,
-                        "skjæringstidspunkt" to 1.januar,
-                        "inntekterSisteTreMåneder" to listOf(
-                            mapOf(
-                                "beløp" to 31000.0,
-                                "årMåned" to YearMonth.of(2017, 10),
-                                "type" to "LØNNSINNTEKT",
-                                "fordel" to "kontantytelse",
-                                "beskrivelse" to "fastloenn"
-                            ),
-                            mapOf(
-                                "beløp" to 31000.0,
-                                "årMåned" to YearMonth.of(2017, 11),
-                                "type" to "LØNNSINNTEKT",
-                                "fordel" to "kontantytelse",
-                                "beskrivelse" to "fastloenn"
-                            ),
-                            mapOf(
-                                "beløp" to 31000.0,
-                                "årMåned" to YearMonth.of(2017, 12),
-                                "type" to "LØNNSINNTEKT",
-                                "fordel" to "kontantytelse",
-                                "beskrivelse" to "fastloenn"
-                            )
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 12),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
                         )
-                    ),
-                    output = mapOf(
-                        "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 372000.0,
-                        "beregnetGrunnlagForSykepengegrunnlagPrMåned" to 31000.0
                     )
+                ),
+                output = mapOf(
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 372000.0,
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to 31000.0
                 )
-            }
+            )
         }
+    }
 
-        @Test
-        fun `§ 8-28 tredje ledd bokstav b - legger tiden arbeidsforholdet har var til grunn om det er nyere enn tre måneder`() {
-            a1 {
+    @Test
+    fun `§ 8-28 tredje ledd bokstav b - legger tiden arbeidsforholdet har var til grunn om det er nyere enn tre måneder`() {
+        a1 {
 
-                håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
-                håndterSøknad(1.januar til 15.mars)
-                håndterArbeidsgiveropplysninger(
-                    listOf(1.januar til 16.januar),
-                    refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                )
-                val arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, null),
-                    Triple(a2, 1.november(2017), null),
-                    Triple(a2, 1.oktober(2017), 31.oktober(2017)),
-                    Triple(a2, 1.april(2016), 3.mai(2016))
-                )
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
+            håndterSøknad(1.januar til 15.mars)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+            val arbeidsforhold = listOf(
+                Triple(a1, LocalDate.EPOCH, null),
+                Triple(a2, 1.november(2017), null),
+                Triple(a2, 1.oktober(2017), 31.oktober(2017)),
+                Triple(a2, 1.april(2016), 3.mai(2016))
+            )
 
-                val skatteinntekter = listOf(
-                    Pair(a1, INNTEKT),
-                    Pair(a2, INNTEKT),
-                )
+            val skatteinntekter = listOf(
+                Pair(a1, INNTEKT),
+                Pair(a2, INNTEKT),
+            )
 
-                håndterVilkårsgrunnlag(
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                    orgnummer = a1,
-                    skatteinntekter = skatteinntekter,
-                    arbeidsforhold = arbeidsforhold
-                )
-                assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
+            håndterVilkårsgrunnlag(
+                vedtaksperiodeId = 1.vedtaksperiode,
+                orgnummer = a1,
+                skatteinntekter = skatteinntekter,
+                arbeidsforhold = arbeidsforhold
+            )
+            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
 
-                håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-                håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-            }
-            a2 {
-                håndterOverstyrInntekt(
-                    1.januar,
-                    inntekt = 1500.månedlig,
-                    //begrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.NYOPPSTARTET_ARBEIDSFORHOLD,
-                    //forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 b"
-                )
-                SubsumsjonInspektør(jurist).assertBeregnet(
-                    versjon = 1.januar(2019),
-                    paragraf = PARAGRAF_8_28,
-                    ledd = 3.ledd,
-                    bokstav = BOKSTAV_B,
-                    input = mapOf(
-                        "organisasjonsnummer" to a2,
-                        "skjæringstidspunkt" to 1.januar,
-                        "startdatoArbeidsforhold" to 1.oktober(2017),
-                        "overstyrtInntektFraSaksbehandler" to mapOf(
-                            "dato" to 1.januar,
-                            "beløp" to 1500.0,
-                        ),
-                        "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-28 b"
-                    ),
-                    output = mapOf(
-                        "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 18000.0,
-                        "beregnetGrunnlagForSykepengegrunnlagPrMåned" to 1500.0
-                    ),
-                )
-
-            }
+            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         }
-
-        @Test
-        fun `§ 8-28 tredje ledd bokstav c - saksbehandler overstyrer inntekt pga varig lønnsendring som ikke ble hensyntatt`() {
-            a1 {
-
-                håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
-                håndterSøknad(1.januar til 15.mars)
-                håndterArbeidsgiveropplysninger(
-                    listOf(1.januar til 16.januar),
-                    refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                )
-                håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2, orgnummer = a1)
-                assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
-
-                håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-                håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-            }
-            a2 {
-
-                håndterOverstyrInntekt(
-                    1.januar,
-                    inntekt = 1500.månedlig,
-                    //begrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.VARIG_LØNNSENDRING,
-                    //forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 c"
-                )
-                SubsumsjonInspektør(jurist).assertBeregnet(
-                    versjon = 1.januar(2019),
-                    paragraf = PARAGRAF_8_28,
-                    ledd = 3.ledd,
-                    bokstav = Bokstav.BOKSTAV_C,
-                    input = mapOf(
-                        "organisasjonsnummer" to a2,
-                        "skjæringstidspunkt" to 1.januar,
-                        "overstyrtInntektFraSaksbehandler" to mapOf(
-                            "dato" to 1.januar,
-                            "beløp" to 1500.0,
-                        ),
-                        "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-28 c"
-                    ),
-                    output = mapOf(
-                        "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 18000.0,
-                        "beregnetGrunnlagForSykepengegrunnlagPrMåned" to 1500.0
-                    )
-                )
-            }
-        }
-
-        @Test
-        fun `§ 8-28 femte ledd - saksbehandler overstyrer inntekt pga mangelfull rapportering til A-ordningen`() {
-            a1 {
-
-                håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
-                håndterSøknad(1.januar til 15.mars)
-                håndterArbeidsgiveropplysninger(
-                    listOf(1.januar til 16.januar),
-                    refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                )
-                håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2, orgnummer = a1)
-                assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
-
-                håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-                håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-
-            }
-            a2 {
-                håndterOverstyrInntekt(
-                    1.januar,
-                    inntekt = 1500.månedlig,
-                    //begrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.MANGELFULL_ELLER_URIKTIG_INNRAPPORTERING,
-                    //forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 (5)"
-                )
-                SubsumsjonInspektør(jurist).assertBeregnet(
-                    versjon = 1.januar(2019),
-                    paragraf = PARAGRAF_8_28,
-                    ledd = 5.ledd,
-                    input = mapOf(
-                        "organisasjonsnummer" to a2,
-                        "skjæringstidspunkt" to 1.januar,
-                        "overstyrtInntektFraSaksbehandler" to mapOf(
-                            "dato" to 1.januar,
-                            "beløp" to 1500.0,
-                        ),
-                        "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-28 (5)"
-                    ),
-                    output = mapOf(
-                        "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 18000.0,
-                        "beregnetGrunnlagForSykepengegrunnlagPrMåned" to 1500.0
-                    )
-                )
-            }
-        }
-
-        @Test
-        fun `§ 8-29 - filter for inntekter som skal medregnes ved beregning av sykepengegrunnlaget for arbeidsforhold hvor sykdom ikke starter på skjæringstidspunktet`() {
-            a1 {
-
-                håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
-                håndterSøknad(1.januar til 15.mars)
-                håndterArbeidsgiveropplysninger(
-                    listOf(1.januar til 16.januar),
-                    refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                )
-                håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2, orgnummer = a1)
-                assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
-
-                håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-                SubsumsjonInspektør(jurist).assertBeregnet(
-                    versjon = 1.januar(2019),
-                    paragraf = PARAGRAF_8_29,
-                    ledd = null,
-                    input = mapOf(
-                        "skjæringstidspunkt" to 1.januar,
-                        "organisasjonsnummer" to a2,
-                        "inntektsopplysninger" to listOf(
-                            mapOf(
-                                "beløp" to 31000.0,
-                                "årMåned" to YearMonth.of(2017, 10),
-                                "type" to "LØNNSINNTEKT",
-                                "fordel" to "kontantytelse",
-                                "beskrivelse" to "fastloenn"
-                            ),
-                            mapOf(
-                                "beløp" to 31000.0,
-                                "årMåned" to YearMonth.of(2017, 11),
-                                "type" to "LØNNSINNTEKT",
-                                "fordel" to "kontantytelse",
-                                "beskrivelse" to "fastloenn"
-                            ),
-                            mapOf(
-                                "beløp" to 31000.0,
-                                "årMåned" to YearMonth.of(2017, 12),
-                                "type" to "LØNNSINNTEKT",
-                                "fordel" to "kontantytelse",
-                                "beskrivelse" to "fastloenn"
+        a2 {
+            håndterOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt = 1.januar,
+                overstyringer = listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = this.orgnummer,
+                        inntekt = 1500.månedlig,
+                        refusjonsopplysninger = emptyList(),
+                        overstyringbegrunnelse =
+                            OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(
+                                forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 b",
+                                begrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.NYOPPSTARTET_ARBEIDSFORHOLD
                             )
+                    )
+                ),
+            )
+
+            SubsumsjonInspektør(jurist).assertBeregnet(
+                versjon = 1.januar(2019),
+                paragraf = PARAGRAF_8_28,
+                ledd = 3.ledd,
+                bokstav = BOKSTAV_B,
+                input = mapOf(
+                    "organisasjonsnummer" to a2,
+                    "skjæringstidspunkt" to 1.januar,
+                    "startdatoArbeidsforhold" to 1.oktober(2017),
+                    "overstyrtInntektFraSaksbehandler" to mapOf(
+                        "dato" to 1.januar,
+                        "beløp" to 1500.0,
+                    ),
+                    "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-28 b"
+                ),
+                output = mapOf(
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 18000.0,
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to 1500.0
+                ),
+            )
+
+        }
+    }
+
+    @Test
+    fun `§ 8-28 tredje ledd bokstav c - saksbehandler overstyrer inntekt pga varig lønnsendring som ikke ble hensyntatt`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
+            håndterSøknad(1.januar til 15.mars)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2, orgnummer = a1)
+            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
+
+            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        }
+        a2 {
+            håndterOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt = 1.januar,
+                overstyringer = listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = this.orgnummer,
+                        inntekt = 1500.månedlig,
+                        refusjonsopplysninger = emptyList(),
+                        overstyringbegrunnelse =
+                            OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(
+                                forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 c",
+                                begrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.VARIG_LØNNSENDRING
+                            )
+                    )
+                ),
+            )
+
+            SubsumsjonInspektør(jurist).assertBeregnet(
+                versjon = 1.januar(2019),
+                paragraf = PARAGRAF_8_28,
+                ledd = 3.ledd,
+                bokstav = Bokstav.BOKSTAV_C,
+                input = mapOf(
+                    "organisasjonsnummer" to a2,
+                    "skjæringstidspunkt" to 1.januar,
+                    "overstyrtInntektFraSaksbehandler" to mapOf(
+                        "dato" to 1.januar,
+                        "beløp" to 1500.0,
+                    ),
+                    "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-28 c"
+                ),
+                output = mapOf(
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 18000.0,
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to 1500.0
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `§ 8-28 femte ledd - saksbehandler overstyrer inntekt pga mangelfull rapportering til A-ordningen`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
+            håndterSøknad(1.januar til 15.mars)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2, orgnummer = a1)
+            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
+
+            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        }
+        a2 {
+            håndterOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt = 1.januar,
+                overstyringer = listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = this.orgnummer,
+                        inntekt = 1500.månedlig,
+                        refusjonsopplysninger = emptyList(),
+                        overstyringbegrunnelse =
+                            OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(
+                                forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 (5)",
+                                begrunnelse = OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse.MANGELFULL_ELLER_URIKTIG_INNRAPPORTERING,
+                            )
+                    )
+                ),
+            )
+
+            SubsumsjonInspektør(jurist).assertBeregnet(
+                versjon = 1.januar(2019),
+                paragraf = PARAGRAF_8_28,
+                ledd = 5.ledd,
+                input = mapOf(
+                    "organisasjonsnummer" to a2,
+                    "skjæringstidspunkt" to 1.januar,
+                    "overstyrtInntektFraSaksbehandler" to mapOf(
+                        "dato" to 1.januar,
+                        "beløp" to 1500.0,
+                    ),
+                    "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-28 (5)"
+                ),
+                output = mapOf(
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 18000.0,
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to 1500.0
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `§ 8-29 - filter for inntekter som skal medregnes ved beregning av sykepengegrunnlaget for arbeidsforhold hvor sykdom ikke starter på skjæringstidspunktet`() {
+        a1 {
+
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
+            håndterSøknad(1.januar til 15.mars)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2, orgnummer = a1)
+            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
+
+            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+            SubsumsjonInspektør(jurist).assertBeregnet(
+                versjon = 1.januar(2019),
+                paragraf = PARAGRAF_8_29,
+                ledd = null,
+                input = mapOf(
+                    "skjæringstidspunkt" to 1.januar,
+                    "organisasjonsnummer" to a2,
+                    "inntektsopplysninger" to listOf(
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 10),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
+                        ),
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 11),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
+                        ),
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 12),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
                         )
-                    ),
-                    output = mapOf(
-                        "grunnlagForSykepengegrunnlag" to 372000.0
                     )
+                ),
+                output = mapOf(
+                    "grunnlagForSykepengegrunnlag" to 372000.0
                 )
+            )
 
-            }
         }
+    }
 
-        @Test
-        fun `§ 8-51 ledd 2 - er ikke over 67 år`() {
-            a1 {
-                håndterSykmelding(januar)
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(
-                    listOf(1.januar til 16.januar),
-                    beregnetInntekt = 187268.årlig,
-                    vedtaksperiodeId = 1.vedtaksperiode
-                )
-                håndterVilkårsgrunnlag()
+    @Test
+    fun `§ 8-51 ledd 2 - er ikke over 67 år`() {
+        a1 {
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 187268.årlig,
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
+            håndterVilkårsgrunnlag()
 
-                SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_51, ledd = LEDD_2)
-            }
+            SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_51, ledd = LEDD_2)
         }
+    }
 
-        @Test
-        fun `§ 8-51 ledd 2 - har minimum inntekt 2G - over 67 år`() {
-            a1 {
-                val personOver67år = Personidentifikator("01014500065")
-                medPersonidentifikator(personOver67år)
-                håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(
-                    listOf(1.januar til 16.januar),
-                    beregnetInntekt = 187268.årlig,
-                    vedtaksperiodeId = 1.vedtaksperiode
-                )
-                håndterVilkårsgrunnlag()
-                håndterYtelser(1.vedtaksperiode)
+    @Test
+    fun `§ 8-51 ledd 2 - har minimum inntekt 2G - over 67 år`() {
+        val personOver67år = LocalDate.of(1945, 1, 1)
+        medFødselsdato(personOver67år)
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 187268.årlig,
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
+            håndterVilkårsgrunnlag()
+            håndterYtelser(1.vedtaksperiode)
 
-                SubsumsjonInspektør(jurist).assertOppfylt(
-                    paragraf = PARAGRAF_8_51,
-                    ledd = LEDD_2,
-                    versjon = 16.desember(2011),
-                    input = mapOf(
-                        "sekstisyvårsdag" to 1.januar(2012),
-                        "utfallFom" to 1.januar,
-                        "utfallTom" to 31.januar,
-                        "periodeFom" to 1.januar,
-                        "periodeTom" to 31.januar,
-                        "grunnlagForSykepengegrunnlag" to 187268.0,
-                        "minimumInntekt" to 187268.0
-                    ),
-                    output = emptyMap()
-                )
-                SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
-            }
+            SubsumsjonInspektør(jurist).assertOppfylt(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_2,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "sekstisyvårsdag" to 1.januar(2012),
+                    "utfallFom" to 1.januar,
+                    "utfallTom" to 31.januar,
+                    "periodeFom" to 1.januar,
+                    "periodeTom" to 31.januar,
+                    "grunnlagForSykepengegrunnlag" to 187268.0,
+                    "minimumInntekt" to 187268.0
+                ),
+                output = emptyMap()
+            )
+            SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
         }
+    }
 
-        @Test
-        fun `§ 8-51 ledd 2 - har inntekt mindre enn 2G - over 67 år`() {
-            a1 {
-                val personOver67år = Personidentifikator("01014500065")
-                medPersonidentifikator(personOver67år)
-                håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(
-                    listOf(1.januar til 16.januar),
-                    beregnetInntekt = 187267.årlig,
-                    vedtaksperiodeId = 1.vedtaksperiode
-                )
-                håndterVilkårsgrunnlag()
-                håndterYtelser(1.vedtaksperiode)
-                assertVarsler(listOf(Varselkode.RV_SV_1), 1.vedtaksperiode.filter())
+    @Test
+    fun `§ 8-51 ledd 2 - har inntekt mindre enn 2G - over 67 år`() {
+        val personOver67år = LocalDate.of(1945, 1, 1)
+        medFødselsdato(personOver67år)
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 187267.årlig,
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
+            håndterVilkårsgrunnlag()
+            håndterYtelser(1.vedtaksperiode)
+            assertVarsler(listOf(Varselkode.RV_SV_1), 1.vedtaksperiode.filter())
 
-                SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-                    paragraf = PARAGRAF_8_51,
-                    ledd = LEDD_2,
-                    versjon = 16.desember(2011),
-                    input = mapOf(
-                        "sekstisyvårsdag" to 1.januar(2012),
-                        "utfallFom" to 1.januar,
-                        "utfallTom" to 31.januar,
-                        "periodeFom" to 1.januar,
-                        "periodeTom" to 31.januar,
-                        "grunnlagForSykepengegrunnlag" to 187267.0,
-                        "minimumInntekt" to 187268.0
-                    ),
-                    output = emptyMap()
-                )
-                SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
-            }
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_2,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "sekstisyvårsdag" to 1.januar(2012),
+                    "utfallFom" to 1.januar,
+                    "utfallTom" to 31.januar,
+                    "periodeFom" to 1.januar,
+                    "periodeTom" to 31.januar,
+                    "grunnlagForSykepengegrunnlag" to 187267.0,
+                    "minimumInntekt" to 187268.0
+                ),
+                output = emptyMap()
+            )
+            SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
         }
+    }
 
-        @Test
-        fun `§ 8-51 ledd 2 - avslag subsummeres når person blir 67 år underveis i sykefraværstilfellet og tjener mindre enn 2G`() {
-            a1 {
-                val personOver67år = Personidentifikator("05025100065")
-                medPersonidentifikator(personOver67år)
-                val inntekt = 100_000.årlig // mellom 0.5G og 2G - slik at kravet er oppfyllt før personen fyllte 67, men ikke etter
+    @Test
+    fun `§ 8-51 ledd 2 - avslag subsummeres når person blir 67 år underveis i sykefraværstilfellet og tjener mindre enn 2G`() {
+        val personOver67år = LocalDate.of(1951, 2, 5)
+        medFødselsdato(personOver67år)
+        a1 {
+            val inntekt = 100_000.årlig // mellom 0.5G og 2G - slik at kravet er oppfyllt før personen fyllte 67, men ikke etter
 
-                nyttVedtak(januar, beregnetInntekt = inntekt)
-                SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_2, ledd = LEDD_2)
-                SubsumsjonInspektør(jurist).assertOppfylt(
-                    paragraf = PARAGRAF_8_3,
-                    ledd = LEDD_2,
-                    punktum = 1.punktum,
-                    input = null,
-                    versjon = 16.desember(2011)
-                )
+            nyttVedtak(januar, beregnetInntekt = inntekt)
+            SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_2, ledd = LEDD_2)
+            SubsumsjonInspektør(jurist).assertOppfylt(
+                paragraf = PARAGRAF_8_3,
+                ledd = LEDD_2,
+                punktum = 1.punktum,
+                input = null,
+                versjon = 16.desember(2011)
+            )
 
-                forlengVedtak(februar)
-                assertVarsel(Varselkode.RV_SV_1, 2.vedtaksperiode.filter())
-                SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-                    paragraf = PARAGRAF_8_51,
-                    ledd = LEDD_2,
-                    versjon = 16.desember(2011),
-                    input = mapOf(
-                        "sekstisyvårsdag" to 5.februar(2018),
-                        "utfallFom" to 6.februar,
-                        "utfallTom" to 28.februar,
-                        "periodeFom" to 1.februar,
-                        "periodeTom" to 28.februar,
-                        "grunnlagForSykepengegrunnlag" to 100000.0,
-                        "minimumInntekt" to 187268.0
-                    ),
-                    output = emptyMap()
-                )
+            forlengVedtak(februar)
+            assertVarsel(Varselkode.RV_SV_1, 2.vedtaksperiode.filter())
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_2,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "sekstisyvårsdag" to 5.februar(2018),
+                    "utfallFom" to 6.februar,
+                    "utfallTom" to 28.februar,
+                    "periodeFom" to 1.februar,
+                    "periodeTom" to 28.februar,
+                    "grunnlagForSykepengegrunnlag" to 100000.0,
+                    "minimumInntekt" to 187268.0
+                ),
+                output = emptyMap()
+            )
 
-                forlengVedtak(mars)
-                assertVarsel(Varselkode.RV_SV_1, 3.vedtaksperiode.filter())
-                assertEquals(
-                    2, SubsumsjonInspektør(jurist).antallSubsumsjoner(
-                    paragraf = PARAGRAF_8_3,
-                    ledd = LEDD_2,
-                    punktum = 1.punktum,
-                    versjon = 16.desember(2011),
-                    bokstav = null
-                )
-                )
-                SubsumsjonInspektør(jurist).assertPaaIndeks(
-                    index = 0,
-                    forventetAntall = 1,
-                    paragraf = PARAGRAF_8_51,
-                    versjon = 16.desember(2011),
-                    ledd = LEDD_2,
-                    input = mapOf(
-                        "sekstisyvårsdag" to 5.februar(2018),
-                        "utfallFom" to 1.mars,
-                        "utfallTom" to 31.mars,
-                        "periodeFom" to 1.mars,
-                        "periodeTom" to 31.mars,
-                        "grunnlagForSykepengegrunnlag" to 100000.0,
-                        "minimumInntekt" to 187268.0
-                    ),
-                    output = emptyMap(),
-                    vedtaksperiodeId = 3.vedtaksperiode,
-                    utfall = VILKAR_IKKE_OPPFYLT
-                )
-            }
+            val vedtaksperiode = nyPeriode(mars)
+            håndterYtelser(vedtaksperiode)
+            håndterUtbetalingsgodkjenning(vedtaksperiode)
+            assertVarsel(Varselkode.RV_SV_1, 3.vedtaksperiode.filter())
+            assertEquals(
+                2, SubsumsjonInspektør(jurist).antallSubsumsjoner(
+                paragraf = PARAGRAF_8_3,
+                ledd = LEDD_2,
+                punktum = 1.punktum,
+                versjon = 16.desember(2011),
+                bokstav = null
+            )
+            )
+            SubsumsjonInspektør(jurist).assertPaaIndeks(
+                index = 0,
+                forventetAntall = 1,
+                paragraf = PARAGRAF_8_51,
+                versjon = 16.desember(2011),
+                ledd = LEDD_2,
+                input = mapOf(
+                    "sekstisyvårsdag" to 5.februar(2018),
+                    "utfallFom" to 1.mars,
+                    "utfallTom" to 31.mars,
+                    "periodeFom" to 1.mars,
+                    "periodeTom" to 31.mars,
+                    "grunnlagForSykepengegrunnlag" to 100000.0,
+                    "minimumInntekt" to 187268.0
+                ),
+                output = emptyMap(),
+                vedtaksperiodeId = 3.vedtaksperiode,
+                utfall = VILKAR_IKKE_OPPFYLT
+            )
         }
+    }
 
-        @Test
-        fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk på 67-årsdagen så total sykedager blir en dag mindre uten at maksdato endres`() {
-            a1 {
-                val personOver67år = Personidentifikator("01025100065")
-                medPersonidentifikator(personOver67år)
+    @Test
+    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk på 67-årsdagen så total sykedager blir en dag mindre uten at maksdato endres`() {
+        val personOver67år = LocalDate.of(1951, 2, 1)
+        medFødselsdato(personOver67år)
+        a1 {
 
-                håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(
-                    listOf(1.januar til 16.januar),
-                    vedtaksperiodeId = 1.vedtaksperiode
-                )
-                håndterVilkårsgrunnlag(1.vedtaksperiode)
-                håndterYtelser(1.vedtaksperiode)
-                håndterSimulering(1.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-                håndterUtbetalt()
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
 
-                håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
-                håndterSøknad(2.februar til 28.februar)
-                håndterInntektsmelding(
-                    listOf(1.januar til 16.januar),
-                    førsteFraværsdag = 2.februar
-                )
+            håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
+            håndterSøknad(2.februar til 28.februar)
+            håndterInntektsmelding(
+                listOf(1.januar til 16.januar),
+                førsteFraværsdag = 2.februar
+            )
 
-                håndterYtelser(1.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-                håndterUtbetalt()
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            //håndterUtbetalt()
 
-                håndterVilkårsgrunnlag(2.vedtaksperiode)
-                håndterYtelser(2.vedtaksperiode)
-                håndterSimulering(2.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-                håndterUtbetalt()
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
 
-                SubsumsjonInspektør(jurist).assertPaaIndeks(
-                    index = 0,
-                    forventetAntall = 2,
-                    paragraf = PARAGRAF_8_51,
-                    versjon = 16.desember(2011),
-                    ledd = LEDD_3,
-                    input = mapOf(
-                        "fom" to 1.januar,
-                        "tom" to 31.januar,
-                        "utfallFom" to 17.januar,
-                        "utfallTom" to 31.januar,
-                        "tidslinjegrunnlag" to listOf(
-                            listOf(
-                                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                                mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
-                            )
-                        ),
-                        "beregnetTidslinje" to listOf(
+            SubsumsjonInspektør(jurist).assertPaaIndeks(
+                index = 0,
+                forventetAntall = 2,
+                paragraf = PARAGRAF_8_51,
+                versjon = 16.desember(2011),
+                ledd = LEDD_3,
+                input = mapOf(
+                    "fom" to 1.januar,
+                    "tom" to 31.januar,
+                    "utfallFom" to 17.januar,
+                    "utfallTom" to 31.januar,
+                    "tidslinjegrunnlag" to listOf(
+                        listOf(
                             mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to 61,
-                        "forbrukteSykedager" to 11,
-                        "maksdato" to 26.april
-                    ),
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                    utfall = VILKAR_OPPFYLT
-                )
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to 61,
+                    "forbrukteSykedager" to 11,
+                    "maksdato" to 26.april
+                ),
+                vedtaksperiodeId = 1.vedtaksperiode,
+                utfall = VILKAR_OPPFYLT
+            )
 
 
-                SubsumsjonInspektør(jurist).assertPaaIndeks(
-                    index = 1,
-                    forventetAntall = 2,
-                    paragraf = PARAGRAF_8_51,
-                    versjon = 16.desember(2011),
-                    ledd = LEDD_3,
-                    input = mapOf(
-                        "fom" to 1.januar,
-                        "tom" to 31.januar,
-                        "utfallFom" to 17.januar,
-                        "utfallTom" to 31.januar,
-                        "tidslinjegrunnlag" to listOf(
-                            listOf(
-                                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                                mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
-                            )
-                        ),
-                        "beregnetTidslinje" to listOf(
+            SubsumsjonInspektør(jurist).assertPaaIndeks(
+                index = 1,
+                forventetAntall = 2,
+                paragraf = PARAGRAF_8_51,
+                versjon = 16.desember(2011),
+                ledd = LEDD_3,
+                input = mapOf(
+                    "fom" to 1.januar,
+                    "tom" to 31.januar,
+                    "utfallFom" to 17.januar,
+                    "utfallTom" to 31.januar,
+                    "tidslinjegrunnlag" to listOf(
+                        listOf(
                             mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to 61,
-                        "forbrukteSykedager" to 11,
-                        "maksdato" to 26.april
-                    ),
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                    utfall = VILKAR_OPPFYLT
-                )
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to 61,
+                    "forbrukteSykedager" to 11,
+                    "maksdato" to 26.april
+                ),
+                vedtaksperiodeId = 1.vedtaksperiode,
+                utfall = VILKAR_OPPFYLT
+            )
 
-                SubsumsjonInspektør(jurist).assertOppfylt(
-                    paragraf = PARAGRAF_8_51,
-                    ledd = LEDD_3,
-                    versjon = 16.desember(2011),
-                    input = mapOf(
-                        "fom" to 2.februar,
-                        "tom" to 28.februar,
-                        "utfallFom" to 2.februar,
-                        "utfallTom" to 28.februar,
-                        "tidslinjegrunnlag" to listOf(
-                            listOf(
-                                mapOf("fom" to 2.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
-                            ),
-                            listOf(
-                                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                                mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
-                            )
+            SubsumsjonInspektør(jurist).assertOppfylt(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_3,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "fom" to 2.februar,
+                    "tom" to 28.februar,
+                    "utfallFom" to 2.februar,
+                    "utfallTom" to 28.februar,
+                    "tidslinjegrunnlag" to listOf(
+                        listOf(
+                            mapOf("fom" to 2.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                         ),
-                        "beregnetTidslinje" to listOf(
+                        listOf(
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                            mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                        )
+                    ),
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100),
+                        mapOf("fom" to 2.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to 41,
+                    "forbrukteSykedager" to 30,
+                    "maksdato" to 26.april
+                ),
+                vedtaksperiodeId = 2.vedtaksperiode
+            )
+        }
+    }
+
+    @Test
+    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk dagen etter 67-årsdagen så maksdato flyttes en dag`() {
+        val personOver67år = LocalDate.of(1951, 2, 1)
+        medFødselsdato(personOver67år)
+        a1 {
+
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
+            håndterSøknad(2.februar til 28.februar)
+            håndterInntektsmelding(
+                listOf(1.januar til 16.januar),
+                førsteFraværsdag = 2.februar
+            )
+
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            SubsumsjonInspektør(jurist).assertPaaIndeks(
+                index = 0,
+                forventetAntall = 2,
+                paragraf = PARAGRAF_8_51,
+                versjon = 16.desember(2011),
+                ledd = LEDD_3,
+                input = mapOf(
+                    "fom" to 1.januar,
+                    "tom" to 31.januar,
+                    "utfallFom" to 17.januar,
+                    "utfallTom" to 31.januar,
+                    "tidslinjegrunnlag" to listOf(
+                        listOf(
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                            mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                        )
+                    ),
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to 61,
+                    "forbrukteSykedager" to 11,
+                    "maksdato" to 26.april
+                ),
+                vedtaksperiodeId = 1.vedtaksperiode,
+                utfall = VILKAR_OPPFYLT
+            )
+
+            SubsumsjonInspektør(jurist).assertPaaIndeks(
+                index = 1,
+                forventetAntall = 2,
+                paragraf = PARAGRAF_8_51,
+                versjon = 16.desember(2011),
+                ledd = LEDD_3,
+                input = mapOf(
+                    "fom" to 1.januar,
+                    "tom" to 31.januar,
+                    "utfallFom" to 17.januar,
+                    "utfallTom" to 31.januar,
+                    "tidslinjegrunnlag" to listOf(
+                        listOf(
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                            mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                        )
+                    ),
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to 61,
+                    "forbrukteSykedager" to 11,
+                    "maksdato" to 26.april
+                ),
+                vedtaksperiodeId = 1.vedtaksperiode,
+                utfall = VILKAR_OPPFYLT
+            )
+
+            SubsumsjonInspektør(jurist).assertOppfylt(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_3,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "fom" to 2.februar,
+                    "tom" to 28.februar,
+                    "utfallFom" to 2.februar,
+                    "utfallTom" to 28.februar,
+                    "tidslinjegrunnlag" to listOf(
+                        listOf(
+                            mapOf("fom" to 2.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
+                        ),
+                        listOf(
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                            mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                        )
+                    ),
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100),
+                        mapOf("fom" to 2.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to 41,
+                    "forbrukteSykedager" to 30,
+                    "maksdato" to 26.april
+                ),
+                vedtaksperiodeId = 2.vedtaksperiode
+            )
+        }
+    }
+
+    @Test
+    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 60 dager etter fylte 67 år`() {
+        val personOver67år = LocalDate.of(1951, 2, 1)
+        medFødselsdato(personOver67år)
+        a1 {
+            nyttVedtak(januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+            forlengVedtak(februar)
+            forlengVedtak(mars)
+            forlengVedtak(1.april til 26.april)
+
+            SubsumsjonInspektør(jurist).assertOppfylt(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_3,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "fom" to 1.januar,
+                    "tom" to 31.januar,
+                    "utfallFom" to 17.januar,
+                    "utfallTom" to 31.januar,
+                    "tidslinjegrunnlag" to listOf(
+                        listOf(
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                            mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                        )
+                    ),
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to 61,
+                    "forbrukteSykedager" to 11,
+                    "maksdato" to 26.april
+                ),
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
+
+            SubsumsjonInspektør(jurist).assertOppfylt(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_3,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "fom" to 1.februar,
+                    "tom" to 28.februar,
+                    "utfallFom" to 1.februar,
+                    "utfallTom" to 28.februar,
+                    "tidslinjegrunnlag" to listOf(
+                        listOf(
+                            mapOf("fom" to 1.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
+                        ),
+                        listOf(
                             mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100),
-                            mapOf("fom" to 2.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to 41,
-                        "forbrukteSykedager" to 30,
-                        "maksdato" to 26.april
-                    ),
-                    vedtaksperiodeId = 2.vedtaksperiode
-                )
-            }
-        }
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                        mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to 41,
+                    "forbrukteSykedager" to 31,
+                    "maksdato" to 26.april
+                ),
+                vedtaksperiodeId = 2.vedtaksperiode
+            )
 
-        @Test
-        fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk dagen etter 67-årsdagen så maksdato flyttes en dag`() {
-            a1 {
-                val personOver67år = Personidentifikator("01025100065")
-                medPersonidentifikator(personOver67år)
-
-                håndterSykmelding(Sykmeldingsperiode(1.januar, 1.februar))
-                håndterSøknad(1.januar til 1.februar)
-                håndterArbeidsgiveropplysninger(
-                    listOf(1.januar til 16.januar),
-                    vedtaksperiodeId = 1.vedtaksperiode
-                )
-                håndterVilkårsgrunnlag(1.vedtaksperiode)
-                håndterYtelser(1.vedtaksperiode)
-                håndterSimulering(1.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-                håndterUtbetalt()
-
-                håndterSykmelding(Sykmeldingsperiode(3.februar, 28.februar))
-                håndterSøknad(3.februar til 28.februar)
-                håndterInntektsmelding(
-                    listOf(1.januar til 16.januar),
-                    førsteFraværsdag = 3.februar
-                )
-
-                håndterYtelser(1.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-                håndterUtbetalt()
-
-                håndterVilkårsgrunnlag(2.vedtaksperiode)
-                håndterYtelser(2.vedtaksperiode)
-                håndterSimulering(2.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-                håndterUtbetalt()
-
-                SubsumsjonInspektør(jurist).assertPaaIndeks(
-                    index = 0,
-                    forventetAntall = 2,
-                    paragraf = PARAGRAF_8_51,
-                    versjon = 16.desember(2011),
-                    ledd = LEDD_3,
-                    input = mapOf(
-                        "fom" to 1.januar,
-                        "tom" to 1.februar,
-                        "utfallFom" to 17.januar,
-                        "utfallTom" to 1.februar,
-                        "tidslinjegrunnlag" to listOf(
-                            listOf(
-                                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                                mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100)
-                            )
+            SubsumsjonInspektør(jurist).assertOppfylt(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_3,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "fom" to 1.mars,
+                    "tom" to 31.mars,
+                    "utfallFom" to 1.mars,
+                    "utfallTom" to 31.mars,
+                    "tidslinjegrunnlag" to listOf(
+                        listOf(
+                            mapOf("fom" to 1.mars, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
                         ),
-                        "beregnetTidslinje" to listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                            mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100)
-                        )
-                    ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to 60,
-                        "forbrukteSykedager" to 12,
-                        "maksdato" to 26.april
-                    ),
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                    utfall = VILKAR_OPPFYLT
-                )
-
-                SubsumsjonInspektør(jurist).assertPaaIndeks(
-                    index = 1,
-                    forventetAntall = 2,
-                    paragraf = PARAGRAF_8_51,
-                    versjon = 16.desember(2011),
-                    ledd = LEDD_3,
-                    input = mapOf(
-                        "fom" to 1.januar,
-                        "tom" to 1.februar,
-                        "utfallFom" to 17.januar,
-                        "utfallTom" to 1.februar,
-                        "tidslinjegrunnlag" to listOf(
-                            listOf(
-                                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                                mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100)
-                            )
-                        ),
-                        "beregnetTidslinje" to listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                            mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100)
-                        )
-                    ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to 60,
-                        "forbrukteSykedager" to 12,
-                        "maksdato" to 26.april
-                    ),
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                    utfall = VILKAR_OPPFYLT
-                )
-
-                SubsumsjonInspektør(jurist).assertOppfylt(
-                    paragraf = PARAGRAF_8_51,
-                    ledd = LEDD_3,
-                    versjon = 16.desember(2011),
-                    input = mapOf(
-                        "fom" to 3.februar,
-                        "tom" to 28.februar,
-                        "utfallFom" to 3.februar,
-                        "utfallTom" to 28.februar,
-                        "tidslinjegrunnlag" to listOf(
-                            listOf(
-                                mapOf("fom" to 3.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
-                            ),
-                            listOf(
-                                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                                mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100),
-                            )
-                        ),
-                        "beregnetTidslinje" to listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                            mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100),
-                            mapOf("fom" to 3.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
-                        )
-                    ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to 42,
-                        "forbrukteSykedager" to 30,
-                        "maksdato" to 27.april
-                    ),
-                    vedtaksperiodeId = 2.vedtaksperiode
-                )
-            }
-        }
-
-        @Test
-        fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 60 dager etter fylte 67 år`() {
-            a1 {
-                val personOver67år = Personidentifikator("01025100065")
-                medPersonidentifikator(personOver67år)
-                nyttVedtak(januar)
-                forlengVedtak(februar)
-                forlengVedtak(mars)
-                forlengVedtak(1.april til 26.april)
-
-                SubsumsjonInspektør(jurist).assertOppfylt(
-                    paragraf = PARAGRAF_8_51,
-                    ledd = LEDD_3,
-                    versjon = 16.desember(2011),
-                    input = mapOf(
-                        "fom" to 1.januar,
-                        "tom" to 31.januar,
-                        "utfallFom" to 17.januar,
-                        "utfallTom" to 31.januar,
-                        "tidslinjegrunnlag" to listOf(
-                            listOf(
-                                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                                mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
-                            )
-                        ),
-                        "beregnetTidslinje" to listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                            mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
-                        )
-                    ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to 61,
-                        "forbrukteSykedager" to 11,
-                        "maksdato" to 26.april
-                    ),
-                    vedtaksperiodeId = 1.vedtaksperiode
-                )
-
-                SubsumsjonInspektør(jurist).assertOppfylt(
-                    paragraf = PARAGRAF_8_51,
-                    ledd = LEDD_3,
-                    versjon = 16.desember(2011),
-                    input = mapOf(
-                        "fom" to 1.februar,
-                        "tom" to 28.februar,
-                        "utfallFom" to 1.februar,
-                        "utfallTom" to 28.februar,
-                        "tidslinjegrunnlag" to listOf(
-                            listOf(
-                                mapOf("fom" to 1.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
-                            ),
-                            listOf(
-                                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                                mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100),
-                            )
-                        ),
-                        "beregnetTidslinje" to listOf(
+                        listOf(
                             mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to 41,
-                        "forbrukteSykedager" to 31,
-                        "maksdato" to 26.april
-                    ),
-                    vedtaksperiodeId = 2.vedtaksperiode
-                )
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                        mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to 19,
+                    "forbrukteSykedager" to 53,
+                    "maksdato" to 26.april
+                ),
+                vedtaksperiodeId = 3.vedtaksperiode
+            )
 
-                SubsumsjonInspektør(jurist).assertOppfylt(
-                    paragraf = PARAGRAF_8_51,
-                    ledd = LEDD_3,
-                    versjon = 16.desember(2011),
-                    input = mapOf(
-                        "fom" to 1.mars,
-                        "tom" to 31.mars,
-                        "utfallFom" to 1.mars,
-                        "utfallTom" to 31.mars,
-                        "tidslinjegrunnlag" to listOf(
-                            listOf(
-                                mapOf("fom" to 1.mars, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
-                            ),
-                            listOf(
-                                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                                mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
-                            )
+            SubsumsjonInspektør(jurist).assertOppfylt(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_3,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "fom" to 1.april,
+                    "tom" to 26.april,
+                    "utfallFom" to 1.april,
+                    "utfallTom" to 26.april,
+                    "tidslinjegrunnlag" to listOf(
+                        listOf(
+                            mapOf("fom" to 1.april, "tom" to 26.april, "dagtype" to "NAVDAG", "grad" to 100)
                         ),
-                        "beregnetTidslinje" to listOf(
+                        listOf(
                             mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to 19,
-                        "forbrukteSykedager" to 53,
-                        "maksdato" to 26.april
-                    ),
-                    vedtaksperiodeId = 3.vedtaksperiode
-                )
-
-                SubsumsjonInspektør(jurist).assertOppfylt(
-                    paragraf = PARAGRAF_8_51,
-                    ledd = LEDD_3,
-                    versjon = 16.desember(2011),
-                    input = mapOf(
-                        "fom" to 1.april,
-                        "tom" to 26.april,
-                        "utfallFom" to 1.april,
-                        "utfallTom" to 26.april,
-                        "tidslinjegrunnlag" to listOf(
-                            listOf(
-                                mapOf("fom" to 1.april, "tom" to 26.april, "dagtype" to "NAVDAG", "grad" to 100)
-                            ),
-                            listOf(
-                                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                                mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
-                            )
-                        ),
-                        "beregnetTidslinje" to listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                            mapOf("fom" to 17.januar, "tom" to 26.april, "dagtype" to "NAVDAG", "grad" to 100)
-                        )
-                    ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to 0,
-                        "forbrukteSykedager" to 72,
-                        "maksdato" to 26.april
-                    ),
-                    vedtaksperiodeId = 4.vedtaksperiode
-                )
-            }
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                        mapOf("fom" to 17.januar, "tom" to 26.april, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to 0,
+                    "forbrukteSykedager" to 72,
+                    "maksdato" to 26.april
+                ),
+                vedtaksperiodeId = 4.vedtaksperiode
+            )
         }
+    }
 
-        @Test
-        fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 61 dager etter fylte 67 år`() {
-            a1 {
-                val personOver67år = Personidentifikator("01025100065")
-                medPersonidentifikator(personOver67år)
-                nyttVedtak(januar)
-                forlengVedtak(februar)
-                forlengVedtak(mars)
-                forlengVedtak(1.april til 27.april)
+    @Test
+    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 61 dager etter fylte 67 år`() {
+        val personOver67år = LocalDate.of(1951, 2, 1)
+        medFødselsdato(personOver67år)
+        a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+            forlengVedtak(mars)
+            forlengVedtak(1.april til 27.april)
 
-                SubsumsjonInspektør(jurist).assertOppfylt(
-                    paragraf = PARAGRAF_8_51,
-                    ledd = LEDD_3,
-                    versjon = 16.desember(2011),
-                    input = mapOf(
-                        "fom" to 1.januar,
-                        "tom" to 31.januar,
-                        "utfallFom" to 17.januar,
-                        "utfallTom" to 31.januar,
-                        "tidslinjegrunnlag" to listOf(
-                            listOf(
-                                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                                mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
-                            )
-                        ),
-                        "beregnetTidslinje" to listOf(
+            SubsumsjonInspektør(jurist).assertOppfylt(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_3,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "fom" to 1.januar,
+                    "tom" to 31.januar,
+                    "utfallFom" to 17.januar,
+                    "utfallTom" to 31.januar,
+                    "tidslinjegrunnlag" to listOf(
+                        listOf(
                             mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to 61,
-                        "forbrukteSykedager" to 11,
-                        "maksdato" to 26.april
-                    ),
-                    vedtaksperiodeId = 1.vedtaksperiode
-                )
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to 61,
+                    "forbrukteSykedager" to 11,
+                    "maksdato" to 26.april
+                ),
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
 
-                SubsumsjonInspektør(jurist).assertOppfylt(
-                    paragraf = PARAGRAF_8_51,
-                    ledd = LEDD_3,
-                    versjon = 16.desember(2011),
-                    input = mapOf(
-                        "fom" to 1.februar,
-                        "tom" to 28.februar,
-                        "utfallFom" to 1.februar,
-                        "utfallTom" to 28.februar,
-                        "tidslinjegrunnlag" to listOf(
-                            listOf(
-                                mapOf("fom" to 1.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
-                            ),
-                            listOf(
-                                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                                mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
-                            )
+            SubsumsjonInspektør(jurist).assertOppfylt(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_3,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "fom" to 1.februar,
+                    "tom" to 28.februar,
+                    "utfallFom" to 1.februar,
+                    "utfallTom" to 28.februar,
+                    "tidslinjegrunnlag" to listOf(
+                        listOf(
+                            mapOf("fom" to 1.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                         ),
-                        "beregnetTidslinje" to listOf(
+                        listOf(
+                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                            mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                        )
+                    ),
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                        mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to 41,
+                    "forbrukteSykedager" to 31,
+                    "maksdato" to 26.april
+                ),
+                vedtaksperiodeId = 2.vedtaksperiode
+            )
+
+            SubsumsjonInspektør(jurist).assertOppfylt(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_3,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "fom" to 1.mars,
+                    "tom" to 31.mars,
+                    "utfallFom" to 1.mars,
+                    "utfallTom" to 31.mars,
+                    "tidslinjegrunnlag" to listOf(
+                        listOf(
+                            mapOf("fom" to 1.mars, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
+                        ),
+                        listOf(
                             mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to 41,
-                        "forbrukteSykedager" to 31,
-                        "maksdato" to 26.april
-                    ),
-                    vedtaksperiodeId = 2.vedtaksperiode
-                )
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                        mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to 19,
+                    "forbrukteSykedager" to 53,
+                    "maksdato" to 26.april
+                ),
+                vedtaksperiodeId = 3.vedtaksperiode
+            )
 
-                SubsumsjonInspektør(jurist).assertOppfylt(
-                    paragraf = PARAGRAF_8_51,
-                    ledd = LEDD_3,
-                    versjon = 16.desember(2011),
-                    input = mapOf(
-                        "fom" to 1.mars,
-                        "tom" to 31.mars,
-                        "utfallFom" to 1.mars,
-                        "utfallTom" to 31.mars,
-                        "tidslinjegrunnlag" to listOf(
-                            listOf(
-                                mapOf("fom" to 1.mars, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
-                            ),
-                            listOf(
-                                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                                mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
-                            )
+            SubsumsjonInspektør(jurist).assertOppfylt(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_3,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "fom" to 1.april,
+                    "tom" to 27.april,
+                    "utfallFom" to 1.april,
+                    "utfallTom" to 26.april,
+                    "tidslinjegrunnlag" to listOf(
+                        listOf(
+                            mapOf("fom" to 1.april, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
                         ),
-                        "beregnetTidslinje" to listOf(
+                        listOf(
                             mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
                             mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to 19,
-                        "forbrukteSykedager" to 53,
-                        "maksdato" to 26.april
-                    ),
-                    vedtaksperiodeId = 3.vedtaksperiode
-                )
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                        mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to 0,
+                    "forbrukteSykedager" to 72,
+                    "maksdato" to 26.april
+                ),
+                vedtaksperiodeId = 4.vedtaksperiode
+            )
 
-                SubsumsjonInspektør(jurist).assertOppfylt(
-                    paragraf = PARAGRAF_8_51,
-                    ledd = LEDD_3,
-                    versjon = 16.desember(2011),
-                    input = mapOf(
-                        "fom" to 1.april,
-                        "tom" to 27.april,
-                        "utfallFom" to 1.april,
-                        "utfallTom" to 26.april,
-                        "tidslinjegrunnlag" to listOf(
-                            listOf(
-                                mapOf("fom" to 1.april, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
-                            ),
-                            listOf(
-                                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                                mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
-                            )
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_3,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "fom" to 1.april,
+                    "tom" to 27.april,
+                    "utfallFom" to 27.april,
+                    "utfallTom" to 27.april,
+                    "tidslinjegrunnlag" to listOf(
+                        listOf(
+                            mapOf("fom" to 1.april, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
                         ),
-                        "beregnetTidslinje" to listOf(
+                        listOf(
                             mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                            mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
+                            mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
                         )
                     ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to 0,
-                        "forbrukteSykedager" to 72,
-                        "maksdato" to 26.april
-                    ),
-                    vedtaksperiodeId = 4.vedtaksperiode
-                )
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
+                        mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to 0,
+                    "forbrukteSykedager" to 72,
+                    "maksdato" to 26.april
+                ),
+                vedtaksperiodeId = 4.vedtaksperiode
+            )
+        }
+    }
 
-                SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-                    paragraf = PARAGRAF_8_51,
-                    ledd = LEDD_3,
-                    versjon = 16.desember(2011),
-                    input = mapOf(
-                        "fom" to 1.april,
-                        "tom" to 27.april,
-                        "utfallFom" to 27.april,
-                        "utfallTom" to 27.april,
-                        "tidslinjegrunnlag" to listOf(
-                            listOf(
-                                mapOf("fom" to 1.april, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
-                            ),
-                            listOf(
-                                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                                mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
-                            )
+    @Test
+    fun `§ 22-13 - foreldelse`() {
+        a1 {
+            håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                paragraf = PARAGRAF_22_13,
+                ledd = LEDD_3,
+                versjon = 16.desember(2011),
+                input = mapOf(
+                    "avskjæringsdato" to 1.februar
+                ),
+                output = mapOf(
+                    "perioder" to listOf(
+                        mapOf(
+                            "fom" to 15.januar,
+                            "tom" to 19.januar
                         ),
-                        "beregnetTidslinje" to listOf(
-                            mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                            mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
+                        mapOf(
+                            "fom" to 22.januar,
+                            "tom" to 26.januar
+                        ),
+                        mapOf(
+                            "fom" to 29.januar,
+                            "tom" to 31.januar
                         )
-                    ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to 0,
-                        "forbrukteSykedager" to 72,
-                        "maksdato" to 26.april
-                    ),
-                    vedtaksperiodeId = 4.vedtaksperiode
-                )
-            }
+                    )
+                ),
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
+            assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
+
         }
+    }
 
-        @Test
-        fun `§ 22-13 - foreldelse`() {
-            a1 {
-                håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
-                SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-                    paragraf = PARAGRAF_22_13,
-                    ledd = LEDD_3,
-                    versjon = 16.desember(2011),
-                    input = mapOf(
-                        "avskjæringsdato" to 1.februar
-                    ),
-                    output = mapOf(
-                        "perioder" to listOf(
-                            mapOf(
-                                "fom" to 15.januar,
-                                "tom" to 19.januar
-                            ),
-                            mapOf(
-                                "fom" to 22.januar,
-                                "tom" to 26.januar
-                            ),
-                            mapOf(
-                                "fom" to 29.januar,
-                                "tom" to 31.januar
-                            )
-                        )
-                    ),
-                    vedtaksperiodeId = 1.vedtaksperiode
-                )
-                assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
-
-            }
+    @Test
+    fun `§ forvaltningsloven 35 - omgjøring av vedtak uten klage`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 90.prosent))
+            SubsumsjonInspektør(jurist).assertOppfylt(
+                lovverk = "forvaltningsloven",
+                paragraf = PARAGRAF_35,
+                ledd = LEDD_1,
+                versjon = 1.juni(2021),
+                input = mapOf(
+                    "stadfesting" to true
+                ),
+                output = emptyMap(),
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
         }
+    }
 
-        @Test
-        fun `§ forvaltningsloven 35 - omgjøring av vedtak uten klage`() {
-            a1 {
-                nyttVedtak(januar)
-                håndterSøknad(Sykdom(1.januar, 31.januar, 90.prosent))
-                SubsumsjonInspektør(jurist).assertOppfylt(
-                    lovverk = "forvaltningsloven",
-                    paragraf = PARAGRAF_35,
-                    ledd = LEDD_1,
-                    versjon = 1.juni(2021),
-                    input = mapOf(
-                        "stadfesting" to true
-                    ),
-                    output = emptyMap(),
-                    vedtaksperiodeId = 1.vedtaksperiode
+    @Test
+    fun `andre ytelser i snuten`() {
+        a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+            håndterOverstyrTidslinje(
+                overstyringsdager = listOf(
+                    ManuellOverskrivingDag(1.februar, Dagtype.Foreldrepengerdag),
+                    ManuellOverskrivingDag(2.februar, Dagtype.Pleiepengerdag),
+                    ManuellOverskrivingDag(3.februar, Dagtype.Omsorgspengerdag),
+                    ManuellOverskrivingDag(4.februar, Dagtype.Svangerskapspengerdag),
+                    ManuellOverskrivingDag(5.februar, Dagtype.Opplaringspengerdag),
+                    ManuellOverskrivingDag(6.februar, Dagtype.AAPdag),
+                    ManuellOverskrivingDag(7.februar, Dagtype.Dagpengerdag),
+                    ManuellOverskrivingDag(8.februar, Dagtype.AAPdag),
                 )
-            }
+            )
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
+
+            val forventetInput = mapOf(
+                "sykdomstidslinje" to listOf(
+                    mapOf("fom" to 1.februar, "tom" to 1.februar, "dagtype" to "FORELDREPENGER", "grad" to null),
+                    mapOf("fom" to 2.februar, "tom" to 2.februar, "dagtype" to "PLEIEPENGER", "grad" to null),
+                    mapOf("fom" to 3.februar, "tom" to 3.februar, "dagtype" to "OMSORGSPENGER", "grad" to null),
+                    mapOf("fom" to 4.februar, "tom" to 4.februar, "dagtype" to "SVANGERSKAPSPENGER", "grad" to null),
+                    mapOf("fom" to 5.februar, "tom" to 5.februar, "dagtype" to "OPPLÆRINGSPENGER", "grad" to null),
+                    mapOf("fom" to 6.februar, "tom" to 6.februar, "dagtype" to "ARBEIDSAVKLARINGSPENGER", "grad" to null),
+                    mapOf("fom" to 7.februar, "tom" to 7.februar, "dagtype" to "DAGPENGER", "grad" to null),
+                    mapOf("fom" to 8.februar, "tom" to 8.februar, "dagtype" to "ARBEIDSAVKLARINGSPENGER", "grad" to null),
+                    mapOf("fom" to 9.februar, "tom" to 28.februar, "dagtype" to "SYKEDAG", "grad" to 100)
+                ),
+            )
+            // Alt utenom Arbeidsavklaringspenger
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                lovverk = "trygderetten",
+                versjon = 2.mars(2007),
+                paragraf = KJENNELSE_2006_4023,
+                input = forventetInput,
+                output = mapOf(
+                    "perioder" to listOf(
+                        mapOf("fom" to 1.februar, "tom" to 5.februar),
+                        mapOf("fom" to 7.februar, "tom" to 7.februar),
+                    )
+                )
+            )
+            // Arbeidsavklaringspenger
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                lovverk = "folketrygdloven",
+                versjon = 21.mai(2021),
+                paragraf = PARAGRAF_8_48,
+                input = forventetInput,
+                output = mapOf(
+                    "perioder" to listOf(
+                        mapOf("fom" to 6.februar, "tom" to 6.februar),
+                        mapOf("fom" to 8.februar, "tom" to 8.februar),
+                    )
+                )
+            )
         }
+    }
 
-        @Test
-        fun `andre ytelser i snuten`() {
-            a1 {
-                nyttVedtak(januar)
-                forlengVedtak(februar)
-                håndterOverstyrTidslinje(
-                    overstyringsdager = listOf(
-                        ManuellOverskrivingDag(1.februar, Dagtype.Foreldrepengerdag),
-                        ManuellOverskrivingDag(2.februar, Dagtype.Pleiepengerdag),
-                        ManuellOverskrivingDag(3.februar, Dagtype.Omsorgspengerdag),
-                        ManuellOverskrivingDag(4.februar, Dagtype.Svangerskapspengerdag),
-                        ManuellOverskrivingDag(5.februar, Dagtype.Opplaringspengerdag),
-                        ManuellOverskrivingDag(6.februar, Dagtype.AAPdag),
-                        ManuellOverskrivingDag(7.februar, Dagtype.Dagpengerdag),
-                        ManuellOverskrivingDag(8.februar, Dagtype.AAPdag),
+    @Test
+    fun `andre ytelser i halen`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterOverstyrTidslinje(
+                overstyringsdager = listOf(
+                    ManuellOverskrivingDag(24.januar, Dagtype.Foreldrepengerdag),
+                    ManuellOverskrivingDag(25.januar, Dagtype.Pleiepengerdag),
+                    ManuellOverskrivingDag(26.januar, Dagtype.Omsorgspengerdag),
+                    ManuellOverskrivingDag(27.januar, Dagtype.Svangerskapspengerdag),
+                    ManuellOverskrivingDag(28.januar, Dagtype.Opplaringspengerdag),
+                    ManuellOverskrivingDag(29.januar, Dagtype.AAPdag),
+                    ManuellOverskrivingDag(30.januar, Dagtype.Dagpengerdag),
+                    ManuellOverskrivingDag(31.januar, Dagtype.AAPdag),
+                )
+            )
+            håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+            val forventetInput = mapOf(
+                "sykdomstidslinje" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 23.januar, "dagtype" to "SYKEDAG", "grad" to 100),
+                    mapOf("fom" to 24.januar, "tom" to 24.januar, "dagtype" to "FORELDREPENGER", "grad" to null),
+                    mapOf("fom" to 25.januar, "tom" to 25.januar, "dagtype" to "PLEIEPENGER", "grad" to null),
+                    mapOf("fom" to 26.januar, "tom" to 26.januar, "dagtype" to "OMSORGSPENGER", "grad" to null),
+                    mapOf("fom" to 27.januar, "tom" to 27.januar, "dagtype" to "SVANGERSKAPSPENGER", "grad" to null),
+                    mapOf("fom" to 28.januar, "tom" to 28.januar, "dagtype" to "OPPLÆRINGSPENGER", "grad" to null),
+                    mapOf("fom" to 29.januar, "tom" to 29.januar, "dagtype" to "ARBEIDSAVKLARINGSPENGER", "grad" to null),
+                    mapOf("fom" to 30.januar, "tom" to 30.januar, "dagtype" to "DAGPENGER", "grad" to null),
+                    mapOf("fom" to 31.januar, "tom" to 31.januar, "dagtype" to "ARBEIDSAVKLARINGSPENGER", "grad" to null)
+                ),
+            )
+            // Alt utenom Arbeidsavklaringspenger
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                lovverk = "trygderetten",
+                versjon = 2.mars(2007),
+                paragraf = KJENNELSE_2006_4023,
+                input = forventetInput,
+                output = mapOf(
+                    "perioder" to listOf(
+                        mapOf("fom" to 24.januar, "tom" to 28.januar),
+                        mapOf("fom" to 30.januar, "tom" to 30.januar),
                     )
                 )
-                håndterVilkårsgrunnlag(2.vedtaksperiode)
-                håndterYtelser(2.vedtaksperiode)
-                assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
-
-                val forventetInput = mapOf(
-                    "sykdomstidslinje" to listOf(
-                        mapOf("fom" to 1.februar, "tom" to 1.februar, "dagtype" to "FORELDREPENGER", "grad" to null),
-                        mapOf("fom" to 2.februar, "tom" to 2.februar, "dagtype" to "PLEIEPENGER", "grad" to null),
-                        mapOf("fom" to 3.februar, "tom" to 3.februar, "dagtype" to "OMSORGSPENGER", "grad" to null),
-                        mapOf("fom" to 4.februar, "tom" to 4.februar, "dagtype" to "SVANGERSKAPSPENGER", "grad" to null),
-                        mapOf("fom" to 5.februar, "tom" to 5.februar, "dagtype" to "OPPLÆRINGSPENGER", "grad" to null),
-                        mapOf("fom" to 6.februar, "tom" to 6.februar, "dagtype" to "ARBEIDSAVKLARINGSPENGER", "grad" to null),
-                        mapOf("fom" to 7.februar, "tom" to 7.februar, "dagtype" to "DAGPENGER", "grad" to null),
-                        mapOf("fom" to 8.februar, "tom" to 8.februar, "dagtype" to "ARBEIDSAVKLARINGSPENGER", "grad" to null),
-                        mapOf("fom" to 9.februar, "tom" to 28.februar, "dagtype" to "SYKEDAG", "grad" to 100)
-                    ),
-                )
-                // Alt utenom Arbeidsavklaringspenger
-                SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-                    lovverk = "trygderetten",
-                    versjon = 2.mars(2007),
-                    paragraf = KJENNELSE_2006_4023,
-                    input = forventetInput,
-                    output = mapOf(
-                        "perioder" to listOf(
-                            mapOf("fom" to 1.februar, "tom" to 5.februar),
-                            mapOf("fom" to 7.februar, "tom" to 7.februar),
-                        )
+            )
+            // Arbeidsavklaringspenger
+            SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                lovverk = "folketrygdloven",
+                versjon = 21.mai(2021),
+                paragraf = PARAGRAF_8_48,
+                input = forventetInput,
+                output = mapOf(
+                    "perioder" to listOf(
+                        mapOf("fom" to 29.januar, "tom" to 29.januar),
+                        mapOf("fom" to 31.januar, "tom" to 31.januar),
                     )
                 )
-                // Arbeidsavklaringspenger
-                SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-                    lovverk = "folketrygdloven",
-                    versjon = 21.mai(2021),
-                    paragraf = PARAGRAF_8_48,
-                    input = forventetInput,
-                    output = mapOf(
-                        "perioder" to listOf(
-                            mapOf("fom" to 6.februar, "tom" to 6.februar),
-                            mapOf("fom" to 8.februar, "tom" to 8.februar),
-                        )
-                    )
-                )
-            }
-        }
-
-        @Test
-        fun `andre ytelser i halen`() {
-            a1 {
-                nyttVedtak(januar)
-                håndterOverstyrTidslinje(
-                    overstyringsdager = listOf(
-                        ManuellOverskrivingDag(24.januar, Dagtype.Foreldrepengerdag),
-                        ManuellOverskrivingDag(25.januar, Dagtype.Pleiepengerdag),
-                        ManuellOverskrivingDag(26.januar, Dagtype.Omsorgspengerdag),
-                        ManuellOverskrivingDag(27.januar, Dagtype.Svangerskapspengerdag),
-                        ManuellOverskrivingDag(28.januar, Dagtype.Opplaringspengerdag),
-                        ManuellOverskrivingDag(29.januar, Dagtype.AAPdag),
-                        ManuellOverskrivingDag(30.januar, Dagtype.Dagpengerdag),
-                        ManuellOverskrivingDag(31.januar, Dagtype.AAPdag),
-                    )
-                )
-                håndterYtelser(1.vedtaksperiode)
-                assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-                val forventetInput = mapOf(
-                    "sykdomstidslinje" to listOf(
-                        mapOf("fom" to 1.januar, "tom" to 23.januar, "dagtype" to "SYKEDAG", "grad" to 100),
-                        mapOf("fom" to 24.januar, "tom" to 24.januar, "dagtype" to "FORELDREPENGER", "grad" to null),
-                        mapOf("fom" to 25.januar, "tom" to 25.januar, "dagtype" to "PLEIEPENGER", "grad" to null),
-                        mapOf("fom" to 26.januar, "tom" to 26.januar, "dagtype" to "OMSORGSPENGER", "grad" to null),
-                        mapOf("fom" to 27.januar, "tom" to 27.januar, "dagtype" to "SVANGERSKAPSPENGER", "grad" to null),
-                        mapOf("fom" to 28.januar, "tom" to 28.januar, "dagtype" to "OPPLÆRINGSPENGER", "grad" to null),
-                        mapOf("fom" to 29.januar, "tom" to 29.januar, "dagtype" to "ARBEIDSAVKLARINGSPENGER", "grad" to null),
-                        mapOf("fom" to 30.januar, "tom" to 30.januar, "dagtype" to "DAGPENGER", "grad" to null),
-                        mapOf("fom" to 31.januar, "tom" to 31.januar, "dagtype" to "ARBEIDSAVKLARINGSPENGER", "grad" to null)
-                    ),
-                )
-                // Alt utenom Arbeidsavklaringspenger
-                SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-                    lovverk = "trygderetten",
-                    versjon = 2.mars(2007),
-                    paragraf = KJENNELSE_2006_4023,
-                    input = forventetInput,
-                    output = mapOf(
-                        "perioder" to listOf(
-                            mapOf("fom" to 24.januar, "tom" to 28.januar),
-                            mapOf("fom" to 30.januar, "tom" to 30.januar),
-                        )
-                    )
-                )
-                // Arbeidsavklaringspenger
-                SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-                    lovverk = "folketrygdloven",
-                    versjon = 21.mai(2021),
-                    paragraf = PARAGRAF_8_48,
-                    input = forventetInput,
-                    output = mapOf(
-                        "perioder" to listOf(
-                            mapOf("fom" to 29.januar, "tom" to 29.januar),
-                            mapOf("fom" to 31.januar, "tom" to 31.januar),
-                        )
-                    )
-                )
-            }
+            )
         }
     }
 }
+
