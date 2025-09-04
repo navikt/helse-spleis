@@ -255,6 +255,9 @@ internal abstract class AbstractDslTest {
     protected fun TestPerson.TestArbeidsgiver.assertInfo(forventet: String, filter: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertInfo(forventet, filter)
 
+    protected fun TestPerson.TestArbeidsgiver.assertInfo(forventet: String) =
+        testArbeidsgiverAsserter.assertInfo(forventet, AktivitetsloggFilter.Alle)
+
     protected fun TestPerson.TestArbeidsgiver.assertIngenInfo(forventet: String, filter: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertIngenInfo(forventet, filter)
 
