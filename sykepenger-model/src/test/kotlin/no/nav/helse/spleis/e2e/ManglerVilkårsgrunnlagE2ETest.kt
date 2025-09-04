@@ -160,7 +160,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
         a1 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar)))
             assertEquals(januar, testperson.person.infotrygdhistorikk.betaltePerioder().single())
-            val førsteVedtaksperiode = testperson.person.inspektør.vedtaksperioder()[a1]?.first()!!
+            val førsteVedtaksperiode = inspektør.vedtaksperioder(1.vedtaksperiode)
             assertEquals(februar, førsteVedtaksperiode.periode)
 
             val assertTilstandFørInntektsmeldingHensyntas: () -> Unit = {
@@ -186,11 +186,11 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             // Når søknaden kommer replayes Inntektsmelding og nå puttes plutselig info fra Inntektsmlding på
             // arbeidsgiver, også lengre tilbake i tid enn vedtaksperioden som blir truffet.
             håndterSøknad(5.mars til 31.mars)
-            assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
             assertTilstandFørInntektsmeldingHensyntas()
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
         }
     }
 

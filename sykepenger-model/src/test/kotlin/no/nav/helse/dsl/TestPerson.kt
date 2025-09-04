@@ -90,8 +90,8 @@ internal class TestPerson(
     internal val personlogg = Aktivitetslogg()
     private val behovsamler = Behovsamler(deferredLog)
     private val varslersamler = Varslersamler()
-    private val vedtaksperiodesamler = Vedtaksperiodesamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk()
+    private val vedtaksperiodesamler = Vedtaksperiodesamler(person)
     internal val person = person.also {
         it.addObserver(vedtaksperiodesamler)
         it.addObserver(behovsamler)
