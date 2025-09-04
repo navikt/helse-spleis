@@ -75,10 +75,6 @@ spec:
       value: "true"
     - name: JAVA_TOOL_OPTIONS
       value: "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-dev-7ff9,-logtostderr,-minloglevel=1"
-    - name: FRA_DATO
-      value: "1"
-    - name: TIL_DATO
-      value: "31"
   observability:
     logging:
       destinations:

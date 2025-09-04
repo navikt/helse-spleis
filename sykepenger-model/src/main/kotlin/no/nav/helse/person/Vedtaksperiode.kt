@@ -286,10 +286,6 @@ internal class Vedtaksperiode private constructor(
         søknad.forUng(aktivitetsloggMedVedtaksperiodekontekst, person.alder)
         arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(aktivitetsloggMedVedtaksperiodekontekst, periode, arbeidsgivere)
 
-        if (person.alder.fødselsdato.dayOfMonth !in Toggle.FraDato..Toggle.TilDato && arbeidsgiver.yrkesaktivitetssporing is Behandlingsporing.Yrkesaktivitet.Selvstendig) {
-            aktivitetsloggMedVedtaksperiodekontekst.funksjonellFeil(Varselkode.RV_SØ_45)
-        }
-
         infotrygdhistorikk.validerMedFunksjonellFeil(aktivitetsloggMedVedtaksperiodekontekst, periode)
         håndterSøknad(søknad, aktivitetsloggMedVedtaksperiodekontekst)
         aktivitetsloggMedVedtaksperiodekontekst.info("Fullført behandling av søknad")

@@ -90,7 +90,3 @@ spec:
     value: NONE
   - name: JAVA_TOOL_OPTIONS
     value: "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-prod-eacd,-logtostderr,-minloglevel=1"
-  - name: FRA_DATO
-    value: "12"
-  - name: TIL_DATO
-    value: "13"
