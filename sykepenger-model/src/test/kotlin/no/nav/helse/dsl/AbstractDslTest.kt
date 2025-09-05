@@ -505,8 +505,8 @@ internal abstract class AbstractDslTest {
     internal fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT, orgnummer: String = a1) =
         bareÈnArbeidsgiver(orgnummer).håndterUtbetalt(status)
 
-    protected fun håndterAnnullering(utbetalingId: UUID) =
-        bareÈnArbeidsgiver(a1).håndterAnnullering(utbetalingId)
+    protected fun håndterAnnullering(utbetalingId: UUID, orgnummer: String = a1) =
+        bareÈnArbeidsgiver(orgnummer).håndterAnnullering(utbetalingId)
 
     protected fun håndterIdentOpphørt(nyttFnr: Personidentifikator, nyAktørId: String) =
         bareÈnArbeidsgiver(a1).håndterIdentOpphørt(nyttFnr, nyAktørId)

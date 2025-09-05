@@ -123,6 +123,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun sisteMaksdato(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.maksdatoer.last()
 
     internal fun sisteUtbetalingId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.utbetalinger.last().id
+    internal fun sisteUtbetalingId(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.last().id
 
     internal fun vilkårsgrunnlag(vedtaksperiodeIdInnhenter: IdInnhenter) = person.vilkårsgrunnlagFor(skjæringstidspunkt(vedtaksperiodeIdInnhenter))
     internal fun vilkårsgrunnlag(vedtaksperiodeId: UUID) = person.vilkårsgrunnlagFor(skjæringstidspunkt(vedtaksperiodeId))
@@ -151,6 +152,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun hendelseIder(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.hendelseIder.map { it.id }.toSet()
 
     internal fun sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.utbetalinger.last().arbeidsgiverOppdrag.fagsystemId
+    internal fun sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.last().arbeidsgiverOppdrag.fagsystemId
 
     internal fun vedtaksperiodeId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.id(orgnummer)
 
