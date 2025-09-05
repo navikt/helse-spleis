@@ -151,10 +151,11 @@ data class Økonomi(
         }
         private val DekningsgradArbeidstaker = 100.prosent
         private val DekningsgradSelvstendig = 80.prosent
+        private val DekningsgradInaktiv = 65.prosent
     }
 
     init {
-        require(dekningsgrad == DekningsgradSelvstendig || dekningsgrad == DekningsgradArbeidstaker) { "dekningsgrad må være 100 % eller 80 % var $dekningsgrad." }
+        require(dekningsgrad == DekningsgradSelvstendig || dekningsgrad == DekningsgradArbeidstaker || dekningsgrad == DekningsgradInaktiv) { "dekningsgrad må være 100 %, 80 % eller 65 % var $dekningsgrad." }
     }
 
     // sykdomsgrader opprettes som int, og det gir ikke mening å runde opp og på den måten "gjøre personen mer syk"
