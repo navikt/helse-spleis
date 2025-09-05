@@ -46,6 +46,7 @@ internal sealed interface Yrkesaktivitet {
 
     data object SelvstendigBarnepasser : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
+            if (Toggle.SelvstendigNæringsdrivende.enabled) return false
             aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
             return true
         }

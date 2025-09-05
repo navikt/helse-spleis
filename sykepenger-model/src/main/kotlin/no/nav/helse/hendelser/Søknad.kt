@@ -119,7 +119,7 @@ class Søknad(
     internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, refusjonstidslinje: Beløpstidslinje, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
         valider(aktivitetslogg, subsumsjonslogg)
         validerInntektskilder(aktivitetslogg, vilkårsgrunnlag)
-        if (behandlingsporing == Behandlingsporing.Yrkesaktivitet.Selvstendig) validerSelvstendig(aktivitetslogg)
+        if (behandlingsporing in listOf(Behandlingsporing.Yrkesaktivitet.Selvstendig, Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser)) validerSelvstendig(aktivitetslogg)
         if (erArbeidsledig) validerArbeidsledig(aktivitetslogg, vilkårsgrunnlag, sykdomstidslinje.periode(), refusjonstidslinje)
         return aktivitetslogg
     }
@@ -192,8 +192,8 @@ class Søknad(
 
             Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> TODO("Faktaavklart inntekt for selvstendige jordbrukere er ikke implementert")
             Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> TODO("Faktaavklart inntekt for selvstendige fiskere er ikke implementert")
-            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> TODO("Faktaavklart inntekt for selvstendige dagmammaer er ikke implementert")
 
+            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser,
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
                 val anvendtGrunnbeløp = `1G`.beløp(sykdomsperiode.start)
                 val avklartePensjonsgivendeInntekter = pensjonsgivendeInntekter?.map {
@@ -217,6 +217,7 @@ class Søknad(
         }
 
         val ventetid = when (behandlingsporing) {
+            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser,
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
                 val ventetid = perioder.filterIsInstance<Søknadsperiode.Ventetid>().first()
                 Periode(ventetid.periode.start, ventetid.periode.endInclusive)
@@ -225,7 +226,6 @@ class Søknad(
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
             Behandlingsporing.Yrkesaktivitet.Frilans,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser,
             Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
             Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> null
         }

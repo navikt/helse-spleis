@@ -115,6 +115,7 @@ internal class TestPerson(
 
     private fun String.tilYrkesaktivitet(): Behandlingsporing.Yrkesaktivitet = when (this) {
         selvstendig -> Behandlingsporing.Yrkesaktivitet.Selvstendig
+        barnepasser -> Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser
         frilans -> Behandlingsporing.Yrkesaktivitet.Frilans
         arbeidsledig -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
         else -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(this)

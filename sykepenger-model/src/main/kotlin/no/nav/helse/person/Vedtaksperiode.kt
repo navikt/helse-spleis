@@ -1052,9 +1052,9 @@ internal class Vedtaksperiode private constructor(
         tilstand(
             aktivitetsloggMedVedtaksperiodekontekst,
             when {
-                behandlinger.harUtbetalinger() && arbeidsgiver.yrkesaktivitetssporing == Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigTilUtbetaling
+                behandlinger.harUtbetalinger() && arbeidsgiver.yrkesaktivitetssporing in listOf(Behandlingsporing.Yrkesaktivitet.Selvstendig, Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser) -> SelvstendigTilUtbetaling
                 behandlinger.harUtbetalinger() -> TilUtbetaling
-                arbeidsgiver.yrkesaktivitetssporing == Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigAvsluttet
+                arbeidsgiver.yrkesaktivitetssporing in listOf(Behandlingsporing.Yrkesaktivitet.Selvstendig, Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser) -> SelvstendigAvsluttet
                 else -> Avsluttet
             }
         )
@@ -1650,14 +1650,14 @@ internal class Vedtaksperiode private constructor(
 
     private fun avklarSykepengegrunnlagForSelvstendig(): SelvstendigInntektsopplysning? {
         return when (this.arbeidsgiver.yrkesaktivitetssporing) {
+            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser,
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigInntektsopplysning(
                 faktaavklartInntekt = inntektForSelvstendig(),
                 skjønnsmessigFastsatt = null
             )
 
             Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> TODO("Avklaring av sykepengegrunnlag for selvstendig jordbruker, fisker og dagmamma er ikke implementert")
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> TODO("Avklaring av sykepengegrunnlag for selvstendig jordbruker og fisker er ikke implementert")
 
             is Arbeidstaker,
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
@@ -2254,10 +2254,12 @@ internal class Vedtaksperiode private constructor(
     private fun forventerInntekt(): Boolean {
         return when (arbeidsgiver.yrkesaktivitetssporing) {
             is Arbeidstaker -> arbeidsgiver.arbeidsgiverperiode(periode)?.forventerInntekt(periode) == true
+
+            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser,
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> true
+
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser,
             Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
             Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> false
         }
@@ -2418,7 +2420,7 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg = aktivitetslogg,
                 inntektsgrunnlag = grunnlagsdata.inntektsgrunnlag,
                 medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus,
-                opptjening = grunnlagsdata.opptjening.takeUnless { arbeidsgiver.yrkesaktivitetssporing is Behandlingsporing.Yrkesaktivitet.Selvstendig }
+                opptjening = grunnlagsdata.opptjening.takeUnless { arbeidsgiver.yrkesaktivitetssporing is Behandlingsporing.Yrkesaktivitet.Selvstendig || arbeidsgiver.yrkesaktivitetssporing is Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser }
             ),
             maksdatofilter,
             MaksimumUtbetalingFilter(

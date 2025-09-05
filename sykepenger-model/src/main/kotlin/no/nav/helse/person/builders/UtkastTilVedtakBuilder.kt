@@ -4,6 +4,7 @@ import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.collections.listOf
 import kotlin.properties.Delegates
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -265,7 +266,7 @@ internal class UtkastTilVedtakBuilder(
                 "sykepengegrunnlag" to sykepengegrunnlag,
                 "6G" to seksG,
             ).plus(
-                if (yrkesaktivitetssporing is Behandlingsporing.Yrkesaktivitet.Selvstendig) {
+                if (yrkesaktivitetssporing in listOf(Behandlingsporing.Yrkesaktivitet.Selvstendig, Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser)) {
                     selvstendigMap()
                 } else {
                     when (sykepengegrunnlagsfakta) {
