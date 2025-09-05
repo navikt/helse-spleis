@@ -65,7 +65,7 @@ class Vilkårsgrunnlag(
         Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigNæringsdrivendeOpptjening(skjæringstidspunkt)
         Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> TODO()
         Behandlingsporing.Yrkesaktivitet.Frilans -> TODO()
-        Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> TODO()
+        Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> TODO()
         Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> TODO()
         Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> TODO()
     }

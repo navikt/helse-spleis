@@ -208,7 +208,7 @@ internal class Vedtaksperiode private constructor(
             Behandlingsporing.Yrkesaktivitet.Selvstendig,
             Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
             Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> SelvstendigStart
+            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> SelvstendigStart
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             is Arbeidstaker,
@@ -929,7 +929,7 @@ internal class Vedtaksperiode private constructor(
                 Behandlingsporing.Yrkesaktivitet.Selvstendig,
                 Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
                 Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-                Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> error("Forventer ikke tilstanden AvventerInfotrygdHistorikk for vedtaksperiode opprettet av en søknad for Selvstendig næringsdrivende")
+                Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> error("Forventer ikke tilstanden AvventerInfotrygdHistorikk for vedtaksperiode opprettet av en søknad for Selvstendig næringsdrivende")
             }
 
             Avsluttet,
@@ -974,7 +974,7 @@ internal class Vedtaksperiode private constructor(
                 Behandlingsporing.Yrkesaktivitet.Selvstendig,
                 Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
                 Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-                Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
+                Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
             }
         }
     }
@@ -1011,7 +1011,7 @@ internal class Vedtaksperiode private constructor(
             Behandlingsporing.Yrkesaktivitet.Selvstendig,
             Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
             Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> {
+            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> {
             }
         }
 
@@ -1644,7 +1644,7 @@ internal class Vedtaksperiode private constructor(
             Behandlingsporing.Yrkesaktivitet.Frilans,
             Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
             Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> null
+            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> null
         }
     }
 
@@ -1657,7 +1657,7 @@ internal class Vedtaksperiode private constructor(
 
             Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
             Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> TODO("Avklaring av sykepengegrunnlag for selvstendig jordbruker, fisker og dagmamma er ikke implementert")
+            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> TODO("Avklaring av sykepengegrunnlag for selvstendig jordbruker, fisker og dagmamma er ikke implementert")
 
             is Arbeidstaker,
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
@@ -2257,7 +2257,7 @@ internal class Vedtaksperiode private constructor(
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> true
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser,
             Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
             Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> false
         }
@@ -2276,7 +2276,7 @@ internal class Vedtaksperiode private constructor(
             Behandlingsporing.Yrkesaktivitet.Selvstendig,
             Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
             Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> return false
+            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> return false
         }
     }
 

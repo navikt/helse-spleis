@@ -10,5 +10,5 @@ internal val Behandlingsporing.Yrkesaktivitet.somOrganisasjonsnummer
         Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
         Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> "SELVSTENDIG_JORDBRUKER"
         Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> "SELVSTENDIG_FISKER"
-        Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> "SELVSTENDIG_DAGMAMMA"
+        Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> "SELVSTENDIG_BARNEPASSER"
     }

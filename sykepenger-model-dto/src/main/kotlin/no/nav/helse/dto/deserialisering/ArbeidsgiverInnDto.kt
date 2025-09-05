@@ -25,6 +25,6 @@ data class ArbeidsgiverInnDto(
         SELVSTENDIG,
         SELVSTENDIG_JORDBRUKER,
         SELVSTENDIG_FISKER,
-        SELVSTENDIG_DAGMAMMA
+        SELVSTENDIG_BARNEPASSER
     }
 }

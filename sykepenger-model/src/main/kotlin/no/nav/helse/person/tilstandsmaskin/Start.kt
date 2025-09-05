@@ -24,7 +24,7 @@ internal data object Start : Vedtaksperiodetilstand {
                     Behandlingsporing.Yrkesaktivitet.Selvstendig,
                     Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
                     Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> AvventerBlokkerendePeriode
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> AvventerBlokkerendePeriode
                 }
             }
         )

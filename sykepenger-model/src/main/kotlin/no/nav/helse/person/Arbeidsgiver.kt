@@ -164,7 +164,7 @@ internal class Arbeidsgiver private constructor(
         is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> yrkesaktivitetssporing.organisasjonsnummer
         Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANS"
         Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
-        Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> "SELVSTENDIG_DAGMAMMA"
+        Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> "SELVSTENDIG_BARNEPASSER"
         Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> "SELVSTENDIG_FISKER"
         Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> "SELVSTENDIG_JORDBRUKER"
     }
@@ -173,7 +173,7 @@ internal class Arbeidsgiver private constructor(
         is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> Yrkesaktivitet.Arbeidstaker
         Behandlingsporing.Yrkesaktivitet.Frilans -> Yrkesaktivitet.Frilans
         Behandlingsporing.Yrkesaktivitet.Selvstendig -> Yrkesaktivitet.Selvstendig
-        Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> Yrkesaktivitet.SelvstendigDagmamma
+        Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> Yrkesaktivitet.SelvstendigBarnepasser
         Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> Yrkesaktivitet.SelvstendigFisker
         Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> Yrkesaktivitet.SelvstendigJordbruker
     }
@@ -356,7 +356,7 @@ internal class Arbeidsgiver private constructor(
                     ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG -> Behandlingsporing.Yrkesaktivitet.Selvstendig
                     ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_JORDBRUKER -> Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker
                     ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_FISKER -> Behandlingsporing.Yrkesaktivitet.SelvstendigFisker
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_DAGMAMMA -> Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma
+                    ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_BARNEPASSER -> Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser
                 },
                 inntektshistorikk = Inntektshistorikk.gjenopprett(dto.inntektshistorikk),
                 sykdomshistorikk = Sykdomshistorikk.gjenopprett(dto.sykdomshistorikk),
@@ -442,7 +442,7 @@ internal class Arbeidsgiver private constructor(
                 is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> Klassekode.SykepengerArbeidstakerOrdinær
                 Behandlingsporing.Yrkesaktivitet.Selvstendig -> Klassekode.SelvstendigNæringsdrivendeOppgavepliktig
                 Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk
-                Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> Klassekode.SelvstendigNæringsdrivendeDagmammaOppgavepliktig
+                Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> Klassekode.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
                 Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> Klassekode.SelvstendigNæringsdrivendeFisker
                 Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
                 Behandlingsporing.Yrkesaktivitet.Frilans -> error("Forventer ikke å lage utbetaling for $yrkesaktivitetssporing ennå")
@@ -1085,7 +1085,7 @@ internal class Arbeidsgiver private constructor(
             Behandlingsporing.Yrkesaktivitet.Frilans,
             Behandlingsporing.Yrkesaktivitet.Selvstendig,
             Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser,
             Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> emptyList()
         }
     }
@@ -1195,7 +1195,7 @@ internal class Arbeidsgiver private constructor(
                 is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> "ARBEIDSTAKER"
                 Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANS"
                 Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
-                Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> "SELVSTENDIG_DAGMAMMA"
+                Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> "SELVSTENDIG_BARNEPASSER"
                 Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> "SELVSTENDIG_FISKER"
                 Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> "SELVSTENDIG_JORDBRUKER"
             }
@@ -1298,7 +1298,7 @@ internal class Arbeidsgiver private constructor(
                 Behandlingsporing.Yrkesaktivitet.Selvstendig -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG
                 Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_FISKER
                 Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_JORDBRUKER
-                Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_DAGMAMMA
+                Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_BARNEPASSER
             },
             inntektshistorikk = inntektshistorikk.dto(),
             sykdomshistorikk = sykdomshistorikk.dto(),

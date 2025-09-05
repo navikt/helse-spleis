@@ -21,7 +21,7 @@ import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.SelvstendigDagmamma
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.SelvstendigFisker
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -575,7 +575,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 Arbeidsledig,
                 Frilans,
-                SelvstendigDagmamma,
+                SelvstendigBarnepasser,
                 SelvstendigFisker,
                 SelvstendigJordbruker -> error("Forventer ikke å lage utbetalingstidslinje for ${yrkesaktivitet::class.simpleName}")
             }

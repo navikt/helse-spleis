@@ -128,7 +128,7 @@ private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
         ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.SELVSTENDIG
         ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_JORDBRUKER -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.SELVSTENDIG_JORDBRUKER
         ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_FISKER -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.SELVSTENDIG_FISKER
-        ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_DAGMAMMA -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.SELVSTENDIG_DAGMAMMA
+        ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_BARNEPASSER -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.SELVSTENDIG_BARNEPASSER
     },
     inntektshistorikk = this.inntektshistorikk.historikk.map { it.tilPersonData() },
     sykdomshistorikk = this.sykdomshistorikk.elementer.map { it.tilPersonData() },
@@ -674,7 +674,7 @@ private fun KlassekodeDto.tilPersonData() = when (this) {
     KlassekodeDto.RefusjonIkkeOpplysningspliktig -> "SPREFAG-IOP"
     KlassekodeDto.SykepengerArbeidstakerOrdinær -> "SPATORD"
     KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig -> "SPSND-OP"
-    KlassekodeDto.SelvstendigNæringsdrivendeDagmammaOppgavepliktig -> "SPSNDDM-OP"
+    KlassekodeDto.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig -> "SPSNDDM-OP"
     KlassekodeDto.SelvstendigNæringsdrivendeFisker -> "SPSNDFISK"
     KlassekodeDto.SelvstendigNæringsdrivendeJordbrukOgSkogbruk -> "SPSNDJORD"
 }

@@ -44,7 +44,7 @@ internal sealed interface Yrkesaktivitet {
         }
     }
 
-    data object SelvstendigDagmamma : Yrkesaktivitet {
+    data object SelvstendigBarnepasser : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
             return true

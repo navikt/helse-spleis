@@ -75,7 +75,7 @@ sealed class KlassekodeDto(val verdi: String) {
     data object SelvstendigNæringsdrivendeOppgavepliktig : KlassekodeDto("SPSND-OP")
     data object SelvstendigNæringsdrivendeFisker : KlassekodeDto("SPSNDFISK")
     data object SelvstendigNæringsdrivendeJordbrukOgSkogbruk : KlassekodeDto("SPSNDJORD")
-    data object SelvstendigNæringsdrivendeDagmammaOppgavepliktig : KlassekodeDto("SPSNDDM-OP")
+    data object SelvstendigNæringsdrivendeBarnepasserOppgavepliktig : KlassekodeDto("SPSNDDM-OP")
 }
 
 sealed class FeriepengerfagområdeDto {

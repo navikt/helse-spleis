@@ -253,7 +253,7 @@ data class Utbetalingslinje(
             Klassekode.SelvstendigNæringsdrivendeOppgavepliktig -> KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig
             Klassekode.SelvstendigNæringsdrivendeFisker -> KlassekodeDto.SelvstendigNæringsdrivendeFisker
             Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk -> KlassekodeDto.SelvstendigNæringsdrivendeJordbrukOgSkogbruk
-            Klassekode.SelvstendigNæringsdrivendeDagmammaOppgavepliktig -> KlassekodeDto.SelvstendigNæringsdrivendeDagmammaOppgavepliktig
+            Klassekode.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig -> KlassekodeDto.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
         },
         datoStatusFom = this.datoStatusFom,
         statuskode = this.statuskode
