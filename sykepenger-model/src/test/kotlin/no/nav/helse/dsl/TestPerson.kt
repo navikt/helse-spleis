@@ -189,13 +189,15 @@ internal class TestPerson(
             inntekterFraNyeArbeidsforhold: Boolean = false,
             sendTilGosys: Boolean = false,
             egenmeldinger: List<Periode> = emptyList(),
-            pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>? = null
+            pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>? = null,
+            søknadId: UUID = UUID.randomUUID()
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, 100.prosent),
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
             sendTilGosys = sendTilGosys,
             egenmeldinger = egenmeldinger,
-            pensjonsgivendeInntekter = pensjonsgivendeInntekter
+            pensjonsgivendeInntekter = pensjonsgivendeInntekter,
+            søknadId = søknadId
         )
 
         internal fun håndterArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning): UUID {
@@ -309,7 +311,6 @@ internal class TestPerson(
             id: UUID = UUID.randomUUID(),
             mottatt: LocalDateTime = LocalDateTime.now()
         ): UUID {
-
             val arbeidsgiveropplysninger = Arbeidsgiveropplysninger(
                 meldingsreferanseId = MeldingsreferanseId(id),
                 innsendt = mottatt,
@@ -769,6 +770,16 @@ internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
     val vedtaksperiode = nyPeriode(periode, grad)
     håndterInntektsmelding(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, refusjon)
     håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiode, *arbeidsgivere.toTypedArray())
+    håndterYtelser(vedtaksperiode)
+    håndterSimulering(vedtaksperiode)
+    return vedtaksperiode
+}
+
+internal fun TestPerson.TestArbeidsgiver.forlengelseTilGodkjenning(
+    periode: Periode,
+    grad: Prosentdel = 100.prosent,
+): UUID {
+    val vedtaksperiode = nyPeriode(periode, grad)
     håndterYtelser(vedtaksperiode)
     håndterSimulering(vedtaksperiode)
     return vedtaksperiode
