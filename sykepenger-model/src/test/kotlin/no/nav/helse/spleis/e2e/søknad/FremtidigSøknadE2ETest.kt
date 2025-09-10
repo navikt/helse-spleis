@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e.søknad
 
 import java.time.YearMonth
+import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.a1
 import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -16,22 +18,12 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
-import no.nav.helse.spleis.e2e.håndterSimulering
-import no.nav.helse.spleis.e2e.håndterSykmelding
-import no.nav.helse.spleis.e2e.håndterSøknad
-import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalt
-import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
-import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
+internal class FremtidigSøknadE2ETest : AbstractDslTest() {
     private companion object {
         private val inneværendeMåned = YearMonth.now()
         private val nesteMåned = inneværendeMåned.plusMonths(1)
@@ -42,34 +34,36 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `kan sende inn søknad før periode er gått ut`() {
-        håndterSykmelding(Sykmeldingsperiode(fom, tom))
-        håndterSøknad(Sykdom(fom, tom, 100.prosent))
-        håndterArbeidsgiveropplysninger(
-            listOf(Periode(fom, sisteArbeidsgiverdag)),
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-        val arbeidsgiverOppdrag = inspektør.utbetaling(0).arbeidsgiverOppdrag
-        val oppdragInspektør = arbeidsgiverOppdrag.inspektør
-        assertEquals(sisteArbeidsgiverdag.plusDays(1), arbeidsgiverOppdrag.first().inspektør.fom)
-        assertEquals(tom, arbeidsgiverOppdrag.last().inspektør.tom)
-        assertEquals(tom, oppdragInspektør.periode?.endInclusive)
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(fom, tom))
+            håndterSøknad(Sykdom(fom, tom, 100.prosent))
+            håndterArbeidsgiveropplysninger(
+                    listOf(Periode(fom, sisteArbeidsgiverdag)),
+                    vedtaksperiodeId = 1.vedtaksperiode
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertTilstander(
+                    1.vedtaksperiode,
+                    START,
+                    AVVENTER_INFOTRYGDHISTORIKK,
+                    AVVENTER_INNTEKTSMELDING,
+                    AVVENTER_BLOKKERENDE_PERIODE,
+                    AVVENTER_VILKÅRSPRØVING,
+                    AVVENTER_HISTORIKK,
+                    AVVENTER_SIMULERING,
+                    AVVENTER_GODKJENNING,
+                    TIL_UTBETALING,
+                    AVSLUTTET
+            )
+            val arbeidsgiverOppdrag = inspektør.utbetaling(0).arbeidsgiverOppdrag
+            val oppdragInspektør = arbeidsgiverOppdrag.inspektør
+            assertEquals(sisteArbeidsgiverdag.plusDays(1), arbeidsgiverOppdrag.first().inspektør.fom)
+            assertEquals(tom, arbeidsgiverOppdrag.last().inspektør.tom)
+            assertEquals(tom, oppdragInspektør.periode?.endInclusive)
+        }
     }
 }
