@@ -174,6 +174,8 @@ internal class TestPerson(
 
         internal val Int.vedtaksperiode get() = vedtaksperiodesamler.vedtaksperiodeId(orgnummer, this - 1)
 
+        internal val sisteVedtaksperiode get() = vedtaksperiodesamler.sisteVedtaksperiode(orgnummer)
+
         internal fun håndterSykmelding(periode: Periode) = håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
 
         internal fun håndterSykmelding(

@@ -16,6 +16,8 @@ internal class Vedtaksperiodesamler(person: Person? = null) : PersonObserver {
     internal fun vedtaksperiodeId(orgnummer: String, indeks: Int) =
         vedtaksperioder.getValue(orgnummer).elementAt(indeks)
 
+    internal fun sisteVedtaksperiode(orgnummer: String) = vedtaksperioder.getValue(orgnummer).last()
+
     internal fun fangVedtaksperiode(orgnummer: String, block: () -> Any): UUID? {
         val forrige = forrigeFor(orgnummer)
         block()
