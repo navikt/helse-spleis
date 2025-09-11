@@ -8,6 +8,7 @@ val a4 = "a4"
 val frilans = "FRILANS"
 val selvstendig = "SELVSTENDIG"
 val arbeidsledig = "ARBEIDSLEDIG"
+val barnepasser = "SELVSTENDIG_BARNEPASSER"
 
 @Deprecated("erstatte med a1", replaceWith = ReplaceWith("a1"))
 val ORGNUMMER = "bruk_heller_a1"
