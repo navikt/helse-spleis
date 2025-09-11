@@ -3,15 +3,21 @@ package no.nav.helse.spleis.e2e
 import java.time.Year
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.INNTEKT
+import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.oktober
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING
@@ -31,6 +37,29 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SelvstendigTest : AbstractDslTest() {
+
+    @Test
+    fun `Person med frilanserinntekt i løpet av de siste 3 månedene sendes til infotrygd`() = Toggle.SelvstendigNæringsdrivende.enable {
+        selvstendig {
+            håndterSøknadSelvstendig(januar)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                skatteinntekter = listOf(a1 to INNTEKT),
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, 1.oktober(2017), 31.oktober(2017), Arbeidsforholdtype.FRILANSER),
+                )
+            )
+            assertFunksjonellFeil(Varselkode.RV_IV_3.varseltekst, 1.vedtaksperiode.filter())
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                SELVSTENDIG_START,
+                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
+                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
+                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
+                TIL_INFOTRYGD
+            )
+        }
+    }
 
     @Test
     fun `Verifiserer sykdomstidslinje for selvstendig`() = Toggle.SelvstendigNæringsdrivende.enable {
