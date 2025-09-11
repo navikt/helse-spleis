@@ -8,7 +8,7 @@ val mainClass = "no.nav.helse.AppKt"
 
 val tbdLibsVersion = "2025.08.16-09.21-71db7cad"
 val tbdSpillAvImMatchingVersion = "2025.04.08-12.41-e519e1f8"
-val syfokafkaVersion = "2025.08.25-11.40-5d9089e8"
+val syfokafkaVersion = "2025.09.09-07.30-baf456bb"
 val mockkVersion = "1.13.17"
 val jsonSchemaValidatorVersion = "1.0.70"
 val jsonassertVersion = "1.5.0"
