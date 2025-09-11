@@ -98,6 +98,7 @@ import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnslagInnDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlaghistorikkInnDto
+import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
@@ -519,13 +520,13 @@ data class PersonData(
             id = this.id,
             organisasjonsnummer = this.organisasjonsnummer,
             yrkesaktivitetstype = when (this.yrkesaktivitetstype) {
-                YrkesaktivitetTypeData.ARBEIDSTAKER -> ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSTAKER
-                YrkesaktivitetTypeData.ARBEIDSLEDIG -> ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSLEDIG
-                YrkesaktivitetTypeData.FRILANS -> ArbeidsgiverInnDto.Yrkesaktivitetstype.FRILANS
-                YrkesaktivitetTypeData.SELVSTENDIG -> ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG
-                YrkesaktivitetTypeData.SELVSTENDIG_JORDBRUKER -> ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_JORDBRUKER
-                YrkesaktivitetTypeData.SELVSTENDIG_FISKER -> ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_FISKER
-                YrkesaktivitetTypeData.SELVSTENDIG_BARNEPASSER -> ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_BARNEPASSER
+                YrkesaktivitetTypeData.ARBEIDSTAKER -> YrkesaktivitetstypeDto.ARBEIDSTAKER
+                YrkesaktivitetTypeData.ARBEIDSLEDIG -> YrkesaktivitetstypeDto.ARBEIDSLEDIG
+                YrkesaktivitetTypeData.FRILANS -> YrkesaktivitetstypeDto.FRILANS
+                YrkesaktivitetTypeData.SELVSTENDIG -> YrkesaktivitetstypeDto.SELVSTENDIG
+                YrkesaktivitetTypeData.SELVSTENDIG_JORDBRUKER -> YrkesaktivitetstypeDto.SELVSTENDIG_JORDBRUKER
+                YrkesaktivitetTypeData.SELVSTENDIG_FISKER -> YrkesaktivitetstypeDto.SELVSTENDIG_FISKER
+                YrkesaktivitetTypeData.SELVSTENDIG_BARNEPASSER -> YrkesaktivitetstypeDto.SELVSTENDIG_BARNEPASSER
             },
             inntektshistorikk = InntektshistorikkInnDto(this.inntektshistorikk.map { it.tilDto() }),
             sykdomshistorikk = SykdomshistorikkDto(this.sykdomshistorikk.map { it.tilDto() }),

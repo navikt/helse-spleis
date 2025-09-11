@@ -6,6 +6,7 @@ import java.util.*
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
+import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.UbrukteRefusjonsopplysningerUtDto
 import no.nav.helse.erHelg
@@ -350,13 +351,13 @@ internal class Arbeidsgiver private constructor(
                 person = person,
                 id = dto.id,
                 yrkesaktivitetssporing = when (dto.yrkesaktivitetstype) {
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSLEDIG -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.ARBEIDSTAKER -> Arbeidstaker(dto.organisasjonsnummer)
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.FRILANS -> Behandlingsporing.Yrkesaktivitet.Frilans
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG -> Behandlingsporing.Yrkesaktivitet.Selvstendig
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_JORDBRUKER -> Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_FISKER -> Behandlingsporing.Yrkesaktivitet.SelvstendigFisker
-                    ArbeidsgiverInnDto.Yrkesaktivitetstype.SELVSTENDIG_BARNEPASSER -> Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser
+                    YrkesaktivitetstypeDto.ARBEIDSLEDIG -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+                    YrkesaktivitetstypeDto.ARBEIDSTAKER -> Arbeidstaker(dto.organisasjonsnummer)
+                    YrkesaktivitetstypeDto.FRILANS -> Behandlingsporing.Yrkesaktivitet.Frilans
+                    YrkesaktivitetstypeDto.SELVSTENDIG -> Behandlingsporing.Yrkesaktivitet.Selvstendig
+                    YrkesaktivitetstypeDto.SELVSTENDIG_JORDBRUKER -> Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker
+                    YrkesaktivitetstypeDto.SELVSTENDIG_FISKER -> Behandlingsporing.Yrkesaktivitet.SelvstendigFisker
+                    YrkesaktivitetstypeDto.SELVSTENDIG_BARNEPASSER -> Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser
                 },
                 inntektshistorikk = Inntektshistorikk.gjenopprett(dto.inntektshistorikk),
                 sykdomshistorikk = Sykdomshistorikk.gjenopprett(dto.sykdomshistorikk),
@@ -1292,13 +1293,13 @@ internal class Arbeidsgiver private constructor(
             id = id,
             organisasjonsnummer = organisasjonsnummer,
             yrkesaktivitetstype = when (yrkesaktivitetssporing) {
-                Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSLEDIG
-                is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSTAKER
-                Behandlingsporing.Yrkesaktivitet.Frilans -> ArbeidsgiverUtDto.Yrkesaktivitetstype.FRILANS
-                Behandlingsporing.Yrkesaktivitet.Selvstendig -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG
-                Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_FISKER
-                Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_JORDBRUKER
-                Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_BARNEPASSER
+                Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> YrkesaktivitetstypeDto.ARBEIDSLEDIG
+                is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> YrkesaktivitetstypeDto.ARBEIDSTAKER
+                Behandlingsporing.Yrkesaktivitet.Frilans -> YrkesaktivitetstypeDto.FRILANS
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> YrkesaktivitetstypeDto.SELVSTENDIG
+                Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> YrkesaktivitetstypeDto.SELVSTENDIG_FISKER
+                Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> YrkesaktivitetstypeDto.SELVSTENDIG_JORDBRUKER
+                Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> YrkesaktivitetstypeDto.SELVSTENDIG_BARNEPASSER
             },
             inntektshistorikk = inntektshistorikk.dto(),
             sykdomshistorikk = sykdomshistorikk.dto(),

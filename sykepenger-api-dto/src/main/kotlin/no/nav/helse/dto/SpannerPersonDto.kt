@@ -16,6 +16,7 @@ import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.Arbeidsgive
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.InntektsopplysningData.PensjonsgivendeInntektData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagInnslagData
+import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.ArbeidstakerFaktaavklartInntektUtDto
@@ -805,13 +806,13 @@ private fun ArbeidsgiverUtDto.tilPersonData(vilkårsgrunnlagHistorikk: List<Vilk
         id = this.id,
         organisasjonsnummer = this.organisasjonsnummer,
         yrkesaktivitetstype = when (this.yrkesaktivitetstype) {
-            ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSTAKER -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.ARBEIDSTAKER
-            ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSLEDIG -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.ARBEIDSLEDIG
-            ArbeidsgiverUtDto.Yrkesaktivitetstype.FRILANS -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.FRILANS
-            ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.SELVSTENDIG
-            ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_JORDBRUKER -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.SELVSTENDIG_JORDBRUKER
-            ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_FISKER -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.SELVSTENDIG_FISKER
-            ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_BARNEPASSER -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.SELVSTENDIG_BARNEPASSER
+            YrkesaktivitetstypeDto.ARBEIDSTAKER -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.ARBEIDSTAKER
+            YrkesaktivitetstypeDto.ARBEIDSLEDIG -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.ARBEIDSLEDIG
+            YrkesaktivitetstypeDto.FRILANS -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.FRILANS
+            YrkesaktivitetstypeDto.SELVSTENDIG -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.SELVSTENDIG
+            YrkesaktivitetstypeDto.SELVSTENDIG_JORDBRUKER -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.SELVSTENDIG_JORDBRUKER
+            YrkesaktivitetstypeDto.SELVSTENDIG_FISKER -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.SELVSTENDIG_FISKER
+            YrkesaktivitetstypeDto.SELVSTENDIG_BARNEPASSER -> SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData.SELVSTENDIG_BARNEPASSER
         },
         inntektshistorikk = this.inntektshistorikk.historikk.map { it.tilPersonData() },
         sykdomshistorikk = this.sykdomshistorikk.elementer.map { it.tilPersonData() },

@@ -8,7 +8,7 @@ import no.nav.helse.dto.SykmeldingsperioderDto
 data class ArbeidsgiverInnDto(
     val id: UUID,
     val organisasjonsnummer: String,
-    val yrkesaktivitetstype: Yrkesaktivitetstype,
+    val yrkesaktivitetstype: YrkesaktivitetstypeDto,
     val inntektshistorikk: InntektshistorikkInnDto,
     val sykdomshistorikk: SykdomshistorikkDto,
     val sykmeldingsperioder: SykmeldingsperioderDto,
@@ -17,14 +17,4 @@ data class ArbeidsgiverInnDto(
     val utbetalinger: List<UtbetalingInnDto>,
     val feriepengeutbetalinger: List<FeriepengeInnDto>,
     val ubrukteRefusjonsopplysninger: RefusjonsservitørDto
-) {
-    enum class Yrkesaktivitetstype {
-        ARBEIDSLEDIG,
-        ARBEIDSTAKER,
-        FRILANS,
-        SELVSTENDIG,
-        SELVSTENDIG_JORDBRUKER,
-        SELVSTENDIG_FISKER,
-        SELVSTENDIG_BARNEPASSER
-    }
-}
+)

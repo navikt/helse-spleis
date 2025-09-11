@@ -32,6 +32,7 @@ import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingVurderingDto
 import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
+import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.ArbeidstakerFaktaavklartInntektUtDto
@@ -95,6 +96,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Tilstan
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.TIL_ANNULLERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.TIL_INFOTRYGD
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.TIL_UTBETALING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.YrkesaktivitetTypeData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.UtbetalingsdagData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsopplysningskildeData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsopplysningstypeData
@@ -122,13 +124,13 @@ private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
     id = this.id,
     organisasjonsnummer = this.organisasjonsnummer,
     yrkesaktivitetstype = when (this.yrkesaktivitetstype) {
-        ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSTAKER -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.ARBEIDSTAKER
-        ArbeidsgiverUtDto.Yrkesaktivitetstype.ARBEIDSLEDIG -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.ARBEIDSLEDIG
-        ArbeidsgiverUtDto.Yrkesaktivitetstype.FRILANS -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.FRILANS
-        ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.SELVSTENDIG
-        ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_JORDBRUKER -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.SELVSTENDIG_JORDBRUKER
-        ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_FISKER -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.SELVSTENDIG_FISKER
-        ArbeidsgiverUtDto.Yrkesaktivitetstype.SELVSTENDIG_BARNEPASSER -> PersonData.ArbeidsgiverData.YrkesaktivitetTypeData.SELVSTENDIG_BARNEPASSER
+        YrkesaktivitetstypeDto.ARBEIDSTAKER -> YrkesaktivitetTypeData.ARBEIDSTAKER
+        YrkesaktivitetstypeDto.ARBEIDSLEDIG -> YrkesaktivitetTypeData.ARBEIDSLEDIG
+        YrkesaktivitetstypeDto.FRILANS -> YrkesaktivitetTypeData.FRILANS
+        YrkesaktivitetstypeDto.SELVSTENDIG -> YrkesaktivitetTypeData.SELVSTENDIG
+        YrkesaktivitetstypeDto.SELVSTENDIG_JORDBRUKER -> YrkesaktivitetTypeData.SELVSTENDIG_JORDBRUKER
+        YrkesaktivitetstypeDto.SELVSTENDIG_FISKER -> YrkesaktivitetTypeData.SELVSTENDIG_FISKER
+        YrkesaktivitetstypeDto.SELVSTENDIG_BARNEPASSER -> YrkesaktivitetTypeData.SELVSTENDIG_BARNEPASSER
     },
     inntektshistorikk = this.inntektshistorikk.historikk.map { it.tilPersonData() },
     sykdomshistorikk = this.sykdomshistorikk.elementer.map { it.tilPersonData() },

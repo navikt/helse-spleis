@@ -3,11 +3,12 @@ package no.nav.helse.dto.serialisering
 import java.util.UUID
 import no.nav.helse.dto.SykdomshistorikkDto
 import no.nav.helse.dto.SykmeldingsperioderDto
+import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
 
 data class ArbeidsgiverUtDto(
     val id: UUID,
     val organisasjonsnummer: String,
-    val yrkesaktivitetstype: Yrkesaktivitetstype,
+    val yrkesaktivitetstype: YrkesaktivitetstypeDto,
     val inntektshistorikk: InntektshistorikkUtDto,
     val sykdomshistorikk: SykdomshistorikkDto,
     val sykmeldingsperioder: SykmeldingsperioderDto,
@@ -16,15 +17,5 @@ data class ArbeidsgiverUtDto(
     val utbetalinger: List<UtbetalingUtDto>,
     val feriepengeutbetalinger: List<FeriepengeUtDto>,
     val ubrukteRefusjonsopplysninger: UbrukteRefusjonsopplysningerUtDto
-) {
-    enum class Yrkesaktivitetstype {
-        ARBEIDSTAKER,
-        ARBEIDSLEDIG,
-        FRILANS,
-        SELVSTENDIG,
-        SELVSTENDIG_JORDBRUKER,
-        SELVSTENDIG_FISKER,
-        SELVSTENDIG_BARNEPASSER
-    }
-}
+)
 
