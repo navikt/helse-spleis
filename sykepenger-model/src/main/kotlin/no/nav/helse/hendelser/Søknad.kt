@@ -119,7 +119,19 @@ class Søknad(
     internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, refusjonstidslinje: Beløpstidslinje, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
         valider(aktivitetslogg, subsumsjonslogg)
         validerInntektskilder(aktivitetslogg, vilkårsgrunnlag)
-        if (behandlingsporing == Behandlingsporing.Yrkesaktivitet.Selvstendig) validerSelvstendig(aktivitetslogg)
+
+        when (behandlingsporing) {
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
+            Behandlingsporing.Yrkesaktivitet.Frilans -> {}
+
+            Behandlingsporing.Yrkesaktivitet.Selvstendig,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> validerSelvstendig(aktivitetslogg)
+
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> TODO("Validering for selvstendige fiskere og jordbrukere er ikke implementert")
+        }
+
         if (erArbeidsledig) validerArbeidsledig(aktivitetslogg, vilkårsgrunnlag, sykdomstidslinje.periode(), refusjonstidslinje)
         return aktivitetslogg
     }

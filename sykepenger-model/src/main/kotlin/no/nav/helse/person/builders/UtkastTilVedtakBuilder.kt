@@ -265,10 +265,9 @@ internal class UtkastTilVedtakBuilder(
                 "sykepengegrunnlag" to sykepengegrunnlag,
                 "6G" to seksG,
             ).plus(
-                if (yrkesaktivitetssporing is Behandlingsporing.Yrkesaktivitet.Selvstendig) {
-                    selvstendigMap()
-                } else {
-                    when (sykepengegrunnlagsfakta) {
+                when (yrkesaktivitetssporing) {
+                    Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                    is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> when (sykepengegrunnlagsfakta) {
                         is FastsattIInfotrygd -> mapOf(
                             "fastsatt" to sykepengegrunnlagsfakta.fastsatt
                         )
@@ -276,6 +275,13 @@ internal class UtkastTilVedtakBuilder(
                         is FastsattEtterHovedregel -> arbeidstakerHovedregelMap(sykepengegrunnlagsfakta)
                         is FastsattEtterSkjønn -> arbeidstakerEtterSkjønnMap(sykepengegrunnlagsfakta)
                     }.plus("selvstendig" to null)
+
+                    Behandlingsporing.Yrkesaktivitet.Selvstendig,
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> selvstendigMap()
+
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
+                    Behandlingsporing.Yrkesaktivitet.Frilans-> TODO("Har ikke implementert disse yrkesaktivitetstypene enda i sykepengegrunnlagsfakta")
                 }
             ),
         )

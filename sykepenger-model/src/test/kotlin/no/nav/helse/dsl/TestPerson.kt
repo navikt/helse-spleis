@@ -494,10 +494,17 @@ internal class TestPerson(
             orgnummer: String = "aa"
         ) {
             val inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering ?: run {
-                if (this.orgnummer in listOf(selvstendig, frilans)) {
-                    lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, 0.månedlig, skjæringstidspunkt)
-                } else {
-                    lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, INNTEKT, skjæringstidspunkt)
+
+                when (behandlingsporing) {
+                    Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                    is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, INNTEKT, skjæringstidspunkt)
+
+                    Behandlingsporing.Yrkesaktivitet.Frilans,
+                    Behandlingsporing.Yrkesaktivitet.Selvstendig,
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, 0.månedlig, skjæringstidspunkt)
+
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> TODO("Test oppsettet for håndtering av vilkårsgrunnlag for $behandlingsporing er ikke implementert")
                 }
             }
 

@@ -1051,11 +1051,31 @@ internal class Vedtaksperiode private constructor(
         if (erAvvist) return // er i limbo
         tilstand(
             aktivitetsloggMedVedtaksperiodekontekst,
-            when {
-                behandlinger.harUtbetalinger() && arbeidsgiver.yrkesaktivitetssporing == Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigTilUtbetaling
-                behandlinger.harUtbetalinger() -> TilUtbetaling
-                arbeidsgiver.yrkesaktivitetssporing == Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigAvsluttet
-                else -> Avsluttet
+
+            if (behandlinger.harUtbetalinger()) {
+                when (arbeidsgiver.yrkesaktivitetssporing) {
+                    Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                    is Arbeidstaker -> TilUtbetaling
+
+                    Behandlingsporing.Yrkesaktivitet.Selvstendig,
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> SelvstendigTilUtbetaling
+
+                    Behandlingsporing.Yrkesaktivitet.Frilans,
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> TODO("Ikke implementert hva som skjer med frilans og selvstendig næringsdrivende fisker og jordbruker som har utbetaling")
+                }
+            } else {
+                when (arbeidsgiver.yrkesaktivitetssporing) {
+                    Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                    is Arbeidstaker -> Avsluttet
+
+                    Behandlingsporing.Yrkesaktivitet.Selvstendig,
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> SelvstendigAvsluttet
+
+                    Behandlingsporing.Yrkesaktivitet.Frilans,
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+                    Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> TODO("Ikke implementert hva som skjer med frilans og selvstendig næringsdrivende fisker og jordbruker som har utbetaling")
+                }
             }
         )
     }
@@ -2418,7 +2438,19 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg = aktivitetslogg,
                 inntektsgrunnlag = grunnlagsdata.inntektsgrunnlag,
                 medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus,
-                opptjening = grunnlagsdata.opptjening.takeUnless { arbeidsgiver.yrkesaktivitetssporing is Behandlingsporing.Yrkesaktivitet.Selvstendig }
+                opptjening = grunnlagsdata.opptjening.takeIf {
+                    when (arbeidsgiver.yrkesaktivitetssporing) {
+                        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                        is Arbeidstaker -> true
+
+                        Behandlingsporing.Yrkesaktivitet.Selvstendig,
+                        Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> false
+
+                        Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+                        Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
+                        Behandlingsporing.Yrkesaktivitet.Frilans -> TODO("Opptjening ikke implementert for ${arbeidsgiver.yrkesaktivitetssporing}")
+                    }
+                }
             ),
             maksdatofilter,
             MaksimumUtbetalingFilter(
