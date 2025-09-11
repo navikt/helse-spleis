@@ -24,6 +24,7 @@ import java.time.YearMonth
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.februar
+import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
@@ -182,10 +183,11 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun sendNySøknadSelvstendig(
         vararg perioder: SoknadsperiodeDTO,
+        arbeidssituasjon: ArbeidssituasjonDTO,
         meldingOpprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
         fnr: String = UNG_PERSON_FNR_2018
     ): UUID {
-        val (id, message) = meldingsfabrikk.lagNySøknadSelvstendig(*perioder, opprettet = meldingOpprettet, fnr = fnr)
+        val (id, message) = meldingsfabrikk.lagNySøknadSelvstendig(*perioder, opprettet = meldingOpprettet, fnr = fnr, arbeidssituasjon = arbeidssituasjon)
         testRapid.sendTestMessage(message)
         return id.toUUID()
     }
@@ -319,6 +321,7 @@ internal abstract class AbstractEndToEndMediatorTest {
     protected fun sendSelvstendigsøknad(
         fnr: String = UNG_PERSON_FNR_2018,
         perioder: List<SoknadsperiodeDTO>,
+        arbeidssituasjon: ArbeidssituasjonDTO,
         andreInntektskilder: List<InntektskildeDTO>? = null,
         sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
         korrigerer: UUID? = null,
@@ -338,7 +341,8 @@ internal abstract class AbstractEndToEndMediatorTest {
             historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
             sendTilGosys = sendTilGosys,
             egenmeldingerFraSykmelding = egenmeldingerFraSykmelding,
-            ventetid = ventetid
+            ventetid = ventetid,
+            arbeidssituasjon = arbeidssituasjon
         )
 
         val antallVedtaksperioderFørSøknad = testRapid.inspektør.vedtaksperiodeteller
@@ -454,13 +458,14 @@ internal abstract class AbstractEndToEndMediatorTest {
     protected fun sendUtbetalingsgodkjenningSelvstendig(
         vedtaksperiodeIndeks: Int,
         godkjent: Boolean = true,
+        orgnummer: String = "SELVSTENDIG",
         saksbehandlerIdent: String = "O123456",
         saksbehandlerEpost: String = "jan@banan.no",
         automatiskBehandling: Boolean = false,
         makstidOppnådd: Boolean = false,
-        godkjenttidspunkt: LocalDateTime = LocalDateTime.now()
+        godkjenttidspunkt: LocalDateTime = LocalDateTime.now(),
     ) {
-        sendUtbetalingsgodkjenning(vedtaksperiodeIndeks, godkjent, saksbehandlerIdent, saksbehandlerEpost, automatiskBehandling, makstidOppnådd, godkjenttidspunkt, "SELVSTENDIG")
+        sendUtbetalingsgodkjenning(vedtaksperiodeIndeks, godkjent, saksbehandlerIdent, saksbehandlerEpost, automatiskBehandling, makstidOppnådd, godkjenttidspunkt, orgnummer)
     }
 
     protected fun sendYtelser(
@@ -507,8 +512,9 @@ internal abstract class AbstractEndToEndMediatorTest {
         arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList(),
         dagpenger: List<DagpengerTestdata> = emptyList(),
         inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
+        orgnummer: String = "SELVSTENDIG"
     ) {
-        sendYtelser(vedtaksperiodeIndeks, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, dagpenger, inntekterForBeregning, "SELVSTENDIG")
+        sendYtelser(vedtaksperiodeIndeks, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, dagpenger, inntekterForBeregning, orgnummer)
     }
 
     private fun sendUtbetalingshistorikk(
@@ -560,7 +566,8 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun sendVilkårsgrunnlagSelvstendig(
         vedtaksperiodeIndeks: Int,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+        orgnummer: String = "SELVSTENDIG"
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsforholdV2))
@@ -574,7 +581,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             inntekterForOpptjeningsvurdering = emptyList(),
             arbeidsforhold = emptyList(),
             medlemskapstatus = medlemskapstatus,
-            orgnummer = "SELVSTENDIG",
+            orgnummer = orgnummer,
             yrkesaktivitetstype = yrkesaktivitetstypeFraBehov
         )
         testRapid.sendTestMessage(message)
@@ -655,9 +662,10 @@ internal abstract class AbstractEndToEndMediatorTest {
     protected fun sendSimuleringSelvstendig(
         vedtaksperiodeIndeks: Int,
         status: SimuleringMessage.Simuleringstatus = SimuleringMessage.Simuleringstatus.OK,
-        forventedeFagområder: Set<String> = setOf("SP")
+        forventedeFagområder: Set<String> = setOf("SP"),
+        orgnummer: String = "SELVSTENDIG"
     ) {
-        sendSimulering(vedtaksperiodeIndeks, status, forventedeFagområder, "SELVSTENDIG")
+        sendSimulering(vedtaksperiodeIndeks, status, forventedeFagområder, orgnummer)
     }
 
     protected fun sendEtterbetaling(
@@ -711,8 +719,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(message)
     }
 
-    protected fun sendOverstyringTidslinjeSelvstendig(dager: List<ManuellOverskrivingDag>) {
-        val (_, message) = meldingsfabrikk.lagOverstyringTidslinjeSelvstendig(dager)
+    protected fun sendOverstyringTidslinjeSelvstendig(dager: List<ManuellOverskrivingDag>, orgnummer: String = "SELVSTENDIG") {
+        val (_, message) = meldingsfabrikk.lagOverstyringTidslinjeSelvstendig(dager, orgnummer)
         testRapid.sendTestMessage(message)
     }
 

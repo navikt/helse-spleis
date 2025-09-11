@@ -14,7 +14,7 @@ internal class NyeSelvstendigSøknaderRiver(
     override val riverName = "Ny selvstendig søknad"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("sykmeldingId")
+        message.requireKey("sykmeldingId", "arbeidssituasjon")
         message.requireValue("status", "NY")
         message.interestedIn("fremtidig_søknad")
         message.forbid("arbeidsgiver.orgnummer")

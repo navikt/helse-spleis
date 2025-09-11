@@ -1371,6 +1371,7 @@ data class PersonData(
                 "SPREFAG-IOP" -> KlassekodeDto.RefusjonIkkeOpplysningspliktig
                 "SPATORD" -> KlassekodeDto.SykepengerArbeidstakerOrdinær
                 "SPSND-OP" -> KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig
+                "SPSNDDM-OP" -> KlassekodeDto.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
                 else -> error("Ukjent klassekode: ${this.klassekode}")
             },
             datoStatusFom = this.datoStatusFom

@@ -14,7 +14,7 @@ import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
-internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, private val builder: SendtSøknadBuilder = SendtSøknadBuilder()) : SøknadMessage(packet, builder.selvstendig()) {
+internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, private val builder: SendtSøknadBuilder = SendtSøknadBuilder()) : SøknadMessage(packet, builder.selvstendig(packet["arbeidssituasjon"].asText())) {
     override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: MessageContext) {
         builder.sendt(packet["sendtNav"].asLocalDateTime())
         val pensjonsgivendeInntekter = packet["selvstendigNaringsdrivende"]["inntekt"]["inntektsAar"].map {

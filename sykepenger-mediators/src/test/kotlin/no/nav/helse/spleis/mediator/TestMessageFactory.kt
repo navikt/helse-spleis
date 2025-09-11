@@ -139,6 +139,7 @@ internal class TestMessageFactory(
 
     fun lagNySøknadSelvstendig(
         vararg perioder: SoknadsperiodeDTO,
+        arbeidssituasjon: ArbeidssituasjonDTO,
         opprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
         historiskeFolkeregisteridenter: List<String> = emptyList(),
         fnr: String = fødselsnummer
@@ -153,7 +154,7 @@ internal class TestMessageFactory(
             fom = fom,
             tom = perioder.maxOfOrNull { it.tom!! },
             type = SoknadstypeDTO.SELVSTENDIGE_OG_FRILANSERE,
-            arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+            arbeidssituasjon = arbeidssituasjon,
             startSyketilfelle = LocalDate.now(),
             sendtNav = null,
             egenmeldinger = null,
@@ -358,6 +359,7 @@ internal class TestMessageFactory(
     fun lagSøknadSelvstendig(
         fnr: String = fødselsnummer,
         perioder: List<SoknadsperiodeDTO>,
+        arbeidssituasjon: ArbeidssituasjonDTO,
         andreInntektskilder: List<InntektskildeDTO>? = null,
         sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
         korrigerer: UUID? = null,
@@ -377,7 +379,7 @@ internal class TestMessageFactory(
             fom = fom,
             tom = perioder.maxOfOrNull { it.tom!! },
             type = SoknadstypeDTO.SELVSTENDIGE_OG_FRILANSERE,
-            arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+            arbeidssituasjon = arbeidssituasjon,
             startSyketilfelle = LocalDate.now(),
             sendtNav = sendtNav,
             sendtArbeidsgiver = null,
@@ -1418,12 +1420,12 @@ internal class TestMessageFactory(
         ))
     }
 
-    fun lagOverstyringTidslinjeSelvstendig(dager: List<ManuellOverskrivingDag>): Pair<String, String> {
+    fun lagOverstyringTidslinjeSelvstendig(dager: List<ManuellOverskrivingDag>, orgnummer: String): Pair<String, String> {
         return nyHendelse(
             "overstyr_tidslinje", mutableMapOf(
             "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to "SELVSTENDIG",
-            "yrkesaktivitetstype" to "SELVSTENDIG",
+            "organisasjonsnummer" to orgnummer,
+            "yrkesaktivitetstype" to orgnummer,
             "dager" to dager.map {
                 mapOf(
                     "dato" to it.dato,

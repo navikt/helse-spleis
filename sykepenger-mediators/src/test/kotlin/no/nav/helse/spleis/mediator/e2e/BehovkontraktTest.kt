@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Toggle
+import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -107,10 +108,11 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `godkjenning - selvstendig`() = Toggle.SelvstendigNæringsdrivende.enable {
-        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            ventetid = 3.januar til 18.januar
+            ventetid = 3.januar til 18.januar,
+            arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE
         )
 
         sendVilkårsgrunnlagSelvstendig(0)
