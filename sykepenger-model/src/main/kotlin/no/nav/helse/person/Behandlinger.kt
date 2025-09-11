@@ -569,13 +569,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     ).result(sykdomstidslinje)
                 }
 
+                SelvstendigBarnepasser,
                 Selvstendig -> {
                     SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(fastsattÅrsinntekt).result(sykdomstidslinje, gjeldende.ventetid!!)
                 }
 
                 Arbeidsledig,
                 Frilans,
-                SelvstendigBarnepasser,
                 SelvstendigFisker,
                 SelvstendigJordbruker -> error("Forventer ikke å lage utbetalingstidslinje for ${yrkesaktivitet::class.simpleName}")
             }
