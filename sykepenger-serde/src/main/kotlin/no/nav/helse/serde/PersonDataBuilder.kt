@@ -960,7 +960,8 @@ fun SelvstendigInntektsopplysningUtDto.tilPersonData(): PersonData.Vilkårsgrunn
 
     return PersonData.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData(
         inntektsopplysning = this.faktaavklartInntekt.tilPersonData(),
-        skjønnsmessigFastsatt = this.skjønnsmessigFastsatt?.tilPersonData()
+        skjønnsmessigFastsatt = this.skjønnsmessigFastsatt?.tilPersonData(),
+        yrkesaktivitetstype = YrkesaktivitetTypeData.valueOf(this.yrkesaktivitetstype.name)
     )
 }
 

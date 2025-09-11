@@ -385,11 +385,13 @@ data class PersonData(
 
         data class SelvstendigInntektsopplysningData(
             val inntektsopplysning: InntektsopplysningData,
-            val skjønnsmessigFastsatt: SkjønnsmessigFastsattData?
+            val skjønnsmessigFastsatt: SkjønnsmessigFastsattData?,
+            val yrkesaktivitetstype: ArbeidsgiverData.YrkesaktivitetTypeData
         ) {
             fun tilDto() = SelvstendigInntektsopplysningInnDto(
                 faktaavklartInntekt = inntektsopplysning.tilDto(),
-                skjønnsmessigFastsatt = skjønnsmessigFastsatt?.tilDto()
+                skjønnsmessigFastsatt = skjønnsmessigFastsatt?.tilDto(),
+                yrkesaktivitetstype = YrkesaktivitetstypeDto.valueOf(yrkesaktivitetstype.name)
             )
 
             data class SkatteopplysningData(
