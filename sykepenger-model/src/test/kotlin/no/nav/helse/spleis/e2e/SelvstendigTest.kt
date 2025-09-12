@@ -40,6 +40,22 @@ import org.junit.jupiter.api.Test
 internal class SelvstendigTest : AbstractDslTest() {
 
     @Test
+    fun `Kaster ut selvstendigperiode når det finnes ghosts`() = Toggle.SelvstendigNæringsdrivende.enable {
+        selvstendig {
+            håndterSøknadSelvstendig(januar)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                skatteinntekter = listOf(a1 to INNTEKT),
+                arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.oktober(2017), type = Arbeidsforholdtype.ORDINÆRT))
+            )
+
+            assertFunksjonellFeil(Varselkode.RV_IV_13, 1.vedtaksperiode.filter())
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
+        }
+    }
+
+
+    @Test
     fun `Kaster ut søknader når det er oppgitt lønnsinntekter`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
             håndterSøknadSelvstendig(

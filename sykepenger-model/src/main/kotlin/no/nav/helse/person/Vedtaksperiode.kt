@@ -1761,7 +1761,18 @@ internal class Vedtaksperiode private constructor(
         val inntektsgrunnlagSelvstendig = avklarSykepengegrunnlagForSelvstendig()
         // ghosts er alle inntekter fra skatt, som vi ikke har søknad for og som skal vektlegges som ghost
         val ghosts = ghostArbeidsgivere(inntektsgrunnlagArbeidsgivere, skatteopplysninger)
-        if (ghosts.isNotEmpty()) aktivitetslogg.varsel(Varselkode.RV_VV_2)
+        when (arbeidsgiver.yrkesaktivitetssporing) {
+            is Arbeidstaker -> if (ghosts.isNotEmpty()) aktivitetslogg.varsel(Varselkode.RV_VV_2)
+
+            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser,
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> if (ghosts.isNotEmpty()) aktivitetslogg.funksjonellFeil(Varselkode.RV_IV_13)
+
+            Behandlingsporing.Yrkesaktivitet.Frilans,
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> error("Forventer ikke å avklare sykepengegrunnlag for ${arbeidsgiver.yrkesaktivitetssporing}")
+        }
+
         return Inntektsgrunnlag.opprett(
             arbeidsgiverInntektsopplysninger = inntektsgrunnlagArbeidsgivere + ghosts,
             selvstendigInntektsopplysning = inntektsgrunnlagSelvstendig,

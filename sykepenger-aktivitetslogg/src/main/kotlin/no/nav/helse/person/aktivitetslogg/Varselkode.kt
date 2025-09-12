@@ -192,6 +192,7 @@ enum class Varselkode(
     RV_IV_10("Det er foreslått inntekt fra A-ordningen for én arbeidsgiver"),
     RV_IV_11("Perioden inneholder flere skjæringstidspunkt"),
     RV_IV_12("Fant færre enn 3 år med ferdiglignede inntekter for selvstending næringsdrivende"),
+    RV_IV_13("Fant arbeidstaker-inntekter i a-ordningen for de siste tre månedene for selvstendig"),
 
     // SV: Sykepengegrunnlagsvurdering
     RV_SV_1("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"),
