@@ -15,6 +15,7 @@ import no.nav.helse.etterlevelse.`§ 8-9 ledd 1`
 import no.nav.helse.hendelser.Avsender.SYKMELDT
 import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.Søknad.PensjonsgivendeInntekt.Companion.harAndreInntekterEnnNæringsinntekt
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
 import no.nav.helse.person.Arbeidsgiver
@@ -26,6 +27,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøknad er lagt til grunn`
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med inntektstype vi ikke støtter`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som ikke støttes`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som støttes`
@@ -146,7 +148,10 @@ class Søknad(
     }
 
     private fun validerSelvstendig(aktivitetslogg: IAktivitetslogg) {
-        if (pensjonsgivendeInntekter?.size != null && pensjonsgivendeInntekter.size < 3) aktivitetslogg.funksjonellFeil(Varselkode.RV_IV_12)
+        val næringsinntekter = pensjonsgivendeInntekter?.filterNot { it.næringsinntekt == Inntekt.INGEN }
+        if (næringsinntekter == null || næringsinntekter.size < 3) aktivitetslogg.funksjonellFeil(Varselkode.RV_IV_12)
+
+        if (pensjonsgivendeInntekter?.harAndreInntekterEnnNæringsinntekt() == true) aktivitetslogg.funksjonellFeil(`Selvstendigsøknad med inntektstype vi ikke støtter`)
     }
 
     private fun valider(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
@@ -400,5 +405,10 @@ class Søknad(
         fun build() = foreldedeDager.grupperSammenhengendePerioder()
     }
 
-    data class PensjonsgivendeInntekt(val inntektsår: Year, val næringsinntekt: Inntekt)
+    data class PensjonsgivendeInntekt(val inntektsår: Year, val næringsinntekt: Inntekt, val lønnsinntekt: Inntekt, val lønnsinntektBarePensjonsdel: Inntekt, val næringsinntektFraFiskeFangstEllerFamiliebarnehage: Inntekt) {
+        companion object {
+            fun List<PensjonsgivendeInntekt>.harAndreInntekterEnnNæringsinntekt() =
+                any { it.lønnsinntekt != Inntekt.INGEN || it.lønnsinntektBarePensjonsdel != Inntekt.INGEN || it.næringsinntektFraFiskeFangstEllerFamiliebarnehage != Inntekt.INGEN }
+        }
+    }
 }

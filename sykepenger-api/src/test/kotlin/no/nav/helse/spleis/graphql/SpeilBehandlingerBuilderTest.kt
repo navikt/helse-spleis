@@ -144,11 +144,13 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     @Test
     fun `Selvstendig næringsdrivende med inntekt over 6G mappes riktig`() = Toggle.SelvstendigNæringsdrivende.enable {
         håndterSøknadSelvstendig(
-            1.januar til 31.januar, 1.januar til 16.januar, pensjonsgivendeInntekter = listOf(
-            PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig),
-            PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig),
-            PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig),
-        )
+            1.januar til 31.januar,
+            1.januar til 16.januar,
+            pensjonsgivendeInntekter = listOf(
+                PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN),
+                PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN),
+                PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN)
+            )
         )
         håndterVilkårsgrunnlagSelvstendig()
         håndterYtelserSelvstendig()

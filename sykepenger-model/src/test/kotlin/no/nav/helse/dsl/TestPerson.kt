@@ -61,6 +61,7 @@ import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel
@@ -268,9 +269,9 @@ internal class TestPerson(
             periode: Periode,
             ventetid: Periode = 1.januar til 16.januar,
             pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt> = listOf(
-                Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
-                Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
-                Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig)
+                Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN),
+                Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN),
+                Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN)
             ),
             sendtTilNAVEllerArbeidsgiver: Temporal? = null
         ) = håndterSøknad(

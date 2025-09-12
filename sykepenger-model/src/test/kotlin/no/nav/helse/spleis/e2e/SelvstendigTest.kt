@@ -31,12 +31,29 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SelvstendigTest : AbstractDslTest() {
+
+    @Test
+    fun `Kaster ut søknader når det er oppgitt lønnsinntekter`() = Toggle.SelvstendigNæringsdrivende.enable {
+        selvstendig {
+            håndterSøknadSelvstendig(
+                periode = januar,
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INNTEKT, INGEN, INGEN),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN)
+                )
+            )
+            assertFunksjonellFeil(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
+        }
+    }
 
     @Test
     fun `Person med frilanserinntekt i løpet av de siste 3 månedene sendes til infotrygd`() = Toggle.SelvstendigNæringsdrivende.enable {
@@ -142,13 +159,12 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterSøknadSelvstendig(
                 periode = januar,
                 pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig)
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN)
                 )
             )
             assertFunksjonelleFeil(1.vedtaksperiode.filter())
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
-
         }
     }
 
@@ -215,9 +231,9 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterSøknadSelvstendig(
                 periode = januar,
                 pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig)
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN)
                 )
             )
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)

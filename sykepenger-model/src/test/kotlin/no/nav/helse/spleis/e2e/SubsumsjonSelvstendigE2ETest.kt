@@ -34,8 +34,8 @@ import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -238,9 +238,9 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterSøknadSelvstendig(
                 periode = januar,
                 pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig)
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig, INGEN, INGEN, INGEN),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig, INGEN, INGEN, INGEN),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig, INGEN, INGEN, INGEN)
                 )
             )
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -275,9 +275,9 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterSøknadSelvstendig(
                 periode = januar,
                 pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig)
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig, INGEN, INGEN, INGEN),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig, INGEN, INGEN, INGEN),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig, INGEN, INGEN, INGEN)
                 )
             )
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -367,16 +367,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
 
 
             håndterSøknadSelvstendig(2.februar til 28.februar)
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(2.februar, 28.februar, 100.prosent),
-                Søknad.Søknadsperiode.Ventetid(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450_000.årlig)
-                )
-            )
-            håndterVilkårsgrunnlag(2.vedtaksperiode, skatteinntekter = emptyList())
+            håndterVilkårsgrunnlagSelvstendig(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -540,23 +531,13 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-
             håndterSøknadSelvstendig(februar)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
-
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent),
-                Søknad.Søknadsperiode.Ventetid(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450_000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450_000.årlig)
-                )
-            )
+            håndterSøknadSelvstendig(mars)
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)

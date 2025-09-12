@@ -1,20 +1,15 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import java.time.Year
 import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.selvstendig
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.til
 import no.nav.helse.hentFeltFraBehov
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -22,15 +17,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
     @Test
     fun `SelvstendigFaktaavklartInntekt - enda en godkjenningsbehov`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknad(
-                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-                Søknad.Søknadsperiode.Ventetid(1.januar til 16.januar),
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig),
-                )
-            )
+            håndterSøknadSelvstendig(januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

@@ -436,7 +436,7 @@ internal class TestMessageFactory(
                     pensjonsgivendeInntekt = PensjonsgivendeInntektDTO(
                         pensjonsgivendeInntektAvLoennsinntekt = 0,
                         pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
-                        pensjonsgivendeInntektAvNaeringsinntekt = 0,
+                        pensjonsgivendeInntektAvNaeringsinntekt = 800_000,
                         pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0
                     )
                 )

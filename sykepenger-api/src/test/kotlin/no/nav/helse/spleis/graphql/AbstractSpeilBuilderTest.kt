@@ -29,10 +29,10 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.Person
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.IdInnhenter
 import no.nav.helse.spleis.speil.serializePersonForSpeil
 import no.nav.helse.spleis.testhelpers.ArbeidsgiverHendelsefabrikk
@@ -43,6 +43,7 @@ import no.nav.helse.spleis.testhelpers.TestObservatør
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -124,9 +125,24 @@ internal abstract class AbstractSpeilBuilderTest {
         periode: Periode,
         ventetid: Periode,
         pensjonsgivendeInntekter: List<PensjonsgivendeInntekt> = listOf(
-            PensjonsgivendeInntekt(Year.of(2017), 450000.årlig),
-            PensjonsgivendeInntekt(Year.of(2016), 450000.årlig),
-            PensjonsgivendeInntekt(Year.of(2015), 450000.årlig),
+            PensjonsgivendeInntekt(
+                inntektsår = Year.of(2017), næringsinntekt = 450000.årlig,
+                lønnsinntekt = INGEN,
+                lønnsinntektBarePensjonsdel = INGEN,
+                næringsinntektFraFiskeFangstEllerFamiliebarnehage = INGEN,
+            ),
+            PensjonsgivendeInntekt(
+                inntektsår = Year.of(2016), næringsinntekt = 450000.årlig,
+                lønnsinntekt = INGEN,
+                lønnsinntektBarePensjonsdel = INGEN,
+                næringsinntektFraFiskeFangstEllerFamiliebarnehage = INGEN
+            ),
+            PensjonsgivendeInntekt(
+                inntektsår = Year.of(2015), næringsinntekt = 450000.årlig,
+                lønnsinntekt = INGEN,
+                lønnsinntektBarePensjonsdel = INGEN,
+                næringsinntektFraFiskeFangstEllerFamiliebarnehage = INGEN
+            )
         )
     ): UUID {
         val søknadId = UUID.randomUUID()

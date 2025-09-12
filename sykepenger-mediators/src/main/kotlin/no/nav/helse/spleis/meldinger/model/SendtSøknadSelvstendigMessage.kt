@@ -20,7 +20,10 @@ internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val 
         val pensjonsgivendeInntekter = packet["selvstendigNaringsdrivende"]["inntekt"]["inntektsAar"].map {
             Søknad.PensjonsgivendeInntekt(
                 inntektsår = Year.parse(it["aar"].asText()),
-                næringsinntekt = it["pensjonsgivendeInntekt"]["pensjonsgivendeInntektAvNaeringsinntekt"].asInt().årlig
+                næringsinntekt = it["pensjonsgivendeInntekt"]["pensjonsgivendeInntektAvNaeringsinntekt"].asInt().årlig,
+                lønnsinntekt = it["pensjonsgivendeInntekt"]["pensjonsgivendeInntektAvLoennsinntekt"].asInt().årlig,
+                lønnsinntektBarePensjonsdel = it["pensjonsgivendeInntekt"]["pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel"].asInt().årlig,
+                næringsinntektFraFiskeFangstEllerFamiliebarnehage = it["pensjonsgivendeInntekt"]["pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage"].asInt().årlig
             )
         }
         builder.pensjonsgivendeInntekter(pensjonsgivendeInntekter)
