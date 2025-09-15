@@ -2,6 +2,7 @@ package no.nav.helse.serde
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
+import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
 import no.nav.helse.dto.BehandlingkildeDto
@@ -66,6 +67,7 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingData.InntektsmeldingKildeDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.ArbeidssituasjonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_ANNULLERING
@@ -447,6 +449,13 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     sykmeldingsperiodeTom = sykmeldingsperiode.tom,
     fom = periode.fom,
     tom = periode.tom,
+    arbeidssituasjon = when (arbeidssituasjon) {
+        ArbeidssituasjonDto.ARBEIDSTAKER -> ArbeidssituasjonData.ARBEIDSTAKER
+        ArbeidssituasjonDto.ARBEIDSLEDIG -> ArbeidssituasjonData.ARBEIDSLEDIG
+        ArbeidssituasjonDto.SELVSTENDIG_NÆRINGSDRIVENDE -> ArbeidssituasjonData.SELVSTENDIG_NÆRINGSDRIVENDE
+        ArbeidssituasjonDto.BARNEPASSER -> ArbeidssituasjonData.BARNEPASSER
+        ArbeidssituasjonDto.FRILANSER -> ArbeidssituasjonData.FRILANSER
+    },
     skjæringstidspunkt = skjæringstidspunkt,
     skjæringstidspunkter = skjæringstidspunkter,
     utbetalingId = utbetalingId,

@@ -53,6 +53,7 @@ import no.nav.helse.serde.migration.V325InntektjusteringPåØkonomi
 import no.nav.helse.serde.migration.V326DekningsgradPåØkonomi
 import no.nav.helse.serde.migration.V327ProsenterSomTallMellomNullOgEn
 import no.nav.helse.serde.migration.V328InntektjusteringerPåBehandling
+import no.nav.helse.serde.migration.V329ArbeidssituasjonPåBehandling
 import no.nav.helse.serde.migration.migrate
 
 class SerialisertPerson(val json: String) {
@@ -105,7 +106,8 @@ class SerialisertPerson(val json: String) {
             V325InntektjusteringPåØkonomi(),
             V326DekningsgradPåØkonomi(),
             V327ProsenterSomTallMellomNullOgEn(),
-            V328InntektjusteringerPåBehandling()
+            V328InntektjusteringerPåBehandling(),
+            V329ArbeidssituasjonPåBehandling()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)

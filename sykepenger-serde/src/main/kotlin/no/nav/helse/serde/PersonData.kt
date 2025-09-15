@@ -10,6 +10,7 @@ import kotlin.streams.asSequence
 import no.nav.helse.dto.AlderDto
 import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
+import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
 import no.nav.helse.dto.BehandlingkildeDto
@@ -1039,6 +1040,7 @@ data class PersonData(
                     val sykmeldingsperiodeTom: LocalDate,
                     val fom: LocalDate,
                     val tom: LocalDate,
+                    val arbeidssituasjon: ArbeidssituasjonData,
                     val skjæringstidspunkt: LocalDate,
                     val skjæringstidspunkter: List<LocalDate>,
                     val utbetalingId: UUID?,
@@ -1061,6 +1063,13 @@ data class PersonData(
                         tidsstempel = this.tidsstempel,
                         sykmeldingsperiode = PeriodeDto(fom = sykmeldingsperiodeFom, tom = sykmeldingsperiodeTom),
                         periode = PeriodeDto(fom = this.fom, tom = this.tom),
+                        arbeidssituasjon = when (this.arbeidssituasjon) {
+                            ArbeidssituasjonData.ARBEIDSTAKER -> ArbeidssituasjonDto.ARBEIDSTAKER
+                            ArbeidssituasjonData.ARBEIDSLEDIG -> ArbeidssituasjonDto.ARBEIDSLEDIG
+                            ArbeidssituasjonData.SELVSTENDIG_NÆRINGSDRIVENDE -> ArbeidssituasjonDto.SELVSTENDIG_NÆRINGSDRIVENDE
+                            ArbeidssituasjonData.BARNEPASSER -> ArbeidssituasjonDto.BARNEPASSER
+                            ArbeidssituasjonData.FRILANSER -> ArbeidssituasjonDto.FRILANSER
+                        },
                         vilkårsgrunnlagId = this.vilkårsgrunnlagId,
                         utbetalingId = this.utbetalingId,
                         dokumentsporing = this.dokumentsporing.tilDto(),
@@ -1080,6 +1089,14 @@ data class PersonData(
                         faktaavklartInntekt = faktaavklartInntekt?.tilDto(),
                         ventetid = ventetid?.tilDto()
                     )
+
+                    enum class ArbeidssituasjonData {
+                        ARBEIDSTAKER,
+                        ARBEIDSLEDIG,
+                        FRILANSER,
+                        SELVSTENDIG_NÆRINGSDRIVENDE,
+                        BARNEPASSER
+                    }
                 }
             }
 

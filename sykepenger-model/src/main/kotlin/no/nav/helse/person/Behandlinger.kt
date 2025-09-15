@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Toggle
+import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
@@ -108,6 +109,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun initiellBehandling(
         sykmeldingsperiode: Periode,
         sykdomstidslinje: Sykdomstidslinje,
+        arbeidssituasjon: Behandling.Endring.Arbeidssituasjon,
         egenmeldingsdager: List<Periode>,
         faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
         inntektsendringer: Beløpstidslinje,
@@ -119,6 +121,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val behandling = Behandling.nyBehandling(
             observatører = this.observatører,
             sykdomstidslinje = sykdomstidslinje,
+            arbeidssituasjon = arbeidssituasjon,
             egenmeldingsdager = egenmeldingsdager,
             faktaavklartInntekt = faktaavklartInntekt,
             inntektsendringer = inntektsendringer,
@@ -601,6 +604,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val tidsstempel: LocalDateTime,
             val sykmeldingsperiode: Periode,
             val periode: Periode,
+            val arbeidssituasjon: Arbeidssituasjon,
             val grunnlagsdata: VilkårsgrunnlagElement?,
             val utbetaling: Utbetaling?,
             val dokumentsporing: Dokumentsporing,
@@ -680,6 +684,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         tidsstempel = dto.tidsstempel,
                         sykmeldingsperiode = Periode.gjenopprett(dto.sykmeldingsperiode),
                         periode = periode,
+                        arbeidssituasjon = when (dto.arbeidssituasjon) {
+                            ArbeidssituasjonDto.ARBEIDSTAKER -> Arbeidssituasjon.ARBEIDSTAKER
+                            ArbeidssituasjonDto.ARBEIDSLEDIG -> Arbeidssituasjon.ARBEIDSLEDIG
+                            ArbeidssituasjonDto.SELVSTENDIG_NÆRINGSDRIVENDE -> Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE
+                            ArbeidssituasjonDto.BARNEPASSER -> Arbeidssituasjon.BARNEPASSER
+                            ArbeidssituasjonDto.FRILANSER -> Arbeidssituasjon.FRILANSER
+                        },
                         grunnlagsdata = dto.vilkårsgrunnlagId?.let { grunnlagsdata.getValue(it) },
                         utbetaling = utbetaling,
                         dokumentsporing = Dokumentsporing.gjenopprett(dto.dokumentsporing),
@@ -914,6 +925,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     tidsstempel = this.tidsstempel,
                     sykmeldingsperiode = this.sykmeldingsperiode.dto(),
                     periode = this.periode.dto(),
+                    arbeidssituasjon = when (this.arbeidssituasjon) {
+                        Arbeidssituasjon.ARBEIDSTAKER -> ArbeidssituasjonDto.ARBEIDSTAKER
+                        Arbeidssituasjon.ARBEIDSLEDIG -> ArbeidssituasjonDto.ARBEIDSLEDIG
+                        Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> ArbeidssituasjonDto.SELVSTENDIG_NÆRINGSDRIVENDE
+                        Arbeidssituasjon.BARNEPASSER -> ArbeidssituasjonDto.BARNEPASSER
+                        Arbeidssituasjon.FRILANSER -> ArbeidssituasjonDto.FRILANSER
+                    },
                     vilkårsgrunnlagId = vilkårsgrunnlagUtDto?.vilkårsgrunnlagId,
                     skjæringstidspunkt = this.skjæringstidspunkt,
                     skjæringstidspunkter = this.skjæringstidspunkter,
@@ -934,6 +952,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     faktaavklartInntekt = faktaavklartInntekt?.dto(),
                     ventetid = ventetid?.dto()
                 )
+            }
+
+            enum class Arbeidssituasjon {
+                ARBEIDSTAKER,
+                ARBEIDSLEDIG,
+                FRILANSER,
+                SELVSTENDIG_NÆRINGSDRIVENDE,
+                BARNEPASSER
             }
         }
 
@@ -1467,6 +1493,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             fun nyBehandling(
                 observatører: List<BehandlingObserver>,
                 sykdomstidslinje: Sykdomstidslinje,
+                arbeidssituasjon: Endring.Arbeidssituasjon,
                 egenmeldingsdager: List<Periode>,
                 faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
                 inntektsendringer: Beløpstidslinje,
@@ -1484,6 +1511,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             tidsstempel = LocalDateTime.now(),
                             grunnlagsdata = null,
                             utbetaling = null,
+                            arbeidssituasjon = arbeidssituasjon,
                             dokumentsporing = dokumentsporing,
                             sykdomstidslinje = sykdomstidslinje,
                             sykmeldingsperiode = sykmeldingsperiode,

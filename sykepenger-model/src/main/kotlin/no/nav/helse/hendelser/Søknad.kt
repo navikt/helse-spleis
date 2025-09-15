@@ -19,6 +19,7 @@ import no.nav.helse.hendelser.Søknad.PensjonsgivendeInntekt.Companion.harAndreI
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
@@ -247,12 +248,27 @@ class Søknad(
             Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> null
         }
 
+        val arbeidssituasjon = when (behandlingsporing) {
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> Behandlinger.Behandling.Endring.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSLEDIG
+            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> when (erArbeidsledig) {
+                true -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSLEDIG
+                false -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSTAKER
+            }
+            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> Behandlinger.Behandling.Endring.Arbeidssituasjon.BARNEPASSER
+            Behandlingsporing.Yrkesaktivitet.Frilans -> Behandlinger.Behandling.Endring.Arbeidssituasjon.FRILANSER
+
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
+            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> error("Har ikke arbeidssituasjon for ${behandlingsporing::class.simpleName}")
+        }
+
         return Vedtaksperiode(
             egenmeldingsperioder = egenmeldingsperioder(),
             metadata = metadata,
             person = person,
             arbeidsgiver = arbeidsgiver,
             sykdomstidslinje = sykdomstidslinje,
+            arbeidssituasjon = arbeidssituasjon,
             faktaavklartInntekt = faktaavklartInntekt,
             ventetid = ventetid,
             dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
