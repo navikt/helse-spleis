@@ -7,6 +7,7 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.RefusjonservitørData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData
+import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.ArbeidssituasjonData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
 import no.nav.helse.dto.SpannerPersonDto.UtbetalingData
 import no.nav.helse.dto.SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData
@@ -560,6 +561,7 @@ data class SpannerPersonDto(
                 data class EndringData(
                     val id: UUID,
                     val tidsstempel: LocalDateTime,
+                    val arbeidssituasjon: ArbeidssituasjonData,
                     val sykmeldingsperiodeFom: LocalDate,
                     val sykmeldingsperiodeTom: LocalDate,
                     val fom: LocalDate,
@@ -582,6 +584,14 @@ data class SpannerPersonDto(
                     val inntektjusteringer: Map<String, BeløpstidslinjeData>,
                     val faktaavklartInntekt: SelvstendigInntektsopplysningData.InntektsopplysningData?
                 )
+
+                enum class ArbeidssituasjonData {
+                    ARBEIDSTAKER,
+                    ARBEIDSLEDIG,
+                    FRILANSER,
+                    SELVSTENDIG_NÆRINGSDRIVENDE,
+                    BARNEPASSER
+                }
             }
 
             data class DataForSimuleringData(
@@ -1201,6 +1211,13 @@ private fun BehandlingendringUtDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData(
         id = id,
         tidsstempel = tidsstempel,
+        arbeidssituasjon = when (arbeidssituasjon) {
+            ArbeidssituasjonDto.ARBEIDSTAKER -> ArbeidssituasjonData.ARBEIDSTAKER
+            ArbeidssituasjonDto.ARBEIDSLEDIG -> ArbeidssituasjonData.ARBEIDSLEDIG
+            ArbeidssituasjonDto.FRILANSER -> ArbeidssituasjonData.FRILANSER
+            ArbeidssituasjonDto.SELVSTENDIG_NÆRINGSDRIVENDE -> ArbeidssituasjonData.SELVSTENDIG_NÆRINGSDRIVENDE
+            ArbeidssituasjonDto.BARNEPASSER -> ArbeidssituasjonData.BARNEPASSER
+        },
         sykmeldingsperiodeFom = sykmeldingsperiode.fom,
         sykmeldingsperiodeTom = sykmeldingsperiode.tom,
         fom = periode.fom,
