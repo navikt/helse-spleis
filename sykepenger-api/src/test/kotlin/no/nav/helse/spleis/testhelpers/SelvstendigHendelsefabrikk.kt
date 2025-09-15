@@ -101,8 +101,7 @@ internal class SelvstendigHendelsefabrikk() {
             sendTilGosys = sendTilGosys,
             yrkesskade = yrkesskade,
             egenmeldinger = egenmeldinger,
-            erArbeidsledig = false,
-            erBarnepasser = false,
+            arbeidssituasjon = Søknad.Arbeidssituasjon.ARBEIDSTAKER,
             registrert = registrert,
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter

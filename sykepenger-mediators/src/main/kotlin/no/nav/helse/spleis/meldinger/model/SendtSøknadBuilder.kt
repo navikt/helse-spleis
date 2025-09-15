@@ -15,7 +15,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
-internal class SendtSøknadBuilder : SøknadBuilder() {
+internal class SendtSøknadBuilder(arbeidssituasjon: String) : SøknadBuilder() {
     private val perioder = mutableListOf<Søknadsperiode>()
     private val merkander = mutableListOf<Merknad>()
     private var inntekterFraNyeArbeidsforhold: Boolean = false
@@ -24,9 +24,18 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
     private var ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false
     private var utenlandskSykmelding: Boolean = false
     private var sendTilGosys: Boolean = false
-    private var erArbeidsledig: Boolean = false
-    private var erBarnepasser: Boolean = false
+    private val arbeidssituasjon = when (arbeidssituasjon) {
+        "SELVSTENDIG_NARINGSDRIVENDE" -> Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE
+        "BARNEPASSER" -> Søknad.Arbeidssituasjon.BARNEPASSER
+        "FRILANSER" -> Søknad.Arbeidssituasjon.FRILANSER
+        "ARBEIDSTAKER" -> Søknad.Arbeidssituasjon.ARBEIDSTAKER
+        "ARBEIDSLEDIG" -> Søknad.Arbeidssituasjon.ARBEIDSLEDIG
 
+        "FISKER",
+        "JORDBRUKER",
+        "ANNET" -> TODO("støtter ikke $arbeidssituasjon")
+         else -> TODO("støtter ikke $arbeidssituasjon")
+    }
     internal fun build(meldingsporing: Meldingsporing) = Søknad(
         meldingsreferanseId = meldingsporing.id,
         behandlingsporing = behandlingsporing,
@@ -43,20 +52,11 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         sendTilGosys = sendTilGosys,
         yrkesskade = yrkesskade,
         egenmeldinger = egenmeldinger,
-        erArbeidsledig = erArbeidsledig,
-        erBarnepasser = erBarnepasser,
+        arbeidssituasjon = arbeidssituasjon,
         registrert = registrert,
         inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
         pensjonsgivendeInntekter = pensjonsgivendeInntekter
     )
-
-    fun arbeidsledigsøknad() {
-        erArbeidsledig = true
-    }
-
-    fun barnepasser() {
-        erBarnepasser = true
-    }
 
     internal fun pensjonsgivendeInntekter(pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>) = apply {
         this.pensjonsgivendeInntekter = pensjonsgivendeInntekter

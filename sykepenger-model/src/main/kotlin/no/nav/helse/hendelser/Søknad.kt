@@ -73,8 +73,7 @@ class Søknad(
     private val sendTilGosys: Boolean,
     private val yrkesskade: Boolean,
     private val egenmeldinger: List<Periode>,
-    private val erArbeidsledig: Boolean,
-    private val erBarnepasser: Boolean,
+    private val arbeidssituasjon: Arbeidssituasjon,
     registrert: LocalDateTime,
     private val inntekterFraNyeArbeidsforhold: Boolean,
     private val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>?,
@@ -124,15 +123,16 @@ class Søknad(
         valider(aktivitetslogg, subsumsjonslogg)
         validerInntektskilder(aktivitetslogg, vilkårsgrunnlag)
 
-        when (behandlingsporing) {
-            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
-            Behandlingsporing.Yrkesaktivitet.Frilans -> {}
-
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> validerSelvstendig(aktivitetslogg)
+        when (arbeidssituasjon) {
+            Arbeidssituasjon.ARBEIDSTAKER,
+            Arbeidssituasjon.FRILANSER -> {
+                // ingen spesiell validering
+            }
+            Arbeidssituasjon.ARBEIDSLEDIG -> validerArbeidsledig(aktivitetslogg, vilkårsgrunnlag, sykdomstidslinje.periode(), refusjonstidslinje)
+            Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
+            Arbeidssituasjon.BARNEPASSER -> validerSelvstendig(aktivitetslogg)
         }
 
-        if (erArbeidsledig) validerArbeidsledig(aktivitetslogg, vilkårsgrunnlag, sykdomstidslinje.periode(), refusjonstidslinje)
         return aktivitetslogg
     }
 
@@ -238,17 +238,12 @@ class Søknad(
             Behandlingsporing.Yrkesaktivitet.Frilans -> null
         }
 
-        val arbeidssituasjon = when (behandlingsporing) {
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (erBarnepasser) {
-                true -> Behandlinger.Behandling.Endring.Arbeidssituasjon.BARNEPASSER
-                false -> Behandlinger.Behandling.Endring.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE
-            }
-            Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSLEDIG
-            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> when (erArbeidsledig) {
-                true -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSLEDIG
-                false -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSTAKER
-            }
-            Behandlingsporing.Yrkesaktivitet.Frilans -> Behandlinger.Behandling.Endring.Arbeidssituasjon.FRILANSER
+        val arbeidssituasjon = when (arbeidssituasjon) {
+            Arbeidssituasjon.ARBEIDSTAKER -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSTAKER
+            Arbeidssituasjon.ARBEIDSLEDIG -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSLEDIG
+            Arbeidssituasjon.FRILANSER -> Behandlinger.Behandling.Endring.Arbeidssituasjon.FRILANSER
+            Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> Behandlinger.Behandling.Endring.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE
+            Arbeidssituasjon.BARNEPASSER -> Behandlinger.Behandling.Endring.Arbeidssituasjon.BARNEPASSER
         }
 
         return Vedtaksperiode(
@@ -415,5 +410,13 @@ class Søknad(
             fun List<PensjonsgivendeInntekt>.harAndreInntekterEnnNæringsinntekt() =
                 any { it.lønnsinntekt != Inntekt.INGEN || it.lønnsinntektBarePensjonsdel != Inntekt.INGEN || it.næringsinntektFraFiskeFangstEllerFamiliebarnehage != Inntekt.INGEN }
         }
+    }
+
+    enum class Arbeidssituasjon {
+        ARBEIDSTAKER,
+        ARBEIDSLEDIG,
+        FRILANSER,
+        SELVSTENDIG_NÆRINGSDRIVENDE,
+        BARNEPASSER
     }
 }

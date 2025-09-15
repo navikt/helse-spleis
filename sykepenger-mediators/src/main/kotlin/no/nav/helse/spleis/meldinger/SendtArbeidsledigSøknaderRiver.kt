@@ -19,7 +19,7 @@ internal class SendtArbeidsledigSøknaderRiver(
     override val riverName = "Sendt søknad Arbeidsledig"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("id")
+        message.requireKey("id", "arbeidssituasjon")
         message.forbid("arbeidsgiver.orgnummer")
         message.require("sendtNav", JsonNode::asLocalDateTime)
         message.interestedIn("egenmeldingsdagerFraSykmelding") { egenmeldinger -> egenmeldinger.map { it.asLocalDate() } }

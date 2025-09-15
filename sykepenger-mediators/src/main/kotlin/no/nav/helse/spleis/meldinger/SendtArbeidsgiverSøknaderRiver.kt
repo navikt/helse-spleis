@@ -17,7 +17,7 @@ internal class SendtArbeidsgiverSøknaderRiver(
     override val riverName = "Sendt søknad arbeidsgiver"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("id", "arbeidsgiver.orgnummer")
+        message.requireKey("id", "arbeidsgiver.orgnummer", "arbeidssituasjon")
         message.requireArray("papirsykmeldinger") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)

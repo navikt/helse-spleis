@@ -230,8 +230,7 @@ internal class TestPerson(
             orgnummer: String = "",
             søknadId: UUID = UUID.randomUUID(),
             utenlandskSykmelding: Boolean = false,
-            erArbeidsledig: Boolean = false,
-            erBarnepasser: Boolean = false,
+            arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.ARBEIDSTAKER,
             sendTilGosys: Boolean = false,
             registrert: LocalDateTime = LocalDateTime.now(),
             merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
@@ -250,8 +249,7 @@ internal class TestPerson(
                         id = søknadId,
                         yrkesskade = yrkesskade,
                         utenlandskSykmelding = utenlandskSykmelding,
-                        erArbeidsledig = erArbeidsledig,
-                        erBarnepasser = erBarnepasser,
+                        arbeidssituasjon = arbeidssituasjon,
                         sendTilGosys = sendTilGosys,
                         registrert = registrert,
                         merknaderFraSykmelding = merknaderFraSykmelding,
@@ -272,7 +270,7 @@ internal class TestPerson(
         internal fun håndterSøknadSelvstendig(
             periode: Periode,
             ventetid: Periode = 1.januar til 16.januar,
-            erBarnepasser: Boolean = false,
+            arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
             pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt> = listOf(
                 Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN),
                 Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN),
@@ -282,7 +280,7 @@ internal class TestPerson(
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, 100.prosent),
             Ventetid(ventetid),
-            erBarnepasser = erBarnepasser,
+            arbeidssituasjon = arbeidssituasjon,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,
             sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver
         )

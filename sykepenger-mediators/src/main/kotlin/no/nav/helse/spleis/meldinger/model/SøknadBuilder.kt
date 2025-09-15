@@ -40,9 +40,7 @@ internal abstract class SøknadBuilder {
             "UTLANDSOPPHOLD" -> utlandsopphold(fom, tom!!)
         }
     }
-    internal fun selvstendig() = apply {
-        this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Selvstendig
-    }
+    internal fun selvstendig() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Selvstendig }
     internal open fun inntektskilde(andreInntektskilder: Boolean) = apply {}
 
     internal abstract fun periode(fom: LocalDate, tom: LocalDate, grad: Int, arbeidshelse: Int?): SøknadBuilder
