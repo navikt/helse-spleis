@@ -22,9 +22,6 @@ import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.SelvstendigFisker
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
@@ -73,6 +70,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingView
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
@@ -572,15 +570,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     ).result(sykdomstidslinje)
                 }
 
-                SelvstendigBarnepasser,
-                Selvstendig -> {
-                    SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(fastsattÅrsinntekt).result(sykdomstidslinje, gjeldende.ventetid!!)
-                }
+                Selvstendig -> SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(fastsattÅrsinntekt).result(sykdomstidslinje, gjeldende.ventetid!!)
 
                 Arbeidsledig,
-                Frilans,
-                SelvstendigFisker,
-                SelvstendigJordbruker -> error("Forventer ikke å lage utbetalingstidslinje for ${yrkesaktivitet::class.simpleName}")
+                Frilans -> error("Forventer ikke å lage utbetalingstidslinje for ${yrkesaktivitet::class.simpleName}")
             }
         }
 
@@ -1115,9 +1108,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             utbetalingtype: Utbetalingtype,
             nyTilstand: Tilstand
         ) {
+            val klassekodeBruker = when (gjeldende.arbeidssituasjon) {
+                Endring.Arbeidssituasjon.ARBEIDSLEDIG,
+                Endring.Arbeidssituasjon.ARBEIDSTAKER -> Klassekode.SykepengerArbeidstakerOrdinær
+                Endring.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> Klassekode.SelvstendigNæringsdrivendeOppgavepliktig
+                Endring.Arbeidssituasjon.BARNEPASSER -> Klassekode.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
+                Endring.Arbeidssituasjon.FRILANSER -> TODO("har ikke klassekode for frilanser")
+            }
+
             val denNyeUtbetalingen = arbeidsgiver.lagNyUtbetaling(
                 aktivitetslogg = aktivitetslogg,
                 utbetalingstidslinje = beregning.utbetalingstidslinje,
+                klassekodeBruker = klassekodeBruker,
                 maksdato = beregning.maksdatovurdering.resultat.maksdato,
                 forbrukteSykedager = beregning.maksdatovurdering.resultat.antallForbrukteDager,
                 gjenståendeSykedager = beregning.maksdatovurdering.resultat.gjenståendeDager,

@@ -103,6 +103,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         yrkesskade: Boolean = false,
         egenmeldinger: List<Periode> = emptyList(),
         erArbeidsledig: Boolean = false,
+        erBarnepasser: Boolean = false,
         registrert: LocalDateTime = LocalDateTime.now(),
         inntekterFraNyeArbeidsforhold: Boolean = false,
         pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>? = null
@@ -131,6 +132,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             yrkesskade = yrkesskade,
             egenmeldinger = egenmeldinger,
             erArbeidsledig = erArbeidsledig,
+            erBarnepasser = erBarnepasser,
             registrert = registrert,
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter

@@ -74,6 +74,7 @@ class Søknad(
     private val yrkesskade: Boolean,
     private val egenmeldinger: List<Periode>,
     private val erArbeidsledig: Boolean,
+    private val erBarnepasser: Boolean,
     registrert: LocalDateTime,
     private val inntekterFraNyeArbeidsforhold: Boolean,
     private val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>?,
@@ -128,11 +129,7 @@ class Søknad(
             is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
             Behandlingsporing.Yrkesaktivitet.Frilans -> {}
 
-            Behandlingsporing.Yrkesaktivitet.Selvstendig,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> validerSelvstendig(aktivitetslogg)
-
-            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> TODO("Validering for selvstendige fiskere og jordbrukere er ikke implementert")
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> validerSelvstendig(aktivitetslogg)
         }
 
         if (erArbeidsledig) validerArbeidsledig(aktivitetslogg, vilkårsgrunnlag, sykdomstidslinje.periode(), refusjonstidslinje)
@@ -208,10 +205,6 @@ class Søknad(
             is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
             Behandlingsporing.Yrkesaktivitet.Frilans -> null
 
-            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> TODO("Faktaavklart inntekt for selvstendige jordbrukere er ikke implementert")
-            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> TODO("Faktaavklart inntekt for selvstendige fiskere er ikke implementert")
-
-            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser,
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
                 val anvendtGrunnbeløp = `1G`.beløp(sykdomsperiode.start)
                 val avklartePensjonsgivendeInntekter = pensjonsgivendeInntekter?.map {
@@ -235,7 +228,6 @@ class Søknad(
         }
 
         val ventetid = when (behandlingsporing) {
-            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser,
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
                 val ventetid = perioder.filterIsInstance<Søknadsperiode.Ventetid>().first()
                 Periode(ventetid.periode.start, ventetid.periode.endInclusive)
@@ -243,23 +235,20 @@ class Søknad(
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
-            Behandlingsporing.Yrkesaktivitet.Frilans,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> null
+            Behandlingsporing.Yrkesaktivitet.Frilans -> null
         }
 
         val arbeidssituasjon = when (behandlingsporing) {
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> Behandlinger.Behandling.Endring.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (erBarnepasser) {
+                true -> Behandlinger.Behandling.Endring.Arbeidssituasjon.BARNEPASSER
+                false -> Behandlinger.Behandling.Endring.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE
+            }
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSLEDIG
             is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> when (erArbeidsledig) {
                 true -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSLEDIG
                 false -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSTAKER
             }
-            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> Behandlinger.Behandling.Endring.Arbeidssituasjon.BARNEPASSER
             Behandlingsporing.Yrkesaktivitet.Frilans -> Behandlinger.Behandling.Endring.Arbeidssituasjon.FRILANSER
-
-            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> error("Har ikke arbeidssituasjon for ${behandlingsporing::class.simpleName}")
         }
 
         return Vedtaksperiode(

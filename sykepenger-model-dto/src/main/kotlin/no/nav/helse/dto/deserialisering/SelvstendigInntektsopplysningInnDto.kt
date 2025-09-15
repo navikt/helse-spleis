@@ -2,6 +2,5 @@ package no.nav.helse.dto.deserialisering
 
 data class SelvstendigInntektsopplysningInnDto(
     val faktaavklartInntekt: SelvstendigFaktaavklartInntektInnDto,
-    val skjønnsmessigFastsatt: SkjønnsmessigFastsattInnDto?,
-    val yrkesaktivitetstype: YrkesaktivitetstypeDto
+    val skjønnsmessigFastsatt: SkjønnsmessigFastsattInnDto?
 )

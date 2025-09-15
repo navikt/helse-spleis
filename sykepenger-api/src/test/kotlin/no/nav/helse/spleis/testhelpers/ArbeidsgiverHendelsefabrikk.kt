@@ -91,6 +91,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         yrkesskade: Boolean = false,
         egenmeldinger: List<Periode> = emptyList(),
         erArbeidsledig: Boolean = false,
+        erBarnepasser: Boolean = false,
         registrert: LocalDateTime = LocalDateTime.now(),
         inntekterFraNyeArbeidsforhold: Boolean = false
     ): Søknad {
@@ -111,6 +112,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             yrkesskade = yrkesskade,
             egenmeldinger = egenmeldinger,
             erArbeidsledig = erArbeidsledig,
+            erBarnepasser = erBarnepasser,
             registrert = registrert,
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
             pensjonsgivendeInntekter = null

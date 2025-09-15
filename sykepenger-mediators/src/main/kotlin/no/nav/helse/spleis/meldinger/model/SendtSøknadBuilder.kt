@@ -25,6 +25,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
     private var utenlandskSykmelding: Boolean = false
     private var sendTilGosys: Boolean = false
     private var erArbeidsledig: Boolean = false
+    private var erBarnepasser: Boolean = false
 
     internal fun build(meldingsporing: Meldingsporing) = Søknad(
         meldingsreferanseId = meldingsporing.id,
@@ -43,6 +44,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         yrkesskade = yrkesskade,
         egenmeldinger = egenmeldinger,
         erArbeidsledig = erArbeidsledig,
+        erBarnepasser = erBarnepasser,
         registrert = registrert,
         inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
         pensjonsgivendeInntekter = pensjonsgivendeInntekter
@@ -50,6 +52,10 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
 
     fun arbeidsledigsøknad() {
         erArbeidsledig = true
+    }
+
+    fun barnepasser() {
+        erBarnepasser = true
     }
 
     internal fun pensjonsgivendeInntekter(pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>) = apply {

@@ -130,9 +130,6 @@ private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
         YrkesaktivitetstypeDto.ARBEIDSLEDIG -> YrkesaktivitetTypeData.ARBEIDSLEDIG
         YrkesaktivitetstypeDto.FRILANS -> YrkesaktivitetTypeData.FRILANS
         YrkesaktivitetstypeDto.SELVSTENDIG -> YrkesaktivitetTypeData.SELVSTENDIG
-        YrkesaktivitetstypeDto.SELVSTENDIG_JORDBRUKER -> YrkesaktivitetTypeData.SELVSTENDIG_JORDBRUKER
-        YrkesaktivitetstypeDto.SELVSTENDIG_FISKER -> YrkesaktivitetTypeData.SELVSTENDIG_FISKER
-        YrkesaktivitetstypeDto.SELVSTENDIG_BARNEPASSER -> YrkesaktivitetTypeData.SELVSTENDIG_BARNEPASSER
     },
     inntektshistorikk = this.inntektshistorikk.historikk.map { it.tilPersonData() },
     sykdomshistorikk = this.sykdomshistorikk.elementer.map { it.tilPersonData() },
@@ -969,8 +966,7 @@ fun SelvstendigInntektsopplysningUtDto.tilPersonData(): PersonData.Vilkårsgrunn
 
     return PersonData.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData(
         inntektsopplysning = this.faktaavklartInntekt.tilPersonData(),
-        skjønnsmessigFastsatt = this.skjønnsmessigFastsatt?.tilPersonData(),
-        yrkesaktivitetstype = YrkesaktivitetTypeData.valueOf(this.yrkesaktivitetstype.name)
+        skjønnsmessigFastsatt = this.skjønnsmessigFastsatt?.tilPersonData()
     )
 }
 

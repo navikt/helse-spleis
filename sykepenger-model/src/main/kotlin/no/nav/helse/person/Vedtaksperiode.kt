@@ -206,10 +206,7 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiver = arbeidsgiver,
         id = UUID.randomUUID(),
         tilstand = when (arbeidsgiver.yrkesaktivitetssporing) {
-            Behandlingsporing.Yrkesaktivitet.Selvstendig,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> SelvstendigStart
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigStart
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             is Arbeidstaker,
@@ -927,10 +924,7 @@ internal class Vedtaksperiode private constructor(
                 Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
                 Behandlingsporing.Yrkesaktivitet.Frilans -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
 
-                Behandlingsporing.Yrkesaktivitet.Selvstendig,
-                Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
-                Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-                Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> error("Forventer ikke tilstanden AvventerInfotrygdHistorikk for vedtaksperiode opprettet av en søknad for Selvstendig næringsdrivende")
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> error("Forventer ikke tilstanden AvventerInfotrygdHistorikk for vedtaksperiode opprettet av en søknad for Selvstendig næringsdrivende")
             }
 
             Avsluttet,
@@ -972,10 +966,7 @@ internal class Vedtaksperiode private constructor(
                 Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
                 Behandlingsporing.Yrkesaktivitet.Frilans -> error("Forventer ikke tilstanden SelvstendigAvventerInfotrygdHistorikk for vedtaksperiode opprettet av en søknad for $yrkesaktivitet")
 
-                Behandlingsporing.Yrkesaktivitet.Selvstendig,
-                Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
-                Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-                Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> tilstand(aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
             }
         }
     }
@@ -1009,11 +1000,7 @@ internal class Vedtaksperiode private constructor(
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans,
-            Behandlingsporing.Yrkesaktivitet.Selvstendig,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> {
-            }
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> {}
         }
 
         infotrygdhistorikk.validerMedVarsel(aktivitetslogg, periode)
@@ -1058,24 +1045,18 @@ internal class Vedtaksperiode private constructor(
                     Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
                     is Arbeidstaker -> TilUtbetaling
 
-                    Behandlingsporing.Yrkesaktivitet.Selvstendig,
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> SelvstendigTilUtbetaling
+                    Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigTilUtbetaling
 
-                    Behandlingsporing.Yrkesaktivitet.Frilans,
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> TODO("Ikke implementert hva som skjer med frilans og selvstendig næringsdrivende fisker og jordbruker som har utbetaling")
+                    Behandlingsporing.Yrkesaktivitet.Frilans -> TODO("Ikke implementert hva som skjer med frilans som har utbetaling")
                 }
             } else {
                 when (arbeidsgiver.yrkesaktivitetssporing) {
                     Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
                     is Arbeidstaker -> Avsluttet
 
-                    Behandlingsporing.Yrkesaktivitet.Selvstendig,
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> SelvstendigAvsluttet
+                    Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigAvsluttet
 
-                    Behandlingsporing.Yrkesaktivitet.Frilans,
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> TODO("Ikke implementert hva som skjer med frilans og selvstendig næringsdrivende fisker og jordbruker som har utbetaling")
+                    Behandlingsporing.Yrkesaktivitet.Frilans -> TODO("Ikke implementert hva som skjer med frilans som har utbetaling")
                 }
             }
         )
@@ -1662,24 +1643,16 @@ internal class Vedtaksperiode private constructor(
             Behandlingsporing.Yrkesaktivitet.Selvstendig,
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-            Behandlingsporing.Yrkesaktivitet.Frilans,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> null
+            Behandlingsporing.Yrkesaktivitet.Frilans -> null
         }
     }
 
     private fun avklarSykepengegrunnlagForSelvstendig(): SelvstendigInntektsopplysning? {
         return when (this.arbeidsgiver.yrkesaktivitetssporing) {
-            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser,
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigInntektsopplysning(
                 faktaavklartInntekt = inntektForSelvstendig(),
-                skjønnsmessigFastsatt = null,
-                yrkesaktivitet = this.arbeidsgiver.yrkesaktivitetssporing
+                skjønnsmessigFastsatt = null
             )
-
-            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> TODO("Avklaring av sykepengegrunnlag for selvstendig jordbruker og fisker er ikke implementert")
 
             is Arbeidstaker,
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
@@ -1765,13 +1738,10 @@ internal class Vedtaksperiode private constructor(
         when (arbeidsgiver.yrkesaktivitetssporing) {
             is Arbeidstaker -> if (ghosts.isNotEmpty()) aktivitetslogg.varsel(Varselkode.RV_VV_2)
 
-            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser,
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> if (ghosts.isNotEmpty()) aktivitetslogg.funksjonellFeil(Varselkode.RV_IV_13)
 
             Behandlingsporing.Yrkesaktivitet.Frilans,
-            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> error("Forventer ikke å avklare sykepengegrunnlag for ${arbeidsgiver.yrkesaktivitetssporing}")
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> error("Forventer ikke å avklare sykepengegrunnlag for ${arbeidsgiver.yrkesaktivitetssporing}")
         }
 
         return Inntektsgrunnlag.opprett(
@@ -2288,13 +2258,10 @@ internal class Vedtaksperiode private constructor(
         return when (arbeidsgiver.yrkesaktivitetssporing) {
             is Arbeidstaker -> arbeidsgiver.arbeidsgiverperiode(periode)?.forventerInntekt(periode) == true
 
-            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser,
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> true
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-            Behandlingsporing.Yrkesaktivitet.Frilans,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> false
+            Behandlingsporing.Yrkesaktivitet.Frilans -> false
         }
     }
 
@@ -2308,10 +2275,7 @@ internal class Vedtaksperiode private constructor(
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans,
-            Behandlingsporing.Yrkesaktivitet.Selvstendig,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> return false
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> return false
         }
     }
 
@@ -2458,11 +2422,8 @@ internal class Vedtaksperiode private constructor(
                         Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
                         is Arbeidstaker -> true
 
-                        Behandlingsporing.Yrkesaktivitet.Selvstendig,
-                        Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> false
+                        Behandlingsporing.Yrkesaktivitet.Selvstendig -> false
 
-                        Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-                        Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
                         Behandlingsporing.Yrkesaktivitet.Frilans -> TODO("Opptjening ikke implementert for ${arbeidsgiver.yrkesaktivitetssporing}")
                     }
                 }

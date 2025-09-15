@@ -79,10 +79,10 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     fun selvstendigBarnepasserSøknad() = Toggle.SelvstendigNæringsdrivende.enable {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.BARNEPASSER)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.BARNEPASSER)
-        sendVilkårsgrunnlagSelvstendig(0, orgnummer = "SELVSTENDIG_BARNEPASSER")
-        sendYtelserSelvstendig(0, orgnummer = "SELVSTENDIG_BARNEPASSER")
-        sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG_BARNEPASSER")
-        sendUtbetalingsgodkjenningSelvstendig(0, orgnummer = "SELVSTENDIG_BARNEPASSER")
+        sendVilkårsgrunnlagSelvstendig(0, orgnummer = "SELVSTENDIG")
+        sendYtelserSelvstendig(0, orgnummer = "SELVSTENDIG")
+        sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
+        sendUtbetalingsgodkjenningSelvstendig(0, orgnummer = "SELVSTENDIG")
         sendUtbetaling()
         assertTilstander(
             0,
@@ -101,9 +101,9 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     fun `overstyrer tidslinje i avventer godkjenning for Barnepasser`() = Toggle.SelvstendigNæringsdrivende.enable {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.BARNEPASSER)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.BARNEPASSER)
-        sendVilkårsgrunnlagSelvstendig(0, orgnummer = "SELVSTENDIG_BARNEPASSER")
-        sendYtelserSelvstendig(0, orgnummer = "SELVSTENDIG_BARNEPASSER")
-        sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG_BARNEPASSER")
+        sendVilkårsgrunnlagSelvstendig(0, orgnummer = "SELVSTENDIG")
+        sendYtelserSelvstendig(0, orgnummer = "SELVSTENDIG")
+        sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
         assertTilstander(
             0,
             "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
@@ -114,10 +114,10 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             "SELVSTENDIG_AVVENTER_GODKJENNING"
         )
 
-        sendOverstyringTidslinjeSelvstendig((3.januar til 26.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) }, orgnummer = "SELVSTENDIG_BARNEPASSER")
-        sendYtelserSelvstendig(0, orgnummer = "SELVSTENDIG_BARNEPASSER")
-        sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG_BARNEPASSER")
-        sendUtbetalingsgodkjenningSelvstendig(0, true, orgnummer = "SELVSTENDIG_BARNEPASSER")
+        sendOverstyringTidslinjeSelvstendig((3.januar til 26.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) }, orgnummer = "SELVSTENDIG")
+        sendYtelserSelvstendig(0, orgnummer = "SELVSTENDIG")
+        sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
+        sendUtbetalingsgodkjenningSelvstendig(0, true, orgnummer = "SELVSTENDIG")
         sendUtbetaling()
         assertUtbetalingTilstander(1, "NY", "IKKE_UTBETALT", "OVERFØRT", "UTBETALT")
         assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "FORKASTET")

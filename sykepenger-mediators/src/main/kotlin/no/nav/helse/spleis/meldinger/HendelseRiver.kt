@@ -88,7 +88,6 @@ internal val JsonMessage.yrkesaktivitetssporing
         "arbeidstaker" -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(this["organisasjonsnummer"].asText())
         "frilans" -> Behandlingsporing.Yrkesaktivitet.Frilans
         "selvstendig" -> Behandlingsporing.Yrkesaktivitet.Selvstendig
-        "selvstendig_barnepasser" -> Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser
         "arbeidsledig" -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
         "arbeidstaker_default" -> {
             sikkerLogg.info("Yrkesaktivitetstype er ikke spesifisert, default til arbeidstaker, vi gleder oss til at vi slipper å gjøre det her igjen", kv("meldingsreferanseId", meldingsreferanseId()))

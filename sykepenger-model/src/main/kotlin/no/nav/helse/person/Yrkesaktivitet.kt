@@ -30,28 +30,6 @@ internal sealed interface Yrkesaktivitet {
         }
     }
 
-    data object SelvstendigJordbruker : Yrkesaktivitet {
-        override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
-            aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
-            return true
-        }
-    }
-
-    data object SelvstendigFisker : Yrkesaktivitet {
-        override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
-            aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
-            return true
-        }
-    }
-
-    data object SelvstendigBarnepasser : Yrkesaktivitet {
-        override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
-            if (Toggle.SelvstendigNæringsdrivende.enabled) return false
-            aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
-            return true
-        }
-    }
-
     data object Arbeidsledig : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)

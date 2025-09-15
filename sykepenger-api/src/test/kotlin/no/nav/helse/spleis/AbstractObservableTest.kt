@@ -101,6 +101,7 @@ internal abstract class AbstractObservableTest {
         yrkesskade = false,
         egenmeldinger = egenmeldinger,
         erArbeidsledig = false,
+        erBarnepasser = false,
         registrert = LocalDateTime.now(),
         inntekterFraNyeArbeidsforhold = false,
         pensjonsgivendeInntekter = null

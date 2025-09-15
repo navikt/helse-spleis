@@ -276,11 +276,8 @@ internal class UtkastTilVedtakBuilder(
                         is FastsattEtterSkjønn -> arbeidstakerEtterSkjønnMap(sykepengegrunnlagsfakta)
                     }.plus("selvstendig" to null)
 
-                    Behandlingsporing.Yrkesaktivitet.Selvstendig,
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> selvstendigMap()
+                    Behandlingsporing.Yrkesaktivitet.Selvstendig -> selvstendigMap()
 
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
                     Behandlingsporing.Yrkesaktivitet.Frilans-> TODO("Har ikke implementert disse yrkesaktivitetstypene enda i sykepengegrunnlagsfakta")
                 }
             ),

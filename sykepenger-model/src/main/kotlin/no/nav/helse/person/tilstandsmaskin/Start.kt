@@ -20,11 +20,9 @@ internal data object Start : Vedtaksperiodetilstand {
                 else -> when (vedtaksperiode.arbeidsgiver.yrkesaktivitetssporing) {
                     is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> AvventerInntektsmelding
                     Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-                    Behandlingsporing.Yrkesaktivitet.Frilans,
-                    Behandlingsporing.Yrkesaktivitet.Selvstendig,
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker,
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> AvventerBlokkerendePeriode
+                    Behandlingsporing.Yrkesaktivitet.Frilans -> AvventerBlokkerendePeriode
+
+                    Behandlingsporing.Yrkesaktivitet.Selvstendig -> error("Selvstendig skal ikke være her")
                 }
             }
         )

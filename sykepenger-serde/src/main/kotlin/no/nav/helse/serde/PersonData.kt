@@ -386,13 +386,11 @@ data class PersonData(
 
         data class SelvstendigInntektsopplysningData(
             val inntektsopplysning: InntektsopplysningData,
-            val skjønnsmessigFastsatt: SkjønnsmessigFastsattData?,
-            val yrkesaktivitetstype: ArbeidsgiverData.YrkesaktivitetTypeData
+            val skjønnsmessigFastsatt: SkjønnsmessigFastsattData?
         ) {
             fun tilDto() = SelvstendigInntektsopplysningInnDto(
                 faktaavklartInntekt = inntektsopplysning.tilDto(),
-                skjønnsmessigFastsatt = skjønnsmessigFastsatt?.tilDto(),
-                yrkesaktivitetstype = YrkesaktivitetstypeDto.valueOf(yrkesaktivitetstype.name)
+                skjønnsmessigFastsatt = skjønnsmessigFastsatt?.tilDto()
             )
 
             data class SkatteopplysningData(
@@ -527,9 +525,6 @@ data class PersonData(
                 YrkesaktivitetTypeData.ARBEIDSLEDIG -> YrkesaktivitetstypeDto.ARBEIDSLEDIG
                 YrkesaktivitetTypeData.FRILANS -> YrkesaktivitetstypeDto.FRILANS
                 YrkesaktivitetTypeData.SELVSTENDIG -> YrkesaktivitetstypeDto.SELVSTENDIG
-                YrkesaktivitetTypeData.SELVSTENDIG_JORDBRUKER -> YrkesaktivitetstypeDto.SELVSTENDIG_JORDBRUKER
-                YrkesaktivitetTypeData.SELVSTENDIG_FISKER -> YrkesaktivitetstypeDto.SELVSTENDIG_FISKER
-                YrkesaktivitetTypeData.SELVSTENDIG_BARNEPASSER -> YrkesaktivitetstypeDto.SELVSTENDIG_BARNEPASSER
             },
             inntektshistorikk = InntektshistorikkInnDto(this.inntektshistorikk.map { it.tilDto() }),
             sykdomshistorikk = SykdomshistorikkDto(this.sykdomshistorikk.map { it.tilDto() }),
@@ -1200,10 +1195,7 @@ data class PersonData(
             ARBEIDSTAKER,
             ARBEIDSLEDIG,
             FRILANS,
-            SELVSTENDIG,
-            SELVSTENDIG_JORDBRUKER,
-            SELVSTENDIG_FISKER,
-            SELVSTENDIG_BARNEPASSER,
+            SELVSTENDIG
         }
     }
 

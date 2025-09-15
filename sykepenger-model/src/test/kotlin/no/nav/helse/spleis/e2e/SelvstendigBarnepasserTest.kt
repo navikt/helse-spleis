@@ -4,7 +4,7 @@ import java.time.Year
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.barnepasser
+import no.nav.helse.dsl.selvstendig
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad
@@ -35,8 +35,8 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
 
     @Test
     fun `Verifiserer sykdomstidslinje for selvstendig`() = Toggle.SelvstendigNæringsdrivende.enable {
-        barnepasser {
-            håndterSøknadSelvstendig(januar)
+        selvstendig {
+            håndterSøknadSelvstendig(januar, erBarnepasser = true)
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
 
         }
@@ -44,8 +44,8 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
 
     @Test
     fun `Overstyrer tidslinje i halen i avventer godkjenning`() = Toggle.SelvstendigNæringsdrivende.enable {
-        barnepasser {
-            håndterSøknadSelvstendig(januar)
+        selvstendig {
+            håndterSøknadSelvstendig(januar, erBarnepasser = true)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -63,8 +63,8 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
 
     @Test
     fun `Overstyrer tidslinje i halen til annen ytelse i avventer godkjenning`() = Toggle.SelvstendigNæringsdrivende.enable {
-        barnepasser {
-            håndterSøknadSelvstendig(januar)
+        selvstendig {
+            håndterSøknadSelvstendig(januar, erBarnepasser = true)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -82,8 +82,8 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
 
     @Test
     fun `Overstyrer hele perioden til annen ytelse`() = Toggle.SelvstendigNæringsdrivende.enable {
-        barnepasser {
-            håndterSøknadSelvstendig(januar)
+        selvstendig {
+            håndterSøknadSelvstendig(januar, erBarnepasser = true)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -100,8 +100,8 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
 
     @Test
     fun `ventetid fra søknad lagres på behandlingen`() = Toggle.SelvstendigNæringsdrivende.enable {
-        barnepasser {
-            håndterSøknadSelvstendig(januar)
+        selvstendig {
+            håndterSøknadSelvstendig(januar, erBarnepasser = true)
 
             assertEquals(1.januar til 16.januar, inspektør.ventetid(1.vedtaksperiode))
 
@@ -110,9 +110,10 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
 
     @Test
     fun `selvstendigsøknad med færre inntekter enn 3 år kastes ut`() = Toggle.SelvstendigNæringsdrivende.enable {
-        barnepasser {
+        selvstendig {
             håndterSøknadSelvstendig(
                 periode = januar,
+                erBarnepasser = true,
                 pensjonsgivendeInntekter = listOf(
                     Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN),
                     Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN)
@@ -126,8 +127,8 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
 
     @Test
     fun `selvstendigsøknad kastes ut frem til vi støtter det`() = Toggle.SelvstendigNæringsdrivende.disable {
-        barnepasser {
-            håndterSøknadSelvstendig(januar)
+        selvstendig {
+            håndterSøknadSelvstendig(januar, erBarnepasser = true)
             assertFunksjonelleFeil()
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
 
@@ -136,8 +137,8 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
 
     @Test
     fun `beregner korrekt utbetaling for selvstendig med inntekt under 6G og uten forskring`() = Toggle.SelvstendigNæringsdrivende.enable {
-        barnepasser {
-            håndterSøknadSelvstendig(januar)
+        selvstendig {
+            håndterSøknadSelvstendig(januar, erBarnepasser = true)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
@@ -183,9 +184,10 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
 
     @Test
     fun `beregner korrekt utbetaling for selvstendig med inntekt over 6G og uten forsikring`() = Toggle.SelvstendigNæringsdrivende.enable {
-        barnepasser {
+        selvstendig {
             håndterSøknadSelvstendig(
                 periode = januar,
+                erBarnepasser = true,
                 pensjonsgivendeInntekter = listOf( // TODO Inntekt for barnepasser er ikke vanlig næringsinntekt, men i næringsinntektFraFiskeFangstEllerFamiliebarnehage
                     Søknad.PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN),
                     Søknad.PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN),
@@ -235,9 +237,9 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
 
     @Test
     fun `To selvstendigsøknader`() = Toggle.SelvstendigNæringsdrivende.enable {
-        barnepasser {
-            håndterSøknadSelvstendig(januar)
-            håndterSøknadSelvstendig(mars, 1.mars til 16.mars)
+        selvstendig {
+            håndterSøknadSelvstendig(januar, erBarnepasser = true)
+            håndterSøknadSelvstendig(mars, 1.mars til 16.mars, erBarnepasser = true)
 
             assertTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
             assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))

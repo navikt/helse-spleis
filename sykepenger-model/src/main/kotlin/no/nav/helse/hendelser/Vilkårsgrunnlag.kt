@@ -62,13 +62,10 @@ class Vilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt
         )
 
-        Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser,
         Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigNæringsdrivendeOpptjening(skjæringstidspunkt)
 
         Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> TODO()
         Behandlingsporing.Yrkesaktivitet.Frilans -> TODO()
-        Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> TODO()
-        Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> TODO()
     }
 
     internal fun skatteopplysninger(): List<SkatteopplysningerForSykepengegrunnlag> {

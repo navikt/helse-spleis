@@ -102,6 +102,7 @@ internal class SelvstendigHendelsefabrikk() {
             yrkesskade = yrkesskade,
             egenmeldinger = egenmeldinger,
             erArbeidsledig = false,
+            erBarnepasser = false,
             registrert = registrert,
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter

@@ -119,7 +119,6 @@ internal class TestPerson(
 
     private fun String.tilYrkesaktivitet(): Behandlingsporing.Yrkesaktivitet = when (this) {
         selvstendig -> Behandlingsporing.Yrkesaktivitet.Selvstendig
-        barnepasser -> Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser
         frilans -> Behandlingsporing.Yrkesaktivitet.Frilans
         arbeidsledig -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
         else -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(this)
@@ -232,6 +231,7 @@ internal class TestPerson(
             søknadId: UUID = UUID.randomUUID(),
             utenlandskSykmelding: Boolean = false,
             erArbeidsledig: Boolean = false,
+            erBarnepasser: Boolean = false,
             sendTilGosys: Boolean = false,
             registrert: LocalDateTime = LocalDateTime.now(),
             merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
@@ -251,6 +251,7 @@ internal class TestPerson(
                         yrkesskade = yrkesskade,
                         utenlandskSykmelding = utenlandskSykmelding,
                         erArbeidsledig = erArbeidsledig,
+                        erBarnepasser = erBarnepasser,
                         sendTilGosys = sendTilGosys,
                         registrert = registrert,
                         merknaderFraSykmelding = merknaderFraSykmelding,
@@ -271,6 +272,7 @@ internal class TestPerson(
         internal fun håndterSøknadSelvstendig(
             periode: Periode,
             ventetid: Periode = 1.januar til 16.januar,
+            erBarnepasser: Boolean = false,
             pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt> = listOf(
                 Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN),
                 Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN),
@@ -280,6 +282,7 @@ internal class TestPerson(
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, 100.prosent),
             Ventetid(ventetid),
+            erBarnepasser = erBarnepasser,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,
             sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver
         )
@@ -505,11 +508,7 @@ internal class TestPerson(
                     is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, INNTEKT, skjæringstidspunkt)
 
                     Behandlingsporing.Yrkesaktivitet.Frilans,
-                    Behandlingsporing.Yrkesaktivitet.Selvstendig,
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, 0.månedlig, skjæringstidspunkt)
-
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigFisker,
-                    Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> TODO("Test oppsettet for håndtering av vilkårsgrunnlag for $behandlingsporing er ikke implementert")
+                    Behandlingsporing.Yrkesaktivitet.Selvstendig -> lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, 0.månedlig, skjæringstidspunkt)
                 }
             }
 

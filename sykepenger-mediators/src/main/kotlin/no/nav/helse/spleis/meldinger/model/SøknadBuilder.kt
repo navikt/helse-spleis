@@ -26,8 +26,6 @@ internal abstract class SøknadBuilder {
     internal fun arbeidstaker(organisasjonsnummer: String) = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer) }
     internal fun arbeidsledig() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidsledig }
     internal fun frilans() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Frilans }
-    internal fun selvstendigJordbruker() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker }
-    internal fun selvstendigFisker() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.SelvstendigFisker }
     internal fun fom(fom: LocalDate) = apply { this.fom = fom }
     internal fun tom(tom: LocalDate) = apply { this.tom = tom }
     internal fun sendt(tidspunkt: LocalDateTime) = apply { this.innsendt = tidspunkt }
@@ -42,12 +40,8 @@ internal abstract class SøknadBuilder {
             "UTLANDSOPPHOLD" -> utlandsopphold(fom, tom!!)
         }
     }
-    internal fun selvstendig(arbeidssitasjon: String) = apply {
-        when (arbeidssitasjon) {
-            "SELVSTENDIG_NARINGSDRIVENDE" -> this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Selvstendig
-            "BARNEPASSER" ->  this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser
-            else -> throw IllegalArgumentException("Ukjent arbeidssitasjon $arbeidssitasjon for selvstendig søknad")
-        }
+    internal fun selvstendig() = apply {
+        this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Selvstendig
     }
     internal open fun inntektskilde(andreInntektskilder: Boolean) = apply {}
 
