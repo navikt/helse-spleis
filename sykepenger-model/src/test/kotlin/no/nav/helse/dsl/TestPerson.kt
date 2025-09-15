@@ -60,6 +60,8 @@ import no.nav.helse.spill_av_im.Forespørsel
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -79,8 +81,9 @@ internal class TestPerson(
         personidentifikator: Personidentifikator = UNG_PERSON_FNR_2018,
         fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
         jurist: SubsumsjonsListLog,
-        deferredLog: DeferredLog = DeferredLog()
-    ) : this(observatør, Person(personidentifikator, fødselsdato.alder, jurist), deferredLog)
+        deferredLog: DeferredLog = DeferredLog(),
+        regler: ArbeidsgiverRegler = NormalArbeidstaker
+    ) : this(observatør, Person(personidentifikator, fødselsdato.alder, jurist, regler), deferredLog)
 
     internal companion object {
         internal operator fun <R> String.invoke(testPerson: TestPerson, testblokk: TestArbeidsgiver.() -> R) =

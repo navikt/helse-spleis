@@ -36,6 +36,7 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
@@ -583,6 +584,13 @@ internal abstract class AbstractDslTest {
 
     protected fun dto() = testperson.dto()
 
+    private fun regler(maksSykedager: Int): ArbeidsgiverRegler = object : ArbeidsgiverRegler {
+        override fun burdeStarteNyArbeidsgiverperiode(oppholdsdagerBrukt: Int) = oppholdsdagerBrukt >= 16
+        override fun arbeidsgiverperiodenGjennomført(arbeidsgiverperiodedagerBrukt: Int) = arbeidsgiverperiodedagerBrukt >= 16
+        override fun maksSykepengedager() = maksSykedager
+        override fun maksSykepengedagerOver67() = maksSykedager
+    }
+
     protected fun medJSONPerson(filsti: String) {
         testperson = TestPerson(
             observatør = observatør,
@@ -597,6 +605,10 @@ internal abstract class AbstractDslTest {
 
     protected fun medPersonidentifikator(personidentifikator: Personidentifikator) {
         testperson = TestPerson(observatør = observatør, personidentifikator = personidentifikator, deferredLog = deferredLog, jurist = jurist)
+    }
+
+    protected fun medMaksSykedager(maksSykedager: Int) {
+        testperson = TestPerson(observatør = observatør, deferredLog = deferredLog, jurist = jurist, regler = regler(maksSykedager))
     }
 
     @BeforeEach
