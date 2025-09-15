@@ -252,6 +252,28 @@ internal class Feriepengeutbetaling private constructor(
                 """
             )
 
+            val observerresultat = PersonObserver.FeriepengerBeregningsresultat.BeregningsresultatForArbeidsgiver(
+                feriepengebeløp = feriepengeberegningsresultat.arbeidsgiver.totaltFeriepengebeløp + feriepengeberegningsresultat.person.totaltFeriepengebeløp,
+                feriepengebeløpSpleis = feriepengeberegningsresultat.arbeidsgiver.spleisFeriepengebeløp + feriepengeberegningsresultat.person.spleisFeriepengebeløp,
+                feriepengebeløpInfotrygd = feriepengeberegningsresultat.arbeidsgiver.infotrygdFeriepengebeløp + feriepengeberegningsresultat.person.infotrygdFeriepengebeløp,
+                refusjon = PersonObserver.FeriepengerBeregningsresultat.BeregningsresultatForArbeidsgiver.Beregningsresultat(
+                    totalbeløp = feriepengeberegningsresultat.arbeidsgiver.totaltFeriepengebeløp,
+                    betaltFraInfotrygd = feriepengeberegningsresultat.arbeidsgiver.hvaViHarBeregnetAtInfotrygdHarUtbetalt,
+                    skalBetalesAvSpleis = feriepengeberegningsresultat.arbeidsgiver.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd,
+                    nettoFraTidligereUtbetaling = forrigeSendteArbeidsgiverOppdrag?.let {
+                        feriepengeberegningsresultat.arbeidsgiver.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd - it.totalbeløp
+                    }
+                ),
+                brukerutbetaling = PersonObserver.FeriepengerBeregningsresultat.BeregningsresultatForArbeidsgiver.Beregningsresultat(
+                    totalbeløp = feriepengeberegningsresultat.person.totaltFeriepengebeløp,
+                    betaltFraInfotrygd = feriepengeberegningsresultat.person.hvaViHarBeregnetAtInfotrygdHarUtbetalt,
+                    skalBetalesAvSpleis = feriepengeberegningsresultat.person.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd,
+                    nettoFraTidligereUtbetaling = forrigeSendteArbeidsgiverOppdrag?.let {
+                        feriepengeberegningsresultat.person.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd - it.totalbeløp
+                    }
+                )
+            )
+
             return Feriepengeutbetaling(
                 feriepengegrunnlag = grunnlag,
                 infotrygdFeriepengebeløpPerson = feriepengeberegningsresultat.person.infotrygdFeriepengebeløp,

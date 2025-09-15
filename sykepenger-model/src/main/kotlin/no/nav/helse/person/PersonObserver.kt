@@ -338,6 +338,34 @@ interface PersonObserver {
         }
     }
 
+    data class FeriepengerBeregningsresultat(
+        val arbeidsgivere: List<BeregningsresultatForArbeidsgiver>
+    ) {
+        data class BeregningsresultatForArbeidsgiver(
+            // en total beregning for de første 48 dagene når vi ser på spleis og infotrygd samlet
+            val feriepengebeløp: Double,
+            // hvor mye av feriepengebeløpet som kommer fra spleis
+            val feriepengebeløpSpleis: Double,
+            // hvor mye av feriepengebeløpet som kommer fra infotrygd
+            val feriepengebeløpInfotrygd: Double,
+            // hvordan feriepengebeløpet fordeler seg mellom refusjon til arbeidsgiver og betaling til bruker
+            val refusjon: Beregningsresultat,
+            val brukerutbetaling: Beregningsresultat
+        ) {
+            data class Beregningsresultat(
+                // hvor mye som skal utbetales
+                val totalbeløp: Double,
+                // hvor mye -er- betalt fra før, av infotrygd
+                val betaltFraInfotrygd: Int,
+                // hva spleis må betale (enten positivt eller negativt beløp)
+                val skalBetalesAvSpleis: Int,
+                // hvis spleis har kjørt en feriepengeutbetaling tidligere,
+                // hva er differansen mellom det som ble utbetalt og det som nå skal være utbetalt
+                val nettoFraTidligereUtbetaling: Int?
+            )
+        }
+    }
+
     data class FeriepengerUtbetaltEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val fom: LocalDate,
