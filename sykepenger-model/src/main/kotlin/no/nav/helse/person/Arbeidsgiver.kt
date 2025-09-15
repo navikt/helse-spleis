@@ -110,6 +110,7 @@ import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
+import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -434,20 +435,12 @@ internal class Arbeidsgiver private constructor(
             .fold(Feriepengegrunnlagstidslinje(emptyList()), Feriepengegrunnlagstidslinje::plus)
     }
 
-    private fun lagUtbetalingkladd(utbetalingstidslinje: Utbetalingstidslinje): Utbetalingkladd {
+    private fun lagUtbetalingkladd(utbetalingstidslinje: Utbetalingstidslinje, klassekodeBruker: Klassekode): Utbetalingkladd {
         return UtbetalingkladdBuilder(
             tidslinje = utbetalingstidslinje,
             mottakerRefusjon = organisasjonsnummer,
             mottakerBruker = person.fødselsnummer,
-            klassekodeBruker = when (yrkesaktivitetssporing) {
-                is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> Klassekode.SykepengerArbeidstakerOrdinær
-                Behandlingsporing.Yrkesaktivitet.Selvstendig -> Klassekode.SelvstendigNæringsdrivendeOppgavepliktig
-                Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk
-                Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> Klassekode.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
-                Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> Klassekode.SelvstendigNæringsdrivendeFisker
-                Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-                Behandlingsporing.Yrkesaktivitet.Frilans -> error("Forventer ikke å lage utbetaling for $yrkesaktivitetssporing ennå")
-            }
+            klassekodeBruker = klassekodeBruker
         ).build()
     }
 
@@ -460,9 +453,18 @@ internal class Arbeidsgiver private constructor(
         periode: Periode,
         type: Utbetalingtype
     ): Utbetaling {
+        val klassekodeBruker = when (yrkesaktivitetssporing) {
+            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> Klassekode.SykepengerArbeidstakerOrdinær
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> Klassekode.SelvstendigNæringsdrivendeOppgavepliktig
+            Behandlingsporing.Yrkesaktivitet.SelvstendigJordbruker -> Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk
+            Behandlingsporing.Yrkesaktivitet.SelvstendigBarnepasser -> Klassekode.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
+            Behandlingsporing.Yrkesaktivitet.SelvstendigFisker -> Klassekode.SelvstendigNæringsdrivendeFisker
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.Frilans -> error("Forventer ikke å lage utbetaling for $yrkesaktivitetssporing ennå")
+        }
         val utbetalingen = Utbetaling.lagUtbetaling(
             utbetalinger = utbetalinger,
-            vedtaksperiodekladd = lagUtbetalingkladd(utbetalingstidslinje),
+            vedtaksperiodekladd = lagUtbetalingkladd(utbetalingstidslinje, klassekodeBruker),
             utbetalingstidslinje = utbetalingstidslinje,
             periode = periode,
             aktivitetslogg = aktivitetslogg,
@@ -477,7 +479,10 @@ internal class Arbeidsgiver private constructor(
 
     internal fun lagTomUtbetaling(periode: Periode, type: Utbetalingtype): Utbetaling {
         val tomUtbetaling = Utbetaling.lagTomUtbetaling(
-            vedtaksperiodekladd = lagUtbetalingkladd(Utbetalingstidslinje()),
+            vedtaksperiodekladd = Utbetalingkladd(
+                arbeidsgiveroppdrag = Oppdrag(mottaker = organisasjonsnummer, fagområde = Fagområde.SykepengerRefusjon),
+                personoppdrag = Oppdrag(mottaker = person.fødselsnummer, fagområde = Fagområde.Sykepenger),
+            ),
             periode = periode,
             type = type
         )
