@@ -10,7 +10,7 @@ Tar inn søknader og inntektsmeldinger for en person og foreslår utbetalinger.
 
 Dagturnering: 
 
-https://github.com/navikt/helse-spleis/blob/master/sykepenger-model/src/main/resources/dagturnering.csv
+https://github.com/navikt/helse-spleis/blob/main/sykepenger-model/src/main/resources/dagturnering.csv
 
 ## Migrere JSON til siste skjema
 

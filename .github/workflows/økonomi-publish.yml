@@ -6,7 +6,7 @@ on:
       - 'sykepenger-økonomi-dto/**'
       - '.github/workflows/økonomi-publish.yml'
     branches:
-      - master
+      - main
 jobs:
   publish:
     permissions:

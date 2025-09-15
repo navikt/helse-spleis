@@ -3,7 +3,7 @@ name: branch build
 on:
   push:
     branches-ignore:
-      - master
+      - main
 
 env:
   ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}

@@ -3,7 +3,7 @@ name: Spleis-jobs
 on:
   push:
     branches:
-    - master
+    - main
     paths:
     - 'jobs/**'
     - 'sykepenger-model/**'

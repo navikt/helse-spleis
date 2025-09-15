@@ -3,7 +3,7 @@ name: Spleis-api
 on:
   push:
     branches:
-    - master
+    - main
     paths:
     - 'sykepenger-api/**'
     - 'sykepenger-api-dto/**'

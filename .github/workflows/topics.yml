@@ -3,7 +3,7 @@ name: Aiven config for de andre topicene våre
 on:
   push:
     branches:
-    - master
+    - main
     paths:
     - 'deploy/aiven-teknisk-topic-dev.yml'
     - 'deploy/aiven-teknisk-topic-prod.yml'
