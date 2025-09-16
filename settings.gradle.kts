@@ -13,7 +13,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("rapids-and-rivers", rapidsAndRiversVersion)
-            version("postgres", "42.7.5")
+            version("postgres", "42.7.7")
             version("hikari", "6.3.0")
             version("cloudsql", "1.20.0")
             version("flyway", "11.5.0")
