@@ -610,9 +610,14 @@ class Person private constructor(
     private fun finnYrkesaktivitet(behandlingsporing: Behandlingsporing.Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
         yrkesaktiviteter.finn(behandlingsporing) ?: aktivitetslogg.logiskFeil("Finner ikke arbeidsgiver")
 
-    private fun MutableList<Yrkesaktivitet>.finnEllerOpprett(yrkesaktivitet: Behandlingsporing.Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
-        finn(yrkesaktivitet) ?: Yrkesaktivitet(this@Person, yrkesaktivitet, regelverkslogg).also { yrkesaktivitet ->
-            aktivitetslogg.info("Ny yrkesaktivitet med organisasjonsnummer %s for denne personen", yrkesaktivitet.organisasjonsnummer)
+    private fun MutableList<Yrkesaktivitet>.finnEllerOpprett(behandlingsporing: Behandlingsporing.Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
+        finn(behandlingsporing) ?: Yrkesaktivitet(this@Person, behandlingsporing, regelverkslogg).also { yrkesaktivitet ->
+            when (behandlingsporing) {
+                Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> aktivitetslogg.info("Ny yrkesaktivitet som Arbeidsledig for denne personen")
+                is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> aktivitetslogg.info("Ny yrkesaktivitet som Arbeidstaker med organisasjonsnummer ${behandlingsporing.organisasjonsnummer} for denne personen")
+                Behandlingsporing.Yrkesaktivitet.Frilans -> aktivitetslogg.info("Ny yrkesaktivitet som Frilans for denne personen")
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> aktivitetslogg.info("Ny yrkesaktivitet som Selvstendig for denne personen")
+            }
             add(yrkesaktivitet)
         }
 
