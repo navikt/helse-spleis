@@ -1,5 +1,7 @@
 package no.nav.helse.person.tilstandsmaskin
 
+import java.time.LocalDateTime
+import java.time.Period
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Hendelse
@@ -9,8 +11,6 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.behandlingkilde
-import java.time.LocalDateTime
-import java.time.Period
 
 internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_INNTEKTSMELDING
@@ -18,7 +18,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         tilstandsendringstidspunkt.plusDays(180)
 
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-        check(vedtaksperiode.arbeidsgiver.yrkesaktivitetssporing is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) { "Forventer kun arbeidstakere her" }
+        check(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) { "Forventer kun arbeidstakere her" }
         vedtaksperiode.trengerInntektsmeldingReplay()
     }
 

@@ -203,11 +203,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun lagreTidsnæreInntekter(
             skjæringstidspunkt: LocalDate,
-            arbeidsgiver: Arbeidsgiver,
+            yrkesaktivitet: Yrkesaktivitet,
             aktivitetslogg: IAktivitetslogg,
             nyArbeidsgiverperiode: Boolean
         ) {
-            inntektsgrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, aktivitetslogg, nyArbeidsgiverperiode)
+            inntektsgrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, yrkesaktivitet, aktivitetslogg, nyArbeidsgiverperiode)
         }
 
         internal fun berik(builder: UtkastTilVedtakBuilder) {

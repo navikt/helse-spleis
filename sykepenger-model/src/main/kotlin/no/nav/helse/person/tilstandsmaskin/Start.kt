@@ -17,7 +17,7 @@ internal data object Start : Vedtaksperiodetilstand {
             aktivitetslogg,
             when {
                 !vedtaksperiode.person.infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
-                else -> when (vedtaksperiode.arbeidsgiver.yrkesaktivitetssporing) {
+                else -> when (vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype) {
                     is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> AvventerInntektsmelding
                     Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
                     Behandlingsporing.Yrkesaktivitet.Frilans -> AvventerBlokkerendePeriode

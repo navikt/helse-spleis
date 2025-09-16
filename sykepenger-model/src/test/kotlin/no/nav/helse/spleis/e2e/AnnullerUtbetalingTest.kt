@@ -22,6 +22,10 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.BehandlingView
+import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
@@ -35,10 +39,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVU
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.assertNotNull
@@ -63,7 +63,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
 
-            val annulleringskandidater = inspektør.arbeidsgiver.view().aktiveVedtaksperioder.first().annulleringskandidater.map { it.id }
+            val annulleringskandidater = inspektør.yrkesaktivitet.view().aktiveVedtaksperioder.first().annulleringskandidater.map { it.id }
             assertEquals(listOf(1.vedtaksperiode), annulleringskandidater)
         }
     }
@@ -74,7 +74,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nyttVedtak(januar)
             forlengVedtak(februar)
 
-            val annulleringskandidater = inspektør.arbeidsgiver.view().aktiveVedtaksperioder.first().annulleringskandidater.map { it.id }
+            val annulleringskandidater = inspektør.yrkesaktivitet.view().aktiveVedtaksperioder.first().annulleringskandidater.map { it.id }
             assertEquals(listOf(1.vedtaksperiode, 2.vedtaksperiode), annulleringskandidater)
         }
     }
@@ -85,7 +85,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nyttVedtak(januar)
             forlengVedtak(februar)
 
-            val annulleringskandidater = inspektør.arbeidsgiver.view().aktiveVedtaksperioder.last().annulleringskandidater.map { it.id }
+            val annulleringskandidater = inspektør.yrkesaktivitet.view().aktiveVedtaksperioder.last().annulleringskandidater.map { it.id }
             assertEquals(listOf(2.vedtaksperiode), annulleringskandidater)
         }
     }
@@ -96,7 +96,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nyttVedtak(januar)
             nyPeriode(februar)
 
-            val annulleringskandidater = inspektør.arbeidsgiver.view().aktiveVedtaksperioder.first().annulleringskandidater.map { it.id }
+            val annulleringskandidater = inspektør.yrkesaktivitet.view().aktiveVedtaksperioder.first().annulleringskandidater.map { it.id }
             assertEquals(listOf(1.vedtaksperiode), annulleringskandidater)
         }
     }
@@ -109,7 +109,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             nyttVedtak(april)
 
-            val annulleringskandidater = inspektør.arbeidsgiver.view().aktiveVedtaksperioder.first().annulleringskandidater.map { it.id }
+            val annulleringskandidater = inspektør.yrkesaktivitet.view().aktiveVedtaksperioder.first().annulleringskandidater.map { it.id }
             assertEquals(listOf(1.vedtaksperiode, 2.vedtaksperiode), annulleringskandidater)
         }
     }
@@ -717,7 +717,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             )
             assertEquals(
                 forventet,
-                inspektør.arbeidsgiver.view().utbetalinger.toSet()
+                inspektør.yrkesaktivitet.view().utbetalinger.toSet()
             )
         }
     }

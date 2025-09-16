@@ -117,7 +117,7 @@ internal class ForkastetVedtaksperiode(
 
         internal fun gjenopprett(
             person: Person,
-            arbeidsgiver: Arbeidsgiver,
+            yrkesaktivitet: Yrkesaktivitet,
             dto: ForkastetVedtaksperiodeInnDto,
             regelverkslogg: Regelverkslogg,
             grunnlagsdata: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>,
@@ -125,7 +125,7 @@ internal class ForkastetVedtaksperiode(
         ): ForkastetVedtaksperiode {
             val vedtaksperiode = Vedtaksperiode.gjenopprett(
                 person = person,
-                arbeidsgiver = arbeidsgiver,
+                yrkesaktivitet = yrkesaktivitet,
                 dto = dto.vedtaksperiode,
                 regelverkslogg = regelverkslogg,
                 grunnlagsdata = grunnlagsdata,
@@ -133,7 +133,7 @@ internal class ForkastetVedtaksperiode(
             )
             return ForkastetVedtaksperiode(
                 periode = vedtaksperiode.periode,
-                arbeidsgiver = arbeidsgiver.organisasjonsnummer,
+                arbeidsgiver = yrkesaktivitet.organisasjonsnummer,
                 vedtaksperiode = vedtaksperiode
             )
         }

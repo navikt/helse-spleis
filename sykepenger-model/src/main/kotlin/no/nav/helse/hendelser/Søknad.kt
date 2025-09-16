@@ -18,13 +18,13 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Søknad.PensjonsgivendeInntekt.Companion.harAndreInntekterEnnNæringsinntekt
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
+import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøknad er lagt til grunn`
@@ -128,6 +128,7 @@ class Søknad(
             Arbeidssituasjon.FRILANSER -> {
                 // ingen spesiell validering
             }
+
             Arbeidssituasjon.ARBEIDSLEDIG -> validerArbeidsledig(aktivitetslogg, vilkårsgrunnlag, sykdomstidslinje.periode(), refusjonstidslinje)
             Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
             Arbeidssituasjon.BARNEPASSER -> validerSelvstendig(aktivitetslogg)
@@ -198,7 +199,7 @@ class Søknad(
     private fun avskjæringsdato(): LocalDate =
         (opprinneligSendt ?: metadata.innsendt).toLocalDate().minusMonths(3).withDayOfMonth(1)
 
-    internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, arbeidsgiver: Arbeidsgiver, regelverkslogg: Regelverkslogg): Vedtaksperiode {
+    internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, yrkesaktivitet: Yrkesaktivitet, regelverkslogg: Regelverkslogg): Vedtaksperiode {
         requireNotNull(sykdomstidslinje.periode()) { "ugyldig søknad: tidslinjen er tom" }
         val faktaavklartInntekt = when (behandlingsporing) {
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
@@ -250,7 +251,7 @@ class Søknad(
             egenmeldingsperioder = egenmeldingsperioder(),
             metadata = metadata,
             person = person,
-            arbeidsgiver = arbeidsgiver,
+            yrkesaktivitet = yrkesaktivitet,
             sykdomstidslinje = sykdomstidslinje,
             arbeidssituasjon = arbeidssituasjon,
             faktaavklartInntekt = faktaavklartInntekt,

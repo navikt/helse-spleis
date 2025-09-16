@@ -26,11 +26,11 @@ import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Person
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -43,7 +43,7 @@ internal abstract class AbstractEndToEndTest {
     internal companion object {
         val a1Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             organisasjonsnummer = a1,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1)
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1)
         )
 
         private fun overgangFraInfotrygdPerson(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", regelverkslogg)
@@ -119,7 +119,7 @@ internal abstract class AbstractEndToEndTest {
     protected fun createPingPongPerson() = createTestPerson { regelverkslogg -> pingPongPerson(regelverkslogg) }.also {
         Utbetalingshistorikk(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
             vedtaksperiodeId = UUID.randomUUID(),
             element = InfotrygdhistorikkElement.opprett(
                 LocalDateTime.now(),
@@ -168,7 +168,7 @@ internal abstract class AbstractEndToEndTest {
         assertTilstander(
             vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
             tilstander = tilstander,
-            orgnummer = arbeidsgiver.organisasjonsnummer(),
+                orgnummer = yrkesaktivitet.organisasjonsnummer(),
             inspektør = this
         )
     }

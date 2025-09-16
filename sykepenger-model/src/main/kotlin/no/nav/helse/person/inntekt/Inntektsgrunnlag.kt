@@ -11,10 +11,10 @@ import no.nav.helse.etterlevelse.`§ 8-35 ledd 2`
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.SelvstendigNæringsdrivendeOpptjening
+import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
@@ -287,8 +287,8 @@ internal class Inntektsgrunnlag(
     fun harGjenbrukbarInntekt(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.harGjenbrukbarInntekt(organisasjonsnummer)
 
-    fun lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver, aktivitetslogg: IAktivitetslogg, nyArbeidsgiverperiode: Boolean) {
-        arbeidsgiverInntektsopplysninger.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, aktivitetslogg, nyArbeidsgiverperiode)
+    fun lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg, nyArbeidsgiverperiode: Boolean) {
+        arbeidsgiverInntektsopplysninger.lagreTidsnæreInntekter(skjæringstidspunkt, yrkesaktivitet, aktivitetslogg, nyArbeidsgiverperiode)
     }
 
     enum class Begrensning {

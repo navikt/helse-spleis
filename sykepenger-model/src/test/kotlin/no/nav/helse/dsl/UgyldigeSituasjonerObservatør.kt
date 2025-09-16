@@ -4,21 +4,21 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.BehandlingView
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.tilstandsmaskin.TilstandType
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.VedtaksperiodeView
+import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_A_ORDNINGEN
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_UTBETALT
@@ -31,7 +31,7 @@ import org.junit.jupiter.api.assertThrows
 
 internal class UgyldigeSituasjonerObservatør(private val person: Person) : PersonObserver {
 
-    private val arbeidsgivereMap = mutableMapOf<String, Arbeidsgiver>()
+    private val arbeidsgivereMap = mutableMapOf<String, Yrkesaktivitet>()
     private val gjeldendeTilstander = mutableMapOf<UUID, TilstandType>()
     private val gjeldendeBehandlingstatus = mutableMapOf<UUID, MutableList<Pair<LocalDateTime, Behandlingstatus>>>()
     private val arbeidsgivere get() = arbeidsgivereMap.values

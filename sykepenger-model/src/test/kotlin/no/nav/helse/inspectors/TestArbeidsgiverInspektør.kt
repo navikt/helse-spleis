@@ -5,8 +5,8 @@ import java.util.UUID
 import no.nav.helse.feriepenger.Feriepengerendringskode
 import no.nav.helse.feriepenger.Feriepengerklassekode
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
+import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.spleis.e2e.IdInnhenter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -22,7 +22,7 @@ internal class TestArbeidsgiverInspektør(
         }
     }
 
-    internal var arbeidsgiver: Arbeidsgiver = person.arbeidsgivere.first { it.organisasjonsnummer() == orgnummer }
+    internal var yrkesaktivitet: Yrkesaktivitet = person.yrkesaktiviteter.first { it.organisasjonsnummer() == orgnummer }
     private val view = person.view().arbeidsgivere.single { it.organisasjonsnummer == orgnummer }
 
     private val personInspektør = person.inspektør

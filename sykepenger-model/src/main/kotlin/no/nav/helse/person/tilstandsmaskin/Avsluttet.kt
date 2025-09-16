@@ -13,7 +13,7 @@ internal data object Avsluttet : Vedtaksperiodetilstand {
 
     override val erFerdigBehandlet = true
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperiode.behandlinger.bekreftAvsluttetBehandlingMedVedtak(vedtaksperiode.arbeidsgiver)
+        vedtaksperiode.behandlinger.bekreftAvsluttetBehandlingMedVedtak(vedtaksperiode.yrkesaktivitet)
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
@@ -26,7 +26,7 @@ internal data object Avsluttet : Vedtaksperiodetilstand {
     }
 
     override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperiode.behandlinger.bekreftÅpenBehandling(vedtaksperiode.arbeidsgiver)
+        vedtaksperiode.behandlinger.bekreftÅpenBehandling(vedtaksperiode.yrkesaktivitet)
     }
 
     override fun skalHåndtereDager(
@@ -42,10 +42,10 @@ internal data object Avsluttet : Vedtaksperiodetilstand {
         aktivitetslogg: IAktivitetslogg
     ) {
         vedtaksperiode.behandlinger.sikreNyBehandling(
-            vedtaksperiode.arbeidsgiver,
+            vedtaksperiode.yrkesaktivitet,
             revurdering.hendelse.metadata.behandlingkilde,
             vedtaksperiode.person.beregnSkjæringstidspunkt(),
-            vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
+            vedtaksperiode.yrkesaktivitet.beregnArbeidsgiverperiode()
         )
         vedtaksperiode.subsumsjonslogg.logg(`fvl § 35 ledd 1`())
         revurdering.inngåSomRevurdering(vedtaksperiode, aktivitetslogg)

@@ -18,7 +18,7 @@ internal data object TilAnnullering : Vedtaksperiodetilstand {
         } else {
             vedtaksperiode.behandlinger.avsluttTomAnnullering(aktivitetslogg)
             if (!vedtaksperiode.behandlinger.erAvsluttet()) return
-            vedtaksperiode.forkast(AnnullerTomUtbetaling(vedtaksperiode.arbeidsgiver.yrkesaktivitetssporing), aktivitetslogg)
+            vedtaksperiode.forkast(AnnullerTomUtbetaling(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype), aktivitetslogg)
         }
     }
 

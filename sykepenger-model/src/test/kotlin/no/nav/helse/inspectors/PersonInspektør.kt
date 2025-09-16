@@ -1,6 +1,6 @@
 package no.nav.helse.inspectors
 
-import java.util.*
+import java.util.UUID
 import no.nav.helse.person.Person
 
 internal val Person.inspektør get() = PersonInspektør(this)
@@ -14,7 +14,7 @@ internal class PersonInspektør(person: Person) {
     internal val fødselsdato = person.alder.fødselsdato
     internal var dødsdato = person.alder.dødsdato
 
-    private val arbeidsgivere = person.arbeidsgivere.associateBy { it.organisasjonsnummer() }
+    private val arbeidsgivere = person.yrkesaktiviteter.associateBy { it.organisasjonsnummer() }
 
     internal val utbetaltIInfotrygd get() = infotrygdhistorikk.betaltePerioder()
 

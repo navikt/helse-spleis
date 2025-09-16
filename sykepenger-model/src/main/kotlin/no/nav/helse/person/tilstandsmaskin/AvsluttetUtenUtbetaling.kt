@@ -13,7 +13,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
     override val erFerdigBehandlet = true
 
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-        val arbeidsgiverperiode = vedtaksperiode.arbeidsgiver.arbeidsgiverperiode(vedtaksperiode.periode)
+        val arbeidsgiverperiode = vedtaksperiode.yrkesaktivitet.arbeidsgiverperiode(vedtaksperiode.periode)
         check(arbeidsgiverperiode?.forventerInntekt(vedtaksperiode.periode) != true) {
             "i granskauen! skal jo ikke skje dette ?!"
         }
@@ -26,15 +26,15 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
             vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag?.beverte(this)
             build()
         }
-        val (fastsattÅrsinntekt, inntektjusteringer) = inntekterForBeregning.tilBeregning(vedtaksperiode.arbeidsgiver.organisasjonsnummer)
+        val (fastsattÅrsinntekt, inntektjusteringer) = inntekterForBeregning.tilBeregning(vedtaksperiode.yrkesaktivitet.organisasjonsnummer)
 
-        val utbetalingstidslinje = vedtaksperiode.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, inntektjusteringer, vedtaksperiode.arbeidsgiver.yrkesaktivitetssporing)
+        val utbetalingstidslinje = vedtaksperiode.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, inntektjusteringer, vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype)
 
-        vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
+        vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.yrkesaktivitet, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
     }
 
     override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperiode.behandlinger.bekreftÅpenBehandling(vedtaksperiode.arbeidsgiver)
+        vedtaksperiode.behandlinger.bekreftÅpenBehandling(vedtaksperiode.yrkesaktivitet)
     }
 
     override fun igangsettOverstyring(
@@ -43,10 +43,10 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         aktivitetslogg: IAktivitetslogg
     ) {
         vedtaksperiode.behandlinger.sikreNyBehandling(
-            vedtaksperiode.arbeidsgiver,
+            vedtaksperiode.yrkesaktivitet,
             revurdering.hendelse.metadata.behandlingkilde,
             vedtaksperiode.person.beregnSkjæringstidspunkt(),
-            vedtaksperiode.arbeidsgiver.beregnArbeidsgiverperiode()
+            vedtaksperiode.yrkesaktivitet.beregnArbeidsgiverperiode()
         )
         if (vedtaksperiode.skalOmgjøres()) {
             revurdering.inngåSomEndring(vedtaksperiode, aktivitetslogg)

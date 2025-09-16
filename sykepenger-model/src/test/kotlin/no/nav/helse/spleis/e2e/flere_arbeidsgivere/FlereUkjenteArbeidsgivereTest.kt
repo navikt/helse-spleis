@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -16,6 +16,10 @@ import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
@@ -25,13 +29,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVUR
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel

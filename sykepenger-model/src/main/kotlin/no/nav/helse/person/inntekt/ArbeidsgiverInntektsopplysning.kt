@@ -9,9 +9,9 @@ import no.nav.helse.etterlevelse.`§ 8-15`
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
+import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Kilde
@@ -255,14 +255,14 @@ internal data class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.lagreTidsnæreInntekter(
             skjæringstidspunkt: LocalDate,
-            arbeidsgiver: Arbeidsgiver,
+            yrkesaktivitet: Yrkesaktivitet,
             aktivitetslogg: IAktivitetslogg,
             nyArbeidsgiverperiode: Boolean
         ) {
             this.forEach {
                 val tidsnær = it.faktaavklartInntekt.inntektsopplysningskilde as? Arbeidstakerinntektskilde.Arbeidsgiver
                 if (tidsnær != null) {
-                    arbeidsgiver.lagreTidsnærInntektsmelding(
+                    yrkesaktivitet.lagreTidsnærInntektsmelding(
                         skjæringstidspunkt = skjæringstidspunkt,
                         orgnummer = it.orgnummer,
                         arbeidsgiverinntekt = ArbeidstakerFaktaavklartInntekt(
