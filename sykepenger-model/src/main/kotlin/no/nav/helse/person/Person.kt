@@ -198,8 +198,8 @@ class Person private constructor(
     fun håndter(søknad: Søknad, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler søknad")
         tidligereBehandlinger(søknad.behandlingsporing, aktivitetsloggMedPersonkontekst, søknad.sykdomstidslinje.periode()!!)
-        val arbeidsgiver = finnEllerOpprettYrkesaktivitet(søknad.behandlingsporing, aktivitetsloggMedPersonkontekst)
-        val revurderingseventyr = arbeidsgiver.håndter(søknad, aktivitetsloggMedPersonkontekst, yrkesaktiviteter.toList(), infotrygdhistorikk)
+        val yrkesaktivitet = finnEllerOpprettYrkesaktivitet(søknad.behandlingsporing, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr = yrkesaktivitet.håndter(søknad, aktivitetsloggMedPersonkontekst, yrkesaktiviteter.toList(), infotrygdhistorikk)
         igangsettOverstyring(revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(søknad, aktivitetsloggMedPersonkontekst)
     }
