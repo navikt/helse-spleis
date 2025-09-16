@@ -828,6 +828,7 @@ data class PersonData(
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_A_ORDNINGEN,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -854,6 +855,7 @@ data class PersonData(
             fun tilDto() = VedtaksperiodeInnDto(
                 id = this.id,
                 tilstand = when (tilstand) {
+                    TilstandTypeData.AVVENTER_A_ORDNINGEN -> VedtaksperiodetilstandDto.AVVENTER_A_ORDNINGEN
                     TilstandTypeData.AVVENTER_HISTORIKK -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK
                     TilstandTypeData.AVVENTER_GODKJENNING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING
                     TilstandTypeData.AVVENTER_SIMULERING -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING

@@ -189,13 +189,15 @@ internal abstract class AbstractSpeilBuilderTest {
         orgnummer: String = a1,
         vedtaksperiode: Int = 1,
         tilstand: TilstandType,
+        flagg: Set<String> = emptySet(),
         tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()
     ) {
 
         val påminnelse = fabrikker.getValue(orgnummer).lagPåminnelse(
             vedtaksperiodeId = vedtaksperiode.vedtaksperiode.id(orgnummer),
             tilstand = tilstand,
-            tilstandsendringstidspunkt = tilstandsendringstidspunkt
+            tilstandsendringstidspunkt = tilstandsendringstidspunkt,
+            flagg = flagg
         )
         påminnelse.håndter(Person::håndter)
     }

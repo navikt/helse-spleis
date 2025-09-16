@@ -18,6 +18,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_A_ORDNINGEN
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_UTBETALT
@@ -244,7 +245,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
                         if (endring.refusjonstidslinje.isEmpty()) {
                             if (behandling.tilstand == AVSLUTTET_UTEN_VEDTAK) return@behandling // Ikke noe refusjonsopplysning på AUU er OK
                             if (vedtaksperiode.tilstand == AVVENTER_BLOKKERENDE_PERIODE && !vedtaksperiode.skalBehandlesISpeil) return@behandling // Dette kan være AUU'er som skal tilbake til AUU, de må ikke ha refusjonsopplysninger.
-                            if (vedtaksperiode.tilstand in setOf(AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)) return@behandling// Ikke fått refusjonsopplysninger enda da
+                            if (vedtaksperiode.tilstand in setOf(AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_A_ORDNINGEN)) return@behandling// Ikke fått refusjonsopplysninger enda da
                             error("Burde ikke ha tom refusjonstidslinje i tilstand ${vedtaksperiode.tilstand}")
                         }
                         val perioder = endring.refusjonstidslinje.perioderMedBeløp

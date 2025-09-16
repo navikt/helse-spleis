@@ -2,6 +2,7 @@ package no.nav.helse.spleis.mediator.e2e
 
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertUtgåendeMelding
 import org.intellij.lang.annotations.Language
@@ -27,6 +28,7 @@ internal class InntekterFraSkattLagtTilGrunnKontraktTest : AbstractEndToEndMedia
         """
 
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
+        sendNyPåminnelse(0, TilstandType.AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
         sendSykepengegrunnlagForArbeidsgiver(
             vedtaksperiodeIndeks = 0,
             skjæringstidspunkt = 1.januar,
@@ -37,6 +39,7 @@ internal class InntekterFraSkattLagtTilGrunnKontraktTest : AbstractEndToEndMedia
             )
             )
         )
+        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "AVVENTER_A_ORDNINGEN", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING")
         testRapid.assertUtgåendeMelding(forventet)
     }
 }

@@ -33,6 +33,7 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.september
 import no.nav.helse.spleis.speil.dto.AnnullertPeriode
 import no.nav.helse.spleis.speil.dto.Arbeidsgiverinntekt
@@ -191,6 +192,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     fun `im som aldri kom`() {
         val inntektFraSkatt = 10000.månedlig
         val søknadId = håndterSøknad(1.januar til 31.januar, orgnummer = a1)
+        håndterPåminnelse(tilstand = TilstandType.AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
         val inntektFraSkattId = håndterSykepengegrunnlagForArbeidsgiver(
             skjæringstidspunkt = 1.januar, skatteinntekter = listOf(
             ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),

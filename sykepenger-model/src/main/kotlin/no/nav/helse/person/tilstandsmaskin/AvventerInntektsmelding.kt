@@ -60,10 +60,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         }
 
         if (påminnelse.når(Påminnelse.Predikat.Flagg("trengerReplay"))) return vedtaksperiode.trengerInntektsmeldingReplay()
-        if (vurderOmInntektsmeldingAldriKommer(påminnelse)) {
-            aktivitetslogg.info("Nå henter vi inntekt fra skatt!")
-            return vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
-        }
+        if (vurderOmInntektsmeldingAldriKommer(påminnelse)) return vedtaksperiode.tilstand(aktivitetslogg, AvventerAOrdningen)
         vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
     }
 

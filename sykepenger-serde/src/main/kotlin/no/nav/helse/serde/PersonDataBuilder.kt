@@ -71,6 +71,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Behandl
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_ANNULLERING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_A_ORDNINGEN
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_GODKJENNING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_GODKJENNING_REVURDERING
@@ -362,6 +363,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
         VedtaksperiodetilstandDto.AVSLUTTET -> AVSLUTTET
         VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING -> AVSLUTTET_UTEN_UTBETALING
         VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> AVVENTER_BLOKKERENDE_PERIODE
+        VedtaksperiodetilstandDto.AVVENTER_A_ORDNINGEN -> AVVENTER_A_ORDNINGEN
         VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> AVVENTER_GODKJENNING
         VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING -> AVVENTER_GODKJENNING_REVURDERING
         VedtaksperiodetilstandDto.AVVENTER_HISTORIKK -> AVVENTER_HISTORIKK

@@ -269,6 +269,7 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK,
                 VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
                 VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING,
+                VedtaksperiodetilstandDto.AVVENTER_A_ORDNINGEN,
                 VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
                 VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING,
                 VedtaksperiodetilstandDto.REVURDERING_FEILET,

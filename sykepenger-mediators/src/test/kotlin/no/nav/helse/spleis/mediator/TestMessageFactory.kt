@@ -1291,6 +1291,7 @@ internal class TestMessageFactory(
         tilstand: TilstandType,
         orgnummer: String = organisasjonsnummer,
         yrkesaktivitetstype: String = "ARBEIDSTAKER",
+        flagg: Set<String> = emptySet(),
         tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()
     ): Pair<String, String> {
         return nyHendelse(
@@ -1303,7 +1304,8 @@ internal class TestMessageFactory(
             "antallGangerPåminnet" to 0,
             "tilstandsendringstidspunkt" to tilstandsendringstidspunkt,
             "påminnelsestidspunkt" to LocalDateTime.now(),
-            "nestePåminnelsestidspunkt" to LocalDateTime.now()
+            "nestePåminnelsestidspunkt" to LocalDateTime.now(),
+            "flagg" to flagg
         )
         )
     }
