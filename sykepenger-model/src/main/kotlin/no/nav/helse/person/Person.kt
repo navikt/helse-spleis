@@ -612,7 +612,7 @@ class Person private constructor(
 
     private fun MutableList<Yrkesaktivitet>.finnEllerOpprett(yrkesaktivitet: Behandlingsporing.Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
         finn(yrkesaktivitet) ?: Yrkesaktivitet(this@Person, yrkesaktivitet, regelverkslogg).also { yrkesaktivitet ->
-            aktivitetslogg.info("Ny yrkesaktivitet med organisasjonsnummer %s for denne personen", yrkesaktivitet)
+            aktivitetslogg.info("Ny yrkesaktivitet med organisasjonsnummer %s for denne personen", yrkesaktivitet.organisasjonsnummer)
             add(yrkesaktivitet)
         }
 
