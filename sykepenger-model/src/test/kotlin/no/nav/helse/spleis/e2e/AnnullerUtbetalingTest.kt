@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -19,7 +18,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.BehandlingView
 import no.nav.helse.person.aktivitetslogg.Aktivitet
@@ -115,7 +113,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Annullerer en ikke ferdigbehandlet revurdering`() = Toggle.NyAnnulleringsløype.enable {
+    fun `Annullerer en ikke ferdigbehandlet revurdering`() {
         a1 {
             nyttVedtak(januar, grad = 50.prosent)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(23.januar, Dagtype.Sykedag, 100)))
@@ -130,7 +128,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
 
     @Test
-    fun `Annullerer en pågående revurdering`() = Toggle.NyAnnulleringsløype.enable {
+    fun `Annullerer en pågående revurdering`() {
         a1 {
 
             nyttVedtak(januar, grad = 50.prosent)
@@ -147,7 +145,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `kun én vedtaksperiode skal annulleres`() = Toggle.NyAnnulleringsløype.enable {
+    fun `kun én vedtaksperiode skal annulleres`() {
         a1 {
             nyttVedtak(januar)
 
@@ -181,7 +179,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `begge vedtaksperioder annulleres når vi annullerer den første`() = Toggle.NyAnnulleringsløype.enable {
+    fun `begge vedtaksperioder annulleres når vi annullerer den første`() {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar)
@@ -244,7 +242,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `kun siste vedtaksperiode annulleres når det er denne som forsøkes annullert`() = Toggle.NyAnnulleringsløype.enable {
+    fun `kun siste vedtaksperiode annulleres når det er denne som forsøkes annullert`() {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar)
@@ -288,7 +286,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `annullerer bare perioder etter den som forsøkes annullert`() = Toggle.NyAnnulleringsløype.enable {
+    fun `annullerer bare perioder etter den som forsøkes annullert`() {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar)
@@ -359,7 +357,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `annullerer bare i sammenhengende agp`() = Toggle.NyAnnulleringsløype.enable {
+    fun `annullerer bare i sammenhengende agp`() {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar)
@@ -414,7 +412,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `annullerer også etter kort gap`() = Toggle.NyAnnulleringsløype.enable {
+    fun `annullerer også etter kort gap`() {
         a1 {
             nyttVedtak(januar)
             nyttVedtak(10.februar til 28.februar)
@@ -458,7 +456,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `annullerer periode som har ny uberegnet periode etter seg`() = Toggle.NyAnnulleringsløype.enable {
+    fun `annullerer periode som har ny uberegnet periode etter seg`() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(februar)
@@ -504,7 +502,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `annullerer periode som har ny beregnet periode etter seg`() = Toggle.NyAnnulleringsløype.enable {
+    fun `annullerer periode som har ny beregnet periode etter seg`() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(februar)
@@ -552,7 +550,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `annullerer periode som har pågående beregnet revurdering etter seg`() = Toggle.NyAnnulleringsløype.enable {
+    fun `annullerer periode som har pågående beregnet revurdering etter seg`() {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar, 50.prosent)
@@ -611,7 +609,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `annullerer periode som har pågående uberegnet revurdering etter seg`() = Toggle.NyAnnulleringsløype.enable {
+    fun `annullerer periode som har pågående uberegnet revurdering etter seg`() {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar, 50.prosent)
@@ -668,7 +666,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `annulleringer på vedtaksperioder med samme utbetaling`() = Toggle.NyAnnulleringsløype.enable {
+    fun `annulleringer på vedtaksperioder med samme utbetaling`() {
         medJSONPerson("/personer/to_vedtak_samme_fagsystem_id.json")
         a1 {
             assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
@@ -723,7 +721,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `annullering av siste periode og vedtaksperioder med samme utbetaling`() = Toggle.NyAnnulleringsløype.enable {
+    fun `annullering av siste periode og vedtaksperioder med samme utbetaling`() {
         medJSONPerson("/personer/to_vedtak_samme_fagsystem_id.json")
 
         a1 {
@@ -778,7 +776,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `annullering av midterste periode og vedtaksperioder med samme utbetaling`() = Toggle.NyAnnulleringsløype.enable {
+    fun `annullering av midterste periode og vedtaksperioder med samme utbetaling`() {
         medJSONPerson("/personer/tre_vedtak_samme_fagsystem_id.json")
 
         a1 {
@@ -839,7 +837,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `annullering av siste periode og vedtaksperioder med samme utbetaling og vi er til revurdering`() = Toggle.NyAnnulleringsløype.enable {
+    fun `annullering av siste periode og vedtaksperioder med samme utbetaling og vi er til revurdering`() {
         medJSONPerson("/personer/tre_vedtak_samme_fagsystem_id.json")
 
         a1 {
@@ -884,7 +882,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `annullering av andra periode hvor første er AUU og vedtaksperioder med samme utbetaling`() = Toggle.NyAnnulleringsløype.enable {
+    fun `annullering av andra periode hvor første er AUU og vedtaksperioder med samme utbetaling`() {
         medJSONPerson("/personer/tre_vedtak_samme_fagsystem_id_forste_periode_AUU.json")
 
         a1 {
@@ -933,7 +931,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `annullerer ikke ennå perioder på tvers av arbeidsgivere ved samme sykefravær`() = Toggle.NyAnnulleringsløype.enable {
+    fun `annullerer ikke ennå perioder på tvers av arbeidsgivere ved samme sykefravær`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 31000.månedlig)
         (a1 og a2).forlengVedtak(februar)
 
@@ -990,50 +988,6 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nyttVedtak(3.januar til 26.januar, 100.prosent)
             assertThrows<Aktivitetslogg.AktivitetException> { håndterAnnullering(utbetalingId = UUID.randomUUID(), orgnummer = a2) }
             assertTrue(testperson.personlogg.harFunksjonelleFeilEllerVerre(), testperson.personlogg.toString())
-        }
-    }
-
-    @Test
-    fun `avvis hvis vi ikke finner fagsystemId`() {
-        a1 {
-            nyttVedtak(3.januar til 26.januar, 100.prosent)
-            håndterAnnullering(utbetalingId = UUID.randomUUID())
-            inspektør.also {
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            }
-        }
-    }
-
-    @Test
-    fun `forkaster ikke tidligere perioder ved annullering`() {
-        a1 {
-            nyttVedtak(januar)
-            nyttVedtak(mai)
-
-            // Annullerer Mai
-            håndterAnnullering(inspektør.utbetaling(1).utbetalingId)
-            assertEquals(1, observatør.forkastedePerioder())
-            assertEquals(AVSLUTTET, observatør.forkastet(2.vedtaksperiode).gjeldendeTilstand)
-        }
-    }
-
-    @Test
-    fun `forkaster senere perioder ved annullering`() {
-        a1 {
-            nyttVedtak(januar)
-            forlengVedtak(februar) // forlengelse
-            nyttVedtak(10.mars til 31.mars, arbeidsgiverperiode = emptyList())
-            håndterSykmelding(Sykmeldingsperiode(1.mai, 20.mai)) // førstegangsbehandling, ny agp
-            håndterSøknad(1.mai til 20.mai)
-
-            // Annuller 10 - 31 mars
-            håndterAnnullering(inspektør.utbetaling(2).utbetalingId)
-
-            assertEquals(2, observatør.forkastedePerioder())
-            assertTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertTilstand(2.vedtaksperiode, AVSLUTTET)
-            assertSisteForkastetTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
-            assertSisteForkastetTilstand(4.vedtaksperiode, TIL_INFOTRYGD)
         }
     }
 
@@ -1101,39 +1055,16 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Annuller oppdrag som er under utbetaling feiler`() {
-        a1 {
-            tilGodkjenning(3.januar til 26.januar, 100.prosent)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterAnnullering(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
-            assertTrue(testperson.personlogg.harFunksjonelleFeilEllerVerre())
-            assertIngenAnnulleringsbehov()
-        }
-    }
-
-    @Test
-    fun `Annuller av oppdrag med feilet utbetaling feiler`() {
-        a1 {
-            tilGodkjenning(3.januar til 26.januar, 100.prosent)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt(status = Oppdragstatus.FEIL)
-            håndterAnnullering(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
-            assertTrue(testperson.personlogg.harFunksjonelleFeilEllerVerre())
-            assertIngenAnnulleringsbehov()
-        }
-    }
-
-    @Test
     fun `Kan annullere hvis noen vedtaksperioder er til utbetaling`() {
         a1 {
             nyttVedtak(3.januar til 26.januar, 100.prosent)
             tilGodkjenning(mars, 100.prosent)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterAnnullering(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
+            håndterUtbetalt()
 
             assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
-            sisteBehovErAnnullering(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(1.vedtaksperiode, TIL_ANNULLERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         }
     }
@@ -1151,7 +1082,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterUtbetalt(status = Oppdragstatus.FEIL)
             assertFalse(testperson.personlogg.harFunksjonelleFeilEllerVerre())
             assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetaling(1).tilstand)
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, TIL_INFOTRYGD)
+            assertSisteTilstand(1.vedtaksperiode, TIL_ANNULLERING)
         }
     }
 
@@ -1164,23 +1095,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterUtbetalt(status = Oppdragstatus.AVVIST)
             assertFalse(testperson.personlogg.harFunksjonelleFeilEllerVerre())
             assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetaling(1).tilstand)
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, TIL_INFOTRYGD)
-        }
-    }
-
-    @Test
-    fun `En enkel periode som er avsluttet som blir annullert blir også satt i tilstand TilAnnullering`() {
-        a1 {
-            nyttVedtak(3.januar til 26.januar, 100.prosent)
-            inspektør.also {
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            }
-            håndterAnnullering(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
-            assertFalse(testperson.personlogg.harFunksjonelleFeilEllerVerre(), testperson.personlogg.toString())
-            inspektør.also {
-                assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-                assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-            }
+            assertSisteTilstand(1.vedtaksperiode, TIL_ANNULLERING)
         }
     }
 
@@ -1192,7 +1107,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterAnnullering(inspektør.sisteUtbetalingId(1.vedtaksperiode))
             håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
             assertFalse(testperson.personlogg.harFunksjonelleFeilEllerVerre(), testperson.personlogg.toString())
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
         }
     }
 
@@ -1208,11 +1123,12 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             // Annuler 1 mars til 20 mars
             håndterAnnullering(inspektør.sisteUtbetalingId(3.vedtaksperiode))
+            håndterUtbetalt()
             assertFalse(testperson.personlogg.harFunksjonelleFeilEllerVerre(), testperson.personlogg.toString())
             assertEquals(1, testperson.personlogg.behov.size - behovTeller, testperson.personlogg.toString())
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
             assertTilstander(2.vedtaksperiode, AVSLUTTET)
-            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
         }
     }
 
@@ -1235,36 +1151,6 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertEquals("tbd@nav.no", annullering.saksbehandlerEpost)
             assertEquals(3.januar, annullering.fom)
             assertEquals(26.januar, annullering.tom)
-        }
-    }
-
-    @Test
-    fun `publiserer kun ett event ved annullering av utbetaling som strekker seg over flere vedtaksperioder med full refusjon`() {
-        medJSONPerson("/personer/to_vedtak_samme_fagsystem_id.json")
-
-        a1 {
-            assertEquals(2, inspektør.vedtaksperiodeTeller)
-
-            håndterAnnullering(utbetalingId = inspektør.sisteUtbetalingId(2.vedtaksperiode))
-            håndterUtbetalt(
-                status = Oppdragstatus.AKSEPTERT
-            )
-
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-
-            val annulleringer = observatør.annulleringer
-            assertEquals(1, annulleringer.size)
-            val annullering = annulleringer.lastOrNull()
-            assertNotNull(annullering)
-
-            val utbetalingInspektør = inspektør.utbetaling(0)
-            assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), annullering.arbeidsgiverFagsystemId)
-            assertEquals(utbetalingInspektør.personOppdrag.inspektør.fagsystemId(), annullering.personFagsystemId)
-            assertEquals(3.januar, annullering.fom)
-            assertEquals(20.februar, annullering.tom)
-
-            assertEquals("tbd@nav.no", annullering.saksbehandlerEpost)
         }
     }
 
@@ -1329,6 +1215,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), Søknad.Søknadsperiode.Ferie(17.mars, 20.mars))
             håndterInntektsmelding(listOf(1.mars til 16.mars))
             håndterAnnullering(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
+            håndterUtbetalt()
             assertFalse(testperson.personlogg.harFunksjonelleFeilEllerVerre())
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))

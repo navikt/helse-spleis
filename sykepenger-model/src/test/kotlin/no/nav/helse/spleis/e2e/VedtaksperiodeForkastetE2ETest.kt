@@ -12,6 +12,7 @@ import no.nav.helse.mars
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -51,7 +52,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling(a1)
         håndterUtbetalt()
         assertEquals(1, observatør.forkastedePerioder())
-        assertEquals(AVSLUTTET, observatør.forkastet(3.vedtaksperiode.id(a1)).gjeldendeTilstand)
+        assertEquals(TIL_ANNULLERING, observatør.forkastet(3.vedtaksperiode.id(a1)).gjeldendeTilstand)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)

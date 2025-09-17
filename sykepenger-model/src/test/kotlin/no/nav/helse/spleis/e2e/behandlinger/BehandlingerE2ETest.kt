@@ -41,6 +41,10 @@ import no.nav.helse.person.BehandlingView.TilstandView.UBEREGNET_REVURDERING
 import no.nav.helse.person.BehandlingView.TilstandView.VEDTAK_FATTET
 import no.nav.helse.person.BehandlingView.TilstandView.VEDTAK_IVERKSATT
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -50,15 +54,10 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVUR
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
+import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -208,110 +207,15 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `annullere iverksatt vedtak`() {
-        a1 {
-            nyttVedtak(januar)
-            håndterAnnullering(inspektør.utbetaling(0).utbetalingId)
-            inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(2, behandlinger.size)
-                assertEquals(Avsender.SYKMELDT, behandlinger.first().kilde.avsender)
-                assertEquals(Avsender.SAKSBEHANDLER, behandlinger.last().kilde.avsender)
-                behandlinger.last().also { sisteBehandling ->
-                    assertNotNull(sisteBehandling.avsluttet)
-                    assertEquals(ANNULLERT_PERIODE, sisteBehandling.tilstand)
-                    assertEquals(1, sisteBehandling.endringer.size)
-                    sisteBehandling.endringer.single().also { endring ->
-                        assertNotNull(endring.utbetaling)
-                        assertNotNull(endring.grunnlagsdata)
-                        endring.utbetaling.inspektør.also { annulleringen ->
-                            assertEquals(Utbetalingtype.ANNULLERING, annulleringen.type)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `annullere flere iverksatte vedtak`() {
-        a1 {
-            nyttVedtak(januar)
-            forlengVedtak(februar)
-            nyttVedtak(10.mars til 31.mars, arbeidsgiverperiode = listOf(10.mars til 25.mars))
-            assertVarsel(Varselkode.RV_IM_3, 3.vedtaksperiode.filter())
-            håndterAnnullering(inspektør.sisteUtbetaling().utbetalingId)
-            assertEquals(4, inspektør.antallUtbetalinger)
-            inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(1, behandlinger.size)
-                assertEquals(Avsender.SYKMELDT, behandlinger.last().kilde.avsender)
-                behandlinger.last().also { sisteBehandling ->
-                    assertNotNull(sisteBehandling.avsluttet)
-                    assertEquals(VEDTAK_IVERKSATT, sisteBehandling.tilstand)
-                    sisteBehandling.endringer.last().also { endring ->
-                        assertNotNull(endring.utbetaling)
-                        assertNotNull(endring.grunnlagsdata)
-                        endring.utbetaling.inspektør.also { annulleringen ->
-                            assertEquals(Utbetalingtype.UTBETALING, annulleringen.type)
-                        }
-                    }
-                }
-            }
-            inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(1, behandlinger.size)
-                assertEquals(Avsender.SYKMELDT, behandlinger.last().kilde.avsender)
-                behandlinger.last().also { sisteBehandling ->
-                    assertNotNull(sisteBehandling.avsluttet)
-                    assertEquals(VEDTAK_IVERKSATT, sisteBehandling.tilstand)
-                    sisteBehandling.endringer.last().also { endring ->
-                        assertNotNull(endring.utbetaling)
-                        assertNotNull(endring.grunnlagsdata)
-                        endring.utbetaling.inspektør.also { annulleringen ->
-                            assertEquals(Utbetalingtype.UTBETALING, annulleringen.type)
-                        }
-                    }
-                }
-            }
-            inspektørForkastet(3.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(2, behandlinger.size)
-                assertEquals(Avsender.SYKMELDT, behandlinger.first().kilde.avsender)
-                assertEquals(Avsender.SAKSBEHANDLER, behandlinger.last().kilde.avsender)
-                behandlinger.last().also { sisteBehandling ->
-                    assertNotNull(sisteBehandling.avsluttet)
-                    assertEquals(ANNULLERT_PERIODE, sisteBehandling.tilstand)
-                    assertEquals(1, sisteBehandling.endringer.size)
-                    sisteBehandling.endringer.single().also { endring ->
-                        assertNotNull(endring.utbetaling)
-                        assertNotNull(endring.grunnlagsdata)
-                        endring.utbetaling.inspektør.also { annulleringen ->
-                            assertEquals(Utbetalingtype.ANNULLERING, annulleringen.type)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `annullere en uberegnet revurdering`() {
-        a1 {
-            nyttVedtak(januar)
-            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-            håndterAnnullering(inspektør.utbetaling(0).utbetalingId)
-            inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(2, behandlinger.size)
-                assertEquals(ANNULLERT_PERIODE, behandlinger.last().tilstand)
-            }
-        }
-    }
-
-    @Test
     fun `annullere en beregnet revurdering`() {
         a1 {
             nyttVedtak(januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterAnnullering(inspektør.utbetaling(0).utbetalingId)
+            håndterUtbetalt()
             assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetaling(1).tilstand)
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
@@ -845,7 +749,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(3.vedtaksperiode, TIL_ANNULLERING)
             assertSisteTilstand(4.vedtaksperiode, AVVENTER_REVURDERING)
             assertSisteTilstand(5.vedtaksperiode, AVVENTER_REVURDERING)
 

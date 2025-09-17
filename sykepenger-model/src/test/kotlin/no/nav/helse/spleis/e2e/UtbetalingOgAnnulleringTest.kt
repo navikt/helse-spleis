@@ -15,23 +15,21 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -98,26 +96,8 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         tilGodkjenning(januar, a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
-        håndterUtbetalt()
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, TIL_INFOTRYGD)
-        assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
-    }
-
-    @Test
-    fun `annullere senere periode enn perioden til revurdering`() {
-        nyttVedtak(januar)
-        nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-        håndterYtelser(1.vedtaksperiode)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-        håndterSimulering(1.vedtaksperiode)
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(2.vedtaksperiode))
-        håndterUtbetalt()
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ANNULLERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 
     @Test
@@ -131,7 +111,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         håndterAnnullerUtbetaling(a1)
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertEquals(Utbetalingstatus.ANNULLERT, inspektør.utbetaling(1).tilstand)
+        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetaling(1).tilstand)
     }
 
     @Test
@@ -201,55 +181,6 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         assertEquals(26.januar, observatør.annulleringer[0].tom)
         assertEquals(20.mars, observatør.utbetalingMedUtbetalingEventer.last().tom)
-    }
-
-    @Test
-    fun `annullering kaster alle etterfølgende perioder`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(3.januar til 26.januar)
-        håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-
-        håndterSykmelding(Sykmeldingsperiode(20.februar, 25.mars))
-        håndterSøknad(20.februar til 25.mars)
-        håndterArbeidsgiveropplysninger(
-            listOf(Periode(20.februar, 7.mars)),
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
-        )
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-
-        val utbetalingId = inspektør.sisteUtbetaling().utbetalingId
-        håndterAnnullerUtbetaling(utbetalingId = utbetalingId)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            TIL_INFOTRYGD
-        )
-
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
-        )
     }
 
     @Test

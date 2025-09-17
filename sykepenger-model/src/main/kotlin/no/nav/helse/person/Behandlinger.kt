@@ -1328,7 +1328,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             yrkesaktivitet: Yrkesaktivitet,
             behandlingkilde: Behandlingkilde,
         ): Behandling {
-            //check(Toggle.NyAnnulleringsløype.enabled) { "Ny annulleringsløype er ikke aktivert, hvorfor er vi her?" }
             yrkesaktivitet.låsOpp(periode)
             return Behandling(
                 observatører = this.observatører,

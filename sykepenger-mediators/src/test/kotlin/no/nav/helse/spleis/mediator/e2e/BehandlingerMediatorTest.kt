@@ -78,6 +78,7 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
         nyttVedtak(1.januar, 31.januar)
         val utbetalingId = testRapid.inspektør.siste("utbetaling_utbetalt").path("utbetalingId").asText()
         sendAnnullering(utbetalingId)
+        sendUtbetaling()
 
         val behandlingOpprettet = testRapid.inspektør.meldinger("behandling_opprettet")
         val førsteBehandlingOpprettetIndeks = testRapid.inspektør.indeksFor(behandlingOpprettet.first())

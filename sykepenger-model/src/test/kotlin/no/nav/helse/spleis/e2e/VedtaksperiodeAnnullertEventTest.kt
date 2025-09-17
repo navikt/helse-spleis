@@ -8,9 +8,9 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -21,6 +21,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
     fun `vi sender vedtaksperiode annullert-hendelse når saksbehandler annullerer en vedtaksperiode`() {
         nyttVedtak(januar)
         håndterAnnullerUtbetaling()
+        håndterUtbetalt()
 
         assertTrue(observatør.vedtaksperiodeAnnullertEventer.isNotEmpty())
     }
@@ -31,6 +32,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
         forlengVedtak(februar)
 
         håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(2.vedtaksperiode))
+        håndterUtbetalt()
 
         assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
         assertEquals(1.februar til 28.februar, observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom)
@@ -50,6 +52,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
         forlengVedtak(februar)
         nyttVedtak(april, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
         håndterAnnullerUtbetaling()
+        håndterUtbetalt()
 
         assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
         assertEquals(
@@ -99,6 +102,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
 
         håndterUtbetalt()
         håndterAnnullerUtbetaling()
+        håndterUtbetalt()
 
         assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
     }
@@ -109,6 +113,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
         håndterAnnullerUtbetaling()
+        håndterUtbetalt()
         assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
     }
 }

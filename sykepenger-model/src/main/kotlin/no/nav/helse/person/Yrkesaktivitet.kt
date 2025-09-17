@@ -859,6 +859,7 @@ internal class Yrkesaktivitet private constructor(
             val vedtaksperiodeSomSkalAnnulleres = finnVedtaksperiodeForUtbetaling(utbetalingId) ?: error("Fant ikke vedtaksperiode for utbetaling $utbetalingId")
             val annulleringskandidater = finnAnnulleringskandidater(vedtaksperiodeSomSkalAnnulleres)
 
+            if (annulleringskandidater.isEmpty()) return null
             person.emitPlanlagtAnnullering(annulleringskandidater, hendelse)
             return håndter { it.håndter(hendelse, aktivitetsloggMedArbeidsgiverkontekst, annulleringskandidater.toList()) }.tidligsteEventyr()
         } else {

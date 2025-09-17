@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.behandlinger
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
@@ -13,8 +14,8 @@ import no.nav.helse.januar
 import no.nav.helse.person.BehandlingView.TilstandView.ANNULLERT_PERIODE
 import no.nav.helse.person.BehandlingView.TilstandView.TIL_INFOTRYGD
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -87,6 +88,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterAnnullering(inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.utbetalingId)
+            håndterUtbetalt()
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
@@ -98,7 +100,12 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(ANNULLERT_PERIODE, sisteBehandling.tilstand)
-            assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
+            assertForventetFeil(
+                forklaring = "Automatisk behandling settes av utbetalingshendelsen, og den er jo automatisk. Men det er egentlig annulleringen som forkaster den, så det burde være false",
+                nå = { assertEquals(forventetBehandlingEvent.copy(automatiskBehandling = true), behandlingForkastetEvent) },
+                ønsket = { assertEquals(forventetBehandlingEvent, behandlingForkastetEvent) }
+            )
+
             val behandlingOpprettetEventer = observatør.behandlingOpprettetEventer
             assertEquals(2, behandlingOpprettetEventer.size)
             val sisteBehandlingOpprettet = behandlingOpprettetEventer.last()
@@ -116,6 +123,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterAnnullering(inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingId)
+            håndterUtbetalt()
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
@@ -127,7 +135,12 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(ANNULLERT_PERIODE, sisteBehandling.tilstand)
-            assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
+            assertForventetFeil(
+                forklaring = "Automatisk behandling settes av utbetalingshendelsen, og den er jo automatisk. Men det er egentlig annulleringen som forkaster den, så det burde være false",
+                nå = { assertEquals(forventetBehandlingEvent.copy(automatiskBehandling = true), behandlingForkastetEvent) },
+                ønsket = { assertEquals(forventetBehandlingEvent, behandlingForkastetEvent) }
+            )
+
             val behandlingOpprettetEventer = observatør.behandlingOpprettetEventer
             assertEquals(2, behandlingOpprettetEventer.size)
             val sisteBehandlingOpprettet = behandlingOpprettetEventer.last()

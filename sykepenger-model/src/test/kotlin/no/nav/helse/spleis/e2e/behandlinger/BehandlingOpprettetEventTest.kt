@@ -14,11 +14,9 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
+import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -91,6 +89,7 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             nyttVedtak(januar)
             forlengVedtak(februar)
             håndterAnnullering(inspektør.utbetaling(0).utbetalingId)
+            håndterUtbetalt()
             val behandlingOpprettetEventer = observatør.behandlingOpprettetEventer
             assertEquals(4, behandlingOpprettetEventer.size)
             assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettetEventer[0].type)
@@ -102,8 +101,7 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             assertEquals(1, vedtaksperiodeForkastetEventer.size)
             assertEquals(1.vedtaksperiode, vedtaksperiodeForkastetEventer[0].vedtaksperiodeId)
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-            assertVarsler(listOf(RV_RV_7, RV_IV_7), 2.vedtaksperiode.filter())
+            assertSisteTilstand(2.vedtaksperiode, TIL_ANNULLERING)
         }
     }
 

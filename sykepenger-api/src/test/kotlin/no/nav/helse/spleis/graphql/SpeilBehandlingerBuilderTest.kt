@@ -6,7 +6,6 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.halvG
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -83,7 +82,7 @@ import org.junit.jupiter.api.Test
 internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
-    fun `mapper annullerte utbetalinger på beregnede annullerte perioder`() = Toggle.NyAnnulleringsløype.enable {
+    fun `mapper annullerte utbetalinger på beregnede annullerte perioder`() {
         val sisteutbetaling = nyttVedtak(1.januar, 31.januar)
         håndterAnnullerUtbetaling(sisteutbetaling)
         generasjoner(a1) {
@@ -96,7 +95,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     }
 
     @Test
-    fun `Selvstendig har pensjonsgivende inntekt også på uberegnet periode`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Selvstendig har pensjonsgivende inntekt også på uberegnet periode`() {
         håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
 
         val forventetPensjonsgivendeInntekt = listOf(
@@ -116,7 +115,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     }
 
     @Test
-    fun `Selvstendig næringsdrivende med inntekt under 6G mappes riktig`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Selvstendig næringsdrivende med inntekt under 6G mappes riktig`() {
         håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
         håndterVilkårsgrunnlagSelvstendig()
         håndterYtelserSelvstendig()
@@ -143,7 +142,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     }
 
     @Test
-    fun `Selvstendig næringsdrivende med inntekt over 6G mappes riktig`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Selvstendig næringsdrivende med inntekt over 6G mappes riktig`() {
         håndterSøknadSelvstendig(
             1.januar til 31.januar,
             1.januar til 16.januar,

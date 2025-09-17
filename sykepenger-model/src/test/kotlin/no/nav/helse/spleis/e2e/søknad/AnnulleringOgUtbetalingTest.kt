@@ -17,11 +17,11 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.lørdag
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -54,6 +54,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         assertEquals(4, inspektør.antallUtbetalinger)
         val marsutbetalingen = inspektør.utbetaling(1)
         håndterAnnullering(marsutbetalingen.utbetalingId)
+        håndterUtbetalt()
 
         assertEquals(5, inspektør.antallUtbetalinger)
         val annulleringen = inspektør.utbetaling(4)
