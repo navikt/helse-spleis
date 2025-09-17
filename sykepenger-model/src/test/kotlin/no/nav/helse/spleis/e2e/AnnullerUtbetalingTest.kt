@@ -1216,6 +1216,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.mars til 16.mars))
             håndterAnnullering(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
             håndterUtbetalt()
+            assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
             assertFalse(testperson.personlogg.harFunksjonelleFeilEllerVerre())
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))

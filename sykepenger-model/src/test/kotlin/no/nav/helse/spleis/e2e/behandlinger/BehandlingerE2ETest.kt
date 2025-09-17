@@ -505,6 +505,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         }
         a2 {
             håndterInntektsmelding(listOf(2.januar til 17.januar))
+            assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
         }
         a1 {
             håndterYtelser(1.vedtaksperiode)
@@ -767,7 +768,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 10.januar, 15.januar til 20.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn")
 
-            assertVarsler(listOf(Varselkode.RV_IM_8, Varselkode.RV_IM_23), 2.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_IM_8, Varselkode.RV_IM_23, Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->

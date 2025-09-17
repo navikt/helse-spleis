@@ -1555,7 +1555,7 @@ internal class Vedtaksperiode private constructor(
     )
 
     internal fun nullstillEgenmeldingsdagerIArbeidsgiverperiode(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing?): List<Revurderingseventyr> {
-        val arbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode() ?: return emptyList()
+        val arbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder?.periode() ?: return emptyList()
         return yrkesaktivitet.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
             .filter { it.håndterEgenmeldsingsdager(hendelse, dokumentsporing, it.registrerKontekst(aktivitetslogg), emptyList()) }
             .map { Revurderingseventyr.arbeidsgiverperiode(hendelse, it.skjæringstidspunkt, it.periode) }
@@ -2263,7 +2263,19 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun skalBehandlesISpeil(): Boolean {
-        return forventerInntekt() || behandlinger.navOvertarAnsvar()
+        return when (yrkesaktivitet.yrkesaktivitetstype) {
+            is Arbeidstaker -> {
+                // sender perioden til speil så lenge en tidligere behandling har vært beregnet
+                //if (behandlinger.harVærtUtbetalt()) return true
+                // fatter vedtak så lenge perioden er utenfor agp eller at nav skal overta ansvaret for agp
+                // todo: støtte saker med agp i infotrygd (hvis vi skal begynne med det igjen...)
+                behandlinger.arbeidsgiverperiode().skalFatteVedtak
+            }
+
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.Frilans -> false
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> true
+        }
     }
 
     internal fun skalOmgjøres(): Boolean {
