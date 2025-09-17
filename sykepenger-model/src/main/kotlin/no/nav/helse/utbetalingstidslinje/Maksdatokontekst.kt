@@ -25,13 +25,13 @@ internal data class Maksdatokontekst(
 
     internal val oppholdsteller = oppholdsdager.size
     internal val forbrukteDager = betalteDager.size
-    internal fun erDagerUnder67ÅrForbrukte(alder: Alder, regler: ArbeidsgiverRegler) =
-        gjenståendeDagerUnder67År(alder, regler) == 0
+    internal fun erDagerUnder67ÅrForbrukte(regler: ArbeidsgiverRegler) =
+            gjenståendeDagerUnder67År(regler) == 0
 
     internal fun erDagerOver67ÅrForbrukte(alder: Alder, regler: ArbeidsgiverRegler) =
         gjenståendeDagerOver67År(alder, regler) == 0
 
-    internal fun gjenståendeDagerUnder67År(alder: Alder, regler: ArbeidsgiverRegler) = regler.maksSykepengedager() - forbrukteDager
+    internal fun gjenståendeDagerUnder67År(regler: ArbeidsgiverRegler) = regler.maksSykepengedager() - forbrukteDager
     internal fun gjenståendeDagerOver67År(alder: Alder, regler: ArbeidsgiverRegler): Int {
         val redusertYtelseAlder = alder.redusertYtelseAlder
         val forbrukteDagerOver67 = betalteDager.count { it > redusertYtelseAlder }
@@ -55,7 +55,7 @@ internal data class Maksdatokontekst(
             val begrunnelseForAvslåttDag = when {
                 alder.mistetSykepengerett(avslåttDag) -> Begrunnelse.Over70
                 datoForTilstrekkeligOppholdOppnådd != null && avslåttDag > datoForTilstrekkeligOppholdOppnådd -> Begrunnelse.NyVilkårsprøvingNødvendig
-                erDagerUnder67ÅrForbrukte(alder, regler) -> Begrunnelse.SykepengedagerOppbrukt
+                erDagerUnder67ÅrForbrukte(regler) -> Begrunnelse.SykepengedagerOppbrukt
                 else -> Begrunnelse.SykepengedagerOppbruktOver67
             }
             begrunnelseForAvslåttDag to avslåttDag
@@ -125,11 +125,11 @@ internal data class Maksdatokontekst(
             else -> this
         }
 
-        val harNåddMaks = erDagerOver67ÅrForbrukte(alder, regler) || erDagerUnder67ÅrForbrukte(alder, regler)
+        val harNåddMaks = erDagerOver67ÅrForbrukte(alder, regler) || erDagerUnder67ÅrForbrukte(regler)
         val forrigeMaksdato = if (harNåddMaks) betalteDager.last() else null
         val forrigeVirkedag = forrigeMaksdato ?: vurdertTilOgMed.sisteVirkedagInklusiv()
 
-        val maksdatoOrdinærRett = forrigeVirkedag + gjenståendeDagerUnder67År(alder, regler).ukedager
+        val maksdatoOrdinærRett = forrigeVirkedag + gjenståendeDagerUnder67År(regler).ukedager
         val maksdatoBegrensetRett = maxOf(forrigeVirkedag, alder.redusertYtelseAlder.sisteVirkedagInklusiv()) + gjenståendeDagerOver67År(alder, regler).ukedager
 
         val hjemmelsbegrunnelse: Maksdatoresultat.Bestemmelse
@@ -140,7 +140,7 @@ internal data class Maksdatokontekst(
         when {
             maksdatoOrdinærRett <= maksdatoBegrensetRett -> {
                 maksdato = maksdatoOrdinærRett
-                gjenståendeDager = gjenståendeDagerUnder67År(alder, regler)
+                gjenståendeDager = gjenståendeDagerUnder67År(regler)
                 hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.ORDINÆR_RETT
             }
 

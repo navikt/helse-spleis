@@ -120,7 +120,7 @@ internal class MaksimumSykepengedagerfilter(
     private fun subsummerTilstrekkeligOppholdNådd(dagen: LocalDate, oppholdFørDagen: Int = sisteVurdering.oppholdsteller): Boolean {
         // Nok opphold? 🤔
         val harTilstrekkeligOpphold = oppholdFørDagen >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
-        val gjenståendeSykepengedager = sisteVurdering.gjenståendeDagerUnder67År(alder, arbeidsgiverRegler)
+        val gjenståendeSykepengedager = sisteVurdering.gjenståendeDagerUnder67År(arbeidsgiverRegler)
         // Bare relevant om det er ny rett på sykepenger eller om vilkåret ikke er oppfylt
         if (harTilstrekkeligOpphold || gjenståendeSykepengedager == 0) {
             subsumsjonslogg.logg(
@@ -141,7 +141,7 @@ internal class MaksimumSykepengedagerfilter(
     private fun håndterBetalbarDag(dagen: LocalDate) {
         sisteVurdering = sisteVurdering.inkrementer(dagen)
         when {
-            sisteVurdering.erDagerUnder67ÅrForbrukte(alder, arbeidsgiverRegler) || sisteVurdering.erDagerOver67ÅrForbrukte(alder, arbeidsgiverRegler) -> state(Karantene)
+            sisteVurdering.erDagerUnder67ÅrForbrukte(arbeidsgiverRegler) || sisteVurdering.erDagerOver67ÅrForbrukte(alder, arbeidsgiverRegler) -> state(Karantene)
             else -> state(Syk)
         }
     }
