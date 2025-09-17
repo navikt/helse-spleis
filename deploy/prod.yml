@@ -87,7 +87,7 @@ spec:
   - name: SELVSTENDIG_NAERINGSDRIVENDE
     value: "true"
   - name: NY_ANNULLERINGSLOYPE
-    value: "false"
+    value: "true"
   - name: KAFKA_CONSUMER_GROUP_ID
     value: tbd-spleis-v1
   - name: KAFKA_RESET_POLICY
