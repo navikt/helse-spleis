@@ -64,8 +64,6 @@ internal class Arbeidsgiverperiodeteller private constructor(
     }
 
     private inner class Oppholdsdagobservatør : Teller.Observer {
-        override fun onInc() {}
-
         override fun onGrense() {
             sykedagteller.reset()
         }
