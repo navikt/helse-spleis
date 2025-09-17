@@ -369,7 +369,7 @@ internal abstract class AbstractDslTest {
     protected fun String.håndterAnnullering(utbetalingId: UUID) =
         this { håndterAnnullering(utbetalingId) }
 
-    protected fun String.håndterIdentOpphørt(nyttFnr: Personidentifikator, nyAktørId: String) =
+    protected fun String.håndterIdentOpphørt(nyttFnr: Personidentifikator) =
         this { håndterIdentOpphørt(nyttFnr) }
 
     protected fun String.håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) =
@@ -510,7 +510,7 @@ internal abstract class AbstractDslTest {
         bareÈnArbeidsgiver(orgnummer).håndterAnnullering(utbetalingId)
 
     protected fun håndterIdentOpphørt(nyttFnr: Personidentifikator, nyAktørId: String) =
-        bareÈnArbeidsgiver(a1).håndterIdentOpphørt(nyttFnr, nyAktørId)
+        bareÈnArbeidsgiver(a1).håndterIdentOpphørt(nyttFnr)
 
     protected fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) =
         bareÈnArbeidsgiver(a1).håndterPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt)
