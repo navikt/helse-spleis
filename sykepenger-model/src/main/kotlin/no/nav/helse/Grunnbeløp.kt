@@ -130,7 +130,7 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
             require(gyldigMinsteinntektKrav >= gyldigFra) { "Virkningsdato for kravet til minsteinntekt må være nyere eller lik gyldighetstidspunktet" }
         }
 
-        private fun gyldighetsperiode(år: Int, andre: List<HistoriskGrunnbeløp>) =
+        private fun gyldighetsperiode(andre: List<HistoriskGrunnbeløp>) =
             gyldigFra til (andre
                 .filter { it.gyldigFra > this.gyldigFra }
                 .minByOrNull { it.gyldigFra }
@@ -138,7 +138,7 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
                 ?: gyldigFra.withMonth(12).withDayOfMonth(31))
 
         private fun snitt(år: Int, andre: List<HistoriskGrunnbeløp>): Inntekt {
-            val gyldighetsperiode = gyldighetsperiode(år, andre)
+            val gyldighetsperiode = gyldighetsperiode(andre)
             val periode = 1.januar(år) til 31.desember(år)
             if (!gyldighetsperiode.overlapperMed(periode)) return INGEN
             val antallMånederSomDekkesAvGrunnbeløpet = gyldighetsperiode.subset(periode)
