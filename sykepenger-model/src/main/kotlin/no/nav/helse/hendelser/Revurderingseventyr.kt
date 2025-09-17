@@ -67,7 +67,7 @@ class Revurderingseventyr private constructor(
         inngå(vedtaksperiode, aktivitetslogg, TypeEndring.ENDRING)
 
     private fun inngå(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, typeEndring: TypeEndring) {
-        hvorfor.dersomInngått(aktivitetslogg, vedtaksperioder.isEmpty())
+        hvorfor.dersomInngått(aktivitetslogg)
         vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder, typeEndring.name)
     }
 
@@ -93,7 +93,7 @@ class Revurderingseventyr private constructor(
 
     private sealed interface RevurderingÅrsak {
 
-        fun dersomInngått(aktivitetslogg: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {}
+        fun dersomInngått(aktivitetslogg: IAktivitetslogg) {}
 
         fun emitOverstyringIgangsattEvent(person: Person, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode, meldingsreferanseId: MeldingsreferanseId) {
             person.emitOverstyringIgangsattEvent(
@@ -143,7 +143,7 @@ class Revurderingseventyr private constructor(
 
         data object Annullering : RevurderingÅrsak {
             override fun navn() = "ANNULLERING"
-            override fun dersomInngått(aktivitetslogg: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {
+            override fun dersomInngått(aktivitetslogg: IAktivitetslogg) {
                 aktivitetslogg.varsel(RV_RV_7)
             }
         }
