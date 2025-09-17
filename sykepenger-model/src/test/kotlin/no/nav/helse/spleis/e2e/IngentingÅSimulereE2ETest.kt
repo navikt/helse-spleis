@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -43,7 +44,7 @@ internal class IngentingÅSimulereE2ETest : AbstractDslTest() {
             nyttVedtak(1.januar til 18.januar)
             håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar))
             håndterSøknad(20.januar til 21.januar)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 

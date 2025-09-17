@@ -108,13 +108,6 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
                 listOf(5.februar til 20.februar)
             )
 
-            håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, 1.januar.atStartOfDay(), 1.januar.plusDays(90).atStartOfDay())
-            håndterSykepengegrunnlagForArbeidsgiver(2.vedtaksperiode, 6.januar, emptyList())
-            assertVarsel(Varselkode.RV_IV_10, 2.vedtaksperiode.filter())
-            håndterVilkårsgrunnlag(2.vedtaksperiode)
-            håndterYtelser(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
@@ -122,11 +115,11 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertEquals(5.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
-            assertEquals(3, inspektør.antallUtbetalinger)
+            assertEquals(2, inspektør.antallUtbetalinger)
             assertEquals(5.desember(2017) til 5.januar, inspektør.utbetaling(0).periode)
             assertEquals(korrelasjonsIdAugust2017, inspektør.utbetaling(0).korrelasjonsId)
-            val korrelasjonsIdFebruar2018 = inspektør.utbetaling(2).korrelasjonsId
-            assertEquals(5.februar til 24.februar, inspektør.utbetaling(2).periode)
+            val korrelasjonsIdFebruar2018 = inspektør.utbetaling(1).korrelasjonsId
+            assertEquals(5.februar til 24.februar, inspektør.utbetaling(1).periode)
             assertNotEquals(korrelasjonsIdAugust2017, korrelasjonsIdFebruar2018)
 
             // Inntektsmelding som flytter arbeidsgiverperioden en uke frem
@@ -145,8 +138,8 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             håndterUtbetalt()
             assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
-            assertEquals(4, inspektør.antallUtbetalinger)
-            val utbetalingenSomTrekkerPenger = inspektør.utbetaling(3)
+            assertEquals(3, inspektør.antallUtbetalinger)
+            val utbetalingenSomTrekkerPenger = inspektør.utbetaling(2)
             assertEquals(REVURDERING, utbetalingenSomTrekkerPenger.type)
             assertEquals(korrelasjonsIdFebruar2018, utbetalingenSomTrekkerPenger.korrelasjonsId)
             assertEquals(5.februar til 24.februar, utbetalingenSomTrekkerPenger.periode)
@@ -163,19 +156,19 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             håndterSøknad(25.februar til 15.mars)
             håndterYtelser(4.vedtaksperiode)
 
-            assertEquals(5, inspektør.antallUtbetalinger)
+            assertEquals(4, inspektør.antallUtbetalinger)
             assertEquals(korrelasjonsIdFebruar2018, utbetalingenSomTrekkerPenger.korrelasjonsId)
-            val nyUtbetaling = inspektør.utbetaling(4)
+            val nyUtbetaling = inspektør.utbetaling(3)
             assertEquals(1, nyUtbetaling.arbeidsgiverOppdrag.size)
 
-            val utbetalingslinje = inspektør.utbetaling(4).arbeidsgiverOppdrag[0]
+            val utbetalingslinje = inspektør.utbetaling(3).arbeidsgiverOppdrag[0]
             assertEquals(28.februar, utbetalingslinje.inspektør.fom)
             assertEquals(15.mars, utbetalingslinje.inspektør.tom)
 
             // Utbetalingene er knyttet opp mot riktige vedtaksperioder
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
             assertFalse(utbetalingenSomTrekkerPenger.utbetalingId in utbetalingIder(1.vedtaksperiode))
-            assertTilstander(2.vedtaksperiode, AVSLUTTET)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(3.vedtaksperiode, AVSLUTTET)
             assertTrue(utbetalingenSomTrekkerPenger.utbetalingId in utbetalingIder(3.vedtaksperiode))
             assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)

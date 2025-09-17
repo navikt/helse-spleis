@@ -141,11 +141,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         hendelser = hendelseIder()
     )
 
-    internal fun arbeidsgiverperiode() = ArbeidsgiverperiodeForVedtaksperiode(
-        vedtaksperiode = periode(),
-        arbeidsgiverperioder = behandlinger.last().arbeidsgiverperiode,
-        dagerNavOvertarAnsvar = behandlinger.last().dagerNavOvertarAnsvar
-    )
+    internal fun arbeidsgiverperiode() = ArbeidsgiverperiodeForVedtaksperiode(periode(), behandlinger.last().arbeidsgiverperiode)
     internal fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet) =
         behandlinger.last().lagUtbetalingstidslinje(fastsattÅrsinntekt, inntektjusteringer, yrkesaktivitet)
 

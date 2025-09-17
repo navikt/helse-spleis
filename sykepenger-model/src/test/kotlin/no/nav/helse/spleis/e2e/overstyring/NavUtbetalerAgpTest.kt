@@ -26,15 +26,6 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.BehandlingView.TilstandView.UBEREGNET_OMGJØRING
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -45,6 +36,13 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
@@ -111,7 +109,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         )
 
         assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
-        assertVarsler(listOf(RV_IM_8, RV_IM_23, RV_IM_24), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_8, RV_IM_23), 2.vedtaksperiode.filter())
         assertFunksjonellFeil(RV_IM_23, 1.vedtaksperiode.filter())
 
         assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
@@ -153,7 +151,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         assertEquals(listOf(1.mai til 2.mai), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
         assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).dagerNavOvertarAnsvar)
         assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
-        assertVarsler(listOf(RV_IM_8, RV_IM_24), 2.vedtaksperiode.filter())
+        assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
         assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -247,7 +245,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
         assertEquals(listOf(6.januar.somPeriode()), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
         assertEquals(UBEREGNET_OMGJØRING, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().tilstand)
     }
 
@@ -468,7 +466,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(8.februar, 11.februar, 100.prosent))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         håndterInntektsmelding(
             listOf(2.januar til 4.januar, 14.januar til 26.januar)
         )

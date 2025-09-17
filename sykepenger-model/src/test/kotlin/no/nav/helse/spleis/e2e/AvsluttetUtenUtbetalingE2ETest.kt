@@ -39,7 +39,7 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
             håndterSøknad(søndag den 7.januar til fredag den 12.januar)
             håndterSøknad(Sykdom(lørdag den 13.januar, fredag den 2.februar, 100.prosent), Arbeid(23.januar, 2.februar))
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertEquals("H SSSSSHH SSSSSHH SAAAARR AAAAA", inspektør.sykdomstidslinje.toShortString())
             håndterSøknad(Sykdom(lørdag den 13.januar, fredag den 2.februar, 100.prosent))
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)

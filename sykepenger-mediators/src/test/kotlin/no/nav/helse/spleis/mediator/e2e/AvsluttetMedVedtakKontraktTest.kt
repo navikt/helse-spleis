@@ -125,9 +125,10 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `vedtak uten utbetaling`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 18.januar, sykmeldingsgrad = 100))
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         val søknadId = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 18.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            fravær = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.FERIE))
         )
 
         @Language("JSON")
@@ -138,7 +139,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "organisasjonsnummer": "$ORGNUMMER",
             "yrkesaktivitetstype": "ARBEIDSTAKER",
             "fom": "2018-01-03",
-            "tom": "2018-01-18",
+            "tom": "2018-01-26",
             "skjæringstidspunkt": "2018-01-03",
             "hendelser": ["$søknadId"],
             "vedtaksperiodeId": "<uuid>",

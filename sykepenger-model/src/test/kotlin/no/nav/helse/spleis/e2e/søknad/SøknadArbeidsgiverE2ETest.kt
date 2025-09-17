@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
@@ -115,11 +114,11 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `fatter vedtak for søknad utenfor arbeidsgiverperioden dersom det kun er ferie`() {
+    fun `avslutter søknad utenfor arbeidsgiverperioden dersom det kun er ferie`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar))
             håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent), Ferie(19.januar, 21.januar))
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
@@ -129,65 +128,64 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar))
             håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent))
             håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent), Ferie(19.januar, 21.januar))
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
     @Test
-    fun `venter på IM ved forlengelse utenfor arbeidsgiverperioden dersom det kun er friskmelding - etter utbetaling`() {
+    fun `avslutter forlengelse utenfor arbeidsgiverperioden dersom det kun er friskmelding - etter utbetaling`() {
         a1 {
             nyttVedtak(1.januar til 23.januar)
             håndterSykmelding(Sykmeldingsperiode(24.januar, 25.januar))
             håndterSøknad(Sykdom(24.januar, 25.januar, 100.prosent), Arbeid(24.januar, 25.januar))
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
     @Test
-    fun `venter på IM ved forlengelse utenfor arbeidsgiverperioden dersom det kun er friskmelding og helg`() {
+    fun `avslutter forlengelse utenfor arbeidsgiverperioden dersom det kun er friskmelding og helg`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(4.januar, 19.januar))
             håndterSøknad(Sykdom(4.januar, 19.januar, 100.prosent))
             håndterSykmelding(Sykmeldingsperiode(20.januar, 25.januar))
             håndterSøknad(Sykdom(20.januar, 25.januar, 100.prosent), Arbeid(22.januar, 25.januar))
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
     @Test
-    fun `venter på IM ved forlengelse utenfor arbeidsgiverperioden dersom det kun er friskmelding`() {
+    fun `avslutter forlengelse utenfor arbeidsgiverperioden dersom det kun er friskmelding`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar))
             håndterSøknad(Sykdom(17.januar, 25.januar, 100.prosent), Arbeid(17.januar, 25.januar))
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
     @Test
-    fun `venter på IM ved forlengelse utenfor arbeidsgiverperioden dersom det kun er ferie og friskmelding`() {
+    fun `avslutter forlengelse utenfor arbeidsgiverperioden dersom det kun er ferie og friskmelding`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(16.januar, 20.januar))
             håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar))
             håndterSøknad(Sykdom(21.januar, 25.januar, 100.prosent), Arbeid(21.januar, 25.januar))
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
     @Test
-    fun `fatter vedtak for søknad utenfor arbeidsgiverperioden dersom det kun er helg`() {
+    fun `avslutter søknad utenfor arbeidsgiverperioden dersom det kun er helg`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar))
             håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent))
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
     @Test
-    fun `fatter vedtak for uferdig forlengelseperiode som bare strekkes inn i helg`() {
+    fun `avslutter uferdig forlengelseperiode som bare strekkes inn i helg`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
             håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
@@ -207,7 +205,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
             )
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
@@ -240,7 +238,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `fatter vedtak for ferdig forlengelseperiode som dekkes av arbeidsgiverperioden etter IM`() {
+    fun `avslutter ferdig forlengelseperiode som dekkes av arbeidsgiverperioden etter IM`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
@@ -255,7 +253,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
                 vedtaksperiodeId = 2.vedtaksperiode
             )
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
@@ -264,7 +262,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 7.januar))
             håndterSøknad(Sykdom(1.januar, 7.januar, 100.prosent), Permisjon(2.januar, 7.januar))
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
@@ -304,8 +302,8 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
             håndterSøknad(februar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         }
     }
 
@@ -334,7 +332,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
@@ -356,27 +354,27 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
                 Ferie(1.januar, 3.januar),
                 Ferie(18.januar, 19.januar)
             )
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
     @Test
-    fun `venter på IM ved søknad innenfor arbeidsgiverperioden fordi arbeid er gjenopptatt og perioden går ut over agp`() {
+    fun `avslutter søknad innenfor arbeidsgiverperioden fordi arbeid er gjenopptatt`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Arbeid(17.januar, 20.januar))
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
     @Test
-    fun `fatter vedtak ved søknad utenfor arbeidsgiverperioden dersom ferie er utenfor`() {
+    fun `avslutter søknad innenfor arbeidsgiverperioden dersom ferie er utenfor`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(17.januar, 20.januar))
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
@@ -610,7 +608,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), Arbeid(17.januar, 18.januar))
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
             assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
         }

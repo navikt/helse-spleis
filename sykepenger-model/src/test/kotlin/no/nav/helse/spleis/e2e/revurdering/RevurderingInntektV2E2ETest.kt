@@ -492,10 +492,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -504,23 +501,23 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterOverstyrInntekt(skjæringstidspunkt = 1.januar, inntekt = 30000.månedlig)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
-        assertEquals(4, inspektør.antallUtbetalinger)
-        assertEquals(2, inspektør.utbetalinger(1.vedtaksperiode).size)
+        assertEquals(2, inspektør.antallUtbetalinger)
+        assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).size)
         assertEquals(2, inspektør.utbetalinger(2.vedtaksperiode).size)
-        assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(1))
-        assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetalingtilstand(2))
-        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(3))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVSLUTTET_UTEN_UTBETALING
+        )
         assertTilstander(
             2.vedtaksperiode,
             AVSLUTTET,

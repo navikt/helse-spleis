@@ -958,10 +958,14 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
         håndterLpsInntektsmelding(1.januar)
         generasjoner {
-            assertEquals(1, size)
+            assertEquals(2, size)
             0.generasjon {
                 assertEquals(1, size)
-                uberegnetPeriode(0) fra (1.januar til 31.januar) medTilstand ForberederGodkjenning
+                uberegnetPeriode(0) fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand IngenUtbetaling
+            }
+            1.generasjon {
+                assertEquals(1, size)
+                uberegnetPeriode(0) fra (1.januar til 31.januar) medTilstand IngenUtbetaling
             }
         }
     }
@@ -1893,7 +1897,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
     fun `omgjøre periode etter en revurdering`() {
-        håndterSøknad(4.januar til 19.januar)
+        håndterSøknad(4.januar til 20.januar)
         nyttVedtak(1.mars, 31.mars, vedtaksperiode = 2)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(30.mars, 31.mars))
         håndterYtelserTilUtbetalt()
@@ -1906,24 +1910,24 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             0.generasjon {
                 assertEquals(2, size)
                 uberegnetPeriode(0) fra (1.mars til 31.mars) medTilstand ForberederGodkjenning
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 19.januar) medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 20.januar) medTilstand Utbetalt
             }
             1.generasjon {
                 assertEquals(2, size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
-                uberegnetPeriode(1) fra (4.januar til 19.januar) medTilstand IngenUtbetaling
+                uberegnetPeriode(1) fra (4.januar til 20.januar) medTilstand IngenUtbetaling
             }
             2.generasjon {
                 assertEquals(2, size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
-                uberegnetPeriode(1) fra (4.januar til 19.januar) medTilstand IngenUtbetaling
+                uberegnetPeriode(1) fra (4.januar til 20.januar) medTilstand IngenUtbetaling
             }
         }
     }
 
     @Test
     fun `omgjøre kort periode til at nav utbetaler`() {
-        val søknad = håndterSøknad(Sykdom(4.januar, 19.januar, 100.prosent))
+        val søknad = håndterSøknad(Sykdom(4.januar, 20.januar, 100.prosent))
         val im = håndterKorrigerendeArbeidsgiveropplysninger(listOf(4.januar til 19.januar))
         val overstyring = UUID.randomUUID()
         håndterOverstyrTidslinje(4.januar.til(19.januar).map { ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100) }, meldingsreferanseId = overstyring)
@@ -1933,15 +1937,15 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             assertEquals(3, size)
             0.generasjon {
                 assertEquals(1, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (4.januar til 19.januar) medTilstand Utbetalt medHendelser setOf(søknad, im, overstyring)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (4.januar til 20.januar) medTilstand Utbetalt medHendelser setOf(søknad, im, overstyring)
             }
             1.generasjon {
                 assertEquals(1, size)
-                uberegnetPeriode(0) fra 4.januar til 19.januar medTilstand IngenUtbetaling medHendelser setOf(søknad, im)
+                uberegnetPeriode(0) fra 4.januar til 20.januar medTilstand IngenUtbetaling medHendelser setOf(søknad, im)
             }
             2.generasjon {
                 assertEquals(1, size)
-                uberegnetPeriode(0) fra 4.januar til 19.januar medTilstand IngenUtbetaling medHendelser setOf(søknad)
+                uberegnetPeriode(0) fra 4.januar til 20.januar medTilstand IngenUtbetaling medHendelser setOf(søknad)
             }
         }
     }
@@ -2080,9 +2084,6 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterUtbetalingsgodkjenning()
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Arbeid(1.februar, 28.februar))
-        håndterArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(), vedtaksperiode = 2)
-        håndterVilkårsgrunnlagTilGodkjenning()
-        håndterUtbetalingsgodkjenning()
 
         nyttVedtak(2.mars, 31.mars, vedtaksperiode = 3)
 
@@ -2095,13 +2096,13 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             0.generasjon {
                 assertEquals(3, size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (2.mars til 31.mars) medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.februar til 28.februar) medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medTilstand Utbetalt
                 beregnetPeriode(2) er GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
             }
             1.generasjon {
                 assertEquals(3, size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (2.mars til 31.mars) medTilstand Utbetalt
-                beregnetPeriode(1) fra (1.februar til 28.februar) medTilstand IngenUtbetaling
+                uberegnetPeriode(1) fra (1.februar til 28.februar) medTilstand IngenUtbetaling
                 beregnetPeriode(2) er GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
             }
         }

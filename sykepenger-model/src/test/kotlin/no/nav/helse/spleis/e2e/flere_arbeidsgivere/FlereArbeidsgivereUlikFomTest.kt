@@ -18,7 +18,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.lørdag
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
@@ -26,7 +25,6 @@ import no.nav.helse.oktober
 import no.nav.helse.person.PersonObserver.VedtaksperiodeVenterEvent
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -568,7 +566,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
 
-        håndterSøknad(Sykdom(5.januar, lørdag den 20.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(5.januar, søndag den 21.januar, 100.prosent), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -585,11 +583,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         // Ettersom vi nå må ha inntektsmelding fra a2 for refusjonsopplysninger 22.januar
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1)))
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, orgnummer = a1)
         val venterPå = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.venterPå
-        assertEquals("BEREGNING", venterPå.venteårsak.hva)
-        assertEquals(a1, venterPå.yrkesaktivitetssporing.somOrganisasjonsnummer)
-        assertEquals(1.vedtaksperiode.id(a1), venterPå.vedtaksperiodeId)
+        assertEquals("INNTEKTSMELDING", venterPå.venteårsak.hva)
+        assertEquals(a2, venterPå.yrkesaktivitetssporing.somOrganisasjonsnummer)
+        assertEquals(2.vedtaksperiode.id(a2), venterPå.vedtaksperiodeId)
     }
 
     @Test

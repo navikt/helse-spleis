@@ -1,7 +1,9 @@
 package no.nav.helse.bugs_showstoppers
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.april
+import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -10,6 +12,7 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -17,10 +20,9 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -33,6 +35,8 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVIN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
@@ -52,7 +56,9 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
@@ -841,5 +847,56 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(9.januar, 31.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertEquals(1, inspektør.vedtaksperiodeTeller)
+    }
+
+    @Test
+    fun `'arbeidGjenopptatt' i løpet av arbeidsgiverperioden i arbeidsgiversøknad medfører ikke NavDager og påvirker derfor ikke telling av 26 uker opphold`() {
+        nyttVedtak(januar)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 21.mars))
+        håndterSøknad(
+            Sykdom(1.mars, 21.mars, 100.prosent),
+            Arbeid(12.mars, 21.mars)
+        )
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars)
+        )
+
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        val sykdomstidslinjedagerForAndrePeriode = inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller
+        assertEquals(21, sykdomstidslinjedagerForAndrePeriode.values.reduce { acc, i -> acc + i })
+        assertEquals(7, sykdomstidslinjedagerForAndrePeriode[Sykedag::class])
+        assertEquals(4, sykdomstidslinjedagerForAndrePeriode[SykHelgedag::class])
+        assertEquals(2, sykdomstidslinjedagerForAndrePeriode[FriskHelgedag::class])
+        assertEquals(3, sykdomstidslinjedagerForAndrePeriode[Dag.Arbeidsdag::class])
+        assertEquals(5, sykdomstidslinjedagerForAndrePeriode[Arbeidsgiverdag::class])
+
+        val maksdatoFør26UkerOpphold = LocalDate.of(2018, 12, 28)
+        assertEquals(maksdatoFør26UkerOpphold, inspektør.sisteMaksdato(1.vedtaksperiode).maksdato)
+
+        nyttVedtak(1.august til 21.august, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+
+        inspektør.sisteMaksdato(3.vedtaksperiode).also {
+            val maksdatoEtter26UkerOpphold = LocalDate.of(2019, 7, 30)
+            assertEquals(maksdatoEtter26UkerOpphold, it.maksdato)
+            assertEquals(3, it.antallForbrukteDager)
+            assertEquals(245, it.gjenståendeDager)
+        }
+    }
+
+    @Test
+    fun `'arbeidGjenopptatt' i løpet av arbeidsgiverperioden i arbeidsgiversøknad medfører ikke forbrukte sykedager`() {
+        nyttVedtak(januar)
+        assertEquals(28.desember, inspektør.sisteMaksdato(1.vedtaksperiode).maksdato)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 21.mars))
+        håndterSøknad(
+            Sykdom(1.mars, 21.mars, 100.prosent),
+            Arbeid(12.mars, 21.mars)
+        )
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars)
+        )
+        nyttVedtak(1.mai til 21.mai, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
+        assertEquals(12.april(2019), inspektør.sisteMaksdato(3.vedtaksperiode).maksdato)
     }
 }
