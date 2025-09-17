@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate.EPOCH
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode
@@ -137,7 +138,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 15.januar,
-                arbeidsgiverperiode = emptyList(),
+                arbeidsgiverperiode = listOf(EPOCH.somPeriode()),
                 utbetalingsperioder = listOf(1.januar til 15.januar),
                 oppholdsperioder = emptyList(),
                 fullstendig = false
@@ -159,7 +160,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 28.februar,
-                arbeidsgiverperiode = emptyList(),
+                arbeidsgiverperiode = listOf(EPOCH.somPeriode()),
                 utbetalingsperioder = listOf(1.januar til 5.januar, 1.februar til 28.februar),
                 oppholdsperioder = emptyList(),
                 fullstendig = false
@@ -199,7 +200,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 15.januar,
-                arbeidsgiverperiode = emptyList(),
+                arbeidsgiverperiode = listOf(EPOCH.somPeriode()),
                 utbetalingsperioder = listOf(1.januar til 15.januar),
                 oppholdsperioder = emptyList(),
                 fullstendig = false
@@ -221,7 +222,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 17.januar,
-                arbeidsgiverperiode = emptyList(),
+                arbeidsgiverperiode = listOf(EPOCH.somPeriode()),
                 utbetalingsperioder = listOf(1.januar.somPeriode()),
                 oppholdsperioder = listOf(2.januar til 17.januar),
                 fullstendig = false,
@@ -252,7 +253,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 3.februar,
-                arbeidsgiverperiode = emptyList(),
+                arbeidsgiverperiode = listOf(EPOCH.somPeriode()),
                 utbetalingsperioder = listOf(1.januar.somPeriode(), 17.januar til 3.februar),
                 oppholdsperioder = listOf(2.januar til 16.januar),
                 fullstendig = false

@@ -18,7 +18,6 @@ data class Arbeidsgiverperioderesultat(
     // hvis tellingen er fullstendig så er arbeidsgiverperiode.last() dag nr. 16.
     val fullstendig: Boolean
 ) {
-
     fun utvideMed(
         dato: LocalDate,
         arbeidsgiverperiode: LocalDate? = null,
@@ -36,11 +35,7 @@ data class Arbeidsgiverperioderesultat(
     }
 
     internal fun somArbeidsgiverperiode(): Arbeidsgiverperiode {
-        val agp =
-            if (arbeidsgiverperiode.isEmpty() && utbetalingsperioder.isNotEmpty())
-                Arbeidsgiverperiode.fiktiv(utbetalingsperioder.first().start)
-            else
-                Arbeidsgiverperiode(arbeidsgiverperiode)
+        val agp = Arbeidsgiverperiode(arbeidsgiverperiode)
         utbetalingsperioder.flatten().forEach { agp.utbetalingsdag(it) }
         oppholdsperioder.flatten().forEach { agp.oppholdsdag(it) }
         omsluttendePeriode.forEach { agp.kjentDag(it) }

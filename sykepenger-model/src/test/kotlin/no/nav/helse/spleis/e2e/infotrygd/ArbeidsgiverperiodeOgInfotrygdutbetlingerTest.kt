@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDate
+import java.time.LocalDate.EPOCH
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
@@ -22,7 +23,7 @@ internal class ArbeidsgiverperiodeOgInfotrygdutbetlingerTest: AbstractDslTest() 
     @Test
     fun `Utbetalt fra første dag i Infotrygd`() {
         assertEquals(
-            emptyList<Periode>(),
+            listOf(EPOCH.somPeriode()),
             arbeidsgiverperiodeVed(vedtaksperiode = januar, infotrygdutbetaling = 1.januar)
         )
         observatør.assertEtterspurt(1.vedtaksperiode, PersonObserver.Inntekt::class, PersonObserver.Refusjon::class)
@@ -50,7 +51,7 @@ internal class ArbeidsgiverperiodeOgInfotrygdutbetlingerTest: AbstractDslTest() 
         val infotrygdutbetaling = 1.januar
         assertEquals(15, infotrygdutbetaling.somPeriode().periodeMellom(vedtaksperiode.start)?.count())
         assertEquals(
-            emptyList<Periode>(),
+            listOf(EPOCH.somPeriode()),
             arbeidsgiverperiodeVed(vedtaksperiode, infotrygdutbetaling)
         )
     }

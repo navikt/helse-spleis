@@ -43,7 +43,6 @@ internal class ArbeidsgiverperiodeTest {
     @Test
     fun `helg regnes ikke som betalt`() {
         assertFalse(agp(1.januar til 16.januar).utbetalingsdag(20.januar).erFørsteUtbetalingsdagFørEllerLik(1.januar til 20.januar))
-        assertFalse(Arbeidsgiverperiode.fiktiv(20.januar).erFørsteUtbetalingsdagFørEllerLik(1.januar til 20.januar))
     }
 
     @Test
@@ -79,13 +78,6 @@ internal class ArbeidsgiverperiodeTest {
         assertTrue(arbeidsgiverperiode.dekkesAvArbeidsgiver(6.januar til 7.januar))
         assertTrue(arbeidsgiverperiode.dekkesAvArbeidsgiver(1.januar til 6.januar))
         assertFalse(arbeidsgiverperiode.dekkesAvArbeidsgiver(1.januar til 8.januar))
-        assertFalse(arbeidsgiverperiode.dekkesAvArbeidsgiver(1.januar til 1.januar))
-    }
-
-    @Test
-    fun `fiktiv periode dekker ingenting fordi arbeidsgiverperioden er ukjent`() {
-        val arbeidsgiverperiode = Arbeidsgiverperiode.fiktiv(2.januar)
-        assertFalse(arbeidsgiverperiode.dekkesAvArbeidsgiver(2.januar til 2.januar))
         assertFalse(arbeidsgiverperiode.dekkesAvArbeidsgiver(1.januar til 1.januar))
     }
 

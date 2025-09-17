@@ -2,24 +2,22 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalDate.EPOCH
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 
-internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
-    constructor(perioder: List<Periode>) : this(perioder, null)
-
+internal class Arbeidsgiverperiode(private val perioder: List<Periode>) : Iterable<LocalDate>, Comparable<LocalDate> {
     private val kjenteDager = mutableListOf<Periode>()
     private val utbetalingsdager = mutableListOf<Periode>()
     private val oppholdsdager = mutableListOf<Periode>()
 
     init {
-        check(perioder.isNotEmpty() || førsteUtbetalingsdag != null) {
-            "Enten må arbeidsgiverperioden være oppgitt eller så må første utbetalingsdag være oppgitt"
+        check(perioder.isNotEmpty()) {
+            "Arbeidsgiverperioden må være oppgitt"
         }
-        førsteUtbetalingsdag?.also { utbetalingsdag(it) }
     }
 
     private val arbeidsgiverperioden get() = perioder.first().start til perioder.last().endInclusive
@@ -27,7 +25,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     private val sisteKjente get() = listOfNotNull(perioder.lastOrNull()?.endInclusive, utbetalingsdager.lastOrNull()?.endInclusive, kjenteDager.lastOrNull()?.endInclusive).maxOf { it }
     private val innflytelseperioden get() = førsteKjente til sisteKjente
 
-    internal fun fiktiv() = perioder.isEmpty() // Arbeidsperioden er gjennomført i Infotrygd
+    internal fun fiktiv() = perioder.flatten().singleOrNull() == EPOCH // Arbeidsperioden er gjennomført i Infotrygd
 
     internal fun periode(sisteDag: LocalDate) = førsteKjente til sisteDag
 
@@ -49,7 +47,6 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     }
 
     internal fun dekkesAvArbeidsgiver(periode: Periode): Boolean {
-        if (fiktiv()) return false
         val arbeidsgiversAnsvar = dagerSomarbeidsgiverUtbetaler() ?: return false
         return (periode.overlapperMed(arbeidsgiversAnsvar) && arbeidsgiversAnsvar.slutterEtter(periode.endInclusive))
     }
@@ -104,8 +101,6 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     }
 
     internal companion object {
-        internal fun fiktiv(førsteUtbetalingsdag: LocalDate) = Arbeidsgiverperiode(emptyList(), førsteUtbetalingsdag)
-
         private fun Periode.justerForHelg() = when (endInclusive.dayOfWeek) {
             DayOfWeek.SATURDAY -> start til endInclusive.plusDays(1)
             DayOfWeek.FRIDAY -> start til endInclusive.plusDays(2)

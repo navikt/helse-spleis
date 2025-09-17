@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import java.time.LocalDate.EPOCH
 import no.nav.helse.erHelg
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
@@ -189,10 +190,20 @@ internal class Arbeidsgiverperiodeberegner(
         }
 
         fun sykdomsdag(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) {
-            builder.aktivArbeidsgiverperioderesultat = builder.arbeidsgiverperiodeResultatet(dato).utvideMed(
-                dato = dato,
-                utbetalingsperiode = dato
-            )
+            builder.aktivArbeidsgiverperioderesultat = builder.arbeidsgiverperiodeResultatet(dato)
+                .let {
+                    // for å unngå "ugyldig state" så legger vi inn én arbeidsgiverperiode-dag når saken ligger i infotrygd
+                    if (it.arbeidsgiverperiode.isEmpty())
+                        it.utvideMed(
+                            dato = dato,
+                            arbeidsgiverperiode = EPOCH
+                        )
+                    else it
+                }
+                .utvideMed(
+                    dato = dato,
+                    utbetalingsperiode = dato
+                )
         }
 
         fun egenmeldingsdag(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) = sykdomsdag(builder, dato)
