@@ -22,6 +22,9 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
+import no.nav.helse.person.PersonObserver.VedtaksperiodeVenterEvent
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -36,9 +39,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVU
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.VedtaksperiodeVenter
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
@@ -70,10 +70,10 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import no.nav.helse.økonomi.inspectors.inspektør
 
 internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
@@ -113,7 +113,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Arbeidsdag)), orgnummer = a2)
-        assertEquals(emptyList<VedtaksperiodeVenter>(), observatør.vedtaksperiodeVenter)
+        assertEquals(emptyList<VedtaksperiodeVenterEvent>(), observatør.vedtaksperiodeVenter)
         håndterSykepengegrunnlagForArbeidsgiver(skjæringstidspunkt = 2.februar, orgnummer = a2)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -1260,7 +1260,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `søknad for ghost etter utbetalt`()  {
+    fun `søknad for ghost etter utbetalt`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
@@ -1328,7 +1328,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `søknad for ghost etter utbetalt som delvis overlapper med to perioder hos a1`()  {
+    fun `søknad for ghost etter utbetalt som delvis overlapper med to perioder hos a1`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),

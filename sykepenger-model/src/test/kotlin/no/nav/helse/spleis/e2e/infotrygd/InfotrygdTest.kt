@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
-import java.util.*
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
@@ -20,18 +20,7 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.VedtaksperiodeVenter
+import no.nav.helse.person.PersonObserver.VedtaksperiodeVenterEvent
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
@@ -43,6 +32,17 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpsti
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.START
+import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.IdInnhenter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
@@ -82,7 +82,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `Saksbehandler legger til en utbetaling i forkant av en periode som er lagt til grunn ved infotrygdovergang`() {
         createOvergangFraInfotrygdPerson()
-        assertEquals(emptyList<VedtaksperiodeVenter>(), observatør.vedtaksperiodeVenter)
+        assertEquals(emptyList<VedtaksperiodeVenterEvent>(), observatør.vedtaksperiodeVenter)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         val refusjonFør = inspektør.refusjon(1.vedtaksperiode)
@@ -92,7 +92,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(eksisterendeUtbetaling, nyUtbetaling)
 
         assertEquals(20.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(emptyList<VedtaksperiodeVenter>(), observatør.vedtaksperiodeVenter)
+        assertEquals(emptyList<VedtaksperiodeVenterEvent>(), observatør.vedtaksperiodeVenter)
         nullstillTilstandsendringer()
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
 
@@ -225,7 +225,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
         håndterSøknad(4.juni til 6.juni)
         assertSisteTilstand(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        håndterInntektsmelding(emptyList(),  førsteFraværsdag = 4.juni, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        håndterInntektsmelding(emptyList(), førsteFraværsdag = 4.juni, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
         håndterVilkårsgrunnlag(4.vedtaksperiode)
         håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
@@ -242,7 +242,6 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         assertSisteTilstand(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertVarsler(listOf(RV_IM_8), 4.vedtaksperiode.filter())
     }
-
 
     @Test
     fun `infotrygd flytter skjæringstidspunkt`() {
@@ -287,8 +286,14 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         createOvergangFraInfotrygdPerson()
         val antallInnslagFør = inspektør.vilkårsgrunnlagHistorikkInnslag().size
 
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 15000.månedlig,
-            emptyList())))
+        håndterOverstyrArbeidsgiveropplysninger(
+            1.januar, listOf(
+            OverstyrtArbeidsgiveropplysning(
+                a1, 15000.månedlig,
+                emptyList()
+            )
+        )
+        )
         assertEquals(antallInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
@@ -304,8 +309,12 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         val meldingsreferanse = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
-            arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, 15000.månedlig,
-                listOf(Triple(1.januar, null, 15000.månedlig)))),
+            arbeidsgiveropplysninger = listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    a1, 15000.månedlig,
+                    listOf(Triple(1.januar, null, 15000.månedlig))
+                )
+            ),
             meldingsreferanseId = meldingsreferanse
         )
         assertEquals(antallInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
