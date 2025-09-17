@@ -2,7 +2,6 @@ package no.nav.helse.etterlevelse
 
 import java.io.Serializable
 import java.time.LocalDate
-import java.time.Year
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_B
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_C
@@ -835,10 +834,6 @@ fun `§ 8-29`(
     )
 )
 
-fun `§ 8-33 ledd 1`() {}
-
-fun `§ 8-33 ledd 3`(grunnlagForFeriepenger: Int, opptjeningsår: Year, prosentsats: Double, alder: Int, feriepenger: Double) {}
-
 /**
  * Vurdering av krav på om det ytes full kompensasjonsnivå, eller begrenset til 80 % av sykepengegrunnlag, til selvstendig næringsdrivende
  *
@@ -879,38 +874,6 @@ fun `§ 8-35 ledd 2`(pensjonsgivendeInntekter: List<PensjonsgivendeInntektSubsum
     output = mapOf(
         "sykepengegrunnlag" to sykepengegrunnlag
     )
-)
-
-/**
- * Vurdering av krav til minimum inntekt ved alder mellom 67 og 70 år
- *
- * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-51)
- *
- * @param oppfylt dersom vedkommende har inntekt større enn eller lik to ganger grunnbeløpet. Det er en forutsetning at vedkommende er mellom 67 og 70 år
- * @param skjæringstidspunkt dato det tas utgangspunkt i ved vurdering av minimum inntekt
- * @param alderPåSkjæringstidspunkt alder på skjæringstidspunktet
- * @param beregningsgrunnlagÅrlig total inntekt på tvers av alle relevante arbeidsgivere
- * @param minimumInntektÅrlig minimum beløp [beregningsgrunnlagÅrlig] må være lik eller større enn for at vilkåret skal være [oppfylt]
- */
-fun `§ 8-51 ledd 2`(
-    oppfylt: Boolean,
-    skjæringstidspunkt: LocalDate,
-    alderPåSkjæringstidspunkt: Int,
-    beregningsgrunnlagÅrlig: Double,
-    minimumInntektÅrlig: Double
-) = Subsumsjon.enkelSubsumsjon(
-    utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
-    lovverk = "folketrygdloven",
-    versjon = LocalDate.of(2011, 12, 16),
-    paragraf = PARAGRAF_8_51,
-    ledd = LEDD_2,
-    input = mapOf(
-        "skjæringstidspunkt" to skjæringstidspunkt,
-        "alderPåSkjæringstidspunkt" to alderPåSkjæringstidspunkt,
-        "grunnlagForSykepengegrunnlag" to beregningsgrunnlagÅrlig,
-        "minimumInntekt" to minimumInntektÅrlig
-    ),
-    output = emptyMap()
 )
 
 /**
