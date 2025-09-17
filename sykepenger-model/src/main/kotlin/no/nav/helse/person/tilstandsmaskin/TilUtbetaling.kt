@@ -9,7 +9,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal data object TilUtbetaling : Vedtaksperiodetilstand {
     override val type = TilstandType.TIL_UTBETALING
-    override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
     override fun igangsettOverstyring(
         vedtaksperiode: Vedtaksperiode,
         revurdering: Revurderingseventyr,
