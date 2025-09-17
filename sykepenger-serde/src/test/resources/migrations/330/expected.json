@@ -1,0 +1,80 @@
+{
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-16"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "tilstand": "AVSLUTTET_UTEN_VEDTAK",
+              "endringer": [
+                {
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-16"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "fom": "2018-01-01",
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": "1970-01-01",
+                      "tom": "1970-01-01"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "tilstand": "AVSLUTTET_UTEN_VEDTAK",
+              "endringer": [
+                {
+                  "arbeidsgiverperioder": []
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {}
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 330
+}
