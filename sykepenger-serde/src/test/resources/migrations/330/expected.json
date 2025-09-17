@@ -44,11 +44,11 @@
               "tilstand": "VEDTAK_IVERKSATT",
               "endringer": [
                 {
-                  "fom": "2018-01-01",
+                  "fom": [2018, 1, 1],
                   "arbeidsgiverperioder": [
                     {
-                      "fom": "1970-01-01",
-                      "tom": "1970-01-01"
+                      "fom": [1970, 1, 1],
+                      "tom": [1970, 1, 1]
                     }
                   ]
                 }
