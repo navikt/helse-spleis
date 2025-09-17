@@ -1143,9 +1143,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             nyEndring(gjeldende.kopierDokument(dokument))
         }
 
-        private fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: InntekterForBeregning): Boolean {
+        private fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: InntekterForBeregning) {
             nyEndring(gjeldende.kopierMedUtbetalingstidslinje(utbetalingstidslinje, inntekterForBeregning))
-            return true
         }
 
         private fun utenUtbetaling(aktivitetslogg: IAktivitetslogg) {
