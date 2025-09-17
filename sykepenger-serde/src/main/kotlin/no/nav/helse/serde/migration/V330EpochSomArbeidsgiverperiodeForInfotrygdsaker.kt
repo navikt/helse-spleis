@@ -39,8 +39,8 @@ internal class V330EpochSomArbeidsgiverperiodeForInfotrygdsaker : JsonMigration(
             return
         }
 
-        val vedtaksperiodeFomÅr = (sisteEndring.path("fom") as ArrayNode)[0].asInt()
-        sikkerlogg.info("Lagrer EPOCH som arbeidsgiverperiode for Infotrygd-sak for person {} {} {}", kv("fnr", fnr), kv("vedtaksperiodeId", vedtaksperiodeId), kv("årstall", vedtaksperiodeFomÅr))
+        val vedtaksperiodeFomÅr = (sisteEndring.path("fom") as? ArrayNode)?.get(0)?.asInt()
+        sikkerlogg.info("Lagrer EPOCH som arbeidsgiverperiode for Infotrygd-sak for person {} {} {}", kv("fnr", fnr), kv("vedtaksperiodeId", vedtaksperiodeId), kv("årstall", "$vedtaksperiodeFomÅr"))
         arbeidsgiverperiode.addObject().apply {
             putArray("fom").apply {
                 add(1970)
