@@ -25,6 +25,9 @@ internal class V330EpochSomArbeidsgiverperiodeForInfotrygdsaker : JsonMigration(
         val harVærtFattetVedtakPå = vedtaksperiode.path("behandlinger").any { behandling ->
             behandling.path("tilstand").asText() == "VEDTAK_IVERKSATT"
         }
+        val harAldriHattArbeidsgiverperiode = vedtaksperiode.path("behandlinger").none { behandling ->
+            behandling.path("endringer").last().path("arbeidsgiverperioder").size() > 0
+        }
 
         val sisteBehandling = vedtaksperiode.path("behandlinger").last()
         val sisteEndring = sisteBehandling.path("endringer").last()
@@ -40,18 +43,22 @@ internal class V330EpochSomArbeidsgiverperiodeForInfotrygdsaker : JsonMigration(
         }
 
         val vedtaksperiodeFomÅr = (sisteEndring.path("fom") as? ArrayNode)?.get(0)?.asInt()
-        sikkerlogg.info("Lagrer EPOCH som arbeidsgiverperiode for Infotrygd-sak for person {} {} {}", kv("fnr", fnr), kv("vedtaksperiodeId", vedtaksperiodeId), kv("årstall", "$vedtaksperiodeFomÅr"))
-        arbeidsgiverperiode.addObject().apply {
-            putArray("fom").apply {
-                add(1970)
-                add(1)
-                add(1)
+        if (harAldriHattArbeidsgiverperiode) {
+            sikkerlogg.info("Lagrer EPOCH som arbeidsgiverperiode for Infotrygd-sak for person {} {} {}", kv("fnr", fnr), kv("vedtaksperiodeId", vedtaksperiodeId), kv("årstall", "$vedtaksperiodeFomÅr"))
+            arbeidsgiverperiode.addObject().apply {
+                putArray("fom").apply {
+                    add(1970)
+                    add(1)
+                    add(1)
+                }
+                putArray("tom").apply {
+                    add(1970)
+                    add(1)
+                    add(1)
+                }
             }
-            putArray("tom").apply {
-                add(1970)
-                add(1)
-                add(1)
-            }
+        } else {
+            sikkerlogg.info("Lagrer _IKKE_ EPOCH som arbeidsgiverperiode for Infotrygd-sak for person {} {} {} fordi saken har hatt arbeidsgiverperiode før", kv("fnr", fnr), kv("vedtaksperiodeId", vedtaksperiodeId), kv("årstall", "$vedtaksperiodeFomÅr"))
         }
     }
 }
