@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
@@ -14,6 +14,10 @@ import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.Person
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -25,10 +29,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Friperiode
-import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -62,13 +62,13 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        this@InfotrygdKorrigererE2ETest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         nullstillTilstandsendringer()
 
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 2.januar, 2.januar))
+        this@InfotrygdKorrigererE2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 2.januar, 2.januar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        this@InfotrygdKorrigererE2ETest.håndterYtelser(2.vedtaksperiode)
         assertVarsel(Varselkode.RV_IT_14, 2.vedtaksperiode.filter())
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -79,12 +79,12 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
     fun `to sykefraværstilfeller blir til en, starter med AUU`() {
         createDobbelutbetalingPerson()
 
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
-        håndterYtelser(2.vedtaksperiode)
+        this@InfotrygdKorrigererE2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
+        this@InfotrygdKorrigererE2ETest.håndterYtelser(2.vedtaksperiode)
         assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.februar, 28.februar))
+        this@InfotrygdKorrigererE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        this@InfotrygdKorrigererE2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.februar, 28.februar))
         håndterUtbetalt()
 
         assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
@@ -94,12 +94,12 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
     fun `Infotrygdutbetaling mens perioden er til revurdering`() {
         nyttVedtak(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 80.prosent))
-        håndterYtelser()
+        this@InfotrygdKorrigererE2ETest.håndterYtelser()
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
 
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 2.januar, 2.januar))
+        this@InfotrygdKorrigererE2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 2.januar, 2.januar))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 
@@ -107,11 +107,11 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
     fun `to sykefraværstilfeller blir til en, starter med Avsluttet`() {
         createAuuBlirMedIRevureringPerson()
 
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
-        håndterYtelser(1.vedtaksperiode)
+        this@InfotrygdKorrigererE2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
+        this@InfotrygdKorrigererE2ETest.håndterYtelser(1.vedtaksperiode)
         assertVarsler(listOf(Varselkode.RV_UT_23, Varselkode.RV_IT_1), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@InfotrygdKorrigererE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
@@ -135,6 +135,6 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
                 )
             ),
             besvart = LocalDateTime.now()
-        ).håndter(Person::håndter)
+        ).håndter(Person::håndterUtbetalingshistorikkEtterInfotrygdendring)
     }
 }

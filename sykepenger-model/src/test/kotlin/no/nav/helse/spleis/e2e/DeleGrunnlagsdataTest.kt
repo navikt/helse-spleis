@@ -47,22 +47,22 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             førsteFraværsdag = 5.april
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@DeleGrunnlagsdataTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@DeleGrunnlagsdataTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        håndterYtelser(2.vedtaksperiode)
+        this@DeleGrunnlagsdataTest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        this@DeleGrunnlagsdataTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
-        håndterYtelser(3.vedtaksperiode)
+        this@DeleGrunnlagsdataTest.håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        this@DeleGrunnlagsdataTest.håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
         håndterVilkårsgrunnlag(4.vedtaksperiode)
-        håndterYtelser(4.vedtaksperiode)
+        this@DeleGrunnlagsdataTest.håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(4.vedtaksperiode)
+        this@DeleGrunnlagsdataTest.håndterUtbetalingsgodkjenning(4.vedtaksperiode)
         håndterUtbetalt()
 
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
@@ -103,7 +103,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(februar)
         håndterArbeidsgiveropplysninger(listOf(Periode(18.januar, 1.februar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@DeleGrunnlagsdataTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(mars)
@@ -115,9 +115,9 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@DeleGrunnlagsdataTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        håndterYtelser(2.vedtaksperiode)
+        this@DeleGrunnlagsdataTest.håndterYtelser(2.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
         assertVarsler(listOf(), 1.vedtaksperiode.filter())
@@ -137,7 +137,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
         val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(20.februar, 7.mars)))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        this@DeleGrunnlagsdataTest.håndterYtelser(2.vedtaksperiode)
 
         assertTilstander(
             1.vedtaksperiode,

@@ -52,9 +52,9 @@ internal class FriskmeldtE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 20.januar)
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FriskmeldtE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FriskmeldtE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))

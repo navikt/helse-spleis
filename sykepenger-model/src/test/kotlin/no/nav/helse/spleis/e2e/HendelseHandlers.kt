@@ -91,7 +91,7 @@ internal fun AbstractEndToEndTest.håndterSykmelding(
         sykmeldingSkrevet = sykmeldingSkrevet,
         mottatt = mottatt,
         orgnummer = orgnummer
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterSykmelding)
     return id
 }
 
@@ -104,7 +104,7 @@ internal fun AbstractEndToEndTest.håndterAvbrytSøknad(
         periode,
         MeldingsreferanseId(meldingsreferanseId),
         Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer)
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterAvbruttSøknad)
 }
 
 internal fun AbstractEndToEndTest.håndterAvbrytArbeidsledigSøknad(
@@ -116,7 +116,7 @@ internal fun AbstractEndToEndTest.håndterAvbrytArbeidsledigSøknad(
         periode,
         MeldingsreferanseId(meldingsreferanseId),
         Behandlingsporing.Yrkesaktivitet.Arbeidsledig
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterAvbruttSøknad)
 }
 
 internal fun AbstractEndToEndTest.tilGodkjenning(
@@ -147,7 +147,7 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
             vedtaksperiodeIdInnhenter = vedtaksperiode,
             orgnummer = organisasjonsnummer
         )
-        håndterYtelser(vedtaksperiode, orgnummer = organisasjonsnummer)
+        this@tilGodkjenning.håndterYtelser(vedtaksperiode, orgnummer = organisasjonsnummer)
         håndterSimulering(vedtaksperiode, orgnummer = organisasjonsnummer)
     }
 }
@@ -163,14 +163,14 @@ internal fun AbstractEndToEndTest.nyeVedtak(
     val (første, resten) = organisasjonsnummere.first() to organisasjonsnummere.drop(1)
 
     første.let { organisasjonsnummer ->
-        håndterUtbetalingsgodkjenning(vedtaksperiode, orgnummer = organisasjonsnummer)
+        this@nyeVedtak.håndterUtbetalingsgodkjenning(vedtaksperiode, orgnummer = organisasjonsnummer)
         håndterUtbetalt(orgnummer = organisasjonsnummer)
     }
 
     resten.forEach { organisasjonsnummer ->
-        håndterYtelser(vedtaksperiode, orgnummer = organisasjonsnummer)
+        this@nyeVedtak.håndterYtelser(vedtaksperiode, orgnummer = organisasjonsnummer)
         håndterSimulering(vedtaksperiode, orgnummer = organisasjonsnummer)
-        håndterUtbetalingsgodkjenning(vedtaksperiode, orgnummer = organisasjonsnummer)
+        this@nyeVedtak.håndterUtbetalingsgodkjenning(vedtaksperiode, orgnummer = organisasjonsnummer)
         håndterUtbetalt(orgnummer = organisasjonsnummer)
     }
 }
@@ -203,7 +203,7 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
             vedtaksperiodeIdInnhenter = vedtaksperiode,
             orgnummer = arbeidsgiver.first
         )
-        håndterYtelser(vedtaksperiode, orgnummer = arbeidsgiver.first)
+        this@førstegangTilGodkjenning.håndterYtelser(vedtaksperiode, orgnummer = arbeidsgiver.first)
         håndterSimulering(vedtaksperiode, orgnummer = arbeidsgiver.first)
     }
 }
@@ -211,7 +211,7 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
 internal fun AbstractEndToEndTest.forlengelseTilGodkjenning(periode: Periode, vararg organisasjonsnumre: String) {
     require(organisasjonsnumre.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     organisasjonsnumre.forEach { nyPeriode(periode, it) }
-    håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
+    this@forlengelseTilGodkjenning.håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
     håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
 }
 
@@ -220,9 +220,9 @@ internal fun AbstractEndToEndTest.forlengVedtak(periode: Periode, vararg organis
     organisasjonsnumre.forEach { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = it) }
     organisasjonsnumre.forEach { håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = it) }
     organisasjonsnumre.forEach { organisasjonsnummer ->
-        håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
+        this@forlengVedtak.håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
         håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
-        håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
+        this@forlengVedtak.håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
         håndterUtbetalt(orgnummer = organisasjonsnummer)
     }
 }
@@ -262,7 +262,7 @@ internal fun AbstractEndToEndTest.tilGodkjent(
         inntektsmeldingId = inntektsmeldingId,
         vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter
     )
-    håndterUtbetalingsgodkjenning(id, true, orgnummer = orgnummer)
+    this@tilGodkjent.håndterUtbetalingsgodkjenning(id, true, orgnummer = orgnummer)
     return id
 }
 
@@ -316,7 +316,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
     )
     val id = observatør.sisteVedtaksperiode()
     håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter = id, orgnummer = orgnummer)
-    håndterYtelser(id, orgnummer = orgnummer)
+    this@tilYtelser.håndterYtelser(id, orgnummer = orgnummer)
     return id
 }
 
@@ -326,7 +326,7 @@ internal fun AbstractEndToEndTest.forlengTilGodkjentVedtak(
     orgnummer: String = a1
 ) {
     forlengTilGodkjenning(periode, grad, orgnummer)
-    håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), true, orgnummer = orgnummer)
+    this@forlengTilGodkjentVedtak.håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), true, orgnummer = orgnummer)
 }
 
 internal fun AbstractEndToEndTest.forlengTilSimulering(
@@ -336,7 +336,7 @@ internal fun AbstractEndToEndTest.forlengTilSimulering(
 ) {
     nyPeriode(periode, orgnummer, grad = grad)
     val id: IdInnhenter = observatør.sisteVedtaksperiode()
-    håndterYtelser(id, orgnummer = orgnummer)
+    this@forlengTilSimulering.håndterYtelser(id, orgnummer = orgnummer)
     assertTrue(personlogg.etterspurteBehov(id, Behovtype.Simulering, orgnummer)) { "Forventet at simulering er etterspurt" }
 }
 
@@ -347,7 +347,7 @@ internal fun AbstractEndToEndTest.forlengTilGodkjenning(
 ) {
     nyPeriode(periode, orgnummer, grad = grad)
     val id: IdInnhenter = observatør.sisteVedtaksperiode()
-    håndterYtelser(id, orgnummer = orgnummer)
+    this@forlengTilGodkjenning.håndterYtelser(id, orgnummer = orgnummer)
     if (personlogg.etterspurteBehov(id, Behovtype.Simulering, orgnummer)) håndterSimulering(id, orgnummer = orgnummer)
 }
 
@@ -413,10 +413,10 @@ internal fun AbstractEndToEndTest.håndterSøknad(
             merknaderFraSykmelding = merknaderFraSykmelding,
             permittert = permittert,
             egenmeldinger = egenmeldinger
-        ).håndter(Person::håndter)
+        ).håndter(Person::håndterSøknad)
         val vedtaksperiodeId: IdInnhenter = observatør.sisteVedtaksperiode()
         if (hendelselogg.etterspurteBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk, orgnummer = orgnummer)) {
-            håndterUtbetalingshistorikk(vedtaksperiodeId, orgnummer = orgnummer)
+            this@håndterSøknad.håndterUtbetalingshistorikk(vedtaksperiodeId, orgnummer = orgnummer)
         }
     }
     return id
@@ -438,7 +438,7 @@ private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: St
             ),
             vedtaksperiodeId = forespørsel.vedtaksperiodeId,
             inntektsmeldinger = imReplays
-        ).håndter(Person::håndter)
+        ).håndter(Person::håndterInntektsmeldingerReplay)
         observatør.kvitterInntektsmeldingReplay(forespørsel.vedtaksperiodeId)
     }
 }
@@ -520,18 +520,18 @@ internal fun AbstractEndToEndTest.håndterKorrigerteArbeidsgiveropplysninger(
         behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         vedtaksperiodeId = vedtaksperiodeId.id(orgnummer),
         opplysninger = opplysning.toList()
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterKorrigerteArbeidsgiveropplysninger)
     return id
 }
 
 internal fun AbstractEndToEndTest.håndterArbeidsgiveropplysninger(arbeidsgiveropplysninger: Arbeidsgiveropplysninger): UUID {
-    arbeidsgiveropplysninger.håndter(Person::håndter)
+    arbeidsgiveropplysninger.håndter(Person::håndterArbeidsgiveropplysninger)
     return arbeidsgiveropplysninger.metadata.meldingsreferanseId.id
 }
 
 internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Inntektsmelding): UUID {
     håndterOgReplayInntektsmeldinger(inntektsmelding.behandlingsporing.organisasjonsnummer) {
-        inntektsmelding.håndter(Person::håndter)
+        inntektsmelding.håndter(Person::håndterInntektsmelding)
     }
     return inntektsmelding.metadata.meldingsreferanseId.id
 }
@@ -682,7 +682,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
         arbeidsforhold = arbeidsforhold,
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
         inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterVilkårsgrunnlag)
 }
 
 internal fun AbstractEndToEndTest.håndterSimulering(
@@ -697,7 +697,7 @@ internal fun AbstractEndToEndTest.håndterSimulering(
             check(it.isNotEmpty()) { "det er ingenting å simulere ??" }
         }
         .forEach { simulering ->
-            simulering.håndter(Person::håndter)
+            simulering.håndter(Person::håndterSimulering)
         }
 }
 
@@ -721,12 +721,12 @@ internal fun AbstractEndToEndTest.håndterSimulering(
         melding = "",
         utbetalingId = utbetalingId,
         simuleringsResultat = simuleringsresultat
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterSimulering)
 }
 
 internal fun AbstractEndToEndTest.håndterInfotrygdendring() {
     Infotrygdendring(MeldingsreferanseId(UUID.randomUUID()))
-        .håndter(Person::håndter)
+        .håndter(Person::håndterInfotrygdendringer)
 }
 
 private fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
@@ -742,7 +742,7 @@ private fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
         utbetalinger = utbetalinger.toList(),
         orgnummer = orgnummer,
         besvart = besvart
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterUtbetalingshistorikk)
 }
 
 internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkEtterInfotrygdendring(
@@ -754,7 +754,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkEtterInfotrygdendr
         meldingsreferanseId = meldingsreferanseId,
         utbetalinger = utbetalinger.toList(),
         besvart = besvart
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterUtbetalingshistorikkEtterInfotrygdendring)
     return meldingsreferanseId
 }
 
@@ -794,7 +794,7 @@ internal fun AbstractEndToEndTest.håndterYtelser(
         orgnummer = orgnummer,
         arbeidsavklaringspenger = arbeidsavklaringspenger,
         dagpenger = dagpenger
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterYtelser)
 }
 
 internal fun AbstractEndToEndTest.håndterUtbetalingpåminnelse(
@@ -802,17 +802,17 @@ internal fun AbstractEndToEndTest.håndterUtbetalingpåminnelse(
     status: Utbetalingstatus,
     tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()
 ) {
-    utbetalingpåminnelse(inspektør.utbetalingId(utbetalingIndeks), status, tilstandsendringstidspunkt).håndter(Person::håndter)
+    utbetalingpåminnelse(inspektør.utbetalingId(utbetalingIndeks), status, tilstandsendringstidspunkt).håndter(Person::håndterUtbetalingPåminnelse)
 }
 
-internal fun AbstractEndToEndTest.håndterPersonPåminnelse() = PersonHendelsefabrikk().lagPåminnelse().håndter(Person::håndter)
+internal fun AbstractEndToEndTest.håndterPersonPåminnelse() = PersonHendelsefabrikk().lagPåminnelse().håndter(Person::håndterPersonPåminnelse)
 
 internal fun AbstractEndToEndTest.håndterSykepengegrunnlagForArbeidsgiver(
     skjæringstidspunkt: LocalDate = 1.januar,
     orgnummer: String = a1
 ): UUID {
     val inntektFraAOrdningen: SykepengegrunnlagForArbeidsgiver = sykepengegrunnlagForArbeidsgiver(skjæringstidspunkt, orgnummer)
-    inntektFraAOrdningen.håndter(Person::håndter)
+    inntektFraAOrdningen.håndter(Person::håndterSykepengegrunnlagForArbeidsgiver)
     return inntektFraAOrdningen.metadata.meldingsreferanseId.id
 }
 
@@ -833,7 +833,7 @@ internal fun AbstractEndToEndTest.håndterPåminnelse(
         orgnummer = orgnummer,
         antallGangerPåminnet = antallGangerPåminnet,
         flagg = flagg
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterPåminnelse)
 }
 
 internal fun AbstractEndToEndTest.håndterAnmodningOmForkasting(
@@ -845,7 +845,7 @@ internal fun AbstractEndToEndTest.håndterAnmodningOmForkasting(
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer),
         force = force,
         orgnummer = orgnummer,
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterAnmodningOmForkasting)
 }
 
 internal fun AbstractEndToEndTest.håndterUtbetalingsgodkjenning(
@@ -859,7 +859,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingsgodkjenning(
     ),
 ) {
     assertEtterspurt(Utbetalingsgodkjenning::class, Behovtype.Godkjenning, vedtaksperiodeIdInnhenter, orgnummer)
-    utbetalingsgodkjenning(vedtaksperiodeIdInnhenter, utbetalingGodkjent, orgnummer, automatiskBehandling, utbetalingId).håndter(Person::håndter)
+    utbetalingsgodkjenning(vedtaksperiodeIdInnhenter, utbetalingGodkjent, orgnummer, automatiskBehandling, utbetalingId).håndter(Person::håndterUtbetalingsgodkjenning)
 }
 
 internal fun AbstractEndToEndTest.håndterUtbetalt(
@@ -876,7 +876,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
         orgnummer = orgnummer,
         meldingsreferanseId = meldingsreferanseId,
         utbetalingId = UUID.fromString(faktiskUtbetalingId)
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterUtbetalingHendelse)
 }
 
 private fun Oppdrag.fagsytemIdOrNull() = if (harUtbetalinger()) inspektør.fagsystemId() else null
@@ -926,7 +926,7 @@ internal fun AbstractEndToEndTest.håndterAnnullerUtbetaling(
         opprettet = opprettet,
         årsaker = listOf("Annet"),
         begrunnelse = ""
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterAnnulerUtbetaling)
 }
 
 internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
@@ -937,7 +937,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
     forklaring: String = "forklaring",
     begrunnelse: OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse.Begrunnelse? = null
 ) {
-    håndterOverstyrArbeidsgiveropplysninger(
+    this@håndterOverstyrInntekt.håndterOverstyrArbeidsgiveropplysninger(
         skjæringstidspunkt,
         listOf(OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, emptyList(), OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(forklaring, begrunnelse))),
         listOf(OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse(forklaring, begrunnelse)),
@@ -953,7 +953,7 @@ internal fun AbstractEndToEndTest.håndterMinimumSykdomsgradVurdert(
         perioderMedMinimumSykdomsgradVurdertOK.toSet(),
         perioderMedMinimumSykdomsgradVurdertIkkeOK.toSet(),
         MeldingsreferanseId(UUID.randomUUID())
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterMinimumSykdomsgradsvurderingMelding)
 }
 
 internal fun AbstractEndToEndTest.håndterOverstyrArbeidsgiveropplysninger(
@@ -969,7 +969,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrArbeidsgiveropplysninger(
         arbeidsgiveropplysninger = arbeidsgiveropplysninger.tilOverstyrt(meldingsreferanseId, skjæringstidspunkt),
         refusjonstidslinjer = arbeidsgiveropplysninger.refusjonstidslinjer(meldingsreferanseId, opprettet),
         opprettet = opprettet
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterOverstyrArbeidsgiveropplysninger)
     return meldingsreferanseId
 }
 
@@ -983,7 +983,7 @@ internal fun AbstractEndToEndTest.håndterSkjønnsmessigFastsettelse(
         skjæringstidspunkt = skjæringstidspunkt,
         arbeidsgiveropplysninger = arbeidsgiveropplysninger.tilSkjønnsmessigFastsatt(meldingsreferanseId, skjæringstidspunkt),
         opprettet = LocalDateTime.now()
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterSkjønnsmessigFastsettelse)
     return meldingsreferanseId
 }
 
@@ -1047,7 +1047,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrTidslinje(
         opprettet = LocalDateTime.now()
     )
     håndterOgReplayInntektsmeldinger(orgnummer) {
-        hendelse.also { it.håndter(Person::håndter) }
+        hendelse.also { it.håndter(Person::håndterOverstyrTidslinje) }
     }
     return hendelse
 }
@@ -1061,7 +1061,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrArbeidsforhold(
         skjæringstidspunkt = skjæringstidspunkt,
         overstyrteArbeidsforhold = overstyrteArbeidsforhold,
         opprettet = LocalDateTime.now()
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterOverstyrArbeidsforhold)
 }
 
 internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkForFeriepenger(
@@ -1077,7 +1077,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkForFeriepenger(
         feriepengehistorikk = feriepengehistorikk,
         datoForSisteFeriepengekjøringIInfotrygd = datoForSisteFeriepengekjøringIInfotrygd,
         skalBeregnesManuelt = skalBeregnesManuelt
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterUtbetalingshistorikkForFeriepenger)
 }
 
 internal fun AbstractEndToEndTest.håndterFeriepengerUtbetalt(
@@ -1091,10 +1091,10 @@ internal fun AbstractEndToEndTest.håndterFeriepengerUtbetalt(
         status = status,
         orgnummer = orgnummer,
         meldingsreferanseId = meldingsreferanseId
-    ).håndter(Person::håndter)
+    ).håndter(Person::håndterFeriepengeutbetalingHendelse)
 }
 
-internal fun AbstractEndToEndTest.håndterOverstyringSykedag(periode: Periode) = håndterOverstyrTidslinje(periode.map { manuellSykedag(it) })
+internal fun AbstractEndToEndTest.håndterOverstyringSykedag(periode: Periode) = this@håndterOverstyringSykedag.håndterOverstyrTidslinje(periode.map { manuellSykedag(it) })
 
 internal fun AbstractEndToEndTest.nyPeriode(periode: Periode, orgnummer: String = a1, grad: Prosentdel = 100.prosent) {
     håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = orgnummer)

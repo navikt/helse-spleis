@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
@@ -19,7 +20,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -46,7 +46,7 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
         håndterArbeidsgiveropplysninger(listOf(3.mars til 18.mars), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(GradertPeriode(3.februar til 20.februar, 100)))
+        this@OpplæringspengeE2ETest.håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(GradertPeriode(3.februar til 20.februar, 100)))
         assertVarsel(Varselkode.RV_AY_8, 1.vedtaksperiode.filter())
         assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
@@ -57,7 +57,7 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
         håndterArbeidsgiveropplysninger(listOf(3.mars til 18.mars), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(GradertPeriode(3.januar til 20.januar, 100)))
+        this@OpplæringspengeE2ETest.håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(GradertPeriode(3.januar til 20.januar, 100)))
 
         assertIngenFunksjonelleFeil()
         assertVarsler(emptyList(), 1.vedtaksperiode.filter())
@@ -69,9 +69,9 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, opplæringspenger = emptyList())
+        this@OpplæringspengeE2ETest.håndterYtelser(1.vedtaksperiode, opplæringspenger = emptyList())
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        this@OpplæringspengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertTilstander(
@@ -95,7 +95,7 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(GradertPeriode(januar, 100)))
+        this@OpplæringspengeE2ETest.håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(GradertPeriode(januar, 100)))
         assertVarsel(Varselkode.RV_AY_8, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
@@ -106,7 +106,7 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(GradertPeriode(1.desember(2017) til 1.januar, 100)))
+        this@OpplæringspengeE2ETest.håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(GradertPeriode(1.desember(2017) til 1.januar, 100)))
         assertVarsel(Varselkode.RV_AY_8, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
@@ -117,7 +117,7 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(GradertPeriode(31.januar til 14.februar, 100)))
+        this@OpplæringspengeE2ETest.håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(GradertPeriode(31.januar til 14.februar, 100)))
         assertVarsel(Varselkode.RV_AY_8, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }

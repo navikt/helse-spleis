@@ -14,7 +14,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.hentFeltFraBehov
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -40,12 +39,12 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.fail
-import no.nav.helse.økonomi.inspectors.inspektør
 
 internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
     @Test
@@ -62,13 +61,13 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        håndterYtelser(1.vedtaksperiode)
+        this@OverstyrArbeidsforholdTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
         val relevanteOrgnumre1: Iterable<String> = hendelselogg.hentFeltFraBehov(1.vedtaksperiode.id(a1), Behovtype.Godkjenning, "orgnummereMedRelevanteArbeidsforhold") ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
         assertEquals(listOf(a1, a2).toList(), relevanteOrgnumre1.toList())
-        håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
-        håndterYtelser(1.vedtaksperiode)
+        this@OverstyrArbeidsforholdTest.håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
+        this@OverstyrArbeidsforholdTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         val relevanteOrgnumre2: Iterable<String> = hendelselogg.hentFeltFraBehov(1.vedtaksperiode.id(a1), Behovtype.Godkjenning, "orgnummereMedRelevanteArbeidsforhold") ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
         assertEquals(listOf(a1), relevanteOrgnumre2.toList())
@@ -89,7 +88,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        håndterYtelser(1.vedtaksperiode)
+        this@OverstyrArbeidsforholdTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
         inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode)[17.januar].also {
@@ -97,8 +96,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
-        håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
-        håndterYtelser(1.vedtaksperiode)
+        this@OverstyrArbeidsforholdTest.håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
+        this@OverstyrArbeidsforholdTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode)[17.januar].also {
             assertEquals(1431.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
@@ -138,15 +137,15 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a2))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        this@OverstyrArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode)[17.januar].also {
             assertEquals(1080.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
-        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")))
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        this@OverstyrArbeidsforholdTest.håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")))
+        this@OverstyrArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode)[17.januar].also {
             assertEquals(1080.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
@@ -178,10 +177,10 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@OverstyrArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         assertThrows<IllegalStateException>("Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til") {
-            håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")))
+            this@OverstyrArbeidsforholdTest.håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")))
         }
     }
 
@@ -206,15 +205,15 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@OverstyrArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode)[17.januar].also {
             assertEquals(1075.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
-        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")))
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@OverstyrArbeidsforholdTest.håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")))
+        this@OverstyrArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode)[17.januar].also {
             assertEquals(1080.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
@@ -250,7 +249,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
         assertVarsler(listOf(Varselkode.RV_VV_1, RV_VV_2), 1.vedtaksperiode.filter(orgnummer = a2))
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        this@OverstyrArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         assertVarsel(Varselkode.RV_VV_8, 1.vedtaksperiode.filter(orgnummer = a2))
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
@@ -276,11 +275,11 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@OverstyrArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         assertThrows<IllegalStateException> {
-            håndterOverstyrArbeidsforhold(2.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
+            this@OverstyrArbeidsforholdTest.håndterOverstyrArbeidsforhold(2.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
         }
     }
 
@@ -305,10 +304,10 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@OverstyrArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@OverstyrArbeidsforholdTest.håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
+        this@OverstyrArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, 3800.månedlig)
@@ -339,15 +338,15 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@OverstyrArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode)[17.januar].also {
             assertEquals(1431.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
             assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
         }
-        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@OverstyrArbeidsforholdTest.håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
+        this@OverstyrArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode)[17.januar].also {
             assertEquals(0.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)

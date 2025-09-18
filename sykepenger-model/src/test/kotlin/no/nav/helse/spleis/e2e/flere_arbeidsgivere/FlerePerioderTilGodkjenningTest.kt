@@ -15,7 +15,7 @@ internal class FlerePerioderTilGodkjenningTest : AbstractEndToEndTest() {
     fun `flere perioder til godkjenning samtidig`() {
         createTestPerson { jurist -> gjenopprettFraJSON("/personer/to_perioder_til_godkjenning_samtidig.json", jurist) }
         val m = assertThrows<IllegalStateException> {
-            håndterPåminnelse(1.vedtaksperiode, påminnetTilstand = TilstandType.AVVENTER_GODKJENNING, orgnummer = a1)
+            this@FlerePerioderTilGodkjenningTest.håndterPåminnelse(1.vedtaksperiode, påminnetTilstand = TilstandType.AVVENTER_GODKJENNING, orgnummer = a1)
         }
         assertTrue(m.message?.contains("Ugyldig situasjon! Flere perioder til godkjenning samtidig") == true)
     }

@@ -11,13 +11,13 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -54,7 +54,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
             assertInntektsgrunnlag(a2, INNTEKT)
         }
         håndterOverstyrInntekt(19000.månedlig, a1, 1.januar)
-        håndterYtelser(1.vedtaksperiode)
+        this@OverstyrInntektFlereArbeidsgivereTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
@@ -83,9 +83,9 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
     @Test
     fun `skal ikke kunne overstyre en arbeidsgiver hvis en annen er utbetalt`() {
         tilGodkjenning(januar, a1, a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@OverstyrInntektFlereArbeidsgivereTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        this@OverstyrInntektFlereArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterOverstyrInntekt(19000.månedlig, a2, 1.januar)
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
@@ -107,7 +107,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
         }
 
         nullstillTilstandsendringer()
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@OverstyrInntektFlereArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         assertTilstander(
             1.vedtaksperiode,
@@ -122,7 +122,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
     fun `overstyrer inntekt til under krav til minste inntekt`() {
         tilGodkjenning(januar, a1, a2, beregnetInntekt = 1959.månedlig)
         håndterOverstyrInntekt(1500.månedlig, a1, 1.januar)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@OverstyrInntektFlereArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsel(RV_SV_1, 1.vedtaksperiode.filter(a1))
         assertIngenFunksjonelleFeil()
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
@@ -150,10 +150,10 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@OverstyrInntektFlereArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrInntekt(8000.månedlig, skjæringstidspunkt = 1.januar, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@OverstyrInntektFlereArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         inspektør(a1).utbetaling(1).also { utbetaling ->
             assertEquals(1, utbetaling.arbeidsgiverOppdrag.size)
@@ -188,7 +188,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@OverstyrInntektFlereArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
     }
 }

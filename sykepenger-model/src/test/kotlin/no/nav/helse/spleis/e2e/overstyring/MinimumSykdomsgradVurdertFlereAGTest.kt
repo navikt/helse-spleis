@@ -5,10 +5,10 @@ import no.nav.helse.dsl.a2
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -22,10 +22,10 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import no.nav.helse.økonomi.inspectors.inspektør
 
 internal class MinimumSykdomsgradVurdertFlereAGTest : AbstractEndToEndTest() {
 
@@ -46,7 +46,7 @@ internal class MinimumSykdomsgradVurdertFlereAGTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@MinimumSykdomsgradVurdertFlereAGTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -58,15 +58,15 @@ internal class MinimumSykdomsgradVurdertFlereAGTest : AbstractEndToEndTest() {
         assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter(a1))
 
         håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = emptyList(), perioderMedMinimumSykdomsgradVurdertIkkeOK = listOf(januar))
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@MinimumSykdomsgradVurdertFlereAGTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
         assertEquals(11, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
         assertTrue(inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.all { it.økonomi.inspektør.grad == 15.prosent })
         assertTrue(inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.all { it.økonomi.inspektør.totalGrad == 18 })
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@MinimumSykdomsgradVurdertFlereAGTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        this@MinimumSykdomsgradVurdertFlereAGTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         val avvistedager2 = inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager
         assertEquals(11, avvistedager2.size)
         assertTrue(avvistedager2.all { it.begrunnelser == listOf(Begrunnelse.MinimumSykdomsgrad) })
@@ -74,7 +74,7 @@ internal class MinimumSykdomsgradVurdertFlereAGTest : AbstractEndToEndTest() {
         assertTrue(inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.all { it.økonomi.inspektør.grad == 20.prosent })
         assertTrue(inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.all { it.økonomi.inspektør.totalGrad == 18 })
 
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        this@MinimumSykdomsgradVurdertFlereAGTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
         assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)

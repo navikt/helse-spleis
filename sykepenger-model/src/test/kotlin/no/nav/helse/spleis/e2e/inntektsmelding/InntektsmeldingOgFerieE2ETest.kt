@@ -68,9 +68,9 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@InntektsmeldingOgFerieE2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@InntektsmeldingOgFerieE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar), orgnummer = a2)
@@ -96,12 +96,12 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@InntektsmeldingOgFerieE2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@InntektsmeldingOgFerieE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        this@InntektsmeldingOgFerieE2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        this@InntektsmeldingOgFerieE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         nullstillTilstandsendringer()
         håndterUtbetalt(orgnummer = a2)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)

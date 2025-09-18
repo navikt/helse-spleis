@@ -127,7 +127,7 @@ internal abstract class AbstractEndToEndTest {
                 listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar))
             ),
             besvart = LocalDateTime.now()
-        ).håndter(Person::håndter)
+        ).håndter(Person::håndterUtbetalingshistorikk)
     }
     protected fun createOvergangFraInfotrygdPerson() = createTestPerson { regelverkslogg -> overgangFraInfotrygdPerson(regelverkslogg) }.also {
         UtbetalingshistorikkEtterInfotrygdendring(
@@ -138,7 +138,7 @@ internal abstract class AbstractEndToEndTest {
                 listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
             ),
             besvart = LocalDateTime.now()
-        ).håndter(Person::håndter)
+        ).håndter(Person::håndterUtbetalingshistorikkEtterInfotrygdendring)
     }
 
     protected fun createTestPerson(block: (regelverkslogg: Regelverkslogg) -> Person): Person {

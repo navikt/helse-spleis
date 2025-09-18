@@ -11,11 +11,11 @@ import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -41,13 +41,15 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         håndterSøknad(2.januar(2025) til 15.januar(2025))
         håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(16.desember(2024) til 19.desember(2024), 2.januar(2025) til 13.januar(2025)), beregnetInntekt = INNTEKT, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        this@InfotrygdendringE2ETest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        this@InfotrygdendringE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         assertEquals(2.januar(2025), inspektør.vedtaksperioder(2.vedtaksperiode).skjæringstidspunkt)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 20.november(2024), 30.november(2024)
+        this@InfotrygdendringE2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(
+            ArbeidsgiverUtbetalingsperiode(
+                a1, 20.november(2024), 30.november(2024)
         ))
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -59,7 +61,9 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 16.januar)
         håndterInfotrygdendring()
         assertTrue(personlogg.harBehov(Sykepengehistorikk))
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2016), 31.januar(2016)
+        this@InfotrygdendringE2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(
+            ArbeidsgiverUtbetalingsperiode(
+                a1, 1.januar(2016), 31.januar(2016)
         ))
 
         val infotrygdHistorikk = person.inspektør.utbetaltIInfotrygd
@@ -72,7 +76,9 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 20.januar)
         nyPeriode(21.januar til 31.januar)
         håndterInfotrygdendring()
-        val meldingsreferanseId = håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar
+        val meldingsreferanseId = this@InfotrygdendringE2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(
+            ArbeidsgiverUtbetalingsperiode(
+                a1, 17.januar, 31.januar
         ))
 
         assertEquals(2, observatør.overlappendeInfotrygdperioder.size)

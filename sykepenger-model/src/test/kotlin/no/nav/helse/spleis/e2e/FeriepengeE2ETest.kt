@@ -68,7 +68,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals(0, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
         }
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2022),
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2023)
         )
@@ -80,11 +80,11 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     @Test
     fun `person som har fått revurdert en utbetalt periode med ferie`() {
         nyttVedtak(januar)
-        håndterOverstyrTidslinje(januar.map { ManuellOverskrivingDag(it, Dagtype.Feriedag) })
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterOverstyrTidslinje(januar.map { ManuellOverskrivingDag(it, Dagtype.Feriedag) })
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         inspektør.utbetaling(1).let { utbetalingInspektør ->
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
@@ -95,7 +95,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 assertEquals(17.januar, linje.datoStatusFom)
             }
         }
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2018),
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2019)
         )
@@ -111,7 +111,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
         }
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2022),
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2023)
         )
@@ -130,7 +130,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
         }
         val dagsatsIT = (INNTEKT / 2).dagligInt
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2022),
             utbetalinger = listOf(
                 Arbeidsgiverutbetalingsperiode(a1, 17.mars(2022), 31.mars(2022), dagsatsIT, 31.mars(2022)),
@@ -157,7 +157,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
         }
         val dagsatsIT = (INNTEKT / 2).dagligInt
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2022),
             utbetalinger = listOf(
                 Arbeidsgiverutbetalingsperiode(a1, 17.mars(2022), 31.desember(2022), dagsatsIT, 31.mars(2022)),
@@ -194,7 +194,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         nyttVedtak(1.januar(2022) til 31.mars(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
         val dagsatsIT = 1574
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2022),
             utbetalinger = listOf(
                 Personutbetalingsperiode(a1, 1.august(2022), 31.oktober(2022), dagsatsIT, 31.mars(2022))
@@ -224,7 +224,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         val dagsatsIT = 1574
 
         // Første kjøring
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2022),
             utbetalinger = listOf(
                 Personutbetalingsperiode(a1, 1.august(2022), 31.oktober(2022), dagsatsIT, 31.mars(2022))
@@ -252,7 +252,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         )
         håndterUtbetalt()
         // Andre kjøring ❤️
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2022),
             utbetalinger = listOf(
                 Personutbetalingsperiode(a1, 17.januar(2022), 31.mars(2022), dagsatsIT, 31.mars(2022)),
@@ -277,7 +277,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     @Test
     fun `serialiserer og deserialiserer Spleis feriepengebeløp for person`() {
         nyttVedtak(1.januar(2022) til 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2022),
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2023)
         )
@@ -295,12 +295,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
@@ -328,12 +328,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             utbetalinger = listOf(
                 Arbeidsgiverutbetalingsperiode(
@@ -364,7 +364,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Legger ikke infotrygdcache til grunn for feriepenger`() {
-        håndterUtbetalingshistorikkEtterInfotrygdendring(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2020), 31.januar(2020))
         )
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
@@ -374,12 +374,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             utbetalinger = listOf(
                 Arbeidsgiverutbetalingsperiode(
@@ -417,12 +417,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021),
             skalBeregnesManuelt = true
@@ -441,12 +441,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             utbetalinger = listOf(
                 Arbeidsgiverutbetalingsperiode(
@@ -463,7 +463,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.feriepengeoppdrag.size)
         assertEquals(1, engangsutbetalinger().size)
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             utbetalinger = listOf(
                 Arbeidsgiverutbetalingsperiode(
@@ -492,12 +492,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             utbetalinger = listOf(
                 Arbeidsgiverutbetalingsperiode(
@@ -521,7 +521,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Ghost arbeidsgiver fra feriepengeberegner påvirker ikke senere sykepengeberegning`() {
         val ORGNUMMER2 = "978654321"
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             utbetalinger = listOf(
                 Arbeidsgiverutbetalingsperiode(
@@ -542,9 +542,9 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
 
@@ -562,13 +562,13 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         fangLoggmeldinger("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") {
-            håndterUtbetalingshistorikkForFeriepenger(
+            this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020),
                 utbetalinger = listOf(
                     Arbeidsgiverutbetalingsperiode(
@@ -600,13 +600,13 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         fangLoggmeldinger("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") {
-            håndterUtbetalingshistorikkForFeriepenger(
+            this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020),
                 utbetalinger = listOf(
                     Arbeidsgiverutbetalingsperiode(
@@ -638,13 +638,13 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         fangLoggmeldinger("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") {
-            håndterUtbetalingshistorikkForFeriepenger(
+            this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020),
                 feriepengehistorikk = listOf(
                     UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 4000, 1.mai(2021), 31.mai(2021))
@@ -667,12 +667,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
@@ -696,12 +696,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
@@ -728,12 +728,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
@@ -743,12 +743,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.juli(2020), 10.juli(2020)))
         håndterSøknad(1.juli(2020) til 10.juli(2020))
-        håndterYtelser(2.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
@@ -783,7 +783,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 listOf(6.juni(2020) til 7.juni(2020))
             )
 
-            håndterUtbetalingshistorikkForFeriepenger(
+            this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020),
                 datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
             )
@@ -800,16 +800,16 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             utbetalinger = listOf(
                 Arbeidsgiverutbetalingsperiode(
                     a1,
@@ -836,18 +836,18 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
         val førsteUtbetaling = engangsutbetalinger().last()
         val fagsystemId = førsteUtbetaling.detaljer()["fagsystemId"]
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             utbetalinger = listOf(
                 Arbeidsgiverutbetalingsperiode(
                     a1,
@@ -881,12 +881,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             utbetalinger = listOf(
                 Arbeidsgiverutbetalingsperiode(
                     a1,
@@ -900,7 +900,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 1.juli(2020)
         )
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             utbetalinger = listOf(
                 Arbeidsgiverutbetalingsperiode(
                     a1,
@@ -931,26 +931,26 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
         )
         val førsteUtbetaling = engangsutbetalinger().last()
         val fagsystemId = førsteUtbetaling.detaljer()["fagsystemId"]
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
         )
         assertEquals(4, inspektør.feriepengeoppdrag.size)
         assertEquals(1, engangsutbetalinger().size)
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             utbetalinger = listOf(
                 Arbeidsgiverutbetalingsperiode(
                     a1,
@@ -985,19 +985,19 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 vedtaksperiodeIdInnhenter = 1.vedtaksperiode
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
+            this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterUtbetalingshistorikkForFeriepenger(
+            this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020),
                 datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
             )
             val førsteUtbetaling = engangsutbetalinger()
 
             Toggle.SendFeriepengeOppdrag.disable {
-                håndterUtbetalingshistorikkForFeriepenger(
+                this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
                     utbetalinger = listOf(
                         Arbeidsgiverutbetalingsperiode(
                             a1,
@@ -1028,12 +1028,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
         )
@@ -1044,7 +1044,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
         )
@@ -1067,12 +1067,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
         )
@@ -1083,12 +1083,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
         )
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
         )
@@ -1117,12 +1117,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
         )
@@ -1133,7 +1133,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
         )
@@ -1145,12 +1145,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
+        this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020)
         )
@@ -1185,13 +1185,13 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         fangLoggmeldinger("Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale") {
-            håndterUtbetalingshistorikkForFeriepenger(
+            this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020),
                 utbetalinger = listOf(
                     Personutbetalingsperiode(a1, 1.september(2020), 15.september(2020), 1172, 20.september(2020)),
@@ -1219,13 +1219,13 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         fangLoggmeldinger("Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale") {
-            håndterUtbetalingshistorikkForFeriepenger(
+            this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020),
                 utbetalinger = listOf(
                     Personutbetalingsperiode(a1, 1.januar(2020), 6.mars(2020), 1172, 20.mars(2020)),
@@ -1248,13 +1248,13 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         fangLoggmeldinger("Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale") {
-            håndterUtbetalingshistorikkForFeriepenger(
+            this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020),
                 utbetalinger = listOf(
                     Personutbetalingsperiode("0", 1.september(2020), 15.september(2020), 1172, 20.september(2020)),
@@ -1282,13 +1282,13 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@FeriepengeE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         fangLoggmeldinger("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\"") {
-            håndterUtbetalingshistorikkForFeriepenger(
+            this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020),
                 utbetalinger = listOf(
                     // Ikke funksjonelt gyldig med refusjon til orgnr 0

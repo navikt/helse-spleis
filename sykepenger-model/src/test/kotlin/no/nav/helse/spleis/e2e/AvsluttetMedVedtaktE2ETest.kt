@@ -17,11 +17,11 @@ import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterHove
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.somOrganisasjonsnummer
@@ -84,8 +84,8 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         nyttVedtak(1.januar til 20.januar, 100.prosent)
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent), Ferie(21.januar, 31.januar))
-        håndterYtelser(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        this@AvsluttetMedVedtaktE2ETest.håndterYtelser(2.vedtaksperiode)
+        this@AvsluttetMedVedtaktE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertEquals(2, inspektør.antallUtbetalinger)
         assertEquals(1, observatør.utbetalingUtenUtbetalingEventer.size)
@@ -122,14 +122,14 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@AvsluttetMedVedtaktE2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@AvsluttetMedVedtaktE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        this@AvsluttetMedVedtaktE2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        this@AvsluttetMedVedtaktE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
@@ -169,15 +169,15 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-        håndterSkjønnsmessigFastsettelse(1.januar(2020), listOf(OverstyrtArbeidsgiveropplysning(a1, 46000.månedlig), OverstyrtArbeidsgiveropplysning(a2, 45000.månedlig)))
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@AvsluttetMedVedtaktE2ETest.håndterSkjønnsmessigFastsettelse(1.januar(2020), listOf(OverstyrtArbeidsgiveropplysning(a1, 46000.månedlig), OverstyrtArbeidsgiveropplysning(a2, 45000.månedlig)))
+        this@AvsluttetMedVedtaktE2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@AvsluttetMedVedtaktE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        this@AvsluttetMedVedtaktE2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        this@AvsluttetMedVedtaktE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
@@ -219,13 +219,13 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "noe"
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@AvsluttetMedVedtaktE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         val liste = (1..16).map {
             ManuellOverskrivingDag(it.januar, Dagtype.Feriedag)
         }
-        håndterOverstyrTidslinje(liste)
+        this@AvsluttetMedVedtaktE2ETest.håndterOverstyrTidslinje(liste)
         assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         val utbetaling = inspektør.utbetaling(0)
@@ -264,11 +264,11 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
     @Test
     fun `sender med tidligere dokumenter etter revurdering`() {
         nyttVedtak(januar)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-        håndterYtelser(1.vedtaksperiode)
+        this@AvsluttetMedVedtaktE2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+        this@AvsluttetMedVedtaktE2ETest.håndterYtelser(1.vedtaksperiode)
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@AvsluttetMedVedtaktE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertEquals(1, observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode.id(a1)).size)
         val tidligereVedtak = observatør.avsluttetMedVedtakEvent.getValue(1.vedtaksperiode.id(a1))
         håndterUtbetalt()

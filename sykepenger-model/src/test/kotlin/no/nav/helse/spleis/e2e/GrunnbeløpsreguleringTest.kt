@@ -54,10 +54,10 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     @Test
     fun `Grunnbeløpsregulering på en utbetalt periode`() {
         tilGodkjenningMedFeilGrunnbeløp()
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@GrunnbeløpsreguleringTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         håndterGrunnbeløpsregulering(1.januar)
-        håndterYtelser(1.vedtaksperiode)
+        this@GrunnbeløpsreguleringTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
         assertTrue(observatør.utkastTilVedtakEventer.last().tags.contains("Grunnbeløpsregulering"))
@@ -67,7 +67,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     fun `Grunnbeløpsregulering på en periode som står til godkjenning`() {
         tilGodkjenningMedFeilGrunnbeløp()
         håndterGrunnbeløpsregulering(1.januar)
-        håndterYtelser(1.vedtaksperiode)
+        this@GrunnbeløpsreguleringTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
         assertTrue(observatør.utkastTilVedtakEventer.last().tags.contains("Grunnbeløpsregulering"))
@@ -86,14 +86,14 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         assertEquals(riktig6G.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.`6G`)
         hackGrunnbeløp(fra = riktig6G, til = feil6G) // Hacker inn 2017-G
         assertEquals(feil6G.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.`6G`)
-        håndterYtelser(1.vedtaksperiode)
+        this@GrunnbeløpsreguleringTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         nullstillTilstandsendringer()
     }
 
     private fun håndterGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) {
-        ArbeidsgiverHendelsefabrikk(a1, behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1)).lagGrunnbeløpsregulering(skjæringstidspunkt).håndter(Person::håndter)
+        ArbeidsgiverHendelsefabrikk(a1, behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1)).lagGrunnbeløpsregulering(skjæringstidspunkt).håndter(Person::håndterGrunnbeløpsregulering)
     }
 
     private fun hackGrunnbeløp(fra: Int, til: Int) {

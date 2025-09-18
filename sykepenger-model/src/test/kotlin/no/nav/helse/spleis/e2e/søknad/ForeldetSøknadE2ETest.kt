@@ -55,8 +55,8 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning()
+        this@ForeldetSøknadE2ETest.håndterYtelser(1.vedtaksperiode)
+        this@ForeldetSøknadE2ETest.håndterUtbetalingsgodkjenning()
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -80,8 +80,8 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         )
         håndterArbeidsgiveropplysninger(listOf(15.januar til 30.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@ForeldetSøknadE2ETest.håndterYtelser(1.vedtaksperiode)
+        this@ForeldetSøknadE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
         assertEquals(Dag.ForeldetSykedag::class, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode)[31.januar]::class)
         assertTilstander(
@@ -129,8 +129,8 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@ForeldetSøknadE2ETest.håndterYtelser(1.vedtaksperiode)
+        this@ForeldetSøknadE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
         // foreldet søknad :(
         håndterSøknad(Sykdom(24.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
@@ -139,13 +139,13 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 24.januar
         )
 
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@ForeldetSøknadE2ETest.håndterYtelser(1.vedtaksperiode)
+        this@ForeldetSøknadE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        this@ForeldetSøknadE2ETest.håndterYtelser(2.vedtaksperiode)
+        this@ForeldetSøknadE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
         assertVarsel(RV_SØ_2, 2.vedtaksperiode.filter())
@@ -176,8 +176,8 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.juni)
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@ForeldetSøknadE2ETest.håndterYtelser(1.vedtaksperiode)
+        this@ForeldetSøknadE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
         // foreldet søknad :(
         håndterSøknad(Sykdom(19.februar, 12.mars, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.juli)
@@ -186,8 +186,8 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        this@ForeldetSøknadE2ETest.håndterYtelser(2.vedtaksperiode)
+        this@ForeldetSøknadE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
         assertVarsel(RV_SØ_2, 2.vedtaksperiode.filter())

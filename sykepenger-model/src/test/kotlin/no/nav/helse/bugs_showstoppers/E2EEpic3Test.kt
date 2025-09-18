@@ -76,7 +76,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(a1, 29.november(2017), 3.desember(2017)),
             ArbeidsgiverUtbetalingsperiode(a1, 13.november(2017), 28.november(2017))
         )
-        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger)
+        this@E2EEpic3Test.håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger)
 
         håndterSykmelding(Sykmeldingsperiode(15.januar(2020), 12.februar(2020)))
         håndterSøknad(Sykdom(15.januar(2020), 12.februar(2020), 100.prosent))
@@ -85,7 +85,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@E2EEpic3Test.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTilstander(
             1.vedtaksperiode,
@@ -190,7 +190,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
 
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, LocalDateTime.now().minusDays(181))
+        this@E2EEpic3Test.håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, LocalDateTime.now().minusDays(181))
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
@@ -350,7 +350,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        this@E2EEpic3Test.håndterYtelser(2.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(
@@ -375,11 +375,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@E2EEpic3Test.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        this@E2EEpic3Test.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        håndterYtelser(2.vedtaksperiode)
+        this@E2EEpic3Test.håndterYtelser(2.vedtaksperiode)
 
         assertTilstander(
             1.vedtaksperiode,
@@ -440,7 +440,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), Ferie(3.januar(2020), 10.januar(2020)), sendtTilNAVEllerArbeidsgiver = 1.februar(2020))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@E2EEpic3Test.håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
             assertEquals(16, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
@@ -480,7 +480,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.februar(2020))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@E2EEpic3Test.håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
             assertEquals(16, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
@@ -517,8 +517,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei)
         assertVarsel(Varselkode.RV_MV_2, 1.vedtaksperiode.filter())
-        håndterYtelser()
-        håndterUtbetalingsgodkjenning()
+        this@E2EEpic3Test.håndterYtelser()
+        this@E2EEpic3Test.håndterUtbetalingsgodkjenning()
 
         assertTilstander(
             1.vedtaksperiode,
@@ -553,9 +553,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = arbeidsforhold)
-        håndterYtelser()
+        this@E2EEpic3Test.håndterYtelser()
         håndterSimulering()
-        håndterUtbetalingsgodkjenning()
+        this@E2EEpic3Test.håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
 
         assertTilstander(
@@ -589,9 +589,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode, arbeidsforhold = arbeidsforhold)
-        håndterYtelser(2.vedtaksperiode)
+        this@E2EEpic3Test.håndterYtelser(2.vedtaksperiode)
         assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_VV_1), 2.vedtaksperiode.filter())
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        this@E2EEpic3Test.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         assertTilstander(
             2.vedtaksperiode,
@@ -632,9 +632,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = arbeidsforhold)
-        håndterYtelser()
+        this@E2EEpic3Test.håndterYtelser()
         assertVarsel(Varselkode.RV_OV_1, 1.vedtaksperiode.filter())
-        håndterUtbetalingsgodkjenning()
+        this@E2EEpic3Test.håndterUtbetalingsgodkjenning()
 
         assertTilstander(
             1.vedtaksperiode,
@@ -665,9 +665,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode, arbeidsforhold = arbeidsforhold)
-        håndterYtelser(2.vedtaksperiode)
+        this@E2EEpic3Test.håndterYtelser(2.vedtaksperiode)
         assertVarsler(listOf(Varselkode.RV_OV_1, Varselkode.RV_VV_1), 2.vedtaksperiode.filter())
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        this@E2EEpic3Test.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         assertTilstander(
             2.vedtaksperiode,
@@ -708,8 +708,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser()
-        håndterUtbetalingsgodkjenning()
+        this@E2EEpic3Test.håndterYtelser()
+        this@E2EEpic3Test.håndterUtbetalingsgodkjenning()
         assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
         assertTilstander(
             1.vedtaksperiode,
@@ -740,9 +740,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        this@E2EEpic3Test.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        this@E2EEpic3Test.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         assertTilstander(
@@ -794,7 +794,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             Sykdom(26.juni(2020), 17.juli(2020), 100.prosent)
         )
         assertDoesNotThrow {
-            håndterPåminnelse(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING, LocalDateTime.now().minusMonths(2))
+            this@E2EEpic3Test.håndterPåminnelse(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING, LocalDateTime.now().minusMonths(2))
         }
     }
 
@@ -807,9 +807,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@E2EEpic3Test.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        this@E2EEpic3Test.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
 
         håndterSykmelding(Sykmeldingsperiode(9.juli, 31.juli))
         håndterSøknad(Sykdom(9.juli, 31.juli, 100.prosent))
@@ -833,9 +833,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(1.januar, 30.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@E2EEpic3Test.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        this@E2EEpic3Test.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(9.januar, 31.januar))

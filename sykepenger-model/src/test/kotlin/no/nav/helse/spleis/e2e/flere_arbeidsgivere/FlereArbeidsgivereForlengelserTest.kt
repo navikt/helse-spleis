@@ -7,14 +7,14 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -48,13 +48,13 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@FlereArbeidsgivereForlengelserTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
+        this@FlereArbeidsgivereForlengelserTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        this@FlereArbeidsgivereForlengelserTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a2)
+        this@FlereArbeidsgivereForlengelserTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         //Forlengelsen starter her
@@ -79,24 +79,24 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        this@FlereArbeidsgivereForlengelserTest.håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_SIMULERING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING, orgnummer = a1)
 
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a1)
+        this@FlereArbeidsgivereForlengelserTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.TIL_UTBETALING, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK, orgnummer = a2)
 
-        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        this@FlereArbeidsgivereForlengelserTest.håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_SIMULERING, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a2)
+        this@FlereArbeidsgivereForlengelserTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.TIL_UTBETALING, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)
@@ -111,20 +111,20 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@FlereArbeidsgivereForlengelserTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@FlereArbeidsgivereForlengelserTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), orgnummer = a2, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@FlereArbeidsgivereForlengelserTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@FlereArbeidsgivereForlengelserTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        this@FlereArbeidsgivereForlengelserTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        this@FlereArbeidsgivereForlengelserTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)

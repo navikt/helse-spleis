@@ -837,22 +837,22 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     private fun opprettTestdata(person: Person): (TestDataSource) -> Unit {
         return fun(testDataSource: TestDataSource) {
             observatør = TestObservatør().also { person.addObserver(it) }
-            person.håndter(sykmelding(), Aktivitetslogg())
-            person.håndter(utbetalinghistorikk(), Aktivitetslogg())
-            person.håndter(søknad(), Aktivitetslogg())
-            person.håndter(inntektsmelding(), Aktivitetslogg())
-            person.håndter(ytelser(), Aktivitetslogg())
-            person.håndter(vilkårsgrunnlag(), Aktivitetslogg())
+            person.håndterSykmelding(sykmelding(), Aktivitetslogg())
+            person.håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinghistorikk(), Aktivitetslogg())
+            person.håndterSøknad(søknad(), Aktivitetslogg())
+            person.håndterInntektsmelding(inntektsmelding(), Aktivitetslogg())
+            person.håndterYtelser(ytelser(), Aktivitetslogg())
+            person.håndterVilkårsgrunnlag(vilkårsgrunnlag(), Aktivitetslogg())
             val ytelser = ytelser()
             val aktivitetslogg = Aktivitetslogg()
-            person.håndter(ytelser, aktivitetslogg)
+            person.håndterYtelser(ytelser, aktivitetslogg)
             val simuleringsbehov = aktivitetslogg.behov.last { it.type == Simulering }
             val utbetalingId = UUID.fromString(simuleringsbehov.alleKontekster.getValue("utbetalingId"))
             val fagsystemId = simuleringsbehov.detaljer().getValue("fagsystemId") as String
             val fagområde = simuleringsbehov.detaljer().getValue("fagområde") as String
-            person.håndter(simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde), Aktivitetslogg())
-            person.håndter(utbetalingsgodkjenning(utbetalingId = utbetalingId), Aktivitetslogg())
-            person.håndter(utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId), Aktivitetslogg())
+            person.håndterSimulering(simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde), Aktivitetslogg())
+            person.håndterUtbetalingsgodkjenning(utbetalingsgodkjenning(utbetalingId = utbetalingId), Aktivitetslogg())
+            person.håndterUtbetalingHendelse(utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId), Aktivitetslogg())
 
             lagrePerson(testDataSource.ds, UNG_PERSON_FNR, person)
             lagreSykmelding(

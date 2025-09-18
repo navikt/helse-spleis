@@ -7,10 +7,10 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
@@ -30,7 +30,7 @@ internal class InfotrygdhistorikkEndretTest : AbstractEndToEndTest() {
     @Test
     fun `infotrygdhistorikken var tom`() {
         periodeTilGodkjenning()
-        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
+        this@InfotrygdhistorikkEndretTest.håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
@@ -39,32 +39,32 @@ internal class InfotrygdhistorikkEndretTest : AbstractEndToEndTest() {
         periodeTilGodkjenning()
         håndterSykmelding(Sykmeldingsperiode(1.mai, 31.mai))
         håndterSøknad(Sykdom(fom = 1.mai, tom = 31.mai, 100.prosent))
-        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
+        this@InfotrygdhistorikkEndretTest.håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     @Test
     fun `infotrygdhistorikken blir tom`() {
         periodeTilGodkjenning(utbetalinger)
-        håndterUtbetalingshistorikkEtterInfotrygdendring()
+        this@InfotrygdhistorikkEndretTest.håndterUtbetalingshistorikkEtterInfotrygdendring()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     @Test
     fun `infotrygdhistorikken er uendret`() {
         periodeTilGodkjenning(utbetalinger)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
+        this@InfotrygdhistorikkEndretTest.håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 
     private fun periodeTilGodkjenning(perioder: List<Infotrygdperiode> = emptyList()) {
-        håndterUtbetalingshistorikkEtterInfotrygdendring(*perioder.toTypedArray())
+        this@InfotrygdhistorikkEndretTest.håndterUtbetalingshistorikkEtterInfotrygdendring(*perioder.toTypedArray())
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(mars)
         håndterArbeidsgiveropplysninger(listOf(1.mars til 16.mars), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@InfotrygdhistorikkEndretTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        this@InfotrygdhistorikkEndretTest.håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 }

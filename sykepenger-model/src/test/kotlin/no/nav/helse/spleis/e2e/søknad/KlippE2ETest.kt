@@ -185,9 +185,9 @@ internal class KlippTest : AbstractEndToEndTest() {
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter) {
-        håndterYtelser(vedtaksperiode)
+        this@KlippTest.håndterYtelser(vedtaksperiode)
         håndterSimulering(vedtaksperiode)
-        håndterUtbetalingsgodkjenning(vedtaksperiode)
+        this@KlippTest.håndterUtbetalingsgodkjenning(vedtaksperiode)
         håndterUtbetalt()
     }
 

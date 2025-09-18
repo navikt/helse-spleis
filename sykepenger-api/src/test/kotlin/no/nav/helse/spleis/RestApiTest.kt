@@ -119,8 +119,8 @@ internal class RestApiTest {
             mottatt = LocalDateTime.now()
         )
         val person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
-        person.håndter(sykmelding, Aktivitetslogg())
-        person.håndter(inntektsmelding, Aktivitetslogg())
+        person.håndterSykmelding(sykmelding, Aktivitetslogg())
+        person.håndterInntektsmelding(inntektsmelding, Aktivitetslogg())
         testDataSource.ds.lagrePerson(UNG_PERSON_FNR, person)
         testDataSource.ds.lagreHendelse(MELDINGSREFERANSE)
     }

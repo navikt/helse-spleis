@@ -17,6 +17,11 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -28,14 +33,8 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.forlengelseTilGodkjenning
@@ -56,10 +55,10 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import no.nav.helse.økonomi.inspectors.inspektør
 
 internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
 
@@ -69,11 +68,11 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar, a1, a2)
         forlengVedtak(mars, a1, a2)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET, orgnummer = a1)
@@ -90,7 +89,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar, a1, a2)
         forlengVedtak(mars, a1, a2)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.februar, Feriedag)), orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.februar, Feriedag)), orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
@@ -105,7 +104,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar, a1, a2)
         forlengVedtak(mars, a1, a2)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.mars, Feriedag)), orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.mars, Feriedag)), orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
@@ -120,7 +119,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar, a1, a2)
         forlengVedtak(mars, a1, a2)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.januar, Feriedag)), orgnummer = a2)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.januar, Feriedag)), orgnummer = a2)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
@@ -135,7 +134,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar, a1, a2)
         forlengVedtak(mars, a1, a2)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.februar, Feriedag)), orgnummer = a2)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.februar, Feriedag)), orgnummer = a2)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
@@ -150,7 +149,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar, a1, a2)
         forlengVedtak(mars, a1, a2)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.mars, Feriedag)), orgnummer = a2)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.mars, Feriedag)), orgnummer = a2)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
@@ -163,14 +162,14 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
     fun `starte revurdering av ag1 igjen etter at ag2 har startet revurdering`() {
         nyeVedtak(januar, a1, a2)
         forlengVedtak(februar, a1, a2)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Sykedag, 100)), a1)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Sykedag, 100)), a1)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
@@ -182,10 +181,10 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
     fun `revurdering påvirkes ikke av gjenoppta behandling ved avsluttet uten utbetaling`() {
         nyeVedtak(januar, a1, a2)
         forlengVedtak(februar, a1, a2)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(1.juni, 10.juni), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.juni, 10.juni, 100.prosent), orgnummer = a2)
@@ -202,10 +201,10 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
     fun `revurdering av ag 2 mens ag 1 er til utbetaling`() {
         nyeVedtak(januar, a1, a2)
         forlengelseTilGodkjenning(februar, a1, a2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a2)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a2)
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
@@ -230,8 +229,8 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         }
 
         nullstillTilstandsendringer()
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -243,14 +242,14 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         }
 
         nullstillTilstandsendringer()
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
         assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a2))
 
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
         inspektør(a2) {
             assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
@@ -259,7 +258,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
 
-        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(2.vedtaksperiode, orgnummer = a2)
 
         inspektør(a2) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
@@ -273,10 +272,10 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
 
         nyeVedtak(mai, a1, a2)
         forlengelseTilGodkjenning(juni, a1, a2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a3)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a3)
         håndterUtbetalt(orgnummer = a1)
 
         inspektør(a1) {
@@ -293,9 +292,9 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         }
 
         nullstillTilstandsendringer()
-        håndterYtelser(1.vedtaksperiode, orgnummer = a3)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalt(orgnummer = a3)
         assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a3))
 
@@ -320,11 +319,11 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(april, orgnummer = a1, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
 
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
 
         inspektør(a1) {
@@ -348,11 +347,11 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         * */
         nyttVedtak(januar, orgnummer = a1)
         førstegangTilGodkjenning(mars, a1 to 2.vedtaksperiode, a2 to 1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
 
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -380,11 +379,11 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
     fun `tre ag der a1 og a3 har to førstegangsbehandlinger - første førstegang på a1 blir revurdert mens andre førstegang på a1 er til utbetaling`() {
         nyeVedtak(januar, a1, a3)
         førstegangTilGodkjenning(mars, a1 to 2.vedtaksperiode, a2 to 1.vedtaksperiode, a3 to 2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
 
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -423,14 +422,14 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         nyeVedtak(januar, a1, a2)
         forlengVedtak(februar, a1, a2)
 
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         nullstillTilstandsendringer()
         assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
 
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a2)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a2)
 
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
@@ -456,9 +455,9 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         }
 
         nullstillTilstandsendringer()
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a2))
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
 
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
@@ -474,9 +473,9 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `validerer ytelser på alle arbeidsgivere ved revurdering av flere arbeidgivere`() {
         nyeVedtak(januar, a1, a2)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
 
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(20.januar til 31.januar, 100)), orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(20.januar til 31.januar, 100)), orgnummer = a1)
         assertVarsler(listOf(RV_AY_5, RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
         assertVarsler(emptyList(), 1.vedtaksperiode.filter(a2))
     }
@@ -487,8 +486,8 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar, a1, a2)
         forlengVedtak(mars, a2)
 
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(20.mars til 31.mars, 100)), orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(20.mars til 31.mars, 100)), orgnummer = a1)
         assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
         assertVarsler(emptyList(), 1.vedtaksperiode.filter(orgnummer = a2))
         assertVarsler(emptyList(), 2.vedtaksperiode.filter(orgnummer = a1))
@@ -501,26 +500,26 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         nyeVedtak(januar, a1, a2)
         forlengVedtak(februar, a1, a2)
 
-        håndterOverstyrTidslinje(
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(
             listOf(
                 ManuellOverskrivingDag(17.januar, Feriedag),
                 ManuellOverskrivingDag(18.januar, Feriedag)
             ), a1
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        håndterOverstyrTidslinje(
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(
             listOf(
                 ManuellOverskrivingDag(18.januar, Sykedag, 100)
             ), a1
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
 
         assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
 
@@ -543,9 +542,9 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
     fun `Varsel på perioder hos begge AG dersom grad er under 20 prosent`() {
         nyeVedtak(januar, a1, a2)
 
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Sykedag, 19)), orgnummer = a1)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Sykedag, 19)), orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Sykedag, 19)), orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Sykedag, 19)), orgnummer = a2)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         assertEquals(19, inspektør(a1).sykdomstidslinje.inspektør.grader[17.januar])
         assertEquals(19, inspektør(a2).sykdomstidslinje.inspektør.grader[17.januar])
@@ -562,13 +561,13 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             orgnummer = a2
         )
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), orgnummer = a1)
 
         nullstillTilstandsendringer()
-        håndterUtbetalingshistorikkEtterInfotrygdendring(
+        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 18.februar)
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsler(listOf(RV_UT_23, Varselkode.RV_IT_3), 1.vedtaksperiode.filter(orgnummer = a1))
 
         val utbetaling1 = inspektør.utbetaling(0)

@@ -30,7 +30,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -113,7 +112,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             listOf(1.august til 16.august)
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
         val førsteUtbetaling = inspektør.utbetaling(0)
@@ -213,11 +212,11 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             beregnetInntekt = INNTEKT
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
         nullstillTilstandsendringer()
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
     }
@@ -236,10 +235,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         nullstillTilstandsendringer()
-        håndterUtbetalingshistorikkEtterInfotrygdendring(
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 27.januar)
         )
-        håndterYtelser(1.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
@@ -252,10 +251,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         nullstillTilstandsendringer()
-        håndterUtbetalingshistorikkEtterInfotrygdendring(
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(
             PersonUtbetalingsperiode(a1, 1.januar, 27.januar)
         )
-        håndterYtelser(1.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode)
 
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
@@ -280,10 +279,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a2)
         nullstillTilstandsendringer()
-        håndterUtbetalingshistorikkEtterInfotrygdendring(
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(
             PersonUtbetalingsperiode(a2, 1.januar, 27.januar)
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter(orgnummer = a2))
 
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
@@ -304,13 +303,13 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             beregnetInntekt = INNTEKT
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Dagtype.Feriedag)))
-        håndterYtelser(1.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Dagtype.Feriedag)))
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         val vedtaksperiode1Utbetalinger = inspektør.utbetalinger(1.vedtaksperiode)
@@ -338,11 +337,11 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             beregnetInntekt = INNTEKT
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         nullstillTilstandsendringer()
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
@@ -365,11 +364,11 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             beregnetInntekt = INNTEKT
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         nullstillTilstandsendringer()
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
@@ -393,7 +392,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         håndterInntektsmelding(
@@ -402,11 +401,11 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             beregnetInntekt = INNTEKT
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-        håndterYtelser(1.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         nullstillTilstandsendringer()
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
@@ -437,7 +436,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertTrue(inspektør.sykdomstidslinje[27.januar] is Dag.FriskHelgedag)
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(2.vedtaksperiode)
 
         //assertVarsel(RV_IM_4, 2.vedtaksperiode.filter(a1)) // huh? Ser bare 1 IM
         nullstillTilstandsendringer()
@@ -458,9 +457,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSøknad(Sykdom(4.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(19.januar til 3.februar))
         håndterVilkårsgrunnlag(3.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
 
         nullstillTilstandsendringer()
@@ -543,7 +542,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSøknad(Sykdom(28.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(12.januar til 27.januar))
         håndterVilkårsgrunnlag(3.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
 
         nullstillTilstandsendringer()
@@ -755,7 +754,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, orgnummer = a1)
@@ -801,9 +800,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
 
         assertEquals("FLERE_ARBEIDSGIVERE", personlogg.sisteBehov(Godkjenning).detaljer()["inntektskilde"] as? String)
 
@@ -814,9 +813,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         nullstillTilstandsendringer()
         håndterUtbetalt(orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
 
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, orgnummer = a2)
@@ -916,11 +915,11 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         )
         håndterInntektsmelding(listOf(17.juni(2022) til 2.juli(2022)), orgnummer = a2)
         håndterVilkårsgrunnlag(2.vedtaksperiode, orgnummer = a1)
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
 
         nullstillTilstandsendringer()
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false, orgnummer = a1)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false, orgnummer = a1)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
@@ -938,14 +937,14 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
         nullstillTilstandsendringer()
         val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 20.januar))
-        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
-        håndterYtelser(1.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
         assertVarsler(listOf(RV_IT_3), 1.vedtaksperiode.filter())
@@ -966,7 +965,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             beregnetInntekt = forMyeInntekt
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode)
         val im = håndterInntektsmelding(
             listOf(
                 22.januar til 6.februar
@@ -979,9 +978,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertEquals(22.januar til 11.februar, inspektør.periode(1.vedtaksperiode))
         assertEquals("UUUUUGG UUUUUGG SSSSSHH SSSSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
         assertInfo("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 1.vedtaksperiode.filter(a1))
         assertInfo("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 2.vedtaksperiode.filter(a1))
@@ -1053,7 +1052,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode)[17.januar].let {
@@ -1090,9 +1089,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         forlengVedtak(februar, orgnummer = a1)
@@ -1103,16 +1102,16 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
 
-        håndterOverstyrTidslinje(
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterOverstyrTidslinje(
             listOf(
                 ManuellOverskrivingDag(27.februar, Dagtype.Feriedag)
             ), orgnummer = a1
         )
 
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         nullstillTilstandsendringer()
@@ -1154,9 +1153,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         nullstillTilstandsendringer()
@@ -1194,7 +1193,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     @Test
     fun `allerede utbetalt i Infotrygd uten utbetaling etterpå`() {
         nyPeriode(2.januar til 17.januar)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 17.januar))
+        this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 17.januar))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
     }
 
@@ -1228,7 +1227,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
         nyttVedtak(18.januar til 31.januar, arbeidsgiverperiode = listOf(2.januar til 17.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
-        val im = håndterKorrigerteArbeidsgiveropplysninger(
+        val im = this@ReberegningAvAvsluttetUtenUtbetalingNyE2ETest.håndterKorrigerteArbeidsgiveropplysninger(
             *fraInntektsmelding(
                 beregnetInntekt = INNTEKT,
                 refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),

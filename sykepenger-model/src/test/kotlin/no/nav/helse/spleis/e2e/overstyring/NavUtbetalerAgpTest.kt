@@ -34,7 +34,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -92,9 +91,9 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
             listOf(14.april til 14.april, 18.april til 2.mai)
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
         håndterSøknad(Sykdom(22.mai, 26.mai, 100.prosent))
 
@@ -132,9 +131,9 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
             listOf(14.april til 14.april, 18.april til 2.mai)
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
         håndterSøknad(Sykdom(22.mai, 26.mai, 100.prosent))
 
@@ -261,10 +260,10 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterOverstyrTidslinje((1.januar til 16.januar).map { dagen -> ManuellOverskrivingDag(dagen, Dagtype.SykedagNav, 100) })
-        håndterYtelser(1.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterOverstyrTidslinje((1.januar til 16.januar).map { dagen -> ManuellOverskrivingDag(dagen, Dagtype.SykedagNav, 100) })
+        this@NavUtbetalerAgpTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(2, inspektør.antallUtbetalinger)
@@ -289,7 +288,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "ArbeidOpphoert",
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
@@ -311,10 +310,10 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterOverstyrTidslinje((1.januar til 16.januar).map { dagen -> ManuellOverskrivingDag(dagen, Dagtype.Sykedag, 100) })
-        håndterYtelser(1.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterOverstyrTidslinje((1.januar til 16.januar).map { dagen -> ManuellOverskrivingDag(dagen, Dagtype.Sykedag, 100) })
+        this@NavUtbetalerAgpTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
@@ -344,10 +343,10 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterOverstyrTidslinje((1.januar til 16.januar).map { dagen -> ManuellOverskrivingDag(dagen, Dagtype.SykedagNav, 100) })
-        håndterYtelser(1.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterOverstyrTidslinje((1.januar til 16.januar).map { dagen -> ManuellOverskrivingDag(dagen, Dagtype.SykedagNav, 100) })
+        this@NavUtbetalerAgpTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(2, inspektør.antallUtbetalinger)
@@ -368,10 +367,10 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterOverstyrTidslinje((1.januar til 16.januar).map { dagen -> ManuellOverskrivingDag(dagen, Dagtype.SykedagNav, 100) })
-        håndterYtelser(1.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterOverstyrTidslinje((1.januar til 16.januar).map { dagen -> ManuellOverskrivingDag(dagen, Dagtype.SykedagNav, 100) })
+        this@NavUtbetalerAgpTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(2, inspektør.antallUtbetalinger)
@@ -398,9 +397,9 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         assertEquals(listOf(1.januar.somPeriode()), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
         assertInstanceOf<Sykedag>(inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar])
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         val utbetaling = inspektør.utbetaling(0)
@@ -499,7 +498,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "mjau",
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterYtelser(1.vedtaksperiode)
         assertVarsler(listOf(Varselkode.RV_VV_4, RV_IM_8, RV_VV_2), 1.vedtaksperiode.filter())
         assertEquals(listOf(2.januar til 17.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -517,11 +516,11 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         assertVarsler(listOf(RV_IM_3, RV_IM_25), 2.vedtaksperiode.filter())
 
-        håndterOverstyrTidslinje((1..31).map {
+        this@NavUtbetalerAgpTest.håndterOverstyrTidslinje((1..31).map {
             ManuellOverskrivingDag(
                 it.juli,
                 Dagtype.ArbeidIkkeGjenopptattDag
@@ -529,7 +528,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         } + listOf(
             ManuellOverskrivingDag(1.august, Dagtype.Sykedag, 50)
         ))
-        håndterYtelser(2.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         assertEquals("SHH SSSSSHH SSSSSHH SSSSSHH SSSSSHJ JJJJJJJ JJJJJJJ JJJJJJJ JJJJJJJ JJSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
@@ -545,7 +544,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "HvaSomHelst",
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@NavUtbetalerAgpTest.håndterYtelser(1.vedtaksperiode)
         assertVarsler(listOf(RV_IM_8, RV_SV_1), 1.vedtaksperiode.filter())
         assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
         (1.januar til 31.januar).filterNot { it.erHelg() }.forEach {

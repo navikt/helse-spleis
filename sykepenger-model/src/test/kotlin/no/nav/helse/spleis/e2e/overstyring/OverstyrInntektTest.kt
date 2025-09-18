@@ -11,13 +11,13 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -57,7 +57,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             beregnetInntekt = overstyrtInntekt,
             refusjon = Refusjon(overstyrtInntekt, null, emptyList())
         )
-        håndterYtelser(1.vedtaksperiode)
+        this@OverstyrInntektTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         nullstillTilstandsendringer()
@@ -89,12 +89,12 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        this@OverstyrInntektTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         nullstillTilstandsendringer()
 
-        håndterOverstyrArbeidsgiveropplysninger(
+        this@OverstyrInntektTest.håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
             arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a2, 500.daglig, emptyList()))
         )
@@ -109,7 +109,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         tilGodkjenning(januar, a1)
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(inntekt = 19000.månedlig, orgnummer = a1, skjæringstidspunkt = 1.januar)
-        håndterYtelser(1.vedtaksperiode)
+        this@OverstyrInntektTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTilstander(
             1.vedtaksperiode,
@@ -134,12 +134,12 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@OverstyrInntektTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         håndterOverstyrInntekt(UnderMinstegrense, skjæringstidspunkt = 1.januar)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@OverstyrInntektTest.håndterYtelser(1.vedtaksperiode)
+        this@OverstyrInntektTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
 
         assertEquals(2, inspektør.antallUtbetalinger)

@@ -29,7 +29,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(6.april(2021), 16.april(2021), 50.prosent))
 
         håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode)
+        this@VarselOmFlereInntektsmeldingerTest.håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(17.april(2021), 30.april(2021)))
@@ -47,9 +47,9 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        this@VarselOmFlereInntektsmeldingerTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@VarselOmFlereInntektsmeldingerTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars))

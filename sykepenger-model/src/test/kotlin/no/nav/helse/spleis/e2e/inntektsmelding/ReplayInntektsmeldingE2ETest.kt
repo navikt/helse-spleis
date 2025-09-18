@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -15,7 +16,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTOR
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -120,10 +120,10 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
-        håndterSkjønnsmessigFastsettelse(1.mars, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.daglig)))
-        håndterYtelser()
+        this@ReplayInntektsmeldingE2ETest.håndterSkjønnsmessigFastsettelse(1.mars, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.daglig)))
+        this@ReplayInntektsmeldingE2ETest.håndterYtelser()
         håndterSimulering()
-        håndterUtbetalingsgodkjenning()
+        this@ReplayInntektsmeldingE2ETest.håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
 
         nullstillTilstandsendringer()
@@ -136,18 +136,18 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar)
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        this@ReplayInntektsmeldingE2ETest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        this@ReplayInntektsmeldingE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         nullstillTilstandsendringer()
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET)
 
-        håndterYtelser(1.vedtaksperiode)
+        this@ReplayInntektsmeldingE2ETest.håndterYtelser(1.vedtaksperiode)
         // ingen simulering fordi det er ingen endring
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        this@ReplayInntektsmeldingE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)

@@ -8,12 +8,12 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -41,7 +41,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         val historie1 = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a1, 3.januar, 26.januar)
         )
-        håndterUtbetalingshistorikkEtterInfotrygdendring(
+        this@DobbelbehandlingIInfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(
             *historie1,
             besvart = LocalDate.EPOCH.atStartOfDay()
         )
@@ -57,13 +57,13 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         val historie1 = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 26.januar)
         )
-        håndterUtbetalingshistorikkEtterInfotrygdendring(
+        this@DobbelbehandlingIInfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(
             *historie1,
             besvart = LocalDate.EPOCH.atStartOfDay()
         )
 
-        håndterPåminnelse(1.vedtaksperiode, AVSLUTTET, flagg = setOf("ønskerReberegning"))
-        håndterYtelser(1.vedtaksperiode)
+        this@DobbelbehandlingIInfotrygdTest.håndterPåminnelse(1.vedtaksperiode, AVSLUTTET, flagg = setOf("ønskerReberegning"))
+        this@DobbelbehandlingIInfotrygdTest.håndterYtelser(1.vedtaksperiode)
 
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.also { utbetalingInspektør ->
