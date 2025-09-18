@@ -694,7 +694,7 @@ internal class Yrkesaktivitet private constructor(
 
     internal fun håndterBehandlingsavgjørelse(utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        utbetalinger.forEach { it.håndter(utbetalingsavgjørelse, aktivitetsloggMedArbeidsgiverkontekst) }
+        utbetalinger.forEach { it.håndterUtbetalingsavgjørelseHendelse(utbetalingsavgjørelse, aktivitetsloggMedArbeidsgiverkontekst) }
         håndter {
             it.håndterUtbetalingsavgjørelse(utbetalingsavgjørelse, aktivitetsloggMedArbeidsgiverkontekst)
         }
@@ -738,7 +738,7 @@ internal class Yrkesaktivitet private constructor(
 
     internal fun håndterSimulering(simulering: Simulering, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedYrkesaktivitetkontekst = aktivitetslogg.kontekst(this)
-        utbetalinger.forEach { it.håndter(simulering) }
+        utbetalinger.forEach { it.håndterSimuleringHendelse(simulering) }
         håndter {
             it.håndterSimulering(simulering, aktivitetsloggMedYrkesaktivitetkontekst)
         }
@@ -751,7 +751,7 @@ internal class Yrkesaktivitet private constructor(
 
     internal fun håndterUtbetalingHendelse(utbetalingHendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        utbetalinger.forEach { it.håndter(utbetalingHendelse, aktivitetsloggMedArbeidsgiverkontekst) }
+        utbetalinger.forEach { it.håndterUtbetalingmodulHendelse(utbetalingHendelse, aktivitetsloggMedArbeidsgiverkontekst) }
         håndter {
             it.håndterUtbetalingHendelse(utbetalingHendelse, aktivitetsloggMedArbeidsgiverkontekst)
         }
@@ -767,7 +767,7 @@ internal class Yrkesaktivitet private constructor(
         val annullering =
             utbetalingSomSkalAnnulleres.annuller(hendelse, aktivitetslogg, utbetalinger.toList()) ?: return null
         nyUtbetaling(aktivitetslogg, annullering)
-        annullering.håndter(hendelse, aktivitetslogg)
+        annullering.håndterAnnullerUtbetalingHendelse(hendelse, aktivitetslogg)
         looper { vedtaksperiode -> vedtaksperiode.nyAnnullering(aktivitetslogg) }
         return annullering
     }
@@ -869,7 +869,7 @@ internal class Yrkesaktivitet private constructor(
 
     internal fun håndterUtbetalingpåminnelse(påminnelse: Utbetalingpåminnelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        utbetalinger.forEach { it.håndter(påminnelse, aktivitetsloggMedArbeidsgiverkontekst) }
+        utbetalinger.forEach { it.håndterUtbetalingpåminnelseHendelse(påminnelse, aktivitetsloggMedArbeidsgiverkontekst) }
     }
 
     internal fun håndterPåminnelse(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {

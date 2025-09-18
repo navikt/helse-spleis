@@ -153,14 +153,14 @@ class Utbetaling private constructor(
         tilstand.opprett(this, aktivitetsloggMedUtbetalingkontekst)
     }
 
-    fun håndter(hendelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
+    fun håndterUtbetalingsavgjørelseHendelse(hendelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         if (hendelse.utbetalingId != this.id) return
         hendelse.valider(aktivitetsloggMedUtbetalingkontekst)
         godkjenn(aktivitetsloggMedUtbetalingkontekst, hendelse.vurdering)
     }
 
-    fun håndter(utbetaling: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
+    fun håndterUtbetalingmodulHendelse(utbetaling: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         if (!relevantFor(utbetaling)) return håndterKvitteringForAnnullering(utbetaling, aktivitetsloggMedUtbetalingkontekst)
         if (harHåndtert(utbetaling)) return
@@ -176,7 +176,7 @@ class Utbetaling private constructor(
     private fun relevantFor(utbetaling: UtbetalingmodulHendelse) =
         utbetaling.utbetalingId == this.id && (utbetaling.fagsystemId in setOf(this.arbeidsgiverOppdrag.fagsystemId, this.personOppdrag.fagsystemId))
 
-    fun håndter(simulering: SimuleringHendelse) {
+    fun håndterSimuleringHendelse(simulering: SimuleringHendelse) {
         if (simulering.utbetalingId != this.id) return
         personOppdrag.håndter(simulering)
         arbeidsgiverOppdrag.håndter(simulering)
@@ -187,7 +187,7 @@ class Utbetaling private constructor(
         tilstand.simuler(this, aktivitetsloggMedUtbetalingkontekst)
     }
 
-    fun håndter(påminnelse: UtbetalingpåminnelseHendelse, aktivitetslogg: IAktivitetslogg) {
+    fun håndterUtbetalingpåminnelseHendelse(påminnelse: UtbetalingpåminnelseHendelse, aktivitetslogg: IAktivitetslogg) {
         if (påminnelse.utbetalingId != this.id) return
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         if (påminnelse.status != this.tilstand.status) return
@@ -214,7 +214,7 @@ class Utbetaling private constructor(
         if (harNegativtTotalbeløp) aktivitetslogg.varsel(Varselkode.RV_SI_3)
     }
 
-    fun håndter(hendelse: AnnullerUtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
+    fun håndterAnnullerUtbetalingHendelse(hendelse: AnnullerUtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         godkjenn(aktivitetsloggMedUtbetalingkontekst, hendelse.vurdering)
     }

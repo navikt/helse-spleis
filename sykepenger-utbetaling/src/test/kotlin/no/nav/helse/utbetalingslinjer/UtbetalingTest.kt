@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.AnnullerUtbetalingHendelse
 import no.nav.helse.hendelser.Periode
@@ -639,7 +639,7 @@ internal class UtbetalingTest {
             perioder = emptyList()
         )
         )
-        utbetaling.håndter(simulering)
+        utbetaling.håndterSimuleringHendelse(simulering)
         assertNotNull(utbetaling.inspektør.personOppdrag.inspektør.simuleringsResultat())
         assertNull(utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.simuleringsResultat())
     }
@@ -654,7 +654,7 @@ internal class UtbetalingTest {
             perioder = emptyList()
         )
         )
-        utbetaling.håndter(simulering)
+        utbetaling.håndterSimuleringHendelse(simulering)
         assertNotNull(utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.simuleringsResultat())
         assertNull(utbetaling.inspektør.personOppdrag.inspektør.simuleringsResultat())
     }
@@ -676,8 +676,8 @@ internal class UtbetalingTest {
             perioder = emptyList()
         )
         )
-        utbetaling.håndter(simuleringArbeidsgiver)
-        utbetaling.håndter(simuleringPerson)
+        utbetaling.håndterSimuleringHendelse(simuleringArbeidsgiver)
+        utbetaling.håndterSimuleringHendelse(simuleringPerson)
 
         assertNotNull(utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.simuleringsResultat())
         assertNotNull(utbetaling.inspektør.personOppdrag.inspektør.simuleringsResultat())
@@ -751,7 +751,7 @@ internal class UtbetalingTest {
             status = status
         )
         val aktivitetslogg = Aktivitetslogg()
-        utbetalingmottaker.håndter(hendelsen, aktivitetslogg)
+        utbetalingmottaker.håndterUtbetalingmodulHendelse(hendelsen, aktivitetslogg)
         return aktivitetslogg
     }
 
@@ -760,7 +760,7 @@ internal class UtbetalingTest {
             utbetalingId = utbetaling.inspektør.utbetalingId,
             godkjent = utbetalingGodkjent
         ).also {
-            utbetaling.håndter(it, aktivitetslogg)
+            utbetaling.håndterUtbetalingsavgjørelseHendelse(it, aktivitetslogg)
         }
     }
 
