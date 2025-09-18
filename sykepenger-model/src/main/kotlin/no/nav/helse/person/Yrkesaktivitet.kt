@@ -512,7 +512,7 @@ internal class Yrkesaktivitet private constructor(
 
     internal fun håndter(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedYrkesaktivitetkontekst = aktivitetslogg.kontekst(this)
-        håndter { it.håndter(sykmelding) }
+        håndter { it.håndterSykmelding(sykmelding) }
         yrkesaktivitetType.håndter(sykmelding, aktivitetsloggMedYrkesaktivitetkontekst, sykmeldingsperioder)
     }
 
@@ -529,7 +529,7 @@ internal class Yrkesaktivitet private constructor(
     internal fun håndter(anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedYrkesaktivitetkontekst = aktivitetslogg.kontekst(this)
         håndter {
-            it.håndter(anmodningOmForkasting, aktivitetsloggMedYrkesaktivitetkontekst)
+            it.håndterAnmodningOmForkasting(anmodningOmForkasting, aktivitetsloggMedYrkesaktivitetkontekst)
         }
     }
 
@@ -599,13 +599,13 @@ internal class Yrkesaktivitet private constructor(
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         aktivitetsloggMedArbeidsgiverkontekst.info("Replayer inntektsmeldinger for vedtaksperiode ${replays.vedtaksperiodeId} og påfølgende som overlapper")
         val revurderingseventyr = håndterReplayAvInntektsmelding(replays.inntektsmeldinger, aktivitetsloggMedArbeidsgiverkontekst, replays.vedtaksperiodeId)
-        håndter { it.håndter(replays, aktivitetsloggMedArbeidsgiverkontekst) }
+        håndter { it.håndterInntektsmeldingerReplay(replays, aktivitetsloggMedArbeidsgiverkontekst) }
         return revurderingseventyr
     }
 
     internal fun håndter(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        val overstyring = énHåndtert(arbeidsgiveropplysninger) { håndter(arbeidsgiveropplysninger, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList(), inntektshistorikk, ubrukteRefusjonsopplysninger) }
+        val overstyring = énHåndtert(arbeidsgiveropplysninger) { håndterArbeidsgiveropplysninger(arbeidsgiveropplysninger, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList(), inntektshistorikk, ubrukteRefusjonsopplysninger) }
         if (overstyring != null) return overstyring
 
         person.emitArbeidsgiveropplysningerIkkeHåndtert(arbeidsgiveropplysninger.metadata.meldingsreferanseId, organisasjonsnummer)
@@ -620,7 +620,7 @@ internal class Yrkesaktivitet private constructor(
 
     internal fun håndter(arbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        val overstyring = énHåndtert(arbeidsgiveropplysninger) { håndter(arbeidsgiveropplysninger, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList(), inntektshistorikk, ubrukteRefusjonsopplysninger) }
+        val overstyring = énHåndtert(arbeidsgiveropplysninger) { håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiveropplysninger, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList(), inntektshistorikk, ubrukteRefusjonsopplysninger) }
         if (overstyring != null) return overstyring
         person.emitArbeidsgiveropplysningerIkkeHåndtert(arbeidsgiveropplysninger.metadata.meldingsreferanseId, organisasjonsnummer)
         return null
@@ -660,7 +660,7 @@ internal class Yrkesaktivitet private constructor(
     }
 
     private fun håndterDagerFraInntektsmelding(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        håndter { it.håndter(dager, aktivitetslogg) }
+        håndter { it.håndterDagerFraInntektsmelding(dager, aktivitetslogg) }
         return dager.revurderingseventyr()
     }
 
@@ -696,7 +696,7 @@ internal class Yrkesaktivitet private constructor(
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         utbetalinger.forEach { it.håndter(utbetalingsavgjørelse, aktivitetsloggMedArbeidsgiverkontekst) }
         håndter {
-            it.håndter(utbetalingsavgjørelse, aktivitetsloggMedArbeidsgiverkontekst)
+            it.håndterUtbetalingsavgjørelse(utbetalingsavgjørelse, aktivitetsloggMedArbeidsgiverkontekst)
         }
     }
 
@@ -732,7 +732,7 @@ internal class Yrkesaktivitet private constructor(
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedYrkesaktivitetkontekst = aktivitetslogg.kontekst(this)
         håndter {
-            it.håndter(vilkårsgrunnlag, aktivitetsloggMedYrkesaktivitetkontekst)
+            it.håndterVilkårsgrunnlag(vilkårsgrunnlag, aktivitetsloggMedYrkesaktivitetkontekst)
         }
     }
 
@@ -740,7 +740,7 @@ internal class Yrkesaktivitet private constructor(
         val aktivitetsloggMedYrkesaktivitetkontekst = aktivitetslogg.kontekst(this)
         utbetalinger.forEach { it.håndter(simulering) }
         håndter {
-            it.håndter(simulering, aktivitetsloggMedYrkesaktivitetkontekst)
+            it.håndterSimulering(simulering, aktivitetsloggMedYrkesaktivitetkontekst)
         }
     }
 
@@ -753,7 +753,7 @@ internal class Yrkesaktivitet private constructor(
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         utbetalinger.forEach { it.håndter(utbetalingHendelse, aktivitetsloggMedArbeidsgiverkontekst) }
         håndter {
-            it.håndter(utbetalingHendelse, aktivitetsloggMedArbeidsgiverkontekst)
+            it.håndterUtbetalingHendelse(utbetalingHendelse, aktivitetsloggMedArbeidsgiverkontekst)
         }
         person.gjenopptaBehandling(aktivitetsloggMedArbeidsgiverkontekst)
     }
@@ -861,9 +861,9 @@ internal class Yrkesaktivitet private constructor(
 
             if (annulleringskandidater.isEmpty()) return null
             person.emitPlanlagtAnnullering(annulleringskandidater, hendelse)
-            return håndter { it.håndter(hendelse, aktivitetsloggMedArbeidsgiverkontekst, annulleringskandidater.toList()) }.tidligsteEventyr()
+            return håndter { it.håndterAnnullerUtbetaling(hendelse, aktivitetsloggMedArbeidsgiverkontekst, annulleringskandidater.toList()) }.tidligsteEventyr()
         } else {
-            return håndter { it.håndter(hendelse, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList()) }.tidligsteEventyr()
+            return håndter { it.håndterAnnullerUtbetaling(hendelse, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList()) }.tidligsteEventyr()
         }
     }
 
@@ -874,7 +874,7 @@ internal class Yrkesaktivitet private constructor(
 
     internal fun håndter(påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        return énHåndtert(påminnelse) { håndter(it, aktivitetsloggMedArbeidsgiverkontekst) }
+        return énHåndtert(påminnelse) { håndterPåminnelse(it, aktivitetsloggMedArbeidsgiverkontekst) }
     }
 
     override fun utbetalingUtbetalt(
@@ -1019,20 +1019,20 @@ internal class Yrkesaktivitet private constructor(
     internal fun håndter(hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         return håndter {
-            it.håndter(hendelse, aktivitetsloggMedArbeidsgiverkontekst)
+            it.håndterOverstyrTidslinje(hendelse, aktivitetsloggMedArbeidsgiverkontekst)
         }.tidligsteEventyr()
     }
 
     private fun håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        return vedtaksperioder.firstNotNullOfOrNull { it.håndter(overstyrInntektsgrunnlag, aktivitetsloggMedArbeidsgiverkontekst) }
+        return vedtaksperioder.firstNotNullOfOrNull { it.håndterOverstyrInntektsgrunnlag(overstyrInntektsgrunnlag, aktivitetsloggMedArbeidsgiverkontekst) }
     }
 
     private fun håndter(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         var revurderingseventyr: Revurderingseventyr? = null
         énHarHåndtert(overstyrArbeidsgiveropplysninger) {
-            revurderingseventyr = håndter(it, aktivitetsloggMedArbeidsgiverkontekst)
+            revurderingseventyr = håndterOverstyrArbeidsgiveropplysninger(it, aktivitetsloggMedArbeidsgiverkontekst)
             revurderingseventyr != null
         }
         return revurderingseventyr
