@@ -513,7 +513,7 @@ internal class Yrkesaktivitet private constructor(
     internal fun håndterSykmelding(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedYrkesaktivitetkontekst = aktivitetslogg.kontekst(this)
         håndter { it.håndterSykmelding(sykmelding) }
-        yrkesaktivitetType.håndter(sykmelding, aktivitetsloggMedYrkesaktivitetkontekst, sykmeldingsperioder)
+        yrkesaktivitetType.håndterSykmelding(sykmelding, aktivitetsloggMedYrkesaktivitetkontekst, sykmeldingsperioder)
     }
 
     internal fun håndterAvbruttSøknad(avbruttSøknad: AvbruttSøknad, aktivitetslogg: IAktivitetslogg) {

@@ -7,7 +7,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 
 internal sealed interface YrkesaktivitetType {
     fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean
-    fun håndter(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg, sykmeldingsperioder: Sykmeldingsperioder) {
+    fun håndterSykmelding(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg, sykmeldingsperioder: Sykmeldingsperioder) {
         sykmeldingsperioder.lagre(sykmelding, aktivitetslogg)
     }
 
@@ -36,7 +36,7 @@ internal sealed interface YrkesaktivitetType {
             return true
         }
 
-        override fun håndter(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg, sykmeldingsperioder: Sykmeldingsperioder) {
+        override fun håndterSykmelding(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg, sykmeldingsperioder: Sykmeldingsperioder) {
             aktivitetslogg.info("Lagrer _ikke_ sykmeldingsperiode ${sykmelding.periode()} ettersom det er en sykmelding som arbeidsledig.")
         }
     }
