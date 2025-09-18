@@ -73,7 +73,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
 
@@ -92,10 +91,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            val err = assertThrows<IllegalStateException> {
-                håndterArbeidsgiveropplysninger(2.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()))
-            }
-            assertTrue(err.message!!.contains("Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling"))
+            håndterArbeidsgiveropplysninger(2.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()))
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+        a2 {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
         }
     }
 

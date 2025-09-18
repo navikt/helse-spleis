@@ -48,7 +48,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
             vedtaksperiode.person.beregnSkjæringstidspunkt(),
             vedtaksperiode.yrkesaktivitet.beregnArbeidsgiverperiode()
         )
-        if (vedtaksperiode.skalOmgjøres()) {
+        if (vedtaksperiode.skalBehandlesISpeil()) {
             revurdering.inngåSomEndring(vedtaksperiode, aktivitetslogg)
             revurdering.loggDersomKorrigerendeSøknad(
                 aktivitetslogg,
