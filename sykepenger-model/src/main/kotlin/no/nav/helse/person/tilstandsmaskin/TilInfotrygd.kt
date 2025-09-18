@@ -13,7 +13,7 @@ internal data object TilInfotrygd : Vedtaksperiodetilstand {
     }
 
     override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) = false
-    override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {}
+    override fun håndterKorrigerendeInntektsmelding(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {}
 
     override fun igangsettOverstyring(
         vedtaksperiode: Vedtaksperiode,

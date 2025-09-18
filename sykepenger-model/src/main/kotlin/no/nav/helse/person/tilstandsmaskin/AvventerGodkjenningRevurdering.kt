@@ -32,7 +32,7 @@ internal data object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
     ) =
         vedtaksperiode.skalHåndtereDagerRevurdering(dager, aktivitetslogg)
 
-    override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.trengerGodkjenning(aktivitetslogg)
     }
 }

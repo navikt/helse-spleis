@@ -30,7 +30,7 @@ internal data object TilAnnullering : Vedtaksperiodetilstand {
         aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående annullering")
     }
 
-    override fun håndter(
+    override fun håndterUtbetalingHendelse(
         vedtaksperiode: Vedtaksperiode,
         hendelse: UtbetalingHendelse,
         aktivitetslogg: IAktivitetslogg
@@ -41,7 +41,7 @@ internal data object TilAnnullering : Vedtaksperiodetilstand {
             .also { aktivitetslogg.info("Annulleringen fikk OK fra Oppdragssystemet") }
     }
 
-    override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Vi har ikke fått kvittering fra OS for annullering av vedtaksperiode ${vedtaksperiode.id}")
         sikkerLogg.warn("Vi har ikke fått kvittering fra OS for annullering av vedtaksperiode ${vedtaksperiode.id}")
     }

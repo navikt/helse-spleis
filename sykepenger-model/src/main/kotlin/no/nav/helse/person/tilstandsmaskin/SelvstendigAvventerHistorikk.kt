@@ -13,7 +13,7 @@ internal data object SelvstendigAvventerHistorikk : Vedtaksperiodetilstand {
         aktivitetslogg.info("Forespør sykdoms- og inntektshistorikk")
     }
 
-    override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.trengerYtelser(aktivitetslogg)
     }
 

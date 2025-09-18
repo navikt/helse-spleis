@@ -13,7 +13,7 @@ internal data object AvventerAOrdningen : Vedtaksperiodetilstand {
         aktivitetslogg.info("Forespør inntekter fra a-ordningen")
     }
 
-    override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
     }
 

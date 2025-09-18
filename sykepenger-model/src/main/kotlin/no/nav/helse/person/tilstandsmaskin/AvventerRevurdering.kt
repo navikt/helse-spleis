@@ -45,7 +45,7 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
         tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, aktivitetslogg)
     }
 
-    override fun håndter(
+    override fun håndterUtbetalingHendelse(
         vedtaksperiode: Vedtaksperiode,
         hendelse: UtbetalingHendelse,
         aktivitetslogg: IAktivitetslogg
@@ -53,7 +53,7 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
         vedtaksperiode.håndterUtbetalingHendelse(aktivitetslogg)
     }
 
-    override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.sikreRefusjonsopplysningerHvisTomt(påminnelse, aktivitetslogg)
         if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
             vedtaksperiode.videreførEksisterendeOpplysninger(påminnelse.metadata.behandlingkilde, aktivitetslogg)

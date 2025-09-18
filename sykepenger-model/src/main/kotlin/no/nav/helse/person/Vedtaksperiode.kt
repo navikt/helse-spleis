@@ -855,7 +855,7 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (!tilstand.skalHåndtereDager(this, dager, aktivitetsloggMedVedtaksperiodekontekst) || dager.alleredeHåndtert(behandlinger))
             return dager.vurdertTilOgMed(periode.endInclusive)
-        tilstand.håndter(this, dager, aktivitetsloggMedVedtaksperiodekontekst)
+        tilstand.håndterKorrigerendeInntektsmelding(this, dager, aktivitetsloggMedVedtaksperiodekontekst)
         dager.vurdertTilOgMed(periode.endInclusive)
     }
 
@@ -1214,7 +1214,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndterUtbetalingHendelse(hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (!behandlinger.håndterUtbetalinghendelse(hendelse, aktivitetsloggMedVedtaksperiodekontekst)) return
-        tilstand.håndter(this, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
+        tilstand.håndterUtbetalingHendelse(this, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
     internal fun håndterAnnullerUtbetaling(
@@ -2072,7 +2072,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
             return overstyring
         }
-        håndter(vedtaksperiode, påminnelse, aktivitetslogg)
+        håndterPåminnelse(vedtaksperiode, påminnelse, aktivitetslogg)
         return null
     }
 

@@ -1,15 +1,15 @@
 package no.nav.helse.person.tilstandsmaskin
 
+import java.time.Period
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VenterPå
 import no.nav.helse.person.Venteårsak
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import java.time.Period
-import no.nav.helse.person.VenterPå
 
 internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -32,7 +32,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         is TrengerInntektsmeldingAnnenPeriode -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.venter(), Venteårsak.INNTEKTSMELDING)
     }
 
-    override fun håndter(
+    override fun håndterKorrigerendeInntektsmelding(
         vedtaksperiode: Vedtaksperiode,
         dager: DagerFraInntektsmelding,
         aktivitetslogg: IAktivitetslogg
@@ -55,7 +55,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     ) =
         tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, hendelse, aktivitetslogg)
 
-    override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         tilstand(vedtaksperiode).håndter(vedtaksperiode, påminnelse, aktivitetslogg)
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }

@@ -68,7 +68,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
     }
 
-    override fun håndter(
+    override fun håndterKorrigerendeInntektsmelding(
         vedtaksperiode: Vedtaksperiode,
         dager: DagerFraInntektsmelding,
         aktivitetslogg: IAktivitetslogg
@@ -80,7 +80,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
     }
 
-    override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         if (!vedtaksperiode.skalOmgjøres() && vedtaksperiode.behandlinger.erAvsluttet()) return aktivitetslogg.info("Forventer ikke inntekt. Vil forbli i AvsluttetUtenUtbetaling")
     }
 }

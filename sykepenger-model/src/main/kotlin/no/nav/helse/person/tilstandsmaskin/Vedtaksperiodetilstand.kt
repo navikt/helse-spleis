@@ -1,5 +1,6 @@
 package no.nav.helse.person.tilstandsmaskin
 
+import java.time.LocalDateTime
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -9,7 +10,6 @@ import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import java.time.LocalDateTime
 
 // Gang of four State pattern
 internal sealed interface Vedtaksperiodetilstand {
@@ -40,17 +40,17 @@ internal sealed interface Vedtaksperiodetilstand {
     ) =
         dager.skalHåndteresAv(vedtaksperiode.periode)
 
-    fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
+    fun håndterKorrigerendeInntektsmelding(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.håndterKorrigerendeInntektsmelding(dager, aktivitetslogg)
     }
 
-    fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
+    fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
 
-    fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
+    fun håndterUtbetalingHendelse(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Forventet ikke utbetaling i %s".format(type.name))
     }
 
-    fun håndter(
+    fun håndterOverstyrArbeidsgiveropplysninger(
         vedtaksperiode: Vedtaksperiode,
         hendelse: OverstyrArbeidsgiveropplysninger,
         aktivitetslogg: IAktivitetslogg

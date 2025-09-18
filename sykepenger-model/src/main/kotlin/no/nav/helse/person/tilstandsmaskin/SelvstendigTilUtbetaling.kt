@@ -21,7 +21,7 @@ internal data object SelvstendigTilUtbetaling : Vedtaksperiodetilstand {
         aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
     }
 
-    override fun håndter(
+    override fun håndterUtbetalingHendelse(
         vedtaksperiode: Vedtaksperiode,
         hendelse: UtbetalingHendelse,
         aktivitetslogg: IAktivitetslogg
@@ -33,7 +33,7 @@ internal data object SelvstendigTilUtbetaling : Vedtaksperiodetilstand {
         }
     }
 
-    override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         when {
             vedtaksperiode.behandlinger.erUbetalt() -> vedtaksperiode.tilstand(aktivitetslogg, SelvstendigAvventerBlokkerendePeriode)
             vedtaksperiode.behandlinger.erAvsluttet() -> vedtaksperiode.tilstand(aktivitetslogg, SelvstendigAvsluttet)

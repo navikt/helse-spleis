@@ -20,7 +20,7 @@ internal data object AvventerSimuleringRevurdering : Vedtaksperiodetilstand {
         vedtaksperiode.håndterOverstyringIgangsattRevurdering(revurdering, aktivitetslogg)
     }
 
-    override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.behandlinger.simuler(aktivitetslogg)
     }
 

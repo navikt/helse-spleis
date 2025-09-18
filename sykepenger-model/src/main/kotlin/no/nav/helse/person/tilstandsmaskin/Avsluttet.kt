@@ -17,7 +17,7 @@ internal data object Avsluttet : Vedtaksperiodetilstand {
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
-    override fun håndter(
+    override fun håndterKorrigerendeInntektsmelding(
         vedtaksperiode: Vedtaksperiode,
         dager: DagerFraInntektsmelding,
         aktivitetslogg: IAktivitetslogg

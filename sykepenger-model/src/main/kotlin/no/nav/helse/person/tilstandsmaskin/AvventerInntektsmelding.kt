@@ -36,7 +36,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         return vedtaksperiode.skalHåndtereDagerAvventerInntektsmelding(dager, aktivitetslogg)
     }
 
-    override fun håndter(
+    override fun håndterKorrigerendeInntektsmelding(
         vedtaksperiode: Vedtaksperiode,
         dager: DagerFraInntektsmelding,
         aktivitetslogg: IAktivitetslogg
@@ -54,7 +54,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
     }
 
-    override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         if (vurderOmKanGåVidere(vedtaksperiode, påminnelse, aktivitetslogg)) {
             aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
         }

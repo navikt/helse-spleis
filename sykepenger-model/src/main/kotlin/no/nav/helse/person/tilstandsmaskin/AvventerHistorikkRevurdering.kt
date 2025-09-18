@@ -22,7 +22,7 @@ internal data object AvventerHistorikkRevurdering : Vedtaksperiodetilstand {
         vedtaksperiode.håndterOverstyringIgangsattRevurdering(revurdering, aktivitetslogg)
     }
 
-    override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.trengerYtelser(aktivitetslogg)
     }
 

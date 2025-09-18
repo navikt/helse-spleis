@@ -21,11 +21,11 @@ internal data object SelvstendigAvventerInfotrygdHistorikk : Vedtaksperiodetilst
         vedtaksperiode.person.trengerHistorikkFraInfotrygd(aktivitetslogg)
     }
 
-    override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.person.trengerHistorikkFraInfotrygd(aktivitetslogg)
     }
 
-    override fun håndter(
+    override fun håndterKorrigerendeInntektsmelding(
         vedtaksperiode: Vedtaksperiode,
         dager: DagerFraInntektsmelding,
         aktivitetslogg: IAktivitetslogg
