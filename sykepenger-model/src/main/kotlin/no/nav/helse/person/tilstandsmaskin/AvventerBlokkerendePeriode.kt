@@ -56,7 +56,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, hendelse, aktivitetslogg)
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-        tilstand(vedtaksperiode).håndter(vedtaksperiode, påminnelse, aktivitetslogg)
+        tilstand(vedtaksperiode).håndterPåminnelse(vedtaksperiode, påminnelse, aktivitetslogg)
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
@@ -92,7 +92,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
 
     private sealed interface Tilstand {
         fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg)
-        fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
+        fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
     }
 
     private data object AvventerTidligereEllerOverlappendeSøknad : Tilstand {
@@ -100,7 +100,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
             aktivitetslogg.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden")
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+        override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
             if (påminnelse.når(Påminnelse.Predikat.VentetMinst(Period.ofMonths(3))) || påminnelse.når(
                     Påminnelse.Predikat.Flagg(
                         "forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere"

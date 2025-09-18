@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
 import no.nav.helse.dto.OppdragstatusDto
@@ -346,7 +346,7 @@ class Oppdrag private constructor(
         this.status = hendelse.status
     }
 
-    fun håndter(simulering: SimuleringHendelse) {
+    fun håndterSimulering(simulering: SimuleringHendelse) {
         if (simulering.fagsystemId != this.fagsystemId || simulering.fagområde != this.fagområde || !simulering.simuleringOK) return
         this.erSimulert = true
         this.simuleringsResultat = simulering.simuleringsResultat

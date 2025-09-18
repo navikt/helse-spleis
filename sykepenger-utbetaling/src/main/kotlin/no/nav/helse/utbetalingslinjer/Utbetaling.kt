@@ -178,8 +178,8 @@ class Utbetaling private constructor(
 
     fun håndterSimuleringHendelse(simulering: SimuleringHendelse) {
         if (simulering.utbetalingId != this.id) return
-        personOppdrag.håndter(simulering)
-        arbeidsgiverOppdrag.håndter(simulering)
+        personOppdrag.håndterSimulering(simulering)
+        arbeidsgiverOppdrag.håndterSimulering(simulering)
     }
 
     fun simuler(aktivitetslogg: IAktivitetslogg) {
