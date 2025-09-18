@@ -510,7 +510,7 @@ internal class Vedtaksperiode private constructor(
 
                 if (antallInntektsmeldinger > 1) aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
                 return inntektsmeldinger
-                    .mapNotNull { yrkesaktivitet.håndter(it, aktivitetsloggMedVedtaksperiodekontekst, trengerRefusjonsopplysninger) }
+                    .mapNotNull { yrkesaktivitet.håndterInntektsmelding(it, aktivitetsloggMedVedtaksperiodekontekst, trengerRefusjonsopplysninger) }
                     .tidligsteEventyr()
             }
 
