@@ -1827,7 +1827,12 @@ internal class Vedtaksperiode private constructor(
 
     private fun opplysningerViTrenger(): Set<PersonObserver.ForespurtOpplysning> {
         if (!skalBehandlesISpeil()) return emptySet() // perioden er AUU ✋
-        if (yrkesaktivitet.finnVedtaksperiodeRettFør(this)?.skalBehandlesISpeil() == true) return emptySet() // Da har perioden foran oss spurt for oss/ vi har det vi trenger ✋
+
+        val vedtaksperiodeRettFør = yrkesaktivitet.finnVedtaksperiodeRettFør(this)
+        if (vedtaksperiodeRettFør != null) {
+            val periodenFørHarBedtOmOpplysninger = vedtaksperiodeRettFør.skalBehandlesISpeil() && vedtaksperiodeRettFør.tilstand === AvventerInntektsmelding
+            if (periodenFørHarBedtOmOpplysninger) return emptySet() // Da har perioden foran oss spurt for oss/ vi har det vi trenger ✋
+        }
 
         val opplysninger = mutableSetOf<PersonObserver.ForespurtOpplysning>().apply {
             if (!harEksisterendeInntekt()) addAll(setOf(PersonObserver.Inntekt, PersonObserver.Refusjon)) // HAG støtter ikke skjema uten refusjon, så når vi først spør om inntekt _må_ vi også spørre om refusjon

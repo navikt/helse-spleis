@@ -15,7 +15,8 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_BLOKKERENDE_PERIODE
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         check(!vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
-            "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}"
+            val harVærtAUUMenSkalIkkeVæreDetMer = !vedtaksperiode.skalOmgjøres() && vedtaksperiode.skalBehandlesISpeil()
+            "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}. ${if (harVærtAUUMenSkalIkkeVæreDetMer) "Periode har vært AUU, men skal ikke være der lenger med ny kode" else ""}"
         }
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }

@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
@@ -41,6 +41,16 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Arbeidsgiverperiode
 import no.nav.helse.person.PersonObserver.Inntekt
 import no.nav.helse.person.PersonObserver.Refusjon
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -52,16 +62,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
-import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
-import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
 import no.nav.helse.sykdomstidslinje.Dag
@@ -73,8 +73,31 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
+
+    @Test
+    fun `periode utenfor agp, som er i auu, dras ut av auu som følge av arbeidsgiveropplysninger`() {
+        medJSONPerson("/personer/auu-utenfor-agp-med-ferie.json")
+        // setup:
+        /*
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent), Ferie(7.januar, 17.januar))
+        }
+        a2 {
+            håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent), Ferie(7.januar, 17.januar))
+        }*/
+
+        a1 {
+            håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            val err = assertThrows<IllegalStateException> {
+                håndterArbeidsgiveropplysninger(2.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()))
+            }
+            assertTrue(err.message!!.contains("Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling"))
+        }
+    }
 
     @Test
     fun `Arbeidsgiver korrigerer ubrukte refusjonsopplysninger`() {
