@@ -928,7 +928,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `forlengelse av auu som slutter på en lørdag skal be om agp`() {
         nyPeriode(4.januar til 20.januar)
-        assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         nyPeriode(21.januar til 31.januar)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 

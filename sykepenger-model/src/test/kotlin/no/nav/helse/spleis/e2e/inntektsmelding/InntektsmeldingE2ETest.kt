@@ -41,6 +41,19 @@ import no.nav.helse.oktober
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -57,17 +70,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVIN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
-import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -93,6 +95,7 @@ import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -125,6 +128,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
@@ -277,6 +281,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(februar)
 
         håndterInntektsmelding(listOf(1.februar til 16.februar))
+        // IM kommer ikke så spleis innhenter inntekter selv
+        håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), 1.januar.plusDays(90).atStartOfDay())
+        håndterSykepengegrunnlagForArbeidsgiver(17.januar, a1)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        assertVarsler(listOf(RV_IV_10), 2.vedtaksperiode.filter())
+
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -285,12 +297,24 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         assertVarsler(listOf(RV_IM_3), 3.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
-        håndtererInntektsmeldingInntektUtenDokumentsporing(2.vedtaksperiode) {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+        nullstillTilstandsendringer()
+
+        // vedtaksperiode 2 håndterer inntekt, men har ikke håndtert refusjonen fordi inntektsmeldingen teknisk
+        // sett har 1.januar som første fraværsdag, og vedtaksperiode 2 har eget skjæringstidspunkt på 17. januar.
+        // Sånn sett er det rart at vedtaksperiode 2 håndterer inntekten i det hele tatt.
+        val err = assertThrows<IllegalStateException> {
+            håndtererInntektsmeldingInntektUtenDokumentsporing(2.vedtaksperiode) {
+                håndterInntektsmelding(listOf(1.januar til 16.januar))
+            }
         }
+        assertEquals("forventer ikke at vedtaksperioden har en lukket behandling når inntekt håndteres", err.message)
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET)
     }
 
     @Test
@@ -326,7 +350,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
 
         assertVarsler(listOf(RV_IM_8, RV_IM_24), 1.vedtaksperiode.filter())
-        assertVarsler(listOf(RV_IM_8), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_8, RV_IM_24), 2.vedtaksperiode.filter())
         assertVarsler(listOf(RV_IM_8), 3.vedtaksperiode.filter())
     }
 
@@ -441,11 +465,11 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `portalinntektsmelding på forlengelse til en periode utenfor arbeidsgiverperioden, men bare i helg`() {
         håndterSøknad(torsdag den 4.januar til søndag den 21.januar)
         håndterSøknad(mandag den 22.januar til 31.januar)
-        håndterArbeidsgiveropplysninger(listOf(4.januar til 19.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        håndterArbeidsgiveropplysninger(listOf(4.januar til 19.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         assertEquals(4.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(4.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test
@@ -484,7 +508,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 5.februar,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
-        assertVarsler(listOf(Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(Varselkode.RV_IM_25, RV_IM_24), 2.vedtaksperiode.filter())
         assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
         assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
         assertEquals(5.februar til 28.februar, inspektør.periode(1.vedtaksperiode))

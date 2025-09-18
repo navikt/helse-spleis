@@ -76,15 +76,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             fravær = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.FERIE))
         )
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        assertTilstander(
-            0,
-            "AVVENTER_INFOTRYGDHISTORIKK",
-            "AVVENTER_INNTEKTSMELDING",
-            "AVVENTER_BLOKKERENDE_PERIODE",
-            "AVSLUTTET_UTEN_UTBETALING",
-            "AVVENTER_BLOKKERENDE_PERIODE",
-            "AVSLUTTET_UTEN_UTBETALING"
-        )
+        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING")
     }
 
     @Test
@@ -95,15 +87,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             fravær = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.PERMISJON))
         )
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        assertTilstander(
-            0,
-            "AVVENTER_INFOTRYGDHISTORIKK",
-            "AVVENTER_INNTEKTSMELDING",
-            "AVVENTER_BLOKKERENDE_PERIODE",
-            "AVSLUTTET_UTEN_UTBETALING",
-            "AVVENTER_BLOKKERENDE_PERIODE",
-            "AVSLUTTET_UTEN_UTBETALING"
-        )
+        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING")
     }
 
     @Test

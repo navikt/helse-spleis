@@ -71,12 +71,11 @@ class Inntektsmelding(
     }
 
     // dagen inntekten gjelder for er "dag nr 17", slik at ikke en auu-periode håndterer inntekten
-    // fordi "dag nr 17" -kan- være en lørdag/søndag så hopper vi til mandagen etterpå
     internal val datoForHåndteringAvInntekt = if (begrunnelseForReduksjonEllerIkkeUtbetalt == null) {
         listOfNotNull(grupperteArbeidsgiverperioder.lastOrNull()?.endInclusive?.nesteDag, førsteFraværsdag).max()
     } else {
         kompensertFørsteFraværsdag
-    }.førsteArbeidsdag()
+    }
 
     private val refusjonsdato: LocalDate by lazy {
         if (førsteFraværsdag == null) grupperteArbeidsgiverperioder.maxOf { it.start }
