@@ -17,13 +17,13 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, private val builder: SendtSøknadBuilder = SendtSøknadBuilder(packet["arbeidssituasjon"].asText())) : SøknadMessage(packet, builder.selvstendig()) {
     override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: MessageContext) {
         builder.sendt(packet["sendtNav"].asLocalDateTime())
-        val pensjonsgivendeInntekter = packet["selvstendigNaringsdrivende"]["inntekt"]["inntektsAar"].map {
+        val pensjonsgivendeInntekter = packet["selvstendigNaringsdrivende.inntekt.inntektsAar"].map {
             Søknad.PensjonsgivendeInntekt(
-                inntektsår = Year.parse(it["aar"].asText()),
-                næringsinntekt = it["pensjonsgivendeInntekt"]["pensjonsgivendeInntektAvNaeringsinntekt"].asInt().årlig,
-                lønnsinntekt = it["pensjonsgivendeInntekt"]["pensjonsgivendeInntektAvLoennsinntekt"].asInt().årlig,
-                lønnsinntektBarePensjonsdel = it["pensjonsgivendeInntekt"]["pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel"].asInt().årlig,
-                næringsinntektFraFiskeFangstEllerFamiliebarnehage = it["pensjonsgivendeInntekt"]["pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage"].asInt().årlig
+                inntektsår = Year.parse(it.path("aar").asText()),
+                næringsinntekt = it.path("pensjonsgivendeInntekt").path("pensjonsgivendeInntektAvNaeringsinntekt").asInt().årlig,
+                lønnsinntekt = it.path("pensjonsgivendeInntekt").path("pensjonsgivendeInntektAvLoennsinntekt").asInt().årlig,
+                lønnsinntektBarePensjonsdel = it.path("pensjonsgivendeInntekt").path("pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel").asInt().årlig,
+                næringsinntektFraFiskeFangstEllerFamiliebarnehage = it.path("pensjonsgivendeInntekt").path("pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage").asInt().årlig
             )
         }
         builder.pensjonsgivendeInntekter(pensjonsgivendeInntekter)
