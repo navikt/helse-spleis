@@ -15,6 +15,7 @@ import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
 
@@ -29,6 +30,34 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
+        }
+    }
+
+    @Test
+    fun `revurdering mens annullere tidligere utbetaling`() {
+        a1 {
+            nyttVedtak(januar)
+            val utbetalingId = inspektør.utbetaling(0).utbetalingId
+            nyttVedtak(mars)
+            håndterAnnullering(utbetalingId)
+            val err = assertThrows<IllegalStateException> {
+                håndterSøknad(januar)
+            }
+            assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
+            assertEquals("Kan ikke håndtere søknad mens perioden er i TilAnnullering", err.message)
+        }
+    }
+
+    @Test
+    fun `revurdering mens annullere senere utbetaling`() {
+        a1 {
+            nyttVedtak(januar)
+            nyttVedtak(mars)
+            val utbetalingId = inspektør.utbetaling(1).utbetalingId
+            håndterAnnullering(utbetalingId)
+            håndterSøknad(januar)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_REVURDERING)
+            assertSisteTilstand(2.vedtaksperiode, TilstandType.TIL_ANNULLERING)
         }
     }
 

@@ -22,9 +22,7 @@ internal data object TilAnnullering : Vedtaksperiodetilstand {
         }
     }
 
-    override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
-        error("Kan ikke igangsette overstyring i TilAnnullering-tilstanden")
-    }
+    override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {}
 
     override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående annullering")
