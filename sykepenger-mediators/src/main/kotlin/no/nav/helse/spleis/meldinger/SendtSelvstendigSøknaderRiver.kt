@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -15,6 +16,13 @@ internal class SendtSelvstendigSøknaderRiver(
 ) : SøknadRiver(rapidsConnection, messageMediator) {
     override val eventName = "sendt_søknad_selvstendig"
     override val riverName = "Sendt søknad Selvstendig"
+
+    override fun precondition(packet: JsonMessage) {
+        packet.requireAny("arbeidssituasjon", listOf("SELVSTENDIG_NARINGSDRIVENDE", "BARNEPASSER"))
+        packet.require("selvstendigNaringsdrivende.ventetid") { ventetid ->
+            check(!ventetid.isMissingOrNull())
+        }
+    }
 
     override fun validate(message: JsonMessage) {
         message.requireKey("id", "selvstendigNaringsdrivende", "arbeidssituasjon")
