@@ -1,0 +1,131 @@
+{
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": true,
+                    "dager": [
+                      {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-16"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "tilstand": "AVSLUTTET_UTEN_VEDTAK",
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": false,
+                    "dager": [
+                      {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-16"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": true,
+                    "dager": []
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "tilstand": "UBEREGNET",
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": false,
+                    "dager": [
+                      {
+                        "fom": [2018, 1, 1],
+                        "tom": [2018, 1, 10]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "tilstand": "AVSLUTTET_UTEN_VEDTAK",
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": false,
+                    "dager": [
+                      {
+                        "fom": [2018, 1, 1],
+                        "tom": [2018, 1, 16]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "tilstand": "UBEREGNET",
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": true,
+                    "dager": [
+                      {
+                        "fom": [2018, 1, 1],
+                        "tom": [2018, 1, 16]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {}
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 331
+}

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
-import java.time.LocalDate.EPOCH
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
@@ -14,7 +13,6 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -138,7 +136,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         assertEquals(listOf(10.februar til 25.februar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
 
         this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
-        assertEquals(listOf(EPOCH.somPeriode()), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(emptyList<Periode>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
 
         this@InfotrygdTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -155,7 +153,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null),
             arbeidsgiverperioder = null
         )
-        assertEquals(listOf(EPOCH.somPeriode()), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        assertEquals(emptyList<Periode>(), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         this@InfotrygdTest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -163,7 +161,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
         // Mens Mars står til godkjenning utbetales den i Infotrygd
         this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar), ArbeidsgiverUtbetalingsperiode(a1, 10.mars, 31.mars))
-        assertEquals(listOf(EPOCH.somPeriode()), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        assertEquals(emptyList<Periode>(), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
         this@InfotrygdTest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         assertNotEquals(februarKorrelasjonsId, gjeldendeKorrelasjonsId(2.vedtaksperiode))
@@ -191,7 +189,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar), ArbeidsgiverUtbetalingsperiode(a1, 1.juli, 31.juli))
 
-        assertEquals(listOf(EPOCH.somPeriode()), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.arbeidsgiverperiode)
+        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.arbeidsgiverperiode)
 
         this@InfotrygdTest.håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)

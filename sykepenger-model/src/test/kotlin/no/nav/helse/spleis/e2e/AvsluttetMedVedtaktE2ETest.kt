@@ -30,7 +30,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertNull
 
 internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
 
@@ -253,10 +252,10 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(15.januar, 31.januar))
         håndterSøknad(Sykdom(15.januar, 31.januar, 100.prosent), Ferie(15.januar, 31.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         assertEquals(1, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
-        assertNull(observatør.avsluttetUtenVedtakEventer[2.vedtaksperiode.id(a1)])
+        assertEquals(1, 2.vedtaksperiode.avsluttetUtenVedtakEventer.size)
         1.vedtaksperiode.assertIngenVedtakFattet()
         2.vedtaksperiode.assertIngenVedtakFattet()
     }

@@ -4,9 +4,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.RefusjonservitørData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData
+import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.ArbeidsgiverperiodeData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.ArbeidssituasjonData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
 import no.nav.helse.dto.SpannerPersonDto.UtbetalingData
@@ -377,7 +378,7 @@ data class SpannerPersonDto(
             val dagerNavOvertarAnsvar: List<PeriodeData>,
             val egenmeldingsdager: List<PeriodeData>,
             val utbetalingstidslinje: List<Any>,
-            val arbeidsgiverperiode: List<PeriodeData>,
+            val arbeidsgiverperiode: ArbeidsgiverperiodeData,
             val ventetid: PeriodeData?,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             val forbrukteDager: Long,
@@ -574,7 +575,7 @@ data class SpannerPersonDto(
                     val refusjonstidslinje: BeløpstidslinjeData,
                     val inntektsendringer: BeløpstidslinjeData,
                     val dokumentsporing: DokumentsporingData,
-                    val arbeidsgiverperiode: List<PeriodeData>,
+                    val arbeidsgiverperiode: ArbeidsgiverperiodeData,
                     val ventetid: PeriodeData?,
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
                     val egenmeldingsdager: List<PeriodeData>,
@@ -583,6 +584,10 @@ data class SpannerPersonDto(
                     val faktaavklartInntekt: SelvstendigInntektsopplysningData.InntektsopplysningData?
                 )
 
+                data class ArbeidsgiverperiodeData(
+                    val ferdigAvklart: Boolean,
+                    val dager: List<PeriodeData>
+                )
                 enum class ArbeidssituasjonData {
                     ARBEIDSTAKER,
                     ARBEIDSLEDIG,
@@ -1234,12 +1239,7 @@ private fun BehandlingendringUtDto.tilPersonData() =
         refusjonstidslinje = refusjonstidslinje.tilPersonData(),
         inntektsendringer = inntektsendringer.tilPersonData(),
         dokumentsporing = dokumentsporing.tilPersonData(),
-        arbeidsgiverperiode = arbeidsgiverperioder.map {
-            SpannerPersonDto.ArbeidsgiverData.PeriodeData(
-                it.fom,
-                it.tom
-            )
-        },
+        arbeidsgiverperiode = arbeidsgiverperiode.tilPersonData(),
         dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map {
             SpannerPersonDto.ArbeidsgiverData.PeriodeData(
                 it.fom,
@@ -1259,6 +1259,11 @@ private fun BehandlingendringUtDto.tilPersonData() =
         faktaavklartInntekt = faktaavklartInntekt?.tilPersonData(),
         ventetid = ventetid?.let { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
     )
+
+private fun ArbeidsgiverperiodeavklaringDto.tilPersonData() = ArbeidsgiverperiodeData(
+    ferdigAvklart = this.ferdigAvklart,
+    dager = this.dager.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
+)
 
 private fun MaksdatoresultatUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatoresultatData(
     vurdertTilOgMed = vurdertTilOgMed,

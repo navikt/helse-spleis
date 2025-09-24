@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import java.time.LocalDate.EPOCH
 import no.nav.helse.erHelg
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
@@ -32,7 +31,8 @@ internal class Arbeidsgiverperiodeberegner(
             arbeidsgiverperiode = emptyList(),
             utbetalingsperioder = emptyList(),
             oppholdsperioder = emptyList(),
-            fullstendig = false
+            fullstendig = false,
+            ferdigAvklart = false
         ).also { aktivArbeidsgiverperioderesultat = it }
     }
 
@@ -190,20 +190,11 @@ internal class Arbeidsgiverperiodeberegner(
         }
 
         fun sykdomsdag(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) {
-            builder.aktivArbeidsgiverperioderesultat = builder.arbeidsgiverperiodeResultatet(dato)
-                .let {
-                    // for å unngå "ugyldig state" så legger vi inn én arbeidsgiverperiode-dag når saken ligger i infotrygd
-                    if (it.arbeidsgiverperiode.isEmpty())
-                        it.utvideMed(
-                            dato = dato,
-                            arbeidsgiverperiode = EPOCH
-                        )
-                    else it
-                }
-                .utvideMed(
-                    dato = dato,
-                    utbetalingsperiode = dato
-                )
+            builder.aktivArbeidsgiverperioderesultat = builder.arbeidsgiverperiodeResultatet(dato).utvideMed(
+                dato = dato,
+                ferdigAvklart = true,
+                utbetalingsperiode = dato
+            )
         }
 
         fun egenmeldingsdag(builder: Arbeidsgiverperiodeberegner, dato: LocalDate) = sykdomsdag(builder, dato)
@@ -267,7 +258,8 @@ internal class Arbeidsgiverperiodeberegner(
             builder.aktivArbeidsgiverperioderesultat = builder.arbeidsgiverperiodeResultatet(dato).utvideMed(
                 dato = dato,
                 arbeidsgiverperiode = dato,
-                fullstendig = true
+                fullstendig = true,
+                ferdigAvklart = true
             )
             builder.tilstand(Utbetaling)
         }

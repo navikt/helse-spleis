@@ -773,7 +773,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterUtbetaltDelerAvArbeidsgiverperioden(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
         val utbetaltDelerAvArbeidsgiverperioden = arbeidsgiveropplysninger.filterIsInstance<UtbetaltDelerAvArbeidsgiverperioden>().singleOrNull() ?: return emptyList()
-        val perioderNavUtbetaler = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.flatMap { it.uten(LocalDate.MIN til utbetaltDelerAvArbeidsgiverperioden.utbetaltTilOgMed) }
+        val perioderNavUtbetaler = behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.dager.flatMap { it.uten(LocalDate.MIN til utbetaltDelerAvArbeidsgiverperioden.utbetaltTilOgMed) }
         return håndterNavUtbetalerArbeidsgiverperiode(aktivitetslogg, arbeidsgiveropplysninger, perioderNavUtbetaler = perioderNavUtbetaler) {
             utbetaltDelerAvArbeidsgiverperioden.valider(aktivitetslogg)
         }
@@ -782,7 +782,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndterNavUtbetalerArbeidsgiverperiode(
         aktivitetslogg: IAktivitetslogg,
         arbeidsgiveropplysninger: Arbeidsgiveropplysninger,
-        perioderNavUtbetaler: List<Periode> = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder,
+        perioderNavUtbetaler: List<Periode> = behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.dager,
         valider: () -> Unit
     ): List<Revurderingseventyr> {
         val bit = sykNavBit(arbeidsgiveropplysninger, perioderNavUtbetaler)
@@ -822,7 +822,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun varselVedEndretArbeidsgiverperiode(korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
         val oppgittArbeidgiverperiode = korrigerteArbeidsgiveropplysninger.filterIsInstance<OppgittArbeidgiverperiode>().singleOrNull() ?: return
-        val beregnetArbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode() ?: return varselFraArbeidsgiveropplysning(korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_24)
+        val beregnetArbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.periode ?: return varselFraArbeidsgiveropplysning(korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_24)
         if (oppgittArbeidgiverperiode.perioder.periode()!! in beregnetArbeidsgiverperiode) return
         varselFraArbeidsgiveropplysning(korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_24)
     }
@@ -861,7 +861,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun skalHåndtereDagerRevurdering(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg): Boolean {
         return skalHåndtereDager(dager, aktivitetslogg) { sammenhengende ->
-            dager.skalHåndteresAvRevurdering(periode, sammenhengende, behandlinger.arbeidsgiverperiode().arbeidsgiverperioder)
+            dager.skalHåndteresAvRevurdering(periode, sammenhengende, behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.dager)
         }
     }
 
@@ -894,14 +894,14 @@ internal class Vedtaksperiode private constructor(
         )
         håndterDager(dager.hendelse, bit, aktivitetslogg) {
             dager.valider(aktivitetslogg, vedtaksperiodeId = id)
-            dager.validerArbeidsgiverperiode(aktivitetslogg, periode, behandlinger.arbeidsgiverperiode().arbeidsgiverperioder)
+            dager.validerArbeidsgiverperiode(aktivitetslogg, periode, behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.dager)
         }
     }
 
     private fun håndterDagerUtenEndring(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
         val hendelse = dager.tomBitAvInntektsmelding(aktivitetslogg, periode)
         håndterDager(dager.hendelse, hendelse, aktivitetslogg) {
-            dager.valider(aktivitetslogg, behandlinger.arbeidsgiverperiode().arbeidsgiverperioder, vedtaksperiodeId = id)
+            dager.valider(aktivitetslogg, behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.dager, vedtaksperiodeId = id)
         }
     }
 
@@ -1554,7 +1554,7 @@ internal class Vedtaksperiode private constructor(
     )
 
     internal fun nullstillEgenmeldingsdagerIArbeidsgiverperiode(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing?): List<Revurderingseventyr> {
-        val arbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder?.periode() ?: return emptyList()
+        val arbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.periode ?: return emptyList()
         return yrkesaktivitet.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
             .filter { it.håndterEgenmeldsingsdager(hendelse, dokumentsporing, it.registrerKontekst(aktivitetslogg), emptyList()) }
             .map { Revurderingseventyr.arbeidsgiverperiode(hendelse, it.skjæringstidspunkt, it.periode) }
@@ -1592,7 +1592,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndterKorrigerendeInntektsmelding(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
         val opprinneligAgp = behandlinger.arbeidsgiverperiode()
-        if (dager.erKorrigeringForGammel(aktivitetslogg, opprinneligAgp.arbeidsgiverperioder)) {
+        if (dager.erKorrigeringForGammel(aktivitetslogg, opprinneligAgp.arbeidsgiverperiode.dager)) {
             håndterDagerUtenEndring(dager, aktivitetslogg)
         } else {
             håndterDager(dager, aktivitetslogg)
@@ -1842,7 +1842,7 @@ internal class Vedtaksperiode private constructor(
         if (behandlinger.dagerNavOvertarAnsvar.isNotEmpty()) return opplysninger // Trenger hvert fall ikke opplysninger om arbeidsgiverperiode dersom Nav har overtatt ansvar for den ✋
 
         return opplysninger.apply {
-            val sisteDelAvAgp = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.lastOrNull()
+            val sisteDelAvAgp = behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.dager.lastOrNull()
             // Vi "trenger" jo aldri AGP, men spør om vi perioden overlapper/er rett etter beregnet AGP
             if (sisteDelAvAgp?.overlapperMed(periode) == true || sisteDelAvAgp?.erRettFør(periode) == true) {
                 add(PersonObserver.Arbeidsgiverperiode)
@@ -1898,7 +1898,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(): List<Vedtaksperiode> {
-        val arbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode() ?: return listOf(this)
+        val arbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.periode ?: return listOf(this)
         return yrkesaktivitet.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).filter { it <= this }
     }
 
@@ -2631,7 +2631,7 @@ internal class Vedtaksperiode private constructor(
 
         internal val SAMME_ARBEIDSGIVERPERIODE = fun(yrkesaktivitet: Yrkesaktivitet, arbeidsgiverperiode: Periode): VedtaksperiodeFilter {
             return fun(other: Vedtaksperiode): Boolean {
-                return other.yrkesaktivitet.organisasjonsnummer == yrkesaktivitet.organisasjonsnummer && (other.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode()?.overlapperMed(arbeidsgiverperiode) == true)
+                return other.yrkesaktivitet.organisasjonsnummer == yrkesaktivitet.organisasjonsnummer && (other.behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.periode?.overlapperMed(arbeidsgiverperiode) == true)
             }
         }
 
@@ -2667,7 +2667,7 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.beregnSkjæringstidspunkter(
             beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
-            beregnArbeidsgiverperiode: (Periode) -> List<Periode>
+            beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
         ) {
             forEach { it.behandlinger.beregnSkjæringstidspunkt(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode) }
         }

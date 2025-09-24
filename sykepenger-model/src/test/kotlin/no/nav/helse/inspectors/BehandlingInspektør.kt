@@ -30,7 +30,7 @@ internal class BehandlingInspektør(view: BehandlingView) {
                 inntektsendringer = it.inntektsendringer,
                 skjæringstidspunkt = it.skjæringstidspunkt,
                 sykdomstidslinje = it.sykdomstidslinje,
-                arbeidsgiverperiode = it.arbeidsgiverperiode,
+                arbeidsgiverperiode = it.arbeidsgiverperiode.dager,
                 sykmeldingsperiode = it.sykmeldingsperiode,
                 ventetid = it.ventetid
             )

@@ -1,0 +1,118 @@
+{
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-16"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "tilstand": "AVSLUTTET_UTEN_VEDTAK",
+              "endringer": [
+                {
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-16"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": [1970, 1, 1],
+                      "tom": [1970, 1, 1]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "tilstand": "UBEREGNET",
+              "endringer": [
+                {
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": [2018, 1, 1],
+                      "tom": [2018, 1, 10]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "tilstand": "AVSLUTTET_UTEN_VEDTAK",
+              "endringer": [
+                {
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": [2018, 1, 1],
+                      "tom": [2018, 1, 16]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "tilstand": "UBEREGNET",
+              "endringer": [
+                {
+                  "arbeidsgiverperioder": [
+                    {
+                      "fom": [2018, 1, 1],
+                      "tom": [2018, 1, 16]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {}
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 330
+}

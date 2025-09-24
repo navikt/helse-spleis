@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import java.time.LocalDate.EPOCH
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.nesteDag
@@ -16,26 +17,30 @@ data class Arbeidsgiverperioderesultat(
     val oppholdsperioder: List<Periode>,
     // hvorvidt arbeidsgiverperiodetellingen er komplett, aka. 16 dager.
     // hvis tellingen er fullstendig så er arbeidsgiverperiode.last() dag nr. 16.
-    val fullstendig: Boolean
+    val fullstendig: Boolean,
+    // hvorvidt arbeidsgiverperioden er ferdig avklart (enten fordi tellingen er fullstendig eller fordi agp er avklart i Infotrygd)
+    val ferdigAvklart: Boolean
 ) {
     fun utvideMed(
         dato: LocalDate,
         arbeidsgiverperiode: LocalDate? = null,
         utbetalingsperiode: LocalDate? = null,
         oppholdsperiode: LocalDate? = null,
-        fullstendig: Boolean? = null
+        fullstendig: Boolean? = null,
+        ferdigAvklart: Boolean? = null
     ): Arbeidsgiverperioderesultat {
         return this.copy(
             omsluttendePeriode = this.omsluttendePeriode.oppdaterTom(dato),
             arbeidsgiverperiode = this.arbeidsgiverperiode.leggTil(arbeidsgiverperiode),
             utbetalingsperioder = this.utbetalingsperioder.leggTil(utbetalingsperiode),
             oppholdsperioder = this.oppholdsperioder.leggTil(oppholdsperiode),
-            fullstendig = fullstendig ?: this.fullstendig
+            fullstendig = fullstendig ?: this.fullstendig,
+            ferdigAvklart = ferdigAvklart ?: this.ferdigAvklart
         )
     }
 
     internal fun somArbeidsgiverperiode(): Arbeidsgiverperiode {
-        val agp = Arbeidsgiverperiode(arbeidsgiverperiode)
+        val agp = Arbeidsgiverperiode(arbeidsgiverperiode.takeUnless { it.isEmpty() } ?: listOf(EPOCH.somPeriode()))
         utbetalingsperioder.flatten().forEach { agp.utbetalingsdag(it) }
         oppholdsperioder.flatten().forEach { agp.oppholdsdag(it) }
         omsluttendePeriode.forEach { agp.kjentDag(it) }

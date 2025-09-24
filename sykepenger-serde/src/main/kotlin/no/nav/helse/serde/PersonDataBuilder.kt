@@ -2,6 +2,7 @@ package no.nav.helse.serde
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
+import no.nav.helse.dto.ArbeidsgiverperiodeavklaringDto
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
@@ -67,6 +68,7 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingData.InntektsmeldingKildeDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.ArbeidsgiverperiodeData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.ArbeidssituasjonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET_UTEN_UTBETALING
@@ -467,7 +469,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     refusjonstidslinje = refusjonstidslinje.tilPersonData(),
     inntektsendringer = inntektsendringer.tilPersonData(),
     dokumentsporing = dokumentsporing.tilPersonData(),
-    arbeidsgiverperioder = arbeidsgiverperioder.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
+    arbeidsgiverperiode = arbeidsgiverperiode.tilPersonData(),
     dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     egenmeldingsdager = egenmeldingsdager.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     maksdatoresultat = maksdatoresultat.tilPersonData(),
@@ -476,6 +478,11 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     }.toMap(),
     faktaavklartInntekt = faktaavklartInntekt?.tilPersonData(),
     ventetid = ventetid?.let { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
+)
+
+private fun ArbeidsgiverperiodeavklaringDto.tilPersonData() = ArbeidsgiverperiodeData(
+    ferdigAvklart = this.ferdigAvklart,
+    dager = this.dager.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
 )
 
 private fun MaksdatoresultatUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.MaksdatoresultatData(

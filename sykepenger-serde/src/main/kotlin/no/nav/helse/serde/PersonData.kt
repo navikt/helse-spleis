@@ -10,6 +10,7 @@ import kotlin.streams.asSequence
 import no.nav.helse.dto.AlderDto
 import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
+import no.nav.helse.dto.ArbeidsgiverperiodeavklaringDto
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
@@ -1047,7 +1048,7 @@ data class PersonData(
                     val refusjonstidslinje: BeløpstidslinjeData,
                     val inntektsendringer: BeløpstidslinjeData,
                     val dokumentsporing: DokumentsporingData,
-                    val arbeidsgiverperioder: List<PeriodeData>,
+                    val arbeidsgiverperiode: ArbeidsgiverperiodeData,
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
                     val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
@@ -1079,7 +1080,7 @@ data class PersonData(
                         inntektsendringer = this.inntektsendringer.tilDto(),
                         skjæringstidspunkt = skjæringstidspunkt,
                         skjæringstidspunkter = skjæringstidspunkter,
-                        arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() },
+                        arbeidsgiverperiode = arbeidsgiverperiode.tilDto(),
                         dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map { it.tilDto() },
                         egenmeldingsdager = egenmeldingsdager.map { it.tilDto() },
                         maksdatoresultat = maksdatoresultat.tilDto(),
@@ -1089,6 +1090,16 @@ data class PersonData(
                         faktaavklartInntekt = faktaavklartInntekt?.tilDto(),
                         ventetid = ventetid?.tilDto()
                     )
+
+                    data class ArbeidsgiverperiodeData(
+                        val ferdigAvklart: Boolean,
+                        val dager: List<PeriodeData>
+                    ) {
+                        fun tilDto() = ArbeidsgiverperiodeavklaringDto(
+                            ferdigAvklart = this.ferdigAvklart,
+                            dager = this.dager.map { it.tilDto() }
+                        )
+                    }
 
                     enum class ArbeidssituasjonData {
                         ARBEIDSTAKER,

@@ -52,7 +52,6 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.mursteinsperioder
-import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
@@ -842,7 +841,7 @@ internal class Yrkesaktivitet private constructor(
 
     // Utbetalinger gjort på "ny rigg" (én utbetaling per vedtaksperiode)
     private fun senereVedtaksperioderMedFattetVedtakMedSammeAgp(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
-        val arbeidsgiverperiode = vedtaksperiodeSomForsøkesAnnullert.behandlinger.arbeidsgiverperiode().arbeidsgiverperioder.periode() ?: return setOf(vedtaksperiodeSomForsøkesAnnullert)
+        val arbeidsgiverperiode = vedtaksperiodeSomForsøkesAnnullert.behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.periode ?: return setOf(vedtaksperiodeSomForsøkesAnnullert)
         val vedtaksperioder = vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).filter { it.periode.start >= vedtaksperiodeSomForsøkesAnnullert.periode.start }
         return vedtaksperioder.filter { it.behandlinger.harVærtUtbetalt() }.toSet()
     }
@@ -1070,13 +1069,16 @@ internal class Yrkesaktivitet private constructor(
         when (yrkesaktivitetstype) {
             is Arbeidstaker -> arbeidsgiverperiodeFor()
                 .finn(vedtaksperiode)
-                ?.arbeidsgiverperiode
-                ?.grupperSammenhengendePerioder()
-                ?: emptyList()
+                ?.let {
+                    Arbeidsgiverperiodeavklaring(
+                        ferdigAvklart = it.ferdigAvklart,
+                        dager = it.arbeidsgiverperiode.grupperSammenhengendePerioder()
+                    )
+                } ?: Arbeidsgiverperiodeavklaring(false, emptyList())
 
             Arbeidsledig,
             Frilans,
-            Selvstendig -> emptyList()
+            Selvstendig -> Arbeidsgiverperiodeavklaring(true, emptyList())
         }
     }
 
