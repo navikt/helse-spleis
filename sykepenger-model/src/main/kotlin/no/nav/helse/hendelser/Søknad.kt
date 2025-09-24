@@ -4,7 +4,7 @@ import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
@@ -30,6 +30,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøknad er lagt til grunn`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med inntektstype vi ikke støtter`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som ikke støttes`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som støttes`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_3
@@ -132,6 +133,13 @@ class Søknad(
             Arbeidssituasjon.ARBEIDSLEDIG -> validerArbeidsledig(aktivitetslogg, vilkårsgrunnlag, sykdomstidslinje.periode(), refusjonstidslinje)
             Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
             Arbeidssituasjon.BARNEPASSER -> validerSelvstendig(aktivitetslogg)
+
+            Arbeidssituasjon.JORDBRUKER,
+            Arbeidssituasjon.FISKER,
+            Arbeidssituasjon.ANNET -> {
+                aktivitetslogg.info("Har ikke støtte for søknadstypen $arbeidssituasjon")
+                aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
+            }
         }
 
         return aktivitetslogg
@@ -245,6 +253,9 @@ class Søknad(
             Arbeidssituasjon.FRILANSER -> Behandlinger.Behandling.Endring.Arbeidssituasjon.FRILANSER
             Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> Behandlinger.Behandling.Endring.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE
             Arbeidssituasjon.BARNEPASSER -> Behandlinger.Behandling.Endring.Arbeidssituasjon.BARNEPASSER
+            Arbeidssituasjon.JORDBRUKER -> Behandlinger.Behandling.Endring.Arbeidssituasjon.JORDBRUKER
+            Arbeidssituasjon.FISKER -> Behandlinger.Behandling.Endring.Arbeidssituasjon.FISKER
+            Arbeidssituasjon.ANNET -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ANNET
         }
 
         return Vedtaksperiode(
@@ -418,6 +429,9 @@ class Søknad(
         ARBEIDSLEDIG,
         FRILANSER,
         SELVSTENDIG_NÆRINGSDRIVENDE,
-        BARNEPASSER
+        BARNEPASSER,
+        JORDBRUKER,
+        FISKER,
+        ANNET
     }
 }

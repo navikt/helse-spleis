@@ -454,6 +454,9 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
         ArbeidssituasjonDto.SELVSTENDIG_NÆRINGSDRIVENDE -> ArbeidssituasjonData.SELVSTENDIG_NÆRINGSDRIVENDE
         ArbeidssituasjonDto.BARNEPASSER -> ArbeidssituasjonData.BARNEPASSER
         ArbeidssituasjonDto.FRILANSER -> ArbeidssituasjonData.FRILANSER
+        ArbeidssituasjonDto.JORDBRUKER -> ArbeidssituasjonData.JORDBRUKER
+        ArbeidssituasjonDto.FISKER -> ArbeidssituasjonData.FISKER
+        ArbeidssituasjonDto.ANNET -> ArbeidssituasjonData.ANNET
     },
     skjæringstidspunkt = skjæringstidspunkt,
     skjæringstidspunkter = skjæringstidspunkter,

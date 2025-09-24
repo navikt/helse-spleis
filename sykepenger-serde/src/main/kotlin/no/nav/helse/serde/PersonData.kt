@@ -1066,6 +1066,9 @@ data class PersonData(
                             ArbeidssituasjonData.SELVSTENDIG_NÆRINGSDRIVENDE -> ArbeidssituasjonDto.SELVSTENDIG_NÆRINGSDRIVENDE
                             ArbeidssituasjonData.BARNEPASSER -> ArbeidssituasjonDto.BARNEPASSER
                             ArbeidssituasjonData.FRILANSER -> ArbeidssituasjonDto.FRILANSER
+                            ArbeidssituasjonData.JORDBRUKER -> ArbeidssituasjonDto.JORDBRUKER
+                            ArbeidssituasjonData.FISKER -> ArbeidssituasjonDto.FISKER
+                            ArbeidssituasjonData.ANNET -> ArbeidssituasjonDto.ANNET
                         },
                         vilkårsgrunnlagId = this.vilkårsgrunnlagId,
                         utbetalingId = this.utbetalingId,
@@ -1092,7 +1095,10 @@ data class PersonData(
                         ARBEIDSLEDIG,
                         FRILANSER,
                         SELVSTENDIG_NÆRINGSDRIVENDE,
-                        BARNEPASSER
+                        BARNEPASSER,
+                        JORDBRUKER,
+                        FISKER,
+                        ANNET
                     }
                 }
             }

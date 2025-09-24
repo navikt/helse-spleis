@@ -31,10 +31,10 @@ internal class SendtSøknadBuilder(arbeidssituasjon: String) : SøknadBuilder() 
         "ARBEIDSTAKER" -> Søknad.Arbeidssituasjon.ARBEIDSTAKER
         "ARBEIDSLEDIG" -> Søknad.Arbeidssituasjon.ARBEIDSLEDIG
 
-        "FISKER",
-        "JORDBRUKER",
-        "ANNET" -> TODO("støtter ikke $arbeidssituasjon")
-         else -> TODO("støtter ikke $arbeidssituasjon")
+        "FISKER" -> Søknad.Arbeidssituasjon.FISKER
+        "JORDBRUKER" -> Søknad.Arbeidssituasjon.JORDBRUKER
+        "ANNET" -> Søknad.Arbeidssituasjon.ANNET
+         else -> error("støtter ikke $arbeidssituasjon")
     }
     internal fun build(meldingsporing: Meldingsporing) = Søknad(
         meldingsreferanseId = meldingsporing.id,

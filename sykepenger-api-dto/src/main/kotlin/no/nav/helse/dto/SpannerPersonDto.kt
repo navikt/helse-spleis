@@ -588,7 +588,10 @@ data class SpannerPersonDto(
                     ARBEIDSLEDIG,
                     FRILANSER,
                     SELVSTENDIG_NÆRINGSDRIVENDE,
-                    BARNEPASSER
+                    BARNEPASSER,
+                    JORDBRUKER,
+                    FISKER,
+                    ANNET
                 }
             }
 
@@ -1213,6 +1216,9 @@ private fun BehandlingendringUtDto.tilPersonData() =
             ArbeidssituasjonDto.FRILANSER -> ArbeidssituasjonData.FRILANSER
             ArbeidssituasjonDto.SELVSTENDIG_NÆRINGSDRIVENDE -> ArbeidssituasjonData.SELVSTENDIG_NÆRINGSDRIVENDE
             ArbeidssituasjonDto.BARNEPASSER -> ArbeidssituasjonData.BARNEPASSER
+            ArbeidssituasjonDto.JORDBRUKER -> ArbeidssituasjonData.JORDBRUKER
+            ArbeidssituasjonDto.FISKER -> ArbeidssituasjonData.FISKER
+            ArbeidssituasjonDto.ANNET -> ArbeidssituasjonData.ANNET
         },
         sykmeldingsperiodeFom = sykmeldingsperiode.fom,
         sykmeldingsperiodeTom = sykmeldingsperiode.tom,

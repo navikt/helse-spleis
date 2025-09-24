@@ -687,6 +687,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             ArbeidssituasjonDto.SELVSTENDIG_NÆRINGSDRIVENDE -> Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE
                             ArbeidssituasjonDto.BARNEPASSER -> Arbeidssituasjon.BARNEPASSER
                             ArbeidssituasjonDto.FRILANSER -> Arbeidssituasjon.FRILANSER
+                            ArbeidssituasjonDto.JORDBRUKER -> Arbeidssituasjon.JORDBRUKER
+                            ArbeidssituasjonDto.FISKER -> Arbeidssituasjon.FISKER
+                            ArbeidssituasjonDto.ANNET -> Arbeidssituasjon.ANNET
                         },
                         grunnlagsdata = dto.vilkårsgrunnlagId?.let { grunnlagsdata.getValue(it) },
                         utbetaling = utbetaling,
@@ -928,6 +931,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> ArbeidssituasjonDto.SELVSTENDIG_NÆRINGSDRIVENDE
                         Arbeidssituasjon.BARNEPASSER -> ArbeidssituasjonDto.BARNEPASSER
                         Arbeidssituasjon.FRILANSER -> ArbeidssituasjonDto.FRILANSER
+                        Arbeidssituasjon.JORDBRUKER -> ArbeidssituasjonDto.JORDBRUKER
+                        Arbeidssituasjon.FISKER -> ArbeidssituasjonDto.FISKER
+                        Arbeidssituasjon.ANNET -> ArbeidssituasjonDto.ANNET
                     },
                     vilkårsgrunnlagId = vilkårsgrunnlagUtDto?.vilkårsgrunnlagId,
                     skjæringstidspunkt = this.skjæringstidspunkt,
@@ -956,7 +962,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 ARBEIDSLEDIG,
                 FRILANSER,
                 SELVSTENDIG_NÆRINGSDRIVENDE,
-                BARNEPASSER
+                BARNEPASSER,
+                FISKER,
+                JORDBRUKER,
+                ANNET
             }
         }
 
@@ -1117,7 +1126,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Endring.Arbeidssituasjon.ARBEIDSTAKER -> Klassekode.SykepengerArbeidstakerOrdinær
                 Endring.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> Klassekode.SelvstendigNæringsdrivendeOppgavepliktig
                 Endring.Arbeidssituasjon.BARNEPASSER -> Klassekode.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
-                Endring.Arbeidssituasjon.FRILANSER -> TODO("har ikke klassekode for frilanser")
+                Endring.Arbeidssituasjon.FRILANSER,
+                Endring.Arbeidssituasjon.JORDBRUKER,
+                Endring.Arbeidssituasjon.FISKER,
+                Endring.Arbeidssituasjon.ANNET -> TODO("har ikke klassekode for ${gjeldende.arbeidssituasjon}")
             }
 
             val denNyeUtbetalingen = yrkesaktivitet.lagNyUtbetaling(

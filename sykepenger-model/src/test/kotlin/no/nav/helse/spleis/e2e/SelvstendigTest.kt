@@ -40,6 +40,34 @@ import org.junit.jupiter.api.Test
 internal class SelvstendigTest : AbstractDslTest() {
 
     @Test
+    fun `tar inn fisker, men forkaster perioden`() {
+        selvstendig {
+            håndterSøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.FISKER)
+            assertFunksjonellFeil(Varselkode.RV_SØ_39, 1.vedtaksperiode.filter())
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `tar inn jordbruker, men forkaster perioden`() {
+        selvstendig {
+            håndterSøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
+            assertFunksjonellFeil(Varselkode.RV_SØ_39, 1.vedtaksperiode.filter())
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
+        }
+    }
+
+
+    @Test
+    fun `tar inn annet, men forkaster perioden`() {
+        selvstendig {
+            håndterSøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.ANNET)
+            assertFunksjonellFeil(Varselkode.RV_SØ_39, 1.vedtaksperiode.filter())
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
     fun `Kaster ut selvstendigperiode når det finnes ghosts`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
             håndterSøknadSelvstendig(januar)
