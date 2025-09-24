@@ -95,6 +95,19 @@ class Søknad(
     var delvisOverlappende: Boolean = false
         private set
 
+    private val ventetid = when (behandlingsporing) {
+        Behandlingsporing.Yrkesaktivitet.Selvstendig -> perioder
+            .filterIsInstance<Søknadsperiode.Ventetid>()
+            .singleOrNull()
+            ?.let { ventetid ->
+                Periode(ventetid.periode.start, ventetid.periode.endInclusive)
+            }
+
+        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+        is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
+        Behandlingsporing.Yrkesaktivitet.Frilans -> null
+    }
+
     internal companion object {
         internal const val tidslinjegrense = 40L
     }
@@ -159,6 +172,11 @@ class Søknad(
         if (næringsinntekter == null || næringsinntekter.size < 3) aktivitetslogg.funksjonellFeil(Varselkode.RV_IV_12)
 
         if (pensjonsgivendeInntekter?.harAndreInntekterEnnNæringsinntekt() == true) aktivitetslogg.funksjonellFeil(`Selvstendigsøknad med inntektstype vi ikke støtter`)
+
+        if (ventetid == null) {
+            aktivitetslogg.info("Søknaden har ikke ventetid")
+            aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
+        }
     }
 
     private fun valider(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
@@ -234,17 +252,6 @@ class Søknad(
                     anvendtGrunnbeløp = anvendtGrunnbeløp
                 )
             }
-        }
-
-        val ventetid = when (behandlingsporing) {
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
-                val ventetid = perioder.filterIsInstance<Søknadsperiode.Ventetid>().first()
-                Periode(ventetid.periode.start, ventetid.periode.endInclusive)
-            }
-
-            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
-            Behandlingsporing.Yrkesaktivitet.Frilans -> null
         }
 
         val arbeidssituasjon = when (arbeidssituasjon) {

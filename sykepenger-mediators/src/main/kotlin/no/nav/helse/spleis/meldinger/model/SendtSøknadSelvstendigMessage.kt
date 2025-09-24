@@ -27,8 +27,11 @@ internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val 
             )
         }
         builder.pensjonsgivendeInntekter(pensjonsgivendeInntekter)
-        val ventetid = Periode(packet["selvstendigNaringsdrivende.ventetid.fom"].asLocalDate(), packet["selvstendigNaringsdrivende.ventetid.tom"].asLocalDate())
-        builder.ventetid(ventetid)
+        val ventetid = packet["selvstendigNaringsdrivende.ventetid"]
+        if (ventetid.isObject) {
+            val ventetidperiode = Periode(ventetid.path("fom").asLocalDate(), ventetid.path("tom").asLocalDate())
+            builder.ventetid(ventetidperiode)
+        }
         SendtSøknadNavMessage.byggSendtSøknad(builder, packet)
         mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
     }

@@ -10,6 +10,7 @@ import no.nav.helse.dsl.selvstendig
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
@@ -40,9 +41,24 @@ import org.junit.jupiter.api.Test
 internal class SelvstendigTest : AbstractDslTest() {
 
     @Test
+    fun `tar inn søknad uten ventetid, men forkaster perioden`() {
+        selvstendig {
+            håndterSøknad(
+                Sykdom(1.januar, 31.januar, 100.prosent),
+                arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
+                pensjonsgivendeInntekter = emptyList()
+            )
+            assertInfo("Søknaden har ikke ventetid", 1.vedtaksperiode.filter())
+            assertFunksjonellFeil(Varselkode.RV_SØ_39, 1.vedtaksperiode.filter())
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
     fun `tar inn fisker, men forkaster perioden`() {
         selvstendig {
             håndterSøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.FISKER)
+            assertInfo("Har ikke støtte for søknadstypen FISKER", 1.vedtaksperiode.filter())
             assertFunksjonellFeil(Varselkode.RV_SØ_39, 1.vedtaksperiode.filter())
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
         }
@@ -52,16 +68,17 @@ internal class SelvstendigTest : AbstractDslTest() {
     fun `tar inn jordbruker, men forkaster perioden`() {
         selvstendig {
             håndterSøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
+            assertInfo("Har ikke støtte for søknadstypen JORDBRUKER", 1.vedtaksperiode.filter())
             assertFunksjonellFeil(Varselkode.RV_SØ_39, 1.vedtaksperiode.filter())
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
         }
     }
 
-
     @Test
     fun `tar inn annet, men forkaster perioden`() {
         selvstendig {
             håndterSøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.ANNET)
+            assertInfo("Har ikke støtte for søknadstypen ANNET", 1.vedtaksperiode.filter())
             assertFunksjonellFeil(Varselkode.RV_SØ_39, 1.vedtaksperiode.filter())
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
         }
