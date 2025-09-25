@@ -8,6 +8,7 @@ import no.nav.helse.dsl.Varslersamler.AssertetVarsler
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.gjenopprettFraJSON
+import no.nav.helse.gjenopprettFraJSONtekst
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -595,6 +596,14 @@ internal abstract class AbstractDslTest {
         testperson = TestPerson(
             observatør = observatør,
             person = gjenopprettFraJSON(filsti, jurist),
+            deferredLog = deferredLog
+        )
+    }
+
+    protected fun medJSONPersonTekst(json: String) {
+        testperson = TestPerson(
+            observatør = observatør,
+            person = gjenopprettFraJSONtekst(json, jurist),
             deferredLog = deferredLog
         )
     }
