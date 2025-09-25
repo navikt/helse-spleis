@@ -19,8 +19,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.berik
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.beverte
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.beverteDeaktiverte
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harFunksjonellEndring
@@ -38,14 +36,13 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTRYGD
 import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning.Companion.berik
-import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning.Companion.beverte
 import no.nav.helse.økonomi.Inntekt
 
 internal class Inntektsgrunnlag(
     private val skjæringstidspunkt: LocalDate,
     val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     val selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
-    private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
+    val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
     private val vurdertInfotrygd: Boolean,
     `6G`: Inntekt? = null
 ) : Comparable<Inntekt> {
@@ -101,12 +98,6 @@ internal class Inntektsgrunnlag(
                 )
             }
         }
-    }
-
-    internal fun beverte(builder: InntekterForBeregning.Builder) {
-        arbeidsgiverInntektsopplysninger.beverte(builder)
-        selvstendigInntektsopplysning?.beverte(builder)
-        deaktiverteArbeidsforhold.beverteDeaktiverte(builder)
     }
 
     internal companion object {

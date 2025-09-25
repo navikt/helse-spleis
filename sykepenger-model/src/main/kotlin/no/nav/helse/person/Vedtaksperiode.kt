@@ -27,6 +27,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbe
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
@@ -37,6 +38,7 @@ import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Hendelseskilde
+import no.nav.helse.hendelser.InntekterForBeregning.Inntektsperiode
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
@@ -114,7 +116,6 @@ import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
-import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
@@ -174,6 +175,7 @@ import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
 import no.nav.helse.utbetalingstidslinje.Vedtaksperiodeberegning
+import no.nav.helse.utbetalingstidslinje.beregning.BeregningRequest
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -995,12 +997,74 @@ internal class Vedtaksperiode private constructor(
         håndterYtelser(ytelser, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk)
     }
 
-    private fun håndterYtelser(ytelser: Ytelser, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
-        val inntekterForBeregningBuilder = InntekterForBeregning.Builder(beregningsperiode).apply {
-            ytelser.inntektsendringer(this)
+    internal fun dataForBeregning(): BeregningRequest.VedtaksperiodeForBeregning.DataForBeregning {
+        return when (this.yrkesaktivitet.yrkesaktivitetstype) {
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.Frilans -> TODO("Støtter ikke beregning av ${this.yrkesaktivitet.yrkesaktivitetstype}")
+
+            is Arbeidstaker -> BeregningRequest.VedtaksperiodeForBeregning.DataForBeregning.Arbeidstaker(
+                organisasjonsnummer = this.yrkesaktivitet.organisasjonsnummer,
+                arbeidsgiverperiode = this.behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.dager,
+                dagerNavOvertarAnsvar = this.behandlinger.arbeidsgiverperiode().dagerNavOvertarAnsvar,
+                refusjonstidslinje = this.refusjonstidslinje
+            )
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> BeregningRequest.VedtaksperiodeForBeregning.DataForBeregning.Selvstendig(
+                ventetid =  this.behandlinger.ventetid()!!
+            )
+        }
+    }
+
+    internal fun lagBeregningRequest(inntektsperioder: List<Inntektsperiode>): BeregningRequest {
+        val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
+            "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
         }
 
-        val maksdatoresultat = beregnUtbetalinger(aktivitetslogg, inntekterForBeregningBuilder)
+        val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning().map {
+            BeregningRequest.VedtaksperiodeForBeregning(
+                vedtaksperiodeId = it.id,
+                sykdomstidslinje = it.sykdomstidslinje,
+                dataForBeregning = it.dataForBeregning()
+            )
+        }
+        val sisteBeregningsdato = perioderSomMåHensyntasVedBeregning.maxOf { it.periode.endInclusive }
+        val inntektsjusteringer = inntektsperioder.somBeløpstidslinje(sisteBeregningsdato)
+
+        return BeregningRequest(
+            perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning,
+            fastsatteÅrsinntekter = grunnlagsdata.fastsatteÅrsinntekter(),
+            selvstendigNæringsdrivende = grunnlagsdata.inntektsgrunnlag.selvstendigInntektsopplysning?.fastsattÅrsinntekt,
+            inntektjusteringer = inntektsjusteringer
+        )
+    }
+
+    internal fun VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.fastsatteÅrsinntekter() =
+        buildMap {
+            inntektsgrunnlag.arbeidsgiverInntektsopplysninger.forEach {
+                put(no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)
+            }
+            inntektsgrunnlag.deaktiverteArbeidsforhold.forEach {
+                put(no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), INGEN)
+            }
+        }
+
+    private fun List<Inntektsperiode>.somBeløpstidslinje(sisteBeregningsdato: LocalDate) =
+        this
+            .groupBy({
+                when (it.inntektskilde) {
+                    "SELVSTENDIG" -> no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Selvstendig
+                    else -> no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.inntektskilde)
+                }
+            }) { periodisertInntekt ->
+                // beløpstidslinje er en lukket tidslinje som ikke støtter åpen ende, så vi begrenser "null" til siste beregningsdato
+                val reellPeriode = periodisertInntekt.fom.til(periodisertInntekt.tom ?: sisteBeregningsdato)
+                val kilde = Kilde(MeldingsreferanseId( UUID.randomUUID()), SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
+                Beløpstidslinje.fra(reellPeriode, periodisertInntekt.inntekt, kilde)
+            }
+            .mapValues { (_, inntekter) -> inntekter.reduce { a, b -> a.erstatt(b) } }
+
+    private fun håndterYtelser(ytelser: Ytelser, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
+        val request = lagBeregningRequest(ytelser.inntekterForBeregning.inntektsperioder)
+        val maksdatoresultat = beregnUtbetalinger(aktivitetslogg, request)
 
         when (yrkesaktivitet.yrkesaktivitetstype) {
             is Arbeidstaker -> {
@@ -1802,7 +1866,7 @@ internal class Vedtaksperiode private constructor(
         institusjonsopphold(aktivitetslogg, periode)
         arbeidsavklaringspenger(aktivitetslogg, periode.start.minusMonths(6), periode.endInclusive)
         dagpenger(aktivitetslogg, periode.start.minusMonths(2), periode.endInclusive)
-        inntekterForBeregning(aktivitetslogg, beregningsperiode)
+        inntekterForBeregning(aktivitetslogg, lagBeregningRequest(emptyList()).beregningsperiode)
     }
 
     internal fun trengerVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg) {
@@ -2320,25 +2384,16 @@ internal class Vedtaksperiode private constructor(
         return førstePeriodePåSkjæringstidspunktetAnnenArbeidsgiverSomTrengerInntektEllerRefusjon ?: førsteMursteinsperiodeSomTrengerInntektEllerRefusjon
     }
 
-    private val beregningsperiode get() = checkNotNull(perioderSomMåHensyntasVedBeregning().map { it.periode }.periode()) { "Hvordan kan det ha seg at vi ikke har noen beregningsperiode?" }
-    private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg, inntekterForBeregningBuilder: InntekterForBeregning.Builder): Maksdatoresultat {
+    private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg, request: BeregningRequest): Maksdatoresultat {
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
 
         check(perioderDetSkalBeregnesUtbetalingFor.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
             "ugyldig situasjon: skal beregne utbetaling for vedtaksperioder med ulike skjæringstidspunkter"
         }
-        val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
-            "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
-        }
-
-        val inntekterForBeregning = inntekterForBeregningBuilder.apply {
-            grunnlagsdata.inntektsgrunnlag.beverte(this)
-        }.build()
 
         val beregnetTidslinjePerVedtaksperiode = beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(
             aktivitetslogg,
-            grunnlagsdata,
-            inntekterForBeregning
+            request
         )
         perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
             val beregning = beregnetTidslinjePerVedtaksperiode.single { it.vedtaksperiodeId == other.id }
@@ -2349,9 +2404,9 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg = other.registrerKontekst(aktivitetslogg),
                 beregning = BeregnetPeriode(
                     maksdatovurdering = maksdatoresultat,
-                    grunnlagsdata = grunnlagsdata,
+                    grunnlagsdata = vilkårsgrunnlag!!,
                     utbetalingstidslinje = utbetalingstidslinje,
-                    inntekterForBeregning = inntekterForBeregning
+                    inntektsjusteringer = beregning.inntektsjusteringer
                 )
             )
         }
@@ -2360,11 +2415,23 @@ internal class Vedtaksperiode private constructor(
 
     private fun beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(
         aktivitetslogg: IAktivitetslogg,
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-        inntekterForBeregning: InntekterForBeregning
+        request: BeregningRequest
     ): List<Vedtaksperiodeberegningsresultat> {
-        val uberegnetTidslinjePerArbeidsgiver = utbetalingstidslinjePerArbeidsgiver(inntekterForBeregning)
-        return filtrerUtbetalingstidslinjer(aktivitetslogg, uberegnetTidslinjePerArbeidsgiver, grunnlagsdata)
+        val uberegnetTidslinjePerArbeidsgiver = no.nav.helse.utbetalingstidslinje.beregning.beregnUtbetalinger(request)
+            .yrkesaktiviteter
+            .map {
+                Arbeidsgiverberegning(
+                    orgnummer = when (it.yrkesaktivitet) {
+                        is no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker -> it.yrkesaktivitet.organisasjonsnummer
+                        no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+                    },
+                    vedtaksperioder = it.vedtaksperioder.map {
+                        Vedtaksperiodeberegning(it.vedtaksperiodeId, it.utbetalingstidslinje, it.inntektjusteringer)
+                    },
+                    ghostOgAndreInntektskilder = it.ghostOgAndreInntektskilder
+                )
+            }
+        return filtrerUtbetalingstidslinjer(aktivitetslogg, uberegnetTidslinjePerArbeidsgiver, vilkårsgrunnlag!!)
     }
 
     private fun harSammeUtbetalingSom(annenVedtaksperiode: Vedtaksperiode) = behandlinger.harSammeUtbetalingSom(annenVedtaksperiode)
@@ -2372,35 +2439,9 @@ internal class Vedtaksperiode private constructor(
     private data class Vedtaksperiodeberegningsresultat(
         val vedtaksperiodeId: UUID,
         val utbetalingstidslinje: Utbetalingstidslinje,
-        val maksdatovurdering: Maksdatovurdering
+        val maksdatovurdering: Maksdatovurdering,
+        val inntektsjusteringer: Map<no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet, Beløpstidslinje>
     )
-
-    private fun utbetalingstidslinjePerArbeidsgiver(inntekterForBeregning: InntekterForBeregning): List<Arbeidsgiverberegning> {
-        val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning()
-            .groupBy({ it.yrkesaktivitet.organisasjonsnummer }) { vedtaksperiode ->
-                val (fastsattÅrsinntekt, inntektjusteringer) = inntekterForBeregning.tilBeregning(vedtaksperiode.yrkesaktivitet.organisasjonsnummer)
-                Vedtaksperiodeberegning(
-                    vedtaksperiodeId = vedtaksperiode.id,
-                    utbetalingstidslinje = vedtaksperiode.behandlinger.lagUtbetalingstidslinje(
-                        fastsattÅrsinntekt = fastsattÅrsinntekt,
-                        inntektjusteringer = inntektjusteringer,
-                        yrkesaktivitet = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype
-                    )
-                )
-            }
-            .map { (orgnr, vedtaksperioder) ->
-                Arbeidsgiverberegning(
-                    orgnummer = orgnr,
-                    vedtaksperioder = vedtaksperioder,
-                    ghostOgAndreInntektskilder = emptyList()
-                )
-            }
-        // nå vi må lage en ghost-tidslinje per arbeidsgiver for de som eksisterer i sykepengegrunnlaget.
-        // i tillegg må vi lage én tidslinje per inntektskilde som ikke er en del av sykepengegrunnlaget
-        // resultatet er én utbetalingstidslinje per arbeidsgiver som garantert dekker perioden ${vedtaksperiode.periode}, dog kan
-        // andre arbeidsgivere dekke litt før/litt etter, avhengig av perioden til vedtaksperiodene som overlapper
-        return inntekterForBeregning.hensyntattAlleInntektskilder(utbetalingstidslinjer)
-    }
 
     private fun filtrerUtbetalingstidslinjer(
         aktivitetslogg: IAktivitetslogg,
@@ -2452,7 +2493,8 @@ internal class Vedtaksperiode private constructor(
                 Vedtaksperiodeberegningsresultat(
                     vedtaksperiodeId = vedtaksperiodeberegning.vedtaksperiodeId,
                     utbetalingstidslinje = vedtaksperiodeberegning.utbetalingstidslinje,
-                    maksdatovurdering = maksdatofilter.maksdatoresultatForVedtaksperiode(vedtaksperiodeberegning.periode)
+                    maksdatovurdering = maksdatofilter.maksdatoresultatForVedtaksperiode(vedtaksperiodeberegning.periode),
+                    inntektsjusteringer = vedtaksperiodeberegning.inntektsjusteringer
                 )
             }
         }

@@ -3,12 +3,10 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.inntekt.InntekterForBeregning.Builder
-import no.nav.helse.person.inntekt.Inntektskilde
 
 class Ytelser(
     meldingsreferanseId: MeldingsreferanseId,
@@ -22,7 +20,7 @@ class Ytelser(
     private val institusjonsopphold: Institusjonsopphold,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
     private val dagpenger: Dagpenger,
-    private val inntekterForBeregning: InntekterForBeregning
+    val inntekterForBeregning: InntekterForBeregning
 ) : Hendelse {
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
@@ -60,18 +58,6 @@ class Ytelser(
         if (institusjonsopphold.overlapper(aktivitetslogg, periodeForOverlappsjekk)) aktivitetslogg.funksjonellFeil(Varselkode.`Overlapper med institusjonsopphold`)
 
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
-    }
-
-    internal fun inntektsendringer(builder: Builder) {
-        inntekterForBeregning.inntektsperioder.forEach { inntektsperiode ->
-            builder.inntektsendringer(
-                inntektskilde = Inntektskilde(inntektsperiode.inntektskilde),
-                fom = inntektsperiode.fom,
-                tom = inntektsperiode.tom,
-                inntekt = inntektsperiode.inntekt,
-                meldingsreferanseId = metadata.meldingsreferanseId
-            )
-        }
     }
 }
 

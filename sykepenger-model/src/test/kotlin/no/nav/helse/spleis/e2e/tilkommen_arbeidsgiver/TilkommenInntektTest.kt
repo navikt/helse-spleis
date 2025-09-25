@@ -6,6 +6,7 @@ import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.a3
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.hendelser.InntekterForBeregning
@@ -18,6 +19,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REV
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class TilkommenInntektTest : AbstractDslTest() {
@@ -85,6 +87,42 @@ internal class TilkommenInntektTest : AbstractDslTest() {
 
             håndterInntektsendringer(inntektsendringFom = 1.januar)
             håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 1.januar, 31.januar, 10000.daglig)))
+            assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 17.januar til 31.januar)
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_VV_4, Varselkode.RV_SV_5)
+        }
+    }
+
+    @Disabled
+    @Test
+    fun `tjener masse penger som tilkommen - flere ag`() = Toggle.TilkommenInntektV4.enable {
+        a1 {
+            håndterSøknad(1.januar til 18.januar)
+            håndterSøknad(19.januar til 24.januar)
+            håndterSøknad(25.januar til 31.januar)
+        }
+
+        a2 {
+            håndterSøknad(1.januar til 20.januar)
+            håndterSøknad(21.januar til 25.januar)
+            håndterSøknad(26.januar til 27.januar)
+        }
+
+        a1 {
+            håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(1.januar til 16.januar))
+        }
+        a2 {
+            håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(1.januar til 16.januar))
+        }
+
+        a1 {
+            håndterVilkårsgrunnlag()
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+
+            // Her legger saksbehandler til inntekter basert på informasjon i søknaden
+
+            håndterInntektsendringer(inntektsendringFom = 1.januar)
+            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a3, 24.januar, 31.januar, 10000.daglig)))
             assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 17.januar til 31.januar)
             assertVarsler(1.vedtaksperiode, Varselkode.RV_VV_4, Varselkode.RV_SV_5)
         }

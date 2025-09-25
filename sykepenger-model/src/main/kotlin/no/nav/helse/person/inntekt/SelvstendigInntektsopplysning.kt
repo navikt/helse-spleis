@@ -27,10 +27,6 @@ internal data class SelvstendigInntektsopplysning(
             tidsstempel = fastsattÅrsinntektInntektsdata.tidsstempel
         )
 
-        internal fun SelvstendigInntektsopplysning.beverte(builder: InntekterForBeregning.Builder) {
-            builder.fraInntektsgrunnlag("SELVSTENDIG", fastsattÅrsinntekt, this.kilde())
-        }
-
         internal fun SelvstendigInntektsopplysning.skjønnsfastsett(other: SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt): SelvstendigInntektsopplysning {
             return this.copy(
                 skjønnsmessigFastsatt = SkjønnsmessigFastsatt(

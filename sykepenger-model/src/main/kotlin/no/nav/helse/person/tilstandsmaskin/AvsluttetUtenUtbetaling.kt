@@ -5,7 +5,9 @@ import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.behandlingkilde
-import no.nav.helse.person.inntekt.InntekterForBeregning
+import no.nav.helse.utbetalingstidslinje.beregning.BeregningRequest
+import no.nav.helse.utbetalingstidslinje.beregning.beregnUtbetalinger
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
 internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
     override val type = TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -17,15 +19,24 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
     }
 
     private fun avsluttUtenVedtak(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-        val inntekterForBeregning = with(InntekterForBeregning.Builder(vedtaksperiode.periode)) {
-            vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag?.beverte(this)
-            build()
-        }
-        val (fastsattÅrsinntekt, inntektjusteringer) = inntekterForBeregning.tilBeregning(vedtaksperiode.yrkesaktivitet.organisasjonsnummer)
-
-        val utbetalingstidslinje = vedtaksperiode.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, inntektjusteringer, vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype)
-
-        vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.yrkesaktivitet, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
+        val dataForBeregning = vedtaksperiode.dataForBeregning()
+        val request = BeregningRequest(
+            perioderSomMåHensyntasVedBeregning = listOf(
+                BeregningRequest.VedtaksperiodeForBeregning(
+                    vedtaksperiodeId = vedtaksperiode.id,
+                    sykdomstidslinje = vedtaksperiode.sykdomstidslinje,
+                    dataForBeregning = dataForBeregning
+                )
+            ),
+            fastsatteÅrsinntekter = with (vedtaksperiode) {
+                vilkårsgrunnlag?.fastsatteÅrsinntekter()
+            } ?: emptyMap(),
+            selvstendigNæringsdrivende = null,
+            inntektjusteringer = emptyMap()
+        )
+        val response = beregnUtbetalinger(request)
+        val utbetalingstidslinje = response.yrkesaktiviteter.single { it.yrkesaktivitet == dataForBeregning.yrkesaktivitet }.vedtaksperioder.single().utbetalingstidslinje
+        vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.yrkesaktivitet, aktivitetslogg, utbetalingstidslinje, emptyMap())
     }
 
     override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
