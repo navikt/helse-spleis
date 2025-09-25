@@ -1,24 +1,17 @@
 package no.nav.helse.person.tilstandsmaskin
 
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.hendelser.DagerFraInntektsmelding
-import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.behandlingkilde
 import no.nav.helse.person.inntekt.InntekterForBeregning
-import org.slf4j.LoggerFactory
 
 internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
     override val type = TilstandType.AVSLUTTET_UTEN_UTBETALING
     override val erFerdigBehandlet = true
 
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-        val arbeidsgiverperiode = vedtaksperiode.yrkesaktivitet.arbeidsgiverperiode(vedtaksperiode.periode)
-        check(arbeidsgiverperiode?.forventerInntekt(vedtaksperiode.periode) != true) {
-            "i granskauen! skal jo ikke skje dette ?!"
-        }
         avsluttUtenVedtak(vedtaksperiode, aktivitetslogg)
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
@@ -81,28 +74,4 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         if (!vedtaksperiode.kanForkastes()) return
         vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
     }
-
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-        val harVærtAUUMenSkalIkkeVæreDetMer = !vedtaksperiode.skalOmgjøres() && vedtaksperiode.skalBehandlesISpeil()
-        if (!harVærtAUUMenSkalIkkeVæreDetMer) return
-        val årstall = vedtaksperiode.periode.start.year
-        val sykdomssituasjon = vedtaksperiode
-            .sykdomstidslinje
-            .groupBy { it::class }
-            .map { (dagtype, dager) -> "${dagtype.simpleName}=${dager.size}" }
-            .sorted()
-        val situasjon = if (sykdomssituasjon.size == 1)
-            "Kun ${sykdomssituasjon.first()}"
-        else
-            sykdomssituasjon.joinToString()
-        sikkerlogg.info(
-            "Ønsker å omgjøres med nye regler. $situasjon",
-            kv("årstall", årstall),
-            kv("fødselsnummer", vedtaksperiode.person.fødselsnummer),
-            kv("vedtaksperiodeId", vedtaksperiode.id)
-        )
-        aktivitetslogg.info("Ønsker å omgjøres med nye regler.")
-    }
 }
-
-private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")

@@ -33,8 +33,6 @@ import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -83,7 +81,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 ferdigAvklart = false
             ), perioder.single()
         )
-        assertFalse(perioder.first().somArbeidsgiverperiode().forventerInntekt(1.januar til 15.januar))
     }
 
     @Test
@@ -148,7 +145,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 ferdigAvklart = true
             ), perioder.single()
         )
-        assertTrue(perioder.first().somArbeidsgiverperiode().fiktiv())
     }
 
     @Test
@@ -213,7 +209,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 ferdigAvklart = true
             ), perioder.single()
         )
-        assertTrue(perioder.first().somArbeidsgiverperiode().fiktiv())
     }
 
     @Test
@@ -246,7 +241,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 ferdigAvklart = true
             ), perioder.last()
         )
-        assertTrue(perioder.first().somArbeidsgiverperiode().fiktiv())
     }
 
     @Test
@@ -269,7 +263,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 ferdigAvklart = true
             ), perioder.single()
         )
-        assertTrue(perioder.first().somArbeidsgiverperiode().fiktiv())
     }
 
     @Test

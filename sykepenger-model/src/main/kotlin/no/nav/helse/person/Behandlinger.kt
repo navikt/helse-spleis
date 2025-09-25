@@ -163,7 +163,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun egenmeldingsdager() = behandlinger.last().egenmeldingsdager
     internal fun sykdomstidslinje() = behandlinger.last().sykdomstidslinje
     internal fun refusjonstidslinje() = behandlinger.last().refusjonstidslinje
-    internal fun navOvertarAnsvar() = behandlinger.last().navOvertarAnsvar()
     internal fun trekkerTilbakePenger() = siste?.trekkerTilbakePenger() == true
     internal fun utbetales() = behandlinger.any { it.erInFlight() }
     internal fun erAvsluttet() = behandlinger.last().erAvsluttet()
@@ -978,7 +977,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return this.dokumentsporing.hashCode()
         }
 
-        internal fun navOvertarAnsvar() = gjeldende.dagerNavOvertarAnsvar.isNotEmpty()
         internal fun forventerUtbetaling(periodeSomBeregner: Periode, skjæringstidspunkt: LocalDate, skalBehandlesISpeil: Boolean): Boolean {
             val skjæringstidspunktetErLikt = this.skjæringstidspunkt == skjæringstidspunkt
             val overlapperMedDenBeregnedePerioden = this.periode.overlapperMed(periodeSomBeregner)

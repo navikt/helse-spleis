@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import java.time.LocalDate.EPOCH
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.nesteDag
@@ -37,14 +36,6 @@ data class Arbeidsgiverperioderesultat(
             fullstendig = fullstendig ?: this.fullstendig,
             ferdigAvklart = ferdigAvklart ?: this.ferdigAvklart
         )
-    }
-
-    internal fun somArbeidsgiverperiode(): Arbeidsgiverperiode {
-        val agp = Arbeidsgiverperiode(arbeidsgiverperiode.takeUnless { it.isEmpty() } ?: listOf(EPOCH.somPeriode()))
-        utbetalingsperioder.flatten().forEach { agp.utbetalingsdag(it) }
-        oppholdsperioder.flatten().forEach { agp.oppholdsdag(it) }
-        omsluttendePeriode.forEach { agp.kjentDag(it) }
-        return agp
     }
 
     companion object {

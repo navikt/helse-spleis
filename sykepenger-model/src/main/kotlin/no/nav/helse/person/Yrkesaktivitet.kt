@@ -125,7 +125,6 @@ import no.nav.helse.utbetalingslinjer.Utbetalingkladd
 import no.nav.helse.utbetalingslinjer.UtbetalingkladdBuilder
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeberegner
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperioderesultat
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperioderesultat.Companion.finn
@@ -1080,11 +1079,6 @@ internal class Yrkesaktivitet private constructor(
             Frilans,
             Selvstendig -> Arbeidsgiverperiodeavklaring(true, emptyList())
         }
-    }
-
-    internal fun arbeidsgiverperiode(periode: Periode): Arbeidsgiverperiode? {
-        val arbeidsgiverperioder = arbeidsgiverperiodeFor()
-        return arbeidsgiverperioder.finn(periode)?.somArbeidsgiverperiode()
     }
 
     private fun sykdomstidslinjeHensyntattEgenmeldinger(): Sykdomstidslinje {

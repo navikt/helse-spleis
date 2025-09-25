@@ -1827,11 +1827,7 @@ internal class Vedtaksperiode private constructor(
     private fun opplysningerViTrenger(): Set<PersonObserver.ForespurtOpplysning> {
         if (!skalBehandlesISpeil()) return emptySet() // perioden er AUU ✋
 
-        val vedtaksperiodeRettFør = yrkesaktivitet.finnVedtaksperiodeRettFør(this)
-        if (vedtaksperiodeRettFør != null) {
-            val periodenFørHarBedtOmOpplysninger = vedtaksperiodeRettFør.skalBehandlesISpeil() && vedtaksperiodeRettFør.tilstand === AvventerInntektsmelding
-            if (periodenFørHarBedtOmOpplysninger) return emptySet() // Da har perioden foran oss spurt for oss/ vi har det vi trenger ✋
-        }
+        if (yrkesaktivitet.finnVedtaksperiodeRettFør(this)?.skalBehandlesISpeil() == true) return emptySet() // Da har perioden foran oss spurt for oss/ vi har det vi trenger ✋
 
         val opplysninger = mutableSetOf<PersonObserver.ForespurtOpplysning>().apply {
             if (!harEksisterendeInntekt()) addAll(setOf(PersonObserver.Inntekt, PersonObserver.Refusjon)) // HAG støtter ikke skjema uten refusjon, så når vi først spør om inntekt _må_ vi også spørre om refusjon
@@ -2135,7 +2131,7 @@ internal class Vedtaksperiode private constructor(
 
     // gitt at du står i tilstand X, hva/hvem henter du på og hvorfor?
     internal val venterPå get() = when (val t = tilstand) {
-        AvsluttetUtenUtbetaling -> when (skalOmgjøres()) {
+        AvsluttetUtenUtbetaling -> when (skalBehandlesISpeil()) {
             true -> VenterPå.SegSelv(Venteårsak.HJELP fordi Venteårsak.Hvorfor.VIL_OMGJØRES)
             false -> null
         }
@@ -2273,21 +2269,6 @@ internal class Vedtaksperiode private constructor(
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans -> false
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> true
-        }
-    }
-
-    internal fun skalOmgjøres(): Boolean {
-        return forventerInntekt() || behandlinger.navOvertarAnsvar()
-    }
-
-    private fun forventerInntekt(): Boolean {
-        return when (yrkesaktivitet.yrkesaktivitetstype) {
-            is Arbeidstaker -> yrkesaktivitet.arbeidsgiverperiode(periode)?.forventerInntekt(periode) == true
-
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> true
-
-            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-            Behandlingsporing.Yrkesaktivitet.Frilans -> false
         }
     }
 
@@ -2647,7 +2628,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val AUU_SOM_VIL_UTBETALES: VedtaksperiodeFilter = {
-            it.tilstand == AvsluttetUtenUtbetaling && it.skalOmgjøres()
+            it.tilstand == AvsluttetUtenUtbetaling && it.skalBehandlesISpeil()
         }
 
         internal fun SPEILRELATERT(vararg perioder: Periode): VedtaksperiodeFilter {
