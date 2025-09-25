@@ -5,7 +5,6 @@ import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
@@ -19,8 +18,8 @@ import no.nav.helse.november
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
@@ -165,7 +164,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `godkjenningsbehov som ikke kan avvises blir forsøkt avvist`() {
+    fun `godkjenningsbehov som ikke kan avvises automatisk blir avvist av saksbehandler`() {
         håndterSøknad(1.januar til 16.januar)
         håndterSøknad(17.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -184,7 +183,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "Agp skal utbetales av NAV!!"
         )
-        assertVarsler(listOf(Varselkode.RV_IM_8), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -201,16 +200,14 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         assertEquals(utbetalingId, utbetaling.inspektør.utbetalingId)
 
         assertEquals(IKKE_UTBETALT, utbetaling.inspektør.tilstand)
-        assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_GODKJENNING trenger hjelp!") {
-            this@GodkjenningsbehovTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingId = utbetalingId, utbetalingGodkjent = false)
-        }
+        this@GodkjenningsbehovTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingId = utbetalingId, utbetalingGodkjent = false, automatiskBehandling = false)
         assertEquals(IKKE_GODKJENT, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.tilstand)
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
 
-        assertVarsel(RV_UT_24, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
     }
 
     @Test

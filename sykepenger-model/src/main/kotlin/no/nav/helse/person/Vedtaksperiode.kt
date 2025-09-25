@@ -1040,7 +1040,7 @@ internal class Vedtaksperiode private constructor(
 
         val erAvvist = behandlinger.erAvvist()
         if (erAvvist) {
-            if (kanForkastes()) return forkast(utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst)
+            if (tilstand in setOf(AvventerGodkjenning, SelvstendigAvventerGodkjenning)) return forkast(utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst, tvingForkasting = true)
             if (utbetalingsavgjørelse.automatisert) aktivitetsloggMedVedtaksperiodekontekst.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
             aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_UT_24)
         }
@@ -1402,7 +1402,7 @@ internal class Vedtaksperiode private constructor(
             .onEach { it.registrerKontekst(aktivitetslogg).info("Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet") }
 
         if (tvingForkasting && this !in vedtaksperioderSomSkalForkastes) {
-            aktivitetslogg.info("Behandlingene sier at denne _ikke_ kan forkastes. Men ettersom 'force'-flagget i anmodningen er satt forkastes perioden læll. Ta en god titt på at det ikke blir hengende noen utbetalinger her!")
+            aktivitetslogg.info("Behandlingene sier at denne _ikke_ kan forkastes. Men ettersom tvingForkasting er satt forkastes perioden læll. Ta en god titt på at det ikke blir hengende noen utbetalinger her!")
             return listOf(this) + vedtaksperioderSomSkalForkastes
         }
         return vedtaksperioderSomSkalForkastes

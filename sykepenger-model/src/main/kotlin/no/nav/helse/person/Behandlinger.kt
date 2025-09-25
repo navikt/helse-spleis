@@ -1918,6 +1918,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.utenUtbetaling(aktivitetslogg)
                     behandling.tilstand(UberegnetOmgjøring, aktivitetslogg)
                 }
+
+                override fun forkastVedtaksperiode(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
+                    behandling.gjeldende.forkastUtbetaling(aktivitetslogg)
+                    return super.forkastVedtaksperiode(behandling, yrkesaktivitet, behandlingkilde, aktivitetslogg)
+                }
             }
 
             data object BeregnetRevurdering : Tilstand by (Beregnet) {
