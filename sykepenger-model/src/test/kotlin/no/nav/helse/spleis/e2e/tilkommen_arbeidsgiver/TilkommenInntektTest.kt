@@ -19,7 +19,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REV
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class TilkommenInntektTest : AbstractDslTest() {
@@ -92,7 +91,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
         }
     }
 
-    @Disabled
+    //@Disabled
     @Test
     fun `tjener masse penger som tilkommen - flere ag`() = Toggle.TilkommenInntektV4.enable {
         a1 {
@@ -123,8 +122,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
 
             håndterInntektsendringer(inntektsendringFom = 1.januar)
             håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a3, 24.januar, 31.januar, 10000.daglig)))
-            assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 17.januar til 31.januar)
-            assertVarsler(1.vedtaksperiode, Varselkode.RV_VV_4, Varselkode.RV_SV_5)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1080, 1431, subset = 17.januar til 23.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 24.januar til 31.januar)
         }
     }
 

@@ -20,20 +20,17 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
 
     private fun avsluttUtenVedtak(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         val dataForBeregning = vedtaksperiode.dataForBeregning()
-        val request = BeregningRequest(
-            perioderSomMåHensyntasVedBeregning = listOf(
-                BeregningRequest.VedtaksperiodeForBeregning(
-                    vedtaksperiodeId = vedtaksperiode.id,
-                    sykdomstidslinje = vedtaksperiode.sykdomstidslinje,
-                    dataForBeregning = dataForBeregning
-                )
-            ),
-            fastsatteÅrsinntekter = with (vedtaksperiode) {
-                vilkårsgrunnlag?.fastsatteÅrsinntekter()
-            } ?: emptyMap(),
-            selvstendigNæringsdrivende = null,
-            inntektjusteringer = emptyMap()
-        )
+        val request = with(BeregningRequest.Builder()) {
+            vedtaksperiode(vedtaksperiode.id, vedtaksperiode.sykdomstidslinje, dataForBeregning)
+            vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger?.forEach {
+                fastsattÅrsinntekt(no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)
+            }
+            vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag?.deaktiverteArbeidsforhold?.forEach {
+                fastsattÅrsinntekt(no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), INGEN)
+            }
+            build()
+        }
+
         val response = beregnUtbetalinger(request)
         val utbetalingstidslinje = response.yrkesaktiviteter.single { it.yrkesaktivitet == dataForBeregning.yrkesaktivitet }.vedtaksperioder.single().utbetalingstidslinje
         vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.yrkesaktivitet, aktivitetslogg, utbetalingstidslinje, emptyMap())

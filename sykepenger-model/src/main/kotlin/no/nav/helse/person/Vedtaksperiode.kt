@@ -27,7 +27,6 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbe
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
@@ -1019,48 +1018,31 @@ internal class Vedtaksperiode private constructor(
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
         }
 
-        val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning().map {
-            BeregningRequest.VedtaksperiodeForBeregning(
-                vedtaksperiodeId = it.id,
-                sykdomstidslinje = it.sykdomstidslinje,
-                dataForBeregning = it.dataForBeregning()
-            )
-        }
-        val sisteBeregningsdato = perioderSomMåHensyntasVedBeregning.maxOf { it.periode.endInclusive }
-        val inntektsjusteringer = inntektsperioder.somBeløpstidslinje(sisteBeregningsdato)
-
-        return BeregningRequest(
-            perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning,
-            fastsatteÅrsinntekter = grunnlagsdata.fastsatteÅrsinntekter(),
-            selvstendigNæringsdrivende = grunnlagsdata.inntektsgrunnlag.selvstendigInntektsopplysning?.fastsattÅrsinntekt,
-            inntektjusteringer = inntektsjusteringer
-        )
-    }
-
-    internal fun VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.fastsatteÅrsinntekter() =
-        buildMap {
-            inntektsgrunnlag.arbeidsgiverInntektsopplysninger.forEach {
-                put(no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)
+        val request = with(BeregningRequest.Builder()) {
+            perioderSomMåHensyntasVedBeregning().forEach {
+                vedtaksperiode(it.id, it.sykdomstidslinje, it.dataForBeregning())
             }
-            inntektsgrunnlag.deaktiverteArbeidsforhold.forEach {
-                put(no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), INGEN)
+            grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.forEach {
+                fastsattÅrsinntekt(no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)
             }
-        }
-
-    private fun List<Inntektsperiode>.somBeløpstidslinje(sisteBeregningsdato: LocalDate) =
-        this
-            .groupBy({
-                when (it.inntektskilde) {
+            grunnlagsdata.inntektsgrunnlag.deaktiverteArbeidsforhold.forEach {
+                fastsattÅrsinntekt(no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), INGEN)
+            }
+            grunnlagsdata.inntektsgrunnlag.selvstendigInntektsopplysning?.also {
+                selvstendigNæringsdrivende(it.fastsattÅrsinntekt)
+            }
+            inntektsperioder.forEach {
+                val yrkesaktivitet = when (it.inntektskilde) {
                     "SELVSTENDIG" -> no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Selvstendig
                     else -> no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.inntektskilde)
                 }
-            }) { periodisertInntekt ->
-                // beløpstidslinje er en lukket tidslinje som ikke støtter åpen ende, så vi begrenser "null" til siste beregningsdato
-                val reellPeriode = periodisertInntekt.fom.til(periodisertInntekt.tom ?: sisteBeregningsdato)
-                val kilde = Kilde(MeldingsreferanseId( UUID.randomUUID()), SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
-                Beløpstidslinje.fra(reellPeriode, periodisertInntekt.inntekt, kilde)
+                inntektsjusteringer(yrkesaktivitet, it.fom, it.tom, it.inntekt)
             }
-            .mapValues { (_, inntekter) -> inntekter.reduce { a, b -> a.erstatt(b) } }
+            build()
+        }
+
+        return request
+    }
 
     private fun håndterYtelser(ytelser: Ytelser, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
         val request = lagBeregningRequest(ytelser.inntekterForBeregning.inntektsperioder)
@@ -1866,7 +1848,9 @@ internal class Vedtaksperiode private constructor(
         institusjonsopphold(aktivitetslogg, periode)
         arbeidsavklaringspenger(aktivitetslogg, periode.start.minusMonths(6), periode.endInclusive)
         dagpenger(aktivitetslogg, periode.start.minusMonths(2), periode.endInclusive)
-        inntekterForBeregning(aktivitetslogg, lagBeregningRequest(emptyList()).beregningsperiode)
+
+        val beregningsperiode = perioderSomMåHensyntasVedBeregning().map { it.periode }.reduce(Periode::plus)
+        inntekterForBeregning(aktivitetslogg, beregningsperiode)
     }
 
     internal fun trengerVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg) {
