@@ -218,8 +218,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         )
     }
 
-    internal fun leggTilAnnullering(annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
-        behandlinger.last().leggTilAnnullering(annullering, grunnlagsdata, aktivitetslogg)
+    internal fun leggTilAnnullering(annullering: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+        val forrigeVedtak = behandlinger.last { it.erFattetVedtak() }
+        behandlinger.last().leggTilAnnullering(annullering, forrigeVedtak, aktivitetslogg)
     }
 
     private fun kobleAnnulleringTilAndre(yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg, annullering: Utbetaling) {
@@ -1050,8 +1051,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return this.tilstand.håndterAnnullering(this, yrkesaktivitet, behandlingskilde, aktivitetslogg)
         }
 
-        internal fun leggTilAnnullering(annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
-            tilstand.leggTilAnnullering(this, annullering, grunnlagsdata, aktivitetslogg)
+        internal fun leggTilAnnullering(annullering: Utbetaling, forrigeVedtak: Behandling, aktivitetslogg: IAktivitetslogg) {
+            tilstand.leggTilAnnullering(this, annullering, forrigeVedtak.gjeldende.grunnlagsdata!!, aktivitetslogg)
         }
 
         internal fun overførAnnullering(aktivitetslogg: IAktivitetslogg) {

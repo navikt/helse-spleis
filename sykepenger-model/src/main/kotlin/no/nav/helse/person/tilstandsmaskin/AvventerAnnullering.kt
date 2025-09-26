@@ -22,17 +22,16 @@ internal data object AvventerAnnullering : Vedtaksperiodetilstand {
         }
         val sisteUtbetalteUtbetaling = vedtaksperiode.behandlinger.sisteUtbetalteUtbetaling()
         checkNotNull(sisteUtbetalteUtbetaling) { "Fant ikke en utbetalt utbetaling for vedtaksperiode ${vedtaksperiode.id}" }
-        val grunnlagsdata = checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Mangler vilkårsgrunnlag i pågående annullering for vedtaksperiode ${vedtaksperiode.id} etter hendelse ${hendelse.metadata.meldingsreferanseId}, er ikke det litt rart?" }
 
         val sisteAktiveUtbetalingMedSammeKorrelasjonsId = vedtaksperiode.yrkesaktivitet.sisteAktiveUtbetalingMedSammeKorrelasjonsId(sisteUtbetalteUtbetaling)
 
         if (sisteAktiveUtbetalingMedSammeKorrelasjonsId != null && sisteAktiveUtbetalingMedSammeKorrelasjonsId.overlapperMed(vedtaksperiode.periode)) {
             val annullering = vedtaksperiode.yrkesaktivitet.lagAnnulleringsutbetaling(hendelse, aktivitetslogg, sisteAktiveUtbetalingMedSammeKorrelasjonsId)
-            vedtaksperiode.behandlinger.leggTilAnnullering(annullering, grunnlagsdata, aktivitetslogg)
+            vedtaksperiode.behandlinger.leggTilAnnullering(annullering, aktivitetslogg)
         } else {
             val tomAnnullering = vedtaksperiode.yrkesaktivitet.lagTomUtbetaling(vedtaksperiode.periode, Utbetalingtype.ANNULLERING)
                 .also { it.opprett(aktivitetslogg) }
-            vedtaksperiode.behandlinger.leggTilAnnullering(tomAnnullering, grunnlagsdata, aktivitetslogg)
+            vedtaksperiode.behandlinger.leggTilAnnullering(tomAnnullering, aktivitetslogg)
         }
         vedtaksperiode.tilstand(aktivitetslogg, TilAnnullering)
     }

@@ -24,6 +24,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
@@ -142,6 +143,41 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        }
+    }
+
+    @Test
+    fun `Saksbehandler avviser auu under omgjøring og annullerer etterfulgt utbetalt periode`() {
+        a1 {
+            håndterSøknad(1.januar til 10.januar)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            håndterSøknad(11.januar til 31.januar)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
+            // AUU-en skal utbetales allikevel
+            håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+            assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false, automatiskBehandling = false)
+
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+
+            håndterAnnullering(inspektør.utbetalingId(0))
+
+            assertSisteTilstand(2.vedtaksperiode, TIL_ANNULLERING)
+
+            assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
         }
     }
 
