@@ -7,7 +7,9 @@ import kotlin.collections.sortedBy
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -21,13 +23,13 @@ data class BeregningRequest(
         private val yrkesaktiviteter = mutableSetOf<Yrkesaktivitet>()
         private val inntekter: MutableMap<Yrkesaktivitet, Inntekt> = mutableMapOf()
         private val inntektsjusteringer: MutableMap<Yrkesaktivitet, MutableList<Triple<LocalDate, LocalDate?, Inntekt>>> = mutableMapOf()
-        private val vedtaksperioder: MutableMap<Yrkesaktivitet, MutableList<Triple<UUID, Sykdomstidslinje, VedtaksperiodeForBeregning.DataForBeregning>>> = mutableMapOf()
+        private val vedtaksperioder: MutableMap<Yrkesaktivitet, MutableList<VedtaksperiodeForBeregning>> = mutableMapOf()
 
-        fun fastsattÅrsinntekt(yrkesaktivitet: Yrkesaktivitet.Arbeidstaker, inntekt: Inntekt) {
+        fun fastsattÅrsinntekt(yrkesaktivitet: Yrkesaktivitet.Arbeidstaker, inntekt: Inntekt) = apply {
             leggTilInntekt(yrkesaktivitet, inntekt)
         }
 
-        fun selvstendigNæringsdrivende(inntekt: Inntekt) {
+        fun selvstendigNæringsdrivende(inntekt: Inntekt) = apply {
             val yrkesaktivitet = Yrkesaktivitet.Selvstendig
             leggTilInntekt(yrkesaktivitet, inntekt)
         }
@@ -37,15 +39,15 @@ data class BeregningRequest(
             inntekter[yrkesaktivitet] = inntekt
         }
 
-        fun inntektsjusteringer(yrkesaktivitet: Yrkesaktivitet, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt) {
+        fun inntektsjusteringer(yrkesaktivitet: Yrkesaktivitet, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt) = apply {
             yrkesaktiviteter.add(yrkesaktivitet)
             inntektsjusteringer.getOrPut(yrkesaktivitet) { mutableListOf() }.add(Triple(fom, tom, inntekt))
         }
 
-        fun vedtaksperiode(vedtaksperiodeId: UUID, sykdomstidslinje: Sykdomstidslinje, dataForBeregning: VedtaksperiodeForBeregning.DataForBeregning) {
+        fun vedtaksperiode(vedtaksperiodeId: UUID, periode: Periode, sykdomstidslinje: Sykdomstidslinje, dataForBeregning: VedtaksperiodeForBeregning.DataForBeregning) = apply {
             val yrkesaktivitet = dataForBeregning.yrkesaktivitet
             yrkesaktiviteter.add(yrkesaktivitet)
-            vedtaksperioder.getOrPut(yrkesaktivitet) { mutableListOf() }.add(Triple(vedtaksperiodeId, sykdomstidslinje, dataForBeregning))
+            vedtaksperioder.getOrPut(yrkesaktivitet) { mutableListOf() }.add(VedtaksperiodeForBeregning(vedtaksperiodeId, periode, sykdomstidslinje, dataForBeregning, null, Beløpstidslinje()))
         }
 
         /**
@@ -55,20 +57,30 @@ data class BeregningRequest(
         fun build(): BeregningRequest {
             val beregningsperiode = vedtaksperioder
                 .flatMap { it.value }
-                .map { it.second.periode()!! }
+                .map { it.periode }
                 .reduce(Periode::plus)
 
             val resultat = yrkesaktiviteter.map { yrkesaktivitet ->
                 val inntektsjusteringer = inntektsjusteringer(yrkesaktivitet, beregningsperiode)
                 val inntekt = inntekter[yrkesaktivitet]
                 val vedtaksperioder = vedtaksperioder(yrkesaktivitet, inntekt, inntektsjusteringer)
-                val perioderUtenVedtak = brytOppGhostperiode(beregningsperiode, vedtaksperioder).map {
-                    it to inntektsjusteringer.subset(it)
-                }
-                val andreInntektskilder = perioderUtenVedtak.map { (periode, inntektsjustering) ->
-                    if (inntekt == null) AnnenInntektsperiode(periode, inntektsjustering)
-                    else Ghostperiode(periode, inntekt, inntektsjustering)
-                }
+
+                val ghostOgAndreInntektskilderperioder = if (inntekt != null)
+                    listOf(beregningsperiode)
+                else
+                    inntektsjusteringer
+                        ?.filterIsInstance<Beløpsdag>()
+                        ?.map { it.dato }
+                        ?.grupperSammenhengendePerioder()
+                        ?: emptyList()
+
+                val andreInntektskilder = ghostOgAndreInntektskilderperioder
+                    .flatMap { brytOppGhostperiode(it, vedtaksperioder) }
+                    .map { it to (inntektsjusteringer?.subset(it) ?: Beløpstidslinje()) }
+                    .map { (periode, inntektsjustering) ->
+                        if (inntekt != null) Ghostperiode(periode, inntekt, inntektsjustering)
+                        else AnnenInntektsperiode(periode, inntektsjustering)
+                    }
 
                 val perioder = (vedtaksperioder + andreInntektskilder).sortedBy { it.periode.start }
                 Beregningsperioder(
@@ -79,25 +91,22 @@ data class BeregningRequest(
             return BeregningRequest(resultat)
         }
 
-        private fun vedtaksperioder(yrkesaktivitet: Yrkesaktivitet, inntekt: Inntekt?, inntektsjusteringer: Beløpstidslinje): List<VedtaksperiodeForBeregning> {
+        private fun vedtaksperioder(yrkesaktivitet: Yrkesaktivitet, inntekt: Inntekt?, inntektsjusteringer: Beløpstidslinje?): List<VedtaksperiodeForBeregning> {
             return (vedtaksperioder[yrkesaktivitet]?.toList() ?: emptyList()).map {
-                VedtaksperiodeForBeregning(
-                    vedtaksperiodeId = it.first,
-                    sykdomstidslinje = it.second,
-                    dataForBeregning = it.third,
+                it.copy(
                     inntekt = inntekt,
-                    inntektsjusteringer = inntektsjusteringer.subset(it.second.periode()!!)
+                    inntektsjusteringer = inntektsjusteringer?.subset(it.periode) ?: Beløpstidslinje()
                 )
             }
         }
 
-        private fun inntektsjusteringer(yrkesaktivitet: Yrkesaktivitet, beregningsperiode: Periode): Beløpstidslinje {
+        private fun inntektsjusteringer(yrkesaktivitet: Yrkesaktivitet, beregningsperiode: Periode): Beløpstidslinje? {
             return this.inntektsjusteringer[yrkesaktivitet]?.fold(Beløpstidslinje()) { resultat, (fom, tom, inntekt) ->
                 // beløpstidslinje er en lukket tidslinje som ikke støtter åpen ende, så vi begrenser "null" til siste beregningsdato
                 val reellPeriode = fom.til(tom ?: beregningsperiode.endInclusive)
                 val kilde = Kilde(MeldingsreferanseId( UUID.randomUUID()), SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
                 resultat.erstatt(Beløpstidslinje.fra(reellPeriode, inntekt, kilde))
-            } ?: Beløpstidslinje()
+            }
         }
 
         private fun brytOppGhostperiode(ghostperiode: Periode, vedtaksperioder: List<VedtaksperiodeForBeregning>): List<Periode> {
@@ -137,13 +146,12 @@ data class BeregningRequest(
 
     data class VedtaksperiodeForBeregning(
         val vedtaksperiodeId: UUID,
+        override val periode: Periode,
         val sykdomstidslinje: Sykdomstidslinje,
         val dataForBeregning: DataForBeregning,
         val inntekt: Inntekt?,
         val inntektsjusteringer: Beløpstidslinje
     ) : Beregningsperiode {
-        override val periode = checkNotNull(sykdomstidslinje.periode()) { "sykdomstidslinjen er tom" }
-
         sealed interface DataForBeregning {
             val yrkesaktivitet get() = when (this) {
                 is Arbeidstaker -> Yrkesaktivitet.Arbeidstaker(organisasjonsnummer)

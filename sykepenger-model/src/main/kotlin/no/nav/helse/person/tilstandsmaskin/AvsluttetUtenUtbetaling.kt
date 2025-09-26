@@ -21,7 +21,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
     private fun avsluttUtenVedtak(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         val dataForBeregning = vedtaksperiode.dataForBeregning()
         val request = with(BeregningRequest.Builder()) {
-            vedtaksperiode(vedtaksperiode.id, vedtaksperiode.sykdomstidslinje, dataForBeregning)
+            vedtaksperiode(vedtaksperiode.id, vedtaksperiode.periode, vedtaksperiode.sykdomstidslinje, dataForBeregning)
             vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger?.forEach {
                 fastsattÅrsinntekt(no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)
             }

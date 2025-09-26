@@ -1020,7 +1020,7 @@ internal class Vedtaksperiode private constructor(
 
         val request = with(BeregningRequest.Builder()) {
             perioderSomMåHensyntasVedBeregning().forEach {
-                vedtaksperiode(it.id, it.sykdomstidslinje, it.dataForBeregning())
+                vedtaksperiode(it.id, it.periode, it.sykdomstidslinje, it.dataForBeregning())
             }
             grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.forEach {
                 fastsattÅrsinntekt(no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)

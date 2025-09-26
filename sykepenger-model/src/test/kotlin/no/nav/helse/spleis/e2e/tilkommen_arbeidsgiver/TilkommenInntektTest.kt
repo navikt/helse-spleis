@@ -13,10 +13,10 @@ import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Test
@@ -91,7 +91,6 @@ internal class TilkommenInntektTest : AbstractDslTest() {
         }
     }
 
-    //@Disabled
     @Test
     fun `tjener masse penger som tilkommen - flere ag`() = Toggle.TilkommenInntektV4.enable {
         a1 {
