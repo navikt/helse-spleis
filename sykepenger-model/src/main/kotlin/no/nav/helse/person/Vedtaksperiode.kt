@@ -1002,7 +1002,6 @@ internal class Vedtaksperiode private constructor(
             Behandlingsporing.Yrkesaktivitet.Frilans -> TODO("Støtter ikke beregning av ${this.yrkesaktivitet.yrkesaktivitetstype}")
 
             is Arbeidstaker -> BeregningRequest.VedtaksperiodeForBeregning.DataForBeregning.Arbeidstaker(
-                organisasjonsnummer = this.yrkesaktivitet.organisasjonsnummer,
                 arbeidsgiverperiode = this.behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.dager,
                 dagerNavOvertarAnsvar = this.behandlinger.arbeidsgiverperiode().dagerNavOvertarAnsvar,
                 refusjonstidslinje = this.refusjonstidslinje
@@ -1020,7 +1019,14 @@ internal class Vedtaksperiode private constructor(
 
         val request = with(BeregningRequest.Builder()) {
             perioderSomMåHensyntasVedBeregning().forEach {
-                vedtaksperiode(it.id, it.periode, it.sykdomstidslinje, it.dataForBeregning())
+                val yrkesaktivitet = when (it.yrkesaktivitet.yrkesaktivitetstype) {
+                    Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                    Behandlingsporing.Yrkesaktivitet.Frilans -> TODO("Støtter ikke beregning av ${it.yrkesaktivitet.yrkesaktivitetstype}")
+
+                    is Arbeidstaker -> no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.yrkesaktivitet.organisasjonsnummer)
+                    Behandlingsporing.Yrkesaktivitet.Selvstendig -> no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Selvstendig
+                }
+                vedtaksperiode(yrkesaktivitet, it.id, it.periode, it.sykdomstidslinje, it.dataForBeregning())
             }
             grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.forEach {
                 fastsattÅrsinntekt(no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)

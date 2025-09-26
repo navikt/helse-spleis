@@ -44,8 +44,7 @@ data class BeregningRequest(
             inntektsjusteringer.getOrPut(yrkesaktivitet) { mutableListOf() }.add(Triple(fom, tom, inntekt))
         }
 
-        fun vedtaksperiode(vedtaksperiodeId: UUID, periode: Periode, sykdomstidslinje: Sykdomstidslinje, dataForBeregning: VedtaksperiodeForBeregning.DataForBeregning) = apply {
-            val yrkesaktivitet = dataForBeregning.yrkesaktivitet
+        fun vedtaksperiode(yrkesaktivitet: Yrkesaktivitet, vedtaksperiodeId: UUID, periode: Periode, sykdomstidslinje: Sykdomstidslinje, dataForBeregning: VedtaksperiodeForBeregning.DataForBeregning) = apply {
             yrkesaktiviteter.add(yrkesaktivitet)
             vedtaksperioder.getOrPut(yrkesaktivitet) { mutableListOf() }.add(VedtaksperiodeForBeregning(vedtaksperiodeId, periode, sykdomstidslinje, dataForBeregning, null, Beløpstidslinje()))
         }
@@ -153,13 +152,7 @@ data class BeregningRequest(
         val inntektsjusteringer: Beløpstidslinje
     ) : Beregningsperiode {
         sealed interface DataForBeregning {
-            val yrkesaktivitet get() = when (this) {
-                is Arbeidstaker -> Yrkesaktivitet.Arbeidstaker(organisasjonsnummer)
-                is Selvstendig -> Yrkesaktivitet.Selvstendig
-            }
-
             data class Arbeidstaker(
-                val organisasjonsnummer: String,
                 val arbeidsgiverperiode: List<Periode>,
                 val dagerNavOvertarAnsvar: List<Periode>,
                 val refusjonstidslinje: Beløpstidslinje

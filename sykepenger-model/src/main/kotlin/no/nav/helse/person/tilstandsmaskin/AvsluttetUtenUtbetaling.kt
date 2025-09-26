@@ -6,6 +6,7 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.behandlingkilde
 import no.nav.helse.utbetalingstidslinje.beregning.BeregningRequest
+import no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet
 import no.nav.helse.utbetalingstidslinje.beregning.beregnUtbetalinger
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
@@ -20,19 +21,20 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
 
     private fun avsluttUtenVedtak(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         val dataForBeregning = vedtaksperiode.dataForBeregning()
+        val yrkesaktivitet = Yrkesaktivitet.Arbeidstaker(vedtaksperiode.yrkesaktivitet.organisasjonsnummer)
         val request = with(BeregningRequest.Builder()) {
-            vedtaksperiode(vedtaksperiode.id, vedtaksperiode.periode, vedtaksperiode.sykdomstidslinje, dataForBeregning)
+            vedtaksperiode(yrkesaktivitet, vedtaksperiode.id, vedtaksperiode.periode, vedtaksperiode.sykdomstidslinje, dataForBeregning)
             vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger?.forEach {
-                fastsattÅrsinntekt(no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)
+                fastsattÅrsinntekt(Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)
             }
             vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag?.deaktiverteArbeidsforhold?.forEach {
-                fastsattÅrsinntekt(no.nav.helse.utbetalingstidslinje.beregning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), INGEN)
+                fastsattÅrsinntekt(Yrkesaktivitet.Arbeidstaker(it.orgnummer), INGEN)
             }
             build()
         }
 
         val response = beregnUtbetalinger(request)
-        val utbetalingstidslinje = response.yrkesaktiviteter.single { it.yrkesaktivitet == dataForBeregning.yrkesaktivitet }.vedtaksperioder.single().utbetalingstidslinje
+        val utbetalingstidslinje = response.yrkesaktiviteter.single { it.yrkesaktivitet == yrkesaktivitet }.vedtaksperioder.single().utbetalingstidslinje
         vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.yrkesaktivitet, aktivitetslogg, utbetalingstidslinje, emptyMap())
     }
 

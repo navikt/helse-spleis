@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.utbetalingstidslinje.beregning.BeregningRequest
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
@@ -15,7 +14,6 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.utbetalingstidslinje.beregning.BeregningRequest.VedtaksperiodeForBeregning.DataForBeregning.Arbeidstaker
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -28,7 +26,7 @@ internal class BeregningRequestBuilderTest {
     fun `en arbeidsgiver - inngår i sykengegrunnlag`() {
         val request = BeregningRequest.Builder()
             .fastsattÅrsinntekt(Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
-            .vedtaksperiode(UUID.randomUUID(), januar, Sykdomstidslinje(), arbeidstaker(a1))
+            .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), januar, Sykdomstidslinje(), arbeidstaker())
             .build()
 
         assertEquals(1, request.yrkesaktiviteter.size)
@@ -45,7 +43,7 @@ internal class BeregningRequestBuilderTest {
     @Test
     fun `en arbeidsgiver - inngår ikke i sykepengegrunnag`() {
         val request = BeregningRequest.Builder()
-            .vedtaksperiode(UUID.randomUUID(), januar, Sykdomstidslinje(), arbeidstaker(a1))
+            .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), januar, Sykdomstidslinje(), arbeidstaker())
             .build()
 
         assertEquals(1, request.yrkesaktiviteter.size)
@@ -66,11 +64,11 @@ internal class BeregningRequestBuilderTest {
             .fastsattÅrsinntekt(Yrkesaktivitet.Arbeidstaker(a2), INNTEKT * 2)
             .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a3), 10.januar, 14.januar, 1500.daglig)
             .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a3), 25.januar, null, 1500.daglig)
-            .vedtaksperiode(UUID.randomUUID(), 1.januar til 20.januar, Sykdomstidslinje(), arbeidstaker(a1))
-            .vedtaksperiode(UUID.randomUUID(), 21.januar til 25.januar, Sykdomstidslinje(), arbeidstaker(a1))
-            .vedtaksperiode(UUID.randomUUID(), 29.januar til 31.januar, Sykdomstidslinje(), arbeidstaker(a1))
-            .vedtaksperiode(UUID.randomUUID(), 1.januar til 21.januar, Sykdomstidslinje(), arbeidstaker(a2))
-            .vedtaksperiode(UUID.randomUUID(), 25.januar til 30.januar, Sykdomstidslinje(), arbeidstaker(a2))
+            .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), 1.januar til 20.januar, Sykdomstidslinje(), arbeidstaker())
+            .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), 21.januar til 25.januar, Sykdomstidslinje(), arbeidstaker())
+            .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), 29.januar til 31.januar, Sykdomstidslinje(), arbeidstaker())
+            .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a2), UUID.randomUUID(), 1.januar til 21.januar, Sykdomstidslinje(), arbeidstaker())
+            .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a2), UUID.randomUUID(), 25.januar til 30.januar, Sykdomstidslinje(), arbeidstaker())
             .build()
 
         assertEquals(3, request.yrkesaktiviteter.size)
@@ -136,7 +134,7 @@ internal class BeregningRequestBuilderTest {
             .fastsattÅrsinntekt(Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
             .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a3), 1.januar, 10.januar, 1500.daglig)
             .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a3), 15.januar, null, 1500.daglig)
-            .vedtaksperiode(UUID.randomUUID(), 1.januar til 20.januar, Sykdomstidslinje(), arbeidstaker(a1))
+            .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), 1.januar til 20.januar, Sykdomstidslinje(), arbeidstaker())
             .build()
 
         assertEquals(2, request.yrkesaktiviteter.size)
@@ -167,7 +165,7 @@ internal class BeregningRequestBuilderTest {
         val request = BeregningRequest.Builder()
             .fastsattÅrsinntekt(Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
             .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a1), 1.januar, null, 1500.daglig)
-            .vedtaksperiode(UUID.randomUUID(), 1.januar til 20.januar, Sykdomstidslinje(), arbeidstaker(a1))
+            .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), 1.januar til 20.januar, Sykdomstidslinje(), arbeidstaker())
             .build()
 
         assertEquals(1, request.yrkesaktiviteter.size)
@@ -186,8 +184,8 @@ internal class BeregningRequestBuilderTest {
         val request = BeregningRequest.Builder()
             .fastsattÅrsinntekt(Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
             .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a3), 1.januar, null, 1500.daglig)
-            .vedtaksperiode(UUID.randomUUID(), 1.januar til 20.januar, Sykdomstidslinje(), arbeidstaker(a1))
-            .vedtaksperiode(UUID.randomUUID(), 1.januar til 10.januar, Sykdomstidslinje(), arbeidstaker(a3))
+            .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), 1.januar til 20.januar, Sykdomstidslinje(), arbeidstaker())
+            .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a3), UUID.randomUUID(), 1.januar til 10.januar, Sykdomstidslinje(), arbeidstaker())
             .build()
 
         assertEquals(2, request.yrkesaktiviteter.size)
@@ -213,9 +211,8 @@ internal class BeregningRequestBuilderTest {
         }
     }
 
-    private fun arbeidstaker(orgnr: String): Arbeidstaker {
+    private fun arbeidstaker(): Arbeidstaker {
         return Arbeidstaker(
-            organisasjonsnummer = orgnr,
             arbeidsgiverperiode = listOf(1.januar til 16.januar),
             dagerNavOvertarAnsvar = emptyList(),
             refusjonstidslinje = Beløpstidslinje.fra(
