@@ -126,6 +126,7 @@ data class BeregningRequest(
 
     sealed interface Beregningsperiode {
         val periode: Periode
+        val inntektsjusteringer: Beløpstidslinje
     }
 
     // en periode som ikke dekkes av en vedtaksperiode,
@@ -133,14 +134,14 @@ data class BeregningRequest(
     data class Ghostperiode(
         override val periode: Periode,
         val inntekt: Inntekt,
-        val inntektsjusteringer: Beløpstidslinje
+        override val inntektsjusteringer: Beløpstidslinje
     ) : Beregningsperiode
 
     // en periode som ikke dekkes av en vedtaksperiode
     // hvor yrkesaktiviteten ikke inngår i sykepengegrunnlaget
     data class AnnenInntektsperiode(
         override val periode: Periode,
-        val inntektsjusteringer: Beløpstidslinje
+        override val inntektsjusteringer: Beløpstidslinje
     ) : Beregningsperiode
 
     data class VedtaksperiodeForBeregning(
@@ -149,7 +150,7 @@ data class BeregningRequest(
         val sykdomstidslinje: Sykdomstidslinje,
         val dataForBeregning: DataForBeregning,
         val inntekt: Inntekt?,
-        val inntektsjusteringer: Beløpstidslinje
+        override val inntektsjusteringer: Beløpstidslinje
     ) : Beregningsperiode {
         sealed interface DataForBeregning {
             data class Arbeidstaker(

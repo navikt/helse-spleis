@@ -24,10 +24,17 @@ fun beregnUtbetalinger(request: BeregningRequest): BeregningResponse {
 }
 
 private fun beregnVedtaksperioder(request: BeregningRequest): List<BeregningResponse.BeregnetYrkesaktivitet> {
+    val alleInntektsjusteringer = request
+        .yrkesaktiviteter
+        .associateBy({ it.yrkesaktivitet }) {
+            it
+                .perioder
+                .fold(Beløpstidslinje()) { result, beregningsperiode -> result + beregningsperiode.inntektsjusteringer }
+        }
     return request.yrkesaktiviteter.map { yrkesaktivitet ->
         val vedtaksperioder = yrkesaktivitet.perioder
             .filterIsInstance<BeregningRequest.VedtaksperiodeForBeregning>()
-            .map { beregningsperiode -> beregnVedtaksperiode(beregningsperiode) }
+            .map { beregningsperiode -> beregnVedtaksperiode(beregningsperiode, alleInntektsjusteringer) }
 
         val ghosts = yrkesaktivitet.perioder
             .filterIsInstance<BeregningRequest.Ghostperiode>()
@@ -46,7 +53,7 @@ private fun beregnVedtaksperioder(request: BeregningRequest): List<BeregningResp
     }
 }
 
-private fun beregnVedtaksperiode(vedtaksperiode: BeregningRequest.VedtaksperiodeForBeregning): BeregningResponse.BeregnetVedtaksperiode {
+private fun beregnVedtaksperiode(vedtaksperiode: BeregningRequest.VedtaksperiodeForBeregning, alleInntektsjusteringer: Map<Yrkesaktivitet, Beløpstidslinje>): BeregningResponse.BeregnetVedtaksperiode {
     val utbetalingstidslinje = when (vedtaksperiode.dataForBeregning) {
         is BeregningRequest.VedtaksperiodeForBeregning.DataForBeregning.Arbeidstaker -> beregnArbeidstaker(vedtaksperiode.sykdomstidslinje, vedtaksperiode.inntekt, vedtaksperiode.inntektsjusteringer, vedtaksperiode.dataForBeregning)
         is BeregningRequest.VedtaksperiodeForBeregning.DataForBeregning.Selvstendig -> beregnSelvstendig(vedtaksperiode.sykdomstidslinje, vedtaksperiode.inntekt, vedtaksperiode.dataForBeregning)
@@ -54,7 +61,7 @@ private fun beregnVedtaksperiode(vedtaksperiode: BeregningRequest.Vedtaksperiode
     return BeregningResponse.BeregnetVedtaksperiode(
         vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId,
         utbetalingstidslinje = utbetalingstidslinje,
-        inntektjusteringer = emptyMap() // her skal det være en kopi av -alle- inntektsjusteringer som gjelder -alle- yrkesaktiviteter
+        inntektjusteringer = alleInntektsjusteringer
     )
 }
 
