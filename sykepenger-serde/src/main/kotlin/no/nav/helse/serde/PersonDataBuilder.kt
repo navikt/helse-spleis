@@ -1,6 +1,5 @@
 package no.nav.helse.serde
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import no.nav.helse.dto.ArbeidsgiverperiodeavklaringDto
 import no.nav.helse.dto.ArbeidssituasjonDto
@@ -109,10 +108,10 @@ import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInn
 import no.nav.helse.serde.SerialisertPerson.Companion.gjeldendeVersjon
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 
-fun PersonData.tilSerialisertPerson(pretty: Boolean = false): SerialisertPerson {
-    val node = serdeObjectMapper.valueToTree<ObjectNode>(this)
+fun PersonData.tilSerialisertPerson(): SerialisertPerson {
+    val json = serdeObjectMapper.writeValueAsString(this)
     return SerialisertPerson(
-        json = if (pretty) node.toPrettyString() else node.toString(),
+        json = json,
         skjemaVersjon = gjeldendeVersjon()
     )
 }
