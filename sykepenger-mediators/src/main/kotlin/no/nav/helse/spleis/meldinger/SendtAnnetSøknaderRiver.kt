@@ -21,7 +21,7 @@ internal class SendtAnnetSøknaderRiver(
     }
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("id", "selvstendigNaringsdrivende")
+        message.requireKey("id")
         message.forbid("arbeidsgiver.orgnummer")
         message.require("sendtNav", JsonNode::asLocalDateTime)
         message.interestedIn("egenmeldingsdagerFraSykmelding") { egenmeldinger -> egenmeldinger.map { it.asLocalDate() } }
