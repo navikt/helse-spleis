@@ -77,6 +77,7 @@ private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
     sykdomsdagtype = when (dag.sykdomstidslinjedagtype) {
         SykdomstidslinjedagType.ARBEIDSDAG -> GraphQLSykdomsdagtype.Arbeidsdag
         SykdomstidslinjedagType.ARBEIDSGIVERDAG -> GraphQLSykdomsdagtype.Arbeidsgiverdag
+        SykdomstidslinjedagType.MELDING_TIL_NAV_DAG -> GraphQLSykdomsdagtype.MeldingTilNavDag
         SykdomstidslinjedagType.FERIEDAG -> GraphQLSykdomsdagtype.Feriedag
         SykdomstidslinjedagType.ARBEID_IKKE_GJENOPPTATT_DAG -> GraphQLSykdomsdagtype.ArbeidIkkeGjenopptattDag
         SykdomstidslinjedagType.FORELDET_SYKEDAG -> GraphQLSykdomsdagtype.ForeldetSykedag

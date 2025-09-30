@@ -49,6 +49,8 @@ import no.nav.helse.dto.SykdomstidslinjeDagDto.ArbeidsgiverdagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.FeriedagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.ForeldetSykedagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.FriskHelgedagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.MeldingTilNavDagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.MeldingTilNavHelgedagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.PermisjonsdagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.ProblemDagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.SykHelgedagDto
@@ -609,6 +611,11 @@ data class PersonData(
                         ArbeidsgiverHelgedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                     else
                         ArbeidsgiverdagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                    
+                    JsonDagType.MELDING_TIL_NAV_DAG -> if (dagen.erHelg())
+                        MeldingTilNavHelgedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                    else
+                        MeldingTilNavDagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
 
                     JsonDagType.FERIEDAG -> FeriedagDto(dato = dagen, kilde = kilde)
                     JsonDagType.ARBEID_IKKE_GJENOPPTATT_DAG -> ArbeidIkkeGjenopptattDagDto(dato = dagen, kilde = kilde)
@@ -635,6 +642,7 @@ data class PersonData(
             enum class JsonDagType {
                 ARBEIDSDAG,
                 ARBEIDSGIVERDAG,
+                MELDING_TIL_NAV_DAG,
 
                 FERIEDAG,
                 ARBEID_IKKE_GJENOPPTATT_DAG,

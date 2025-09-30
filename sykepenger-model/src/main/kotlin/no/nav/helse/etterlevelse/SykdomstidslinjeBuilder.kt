@@ -24,10 +24,13 @@ internal class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) {
             is Dag.Permisjonsdag -> visit(dag.dato, "PERMISJONSDAG", null)
             is Dag.SykHelgedag -> visit(dag.dato, "SYKEDAG", dag.grad)
             is Dag.Sykedag -> visit(dag.dato, "SYKEDAG", dag.grad)
+
             is Dag.ArbeidIkkeGjenopptattDag,
             is Dag.Arbeidsdag,
             is Dag.ArbeidsgiverHelgedag,
             is Dag.Arbeidsgiverdag,
+            is Dag.MeldingTilNavDag,
+            is Dag.MeldingTilNavHelgedag,
             is Dag.ForeldetSykedag,
             is Dag.FriskHelgedag,
             is Dag.ProblemDag,

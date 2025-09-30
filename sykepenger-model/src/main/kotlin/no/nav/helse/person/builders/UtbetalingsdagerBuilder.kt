@@ -67,9 +67,12 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                     is Dag.Permisjonsdag -> PersonObserver.Utbetalingsdag(dag.dato, Permisjonsdag)
                     is Dag.Feriedag -> PersonObserver.Utbetalingsdag(dag.dato, Feriedag)
                     is Dag.ArbeidIkkeGjenopptattDag -> PersonObserver.Utbetalingsdag(dag.dato, ArbeidIkkeGjenopptattDag)
+
                     is Dag.Arbeidsdag,
                     is Dag.ArbeidsgiverHelgedag,
                     is Dag.Arbeidsgiverdag,
+                    is Dag.MeldingTilNavDag,
+                    is Dag.MeldingTilNavHelgedag,
                     is Dag.ForeldetSykedag,
                     is Dag.FriskHelgedag,
                     is Dag.ProblemDag,

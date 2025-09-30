@@ -54,6 +54,7 @@ import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektskilde
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt.SelvstendigFaktaavklartInntektView
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidIkkeGjenopptattDag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
@@ -646,6 +647,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     when (it) {
                         is ArbeidsgiverHelgedag,
                         is Arbeidsgiverdag,
+                        is Dag.MeldingTilNavDag,
+                        is Dag.MeldingTilNavHelgedag,
                         is ForeldetSykedag,
                         is SykHelgedag,
                         is Sykedag -> true

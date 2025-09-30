@@ -121,6 +121,21 @@ internal class SykdomstidslinjeBuilder(
                 grad = (it.grad.prosentDesimal * 100).roundToInt()
             )
 
+            is SykdomstidslinjeDagDto.MeldingTilNavDagDto -> Sykdomstidslinjedag(
+                dagen = it.dato,
+                type = if (dagerNavOvertarAnsvar.any { (fom, tom) -> it.dato in (fom..tom) }) SykdomstidslinjedagType.SYKEDAG_NAV else SykdomstidslinjedagType.MELDING_TIL_NAV_DAG,
+                kilde = it.kilde.tilKildeDTO(),
+                grad = (it.grad.prosentDesimal * 100).roundToInt()
+            )
+
+            is SykdomstidslinjeDagDto.MeldingTilNavHelgedagDto -> Sykdomstidslinjedag(
+                dagen = it.dato,
+                type = SykdomstidslinjedagType.MELDING_TIL_NAV_DAG,
+                kilde = it.kilde.tilKildeDTO(),
+                grad = (it.grad.prosentDesimal * 100).roundToInt()
+            )
+
+
             is SykdomstidslinjeDagDto.FeriedagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
                 type = SykdomstidslinjedagType.FERIEDAG,

@@ -5268,6 +5268,11 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "MeldingTilNavDag",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "Feriedag",
           "description" : null,
           "isDeprecated" : false,
