@@ -103,7 +103,8 @@ internal class GrunnbeløpsreguleringTest : AbstractDslTest() {
     }
 
     private fun hackGrunnbeløp(fra: Int, til: Int) {
-        val json = testperson.dto().tilPersonData().tilSerialisertPerson().json.replace("\"grunnbeløp\":$fra.0", "\"grunnbeløp\":$til.0")
-        medJSONPersonTekst(json)
+        val serialisertPerson = testperson.dto().tilPersonData().tilSerialisertPerson()
+        val json = serialisertPerson.json.replace("\"grunnbeløp\":$fra.0", "\"grunnbeløp\":$til.0")
+        medJSONPersonTekst(json, serialisertPerson.skjemaVersjon)
     }
 }

@@ -5,13 +5,13 @@ import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
 
-internal fun gjenopprettFraJSON(fil: String, regelverkslogg: Regelverkslogg = EmptyLog): Person {
+internal fun gjenopprettFraJSON(fil: String, skjemaversjon: Int, regelverkslogg: Regelverkslogg = EmptyLog): Person {
     val json = fil.readResource()
-    return gjenopprettFraJSONtekst(json, regelverkslogg)
+    return gjenopprettFraJSONtekst(json, skjemaversjon, regelverkslogg)
 }
 
-internal fun gjenopprettFraJSONtekst(json: String, regelverkslogg: Regelverkslogg = EmptyLog): Person {
-    val serialisertPerson = SerialisertPerson.fraJson(json)
+internal fun gjenopprettFraJSONtekst(json: String, skjemaversjon: Int, regelverkslogg: Regelverkslogg = EmptyLog): Person {
+    val serialisertPerson = SerialisertPerson(json, skjemaversjon)
     val dto = serialisertPerson.tilPersonDto()
     return Person.gjenopprett(regelverkslogg, dto, emptyList())
 }

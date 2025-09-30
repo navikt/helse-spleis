@@ -592,18 +592,18 @@ internal abstract class AbstractDslTest {
         override fun maksSykepengedagerOver67() = maksSykedager
     }
 
-    protected fun medJSONPerson(filsti: String) {
+    protected fun medJSONPerson(filsti: String, skjemaversjon: Int) {
         testperson = TestPerson(
             observatør = observatør,
-            person = gjenopprettFraJSON(filsti, jurist),
+            person = gjenopprettFraJSON(filsti, skjemaversjon, jurist),
             deferredLog = deferredLog
         )
     }
 
-    protected fun medJSONPersonTekst(json: String) {
+    protected fun medJSONPersonTekst(json: String, skjemaversjon: Int) {
         testperson = TestPerson(
             observatør = observatør,
-            person = gjenopprettFraJSONtekst(json, jurist),
+            person = gjenopprettFraJSONtekst(json, skjemaversjon, jurist),
             deferredLog = deferredLog
         )
     }

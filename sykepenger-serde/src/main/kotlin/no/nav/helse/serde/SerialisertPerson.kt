@@ -116,10 +116,6 @@ class SerialisertPerson(
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
-        fun fraJson(json: String): SerialisertPerson {
-            val skjemaversjon = serdeObjectMapper.readTree(json).path("skjemaVersjon").intValue()
-            return SerialisertPerson(json, skjemaversjon)
-        }
     }
 
     private fun migrate(meldingerSupplier: MeldingerSupplier): Pair<Int, String> {

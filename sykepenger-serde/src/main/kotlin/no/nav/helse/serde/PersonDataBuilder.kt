@@ -113,7 +113,7 @@ fun PersonData.tilSerialisertPerson(pretty: Boolean = false): SerialisertPerson 
     val node = serdeObjectMapper.valueToTree<ObjectNode>(this)
     return SerialisertPerson(
         json = if (pretty) node.toPrettyString() else node.toString(),
-        skjemaVersjon = skjemaVersjon
+        skjemaVersjon = gjeldendeVersjon()
     )
 }
 
@@ -125,8 +125,7 @@ fun PersonUtDto.tilPersonData() = PersonData(
     infotrygdhistorikk = this.infotrygdhistorikk.elementer.map { it.tilPersonData() },
     vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.historikk.map { it.tilPersonData() },
     minimumSykdomsgradVurdering = minimumSykdomsgradVurdering.perioder.map { PersonData.MinimumSykdomsgradVurderingPeriodeData(it.fom, it.tom) },
-    dødsdato = this.alder.dødsdato,
-    skjemaVersjon = gjeldendeVersjon()
+    dødsdato = this.alder.dødsdato
 )
 
 private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(

@@ -736,7 +736,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
     @Test
     fun `annulleringer på vedtaksperioder med samme utbetaling`() {
-        medJSONPerson("/personer/to_vedtak_samme_fagsystem_id.json")
+        medJSONPerson("/personer/to_vedtak_samme_fagsystem_id.json", 320)
         a1 {
             assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
             assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
@@ -791,7 +791,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
     @Test
     fun `annullering av siste periode og vedtaksperioder med samme utbetaling`() {
-        medJSONPerson("/personer/to_vedtak_samme_fagsystem_id.json")
+        medJSONPerson("/personer/to_vedtak_samme_fagsystem_id.json", 320)
 
         a1 {
             assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
@@ -846,7 +846,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
     @Test
     fun `annullering av midterste periode og vedtaksperioder med samme utbetaling`() {
-        medJSONPerson("/personer/tre_vedtak_samme_fagsystem_id.json")
+        medJSONPerson("/personer/tre_vedtak_samme_fagsystem_id.json", 320)
 
         a1 {
             assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
@@ -907,7 +907,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
     @Test
     fun `annullering av siste periode og vedtaksperioder med samme utbetaling og vi er til revurdering`() {
-        medJSONPerson("/personer/tre_vedtak_samme_fagsystem_id.json")
+        medJSONPerson("/personer/tre_vedtak_samme_fagsystem_id.json", 320)
 
         a1 {
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.januar, Dagtype.Sykedag, 80)))
@@ -952,7 +952,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
     @Test
     fun `annullering av andra periode hvor første er AUU og vedtaksperioder med samme utbetaling`() {
-        medJSONPerson("/personer/tre_vedtak_samme_fagsystem_id_forste_periode_AUU.json")
+        medJSONPerson("/personer/tre_vedtak_samme_fagsystem_id_forste_periode_AUU.json", 320)
 
         a1 {
             assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)

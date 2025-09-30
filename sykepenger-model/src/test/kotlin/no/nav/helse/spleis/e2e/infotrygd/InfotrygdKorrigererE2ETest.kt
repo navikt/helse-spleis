@@ -119,11 +119,11 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
     }
 
     private fun createDobbelutbetalingPerson() = createTestPerson { jurist ->
-        gjenopprettFraJSON("/personer/dobbelutbetaling.json", jurist)
+        gjenopprettFraJSON("/personer/dobbelutbetaling.json", 312, jurist)
     }
 
     private fun createAuuBlirMedIRevureringPerson() = createTestPerson { jurist ->
-        gjenopprettFraJSON("/personer/auu-blir-med-i-revurdering.json", jurist)
+        gjenopprettFraJSON("/personer/auu-blir-med-i-revurdering.json", 312, jurist)
     }.also {
         UtbetalingshistorikkEtterInfotrygdendring(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),

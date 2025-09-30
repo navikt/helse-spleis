@@ -113,8 +113,7 @@ data class PersonData(
     val infotrygdhistorikk: List<InfotrygdhistorikkElementData>,
     val vilkårsgrunnlagHistorikk: List<VilkårsgrunnlagInnslagData>,
     val minimumSykdomsgradVurdering: List<MinimumSykdomsgradVurderingPeriodeData>?,
-    val dødsdato: LocalDate?,
-    val skjemaVersjon: Int
+    val dødsdato: LocalDate?
 ) {
     fun tilPersonDto() = PersonInnDto(
         fødselsnummer = this.fødselsnummer,

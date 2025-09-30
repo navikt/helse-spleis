@@ -72,7 +72,7 @@ internal abstract class JsonMigration(private val version: Int) {
         val jsonNode = serdeObjectMapper.readTree(unmigratedJson)
         require(jsonNode is ObjectNode) { "Kan kun migrere ObjectNodes" }
         doMigration(jsonNode, meldingerSupplier)
-        after(jsonNode)
+        log.info("Successfully migrated json to $version using ${javaClass.name}: $description")
         val migratedJson = jsonNode.toString()
         return version to migratedJson
     }
@@ -81,9 +81,4 @@ internal abstract class JsonMigration(private val version: Int) {
 
     protected open fun shouldMigrate(skjemaVersjon: Int) =
         skjemaVersjon < version
-
-    private fun after(jsonNode: ObjectNode) {
-        log.info("Successfully migrated json to $version using ${this.javaClass.name}: ${this.description}")
-        jsonNode.put(SkjemaversjonKey, version)
-    }
 }

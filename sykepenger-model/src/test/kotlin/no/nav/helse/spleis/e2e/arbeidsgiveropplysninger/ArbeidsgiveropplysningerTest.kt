@@ -78,7 +78,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
 
     @Test
     fun `periode utenfor agp, som er i auu, dras ut av auu som følge av arbeidsgiveropplysninger`() {
-        medJSONPerson("/personer/auu-utenfor-agp-med-ferie.json")
+        medJSONPerson("/personer/auu-utenfor-agp-med-ferie.json", 330)
         // setup:
         /*
         a1 {

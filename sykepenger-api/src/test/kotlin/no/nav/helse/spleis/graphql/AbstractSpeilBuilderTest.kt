@@ -86,7 +86,7 @@ internal abstract class AbstractSpeilBuilderTest {
     }
 
     protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist ->
-        gjenopprettFraJSON("/personer/infotrygdforlengelse.json", jurist)
+        gjenopprettFraJSON("/personer/infotrygdforlengelse.json", skjemaversjon = 312, regelverkslogg = jurist)
     }
 
     @BeforeEach

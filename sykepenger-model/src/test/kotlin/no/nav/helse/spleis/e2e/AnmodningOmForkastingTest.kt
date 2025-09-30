@@ -124,7 +124,7 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
 
     @Test
     fun `forkasting uten force påvirker ikke vedtaksperioder som ikke kan forkastes`() {
-        medJSONPerson("/personer/auu-med-utbetalt-vedtak-etter.json")
+        medJSONPerson("/personer/auu-med-utbetalt-vedtak-etter.json", 328)
         a1 {
             håndterOverstyrTidslinje((1.januar til 16.januar).map {
                 ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100)
@@ -146,7 +146,7 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
 
     @Test
     fun `forkasting med force påvirker bare vedtaksperioden som forces`() {
-        medJSONPerson("/personer/auu-med-utbetalt-vedtak-etter.json")
+        medJSONPerson("/personer/auu-med-utbetalt-vedtak-etter.json", 328)
         a1 {
             håndterOverstyrTidslinje((1.januar til 16.januar).map {
                 ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100)
