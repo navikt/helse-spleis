@@ -132,6 +132,9 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
                         false -> arbeidsdag(builder, dag.dato, inntekt, inntektjusteringer)
                     }
                 }
+
+                is Dag.MeldingTilNavDag,
+                is Dag.MeldingTilNavHelgedag -> error("Forventer ikke MeldingTilNavDag i arbeidsgiverperiodeberegningen")
             }
         }
         return builder.build()

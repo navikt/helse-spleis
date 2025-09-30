@@ -264,8 +264,30 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
         tom = null
     )
 
+    is SykdomstidslinjeDagDto.MeldingTilNavHelgedagDto -> DagData(
+        type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.MELDING_TIL_NAV_DAG,
+        kilde = this.kilde.tilPersonData(),
+        grad = this.grad.prosentDesimal,
+        other = null,
+        melding = null,
+        dato = dato,
+        fom = null,
+        tom = null
+    )
+
     is SykdomstidslinjeDagDto.ArbeidsgiverdagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
+        kilde = this.kilde.tilPersonData(),
+        grad = this.grad.prosentDesimal,
+        other = null,
+        melding = null,
+        dato = dato,
+        fom = null,
+        tom = null
+    )
+
+    is SykdomstidslinjeDagDto.MeldingTilNavDagDto -> DagData(
+        type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.MELDING_TIL_NAV_DAG,
         kilde = this.kilde.tilPersonData(),
         grad = this.grad.prosentDesimal,
         other = null,

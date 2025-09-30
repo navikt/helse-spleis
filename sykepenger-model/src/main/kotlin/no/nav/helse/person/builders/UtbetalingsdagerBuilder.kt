@@ -73,9 +73,12 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                         is Dag.Permisjonsdag -> EventSubscription.Utbetalingsdag(dag.dato, Permisjonsdag, dag.økonomi.dekningsgrad.toDouble().toInt())
                         is Dag.Feriedag -> EventSubscription.Utbetalingsdag(dag.dato, Feriedag, dag.økonomi.dekningsgrad.toDouble().toInt())
                         is Dag.ArbeidIkkeGjenopptattDag -> EventSubscription.Utbetalingsdag(dag.dato, ArbeidIkkeGjenopptattDag, dag.økonomi.dekningsgrad.toDouble().toInt())
-                        is Dag.Arbeidsdag,
-                        is Dag.ArbeidsgiverHelgedag,
-                        is Dag.Arbeidsgiverdag,
+
+                    is Dag.Arbeidsdag,
+                    is Dag.ArbeidsgiverHelgedag,
+                    is Dag.Arbeidsgiverdag,
+                    is Dag.MeldingTilNavDag,
+                    is Dag.MeldingTilNavHelgedag,
                         is Dag.ForeldetSykedag,
                         is Dag.FriskHelgedag,
                         is Dag.ProblemDag,

@@ -237,6 +237,7 @@ data class SpannerPersonDto(
             enum class JsonDagType {
                 ARBEIDSDAG,
                 ARBEIDSGIVERDAG,
+                MELDING_TIL_NAV_DAG,
 
                 FERIEDAG,
                 ARBEID_IKKE_GJENOPPTATT_DAG,
@@ -994,6 +995,28 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
 
     is SykdomstidslinjeDagDto.ArbeidsgiverdagDto -> DagData(
         type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
+        kilde = this.kilde.tilPersonData(),
+        grad = this.grad.prosentDesimal,
+        other = null,
+        melding = null,
+        dato = dato,
+        fom = null,
+        tom = null
+    )
+
+    is SykdomstidslinjeDagDto.MeldingTilNavDagDto -> DagData(
+        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.MELDING_TIL_NAV_DAG,
+        kilde = this.kilde.tilPersonData(),
+        grad = this.grad.prosentDesimal,
+        other = null,
+        melding = null,
+        dato = dato,
+        fom = null,
+        tom = null
+    )
+
+    is SykdomstidslinjeDagDto.MeldingTilNavHelgedagDto -> DagData(
+        type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.MELDING_TIL_NAV_DAG,
         kilde = this.kilde.tilPersonData(),
         grad = this.grad.prosentDesimal,
         other = null,

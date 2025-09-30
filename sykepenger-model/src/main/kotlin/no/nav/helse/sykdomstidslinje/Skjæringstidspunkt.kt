@@ -51,6 +51,8 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
 
                 is Dag.ArbeidsgiverHelgedag,
                 is Dag.Arbeidsgiverdag,
+                is Dag.MeldingTilNavDag,
+                is Dag.MeldingTilNavHelgedag,
                 is Dag.ForeldetSykedag,
                 is Dag.SykHelgedag,
                 is Dag.Sykedag -> {

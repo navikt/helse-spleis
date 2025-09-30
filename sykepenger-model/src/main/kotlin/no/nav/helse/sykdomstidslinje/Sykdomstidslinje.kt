@@ -28,6 +28,8 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.MeldingTilNavDag
+import no.nav.helse.sykdomstidslinje.Dag.MeldingTilNavHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
 import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
@@ -162,6 +164,8 @@ class Sykdomstidslinje private constructor(
                     is SykHelgedag -> "H"
                     is Arbeidsgiverdag -> "U"
                     is ArbeidsgiverHelgedag -> "G"
+                    is MeldingTilNavDag -> "M"
+                    is MeldingTilNavHelgedag -> "O"
                     is Feriedag -> "F"
                     is ArbeidIkkeGjenopptattDag -> "J"
                     is Permisjonsdag -> "P"

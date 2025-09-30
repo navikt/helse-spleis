@@ -71,6 +71,9 @@ internal class Arbeidsgiverperiodeberegner(
                 is Dag.UkjentDag -> {
                     håndterUkjentDag(dag.dato, gjenståendeInfotrygdBetalteDager, gjenståendeInfotrygdFerieperioder)
                 }
+
+                is Dag.MeldingTilNavDag,
+                is Dag.MeldingTilNavHelgedag -> error("Forventer ikke MeldingTilNavDag i arbeidsgiverperiodeberegningen")
             }
         }
         fridager.somFerieOppholdsdager()

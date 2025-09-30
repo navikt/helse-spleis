@@ -81,6 +81,8 @@ sealed class Dag(
                 is SykdomstidslinjeDagDto.ArbeidsdagDto -> Arbeidsdag.gjenopprett(dag)
                 is SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto -> ArbeidsgiverHelgedag.gjenopprett(dag)
                 is SykdomstidslinjeDagDto.ArbeidsgiverdagDto -> Arbeidsgiverdag.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.MeldingTilNavDagDto -> MeldingTilNavDag.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.MeldingTilNavHelgedagDto -> MeldingTilNavHelgedag.gjenopprett(dag)
                 is SykdomstidslinjeDagDto.FeriedagDto -> Feriedag.gjenopprett(dag)
                 is SykdomstidslinjeDagDto.ForeldetSykedagDto -> ForeldetSykedag.gjenopprett(dag)
                 is SykdomstidslinjeDagDto.FriskHelgedagDto -> FriskHelgedag.gjenopprett(dag)
@@ -160,6 +162,24 @@ sealed class Dag(
         }
     }
 
+    internal class MeldingTilNavDag(
+        dato: LocalDate,
+        val grad: Prosentdel,
+        kilde: Hendelseskilde
+    ) : Dag(dato, kilde) {
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.MeldingTilNavDagDto(dato, kilde, grad.dto())
+
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.MeldingTilNavDagDto): MeldingTilNavDag {
+                return MeldingTilNavDag(
+                    dato = dto.dato,
+                    grad = Prosentdel.gjenopprett(dto.grad),
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
+                )
+            }
+        }
+    }
+
     internal class Feriedag(
         dato: LocalDate,
         kilde: Hendelseskilde
@@ -218,6 +238,24 @@ sealed class Dag(
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto): ArbeidsgiverHelgedag {
                 return ArbeidsgiverHelgedag(
+                    dato = dto.dato,
+                    grad = Prosentdel.gjenopprett(dto.grad),
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
+                )
+            }
+        }
+    }
+
+    internal class MeldingTilNavHelgedag(
+        dato: LocalDate,
+        val grad: Prosentdel,
+        kilde: Hendelseskilde
+    ) : Dag(dato, kilde) {
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.MeldingTilNavHelgedagDto(dato, kilde, grad.dto())
+
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.MeldingTilNavHelgedagDto): MeldingTilNavHelgedag {
+                return MeldingTilNavHelgedag(
                     dato = dto.dato,
                     grad = Prosentdel.gjenopprett(dto.grad),
                     kilde = Hendelseskilde.gjenopprett(dto.kilde)
