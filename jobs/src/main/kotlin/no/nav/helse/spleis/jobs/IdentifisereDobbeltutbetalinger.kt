@@ -15,9 +15,9 @@ import org.slf4j.MDC
 
 fun finneDobbelutbetalinger(arbeidId: String) {
     opprettOgUtførArbeid(arbeidId, size = 10) { session, fnr ->
-        hentPerson(session, fnr).let { data ->
+        hentPerson(session, fnr).let { (skjemaVersjon, data) ->
             try {
-                val dto = SerialisertPerson(data).tilPersonDto()
+                val dto = SerialisertPerson(data, skjemaVersjon).tilPersonDto()
                 dto.finnDobbeltutbetalinger()
             } catch (err: Exception) {
                 log.info("person lar seg ikke serialisere: ${err.message}")

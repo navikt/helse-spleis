@@ -175,7 +175,7 @@ internal object Personeditor {
         val json = try { objectMapper.readTree(readText()).toString() } catch (feil: Exception) {
             throw IllegalArgumentException("❌ Du har laget en ugylig json!", feil)
         }
-        val dto = try { SerialisertPerson(json).tilPersonDto() } catch (feil: Exception) {
+        val dto = try { SerialisertPerson.fraJson(json).tilPersonDto() } catch (feil: Exception) {
             throw IllegalArgumentException("❌ Du har laget en ugylig person-json!", feil)
         }
         try { Person.gjenopprett(Regelverkslogg.EmptyLog, dto) } catch (feil: Exception) {

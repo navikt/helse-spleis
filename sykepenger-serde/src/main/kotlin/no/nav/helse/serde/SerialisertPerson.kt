@@ -1,7 +1,6 @@
 package no.nav.helse.serde
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.treeToValue
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.serde.migration.JsonMigration
 import no.nav.helse.serde.migration.JsonMigrationException
@@ -58,9 +57,11 @@ import no.nav.helse.serde.migration.V330EpochSomArbeidsgiverperiodeForInfotrygds
 import no.nav.helse.serde.migration.V331ArbeidsgiverperiodeFerdigAvklartBoolean
 import no.nav.helse.serde.migration.migrate
 
-class SerialisertPerson(val json: String) {
-    // Teit kommentar
-    internal companion object {
+class SerialisertPerson(
+    val json: String,
+    val skjemaVersjon: Int
+) {
+    companion object {
         private val migrations = listOf(
             V279AvsluttettidspunktVedtakFattet(),
             V280HengendeRevurderinger(),
@@ -115,27 +116,28 @@ class SerialisertPerson(val json: String) {
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
+        fun fraJson(json: String): SerialisertPerson {
+            val skjemaversjon = serdeObjectMapper.readTree(json).path("skjemaVersjon").intValue()
+            return SerialisertPerson(json, skjemaversjon)
+        }
     }
 
-    val skjemaVersjon = gjeldendeVersjon()
-
-    private fun migrate(jsonNode: JsonNode, meldingerSupplier: MeldingerSupplier) {
+    private fun migrate(meldingerSupplier: MeldingerSupplier): Pair<Int, String> {
         try {
-            migrations.migrate(jsonNode, meldingerSupplier)
+            return migrations.migrate(skjemaVersjon, json, meldingerSupplier)
         } catch (err: Exception) {
             throw JsonMigrationException("Feil under migrering: ${err.message}", err)
         }
     }
 
     fun tilPersonDto(meldingerSupplier: MeldingerSupplier = MeldingerSupplier.empty): PersonInnDto {
-        val jsonNode = serdeObjectMapper.readTree(json)
-        migrate(jsonNode, meldingerSupplier)
+        val (nySkjemaverjon, migratedJson) = migrate(meldingerSupplier)
 
         try {
-            val personData: PersonData = requireNotNull(serdeObjectMapper.treeToValue(jsonNode))
+            val personData = serdeObjectMapper.readValue<PersonData>(migratedJson)
             return personData.tilPersonDto()
         } catch (err: Exception) {
-            throw DeserializationException("Feil under oversetting til modellobjekter: ${err.message}", err)
+            throw DeserializationException("Feil under oversetting til modellobjekter fra skjemaversjon $skjemaVersjon til $nySkjemaverjon: ${err.message}", err)
         }
     }
 }

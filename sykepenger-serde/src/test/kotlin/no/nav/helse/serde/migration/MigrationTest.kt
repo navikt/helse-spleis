@@ -15,9 +15,10 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
     open fun meldingerSupplier() = MeldingerSupplier.empty
 
     protected fun toNode(json: String): JsonNode = serdeObjectMapper.readTree(json)
-    protected fun migrer(json: String): JsonNode {
+    protected fun migrer(json: String, inputSkjemaversjon: Int = 0): JsonNode {
         val migers = migration()
-        return listOf(migers).migrate(toNode(json), meldingerSupplier())
+        val (migratedSkjemaversjon, migratedJson) = listOf(migers).migrate(inputSkjemaversjon, json, meldingerSupplier())
+        return toNode(migratedJson)
     }
 
     protected fun assertMigration(

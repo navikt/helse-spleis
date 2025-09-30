@@ -25,10 +25,10 @@ private val objectMapper: ObjectMapper = jacksonObjectMapper()
 fun migrereGrunnbeløp(factory: ConsumerProducerFactory, arbeidId: String) {
     factory.createProducer().use { producer ->
         opprettOgUtførArbeid(arbeidId, size = 500) { session, fnr ->
-            hentPerson(session, fnr)?.let { data ->
+            hentPerson(session, fnr)?.let { (skjemaVersjon, data) ->
                 val mdcContextMap = MDC.getCopyOfContextMap() ?: emptyMap()
                 try {
-                    val node = SerialisertPerson(data).tilPersonDto()
+                    val node = SerialisertPerson(data, skjemaVersjon).tilPersonDto()
                     val grunnbeløp = finnGrunnbeløp(node)
                     if (grunnbeløp.isEmpty()) return@let
                     val fødselsnummer = fødselsnummerSomString(fnr)

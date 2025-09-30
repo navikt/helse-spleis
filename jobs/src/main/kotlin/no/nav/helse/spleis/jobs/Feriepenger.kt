@@ -31,9 +31,9 @@ private val objectMapper: ObjectMapper = jacksonObjectMapper()
 fun startFeriepenger(factory: ConsumerProducerFactory, arbeidId: String, datoForSisteFeriepengekjøringIInfotrygd: LocalDate, opptjeningsår: Year, antallPersonerOmGangen: Int = 10, dryrun: Boolean = true) {
     factory.createProducer().use { producer ->
         opprettOgUtførArbeid(arbeidId, size = antallPersonerOmGangen) { session, fnr ->
-            hentPerson(session, fnr).let { data ->
+            hentPerson(session, fnr).let { (skjemaVersjon, data) ->
                 try {
-                    val dto = SerialisertPerson(data).tilPersonDto()
+                    val dto = SerialisertPerson(data, skjemaVersjon).tilPersonDto()
                     if (dto.potensiellFeriepengekjøring(opptjeningsår)) {
                         sikkerlogg.info("sender behov om SykepengehistorikkForFeriepenger for fødselsnummer=${dto.fødselsnummer}")
                         val event = SykepengehistorikkForFeriepenger(dto.fødselsnummer, opptjeningsår, datoForSisteFeriepengekjøringIInfotrygd)

@@ -11,7 +11,7 @@ internal fun gjenopprettFraJSON(fil: String, regelverkslogg: Regelverkslogg = Em
 }
 
 internal fun gjenopprettFraJSONtekst(json: String, regelverkslogg: Regelverkslogg = EmptyLog): Person {
-    val serialisertPerson = SerialisertPerson(json)
+    val serialisertPerson = SerialisertPerson.fraJson(json)
     val dto = serialisertPerson.tilPersonDto()
     return Person.gjenopprett(regelverkslogg, dto, emptyList())
 }

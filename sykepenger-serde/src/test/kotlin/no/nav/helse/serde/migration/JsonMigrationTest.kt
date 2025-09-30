@@ -1,11 +1,9 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.serde.migration.JsonMigration.Companion.skjemaVersjon
+import java.util.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
@@ -35,7 +33,7 @@ internal class JsonMigrationTest {
                     meldinger.add(meldingerSupplier.hentMeldinger())
                 }
             }
-        ).migrate(objectMapper.createObjectNode(), supplier)
+        ).migrate(0, "{}", supplier)
 
         assertEquals(1, invocationCount)
         assertEquals(2, meldinger.size)
@@ -48,11 +46,11 @@ internal class JsonMigrationTest {
         val expectedField = "field_1"
         val expectedValue = "value"
 
-        val migratedJson = objectMapper.readTree("{}")
+        val (migratedSkjemaversjon, migratedJson) = (0 to "{}")
             .migrate(AddFieldMigration(version, expectedField, expectedValue))
 
-        assertEquals(version, skjemaVersjon(migratedJson))
-        assertEquals(expectedValue, migratedJson[expectedField].textValue())
+        assertEquals(version, migratedSkjemaversjon)
+        assertEquals(expectedValue, objectMapper.readTree(migratedJson)[expectedField].textValue())
     }
 
     @Test
@@ -64,13 +62,13 @@ internal class JsonMigrationTest {
         val field2 = "field_2"
         val value2 = "value2"
 
-        val migratedJson = objectMapper.readTree("{}")
+        val (migratedSkjemaversjon, migratedJson) = (0 to "{}")
             .migrate(AddFieldMigration(version1, field1, value1))
             .migrate(AddFieldMigration(version2, field2, value2))
 
-        assertEquals(version2, skjemaVersjon(migratedJson))
-        assertEquals(value1, migratedJson[field1].textValue())
-        assertEquals(value2, migratedJson[field2].textValue())
+        assertEquals(version2, migratedSkjemaversjon)
+        assertEquals(value1, objectMapper.readTree(migratedJson)[field1].textValue())
+        assertEquals(value2, objectMapper.readTree(migratedJson)[field2].textValue())
     }
 
     @Test
@@ -82,13 +80,13 @@ internal class JsonMigrationTest {
         val field2 = "field_2"
         val value2 = "value2"
 
-        val migratedJson = objectMapper.readTree("{}")
+        val (migratedSkjemaversjon, migratedJson) = (0 to "{}")
             .migrate(AddFieldMigration(version2, field2, value2))
             .migrate(AddFieldMigration(version1, field1, value1))
 
-        assertEquals(version2, skjemaVersjon(migratedJson))
-        assertFalse(migratedJson.has(field1))
-        assertEquals(value2, migratedJson[field2].textValue())
+        assertEquals(version2, migratedSkjemaversjon)
+        assertFalse(objectMapper.readTree(migratedJson).has(field1))
+        assertEquals(value2, objectMapper.readTree(migratedJson)[field2].textValue())
     }
 
     @Test
@@ -105,11 +103,11 @@ internal class JsonMigrationTest {
             AddFieldMigration(version1, field1, value1)
         )
 
-        val migratedJson = migrations.migrate(objectMapper.readTree("{}"))
+        val (migratedSkjemaversjon, migratedJson) = migrations.migrate(0, "{}")
 
-        assertEquals(version2, skjemaVersjon(migratedJson))
-        assertEquals(value1, migratedJson[field1].textValue())
-        assertEquals(value2, migratedJson[field2].textValue())
+        assertEquals(version2, migratedSkjemaversjon)
+        assertEquals(value1, objectMapper.readTree(migratedJson)[field1].textValue())
+        assertEquals(value2, objectMapper.readTree(migratedJson)[field2].textValue())
     }
 
     @Test
@@ -119,10 +117,10 @@ internal class JsonMigrationTest {
             AddFieldMigration(1, "foo", "bar")
         )
 
-        assertThrows<IllegalArgumentException> { migrations.migrate(objectMapper.readTree("{}")) }
+        assertThrows<IllegalArgumentException> { migrations.migrate(0, "{}") }
     }
 
-    private fun JsonNode.migrate(migration: JsonMigration) = listOf(migration).migrate(this)
+    private fun Pair<Int, String>.migrate(migration: JsonMigration) = listOf(migration).migrate(this.first, this.second)
 
     private class AddFieldMigration(version: Int, private val field: String, private val value: String) :
         JsonMigration(version) {

@@ -60,10 +60,10 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
                 val personUt = person.also(håndterPerson).dto()
 
                 val personData = personUt.tilPersonData()
-                val oppdatertJson = personData.tilSerialisertPerson().json
+                val serialisertPerson = personData.tilSerialisertPerson()
 
                 oppdaterAvstemmingtidspunkt(this, message, personidentifikator)
-                oppdaterPersonversjon(this, personId, personData.skjemaVersjon, oppdatertJson)
+                oppdaterPersonversjon(this, personId, serialisertPerson.skjemaVersjon, serialisertPerson.json)
             }
         }
     }
@@ -102,11 +102,14 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
 
     private fun hentPersonOgLåsPersonForBehandling(connection: Connection, personidentifikator: Personidentifikator, historiskeFolkeregisteridenter: Set<Personidentifikator>): Triple<Long, SerialisertPerson, List<SerialisertPerson>>? {
         @Language("PostgreSQL")
-        val statement = "SELECT id, data FROM person WHERE fnr = ? FOR UPDATE"
+        val statement = "SELECT id, skjema_versjon, data FROM person WHERE fnr = ? FOR UPDATE"
         val (personId, person) = connection.prepareStatement(statement).use {
             it.setLong(1, personidentifikator.toLong())
             it.mapNotNull { row ->
-                row.long("id") to SerialisertPerson(row.string("data"))
+                row.long("id") to SerialisertPerson(
+                    json = row.string("data"),
+                    skjemaVersjon = row.int("skjema_versjon")
+                )
             }
         }.singleOrNullOrThrow() ?: return null
 
@@ -125,7 +128,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
     private fun hentIdenter(connection: Connection, identer: Collection<Personidentifikator>): List<Pair<Long, SerialisertPerson>> {
         @Language("PostgreSQL")
         val statement = """
-            SELECT p.id, p.data FROM person p
+            SELECT p.id, p.skjema_versjon, p.data FROM person p
             INNER JOIN person_alias pa ON pa.person_id = p.id
             WHERE pa.fnr = ANY(:identer)
             FOR UPDATE
@@ -136,7 +139,10 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
             withParameter("identer", identer.map { it.toLong() })
         }
             .mapNotNull { row ->
-                row.long("id") to SerialisertPerson(row.string("data"))
+                row.long("id") to SerialisertPerson(
+                    json = row.string("data"),
+                    skjemaVersjon = row.int("skjema_versjon")
+                )
             }
             .distinctBy { (personId, _) -> personId }
     }

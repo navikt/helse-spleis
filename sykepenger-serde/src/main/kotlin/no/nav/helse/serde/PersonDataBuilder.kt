@@ -106,11 +106,15 @@ import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.UtbetalingsdagData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsopplysningskildeData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsopplysningstypeData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData
+import no.nav.helse.serde.SerialisertPerson.Companion.gjeldendeVersjon
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 
 fun PersonData.tilSerialisertPerson(pretty: Boolean = false): SerialisertPerson {
     val node = serdeObjectMapper.valueToTree<ObjectNode>(this)
-    return SerialisertPerson(if (pretty) node.toPrettyString() else node.toString())
+    return SerialisertPerson(
+        json = if (pretty) node.toPrettyString() else node.toString(),
+        skjemaVersjon = skjemaVersjon
+    )
 }
 
 fun PersonUtDto.tilPersonData() = PersonData(
@@ -122,7 +126,7 @@ fun PersonUtDto.tilPersonData() = PersonData(
     vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.historikk.map { it.tilPersonData() },
     minimumSykdomsgradVurdering = minimumSykdomsgradVurdering.perioder.map { PersonData.MinimumSykdomsgradVurderingPeriodeData(it.fom, it.tom) },
     dødsdato = this.alder.dødsdato,
-    skjemaVersjon = SerialisertPerson.gjeldendeVersjon()
+    skjemaVersjon = gjeldendeVersjon()
 )
 
 private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(

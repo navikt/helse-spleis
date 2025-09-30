@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.kafka.AivenConfig
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.github.navikt.tbd_libs.sql_dsl.connection
 import com.github.navikt.tbd_libs.sql_dsl.firstOrNull
+import com.github.navikt.tbd_libs.sql_dsl.int
 import com.github.navikt.tbd_libs.sql_dsl.long
 import com.github.navikt.tbd_libs.sql_dsl.mapNotNull
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
@@ -91,21 +92,24 @@ private fun vacuumTask() {
 private fun migrateV2Task(arbeidId: String, size: Int) {
     @Language("PostgreSQL")
     val query = """
-        SELECT data FROM person WHERE fnr = ? LIMIT 1 FOR UPDATE SKIP LOCKED;
+        SELECT skjema_versjon, data FROM person WHERE fnr = ? LIMIT 1 FOR UPDATE SKIP LOCKED;
     """
     var migreringCounter = 0
     opprettOgUtførArbeid(arbeidId, size = size) { connection, fnr ->
         connection.transaction {
             // låser ned person-raden slik at spleis ikke tar inn meldinger og overskriver mens denne podden holder på
-            val data = prepareStatement(query).use { stmt ->
+            val persondata = prepareStatement(query).use { stmt ->
                 stmt.setLong(1, fnr)
-                stmt.executeQuery().firstOrNull { it.string("data") }
+                stmt.executeQuery().firstOrNull {
+                    it.int("skjema_versjon") to it.string("data")
+                }
             }
-            if (data != null) {
+            if (persondata != null) {
+                val (skjemaVersjon, data) = persondata
                 migreringCounter += 1
                 log.info("[$migreringCounter] Utfører migrering")
                 val time = measureTimeMillis {
-                    val dto = SerialisertPerson(data).tilPersonDto()
+                    val dto = SerialisertPerson(data, skjemaVersjon).tilPersonDto()
                     check(dto.fødselsnummer.toLong() == fnr) { "fnr samsvarer ikke" }
                     val gjenopprettetPerson = Person.gjenopprett(Regelverkslogg.EmptyLog, dto)
                     val resultat = gjenopprettetPerson.dto().tilPersonData().tilSerialisertPerson()
@@ -251,10 +255,12 @@ private fun testSpeilJsonTask(arbeidId: String) {
 }
 
 fun hentPerson(connection: Connection, fnr: Long) =
-    connection.prepareStatementWithNamedParameters("SELECT data FROM person WHERE fnr = :fnr ORDER BY id DESC LIMIT 1") {
+    connection.prepareStatementWithNamedParameters("SELECT skjema_versjon, data FROM person WHERE fnr = :fnr ORDER BY id DESC LIMIT 1") {
         withParameter("fnr", fnr)
     }.use { stmt ->
-        stmt.executeQuery().single { rs -> rs.string("data") }
+        stmt.executeQuery().single { rs ->
+            rs.int("skjema_versjon") to rs.string("data")
+        }
     }
 
 private fun migrateTask(factory: ConsumerProducerFactory) {
