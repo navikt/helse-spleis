@@ -238,9 +238,9 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterSøknadSelvstendig(
                 periode = januar,
                 pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig, INGEN, INGEN, INGEN),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig, INGEN, INGEN, INGEN),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig, INGEN, INGEN, INGEN)
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
                 )
             )
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -275,9 +275,9 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterSøknadSelvstendig(
                 periode = januar,
                 pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig, INGEN, INGEN, INGEN),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig, INGEN, INGEN, INGEN),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig, INGEN, INGEN, INGEN)
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
                 )
             )
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)

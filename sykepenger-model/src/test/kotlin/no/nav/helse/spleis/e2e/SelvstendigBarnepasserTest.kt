@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING
@@ -115,15 +116,34 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
                 periode = januar,
                 arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER,
                 pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN)
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
                 )
             )
-            assertFunksjonelleFeil(1.vedtaksperiode.filter())
+            assertFunksjonellFeil(Varselkode.RV_IV_12, 1.vedtaksperiode.filter())
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
 
         }
     }
+
+    @Test
+    fun `selvstendigsøknad med færre enn 3 ferdiglignede år kastes ut`() = Toggle.SelvstendigNæringsdrivende.enable {
+        selvstendig {
+            håndterSøknadSelvstendig(
+                periode = januar,
+                arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER,
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = false),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
+                )
+            )
+            assertFunksjonellFeil(Varselkode.RV_IV_12, 1.vedtaksperiode.filter())
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
+
+        }
+    }
+
 
     @Test
     fun `selvstendigsøknad kastes ut frem til vi støtter det`() = Toggle.SelvstendigNæringsdrivende.disable {
@@ -189,9 +209,9 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
                 periode = januar,
                 arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER,
                 pensjonsgivendeInntekter = listOf( // TODO Inntekt for barnepasser er ikke vanlig næringsinntekt, men i næringsinntektFraFiskeFangstEllerFamiliebarnehage
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN)
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
                 )
             )
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)

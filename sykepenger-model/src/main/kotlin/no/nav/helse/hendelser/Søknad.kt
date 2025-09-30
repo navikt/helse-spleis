@@ -4,7 +4,7 @@ import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
@@ -168,7 +168,7 @@ class Søknad(
     }
 
     private fun validerSelvstendig(aktivitetslogg: IAktivitetslogg) {
-        val næringsinntekter = pensjonsgivendeInntekter?.filterNot { it.næringsinntekt == Inntekt.INGEN }
+        val næringsinntekter = pensjonsgivendeInntekter?.filter { it.erFerdigLignet }
         if (næringsinntekter == null || næringsinntekter.size < 3) aktivitetslogg.funksjonellFeil(Varselkode.RV_IV_12)
 
         if (pensjonsgivendeInntekter?.harAndreInntekterEnnNæringsinntekt() == true) aktivitetslogg.funksjonellFeil(`Selvstendigsøknad med inntektstype vi ikke støtter`)
@@ -424,7 +424,14 @@ class Søknad(
         fun build() = foreldedeDager.grupperSammenhengendePerioder()
     }
 
-    data class PensjonsgivendeInntekt(val inntektsår: Year, val næringsinntekt: Inntekt, val lønnsinntekt: Inntekt, val lønnsinntektBarePensjonsdel: Inntekt, val næringsinntektFraFiskeFangstEllerFamiliebarnehage: Inntekt) {
+    data class PensjonsgivendeInntekt(
+        val inntektsår: Year,
+        val næringsinntekt: Inntekt,
+        val lønnsinntekt: Inntekt,
+        val lønnsinntektBarePensjonsdel: Inntekt,
+        val næringsinntektFraFiskeFangstEllerFamiliebarnehage: Inntekt,
+        val erFerdigLignet: Boolean
+    ) {
         companion object {
             fun List<PensjonsgivendeInntekt>.harAndreInntekterEnnNæringsinntekt() =
                 any { it.lønnsinntekt != Inntekt.INGEN || it.lønnsinntektBarePensjonsdel != Inntekt.INGEN || it.næringsinntektFraFiskeFangstEllerFamiliebarnehage != Inntekt.INGEN }

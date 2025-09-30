@@ -18,12 +18,14 @@ internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val 
     override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: MessageContext) {
         builder.sendt(packet["sendtNav"].asLocalDateTime())
         val pensjonsgivendeInntekter = packet["selvstendigNaringsdrivende.inntekt.inntektsAar"].map {
+            val pensjonsgivendeInntekt = it.path("pensjonsgivendeInntekt")
             Søknad.PensjonsgivendeInntekt(
                 inntektsår = Year.parse(it.path("aar").asText()),
-                næringsinntekt = it.path("pensjonsgivendeInntekt").path("pensjonsgivendeInntektAvNaeringsinntekt").asInt().årlig,
-                lønnsinntekt = it.path("pensjonsgivendeInntekt").path("pensjonsgivendeInntektAvLoennsinntekt").asInt().årlig,
-                lønnsinntektBarePensjonsdel = it.path("pensjonsgivendeInntekt").path("pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel").asInt().årlig,
-                næringsinntektFraFiskeFangstEllerFamiliebarnehage = it.path("pensjonsgivendeInntekt").path("pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage").asInt().årlig
+                næringsinntekt = pensjonsgivendeInntekt.path("pensjonsgivendeInntektAvNaeringsinntekt").asInt().årlig,
+                lønnsinntekt = pensjonsgivendeInntekt.path("pensjonsgivendeInntektAvLoennsinntekt").asInt().årlig,
+                lønnsinntektBarePensjonsdel = pensjonsgivendeInntekt.path("pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel").asInt().årlig,
+                næringsinntektFraFiskeFangstEllerFamiliebarnehage = pensjonsgivendeInntekt.path("pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage").asInt().årlig,
+                erFerdigLignet = it.path("erFerdigLignet").asBoolean(true)
             )
         }
         builder.pensjonsgivendeInntekter(pensjonsgivendeInntekter)

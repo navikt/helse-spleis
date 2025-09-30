@@ -272,9 +272,9 @@ internal class TestPerson(
             ventetid: Periode = 1.januar til 16.januar,
             arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
             pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt> = listOf(
-                Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN),
-                Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN),
-                Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN)
+                Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
             ),
             sendtTilNAVEllerArbeidsgiver: Temporal? = null
         ) = håndterSøknad(

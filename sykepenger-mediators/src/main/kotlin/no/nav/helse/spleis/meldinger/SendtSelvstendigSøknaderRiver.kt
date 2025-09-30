@@ -20,7 +20,7 @@ internal class SendtSelvstendigSøknaderRiver(
         message.requireKey("id", "selvstendigNaringsdrivende", "arbeidssituasjon")
         message.forbid("arbeidsgiver.orgnummer")
         message.require("sendtNav", JsonNode::asLocalDateTime)
-        message.requireArray("selvstendigNaringsdrivende.inntekt.inntektsAar")
+        message.requireArray("selvstendigNaringsdrivende.inntekt.inntektsAar") { interestedIn("erFerdigLignet") }
         message.interestedIn("selvstendigNaringsdrivende.ventetid") {
             // hvis ventetid er satt så skal 'fom' og 'tom' kunne parses som dato
             it.path("fom").asLocalDate()

@@ -147,9 +147,9 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             1.januar til 31.januar,
             1.januar til 16.januar,
             pensjonsgivendeInntekter = listOf(
-                PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN),
-                PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN),
-                PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN)
+                PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
             )
         )
         håndterVilkårsgrunnlagSelvstendig()

@@ -130,18 +130,21 @@ internal abstract class AbstractSpeilBuilderTest {
                 lønnsinntekt = INGEN,
                 lønnsinntektBarePensjonsdel = INGEN,
                 næringsinntektFraFiskeFangstEllerFamiliebarnehage = INGEN,
+                erFerdigLignet = true
             ),
             PensjonsgivendeInntekt(
                 inntektsår = Year.of(2016), næringsinntekt = 450000.årlig,
                 lønnsinntekt = INGEN,
                 lønnsinntektBarePensjonsdel = INGEN,
-                næringsinntektFraFiskeFangstEllerFamiliebarnehage = INGEN
+                næringsinntektFraFiskeFangstEllerFamiliebarnehage = INGEN,
+                erFerdigLignet = true
             ),
             PensjonsgivendeInntekt(
                 inntektsår = Year.of(2015), næringsinntekt = 450000.årlig,
                 lønnsinntekt = INGEN,
                 lønnsinntektBarePensjonsdel = INGEN,
-                næringsinntektFraFiskeFangstEllerFamiliebarnehage = INGEN
+                næringsinntektFraFiskeFangstEllerFamiliebarnehage = INGEN,
+                erFerdigLignet = true
             )
         )
     ): UUID {

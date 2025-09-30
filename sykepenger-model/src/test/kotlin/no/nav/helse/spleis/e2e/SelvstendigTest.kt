@@ -106,9 +106,9 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterSøknadSelvstendig(
                 periode = januar,
                 pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INNTEKT, INGEN, INGEN),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN)
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INNTEKT, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
                 )
             )
             assertFunksjonellFeil(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
@@ -220,8 +220,8 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterSøknadSelvstendig(
                 periode = januar,
                 pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN)
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
                 )
             )
             assertFunksjonelleFeil(1.vedtaksperiode.filter())
@@ -292,9 +292,9 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterSøknadSelvstendig(
                 periode = januar,
                 pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN)
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
                 )
             )
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
