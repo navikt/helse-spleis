@@ -71,10 +71,13 @@ import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsgiveropplysningerMessa
 import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
 import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadAnnetMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigTidligereArbeidstakerMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadFiskerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadJordbrukerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -277,6 +280,36 @@ internal class TestHendelseMediator : IHendelseMediator {
     override fun behandle(
         personopplysninger: Personopplysninger,
         message: SendtSøknadSelvstendigMessage,
+        søknad: Søknad,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
+    ) {
+        lestSendtSøknadSelvstendigVerdi.set(true)
+    }
+
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: SendtSøknadJordbrukerMessage,
+        søknad: Søknad,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
+    ) {
+        lestSendtSøknadSelvstendigVerdi.set(true)
+    }
+
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: SendtSøknadFiskerMessage,
+        søknad: Søknad,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
+    ) {
+        lestSendtSøknadSelvstendigVerdi.set(true)
+    }
+
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: SendtSøknadAnnetMessage,
         søknad: Søknad,
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>

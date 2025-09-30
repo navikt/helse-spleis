@@ -35,10 +35,13 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_TIDLIGE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSFORHOLD
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSGIVEROPPLYSNINGER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRTIDSLINJE
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ANNET
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSGIVER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSLEDIG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_FISKER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_FRILANS
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_JORDBRUKER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_NAV
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_SELVSTENDIG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SIMULERING
@@ -83,10 +86,13 @@ import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsgiveropplysningerMessa
 import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
 import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadAnnetMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigTidligereArbeidstakerMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadFiskerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadJordbrukerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -156,6 +162,9 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
         is SendtSøknadFrilansMessage -> SENDT_SØKNAD_FRILANS
         is SendtSøknadSelvstendigMessage -> SENDT_SØKNAD_SELVSTENDIG
+        is SendtSøknadJordbrukerMessage -> SENDT_SØKNAD_JORDBRUKER
+        is SendtSøknadFiskerMessage -> SENDT_SØKNAD_FISKER
+        is SendtSøknadAnnetMessage -> SENDT_SØKNAD_ANNET
         is SendtSøknadArbeidsledigTidligereArbeidstakerMessage -> SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER
         is SendtSøknadArbeidsledigMessage -> SENDT_SØKNAD_ARBEIDSLEDIG
         is NavNoSelvbestemtInntektsmeldingMessage -> NAV_NO_SELVBESTEMT_INNTEKTSMELDING
@@ -225,6 +234,9 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         SENDT_SØKNAD_NAV,
         SENDT_SØKNAD_FRILANS,
         SENDT_SØKNAD_SELVSTENDIG,
+        SENDT_SØKNAD_JORDBRUKER,
+        SENDT_SØKNAD_FISKER,
+        SENDT_SØKNAD_ANNET,
         SENDT_SØKNAD_ARBEIDSLEDIG,
         SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER,
         INNTEKTSMELDING,

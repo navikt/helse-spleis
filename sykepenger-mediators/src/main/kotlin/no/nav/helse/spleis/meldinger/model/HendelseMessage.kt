@@ -120,6 +120,9 @@ private val HendelseMessage.kontekstnavn
         is SendtSøknadArbeidsledigTidligereArbeidstakerMessage,
         is SendtSøknadFrilansMessage,
         is SendtSøknadNavMessage,
+        is SendtSøknadFiskerMessage,
+        is SendtSøknadJordbrukerMessage,
+        is SendtSøknadAnnetMessage,
         is SendtSøknadSelvstendigMessage -> "Søknad"
 
         is UtbetalingpåminnelseMessage -> "Utbetalingpåminnelse"

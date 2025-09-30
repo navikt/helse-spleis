@@ -7,34 +7,28 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
-import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadFiskerMessage
 
-internal class SendtSelvstendigSøknaderRiver(
+internal class SendtFiskerSøknaderRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : SøknadRiver(rapidsConnection, messageMediator) {
     override val eventName = "sendt_søknad_selvstendig"
-    override val riverName = "Sendt søknad Selvstendig"
+    override val riverName = "Sendt søknad Fisker"
 
     override fun precondition(packet: JsonMessage) {
-        packet.requireAny("arbeidssituasjon", listOf("SELVSTENDIG_NARINGSDRIVENDE", "BARNEPASSER"))
+        packet.requireValue("arbeidssituasjon", "FISKER")
     }
 
     override fun validate(message: JsonMessage) {
         message.requireKey("id", "selvstendigNaringsdrivende")
         message.forbid("arbeidsgiver.orgnummer")
         message.require("sendtNav", JsonNode::asLocalDateTime)
-        message.requireArray("selvstendigNaringsdrivende.inntekt.inntektsAar") { interestedIn("erFerdigLignet") }
-        message.interestedIn("selvstendigNaringsdrivende.ventetid") {
-            // hvis ventetid er satt så skal 'fom' og 'tom' kunne parses som dato
-            it.path("fom").asLocalDate()
-            it.path("tom").asLocalDate()
-        }
         message.interestedIn("egenmeldingsdagerFraSykmelding") { egenmeldinger -> egenmeldinger.map { it.asLocalDate() } }
         message.interestedIn("sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys", "fravar", "papirsykmeldinger", "inntektFraNyttArbeidsforhold")
     }
 
-    override fun createMessage(packet: JsonMessage) = SendtSøknadSelvstendigMessage(
+    override fun createMessage(packet: JsonMessage) = SendtSøknadFiskerMessage(
         packet, Meldingsporing(
         id = packet.meldingsreferanseId(),
         fødselsnummer = packet["fnr"].asText()

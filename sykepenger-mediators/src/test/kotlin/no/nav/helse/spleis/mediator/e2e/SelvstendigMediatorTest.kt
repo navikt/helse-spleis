@@ -34,6 +34,36 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
+    fun fisker() = Toggle.SelvstendigNæringsdrivende.enable {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.FISKER)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.FISKER)
+        assertTilstander(
+            0,
+            "TIL_INFOTRYGD"
+        )
+    }
+
+    @Test
+    fun jordbruker() = Toggle.SelvstendigNæringsdrivende.enable {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
+        assertTilstander(
+            0,
+            "TIL_INFOTRYGD"
+        )
+    }
+
+    @Test
+    fun annet() = Toggle.SelvstendigNæringsdrivende.enable {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.ANNET)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.ANNET)
+        assertTilstander(
+            0,
+            "TIL_INFOTRYGD"
+        )
+    }
+
+    @Test
     fun `overstyrer tidslinje i avventer godkjenning`() = Toggle.SelvstendigNæringsdrivende.enable {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
