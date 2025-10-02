@@ -756,20 +756,6 @@ internal class Yrkesaktivitet private constructor(
         person.gjenopptaBehandling(aktivitetsloggMedArbeidsgiverkontekst)
     }
 
-    // gammel annulleringsfunksjonalitet. Slettes når ny er igang
-    internal fun nyAnnullering(
-        hendelse: AnnullerUtbetaling,
-        aktivitetslogg: IAktivitetslogg,
-        utbetalingSomSkalAnnulleres: Utbetaling
-    ): Utbetaling? {
-        val annullering =
-            utbetalingSomSkalAnnulleres.annuller(hendelse, aktivitetslogg, utbetalinger.toList()) ?: return null
-        nyUtbetaling(aktivitetslogg, annullering)
-        annullering.håndterAnnullerUtbetalingHendelse(hendelse, aktivitetslogg)
-        looper { vedtaksperiode -> vedtaksperiode.nyAnnullering(aktivitetslogg) }
-        return annullering
-    }
-
     internal fun lagAnnulleringsutbetaling(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, utbetalingSomSkalAnnulleres: Utbetaling): Utbetaling {
         val annullering = utbetalingSomSkalAnnulleres.lagAnnulleringsutbetaling(aktivitetslogg)
         checkNotNull(annullering) { "Klarte ikke lage annullering for utbetaling ${utbetalingSomSkalAnnulleres.id}. Det er litt rart, eller?" }
@@ -852,17 +838,14 @@ internal class Yrkesaktivitet private constructor(
     internal fun håndterAnnullerUtbetaling(hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         aktivitetsloggMedArbeidsgiverkontekst.info("Håndterer annullering")
-        if (Toggle.NyAnnulleringsløype.enabled || hendelse.saksbehandlerIdent in listOf("S161635", "A148751", "V149621", "H160235", "B164848", "F131883", "S165568", "S157539", "K162139", "G155258")) {
-            val utbetalingId = hendelse.utbetalingId
-            val vedtaksperiodeSomSkalAnnulleres = finnVedtaksperiodeForUtbetaling(utbetalingId) ?: error("Fant ikke vedtaksperiode for utbetaling $utbetalingId")
-            val annulleringskandidater = finnAnnulleringskandidater(vedtaksperiodeSomSkalAnnulleres)
 
-            if (annulleringskandidater.isEmpty()) return null
-            person.emitPlanlagtAnnullering(annulleringskandidater, hendelse)
-            return håndter { it.håndterAnnullerUtbetaling(hendelse, aktivitetsloggMedArbeidsgiverkontekst, annulleringskandidater.toList()) }.tidligsteEventyr()
-        } else {
-            return håndter { it.håndterAnnullerUtbetaling(hendelse, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList()) }.tidligsteEventyr()
-        }
+        val utbetalingId = hendelse.utbetalingId
+        val vedtaksperiodeSomSkalAnnulleres = finnVedtaksperiodeForUtbetaling(utbetalingId) ?: error("Fant ikke vedtaksperiode for utbetaling $utbetalingId")
+        val annulleringskandidater = finnAnnulleringskandidater(vedtaksperiodeSomSkalAnnulleres)
+
+        if (annulleringskandidater.isEmpty()) return null
+        person.emitPlanlagtAnnullering(annulleringskandidater, hendelse)
+        return håndter { it.håndterAnnullerUtbetaling(hendelse, aktivitetsloggMedArbeidsgiverkontekst, annulleringskandidater.toList()) }.tidligsteEventyr()
     }
 
     internal fun håndterUtbetalingpåminnelse(påminnelse: Utbetalingpåminnelse, aktivitetslogg: IAktivitetslogg) {

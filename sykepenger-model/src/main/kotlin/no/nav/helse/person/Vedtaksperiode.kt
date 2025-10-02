@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`1G`
-import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
@@ -1220,70 +1219,59 @@ internal class Vedtaksperiode private constructor(
     internal fun håndterAnnullerUtbetaling(
         hendelse: AnnullerUtbetaling,
         aktivitetslogg: IAktivitetslogg,
-        vedtaksperioder: List<Vedtaksperiode>
+        annulleringskandidater: List<Vedtaksperiode>
     ): Revurderingseventyr? {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        if (Toggle.NyAnnulleringsløype.enabled || hendelse.saksbehandlerIdent in listOf("S161635", "A148751", "V149621", "H160235", "B164848", "F131883", "S165568", "S157539", "K162139", "G155258")) {
-            if (!vedtaksperioder.contains(this)) return null
 
-            val sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling = yrkesaktivitet.finnSisteVedtaksperiodeFørMedSammenhengendeUtbetaling(this)
-            val periodeForEndring = sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling?.periode ?: periode
+        if (!annulleringskandidater.contains(this)) return null
 
-            when (tilstand) {
-                Avsluttet,
-                TilUtbetaling,
-                SelvstendigTilUtbetaling,
-                SelvstendigAvsluttet,
+        val sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling = yrkesaktivitet.finnSisteVedtaksperiodeFørMedSammenhengendeUtbetaling(this)
+        val periodeForEndring = sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling?.periode ?: periode
 
-                AvventerSimuleringRevurdering,
-                AvventerGodkjenningRevurdering,
-                RevurderingFeilet,
+        when (tilstand) {
+            Avsluttet,
+            TilUtbetaling,
+            SelvstendigTilUtbetaling,
+            SelvstendigAvsluttet,
 
-                AvventerVilkårsprøvingRevurdering,
-                AvventerHistorikkRevurdering,
-                AvventerRevurdering -> {
-                    behandlinger.håndterAnnullering(
-                        yrkesaktivitet = yrkesaktivitet,
-                        behandlingkilde = hendelse.metadata.behandlingkilde,
-                        aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst
-                    )
-                    tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
-                    return annullering(hendelse, periodeForEndring)
-                }
+            AvventerSimuleringRevurdering,
+            AvventerGodkjenningRevurdering,
+            RevurderingFeilet,
 
-                Start,
-                SelvstendigStart,
-                AvsluttetUtenUtbetaling,
-                AvventerAnnullering,
-                AvventerAOrdningen,
-                AvventerBlokkerendePeriode,
-                AvventerGodkjenning,
-                AvventerHistorikk,
-                AvventerInfotrygdHistorikk,
-                AvventerInntektsmelding,
-                AvventerSimulering,
-                AvventerVilkårsprøving,
-                SelvstendigAvventerBlokkerendePeriode,
-                SelvstendigAvventerGodkjenning,
-                SelvstendigAvventerHistorikk,
-                SelvstendigAvventerInfotrygdHistorikk,
-                SelvstendigAvventerSimulering,
-                SelvstendigAvventerVilkårsprøving,
-                TilAnnullering -> return null
-
-                SelvstendigTilInfotrygd,
-                TilInfotrygd -> error("Forventet ikke annulleringshendelse i tilstand $tilstand for vedtaksperiodeId $id")
+            AvventerVilkårsprøvingRevurdering,
+            AvventerHistorikkRevurdering,
+            AvventerRevurdering -> {
+                behandlinger.håndterAnnullering(
+                    yrkesaktivitet = yrkesaktivitet,
+                    behandlingkilde = hendelse.metadata.behandlingkilde,
+                    aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst
+                )
+                tilstand(aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
+                return annullering(hendelse, periodeForEndring)
             }
-        } else {
-            val annullering = behandlinger.håndterAnnullering(
-                yrkesaktivitet,
-                hendelse,
-                hendelse.metadata.behandlingkilde,
-                aktivitetsloggMedVedtaksperiodekontekst,
-                vedtaksperioder.map { it.behandlinger }) ?: return null
-            aktivitetsloggMedVedtaksperiodekontekst.info("Forkaster denne, og senere perioder, som følge av annullering.")
-            forkast(hendelse, aktivitetsloggMedVedtaksperiodekontekst)
-            return annullering(hendelse, annullering.periode())
+
+            Start,
+            SelvstendigStart,
+            AvsluttetUtenUtbetaling,
+            AvventerAnnullering,
+            AvventerAOrdningen,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerHistorikk,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerSimulering,
+            AvventerVilkårsprøving,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            TilAnnullering -> return null
+
+            SelvstendigTilInfotrygd,
+            TilInfotrygd -> error("Forventet ikke annulleringshendelse i tilstand $tilstand for vedtaksperiodeId $id")
         }
     }
 
@@ -1291,11 +1279,6 @@ internal class Vedtaksperiode private constructor(
         if (!påminnelse.erRelevant(id)) return null
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         return tilstand.påminnelse(this, påminnelse, aktivitetsloggMedVedtaksperiodekontekst)
-    }
-
-    internal fun nyAnnullering(aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        tilstand.nyAnnullering(this, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
     internal fun håndterOverstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
@@ -2130,62 +2113,67 @@ internal class Vedtaksperiode private constructor(
     }
 
     // gitt at du står i tilstand X, hva/hvem henter du på og hvorfor?
-    internal val venterPå get() = when (val t = tilstand) {
-        AvsluttetUtenUtbetaling -> when (skalBehandlesISpeil()) {
-            true -> VenterPå.SegSelv(Venteårsak.HJELP fordi Venteårsak.Hvorfor.VIL_OMGJØRES)
-            false -> null
+    internal val venterPå
+        get() = when (val t = tilstand) {
+            AvsluttetUtenUtbetaling -> when (skalBehandlesISpeil()) {
+                true -> VenterPå.SegSelv(Venteårsak.HJELP fordi Venteårsak.Hvorfor.VIL_OMGJØRES)
+                false -> null
+            }
+
+            AvventerGodkjenning -> when (behandlinger.erAvvist()) {
+                true -> VenterPå.SegSelv(Venteårsak.HJELP)
+                false -> VenterPå.SegSelv(Venteårsak.GODKJENNING)
+            }
+
+            AvventerGodkjenningRevurdering -> when (behandlinger.erAvvist()) {
+                true -> VenterPå.SegSelv(Venteårsak.HJELP)
+                false -> VenterPå.SegSelv(Venteårsak.GODKJENNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
+            }
+
+            RevurderingFeilet -> when (kanForkastes()) {
+                true -> null
+                false -> VenterPå.SegSelv(Venteårsak.HJELP)
+            }
+
+            SelvstendigAvventerGodkjenning -> when (behandlinger.erAvvist()) {
+                true -> VenterPå.SegSelv(Venteårsak.HJELP)
+                false -> VenterPå.SegSelv(Venteårsak.GODKJENNING)
+            }
+
+            // disse to er litt spesielle, fordi tilstanden er både en ventetilstand og en "det er min tur"-tilstand
+            is AvventerBlokkerendePeriode -> t.venterpå(this)
+            is AvventerRevurdering -> t.venterpå(this)
+
+            AvventerAnnullering,
+            SelvstendigAvventerBlokkerendePeriode -> VenterPå.Nestemann
+
+            AvventerInntektsmelding -> VenterPå.SegSelv(Venteårsak.INNTEKTSMELDING)
+
+            AvventerHistorikk,
+            SelvstendigAvventerHistorikk -> VenterPå.SegSelv(Venteårsak.BEREGNING)
+
+            AvventerHistorikkRevurdering -> VenterPå.SegSelv(Venteårsak.BEREGNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
+            AvventerSimuleringRevurdering -> VenterPå.SegSelv(Venteårsak.UTBETALING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
+
+            AvventerSimulering,
+            SelvstendigAvventerSimulering,
+            SelvstendigTilUtbetaling,
+            TilAnnullering,
+            TilUtbetaling -> VenterPå.SegSelv(Venteårsak.UTBETALING)
+
+            AvventerInfotrygdHistorikk,
+            AvventerVilkårsprøving,
+            AvventerAOrdningen,
+            AvventerVilkårsprøvingRevurdering,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerVilkårsprøving,
+            Start,
+            SelvstendigStart,
+            Avsluttet,
+            SelvstendigAvsluttet,
+            SelvstendigTilInfotrygd,
+            TilInfotrygd -> null
         }
-        AvventerGodkjenning -> when (behandlinger.erAvvist()) {
-            true -> VenterPå.SegSelv(Venteårsak.HJELP)
-            false -> VenterPå.SegSelv(Venteårsak.GODKJENNING)
-        }
-        AvventerGodkjenningRevurdering -> when (behandlinger.erAvvist()) {
-            true -> VenterPå.SegSelv(Venteårsak.HJELP)
-            false -> VenterPå.SegSelv(Venteårsak.GODKJENNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
-        }
-        RevurderingFeilet -> when (kanForkastes()) {
-            true -> null
-            false -> VenterPå.SegSelv(Venteårsak.HJELP)
-        }
-        SelvstendigAvventerGodkjenning -> when (behandlinger.erAvvist()) {
-            true -> VenterPå.SegSelv(Venteårsak.HJELP)
-            false -> VenterPå.SegSelv(Venteårsak.GODKJENNING)
-        }
-
-        // disse to er litt spesielle, fordi tilstanden er både en ventetilstand og en "det er min tur"-tilstand
-        is AvventerBlokkerendePeriode -> t.venterpå(this)
-        is AvventerRevurdering -> t.venterpå(this)
-
-        AvventerAnnullering,
-        SelvstendigAvventerBlokkerendePeriode -> VenterPå.Nestemann
-
-        AvventerInntektsmelding -> VenterPå.SegSelv(Venteårsak.INNTEKTSMELDING)
-
-        AvventerHistorikk,
-        SelvstendigAvventerHistorikk -> VenterPå.SegSelv(Venteårsak.BEREGNING)
-
-        AvventerHistorikkRevurdering -> VenterPå.SegSelv(Venteårsak.BEREGNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
-        AvventerSimuleringRevurdering -> VenterPå.SegSelv(Venteårsak.UTBETALING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
-
-        AvventerSimulering,
-        SelvstendigAvventerSimulering,
-        SelvstendigTilUtbetaling,
-        TilAnnullering,
-        TilUtbetaling -> VenterPå.SegSelv(Venteårsak.UTBETALING)
-
-        AvventerInfotrygdHistorikk,
-        AvventerVilkårsprøving,
-        AvventerAOrdningen,
-        AvventerVilkårsprøvingRevurdering,
-        SelvstendigAvventerInfotrygdHistorikk,
-        SelvstendigAvventerVilkårsprøving,
-        Start,
-        SelvstendigStart,
-        Avsluttet,
-        SelvstendigAvsluttet,
-        SelvstendigTilInfotrygd,
-        TilInfotrygd -> null
-    }
 
     // Hvem venter jeg på? Og hvorfor?
     internal val vedtaksperiodeVenter: VedtaksperiodeVenter? get() = venterPå?.let { venter(it) }
@@ -2198,13 +2186,13 @@ internal class Vedtaksperiode private constructor(
 
     internal fun venter() = VedtaksperiodeVenterdata(
         yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
-            vedtaksperiodeId = id,
-            behandlingId = behandlinger.sisteBehandlingId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            hendelseIder = eksterneIderSet,
-            ventetSiden = oppdatert,
-            venterTil = makstid()
-        )
+        vedtaksperiodeId = id,
+        behandlingId = behandlinger.sisteBehandlingId,
+        skjæringstidspunkt = skjæringstidspunkt,
+        hendelseIder = eksterneIderSet,
+        ventetSiden = oppdatert,
+        venterTil = makstid()
+    )
 
     private fun makstid(tilstandsendringstidspunkt: LocalDateTime = oppdatert) =
         tilstand.makstid(this, tilstandsendringstidspunkt)
@@ -2268,6 +2256,7 @@ internal class Vedtaksperiode private constructor(
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans -> false
+
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> true
         }
     }
