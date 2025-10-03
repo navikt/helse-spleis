@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -11,7 +12,8 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 
 internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
-    private val fastsattÅrsinntekt: Inntekt
+    private val fastsattÅrsinntekt: Inntekt,
+    private val arbeidssituasjon: Arbeidssituasjon
 ) {
     private fun medInntektHvisFinnes(grad: Prosentdel): Økonomi {
         return medInntekt(grad)
@@ -21,7 +23,18 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         return Økonomi.inntekt(
             sykdomsgrad = grad,
             aktuellDagsinntekt = fastsattÅrsinntekt,
-            dekningsgrad = 80.prosent,
+            dekningsgrad = when (arbeidssituasjon) {
+                Arbeidssituasjon.BARNEPASSER,
+                Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> 80.prosent
+
+                Arbeidssituasjon.JORDBRUKER -> 100.prosent
+
+                Arbeidssituasjon.ANNET,
+                Arbeidssituasjon.FISKER,
+                Arbeidssituasjon.ARBEIDSTAKER,
+                Arbeidssituasjon.ARBEIDSLEDIG,
+                Arbeidssituasjon.FRILANSER -> error("Har ikke implementert dekningsgrad for $arbeidssituasjon")
+            },
             refusjonsbeløp = INGEN,
             inntektjustering = INGEN,
         )

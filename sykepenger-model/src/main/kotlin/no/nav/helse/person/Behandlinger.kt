@@ -560,7 +560,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     ).result(sykdomstidslinje)
                 }
 
-                Selvstendig -> SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(fastsattÅrsinntekt).result(sykdomstidslinje, gjeldende.ventetid!!)
+                Selvstendig -> SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(fastsattÅrsinntekt, endringer.last().arbeidssituasjon).result(sykdomstidslinje, gjeldende.ventetid!!)
 
                 Arbeidsledig,
                 Frilans -> error("Forventer ikke å lage utbetalingstidslinje for ${yrkesaktivitet::class.simpleName}")
@@ -1107,8 +1107,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 Endring.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> Klassekode.SelvstendigNæringsdrivendeOppgavepliktig
                 Endring.Arbeidssituasjon.BARNEPASSER -> Klassekode.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
+                Endring.Arbeidssituasjon.JORDBRUKER -> Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk
                 Endring.Arbeidssituasjon.FRILANSER,
-                Endring.Arbeidssituasjon.JORDBRUKER,
                 Endring.Arbeidssituasjon.FISKER,
                 Endring.Arbeidssituasjon.ANNET -> TODO("har ikke klassekode for ${gjeldende.arbeidssituasjon}")
             }

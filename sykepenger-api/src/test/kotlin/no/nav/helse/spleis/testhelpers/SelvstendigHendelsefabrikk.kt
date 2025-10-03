@@ -83,7 +83,8 @@ internal class SelvstendigHendelsefabrikk() {
         egenmeldinger: List<Periode> = emptyList(),
         registrert: LocalDateTime = LocalDateTime.now(),
         inntekterFraNyeArbeidsforhold: Boolean = false,
-        pensjonsgivendeInntekter: List<PensjonsgivendeInntekt> = emptyList()
+        pensjonsgivendeInntekter: List<PensjonsgivendeInntekt> = emptyList(),
+        arbeidssituasjon: Søknad.Arbeidssituasjon
     ): Søknad {
         return Søknad(
             meldingsreferanseId = MeldingsreferanseId(id),
@@ -101,7 +102,7 @@ internal class SelvstendigHendelsefabrikk() {
             sendTilGosys = sendTilGosys,
             yrkesskade = yrkesskade,
             egenmeldinger = egenmeldinger,
-            arbeidssituasjon = Søknad.Arbeidssituasjon.ARBEIDSTAKER,
+            arbeidssituasjon = arbeidssituasjon,
             registrert = registrert,
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter

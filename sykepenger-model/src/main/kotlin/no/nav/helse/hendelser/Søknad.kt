@@ -147,7 +147,14 @@ class Søknad(
             Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
             Arbeidssituasjon.BARNEPASSER -> validerSelvstendig(aktivitetslogg)
 
-            Arbeidssituasjon.JORDBRUKER,
+            Arbeidssituasjon.JORDBRUKER -> {
+                if (Toggle.Jordbruker.enabled) validerSelvstendig(aktivitetslogg)
+                else {
+                    aktivitetslogg.info("Har ikke støtte for søknadstypen $arbeidssituasjon")
+                    aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
+                }
+            }
+
             Arbeidssituasjon.FISKER,
             Arbeidssituasjon.ANNET -> {
                 aktivitetslogg.info("Har ikke støtte for søknadstypen $arbeidssituasjon")
