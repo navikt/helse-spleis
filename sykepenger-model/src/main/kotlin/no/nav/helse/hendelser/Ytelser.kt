@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.InntekterForBeregning.Builder
-import no.nav.helse.person.inntekt.Inntektskilde
 
 class Ytelser(
     meldingsreferanseId: MeldingsreferanseId,
@@ -64,8 +63,12 @@ class Ytelser(
 
     internal fun inntektsendringer(builder: Builder) {
         inntekterForBeregning.inntektsperioder.forEach { inntektsperiode ->
+            val yrkesaktivitet = when (inntektsperiode.inntektskilde) {
+                "SELVSTENDIG" -> Behandlingsporing.Yrkesaktivitet.Selvstendig
+                else -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(inntektsperiode.inntektskilde)
+            }
             builder.inntektsendringer(
-                inntektskilde = Inntektskilde(inntektsperiode.inntektskilde),
+                yrkesaktivitet = yrkesaktivitet,
                 fom = inntektsperiode.fom,
                 tom = inntektsperiode.tom,
                 inntekt = inntektsperiode.inntekt,

@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import no.nav.helse.dto.InntektskildeDto
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Avsender.SYSTEM
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -27,14 +28,15 @@ value class Inntektskilde(val id: String) {
 }
 
 internal class InntekterForBeregning private constructor(
-    private val fastsattÅrsinntekter: Map<Inntektskilde, InntektMedKilde>,
-    private val inntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
+    private val yrkesaktiviteter: Set<Behandlingsporing.Yrkesaktivitet>,
+    private val fastsattÅrsinntekter: Map<Behandlingsporing.Yrkesaktivitet, InntektMedKilde>,
+    private val inntektjusteringer: Map<Behandlingsporing.Yrkesaktivitet, Beløpstidslinje>,
     private val beregningsperiode: Periode
 ) {
-    internal fun tilBeregning(organisasjonsnummer: String) = tilBeregning(Inntektskilde(organisasjonsnummer))
-    private fun tilBeregning(inntektskilde: Inntektskilde) = (fastsattÅrsinntekter[inntektskilde]?.inntekt ?: INGEN) to (inntektjusteringer[inntektskilde] ?: Beløpstidslinje())
+    internal fun tilBeregning(yrkesaktivitet: Behandlingsporing.Yrkesaktivitet) =
+        (fastsattÅrsinntekter[yrkesaktivitet]?.inntekt ?: INGEN) to (inntektjusteringer[yrkesaktivitet] ?: Beløpstidslinje())
 
-    internal fun inntektsjusteringer(periode: Periode): Map<Inntektskilde, Beløpstidslinje> {
+    internal fun inntektsjusteringer(periode: Periode): Map<Behandlingsporing.Yrkesaktivitet, Beløpstidslinje> {
         check(periode in beregningsperiode) { "Perioden $periode er utenfor beregningsperioden $beregningsperiode" }
         return inntektjusteringer
             .mapValues { (_, inntektjustering) -> inntektjustering.subset(periode).medBeløp() }
@@ -42,24 +44,24 @@ internal class InntekterForBeregning private constructor(
     }
 
     internal fun hensyntattAlleInntektskilder(beregnedeUtbetalingstidslinjer: List<Arbeidsgiverberegning>): List<Arbeidsgiverberegning> {
-        return (fastsattÅrsinntekter.keys + inntektjusteringer.keys).map { inntektskilde ->
-            val arbeidsgiverberegning = beregnedeUtbetalingstidslinjer.firstOrNull { it.orgnummer == inntektskilde.id } ?: Arbeidsgiverberegning(
-                orgnummer = inntektskilde.id,
+        return yrkesaktiviteter.map { yrkesaktivitet ->
+            val arbeidsgiverberegning = beregnedeUtbetalingstidslinjer.firstOrNull { it.yrkesaktivitet == yrkesaktivitet } ?: Arbeidsgiverberegning(
+                yrkesaktivitet = yrkesaktivitet,
                 vedtaksperioder = emptyList(),
                 ghostOgAndreInntektskilder = emptyList()
             )
             val beregnedeUtbetalingstidslinjerForInntektskilde = arbeidsgiverberegning.vedtaksperioder
             val beregendePerioderForInntektskilde = beregnedeUtbetalingstidslinjerForInntektskilde.map { it.utbetalingstidslinje.periode() }
             val uberegnedeDagerForArbeidsgiver = beregningsperiode.uten(beregendePerioderForInntektskilde)
-            val uberegnetUtbetalingstidslinjeForArbeidsgiver = arbeidsdager(inntektskilde, uberegnedeDagerForArbeidsgiver)
+            val uberegnetUtbetalingstidslinjeForArbeidsgiver = arbeidsdager(yrkesaktivitet, uberegnedeDagerForArbeidsgiver)
             arbeidsgiverberegning.copy(
                 ghostOgAndreInntektskilder = uberegnetUtbetalingstidslinjeForArbeidsgiver
             )
         }
     }
 
-    private fun arbeidsdager(inntektskilde: Inntektskilde, perioderMedArbeid: List<Periode>) = perioderMedArbeid.map { periode ->
-        val (fastsattÅrsinntekt, inntektjusteringer) = tilBeregning(inntektskilde)
+    private fun arbeidsdager(yrkesaktivitet: Behandlingsporing.Yrkesaktivitet, perioderMedArbeid: List<Periode>) = perioderMedArbeid.map { periode ->
+        val (fastsattÅrsinntekt, inntektjusteringer) = tilBeregning(yrkesaktivitet)
         with(Utbetalingstidslinje.Builder()) {
             periode.forEach { dato ->
                 if (dato.erHelg()) addFridag(dato, Økonomi.ikkeBetalt())
@@ -76,32 +78,45 @@ internal class InntekterForBeregning private constructor(
     }
 
     internal class Builder(private val beregningsperiode: Periode) {
-        private val fastsatteÅrsinntekter = mutableMapOf<String, InntektMedKilde>()
-        private val inntektjusteringer = mutableMapOf<Inntektskilde, Beløpstidslinje>()
+        private val yrkesaktiviteter = mutableSetOf<Behandlingsporing.Yrkesaktivitet>()
+        private val fastsatteÅrsinntekter = mutableMapOf<Behandlingsporing.Yrkesaktivitet, InntektMedKilde>()
+        private val inntektjusteringer = mutableMapOf<Behandlingsporing.Yrkesaktivitet, Beløpstidslinje>()
 
         internal fun fraInntektsgrunnlag(organisasjonsnummer: String, fastsattÅrsinntekt: Inntekt, opplysningskilde: Kilde) {
-            check(organisasjonsnummer !in fastsatteÅrsinntekter) { "Organisasjonsnummer $organisasjonsnummer er allerede lagt til" }
-            fastsatteÅrsinntekter[organisasjonsnummer] = InntektMedKilde(fastsattÅrsinntekt, opplysningskilde)
+            leggTilInntekt(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer), InntektMedKilde(fastsattÅrsinntekt, opplysningskilde))
+        }
+
+        internal fun selvstendigNæringsdrivende(fastsattÅrsinntekt: Inntekt, opplysningskilde: Kilde) {
+            leggTilInntekt(Behandlingsporing.Yrkesaktivitet.Selvstendig, InntektMedKilde(fastsattÅrsinntekt, opplysningskilde))
         }
 
         internal fun deaktivertFraInntektsgrunnlag(organisasjonsnummer: String, opplysningskilde: Kilde) {
-            check(organisasjonsnummer !in fastsatteÅrsinntekter) { "Organisasjonsnummer $organisasjonsnummer er allerede lagt til" }
-            fastsatteÅrsinntekter[organisasjonsnummer] = InntektMedKilde(INGEN, opplysningskilde)
+            fraInntektsgrunnlag(organisasjonsnummer, INGEN, opplysningskilde)
         }
 
-        internal fun inntektsendringer(inntektskilde: Inntektskilde, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId) {
+        private fun leggTilInntekt(yrkesaktivitet: Behandlingsporing.Yrkesaktivitet, inntekt: InntektMedKilde) {
+            yrkesaktiviteter.add(yrkesaktivitet)
+            check(fastsatteÅrsinntekter.putIfAbsent(yrkesaktivitet, inntekt) == null) {
+                "Inntekt for $yrkesaktivitet er allerede lagt til"
+            }
+        }
+
+        internal fun inntektsendringer(yrkesaktivitet: Behandlingsporing.Yrkesaktivitet, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId) {
             val periode = (fom til listOfNotNull(tom, beregningsperiode.endInclusive).min()).subset(beregningsperiode)
             val kilde = Kilde(meldingsreferanseId, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
             val inntektsendring = Beløpstidslinje.fra(periode, inntekt, kilde)
-            inntektjusteringer.compute(inntektskilde) { _, inntekter ->
+
+            yrkesaktiviteter.add(yrkesaktivitet)
+            inntektjusteringer.compute(yrkesaktivitet) { _, inntekter ->
                 ((inntekter ?: Beløpstidslinje()).erstatt(inntektsendring))
             }
         }
 
         internal fun build() = InntekterForBeregning(
-            fastsattÅrsinntekter = fastsatteÅrsinntekter.mapKeys { Inntektskilde(it.key) },
+            yrkesaktiviteter = yrkesaktiviteter.toSet(),
+            fastsattÅrsinntekter = fastsatteÅrsinntekter.toMap(),
             beregningsperiode = beregningsperiode,
-            inntektjusteringer = inntektjusteringer
+            inntektjusteringer = inntektjusteringer.toMap()
         )
     }
 

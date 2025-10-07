@@ -10,6 +10,7 @@ import no.nav.helse.dsl.a3
 import no.nav.helse.dsl.a4
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.SYSTEM
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -41,7 +42,7 @@ class InntekterForBeregningTest {
         }
 
         val a1 = Arbeidsgiverberegning(
-            orgnummer = "a1",
+            yrkesaktivitet = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a1"),
             vedtaksperioder = listOf(
                 Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(16.AP, 8.NAV, startDato = 1.januar)), // 1.-24.jan
                 Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(11.NAV, startDato = 7.februar)) // 7.-17.feb
@@ -49,7 +50,7 @@ class InntekterForBeregningTest {
             ghostOgAndreInntektskilder = emptyList()
         )
         val a2 = Arbeidsgiverberegning(
-            orgnummer = "a2",
+            yrkesaktivitet = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a2"),
             vedtaksperioder = listOf(
                 Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(16.AP, 6.NAV, startDato = 20.januar)), // 20.jan-10.feb
                 Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(11.NAV, startDato = 18.februar)) // 18.feb - 28.feb
@@ -59,7 +60,7 @@ class InntekterForBeregningTest {
         inntekterForBeregning.hensyntattAlleInntektskilder(listOf(a1, a2)).also { result ->
             assertEquals(2, result.size)
             result.first().also {
-                assertEquals("a1", it.orgnummer)
+                assertEquals(Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a1"), it.yrkesaktivitet)
                 assertEquals(2, it.vedtaksperioder.size)
                 it.vedtaksperioder[0].also {
                     assertEquals("PPPPPPP PPPPPPP PPNNNHH NNN", it.utbetalingstidslinje.toString())
@@ -88,7 +89,7 @@ class InntekterForBeregningTest {
                 ), it.samletTidslinje.inspektør.perioderMedBeløp)
             }
             result.last().also {
-                assertEquals("a2", it.orgnummer)
+                assertEquals(Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a2"), it.yrkesaktivitet)
                 assertEquals(2, it.vedtaksperioder.size)
                 it.vedtaksperioder[0].also {
                     assertEquals("PP PPPPPPP PPPPPPP NNNNNH", it.utbetalingstidslinje.toString())
@@ -124,25 +125,25 @@ class InntekterForBeregningTest {
         val inntekterForBeregning = inntekterForBeregning(1.januar til 31.januar) {
             fraInntektsgrunnlag(a1, 500.daglig)
             deaktivertFraInntektsgrunnlag(a2)
-            inntektsendringer(Inntektskilde(a3), 10.januar, 15.januar, 250.daglig)
+            inntektsendringer(a3, 10.januar, 15.januar, 250.daglig)
         }
 
         // Hele perioden
         with(inntekterForBeregning.inntektsjusteringer(1.januar til 31.januar)) {
-            assertEquals(setOf(Inntektskilde(a3)), keys)
-            assertBeløpstidslinje(SYSTEM.beløpstidslinje(10.januar til 15.januar, 250.daglig), getValue(Inntektskilde(a3)), ignoreMeldingsreferanseId = true)
+            assertEquals(setOf(Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a3")), keys)
+            assertBeløpstidslinje(SYSTEM.beløpstidslinje(10.januar til 15.januar, 250.daglig), getValue(Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a3")), ignoreMeldingsreferanseId = true)
         }
 
         // Uten snute & hale
         with(inntekterForBeregning.inntektsjusteringer(11.januar til 14.januar)) {
-            assertEquals(setOf(Inntektskilde(a3)), keys)
-            assertBeløpstidslinje(SYSTEM.beløpstidslinje(11.januar til 14.januar, 250.daglig), getValue(Inntektskilde(a3)), ignoreMeldingsreferanseId = true)
+            assertEquals(setOf(Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a3")), keys)
+            assertBeløpstidslinje(SYSTEM.beløpstidslinje(11.januar til 14.januar, 250.daglig), getValue(Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a3")), ignoreMeldingsreferanseId = true)
         }
 
 
         // Etter inntektsendringen
         with(inntekterForBeregning.inntektsjusteringer(16.januar til 31.januar)) {
-            assertEquals(emptySet<Inntektskilde>(), keys)
+            assertEquals(emptySet<Behandlingsporing.Yrkesaktivitet>(), keys)
         }
 
         // Utenfor beregningsperioden
@@ -155,25 +156,25 @@ class InntekterForBeregningTest {
         val inntekterForBeregning = inntekterForBeregning(1.januar til 31.januar) {
             fraInntektsgrunnlag(a1, 0.daglig)
             fraInntektsgrunnlag(a2, 1000.daglig)
-            inntektsendringer(Inntektskilde(a2), 2.januar, 30.januar, 0.daglig)
+            inntektsendringer(a2, 2.januar, 30.januar, 0.daglig)
             deaktivertFraInntektsgrunnlag(a3)
-            inntektsendringer(Inntektskilde(a4), 10.januar, 15.januar, 0.daglig)
+            inntektsendringer(a4, 10.januar, 15.januar, 0.daglig)
         }
 
-        assertEquals(Beløpstidslinje(), inntekterForBeregning.tilBeregning(a1).second)
-        assertBeløpstidslinje(SYSTEM.beløpstidslinje(2.januar til 30.januar, 0.daglig), inntekterForBeregning.tilBeregning(a2).second, ignoreMeldingsreferanseId = true)
-        assertEquals(Beløpstidslinje(), inntekterForBeregning.tilBeregning(a3).second)
-        assertBeløpstidslinje(SYSTEM.beløpstidslinje(10.januar til 15.januar, 0.daglig), inntekterForBeregning.tilBeregning(a4).second, ignoreMeldingsreferanseId = true)
+        assertEquals(Beløpstidslinje(), inntekterForBeregning.tilBeregning(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1)).second)
+        assertBeløpstidslinje(SYSTEM.beløpstidslinje(2.januar til 30.januar, 0.daglig), inntekterForBeregning.tilBeregning(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2)).second, ignoreMeldingsreferanseId = true)
+        assertEquals(Beløpstidslinje(), inntekterForBeregning.tilBeregning(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a3)).second)
+        assertBeløpstidslinje(SYSTEM.beløpstidslinje(10.januar til 15.januar, 0.daglig), inntekterForBeregning.tilBeregning(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a4)).second, ignoreMeldingsreferanseId = true)
     }
 
     @Test
     fun `kan endre inntekt på skjæringstidspunktet for en arbeidsgiver som finnes i inntektsgrunnlaget ved hjelp av en inntektsendring`() {
         val inntekterForBeregning = inntekterForBeregning(januar) {
             fraInntektsgrunnlag(a1, INNTEKT)
-            inntektsendringer(Inntektskilde(a1), 1.januar, 31.januar, INNTEKT * 2)
+            inntektsendringer(a1, 1.januar, 31.januar, INNTEKT * 2)
         }
 
-        val (_, inntektstidslinje) = inntekterForBeregning.tilBeregning(a1)
+        val (_, inntektstidslinje) = inntekterForBeregning.tilBeregning(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1))
 
         val forventetTidslinje = SYSTEM.beløpstidslinje(1.januar til 31.januar, INNTEKT * 2)
         assertBeløpstidslinje(forventetTidslinje, inntektstidslinje, ignoreMeldingsreferanseId = true)
@@ -183,11 +184,11 @@ class InntekterForBeregningTest {
     fun `kan sette inntekt på skjæringstidspunktet for en arbeidsgiver som ikke finnes i inntektsgrunnlaget`() {
         val inntekterForBeregning = inntekterForBeregning(januar) {
             fraInntektsgrunnlag(a1, INNTEKT)
-            inntektsendringer(Inntektskilde(a2), 1.januar, 31.januar, INNTEKT * 2)
+            inntektsendringer(a2, 1.januar, 31.januar, INNTEKT * 2)
         }
 
-        val (_, inntektstidslinjeForA1) = inntekterForBeregning.tilBeregning(a1)
-        val (_, inntektstidslinjeForA2) = inntekterForBeregning.tilBeregning(a2)
+        val (_, inntektstidslinjeForA1) = inntekterForBeregning.tilBeregning(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1))
+        val (_, inntektstidslinjeForA2) = inntekterForBeregning.tilBeregning(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2))
 
         val forventetTidslinjeA2 = SYSTEM.beløpstidslinje(januar, INNTEKT * 2)
 
@@ -200,11 +201,11 @@ class InntekterForBeregningTest {
         val inntekterForBeregning = inntekterForBeregning(januar) {
             fraInntektsgrunnlag(a1, INNTEKT)
             deaktivertFraInntektsgrunnlag(a2)
-            inntektsendringer(Inntektskilde(a2), 1.januar, 31.januar, INNTEKT * 2)
+            inntektsendringer(a2, 1.januar, 31.januar, INNTEKT * 2)
         }
 
-        val (_, inntektstidslinjeForA1) = inntekterForBeregning.tilBeregning(a1)
-        val (_, inntektstidslinjeForA2) = inntekterForBeregning.tilBeregning(a2)
+        val (_, inntektstidslinjeForA1) = inntekterForBeregning.tilBeregning(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1))
+        val (_, inntektstidslinjeForA2) = inntekterForBeregning.tilBeregning(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2))
 
         val forventetTidslinjeA2 = SYSTEM.beløpstidslinje(januar, INNTEKT * 2)
 
@@ -215,10 +216,10 @@ class InntekterForBeregningTest {
     @Test
     fun `kan sende inn inntektsendringer før inntekter fra inntektsgrunnlaget`() {
         val inntekterForBeregning = inntekterForBeregning(januar) {
-            inntektsendringer(Inntektskilde(a1), 1.januar, 31.januar, INNTEKT * 2)
+            inntektsendringer(a1, 1.januar, 31.januar, INNTEKT * 2)
             fraInntektsgrunnlag(a1, INNTEKT)
         }
-        val (_, inntektstidslinje) = inntekterForBeregning.tilBeregning(a1)
+        val (_, inntektstidslinje) = inntekterForBeregning.tilBeregning(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1))
         val forventetTidslinje = SYSTEM.beløpstidslinje(1.januar til 31.januar, INNTEKT * 2)
         assertBeløpstidslinje(forventetTidslinje, inntektstidslinje, ignoreMeldingsreferanseId = true)
     }
@@ -227,7 +228,7 @@ class InntekterForBeregningTest {
     fun `inntekter for beregning uten noen inntekter`() {
         val inntekterForBeregning = InntekterForBeregning.Builder(1.januar til 16.januar).build()
         val inntekterForPeriode = inntekterForBeregning.inntektsjusteringer(1.januar til 16.januar)
-        assertEquals(emptyMap<Inntektskilde, Beløpstidslinje>(), inntekterForPeriode)
+        assertEquals(emptyMap<Behandlingsporing.Yrkesaktivitet, Beløpstidslinje>(), inntekterForPeriode)
     }
 
     private fun inntekterForBeregning(periode: Periode, block: InntekterForBeregning.Builder.() -> Unit) = with(InntekterForBeregning.Builder(periode)) {
@@ -241,6 +242,6 @@ class InntekterForBeregningTest {
     private fun InntekterForBeregning.Builder.deaktivertFraInntektsgrunnlag(organisasjonsnummer: String,meldingsreferanseId: MeldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())) =
         deaktivertFraInntektsgrunnlag(organisasjonsnummer, meldingsreferanseId.id.saksbehandler)
 
-    private fun InntekterForBeregning.Builder.inntektsendringer(inntektskilde: Inntektskilde, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())) =
-        inntektsendringer(inntektskilde, fom, tom, inntekt, meldingsreferanseId)
+    private fun InntekterForBeregning.Builder.inntektsendringer(organisasjonsnummer: String, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())) =
+        inntektsendringer(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer), fom, tom, inntekt, meldingsreferanseId)
 }

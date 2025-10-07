@@ -2366,8 +2366,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun utbetalingstidslinjePerArbeidsgiver(inntekterForBeregning: InntekterForBeregning): List<Arbeidsgiverberegning> {
         val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning()
-            .groupBy({ it.yrkesaktivitet.organisasjonsnummer }) { vedtaksperiode ->
-                val (fastsattÅrsinntekt, inntektjusteringer) = inntekterForBeregning.tilBeregning(vedtaksperiode.yrkesaktivitet.organisasjonsnummer)
+            .groupBy({ it.yrkesaktivitet }) { vedtaksperiode ->
+                val (fastsattÅrsinntekt, inntektjusteringer) = inntekterForBeregning.tilBeregning(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype)
                 Vedtaksperiodeberegning(
                     vedtaksperiodeId = vedtaksperiode.id,
                     utbetalingstidslinje = vedtaksperiode.behandlinger.lagUtbetalingstidslinje(
@@ -2377,9 +2377,9 @@ internal class Vedtaksperiode private constructor(
                     )
                 )
             }
-            .map { (orgnr, vedtaksperioder) ->
+            .map { (yrkesaktivitet, vedtaksperioder) ->
                 Arbeidsgiverberegning(
-                    orgnummer = orgnr,
+                    yrkesaktivitet = yrkesaktivitet.yrkesaktivitetstype,
                     vedtaksperioder = vedtaksperioder,
                     ghostOgAndreInntektskilder = emptyList()
                 )

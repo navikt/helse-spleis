@@ -17,6 +17,7 @@ import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig.somOrganisasjonsnummer
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
@@ -855,6 +856,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utbetalingstidslinje = beregning.utbetalingstidslinje.subset(this.periode),
                 maksdatoresultat = beregning.maksdatovurdering.resultat,
                 inntektjusteringer = beregning.inntekterForBeregning.inntektsjusteringer(this.periode)
+                    .mapKeys { (yrkesaktivitet, _) -> Inntektskilde(yrkesaktivitet.somOrganisasjonsnummer) }
             )
 
             internal fun kopierMedAnnullering(grunnlagsdata: VilkårsgrunnlagElement, annullering: Utbetaling) = kopierMed(
@@ -869,6 +871,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             internal fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: InntekterForBeregning) = kopierMed(
                 utbetalingstidslinje = utbetalingstidslinje.subset(this.periode),
                 inntektjusteringer = inntekterForBeregning.inntektsjusteringer(this.periode)
+                    .mapKeys { (yrkesaktivitet, _) -> Inntektskilde(yrkesaktivitet.somOrganisasjonsnummer) }
             )
 
             fun forkastUtbetaling(aktivitetslogg: IAktivitetslogg) {

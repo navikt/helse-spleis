@@ -28,6 +28,7 @@ import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.erHelg
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -173,7 +174,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         val sykepengegrunnlag = 1200.daglig
         val input = listOf(
             Arbeidsgiverberegning(
-                orgnummer = "a1",
+                yrkesaktivitet = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a1"),
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),

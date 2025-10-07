@@ -1,9 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
 
 data class Arbeidsgiverberegning(
-    val orgnummer: String,
+    val yrkesaktivitet: Behandlingsporing.Yrkesaktivitet,
     val vedtaksperioder: List<Vedtaksperiodeberegning>,
     val ghostOgAndreInntektskilder: List<Utbetalingstidslinje>
 ) {

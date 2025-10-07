@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import java.util.UUID
 import no.nav.helse.Alder
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
@@ -93,7 +94,7 @@ internal class AvvisDagerEtterDødsdatofilterTest {
         aktivitetslogg = Aktivitetslogg()
         val input = tidslinjer.mapIndexed { index, it ->
             Arbeidsgiverberegning(
-                orgnummer = "a${index+1}",
+                yrkesaktivitet = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a${index+1}"),
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),

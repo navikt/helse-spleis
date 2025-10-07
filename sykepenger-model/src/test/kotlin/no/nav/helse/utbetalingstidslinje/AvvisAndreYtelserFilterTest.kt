@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.util.UUID
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -25,7 +26,7 @@ internal class AvvisAndreYtelserFilterTest {
 
         val tidslinjer = listOf(
             Arbeidsgiverberegning(
-                orgnummer = "a1",
+                yrkesaktivitet = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a1"),
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),

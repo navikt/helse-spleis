@@ -8,6 +8,7 @@ import no.nav.helse.desember
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -779,7 +780,7 @@ internal class MaksimumSykepengedagerfilterTest {
         val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(fødselsdato.alder, EmptyLog, aktivitetslogg, NormalArbeidstaker, personTidslinje)
         val tidslinjer = this.mapIndexed { index, it ->
             Arbeidsgiverberegning(
-                orgnummer = "a${index + 1}",
+                yrkesaktivitet = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a${index+1}"),
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),

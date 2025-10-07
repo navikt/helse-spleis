@@ -5,6 +5,7 @@ import kotlin.collections.mapIndexed
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
@@ -139,7 +140,7 @@ internal class SykdomsgradfilterTest {
         aktivitetslogg = Aktivitetslogg()
         val input = tidslinjer.mapIndexed { index, it ->
             Arbeidsgiverberegning(
-                orgnummer = "a${index + 1}",
+                yrkesaktivitet = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a${index+1}"),
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),
