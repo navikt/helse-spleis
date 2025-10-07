@@ -41,7 +41,8 @@ internal class InntekterForBeregning private constructor(
     }
 
     internal fun hensyntattAlleInntektskilder(beregnedeUtbetalingstidslinjer: List<Arbeidsgiverberegning>): List<Arbeidsgiverberegning> {
-        return yrkesaktiviteter.map { yrkesaktivitet ->
+        val alleYrkesaktiviteter = (yrkesaktiviteter + beregnedeUtbetalingstidslinjer.map { it.yrkesaktivitet })
+        return alleYrkesaktiviteter.map { yrkesaktivitet ->
             val arbeidsgiverberegning = beregnedeUtbetalingstidslinjer.firstOrNull { it.yrkesaktivitet == yrkesaktivitet } ?: Arbeidsgiverberegning(
                 yrkesaktivitet = yrkesaktivitet,
                 vedtaksperioder = emptyList(),

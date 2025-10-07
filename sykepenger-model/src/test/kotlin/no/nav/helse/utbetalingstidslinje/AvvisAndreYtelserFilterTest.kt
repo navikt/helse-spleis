@@ -30,7 +30,8 @@ internal class AvvisAndreYtelserFilterTest {
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),
-                        utbetalingstidslinje = tidslinjeOf(9.NAV)
+                        utbetalingstidslinje = tidslinjeOf(9.NAV),
+                        inntekterForBeregning = emptyMap()
                     )
                 ),
                 ghostOgAndreInntektskilder = emptyList()

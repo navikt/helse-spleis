@@ -132,7 +132,8 @@ class AvvisInngangsvilkårfilterTest {
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),
-                        utbetalingstidslinje = it
+                        utbetalingstidslinje = it,
+                        inntekterForBeregning = emptyMap()
                     )
                 ),
                 ghostOgAndreInntektskilder = emptyList()

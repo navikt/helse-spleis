@@ -17,11 +17,13 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
 
     private fun avsluttUtenVedtak(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         val inntekterForBeregning = vedtaksperiode.inntekterForBeregning(vedtaksperiode.periode)
-        val (fastsattÅrsinntekt, inntektjusteringer) = inntekterForBeregning.tilBeregning(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype)
+        val utbetalingstidslinje = vedtaksperiode
+            .utbetalingstidslinjePerArbeidsgiver(listOf(vedtaksperiode), inntekterForBeregning)
+            .single { it.yrkesaktivitet == vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype }
+            .vedtaksperioder
+            .single()
 
-        val utbetalingstidslinje = vedtaksperiode.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, inntektjusteringer, vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype)
-
-        vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.yrkesaktivitet, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
+        vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.yrkesaktivitet, aktivitetslogg, utbetalingstidslinje.utbetalingstidslinje, utbetalingstidslinje.inntekterForBeregning)
     }
 
     override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {

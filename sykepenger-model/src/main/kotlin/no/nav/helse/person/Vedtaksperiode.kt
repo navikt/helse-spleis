@@ -4,6 +4,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.mapKeys
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -28,6 +31,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig.somOrganisasjonsnummer
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
 import no.nav.helse.hendelser.DagerFraInntektsmelding
@@ -117,6 +121,7 @@ import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.Inntektskilde
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning
@@ -166,7 +171,6 @@ import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
 import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
-import no.nav.helse.utbetalingstidslinje.Maksdatovurdering
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
@@ -1015,7 +1019,8 @@ internal class Vedtaksperiode private constructor(
         }
         val inntektsperioder = ytelser.inntektsendringer()
         val inntekterForBeregning = inntekterForBeregning(beregningsperiode, inntektsperioder)
-        val maksdatoresultat = beregnUtbetalinger(aktivitetslogg, inntekterForBeregning, grunnlagsdata)
+        val uberegnetTidslinjePerArbeidsgiver = utbetalingstidslinjePerArbeidsgiver(perioderSomMåHensyntasVedBeregning(), inntekterForBeregning)
+        val maksdatoresultat = beregnUtbetalinger(aktivitetslogg, uberegnetTidslinjePerArbeidsgiver, grunnlagsdata)
 
         when (yrkesaktivitet.yrkesaktivitetstype) {
             is Arbeidstaker -> {
@@ -2326,55 +2331,29 @@ internal class Vedtaksperiode private constructor(
     }
 
     private val beregningsperiode get() = checkNotNull(perioderSomMåHensyntasVedBeregning().map { it.periode }.periode()) { "Hvordan kan det ha seg at vi ikke har noen beregningsperiode?" }
-    private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg, inntekterForBeregning: InntekterForBeregning, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Maksdatoresultat {
+    private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg, uberegnetTidslinjePerArbeidsgiver: List<Arbeidsgiverberegning>, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Maksdatoresultat {
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
 
         check(perioderDetSkalBeregnesUtbetalingFor.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
             "ugyldig situasjon: skal beregne utbetaling for vedtaksperioder med ulike skjæringstidspunkter"
         }
 
-        val beregnetTidslinjePerVedtaksperiode = beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(
-            aktivitetslogg,
-            grunnlagsdata,
-            inntekterForBeregning
-        )
+        val beregnetTidslinjePerVedtaksperiode = filtrerUtbetalingstidslinjer(aktivitetslogg, uberegnetTidslinjePerArbeidsgiver, grunnlagsdata)
         perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
             val beregning = beregnetTidslinjePerVedtaksperiode.single { it.vedtaksperiodeId == other.id }
-            val utbetalingstidslinje = beregning.utbetalingstidslinje
-            val maksdatoresultat = beregning.maksdatovurdering
             other.lagNyUtbetaling(
                 yrkesaktivitetSomBeregner = this.yrkesaktivitet,
                 aktivitetslogg = other.registrerKontekst(aktivitetslogg),
-                beregning = BeregnetPeriode(
-                    maksdatovurdering = maksdatoresultat,
-                    grunnlagsdata = grunnlagsdata,
-                    utbetalingstidslinje = utbetalingstidslinje,
-                    inntekterForBeregning = inntekterForBeregning
-                )
+                beregning = beregning
             )
         }
         return behandlinger.maksdato
     }
 
-    private fun beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(
-        aktivitetslogg: IAktivitetslogg,
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-        inntekterForBeregning: InntekterForBeregning
-    ): List<Vedtaksperiodeberegningsresultat> {
-        val uberegnetTidslinjePerArbeidsgiver = utbetalingstidslinjePerArbeidsgiver(inntekterForBeregning)
-        return filtrerUtbetalingstidslinjer(aktivitetslogg, uberegnetTidslinjePerArbeidsgiver, grunnlagsdata)
-    }
-
     private fun harSammeUtbetalingSom(annenVedtaksperiode: Vedtaksperiode) = behandlinger.harSammeUtbetalingSom(annenVedtaksperiode)
 
-    private data class Vedtaksperiodeberegningsresultat(
-        val vedtaksperiodeId: UUID,
-        val utbetalingstidslinje: Utbetalingstidslinje,
-        val maksdatovurdering: Maksdatovurdering
-    )
-
-    private fun utbetalingstidslinjePerArbeidsgiver(inntekterForBeregning: InntekterForBeregning): List<Arbeidsgiverberegning> {
-        val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning()
+    fun utbetalingstidslinjePerArbeidsgiver(vedtaksperioder: List<Vedtaksperiode>, inntekterForBeregning: InntekterForBeregning): List<Arbeidsgiverberegning> {
+        val utbetalingstidslinjer = vedtaksperioder
             .groupBy({ it.yrkesaktivitet }) { vedtaksperiode ->
                 val (fastsattÅrsinntekt, inntektjusteringer) = inntekterForBeregning.tilBeregning(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype)
                 Vedtaksperiodeberegning(
@@ -2383,7 +2362,9 @@ internal class Vedtaksperiode private constructor(
                         fastsattÅrsinntekt = fastsattÅrsinntekt,
                         inntektjusteringer = inntektjusteringer,
                         yrkesaktivitet = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype
-                    )
+                    ),
+                    inntekterForBeregning = inntekterForBeregning.inntektsjusteringer(vedtaksperiode.periode)
+                        .mapKeys { (yrkesaktivitet, _) -> Inntektskilde(yrkesaktivitet.somOrganisasjonsnummer) }
                 )
             }
             .map { (yrkesaktivitet, vedtaksperioder) ->
@@ -2404,7 +2385,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg,
         uberegnetTidslinjePerArbeidsgiver: List<Arbeidsgiverberegning>,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
-    ): List<Vedtaksperiodeberegningsresultat> {
+    ): List<BeregnetPeriode> {
         // grunnlaget for maksdatoberegning er alt som har skjedd før,
         // frem til og med vedtaksperioden som beregnes
         val historisktidslinje = person.vedtaksperioder { it.periode.endInclusive < periode.start }
@@ -2447,10 +2428,12 @@ internal class Vedtaksperiode private constructor(
 
         return beregnetTidslinjePerArbeidsgiver.flatMap {
             it.vedtaksperioder.map { vedtaksperiodeberegning ->
-                Vedtaksperiodeberegningsresultat(
+                BeregnetPeriode(
                     vedtaksperiodeId = vedtaksperiodeberegning.vedtaksperiodeId,
+                    grunnlagsdata = grunnlagsdata,
                     utbetalingstidslinje = vedtaksperiodeberegning.utbetalingstidslinje,
-                    maksdatovurdering = maksdatofilter.maksdatoresultatForVedtaksperiode(vedtaksperiodeberegning.periode)
+                    maksdatovurdering = maksdatofilter.maksdatoresultatForVedtaksperiode(vedtaksperiodeberegning.periode),
+                    inntekterForBeregning = vedtaksperiodeberegning.inntekterForBeregning
                 )
             }
         }

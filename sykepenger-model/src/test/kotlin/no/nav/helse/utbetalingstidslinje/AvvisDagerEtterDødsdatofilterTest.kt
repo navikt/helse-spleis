@@ -98,7 +98,8 @@ internal class AvvisDagerEtterDødsdatofilterTest {
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),
-                        utbetalingstidslinje = it
+                        utbetalingstidslinje = it,
+                        inntekterForBeregning = emptyMap()
                     )
                 ),
                 ghostOgAndreInntektskilder = emptyList()
