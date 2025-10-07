@@ -171,6 +171,7 @@ import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
+import no.nav.helse.utbetalingstidslinje.UberegnetVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
 import no.nav.helse.utbetalingstidslinje.lagUtbetalingstidslinjePerArbeidsgiver
@@ -1016,7 +1017,8 @@ internal class Vedtaksperiode private constructor(
         }
         val inntektsperioder = ytelser.inntektsendringer()
         val inntekterForBeregning = inntekterForBeregning(beregningsperiode, inntektsperioder)
-        val uberegnetTidslinjePerArbeidsgiver = lagUtbetalingstidslinjePerArbeidsgiver(perioderSomMåHensyntasVedBeregning(), inntekterForBeregning)
+        val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning().map { it.uberegnetVedtaksperiode() }
+        val uberegnetTidslinjePerArbeidsgiver = lagUtbetalingstidslinjePerArbeidsgiver(perioderSomMåHensyntasVedBeregning, inntekterForBeregning)
         val maksdatoresultat = beregnUtbetalinger(aktivitetslogg, uberegnetTidslinjePerArbeidsgiver, grunnlagsdata)
 
         when (yrkesaktivitet.yrkesaktivitetstype) {
@@ -2325,6 +2327,24 @@ internal class Vedtaksperiode private constructor(
         }.minOrNull()
 
         return førstePeriodePåSkjæringstidspunktetAnnenArbeidsgiverSomTrengerInntektEllerRefusjon ?: førsteMursteinsperiodeSomTrengerInntektEllerRefusjon
+    }
+
+    internal fun uberegnetVedtaksperiode(): UberegnetVedtaksperiode {
+        val yrkesaktivitetstype = yrkesaktivitet.yrkesaktivitetstype
+        val utbetalingstidslinjeBuilder = when (yrkesaktivitetstype) {
+            is Arbeidstaker -> behandlinger.utbetalingstidslinjeBuilderForArbeidstaker()
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> behandlinger.utbetalingstidslinjeBuilderForSelvstendig()
+
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.Frilans -> error("Forventer ikke å lage utbetalingstidslinje for ${yrkesaktivitetstype::class.simpleName}")
+        }
+        return UberegnetVedtaksperiode(
+            vedtaksperiodeId = id,
+            yrkesaktivitet = yrkesaktivitetstype,
+            periode = periode,
+            sykdomstidslinje = sykdomstidslinje,
+            utbetalingstidslinjeBuilder = utbetalingstidslinjeBuilder
+        )
     }
 
     private val beregningsperiode get() = checkNotNull(perioderSomMåHensyntasVedBeregning().map { it.periode }.periode()) { "Hvordan kan det ha seg at vi ikke har noen beregningsperiode?" }

@@ -73,7 +73,6 @@ import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class Behandlinger private constructor(behandlinger: List<Behandling>) : Aktivitetskontekst {
@@ -141,17 +140,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         dagerNavOvertarAnsvar = behandlinger.last().dagerNavOvertarAnsvar
     )
 
-    internal fun utbetalingstidslinjeBuilderForArbeidstaker(fastsattÅrsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje): ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode {
+    internal fun utbetalingstidslinjeBuilderForArbeidstaker(): ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode {
         return ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
             arbeidsgiverperiode = behandlinger.last().arbeidsgiverperiode.dager,
             dagerNavOvertarAnsvar = behandlinger.last().dagerNavOvertarAnsvar,
-            refusjonstidslinje = behandlinger.last().refusjonstidslinje,
-            fastsattÅrsinntekt = fastsattÅrsinntekt,
-            inntektjusteringer = inntektjusteringer
+            refusjonstidslinje = behandlinger.last().refusjonstidslinje
         )
     }
 
-    internal fun utbetalingstidslinjeBuilderForSelvstendig(næringsinntekt: Inntekt): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode {
+    internal fun utbetalingstidslinjeBuilderForSelvstendig(): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode {
         val dekningsgrad = when (val arbeidssituasjon = behandlinger.last().arbeidssituasjon) {
             Arbeidssituasjon.BARNEPASSER,
             Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> 80.prosent
@@ -164,7 +161,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             Arbeidssituasjon.ARBEIDSLEDIG,
             Arbeidssituasjon.FRILANSER -> error("Har ikke implementert dekningsgrad for $arbeidssituasjon")
         }
-        return SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(næringsinntekt, dekningsgrad, behandlinger.last().ventetid!!)
+        return SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(dekningsgrad, behandlinger.last().ventetid!!)
     }
 
     internal val maksdato get() = behandlinger.last().maksdato

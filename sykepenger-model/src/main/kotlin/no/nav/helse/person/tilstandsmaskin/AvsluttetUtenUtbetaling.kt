@@ -18,7 +18,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
 
     private fun avsluttUtenVedtak(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         val inntekterForBeregning = vedtaksperiode.inntekterForBeregning(vedtaksperiode.periode)
-        val utbetalingstidslinje = lagUtbetalingstidslinjePerArbeidsgiver(listOf(vedtaksperiode), inntekterForBeregning)
+        val utbetalingstidslinje = lagUtbetalingstidslinjePerArbeidsgiver(listOf(vedtaksperiode.uberegnetVedtaksperiode()), inntekterForBeregning)
             .single { it.yrkesaktivitet == vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype }
             .vedtaksperioder
             .single()

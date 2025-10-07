@@ -198,12 +198,10 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         val builder = ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
             dagerNavOvertarAnsvar = emptyList(),
-            refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje(),
-            fastsattÅrsinntekt = 31000.månedlig,
-            inntektjusteringer = Beløpstidslinje()
+            refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje()
         )
 
-        val utbetalingstidslinje = builder.result(tidslinje)
+        val utbetalingstidslinje = builder.result(tidslinje, 31000.månedlig, Beløpstidslinje())
 
         observatør = Dagobservatør(utbetalingstidslinje)
 
