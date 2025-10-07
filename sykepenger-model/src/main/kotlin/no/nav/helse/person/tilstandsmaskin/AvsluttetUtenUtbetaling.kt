@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.behandlingkilde
+import no.nav.helse.utbetalingstidslinje.lagUtbetalingstidslinjePerArbeidsgiver
 
 internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
     override val type = TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -17,8 +18,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
 
     private fun avsluttUtenVedtak(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         val inntekterForBeregning = vedtaksperiode.inntekterForBeregning(vedtaksperiode.periode)
-        val utbetalingstidslinje = vedtaksperiode
-            .utbetalingstidslinjePerArbeidsgiver(listOf(vedtaksperiode), inntekterForBeregning)
+        val utbetalingstidslinje = lagUtbetalingstidslinjePerArbeidsgiver(listOf(vedtaksperiode), inntekterForBeregning)
             .single { it.yrkesaktivitet == vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype }
             .vedtaksperioder
             .single()

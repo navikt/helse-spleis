@@ -16,10 +16,6 @@ import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
@@ -33,6 +29,7 @@ import no.nav.helse.person.Behandlinger.Behandling.Companion.forrigeDokumentspor
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
 import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbarInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbarInntekt
+import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.eksterneIder
@@ -77,6 +74,7 @@ import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class Behandlinger private constructor(behandlinger: List<Behandling>) : Aktivitetskontekst {
     internal constructor() : this(emptyList())
@@ -143,8 +141,31 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         dagerNavOvertarAnsvar = behandlinger.last().dagerNavOvertarAnsvar
     )
 
-    internal fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet) =
-        behandlinger.last().lagUtbetalingstidslinje(fastsattÅrsinntekt, inntektjusteringer, yrkesaktivitet)
+    internal fun utbetalingstidslinjeBuilderForArbeidstaker(fastsattÅrsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje): ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode {
+        return ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
+            arbeidsgiverperiode = behandlinger.last().arbeidsgiverperiode.dager,
+            dagerNavOvertarAnsvar = behandlinger.last().dagerNavOvertarAnsvar,
+            refusjonstidslinje = behandlinger.last().refusjonstidslinje,
+            fastsattÅrsinntekt = fastsattÅrsinntekt,
+            inntektjusteringer = inntektjusteringer
+        )
+    }
+
+    internal fun utbetalingstidslinjeBuilderForSelvstendig(næringsinntekt: Inntekt): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode {
+        val dekningsgrad = when (val arbeidssituasjon = behandlinger.last().arbeidssituasjon) {
+            Arbeidssituasjon.BARNEPASSER,
+            Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> 80.prosent
+
+            Arbeidssituasjon.JORDBRUKER -> 100.prosent
+
+            Arbeidssituasjon.ANNET,
+            Arbeidssituasjon.FISKER,
+            Arbeidssituasjon.ARBEIDSTAKER,
+            Arbeidssituasjon.ARBEIDSLEDIG,
+            Arbeidssituasjon.FRILANSER -> error("Har ikke implementert dekningsgrad for $arbeidssituasjon")
+        }
+        return SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(næringsinntekt, dekningsgrad, behandlinger.last().ventetid!!)
+    }
 
     internal val maksdato get() = behandlinger.last().maksdato
     internal val dagerNavOvertarAnsvar get() = behandlinger.last().dagerNavOvertarAnsvar
@@ -461,6 +482,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val dagerNavOvertarAnsvar get() = gjeldende.dagerNavOvertarAnsvar
         val sykdomstidslinje get() = endringer.last().sykdomstidslinje
         val refusjonstidslinje get() = endringer.last().refusjonstidslinje
+        val arbeidssituasjon get() = endringer.last().arbeidssituasjon
+        val ventetid get() = endringer.last().ventetid
         val utbetalingstidslinje get() = endringer.last().utbetalingstidslinje
         val faktaavklartInntekt get() = endringer.last().faktaavklartInntekt
         val inntektsendringer get() = endringer.last().inntektsendringer
@@ -547,24 +570,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         fun utbetalingstidslinje() = gjeldende.utbetalingstidslinje
-        fun lagUtbetalingstidslinje(fastsattÅrsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet): Utbetalingstidslinje {
-            return when (yrkesaktivitet) {
-                is Arbeidstaker -> {
-                    ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
-                        arbeidsgiverperiode = arbeidsgiverperiode.dager,
-                        dagerNavOvertarAnsvar = gjeldende.dagerNavOvertarAnsvar,
-                        refusjonstidslinje = refusjonstidslinje,
-                        fastsattÅrsinntekt = fastsattÅrsinntekt,
-                        inntektjusteringer = inntektjusteringer
-                    ).result(sykdomstidslinje)
-                }
-
-                Selvstendig -> SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(fastsattÅrsinntekt, endringer.last().arbeidssituasjon).result(sykdomstidslinje, gjeldende.ventetid!!)
-
-                Arbeidsledig,
-                Frilans -> error("Forventer ikke å lage utbetalingstidslinje for ${yrkesaktivitet::class.simpleName}")
-            }
-        }
 
         internal fun håndterRefusjonsopplysninger(
             yrkesaktivitet: Yrkesaktivitet,

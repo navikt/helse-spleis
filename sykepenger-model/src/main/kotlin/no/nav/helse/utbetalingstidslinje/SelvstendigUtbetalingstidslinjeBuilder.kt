@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -13,8 +12,9 @@ import no.nav.helse.økonomi.Økonomi
 
 internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
     private val fastsattÅrsinntekt: Inntekt,
-    private val arbeidssituasjon: Arbeidssituasjon
-) {
+    private val dekningsgrad: Prosentdel,
+    private val ventetid: Periode
+) : UtbetalingstidslinjeBuilder {
     private fun medInntektHvisFinnes(grad: Prosentdel): Økonomi {
         return medInntekt(grad)
     }
@@ -23,24 +23,13 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         return Økonomi.inntekt(
             sykdomsgrad = grad,
             aktuellDagsinntekt = fastsattÅrsinntekt,
-            dekningsgrad = when (arbeidssituasjon) {
-                Arbeidssituasjon.BARNEPASSER,
-                Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> 80.prosent
-
-                Arbeidssituasjon.JORDBRUKER -> 100.prosent
-
-                Arbeidssituasjon.ANNET,
-                Arbeidssituasjon.FISKER,
-                Arbeidssituasjon.ARBEIDSTAKER,
-                Arbeidssituasjon.ARBEIDSLEDIG,
-                Arbeidssituasjon.FRILANSER -> error("Har ikke implementert dekningsgrad for $arbeidssituasjon")
-            },
+            dekningsgrad = dekningsgrad,
             refusjonsbeløp = INGEN,
             inntektjustering = INGEN,
         )
     }
 
-    internal fun result(sykdomstidslinje: Sykdomstidslinje, ventetid: Periode): Utbetalingstidslinje {
+    override fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje {
         val builder = Utbetalingstidslinje.Builder()
         sykdomstidslinje.forEach { dag ->
             when (dag) {

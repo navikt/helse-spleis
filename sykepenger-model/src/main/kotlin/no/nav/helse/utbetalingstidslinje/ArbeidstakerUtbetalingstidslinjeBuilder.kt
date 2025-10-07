@@ -25,13 +25,17 @@ internal data class ArbeidsgiverperiodeForVedtaksperiode(
     val skalFatteVedtak = erUtenforAGP || navSkalOvertaAGP
 }
 
+internal interface UtbetalingstidslinjeBuilder {
+    fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje
+}
+
 internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
     private val arbeidsgiverperiode: List<Periode>,
     private val dagerNavOvertarAnsvar: List<Periode>,
     private val refusjonstidslinje: Beløpstidslinje,
     private val fastsattÅrsinntekt: Inntekt,
     private val inntektjusteringer: Beløpstidslinje
-) {
+) : UtbetalingstidslinjeBuilder {
     internal fun medInntektHvisFinnes(
         dato: LocalDate,
         grad: Prosentdel
@@ -49,7 +53,7 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
         )
     }
 
-    internal fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje {
+    override fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje {
         val builder = Utbetalingstidslinje.Builder()
         sykdomstidslinje.forEach { dag ->
             when (dag) {

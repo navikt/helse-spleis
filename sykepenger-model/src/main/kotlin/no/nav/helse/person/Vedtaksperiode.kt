@@ -6,7 +6,6 @@ import java.time.YearMonth
 import java.util.UUID
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.mapKeys
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -31,7 +30,6 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig.somOrganisasjonsnummer
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
 import no.nav.helse.hendelser.DagerFraInntektsmelding
@@ -121,7 +119,6 @@ import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.person.inntekt.Inntektskilde
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning
@@ -176,7 +173,7 @@ import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
-import no.nav.helse.utbetalingstidslinje.Vedtaksperiodeberegning
+import no.nav.helse.utbetalingstidslinje.lagUtbetalingstidslinjePerArbeidsgiver
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -1019,7 +1016,7 @@ internal class Vedtaksperiode private constructor(
         }
         val inntektsperioder = ytelser.inntektsendringer()
         val inntekterForBeregning = inntekterForBeregning(beregningsperiode, inntektsperioder)
-        val uberegnetTidslinjePerArbeidsgiver = utbetalingstidslinjePerArbeidsgiver(perioderSomMåHensyntasVedBeregning(), inntekterForBeregning)
+        val uberegnetTidslinjePerArbeidsgiver = lagUtbetalingstidslinjePerArbeidsgiver(perioderSomMåHensyntasVedBeregning(), inntekterForBeregning)
         val maksdatoresultat = beregnUtbetalinger(aktivitetslogg, uberegnetTidslinjePerArbeidsgiver, grunnlagsdata)
 
         when (yrkesaktivitet.yrkesaktivitetstype) {
@@ -2351,35 +2348,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun harSammeUtbetalingSom(annenVedtaksperiode: Vedtaksperiode) = behandlinger.harSammeUtbetalingSom(annenVedtaksperiode)
-
-    fun utbetalingstidslinjePerArbeidsgiver(vedtaksperioder: List<Vedtaksperiode>, inntekterForBeregning: InntekterForBeregning): List<Arbeidsgiverberegning> {
-        val utbetalingstidslinjer = vedtaksperioder
-            .groupBy({ it.yrkesaktivitet }) { vedtaksperiode ->
-                val (fastsattÅrsinntekt, inntektjusteringer) = inntekterForBeregning.tilBeregning(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype)
-                Vedtaksperiodeberegning(
-                    vedtaksperiodeId = vedtaksperiode.id,
-                    utbetalingstidslinje = vedtaksperiode.behandlinger.lagUtbetalingstidslinje(
-                        fastsattÅrsinntekt = fastsattÅrsinntekt,
-                        inntektjusteringer = inntektjusteringer,
-                        yrkesaktivitet = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype
-                    ),
-                    inntekterForBeregning = inntekterForBeregning.inntektsjusteringer(vedtaksperiode.periode)
-                        .mapKeys { (yrkesaktivitet, _) -> Inntektskilde(yrkesaktivitet.somOrganisasjonsnummer) }
-                )
-            }
-            .map { (yrkesaktivitet, vedtaksperioder) ->
-                Arbeidsgiverberegning(
-                    yrkesaktivitet = yrkesaktivitet.yrkesaktivitetstype,
-                    vedtaksperioder = vedtaksperioder,
-                    ghostOgAndreInntektskilder = emptyList()
-                )
-            }
-        // nå vi må lage en ghost-tidslinje per arbeidsgiver for de som eksisterer i sykepengegrunnlaget.
-        // i tillegg må vi lage én tidslinje per inntektskilde som ikke er en del av sykepengegrunnlaget
-        // resultatet er én utbetalingstidslinje per arbeidsgiver som garantert dekker perioden ${vedtaksperiode.periode}, dog kan
-        // andre arbeidsgivere dekke litt før/litt etter, avhengig av perioden til vedtaksperiodene som overlapper
-        return inntekterForBeregning.hensyntattAlleInntektskilder(utbetalingstidslinjer)
-    }
 
     private fun filtrerUtbetalingstidslinjer(
         aktivitetslogg: IAktivitetslogg,
