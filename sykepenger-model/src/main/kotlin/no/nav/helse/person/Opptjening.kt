@@ -24,8 +24,6 @@ import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnla
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiode
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.startdatoFor
 import no.nav.helse.person.Opptjening.Companion.TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 
 internal sealed interface Opptjening {
     val subsumsjon: Subsumsjon
@@ -87,12 +85,6 @@ internal class ArbeidstakerOpptjening private constructor(
     internal fun harTilstrekkeligAntallOpptjeningsdager(): Boolean = opptjeningsdager >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
     internal fun erOppfylt(): Boolean = harTilstrekkeligAntallOpptjeningsdager()
-
-    internal fun validerOpptjeningsdager(aktivitetslogg: IAktivitetslogg): Boolean {
-        val harTilstrekkeligAntallOpptjeningsdager = harTilstrekkeligAntallOpptjeningsdager()
-        if (!harTilstrekkeligAntallOpptjeningsdager) aktivitetslogg.varsel(RV_OV_1)
-        return harTilstrekkeligAntallOpptjeningsdager()
-    }
 
     internal fun opptjeningFom() = opptjeningsperiode.start
     internal fun startdatoFor(orgnummer: String) = arbeidsforhold.startdatoFor(orgnummer, skjæringstidspunkt)

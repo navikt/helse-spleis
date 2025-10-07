@@ -6,7 +6,6 @@ import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.NAV
@@ -147,7 +146,7 @@ internal class ØkonomiDagTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         }
-        return MaksimumUtbetalingFilter(sykepengegrunnlagBegrenset6G, false, Aktivitetslogg())
+        return MaksimumUtbetalingFilter(sykepengegrunnlagBegrenset6G)
             .filter(input, periode).map { it.vedtaksperioder.single().utbetalingstidslinje }
     }
 }

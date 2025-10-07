@@ -1,29 +1,19 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class MaksimumUtbetalingFilterTest {
-    private lateinit var aktivitetslogg: Aktivitetslogg
-
-    @BeforeEach
-    internal fun setup() {
-        aktivitetslogg = Aktivitetslogg()
-    }
 
     @Test
     fun `når inntekt er under 6G blir utbetaling lik inntekt`() {
@@ -62,8 +52,6 @@ internal class MaksimumUtbetalingFilterTest {
         val sykepengegrunnlag= 1200.daglig
         val tidslinje = tidslinjeOf(12.NAV(1200.0, 50.0)).betal(sykepengegrunnlag)
         assertEquals(6000.0, tidslinje.inspektør.totalUtbetaling())
-        assertTrue(aktivitetslogg.aktiviteter.isNotEmpty())
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     private fun Utbetalingstidslinje.betal(sykepengegrunnlag: Inntekt): Utbetalingstidslinje {
@@ -80,7 +68,7 @@ internal class MaksimumUtbetalingFilterTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         )
-        val filter = MaksimumUtbetalingFilter(sykepengegrunnlag, false, aktivitetslogg)
+        val filter = MaksimumUtbetalingFilter(sykepengegrunnlag)
 
         return filter
             .filter(input, this.periode())

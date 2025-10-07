@@ -38,7 +38,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.oktober
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.AP
@@ -196,7 +195,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                 ghostOgAndreInntektskilder = emptyList()
             )
         )
-        val tidslinje = MaksimumUtbetalingFilter(sykepengegrunnlag, false, Aktivitetslogg())
+        val tidslinje = MaksimumUtbetalingFilter(sykepengegrunnlag)
             .filter(input, januar).single()
         val dto = tidslinje.vedtaksperioder.single().utbetalingstidslinje.dto()
         assertEquals(10, dto.dager.size)

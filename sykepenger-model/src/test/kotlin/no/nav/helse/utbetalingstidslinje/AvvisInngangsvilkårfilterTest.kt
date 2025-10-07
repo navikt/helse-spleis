@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
@@ -99,32 +98,15 @@ class AvvisInngangsvilkårfilterTest {
             vurdertInfotrygd = false
         )
         val medlemskapstatus = if (manglerMedlemskap) Medlemskapsvurdering.Medlemskapstatus.Nei else Medlemskapsvurdering.Medlemskapstatus.Ja
-        val opptjening = ArbeidstakerOpptjening.nyOpptjening(
-            grunnlag =
-                if (manglerOpptjening) emptyList()
-                else listOf(
-                    ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
-                        orgnummer = "a1",
-                        ansattPerioder = listOf(
-                            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(
-                                ansattFom = skjæringstidspunkt.minusYears(1),
-                                ansattTom = null,
-                                deaktivert = false
-                            )
-                        )
-                    )
-                ),
-            skjæringstidspunkt = skjæringstidspunkt
-        )
-
         val filter = AvvisInngangsvilkårfilter(
             skjæringstidspunkt = skjæringstidspunkt,
             alder = ALDER,
             subsumsjonslogg = subsumsjonslogg,
             aktivitetslogg = Aktivitetslogg(),
-            inntektsgrunnlag = inntektsgrunnlag,
+            sykepengegrunnlag = inntektsgrunnlag.sykepengegrunnlag,
+            beregningsgrunnlag = inntektsgrunnlag.beregningsgrunnlag,
             medlemskapstatus = medlemskapstatus,
-            opptjening = opptjening
+            harOpptjening = !manglerOpptjening
         )
         val arbeidsgivere = tidslinjer.mapIndexed { index, it ->
             Arbeidsgiverberegning(

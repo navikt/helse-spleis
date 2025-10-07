@@ -11,22 +11,20 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
-import no.nav.helse.person.ArbeidstakerOpptjening
-import no.nav.helse.person.Opptjening
-import no.nav.helse.person.SelvstendigNæringsdrivendeOpptjening
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
-import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvisteDager
+import no.nav.helse.økonomi.Inntekt
 
 internal class AvvisInngangsvilkårfilter(
     private val skjæringstidspunkt: LocalDate,
     private val alder: Alder,
     private val subsumsjonslogg: Subsumsjonslogg,
     private val aktivitetslogg: IAktivitetslogg,
-    private val inntektsgrunnlag: Inntektsgrunnlag,
+    private val sykepengegrunnlag: Inntekt,
+    private val beregningsgrunnlag: Inntekt,
     private val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus?,
-    private val opptjening: Opptjening?
+    private val harOpptjening: Boolean
 ) : UtbetalingstidslinjerFilter {
 
     override fun filter(
@@ -42,12 +40,12 @@ internal class AvvisInngangsvilkårfilter(
     private fun List<Arbeidsgiverberegning>.minsteinntekt(periode: Periode): List<Arbeidsgiverberegning> {
         // dager frem til og med alder.redusertYtelseAlder avvises hvis sykepengegrunnlaget er under halvG
         val minsteinntektkravTilFylte67 = halvG.minsteinntekt(skjæringstidspunkt)
-        val erUnderMinsteinntektskravTilFylte67 = inntektsgrunnlag.sykepengegrunnlag < minsteinntektkravTilFylte67
+        val erUnderMinsteinntektskravTilFylte67 = sykepengegrunnlag < minsteinntektkravTilFylte67
         val aktuellPeriodeTilFylte67 = LocalDate.MIN til alder.redusertYtelseAlder
 
         // dager etter alder.redusertYtelseAlder avvises hvis sykepengegrunnlaget er under 2g
         val minsteinntektkravEtterFylte67 = `2G`.minsteinntekt(skjæringstidspunkt)
-        val erUnderMinsteinntektEtterFylte67 = inntektsgrunnlag.sykepengegrunnlag < minsteinntektkravEtterFylte67
+        val erUnderMinsteinntektEtterFylte67 = sykepengegrunnlag < minsteinntektkravEtterFylte67
         val aktuellPeriodeEtterFylte67 = alder.redusertYtelseAlder.nesteDag til LocalDate.MAX
 
         val avviste = this
@@ -70,7 +68,7 @@ internal class AvvisInngangsvilkårfilter(
                 `§ 8-3 ledd 2 punktum 1`(
                     oppfylt = !erUnderMinsteinntektskravTilFylte67,
                     skjæringstidspunkt = skjæringstidspunkt,
-                    beregningsgrunnlagÅrlig = inntektsgrunnlag.beregningsgrunnlag.årlig,
+                    beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
                     minimumInntektÅrlig = minsteinntektkravTilFylte67.årlig
                 )
             )
@@ -87,7 +85,7 @@ internal class AvvisInngangsvilkårfilter(
                         sekstisyvårsdag = alder.redusertYtelseAlder,
                         periodeFom = periode.start,
                         periodeTom = periode.endInclusive,
-                        beregningsgrunnlagÅrlig = inntektsgrunnlag.beregningsgrunnlag.årlig,
+                        beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
                         minimumInntektÅrlig = minsteinntektkravEtterFylte67.årlig
                     )
                 )
@@ -102,11 +100,7 @@ internal class AvvisInngangsvilkårfilter(
     }
 
     private fun List<Arbeidsgiverberegning>.avvisOpptjening(): List<Arbeidsgiverberegning> {
-        if (opptjening == null) return this
-        when (opptjening) {
-            is ArbeidstakerOpptjening -> if (opptjening.harTilstrekkeligAntallOpptjeningsdager()) return this
-            is SelvstendigNæringsdrivendeOpptjening -> TODO()
-        }
+        if (harOpptjening) return this
         return avvis(listOf(LocalDate.MIN til LocalDate.MAX), Begrunnelse.ManglerOpptjening)
     }
 }

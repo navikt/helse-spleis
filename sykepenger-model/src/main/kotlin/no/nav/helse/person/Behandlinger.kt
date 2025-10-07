@@ -249,10 +249,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         vedtaksperiodeSomLagerUtbetaling: UUID,
         yrkesaktivitet: Yrkesaktivitet,
         aktivitetslogg: IAktivitetslogg,
-        beregning: BeregnetPeriode
+        beregning: BeregnetPeriode,
+        grunnlagsdata: VilkårsgrunnlagElement
     ) {
         val forrigeUtbetaling = behandlinger.dropLast(1).lastOrNull()?.utbetalingstidslinje
-        behandlinger.last().utbetaling(vedtaksperiodeSomLagerUtbetaling, yrkesaktivitet, aktivitetslogg, beregning)
+        behandlinger.last().utbetaling(vedtaksperiodeSomLagerUtbetaling, yrkesaktivitet, aktivitetslogg, beregning, grunnlagsdata)
         if (forrigeUtbetaling != null) {
             val negativEndringIBeløp = behandlinger.last().utbetalingstidslinje.negativEndringIBeløp(forrigeUtbetaling)
             if (negativEndringIBeløp) {
@@ -850,8 +851,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 )
             }
 
-            internal fun kopierMedUtbetaling(beregning: BeregnetPeriode, utbetaling: Utbetaling) = kopierMed(
-                grunnlagsdata = beregning.grunnlagsdata,
+            internal fun kopierMedUtbetaling(beregning: BeregnetPeriode, grunnlagsdata: VilkårsgrunnlagElement, utbetaling: Utbetaling) = kopierMed(
+                grunnlagsdata = grunnlagsdata,
                 utbetaling = utbetaling,
                 utbetalingstidslinje = beregning.utbetalingstidslinje.subset(this.periode),
                 maksdatoresultat = beregning.maksdatovurdering.resultat,
@@ -1027,8 +1028,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             vedtaksperiodeSomLagerUtbetaling: UUID,
             yrkesaktivitet: Yrkesaktivitet,
             aktivitetslogg: IAktivitetslogg,
-            beregning: BeregnetPeriode
-        ) = tilstand.utbetaling(this, vedtaksperiodeSomLagerUtbetaling, yrkesaktivitet, aktivitetslogg, beregning)
+            beregning: BeregnetPeriode,
+            grunnlagsdata: VilkårsgrunnlagElement
+        ) = tilstand.utbetaling(this, vedtaksperiodeSomLagerUtbetaling, yrkesaktivitet, aktivitetslogg, beregning, grunnlagsdata)
 
         internal fun håndterAnnullering(yrkesaktivitet: Yrkesaktivitet, behandlingskilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
             return this.tilstand.håndterAnnullering(this, yrkesaktivitet, behandlingskilde, aktivitetslogg)
@@ -1050,13 +1052,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             vedtaksperiodeSomLagerUtbetaling: UUID,
             yrkesaktivitet: Yrkesaktivitet,
             aktivitetslogg: IAktivitetslogg,
-            beregning: BeregnetPeriode
+            beregning: BeregnetPeriode,
+            grunnlagsdata: VilkårsgrunnlagElement
         ) {
             lagUtbetaling(
                 vedtaksperiodeSomLagerUtbetaling,
                 yrkesaktivitet,
                 aktivitetslogg,
                 beregning,
+                grunnlagsdata,
                 Utbetalingtype.UTBETALING,
                 Tilstand.BeregnetOmgjøring
             )
@@ -1066,13 +1070,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             vedtaksperiodeSomLagerUtbetaling: UUID,
             yrkesaktivitet: Yrkesaktivitet,
             aktivitetslogg: IAktivitetslogg,
-            beregning: BeregnetPeriode
+            beregning: BeregnetPeriode,
+            grunnlagsdata: VilkårsgrunnlagElement
         ) {
             return lagUtbetaling(
                 vedtaksperiodeSomLagerUtbetaling,
                 yrkesaktivitet,
                 aktivitetslogg,
                 beregning,
+                grunnlagsdata,
                 Utbetalingtype.UTBETALING,
                 Tilstand.Beregnet
             )
@@ -1082,13 +1088,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             vedtaksperiodeSomLagerUtbetaling: UUID,
             yrkesaktivitet: Yrkesaktivitet,
             aktivitetslogg: IAktivitetslogg,
-            beregning: BeregnetPeriode
+            beregning: BeregnetPeriode,
+            grunnlagsdata: VilkårsgrunnlagElement
         ) {
             lagUtbetaling(
                 vedtaksperiodeSomLagerUtbetaling,
                 yrkesaktivitet,
                 aktivitetslogg,
                 beregning,
+                grunnlagsdata,
                 Utbetalingtype.REVURDERING,
                 Tilstand.BeregnetRevurdering
             )
@@ -1099,6 +1107,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             yrkesaktivitet: Yrkesaktivitet,
             aktivitetslogg: IAktivitetslogg,
             beregning: BeregnetPeriode,
+            grunnlagsdata: VilkårsgrunnlagElement,
             utbetalingtype: Utbetalingtype,
             nyTilstand: Tilstand
         ) {
@@ -1125,7 +1134,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 type = utbetalingtype
             )
             denNyeUtbetalingen.nyVedtaksperiodeUtbetaling(vedtaksperiodeSomLagerUtbetaling)
-            nyEndring(gjeldende.kopierMedUtbetaling(beregning, denNyeUtbetalingen))
+            nyEndring(gjeldende.kopierMedUtbetaling(beregning, grunnlagsdata, denNyeUtbetalingen))
             tilstand(nyTilstand, aktivitetslogg)
         }
 
@@ -1661,7 +1670,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 vedtaksperiodeSomLagerUtbetaling: UUID,
                 yrkesaktivitet: Yrkesaktivitet,
                 aktivitetslogg: IAktivitetslogg,
-                beregning: BeregnetPeriode
+                beregning: BeregnetPeriode,
+                grunnlagsdata: VilkårsgrunnlagElement
             ) {
                 error("Støtter ikke å opprette utbetaling i $this")
             }
@@ -1725,8 +1735,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     vedtaksperiodeSomLagerUtbetaling: UUID,
                     yrkesaktivitet: Yrkesaktivitet,
                     aktivitetslogg: IAktivitetslogg,
-                    beregning: BeregnetPeriode
-                ) = behandling.lagUtbetaling(vedtaksperiodeSomLagerUtbetaling, yrkesaktivitet, aktivitetslogg, beregning)
+                    beregning: BeregnetPeriode,
+                    grunnlagsdata: VilkårsgrunnlagElement
+                ) = behandling.lagUtbetaling(vedtaksperiodeSomLagerUtbetaling, yrkesaktivitet, aktivitetslogg, beregning, grunnlagsdata)
 
                 override fun avsluttUtenVedtak(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
                     behandling.behandlingLukket(yrkesaktivitet)
@@ -1742,8 +1753,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     vedtaksperiodeSomLagerUtbetaling: UUID,
                     yrkesaktivitet: Yrkesaktivitet,
                     aktivitetslogg: IAktivitetslogg,
-                    beregning: BeregnetPeriode
-                ) = behandling.lagOmgjøring(vedtaksperiodeSomLagerUtbetaling, yrkesaktivitet, aktivitetslogg, beregning)
+                    beregning: BeregnetPeriode,
+                    grunnlagsdata: VilkårsgrunnlagElement
+                ) = behandling.lagOmgjøring(vedtaksperiodeSomLagerUtbetaling, yrkesaktivitet, aktivitetslogg, beregning, grunnlagsdata)
             }
 
             data object UberegnetRevurdering : Tilstand by (Uberegnet) {
@@ -1754,8 +1766,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     vedtaksperiodeSomLagerUtbetaling: UUID,
                     yrkesaktivitet: Yrkesaktivitet,
                     aktivitetslogg: IAktivitetslogg,
-                    beregning: BeregnetPeriode
-                ) = behandling.lagRevurdering(vedtaksperiodeSomLagerUtbetaling, yrkesaktivitet, aktivitetslogg, beregning)
+                    beregning: BeregnetPeriode,
+                    grunnlagsdata: VilkårsgrunnlagElement
+                ) = behandling.lagRevurdering(vedtaksperiodeSomLagerUtbetaling, yrkesaktivitet, aktivitetslogg, beregning, grunnlagsdata)
 
                 override fun håndterAnnullering(
                     behandling: Behandling,
