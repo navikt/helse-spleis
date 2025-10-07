@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.behandlingkilde
-import no.nav.helse.person.inntekt.InntekterForBeregning
 
 internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
     override val type = TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -17,10 +16,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
     }
 
     private fun avsluttUtenVedtak(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-        val inntekterForBeregning = with(InntekterForBeregning.Builder(vedtaksperiode.periode)) {
-            vedtaksperiode.vilkårsgrunnlag?.inntektsgrunnlag?.beverte(this)
-            build()
-        }
+        val inntekterForBeregning = vedtaksperiode.inntekterForBeregning(vedtaksperiode.periode)
         val (fastsattÅrsinntekt, inntektjusteringer) = inntekterForBeregning.tilBeregning(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype)
 
         val utbetalingstidslinje = vedtaksperiode.behandlinger.lagUtbetalingstidslinje(fastsattÅrsinntekt, inntektjusteringer, vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype)

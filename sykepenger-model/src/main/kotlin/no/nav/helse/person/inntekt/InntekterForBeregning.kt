@@ -1,12 +1,9 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import no.nav.helse.dto.InntektskildeDto
 import no.nav.helse.erHelg
-import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.beløp.Beløpsdag
@@ -101,9 +98,8 @@ internal class InntekterForBeregning private constructor(
             }
         }
 
-        internal fun inntektsendringer(yrkesaktivitet: Behandlingsporing.Yrkesaktivitet, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId) {
+        internal fun inntektsendringer(yrkesaktivitet: Behandlingsporing.Yrkesaktivitet, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, kilde: Kilde) {
             val periode = (fom til listOfNotNull(tom, beregningsperiode.endInclusive).min()).subset(beregningsperiode)
-            val kilde = Kilde(meldingsreferanseId, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
             val inntektsendring = Beløpstidslinje.fra(periode, inntekt, kilde)
 
             yrkesaktiviteter.add(yrkesaktivitet)

@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
@@ -9,6 +10,7 @@ import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
 import no.nav.helse.dsl.a4
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -21,6 +23,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
@@ -243,5 +246,5 @@ class InntekterForBeregningTest {
         deaktivertFraInntektsgrunnlag(organisasjonsnummer, meldingsreferanseId.id.saksbehandler)
 
     private fun InntekterForBeregning.Builder.inntektsendringer(organisasjonsnummer: String, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())) =
-        inntektsendringer(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer), fom, tom, inntekt, meldingsreferanseId)
+        inntektsendringer(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer), fom, tom, inntekt, Kilde(meldingsreferanseId, Avsender.SYSTEM, LocalDateTime.now()))
 }

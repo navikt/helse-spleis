@@ -994,12 +994,28 @@ internal class Vedtaksperiode private constructor(
         håndterYtelser(ytelser, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk)
     }
 
-    private fun håndterYtelser(ytelser: Ytelser, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
-        val inntekterForBeregningBuilder = InntekterForBeregning.Builder(beregningsperiode).apply {
-            ytelser.inntektsendringer(this)
+    fun inntekterForBeregning(beregningsperiode: Periode, inntektsperioder: List<Triple<Behandlingsporing.Yrkesaktivitet, Kilde, no.nav.helse.hendelser.InntekterForBeregning.Inntektsperiode>> = emptyList()): InntekterForBeregning {
+        return with(InntekterForBeregning.Builder(beregningsperiode)) {
+            vilkårsgrunnlag?.inntektsgrunnlag?.beverte(this)
+            inntektsperioder.forEach { (yrkesaktivitet, kilde, inntektsperiode) ->
+                inntektsendringer(
+                    yrkesaktivitet = yrkesaktivitet,
+                    fom = inntektsperiode.fom,
+                    tom = inntektsperiode.tom,
+                    inntekt = inntektsperiode.inntekt,
+                    kilde = kilde
+                )
+            }
+            build()
         }
-
-        val maksdatoresultat = beregnUtbetalinger(aktivitetslogg, inntekterForBeregningBuilder)
+    }
+    private fun håndterYtelser(ytelser: Ytelser, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
+        val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
+            "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
+        }
+        val inntektsperioder = ytelser.inntektsendringer()
+        val inntekterForBeregning = inntekterForBeregning(beregningsperiode, inntektsperioder)
+        val maksdatoresultat = beregnUtbetalinger(aktivitetslogg, inntekterForBeregning, grunnlagsdata)
 
         when (yrkesaktivitet.yrkesaktivitetstype) {
             is Arbeidstaker -> {
@@ -2310,19 +2326,12 @@ internal class Vedtaksperiode private constructor(
     }
 
     private val beregningsperiode get() = checkNotNull(perioderSomMåHensyntasVedBeregning().map { it.periode }.periode()) { "Hvordan kan det ha seg at vi ikke har noen beregningsperiode?" }
-    private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg, inntekterForBeregningBuilder: InntekterForBeregning.Builder): Maksdatoresultat {
+    private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg, inntekterForBeregning: InntekterForBeregning, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Maksdatoresultat {
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
 
         check(perioderDetSkalBeregnesUtbetalingFor.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
             "ugyldig situasjon: skal beregne utbetaling for vedtaksperioder med ulike skjæringstidspunkter"
         }
-        val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
-            "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
-        }
-
-        val inntekterForBeregning = inntekterForBeregningBuilder.apply {
-            grunnlagsdata.inntektsgrunnlag.beverte(this)
-        }.build()
 
         val beregnetTidslinjePerVedtaksperiode = beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(
             aktivitetslogg,
