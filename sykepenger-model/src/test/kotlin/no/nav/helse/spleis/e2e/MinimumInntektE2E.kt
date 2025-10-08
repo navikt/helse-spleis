@@ -4,8 +4,12 @@ import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a2
 import no.nav.helse.erHelg
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -87,6 +91,37 @@ internal class MinimumInntektE2E : AbstractDslTest() {
                 assertTrue(utbetalingstidslinjeInspektør.avvistedatoer.all { utbetalingstidslinjeInspektør.begrunnelse(it).single() == Begrunnelse.MinimumInntektOver67 })
             }
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
+        }
+    }
+
+    @Test
+    fun `avslår dager etter fylte 67 år - blir 67 år etter vedtaksperioden som beregner`() {
+        medFødselsdato(fødseldato67år)
+
+        a1 {
+            nyPeriode(januar, a1)
+        }
+        a2 {
+            nyPeriode(31.januar til 28.februar, a2)
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(31.januar til 15.februar)), OppgittInntekt(500.daglig), OppgittRefusjon(500.daglig, emptyList()))
+        }
+        a1 {
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)), OppgittInntekt(200.daglig), OppgittRefusjon(200.daglig, emptyList()))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
+            inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
+                assertEquals(0, utbetalingstidslinjeInspektør.avvistDagTeller)
+            }
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
+        }
+        a2 {
+            inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
+                assertEquals(9, utbetalingstidslinjeInspektør.avvistDagTeller)
+                assertEquals((16.februar til 28.februar).filterNot { it.erHelg() }, utbetalingstidslinjeInspektør.avvistedatoer)
+                assertTrue(utbetalingstidslinjeInspektør.avvistedatoer.all { utbetalingstidslinjeInspektør.begrunnelse(it).single() == Begrunnelse.MinimumInntektOver67 })
+            }
         }
     }
 

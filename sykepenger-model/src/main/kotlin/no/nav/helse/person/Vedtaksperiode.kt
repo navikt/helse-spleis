@@ -1035,7 +1035,7 @@ internal class Vedtaksperiode private constructor(
         val beregningsgrunnlag = grunnlagsdata.inntektsgrunnlag.beregningsgrunnlag
         val medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus
         val redusertYtelseAlder = person.alder.redusertYtelseAlder
-        val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, periode, sykepengegrunnlag, redusertYtelseAlder)
+        val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, beregningsperiode, sykepengegrunnlag, redusertYtelseAlder)
 
         val beregnetTidslinjePerVedtaksperiode = beregnUtbetalinger(
             aktivitetslogg = aktivitetslogg,
