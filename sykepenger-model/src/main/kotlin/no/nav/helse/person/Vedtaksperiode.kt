@@ -168,7 +168,6 @@ import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
-import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
 import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
@@ -1072,6 +1071,10 @@ internal class Vedtaksperiode private constructor(
         // steg 5: lage varsler ved gitte situasjoner
         if (minsteinntektsvurdering.erUnderMinsteinntektskrav) aktivitetslogg.varsel(RV_SV_1)
         else aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
+
+        if (person.alder.dødsdato != null && person.alder.dødsdato in periode) {
+            aktivitetslogg.info("Utbetaling stoppet etter ${person.alder.dødsdato} grunnet dødsfall")
+        }
 
         when (yrkesaktivitet.yrkesaktivitetstype) {
             is Arbeidstaker -> grunnlagsdata.valider(aktivitetslogg, yrkesaktivitet.organisasjonsnummer)
@@ -2408,7 +2411,6 @@ internal class Vedtaksperiode private constructor(
         val maksdatofilter = MaksimumSykepengedagerfilter(person.alder, subsumsjonslogg, aktivitetslogg, person.regler, historisktidslinje)
         val filtere = listOf(
             Sykdomsgradfilter(perioderMedMinimumSykdomsgradVurdertOK, subsumsjonslogg, aktivitetslogg),
-            AvvisDagerEtterDødsdatofilter(person.alder, aktivitetslogg),
             AvvisInngangsvilkårfilter(
                 periodeTilFylte67UnderMinsteinntekt = periodeTilFylte67UnderMinsteinntekt,
                 periodeEtterFylte67UnderMinsteinntekt = periodeEtterFylte67UnderMinsteinntekt,

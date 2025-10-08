@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -27,6 +28,11 @@ internal class DødsmeldingE2E : AbstractDslTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), INNTEKT)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
+        inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.also {
+            it.avvistedatoer.forEach { dag ->
+                assertEquals(listOf(Begrunnelse.EtterDødsdato), it.begrunnelse(dag))
+            }
+        }
         assertEquals(9, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.avvistDagTeller)
     }
 
@@ -49,6 +55,9 @@ internal class DødsmeldingE2E : AbstractDslTest() {
         håndterYtelser(1.vedtaksperiode)
         inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.also {
             assertEquals(11, it.avvistDagTeller)
+            it.avvistedatoer.forEach { dag ->
+                assertEquals(listOf(Begrunnelse.EtterDødsdato), it.begrunnelse(dag))
+            }
             assertEquals(16, it.arbeidsgiverperiodeDagTeller)
             assertEquals(4, it.navHelgDagTeller)
         }

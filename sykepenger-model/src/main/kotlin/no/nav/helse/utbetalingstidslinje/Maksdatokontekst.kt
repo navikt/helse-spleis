@@ -54,6 +54,7 @@ internal data class Maksdatokontekst(
         return avslåtteDager.map { avslåttDag ->
             val begrunnelseForAvslåttDag = when {
                 alder.mistetSykepengerett(avslåttDag) -> Begrunnelse.Over70
+                alder.dødsdato != null && alder.dødsdato < avslåttDag -> Begrunnelse.EtterDødsdato
                 datoForTilstrekkeligOppholdOppnådd != null && avslåttDag > datoForTilstrekkeligOppholdOppnådd -> Begrunnelse.NyVilkårsprøvingNødvendig
                 erDagerUnder67ÅrForbrukte(regler) -> Begrunnelse.SykepengedagerOppbrukt
                 else -> Begrunnelse.SykepengedagerOppbruktOver67
@@ -139,13 +140,13 @@ internal data class Maksdatokontekst(
         // med mindre man allerede har brukt opp alt tidligere
         when {
             maksdatoOrdinærRett <= maksdatoBegrensetRett -> {
-                maksdato = maksdatoOrdinærRett
+                maksdato = listOfNotNull(maksdatoOrdinærRett, alder.dødsdato).min()
                 gjenståendeDager = gjenståendeDagerUnder67År(regler)
                 hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.ORDINÆR_RETT
             }
 
             maksdatoBegrensetRett <= alder.syttiårsdagen.forrigeVirkedagFør() -> {
-                maksdato = maksdatoBegrensetRett
+                maksdato = listOfNotNull(maksdatoBegrensetRett, alder.dødsdato).min()
                 gjenståendeDager = ukedager(forrigeVirkedag, maksdato)
                 hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.BEGRENSET_RETT
             }
