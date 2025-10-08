@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
 import java.time.Year
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
@@ -9,6 +10,9 @@ import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -122,6 +126,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                 arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.oktober(2017), type = Arbeidsforholdtype.ORDINÆRT))
             )
 
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             assertFunksjonellFeil(Varselkode.RV_IV_13, 1.vedtaksperiode.filter())
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
         }
@@ -483,6 +488,33 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_HISTORIKK,
                 SELVSTENDIG_AVVENTER_SIMULERING, SELVSTENDIG_AVVENTER_GODKJENNING, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVSLUTTET)
             assertEquals(Utbetalingtype.REVURDERING, inspektør.utbetalinger(1.vedtaksperiode)[1].type)
+        }
+    }
+
+    @Test
+    fun `kombinert arbeidstaker og selvstendig`() {
+        a1 {
+            håndterSøknad(januar)
+        }
+
+        selvstendig {
+            håndterSøknadSelvstendig(januar)
+            assertTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE)
+        }
+
+        a1 {
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)), OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()))
+            håndterVilkårsgrunnlag(
+                vedtaksperiodeId = 1.vedtaksperiode,
+                skatteinntekter = listOf(this.orgnummer to INNTEKT),
+                arbeidsforhold = listOf(Triple(a1, LocalDate.EPOCH, null))
+            )
+
+            assertFunksjonellFeil(Varselkode.RV_IV_13, 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        }
+        selvstendig {
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
     }
 }
