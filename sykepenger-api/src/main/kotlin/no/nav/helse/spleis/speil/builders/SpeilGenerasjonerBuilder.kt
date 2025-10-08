@@ -276,7 +276,6 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.START,
                 VedtaksperiodetilstandDto.SELVSTENDIG_START,
                 VedtaksperiodetilstandDto.TIL_INFOTRYGD,
-                VedtaksperiodetilstandDto.SELVSTENDIG_TIL_INFOTRYGD,
                 VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING,
                 VedtaksperiodetilstandDto.AVVENTER_ANNULLERING,
                 VedtaksperiodetilstandDto.TIL_ANNULLERING,

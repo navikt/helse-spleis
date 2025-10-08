@@ -467,7 +467,6 @@ data class SpannerPersonDto(
                 SELVSTENDIG_AVVENTER_GODKJENNING,
 
                 SELVSTENDIG_TIL_UTBETALING,
-                SELVSTENDIG_TIL_INFOTRYGD,
                 SELVSTENDIG_AVSLUTTET
             }
 
@@ -1116,7 +1115,6 @@ private fun VedtaksperiodeUtDto.tilPersonData(
         VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_SIMULERING
         VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
         VedtaksperiodetilstandDto.SELVSTENDIG_START -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_START
-        VedtaksperiodetilstandDto.SELVSTENDIG_TIL_INFOTRYGD -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_TIL_INFOTRYGD
         VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_TIL_UTBETALING
     },
     skjæringstidspunkt = skjæringstidspunkt,

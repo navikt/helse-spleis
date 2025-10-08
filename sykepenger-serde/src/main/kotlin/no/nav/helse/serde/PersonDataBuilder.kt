@@ -95,7 +95,6 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Tilstan
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_SIMULERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_START
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_TIL_INFOTRYGD
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_TIL_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.START
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.TIL_ANNULLERING
@@ -398,7 +397,6 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
 
         VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING -> SELVSTENDIG_TIL_UTBETALING
         VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET -> SELVSTENDIG_AVSLUTTET
-        VedtaksperiodetilstandDto.SELVSTENDIG_TIL_INFOTRYGD -> SELVSTENDIG_TIL_INFOTRYGD
 
     },
     skjæringstidspunkt = skjæringstidspunkt,

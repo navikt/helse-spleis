@@ -156,7 +156,6 @@ import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerInfotrygdHistorikk
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerSimulering
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerVilkårsprøving
 import no.nav.helse.person.tilstandsmaskin.SelvstendigStart
-import no.nav.helse.person.tilstandsmaskin.SelvstendigTilInfotrygd
 import no.nav.helse.person.tilstandsmaskin.SelvstendigTilUtbetaling
 import no.nav.helse.person.tilstandsmaskin.Start
 import no.nav.helse.person.tilstandsmaskin.TilAnnullering
@@ -334,8 +333,7 @@ internal class Vedtaksperiode private constructor(
             TilAnnullering,
             TilInfotrygd -> error("Kan ikke håndtere søknad mens perioden er i $tilstand")
 
-            SelvstendigStart,
-            SelvstendigTilInfotrygd -> error("Kan ikke håndtere søknad mens perioden er i $tilstand")
+            SelvstendigStart -> error("Kan ikke håndtere søknad mens perioden er i $tilstand")
 
             SelvstendigAvsluttet,
             SelvstendigAvventerBlokkerendePeriode,
@@ -401,7 +399,6 @@ internal class Vedtaksperiode private constructor(
             TilInfotrygd -> error("Kan ikke overstyre tidslinjen i $tilstand")
 
             SelvstendigStart,
-            SelvstendigTilInfotrygd,
             SelvstendigTilUtbetaling -> error("Kan ikke overstyre tidslinjen i $tilstand")
         }
 
@@ -449,7 +446,6 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerSimulering,
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
-            SelvstendigTilInfotrygd,
             SelvstendigTilUtbetaling -> {
                 if (anmodningOmForkasting.force) return forkast(anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst, true)
                 aktivitetsloggMedVedtaksperiodekontekst.info("Avslår anmodning om forkasting i $tilstand")
@@ -559,7 +555,6 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerSimulering,
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
-            SelvstendigTilInfotrygd,
             SelvstendigTilUtbetaling -> error("Kan ikke håndtere replay av inntektsmelding i en selvstendigtilstand: $tilstand")
         }
         return null
@@ -977,7 +972,6 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerSimulering,
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
-            SelvstendigTilInfotrygd,
             SelvstendigTilUtbetaling -> {
                 /* gjør ingenting */
             }
@@ -1190,7 +1184,6 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerSimulering,
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
-            SelvstendigTilInfotrygd,
             SelvstendigTilUtbetaling -> false
         }
     }
@@ -1345,7 +1338,6 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerVilkårsprøving,
             TilAnnullering -> return null
 
-            SelvstendigTilInfotrygd,
             TilInfotrygd -> error("Forventet ikke annulleringshendelse i tilstand $tilstand for vedtaksperiodeId $id")
         }
     }
@@ -1510,7 +1502,6 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerSimulering,
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
-            SelvstendigTilInfotrygd,
             SelvstendigTilUtbetaling -> VedtaksperiodeForkastetEventBuilder()
 
             AvventerInfotrygdHistorikk,
@@ -2236,7 +2227,6 @@ internal class Vedtaksperiode private constructor(
             SelvstendigStart,
             Avsluttet,
             SelvstendigAvsluttet,
-            SelvstendigTilInfotrygd,
             TilInfotrygd -> null
         }
 
@@ -2746,7 +2736,6 @@ internal class Vedtaksperiode private constructor(
 
                     VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING -> SelvstendigTilUtbetaling
                     VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET -> SelvstendigAvsluttet
-                    VedtaksperiodetilstandDto.SELVSTENDIG_TIL_INFOTRYGD -> SelvstendigTilInfotrygd
                 },
                 behandlinger = Behandlinger.gjenopprett(dto.behandlinger, grunnlagsdata, utbetalinger),
                 opprettet = dto.opprettet,
@@ -2832,7 +2821,6 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerSimulering -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING
             SelvstendigAvventerVilkårsprøving -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
             SelvstendigStart -> VedtaksperiodetilstandDto.SELVSTENDIG_START
-            SelvstendigTilInfotrygd -> VedtaksperiodetilstandDto.SELVSTENDIG_TIL_INFOTRYGD
             SelvstendigTilUtbetaling -> VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING
         },
         skjæringstidspunkt = this.skjæringstidspunkt,

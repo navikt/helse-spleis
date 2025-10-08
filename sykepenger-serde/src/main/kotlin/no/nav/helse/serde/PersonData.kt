@@ -849,7 +849,6 @@ data class PersonData(
                 SELVSTENDIG_AVVENTER_GODKJENNING,
 
                 SELVSTENDIG_TIL_UTBETALING,
-                SELVSTENDIG_TIL_INFOTRYGD,
                 SELVSTENDIG_AVSLUTTET,
             }
 
@@ -886,7 +885,6 @@ data class PersonData(
                     TilstandTypeData.SELVSTENDIG_AVVENTER_SIMULERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING
                     TilstandTypeData.SELVSTENDIG_AVVENTER_GODKJENNING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING
                     TilstandTypeData.SELVSTENDIG_TIL_UTBETALING -> VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING
-                    TilstandTypeData.SELVSTENDIG_TIL_INFOTRYGD -> VedtaksperiodetilstandDto.SELVSTENDIG_TIL_INFOTRYGD
                     TilstandTypeData.SELVSTENDIG_AVSLUTTET -> VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET
                 },
                 behandlinger = BehandlingerInnDto(this.behandlinger.map { it.tilDto() }),
