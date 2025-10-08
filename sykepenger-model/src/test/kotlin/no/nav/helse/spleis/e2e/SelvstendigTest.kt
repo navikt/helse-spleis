@@ -7,6 +7,7 @@ import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.selvstendig
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad
@@ -37,7 +38,9 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNull
 
 internal class SelvstendigTest : AbstractDslTest() {
 
@@ -233,6 +236,35 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             assertEquals(1.januar til 16.januar, inspektør.ventetid(1.vedtaksperiode))
 
+        }
+    }
+
+    @Test
+    fun `opptjeningVurdertOk lagres på behandlingen når det ikke er fravær før sykmelding`() {
+        selvstendig {
+            håndterSøknadSelvstendig(januar, fraværFørSykmelding = false)
+
+            assertTrue(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.single().endringer.last().forberedendeVilkårsgrunnlag!!.erOpptjeningVurdertOk)
+        }
+    }
+
+    @Test
+    fun `perioden kastes ut når det er fravær før sykmelding`() {
+        selvstendig {
+            håndterSøknadSelvstendig(januar, fraværFørSykmelding = true)
+
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertFunksjonelleFeil()
+        }
+    }
+
+    @Test
+    fun `lager ikke forberedende vilkårsgrunnlag når spørsmål om fravær før sykmelding ikke stilles`() {
+        selvstendig {
+            håndterSøknadSelvstendig(januar, fraværFørSykmelding = false)
+            håndterSøknadSelvstendig(februar)
+
+            assertNull(inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.single().endringer.last().forberedendeVilkårsgrunnlag)
         }
     }
 

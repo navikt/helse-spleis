@@ -24,6 +24,7 @@ internal class SendtSøknadBuilder(arbeidssituasjon: String) : SøknadBuilder() 
     private var ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false
     private var utenlandskSykmelding: Boolean = false
     private var sendTilGosys: Boolean = false
+    private var fraværFørSykmelding: Boolean? = null
     private val arbeidssituasjon = when (arbeidssituasjon) {
         "SELVSTENDIG_NARINGSDRIVENDE" -> Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE
         "BARNEPASSER" -> Søknad.Arbeidssituasjon.BARNEPASSER
@@ -55,11 +56,16 @@ internal class SendtSøknadBuilder(arbeidssituasjon: String) : SøknadBuilder() 
         arbeidssituasjon = arbeidssituasjon,
         registrert = registrert,
         inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
-        pensjonsgivendeInntekter = pensjonsgivendeInntekter
+        pensjonsgivendeInntekter = pensjonsgivendeInntekter,
+        fraværFørSykmelding = fraværFørSykmelding
     )
 
     internal fun pensjonsgivendeInntekter(pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>) = apply {
         this.pensjonsgivendeInntekter = pensjonsgivendeInntekter
+    }
+
+    internal fun fraværFørSykmelding(fraværFørSykmelding: Boolean?) = apply {
+        this.fraværFørSykmelding = fraværFørSykmelding
     }
 
     internal fun ventetid(ventetid: Periode) = apply {

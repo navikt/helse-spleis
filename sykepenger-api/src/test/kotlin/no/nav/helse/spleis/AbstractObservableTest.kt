@@ -103,7 +103,8 @@ internal abstract class AbstractObservableTest {
         arbeidssituasjon = Søknad.Arbeidssituasjon.ARBEIDSTAKER,
         registrert = LocalDateTime.now(),
         inntekterFraNyeArbeidsforhold = false,
-        pensjonsgivendeInntekter = null
+        pensjonsgivendeInntekter = null,
+        fraværFørSykmelding = null
     )
 
     protected fun utbetalinghistorikk() = UtbetalingshistorikkEtterInfotrygdendring(

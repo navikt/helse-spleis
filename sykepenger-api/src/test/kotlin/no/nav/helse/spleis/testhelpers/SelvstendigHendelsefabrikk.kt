@@ -84,6 +84,7 @@ internal class SelvstendigHendelsefabrikk() {
         registrert: LocalDateTime = LocalDateTime.now(),
         inntekterFraNyeArbeidsforhold: Boolean = false,
         pensjonsgivendeInntekter: List<PensjonsgivendeInntekt> = emptyList(),
+        fraværFørSykmelding: Boolean? = null,
         arbeidssituasjon: Søknad.Arbeidssituasjon
     ): Søknad {
         return Søknad(
@@ -105,7 +106,8 @@ internal class SelvstendigHendelsefabrikk() {
             arbeidssituasjon = arbeidssituasjon,
             registrert = registrert,
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
-            pensjonsgivendeInntekter = pensjonsgivendeInntekter
+            pensjonsgivendeInntekter = pensjonsgivendeInntekter,
+            fraværFørSykmelding = fraværFørSykmelding
         ).apply {
             søknader.add(this)
         }

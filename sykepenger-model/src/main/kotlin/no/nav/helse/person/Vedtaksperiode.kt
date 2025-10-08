@@ -67,6 +67,7 @@ import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.mapWithNext
 import no.nav.helse.nesteDag
+import no.nav.helse.person.Behandlinger.Behandling.Endring.ForberedendeVilkårsgrunnlag
 import no.nav.helse.person.Behandlinger.Behandlingkilde
 import no.nav.helse.person.Behandlinger.Companion.berik
 import no.nav.helse.person.Dokumentsporing.Companion.inntektFraAOrdingen
@@ -207,6 +208,7 @@ internal class Vedtaksperiode private constructor(
         faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
         inntektsendringer: Beløpstidslinje = Beløpstidslinje(),
         ventetid: Periode?,
+        forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?,
         regelverkslogg: Regelverkslogg
     ) : this(
         person = person,
@@ -225,7 +227,7 @@ internal class Vedtaksperiode private constructor(
     ) {
         val periode = checkNotNull(sykdomstidslinje.periode()) { "sykdomstidslinjen er tom" }
         person.vedtaksperiodeOpprettet(id, yrkesaktivitet.yrkesaktivitetstype, periode, periode.start, opprettet)
-        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, arbeidssituasjon, egenmeldingsperioder, faktaavklartInntekt, inntektsendringer, ventetid, dokumentsporing, metadata.behandlingkilde)
+        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, arbeidssituasjon, egenmeldingsperioder, faktaavklartInntekt, inntektsendringer, ventetid, dokumentsporing, metadata.behandlingkilde, forberedendeVilkårsgrunnlag)
     }
 
     private val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()

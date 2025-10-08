@@ -67,6 +67,7 @@ enum class Varselkode(
 
     // Selvstendig søknader
     RV_SØ_45("Selvstendigsøknad med inntektstype vi ikke støtter"),
+    RV_SØ_46("Selvstendigsøknad med fravær før sykmelding"),
 
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne.", avviklet = true),

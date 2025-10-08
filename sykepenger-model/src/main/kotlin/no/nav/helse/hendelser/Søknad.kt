@@ -78,6 +78,7 @@ class Søknad(
     registrert: LocalDateTime,
     private val inntekterFraNyeArbeidsforhold: Boolean,
     private val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>?,
+    private val fraværFørSykmelding: Boolean?
 ) : Hendelse {
 
     override val metadata = HendelseMetadata(
@@ -272,6 +273,28 @@ class Søknad(
             Arbeidssituasjon.ANNET -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ANNET
         }
 
+        val forberedendeVilkårsgrunnlag = when (arbeidssituasjon) {
+            Behandlinger.Behandling.Endring.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> {
+                when (fraværFørSykmelding) {
+                    true -> {
+                        aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_46)
+                        null
+                    }
+
+                    false -> Behandlinger.Behandling.Endring.ForberedendeVilkårsgrunnlag(erOpptjeningVurdertOk = true)
+                    else -> null
+                }
+            }
+
+            Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSTAKER,
+            Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSLEDIG,
+            Behandlinger.Behandling.Endring.Arbeidssituasjon.FRILANSER,
+            Behandlinger.Behandling.Endring.Arbeidssituasjon.BARNEPASSER,
+            Behandlinger.Behandling.Endring.Arbeidssituasjon.FISKER,
+            Behandlinger.Behandling.Endring.Arbeidssituasjon.JORDBRUKER,
+            Behandlinger.Behandling.Endring.Arbeidssituasjon.ANNET -> null
+        }
+
         return Vedtaksperiode(
             egenmeldingsperioder = egenmeldingsperioder(),
             metadata = metadata,
@@ -283,6 +306,7 @@ class Søknad(
             ventetid = ventetid,
             dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
             sykmeldingsperiode = sykdomsperiode,
+            forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag,
             regelverkslogg = regelverkslogg
         )
     }

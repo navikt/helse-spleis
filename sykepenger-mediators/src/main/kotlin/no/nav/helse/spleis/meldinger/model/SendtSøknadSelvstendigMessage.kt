@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.Year
 import no.nav.helse.Personidentifikator
@@ -34,6 +35,10 @@ internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val 
             val ventetidperiode = Periode(ventetid.path("fom").asLocalDate(), ventetid.path("tom").asLocalDate())
             builder.ventetid(ventetidperiode)
         }
+
+        val fraværFørSykmelding = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("FRAVAR_FOR_SYKMELDINGEN_V2").takeUnless { it.isMissingOrNull() }?.asBoolean()
+        builder.fraværFørSykmelding(fraværFørSykmelding)
+
         SendtSøknadNavMessage.byggSendtSøknad(builder, packet)
         mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
     }

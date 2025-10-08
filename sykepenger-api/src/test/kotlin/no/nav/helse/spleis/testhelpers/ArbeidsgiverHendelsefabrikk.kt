@@ -113,7 +113,8 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             arbeidssituasjon = arbeidssituasjon,
             registrert = registrert,
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
-            pensjonsgivendeInntekter = null
+            pensjonsgivendeInntekter = null,
+            fraværFørSykmelding = null
         ).apply {
             søknader.add(this)
         }

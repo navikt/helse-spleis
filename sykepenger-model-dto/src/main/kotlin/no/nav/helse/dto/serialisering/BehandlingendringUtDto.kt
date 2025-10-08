@@ -11,6 +11,7 @@ import no.nav.helse.dto.InntektskildeDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.SykdomstidslinjeDto
 import no.nav.helse.dto.UtbetalingTilstandDto
+import no.nav.helse.dto.deserialisering.ForberedendeVilkårsgrunnlagDto
 
 data class BehandlingendringUtDto(
     val id: UUID,
@@ -34,5 +35,6 @@ data class BehandlingendringUtDto(
     val maksdatoresultat: MaksdatoresultatUtDto,
     val inntektjusteringer: Map<InntektskildeDto, BeløpstidslinjeDto>,
     val faktaavklartInntekt: SelvstendigFaktaavklartInntektUtDto?,
-    val ventetid: PeriodeDto?
+    val ventetid: PeriodeDto?,
+    val forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlagDto?
 )

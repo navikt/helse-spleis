@@ -235,7 +235,8 @@ internal class TestPerson(
             registrert: LocalDateTime = LocalDateTime.now(),
             merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
             inntekterFraNyeArbeidsforhold: Boolean = false,
-            pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>? = null
+            pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>? = null,
+            fraværFørSykmelding: Boolean? = null
         ) =
             behovsamler.fangInntektsmeldingReplay({
                 vedtaksperiodesamler.fangVedtaksperiode(this.orgnummer) {
@@ -254,7 +255,8 @@ internal class TestPerson(
                         registrert = registrert,
                         merknaderFraSykmelding = merknaderFraSykmelding,
                         inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
-                        pensjonsgivendeInntekter = pensjonsgivendeInntekter
+                        pensjonsgivendeInntekter = pensjonsgivendeInntekter,
+                        fraværFørSykmelding = fraværFørSykmelding
                     ).håndter(Person::håndterSøknad)
                 }?.also {
                     if (behovsamler.harBehov(it, Sykepengehistorikk)) {
@@ -276,13 +278,15 @@ internal class TestPerson(
                 Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
                 Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
             ),
-            sendtTilNAVEllerArbeidsgiver: Temporal? = null
+            sendtTilNAVEllerArbeidsgiver: Temporal? = null,
+            fraværFørSykmelding: Boolean? = null
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, 100.prosent),
             Ventetid(ventetid),
             arbeidssituasjon = arbeidssituasjon,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,
-            sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver
+            sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
+            fraværFørSykmelding = fraværFørSykmelding
         )
 
         internal fun håndterInntektsmelding(

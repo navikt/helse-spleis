@@ -33,7 +33,6 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as Hendelseperiode
 import no.nav.helse.januar
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
@@ -50,6 +49,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spill_av_im.Forespørsel
 import no.nav.helse.spill_av_im.FørsteFraværsdag
 import no.nav.helse.spleis.HendelseMediator
@@ -329,7 +329,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         historiskeFolkeregisteridenter: List<String> = emptyList(),
         sendTilGosys: Boolean? = false,
         egenmeldingerFraSykmelding: List<LocalDate> = emptyList(),
-        ventetid: Hendelseperiode
+        ventetid: Hendelseperiode,
+        fraværFørSykmelding: Boolean? = null
     ): UUID {
         val (id, message) = meldingsfabrikk.lagSøknadSelvstendig(
             fnr = fnr,
@@ -342,7 +343,8 @@ internal abstract class AbstractEndToEndMediatorTest {
             sendTilGosys = sendTilGosys,
             egenmeldingerFraSykmelding = egenmeldingerFraSykmelding,
             ventetid = ventetid,
-            arbeidssituasjon = arbeidssituasjon
+            arbeidssituasjon = arbeidssituasjon,
+            fraværFørSykmelding = fraværFørSykmelding
         )
 
         val antallVedtaksperioderFørSøknad = testRapid.inspektør.vedtaksperiodeteller

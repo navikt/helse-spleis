@@ -34,6 +34,13 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
+    fun `kaster ut søknad når det er fravær før sykmelding`() = Toggle.SelvstendigNæringsdrivende.enable {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE, fraværFørSykmelding = true)
+        assertTilstander(0, "TIL_INFOTRYGD")
+    }
+
+    @Test
     fun fisker() = Toggle.SelvstendigNæringsdrivende.enable {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.FISKER)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.FISKER)

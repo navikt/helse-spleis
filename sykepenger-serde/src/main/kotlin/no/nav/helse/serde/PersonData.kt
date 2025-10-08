@@ -73,6 +73,7 @@ import no.nav.helse.dto.deserialisering.FeriepengeoppdragInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeutbetalinggrunnlagInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeutbetalinggrunnlagInnDto.UtbetaltDagInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeutbetalingslinjeInnDto
+import no.nav.helse.dto.deserialisering.ForberedendeVilkårsgrunnlagDto
 import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdArbeidsgiverutbetalingsperiodeInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdPersonutbetalingsperiodeInnDto
@@ -1054,6 +1055,7 @@ data class PersonData(
                     val inntektjusteringer: Map<String, BeløpstidslinjeData>,
                     val faktaavklartInntekt: VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.InntektsopplysningData?,
                     val ventetid: PeriodeData?,
+                    val forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlagData?
                 ) {
                     fun tilDto() = BehandlingendringInnDto(
                         id = this.id,
@@ -1087,7 +1089,8 @@ data class PersonData(
                             InntektskildeDto(inntektskilde) to beløpstidslinje.tilDto()
                         }.toMap(),
                         faktaavklartInntekt = faktaavklartInntekt?.tilDto(),
-                        ventetid = ventetid?.tilDto()
+                        ventetid = ventetid?.tilDto(),
+                        forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag?.tilDto()
                     )
 
                     data class ArbeidsgiverperiodeData(
@@ -1109,6 +1112,10 @@ data class PersonData(
                         JORDBRUKER,
                         FISKER,
                         ANNET
+                    }
+
+                    data class ForberedendeVilkårsgrunnlagData(val erOpptjeningVurdertOk: Boolean) {
+                        fun tilDto() = ForberedendeVilkårsgrunnlagDto(erOpptjeningVurdertOk)
                     }
                 }
             }

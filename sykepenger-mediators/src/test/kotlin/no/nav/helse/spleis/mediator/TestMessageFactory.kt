@@ -370,7 +370,8 @@ internal class TestMessageFactory(
         sendTilGosys: Boolean? = false,
         egenmeldingerFraSykmelding: List<LocalDate> = emptyList(),
         ventetid: HendelsePeriode,
-        selvstendigNaringsdrivende: SelvstendigNaringsdrivendeDTO? = selvstendigNæringsdrivende(ventetid),
+        fraværFørSykmelding: Boolean? = null,
+        selvstendigNaringsdrivende: SelvstendigNaringsdrivendeDTO? = selvstendigNæringsdrivende(ventetid, fraværFørSykmelding?.let { mapOf("FRAVAR_FOR_SYKMELDINGEN_V2" to fraværFørSykmelding) } ?: emptyMap()),
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }
         val sendtSøknad = SykepengesoknadDTO(
@@ -410,7 +411,7 @@ internal class TestMessageFactory(
         )
     }
 
-    private fun selvstendigNæringsdrivende(ventetid: HendelsePeriode): SelvstendigNaringsdrivendeDTO = SelvstendigNaringsdrivendeDTO(
+    private fun selvstendigNæringsdrivende(ventetid: HendelsePeriode, hovedspørsmålSvar: Map<String, Boolean>): SelvstendigNaringsdrivendeDTO = SelvstendigNaringsdrivendeDTO(
         roller = emptyList(),
         inntekt = InntektDTO(
             norskPersonidentifikator = "12345678912",
@@ -444,7 +445,9 @@ internal class TestMessageFactory(
                 )
             )
         ),
-        ventetid = VentetidDTO(fom = ventetid.start, tom = ventetid.endInclusive)
+        ventetid = VentetidDTO(fom = ventetid.start, tom = ventetid.endInclusive),
+        hovedSporsmalSvar = hovedspørsmålSvar,
+        harForsikring = false
     )
 
     fun lagSøknadArbeidsledig(
