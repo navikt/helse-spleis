@@ -1019,11 +1019,13 @@ internal class Vedtaksperiode private constructor(
         val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
         }
+        val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning()
+            .map { it.uberegnetVedtaksperiode() }
+        val beregningsperiode = perioderSomMåHensyntasVedBeregning.map { it.periode }.reduce(Periode::plus)
         // steg 1: sett sammen alle inntekter som skal brukes i beregning
         val inntektsperioder = ytelser.inntektsendringer()
         val inntekterForBeregning = inntekterForBeregning(beregningsperiode, inntektsperioder)
         // steg 2: lag utbetalingstidslinjer for alle vedtaksperiodene
-        val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning().map { it.uberegnetVedtaksperiode() }
         val uberegnetTidslinjePerArbeidsgiver = lagUtbetalingstidslinjePerArbeidsgiver(perioderSomMåHensyntasVedBeregning, inntekterForBeregning)
         // steg 3: beregn alle utbetalingstidslinjer (avslå dager, beregne maksdato og utbetalingsbeløp)
         val harOpptjening = when (val opptjening = grunnlagsdata.opptjening) {
@@ -1036,15 +1038,21 @@ internal class Vedtaksperiode private constructor(
         val medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus
         val redusertYtelseAlder = person.alder.redusertYtelseAlder
         val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, beregningsperiode, sykepengegrunnlag, redusertYtelseAlder)
-
-        val beregnetTidslinjePerVedtaksperiode = beregnUtbetalinger(
+        // grunnlaget for maksdatoberegning er alt som har skjedd før,
+        // frem til og med vedtaksperioden som beregnes
+        val historisktidslinje = person.vedtaksperioder { it.periode.endInclusive < periode.start }
+            .map { it.behandlinger.utbetalingstidslinje() }
+            .fold(person.infotrygdhistorikk.utbetalingstidslinje(), Utbetalingstidslinje::plus)
+        val beregnetTidslinjePerVedtaksperiode = filtrerUtbetalingstidslinjer(
             aktivitetslogg = aktivitetslogg,
             uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
             harOpptjening = harOpptjening,
             sykepengegrunnlag = sykepengegrunnlag,
             medlemskapstatus = medlemskapstatus,
             periodeTilFylte67UnderMinsteinntekt = minsteinntektsvurdering.periodeTilFylte67UnderMinsteinntekt,
-            periodeEtterFylte67UnderMinsteinntekt = minsteinntektsvurdering.periodeEtterFylte67UnderMinsteinntekt
+            periodeEtterFylte67UnderMinsteinntekt = minsteinntektsvurdering.periodeEtterFylte67UnderMinsteinntekt,
+            historisktidslinje = historisktidslinje,
+            perioderMedMinimumSykdomsgradVurdertOK = person.minimumSykdomsgradsvurdering.perioder
         )
         // steg 4: lag et utbetalingsobjekt for vedtaksperioder som ikke har fått det enda (én per arbeidsgiver)
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
@@ -1841,7 +1849,7 @@ internal class Vedtaksperiode private constructor(
         institusjonsopphold(aktivitetslogg, periode)
         arbeidsavklaringspenger(aktivitetslogg, periode.start.minusMonths(6), periode.endInclusive)
         dagpenger(aktivitetslogg, periode.start.minusMonths(2), periode.endInclusive)
-        inntekterForBeregning(aktivitetslogg, beregningsperiode)
+        inntekterForBeregning(aktivitetslogg, perioderSomMåHensyntasVedBeregning().map { it.periode }.reduce(Periode::plus))
     }
 
     internal fun trengerVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg) {
@@ -2384,28 +2392,6 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private val beregningsperiode get() = checkNotNull(perioderSomMåHensyntasVedBeregning().map { it.periode }.periode()) { "Hvordan kan det ha seg at vi ikke har noen beregningsperiode?" }
-    private fun beregnUtbetalinger(
-        aktivitetslogg: IAktivitetslogg,
-        uberegnetTidslinjePerArbeidsgiver: List<Arbeidsgiverberegning>,
-        harOpptjening: Boolean,
-        sykepengegrunnlag: Inntekt,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus?,
-        periodeTilFylte67UnderMinsteinntekt: Periode?,
-        periodeEtterFylte67UnderMinsteinntekt: Periode?
-    ): List<BeregnetPeriode> {
-        val beregnetTidslinjePerVedtaksperiode = filtrerUtbetalingstidslinjer(
-            aktivitetslogg = aktivitetslogg,
-            uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
-            sykepengegrunnlag = sykepengegrunnlag,
-            medlemskapstatus = medlemskapstatus,
-            harOpptjening = harOpptjening,
-            periodeTilFylte67UnderMinsteinntekt = periodeTilFylte67UnderMinsteinntekt,
-            periodeEtterFylte67UnderMinsteinntekt = periodeEtterFylte67UnderMinsteinntekt
-        )
-        return beregnetTidslinjePerVedtaksperiode
-    }
-
     private fun harSammeUtbetalingSom(annenVedtaksperiode: Vedtaksperiode) = behandlinger.harSammeUtbetalingSom(annenVedtaksperiode)
 
     private fun filtrerUtbetalingstidslinjer(
@@ -2415,17 +2401,13 @@ internal class Vedtaksperiode private constructor(
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus?,
         harOpptjening: Boolean,
         periodeTilFylte67UnderMinsteinntekt: Periode?,
-        periodeEtterFylte67UnderMinsteinntekt: Periode?
+        periodeEtterFylte67UnderMinsteinntekt: Periode?,
+        historisktidslinje: Utbetalingstidslinje,
+        perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>
     ): List<BeregnetPeriode> {
-        // grunnlaget for maksdatoberegning er alt som har skjedd før,
-        // frem til og med vedtaksperioden som beregnes
-        val historisktidslinje = person.vedtaksperioder { it.periode.endInclusive < periode.start }
-            .map { it.behandlinger.utbetalingstidslinje() }
-            .fold(person.infotrygdhistorikk.utbetalingstidslinje(), Utbetalingstidslinje::plus)
-
         val maksdatofilter = MaksimumSykepengedagerfilter(person.alder, subsumsjonslogg, aktivitetslogg, person.regler, historisktidslinje)
         val filtere = listOf(
-            Sykdomsgradfilter(person.minimumSykdomsgradsvurdering, subsumsjonslogg, aktivitetslogg),
+            Sykdomsgradfilter(perioderMedMinimumSykdomsgradVurdertOK, subsumsjonslogg, aktivitetslogg),
             AvvisDagerEtterDødsdatofilter(person.alder, aktivitetslogg),
             AvvisInngangsvilkårfilter(
                 periodeTilFylte67UnderMinsteinntekt = periodeTilFylte67UnderMinsteinntekt,

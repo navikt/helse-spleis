@@ -11,7 +11,6 @@ import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.MinimumSykdomsgradsvurdering
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
@@ -151,7 +150,7 @@ internal class SykdomsgradfilterTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         }
-        val resultat = Sykdomsgradfilter(MinimumSykdomsgradsvurdering(), subsumsjonslogg, aktivitetslogg)
+        val resultat = Sykdomsgradfilter(emptySet(), subsumsjonslogg, aktivitetslogg)
             .filter(input, periode)
             .map { it.samletVedtaksperiodetidslinje }
         inspektør = resultat.inspektør(0)

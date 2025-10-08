@@ -6,7 +6,7 @@ import no.nav.helse.etterlevelse.`§ 8-13 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-13 ledd 2`
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
-import no.nav.helse.person.MinimumSykdomsgradsvurdering
+import no.nav.helse.hendelser.Periode.Companion.utenPerioder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_17
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
@@ -14,7 +14,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvisteD
 import no.nav.helse.økonomi.Prosentdel
 
 internal class Sykdomsgradfilter(
-    private val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering,
+    private val perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
     private val subsumsjonslogg: Subsumsjonslogg,
     private val aktivitetslogg: IAktivitetslogg
 ) : UtbetalingstidslinjerFilter {
@@ -38,7 +38,7 @@ internal class Sykdomsgradfilter(
             }
 
         val tentativtAvvistePerioder = Utbetalingsdag.dagerUnderGrensen(oppdaterte.map { it.samletVedtaksperiodetidslinje })
-        val avvistePerioder = minimumSykdomsgradsvurdering.fjernDagerSomSkalUtbetalesLikevel(tentativtAvvistePerioder)
+        val avvistePerioder = tentativtAvvistePerioder.utenPerioder(perioderMedMinimumSykdomsgradVurdertOK)
         if (!avvistePerioder.containsAll(tentativtAvvistePerioder)) {
             aktivitetslogg.varsel(RV_VV_17)
         }

@@ -85,6 +85,13 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
 
         fun Periode.delvisOverlappMed(other: Periode) = overlapperMed(other) && !inneholder(other)
 
+        fun Collection<Periode>.utenPerioder(utenPerioder: Collection<Periode>) = this
+            .flatMap { gammelPeriode ->
+                utenPerioder.fold(listOf(gammelPeriode)) { result, utenPeriode ->
+                    result.dropLast(1) + result.last().uten(utenPeriode)
+                }
+            }
+
         // finner mursteinsperioder (både tidligere og senere) enn utgangspunktet
         fun Collection<Periode>.mursteinsperioder(utgangspunkt: Periode): List<Periode> {
             return mursteinsperioder(utgangspunkt) { it }

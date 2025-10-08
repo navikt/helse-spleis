@@ -17,6 +17,7 @@ import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
 import no.nav.helse.hendelser.Periode.Companion.slutterEtter
+import no.nav.helse.hendelser.Periode.Companion.utenPerioder
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
@@ -441,6 +442,16 @@ internal class PeriodeTest {
         assertEquals(10.januar til 11.januar, dager.periodeRettFør(12.januar))
         assertEquals(10.januar til 12.januar, dager.periodeRettFør(15.januar))
         assertEquals(1.januar til 31.januar, (1.januar til 31.januar).periodeRettFør(1.februar))
+    }
+
+    @Test
+    fun `uten perioder`() {
+        val perioder = setOf(1.januar til 20.januar, 25.januar til 31.januar)
+        val result = perioder.utenPerioder(listOf(5.januar til 15.januar, 23.januar til 26.januar, 30.januar til 1.februar))
+        assertEquals(
+            listOf(1.januar til 4.januar, 16.januar til 20.januar, 27.januar til 29.januar),
+            result
+        )
     }
 
     @Test
