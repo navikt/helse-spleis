@@ -31,6 +31,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_TIL_UTBETALI
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Klassekode
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -369,6 +370,31 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
             assertTilstander(2.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE)
             assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+
+        }
+    }
+
+    @Test
+    fun `Overstyrer tidslinje etter fattet vedtak`() {
+        selvstendig {
+            håndterSøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            nullstillTilstandsendringer()
+
+            håndterOverstyrTidslinje((1.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) })
+            håndterYtelser(1.vedtaksperiode)
+            assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstander(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_HISTORIKK,
+                SELVSTENDIG_AVVENTER_SIMULERING, SELVSTENDIG_AVVENTER_GODKJENNING, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVSLUTTET)
+            assertEquals(Utbetalingtype.REVURDERING, inspektør.utbetalinger(1.vedtaksperiode)[1].type)
+            assertEquals(setOf(80), inspektør.sykdomstidslinje.inspektør.grader.values.toSet())
 
         }
     }

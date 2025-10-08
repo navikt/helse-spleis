@@ -378,7 +378,8 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerHistorikk,
             SelvstendigAvventerInfotrygdHistorikk,
             SelvstendigAvventerSimulering,
-            SelvstendigAvventerVilkårsprøving -> {
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigAvsluttet -> {
                 val dagerNavOvertarAnsvar = behandlinger.dagerNavOvertarAnsvar
                 oppdaterHistorikk(hendelse.metadata.behandlingkilde, overstyrTidslinje(hendelse.metadata.meldingsreferanseId), hendelse.sykdomstidslinje, aktivitetsloggMedVedtaksperiodekontekst, hendelse.dagerNavOvertarAnsvar(dagerNavOvertarAnsvar)) {
                     // ingen validering å gjøre :(
@@ -394,7 +395,6 @@ internal class Vedtaksperiode private constructor(
             TilAnnullering,
             TilInfotrygd -> error("Kan ikke overstyre tidslinjen i $tilstand")
 
-            SelvstendigAvsluttet,
             SelvstendigStart,
             SelvstendigTilInfotrygd,
             SelvstendigTilUtbetaling -> error("Kan ikke overstyre tidslinjen i $tilstand")
@@ -2470,9 +2470,24 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal fun håndterOverstyringIgangsattRevurdering(
+    internal fun håndterOverstyringIgangsattRevurderingArbeidstaker(
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
+    ) {
+        håndterOverstyringIgangsattRevurdering(revurdering, aktivitetslogg, AvventerRevurdering)
+    }
+
+    internal fun håndterOverstyringIgangsattRevurderingSelvstendig(
+        revurdering: Revurderingseventyr,
+        aktivitetslogg: IAktivitetslogg
+    ) {
+        håndterOverstyringIgangsattRevurdering(revurdering, aktivitetslogg, SelvstendigAvventerBlokkerendePeriode)
+    }
+
+    private fun håndterOverstyringIgangsattRevurdering(
+        revurdering: Revurderingseventyr,
+        aktivitetslogg: IAktivitetslogg,
+        nesteTilstand: Vedtaksperiodetilstand
     ) {
         revurdering.inngåSomRevurdering(this, aktivitetslogg)
         behandlinger.sikreNyBehandling(
@@ -2481,7 +2496,7 @@ internal class Vedtaksperiode private constructor(
             person.beregnSkjæringstidspunkt(),
             yrkesaktivitet.beregnArbeidsgiverperiode()
         )
-        tilstand(aktivitetslogg, AvventerRevurdering)
+        tilstand(aktivitetslogg, nesteTilstand)
     }
 
     internal fun håndterOverstyringIgangsattFørstegangsvurdering(

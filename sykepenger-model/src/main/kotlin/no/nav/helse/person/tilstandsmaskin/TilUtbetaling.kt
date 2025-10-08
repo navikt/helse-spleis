@@ -14,7 +14,7 @@ internal data object TilUtbetaling : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.håndterOverstyringIgangsattRevurdering(revurdering, aktivitetslogg)
+        vedtaksperiode.håndterOverstyringIgangsattRevurderingArbeidstaker(revurdering, aktivitetslogg)
     }
 
     override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {

@@ -17,7 +17,7 @@ internal data object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.håndterOverstyringIgangsattRevurdering(revurdering, aktivitetslogg)
+        vedtaksperiode.håndterOverstyringIgangsattRevurderingArbeidstaker(revurdering, aktivitetslogg)
     }
 
     override fun nyAnnullering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {

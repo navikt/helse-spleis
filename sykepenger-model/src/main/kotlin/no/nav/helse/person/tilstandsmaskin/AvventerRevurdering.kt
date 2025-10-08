@@ -23,7 +23,7 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.håndterOverstyringIgangsattRevurdering(revurdering, aktivitetslogg)
+        vedtaksperiode.håndterOverstyringIgangsattRevurderingArbeidstaker(revurdering, aktivitetslogg)
         vedtaksperiode.behandlinger.forkastUtbetaling(aktivitetslogg)
     }
 

@@ -17,7 +17,7 @@ internal data object AvventerSimuleringRevurdering : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.håndterOverstyringIgangsattRevurdering(revurdering, aktivitetslogg)
+        vedtaksperiode.håndterOverstyringIgangsattRevurderingArbeidstaker(revurdering, aktivitetslogg)
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
