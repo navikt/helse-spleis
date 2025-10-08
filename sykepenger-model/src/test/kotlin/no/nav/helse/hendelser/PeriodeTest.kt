@@ -386,6 +386,16 @@ internal class PeriodeTest {
     }
 
     @Test
+    fun beholdDagerFremTil() {
+        val periode = februar
+        assertEquals(null, periode.beholdDagerTil(31.januar))
+        assertEquals(1.februar.somPeriode(), periode.beholdDagerTil(1.februar))
+        assertEquals(1.februar til 15.februar, periode.beholdDagerTil(15.februar))
+        assertEquals(1.februar til 27.februar, periode.beholdDagerTil(27.februar))
+        assertEquals(periode, periode.beholdDagerTil(28.februar))
+    }
+
+    @Test
     fun beholdDagerEtter() {
         val periode = februar
         assertEquals(null, periode.beholdDagerEtter(28.februar))

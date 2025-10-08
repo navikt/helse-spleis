@@ -104,6 +104,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.beløp.Beløpsdag
@@ -172,6 +173,7 @@ import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
+import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering.Companion.lagMinsteinntektsvurdering
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.UberegnetVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -1033,7 +1035,18 @@ internal class Vedtaksperiode private constructor(
         val sykepengegrunnlag = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag
         val beregningsgrunnlag = grunnlagsdata.inntektsgrunnlag.beregningsgrunnlag
         val medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus
-        val beregnetTidslinjePerVedtaksperiode = beregnUtbetalinger(aktivitetslogg, uberegnetTidslinjePerArbeidsgiver, harOpptjening, sykepengegrunnlag, beregningsgrunnlag, medlemskapstatus)
+        val redusertYtelseAlder = person.alder.redusertYtelseAlder
+        val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, periode, sykepengegrunnlag, redusertYtelseAlder)
+
+        val beregnetTidslinjePerVedtaksperiode = beregnUtbetalinger(
+            aktivitetslogg = aktivitetslogg,
+            uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
+            harOpptjening = harOpptjening,
+            sykepengegrunnlag = sykepengegrunnlag,
+            medlemskapstatus = medlemskapstatus,
+            periodeTilFylte67UnderMinsteinntekt = minsteinntektsvurdering.periodeTilFylte67UnderMinsteinntekt,
+            periodeEtterFylte67UnderMinsteinntekt = minsteinntektsvurdering.periodeEtterFylte67UnderMinsteinntekt
+        )
         // steg 4: lag et utbetalingsobjekt for vedtaksperioder som ikke har fått det enda (én per arbeidsgiver)
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
         check(perioderDetSkalBeregnesUtbetalingFor.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
@@ -1050,6 +1063,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         // steg 5: lage varsler ved gitte situasjoner
+        if (minsteinntektsvurdering.erUnderMinsteinntektskrav) aktivitetslogg.varsel(RV_SV_1)
+        else aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
+
         when (yrkesaktivitet.yrkesaktivitetstype) {
             is Arbeidstaker -> grunnlagsdata.valider(aktivitetslogg, yrkesaktivitet.organisasjonsnummer)
 
@@ -1067,6 +1083,9 @@ internal class Vedtaksperiode private constructor(
         infotrygdhistorikk.validerMedVarsel(aktivitetslogg, periode)
         infotrygdhistorikk.validerNyereOpplysninger(aktivitetslogg, periode)
         ytelser.valider(aktivitetslogg, periode, skjæringstidspunkt, behandlinger.maksdato.maksdato, erForlengelse())
+
+        // steg 6: subsummere ting
+        minsteinntektsvurdering.subsummere(subsumsjonslogg, skjæringstidspunkt, beregningsgrunnlag, redusertYtelseAlder, periode)
 
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(ytelser, aktivitetslogg)
 
@@ -2381,14 +2400,23 @@ internal class Vedtaksperiode private constructor(
     }
 
     private val beregningsperiode get() = checkNotNull(perioderSomMåHensyntasVedBeregning().map { it.periode }.periode()) { "Hvordan kan det ha seg at vi ikke har noen beregningsperiode?" }
-    private fun beregnUtbetalinger(aktivitetslogg: IAktivitetslogg, uberegnetTidslinjePerArbeidsgiver: List<Arbeidsgiverberegning>, harOpptjening: Boolean, sykepengegrunnlag: Inntekt, beregningsgrunnlag: Inntekt, medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus?): List<BeregnetPeriode> {
+    private fun beregnUtbetalinger(
+        aktivitetslogg: IAktivitetslogg,
+        uberegnetTidslinjePerArbeidsgiver: List<Arbeidsgiverberegning>,
+        harOpptjening: Boolean,
+        sykepengegrunnlag: Inntekt,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus?,
+        periodeTilFylte67UnderMinsteinntekt: Periode?,
+        periodeEtterFylte67UnderMinsteinntekt: Periode?
+    ): List<BeregnetPeriode> {
         val beregnetTidslinjePerVedtaksperiode = filtrerUtbetalingstidslinjer(
             aktivitetslogg = aktivitetslogg,
             uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
             sykepengegrunnlag = sykepengegrunnlag,
-            beregningsgrunnlag = sykepengegrunnlag,
             medlemskapstatus = medlemskapstatus,
-            harOpptjening = harOpptjening
+            harOpptjening = harOpptjening,
+            periodeTilFylte67UnderMinsteinntekt = periodeTilFylte67UnderMinsteinntekt,
+            periodeEtterFylte67UnderMinsteinntekt = periodeEtterFylte67UnderMinsteinntekt
         )
         return beregnetTidslinjePerVedtaksperiode
     }
@@ -2399,9 +2427,10 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg,
         uberegnetTidslinjePerArbeidsgiver: List<Arbeidsgiverberegning>,
         sykepengegrunnlag: Inntekt,
-        beregningsgrunnlag: Inntekt,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus?,
-        harOpptjening: Boolean
+        harOpptjening: Boolean,
+        periodeTilFylte67UnderMinsteinntekt: Periode?,
+        periodeEtterFylte67UnderMinsteinntekt: Periode?
     ): List<BeregnetPeriode> {
         // grunnlaget for maksdatoberegning er alt som har skjedd før,
         // frem til og med vedtaksperioden som beregnes
@@ -2414,12 +2443,8 @@ internal class Vedtaksperiode private constructor(
             Sykdomsgradfilter(person.minimumSykdomsgradsvurdering, subsumsjonslogg, aktivitetslogg),
             AvvisDagerEtterDødsdatofilter(person.alder, aktivitetslogg),
             AvvisInngangsvilkårfilter(
-                skjæringstidspunkt = skjæringstidspunkt,
-                alder = person.alder,
-                subsumsjonslogg = subsumsjonslogg,
-                aktivitetslogg = aktivitetslogg,
-                sykepengegrunnlag = sykepengegrunnlag,
-                beregningsgrunnlag = beregningsgrunnlag,
+                periodeTilFylte67UnderMinsteinntekt = periodeTilFylte67UnderMinsteinntekt,
+                periodeEtterFylte67UnderMinsteinntekt = periodeEtterFylte67UnderMinsteinntekt,
                 medlemskapstatus = medlemskapstatus,
                 harOpptjening = harOpptjening
             ),

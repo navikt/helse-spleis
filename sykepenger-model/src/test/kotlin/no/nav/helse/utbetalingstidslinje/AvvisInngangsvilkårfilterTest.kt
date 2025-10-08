@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
@@ -11,7 +12,6 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
@@ -20,6 +20,7 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering.Companion.lagMinsteinntektsvurdering
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -98,13 +99,12 @@ class AvvisInngangsvilkårfilterTest {
             vurdertInfotrygd = false
         )
         val medlemskapstatus = if (manglerMedlemskap) Medlemskapsvurdering.Medlemskapstatus.Nei else Medlemskapsvurdering.Medlemskapstatus.Ja
+        val redusertYtelseAlder: LocalDate = ALDER.redusertYtelseAlder
+        val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, periode(tidslinjer)!!, inntektsgrunnlag.sykepengegrunnlag, redusertYtelseAlder)
+
         val filter = AvvisInngangsvilkårfilter(
-            skjæringstidspunkt = skjæringstidspunkt,
-            alder = ALDER,
-            subsumsjonslogg = subsumsjonslogg,
-            aktivitetslogg = Aktivitetslogg(),
-            sykepengegrunnlag = inntektsgrunnlag.sykepengegrunnlag,
-            beregningsgrunnlag = inntektsgrunnlag.beregningsgrunnlag,
+            periodeTilFylte67UnderMinsteinntekt = minsteinntektsvurdering.periodeTilFylte67UnderMinsteinntekt,
+            periodeEtterFylte67UnderMinsteinntekt = minsteinntektsvurdering.periodeEtterFylte67UnderMinsteinntekt,
             medlemskapstatus = medlemskapstatus,
             harOpptjening = !manglerOpptjening
         )

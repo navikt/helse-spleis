@@ -180,6 +180,12 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
         return start til nyTom
     }
 
+    fun beholdDagerTil(cutoff: LocalDate): Periode? = when {
+        start > cutoff -> null
+        endInclusive <= cutoff -> this
+        else -> start til cutoff
+    }
+
     fun beholdDagerEtter(cutoff: LocalDate): Periode? = when {
         endInclusive <= cutoff -> null
         start > cutoff -> this

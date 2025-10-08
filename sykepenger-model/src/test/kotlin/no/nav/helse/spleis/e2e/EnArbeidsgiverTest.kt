@@ -113,6 +113,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IV_10, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
+            assertVarsel(Varselkode.RV_SV_1, 2.vedtaksperiode.filter())
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
             håndterVilkårsgrunnlag(3.vedtaksperiode)
