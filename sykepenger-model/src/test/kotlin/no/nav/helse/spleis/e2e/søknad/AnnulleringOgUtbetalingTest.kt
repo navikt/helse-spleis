@@ -111,7 +111,9 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
                 ManuellOverskrivingDag(it, Dagtype.Feriedag)
             }.plusElement(ManuellOverskrivingDag(31.juli, Dagtype.Arbeidsdag)))
             håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
 
             assertEquals(2, observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode).size)
             assertEquals(1, observatør.avsluttetMedVedtakEventer.getValue(2.vedtaksperiode).size)

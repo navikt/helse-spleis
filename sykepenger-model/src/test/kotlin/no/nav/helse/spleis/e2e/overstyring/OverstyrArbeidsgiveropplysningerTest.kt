@@ -269,13 +269,13 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(1, revurderingMarsUtbetaling.personOppdrag.size)
         revurderingMarsUtbetaling.arbeidsgiverOppdrag.also { oppdrag ->
             assertEquals(1.mars, oppdrag[0].inspektør.fom)
-            assertEquals(30.mars, oppdrag[0].inspektør.tom)
+            assertEquals(31.mars, oppdrag[0].inspektør.tom)
             assertEquals(715, oppdrag[0].inspektør.beløp)
             assertEquals(NY, oppdrag[0].inspektør.endringskode)
         }
         revurderingMarsUtbetaling.personOppdrag.also { oppdrag ->
             assertEquals(1.mars, oppdrag[0].inspektør.fom)
-            assertEquals(30.mars, oppdrag[0].inspektør.tom)
+            assertEquals(31.mars, oppdrag[0].inspektør.tom)
             assertEquals(715, oppdrag[0].inspektør.beløp)
             assertEquals(NY, oppdrag[0].inspektør.endringskode)
         }
@@ -631,7 +631,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
             revurdering.arbeidsgiverOppdrag[0].let { utbetalingslinje ->
                 assertEquals(17.januar, utbetalingslinje.inspektør.fom)
-                assertEquals(19.januar, utbetalingslinje.inspektør.tom)
+                assertEquals(21.januar, utbetalingslinje.inspektør.tom)
                 assertEquals(462, utbetalingslinje.inspektør.beløp)
                 assertEquals(ENDR, utbetalingslinje.inspektør.endringskode)
             }

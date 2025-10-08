@@ -178,7 +178,9 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             nyttVedtak(1.januar til (søndag den 28.januar))
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(søndag den 28.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
+            håndterUtbetalt()
 
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()

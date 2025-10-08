@@ -654,7 +654,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             assertEquals(1, utbetaling.arbeidsgiverOppdrag.size)
             utbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
                 assertEquals(1080, linje.beløp)
-                assertEquals(17.januar til 19.januar, linje.fom til linje.tom)
+                assertEquals(17.januar til 21.januar, linje.fom til linje.tom)
             }
 
             assertEquals(1, utbetaling.personOppdrag.size)

@@ -180,7 +180,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         andreUtbetaling.arbeidsgiverOppdrag.single().inspektør.also { linje ->
             assertEquals(NY, linje.endringskode)
             assertEquals(29.januar, linje.fom)
-            assertEquals(9.februar, linje.tom)
+            assertEquals(11.februar, linje.tom)
         }
 
         val arbeidsgiverOppdrag = outOfOrderUtbetaling.arbeidsgiverOppdrag
@@ -191,7 +191,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         revurderingutbetaling.arbeidsgiverOppdrag.single().inspektør.also { linje ->
             assertEquals(UEND, linje.endringskode)
             assertEquals(29.januar, linje.fom)
-            assertEquals(9.februar, linje.tom)
+            assertEquals(11.februar, linje.tom)
         }
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
@@ -472,7 +472,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         }
         assertEquals(1, januarUtbetaling.arbeidsgiverOppdrag.size)
         januarUtbetaling.arbeidsgiverOppdrag[0].also { linje ->
-            assertEquals(17.januar til 26.januar, linje.fom til linje.tom)
+            assertEquals(17.januar til 28.januar, linje.fom til linje.tom)
             assertEquals(1431, linje.beløp)
         }
         assertEquals(1, februarRevurderingUtbetaling.arbeidsgiverOppdrag.size)
@@ -573,14 +573,14 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             assertEquals(1, oppdrag.size)
             val linje = oppdrag.single().inspektør
             assertEquals(17.mars, linje.fom)
-            assertEquals(30.mars, linje.tom)
+            assertEquals(31.mars, linje.tom)
             assertEquals(1431, linje.beløp)
         }
         a2AndreUtbetaling.arbeidsgiverOppdrag.also { oppdrag ->
             assertEquals(1, oppdrag.size)
             val linje = oppdrag.single().inspektør
             assertEquals(17.mars, linje.fom)
-            assertEquals(30.mars, linje.tom)
+            assertEquals(31.mars, linje.tom)
             assertEquals(1080, linje.beløp)
         }
         a1Utbetaling.arbeidsgiverOppdrag.also { oppdrag ->

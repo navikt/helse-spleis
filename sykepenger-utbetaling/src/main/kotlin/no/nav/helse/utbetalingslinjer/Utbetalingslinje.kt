@@ -44,16 +44,10 @@ data class Utbetalingslinje(
 
         internal fun normaliserLinjer(fagsystemId: String, linjer: List<Utbetalingslinje>): List<Utbetalingslinje> {
             val linjerMedBeløp = fjernLinjerUtenUtbetalingsdager(linjer)
-            val nyeLinjerSkalPekePåFagsystemId = nyeLinjer(fagsystemId, linjerMedBeløp)
-            val ferdigeLinjer = sisteLinjeSkalIkkeTrekkesIHelg(nyeLinjerSkalPekePåFagsystemId)
+            val ferdigeLinjer = nyeLinjer(fagsystemId, linjerMedBeløp)
             return kjedeSammenLinjer(ferdigeLinjer)
         }
 
-        private fun sisteLinjeSkalIkkeTrekkesIHelg(linjer: List<Utbetalingslinje>): List<Utbetalingslinje> {
-            val utbetalingslinje = linjer.dropLast(1)
-            val siste = linjer.takeLast(1).mapNotNull { it.kuttHelg() }
-            return utbetalingslinje + siste
-        }
 
         // alle nye linjer skal peke på fagsystemId, foruten linje nr 1
         private fun nyeLinjer(fagsystemId: String, linjer: List<Utbetalingslinje>) =

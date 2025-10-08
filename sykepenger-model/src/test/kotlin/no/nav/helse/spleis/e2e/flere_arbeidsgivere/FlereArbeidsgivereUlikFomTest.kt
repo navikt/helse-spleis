@@ -380,7 +380,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         val a1Linje = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag.single()
         assertEquals(16.mars, a1Linje.fom)
-        assertEquals(30.mars, a1Linje.tom)
+        assertEquals(31.mars, a1Linje.tom)
         assertEquals(462, a1Linje.beløp)
 
         this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -391,7 +391,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         val a2Linje = inspektør(a2).sisteUtbetaling().arbeidsgiverOppdrag.single()
         assertEquals(21.mars, a2Linje.fom)
-        assertEquals(30.mars, a2Linje.tom)
+        assertEquals(31.mars, a2Linje.tom)
         assertEquals(20000.månedlig.dagligInt, a2Linje.beløp)
     }
 
@@ -432,7 +432,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(1, arbeidsgiverOppdrag.size)
         val a1Linje1 = arbeidsgiverOppdrag[0]
         assertEquals(16.mars, a1Linje1.fom)
-        assertEquals(30.mars, a1Linje1.tom)
+        assertEquals(31.mars, a1Linje1.tom)
         assertEquals(997, a1Linje1.beløp)
 
         this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -443,7 +443,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         val a2Linje = inspektør(a2).sisteUtbetaling().arbeidsgiverOppdrag.single()
         assertEquals(21.mars, a2Linje.fom)
-        assertEquals(30.mars, a2Linje.tom)
+        assertEquals(31.mars, a2Linje.tom)
         assertEquals(1163, a2Linje.beløp)
     }
 
@@ -488,12 +488,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         val a1Linje = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag.single()
         assertEquals(16.mars, a1Linje.fom)
-        assertEquals(30.mars, a1Linje.tom)
+        assertEquals(31.mars, a1Linje.tom)
         assertEquals(997, a1Linje.beløp)
 
         val a2Linje = inspektør(a2).sisteUtbetaling().arbeidsgiverOppdrag.single()
         assertEquals(21.mars, a2Linje.fom)
-        assertEquals(30.mars, a2Linje.tom)
+        assertEquals(31.mars, a2Linje.tom)
         assertEquals(582, a2Linje.beløp)
     }
 
@@ -631,12 +631,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         val a1Linje = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag.single()
         assertEquals(16.mars, a1Linje.fom)
-        assertEquals(30.mars, a1Linje.tom)
+        assertEquals(31.mars, a1Linje.tom)
         assertEquals(499, a1Linje.beløp)
 
         val a2Linje = inspektør(a2).sisteUtbetaling().arbeidsgiverOppdrag.single()
         assertEquals(21.mars, a2Linje.fom)
-        assertEquals(30.mars, a2Linje.tom)
+        assertEquals(31.mars, a2Linje.tom)
         assertEquals(1163, a2Linje.beløp)
     }
 
@@ -1058,7 +1058,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         val a1Linje = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag.last()
         assertEquals(16.mars, a1Linje.fom)
-        assertEquals(30.mars, a1Linje.tom)
+        assertEquals(31.mars, a1Linje.tom)
         assertEquals(997, a1Linje.beløp)
 
         this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -1107,7 +1107,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         val a1Linje = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag.last()
         assertEquals(16.mars, a1Linje.fom)
-        assertEquals(30.mars, a1Linje.tom)
+        assertEquals(31.mars, a1Linje.tom)
         assertEquals(499, a1Linje.beløp)
 
         this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)

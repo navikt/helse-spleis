@@ -289,7 +289,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 assertEquals(Endringskode.UEND, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
                 revurdering.arbeidsgiverOppdrag.inspektør.also { arbeidsgiveroppdrag ->
                     assertEquals(10.februar, arbeidsgiveroppdrag.fom(0))
-                    assertEquals(23.februar, arbeidsgiveroppdrag.tom(0))
+                    assertEquals(25.februar, arbeidsgiveroppdrag.tom(0))
                     assertEquals(Endringskode.UEND, arbeidsgiveroppdrag.endringskode(0))
                 }
             }
@@ -579,7 +579,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 assertEquals(Endringskode.ENDR, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
                 revurdering.arbeidsgiverOppdrag.inspektør.also { arbeidsgiveroppdrag ->
                     assertEquals(10.februar, arbeidsgiveroppdrag.fom(0))
-                    assertEquals(23.februar, arbeidsgiveroppdrag.tom(0))
+                    assertEquals(25.februar, arbeidsgiveroppdrag.tom(0))
                     assertEquals(50, arbeidsgiveroppdrag.grad(0))
                     assertEquals(Endringskode.NY, arbeidsgiveroppdrag.endringskode(0))
                 }

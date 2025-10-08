@@ -160,7 +160,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         )
         val a2Linje = inspektør(a2).utbetaling(0).arbeidsgiverOppdrag.last()
         assertEquals(17.mars, a2Linje.fom)
-        assertEquals(30.mars, a2Linje.tom)
+        assertEquals(31.mars, a2Linje.tom)
         assertEquals(692, a2Linje.beløp)
 
         assertVarsler(emptyList(), 1.vedtaksperiode.filter(a1))

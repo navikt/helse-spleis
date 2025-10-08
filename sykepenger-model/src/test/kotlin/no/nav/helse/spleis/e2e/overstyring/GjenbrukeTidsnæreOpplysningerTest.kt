@@ -603,13 +603,13 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             revurdering.arbeidsgiverOppdrag.also { oppdrag ->
                 assertEquals(2, oppdrag.size)
                 oppdrag[0].inspektør.also { linje ->
-                    assertEquals(17.mars til 30.mars, linje.fom til linje.tom)
+                    assertEquals(17.mars til 31.mars, linje.fom til linje.tom)
                     assertEquals(17.mars, linje.datoStatusFom)
                     assertEquals(Endringskode.ENDR, linje.endringskode)
                     assertEquals("OPPH", linje.statuskode)
                 }
                 oppdrag[1].inspektør.also { linje ->
-                    assertEquals(27.mars til 30.mars, linje.fom til linje.tom)
+                    assertEquals(27.mars til 31.mars, linje.fom til linje.tom)
                     assertEquals(Endringskode.NY, linje.endringskode)
                 }
             }
@@ -655,7 +655,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             februarutbetaling.arbeidsgiverOppdrag.also { oppdrag ->
                 assertEquals(1, oppdrag.size)
                 oppdrag[0].inspektør.also { linje ->
-                    assertEquals(14.februar til 9.mars, linje.fom til linje.tom)
+                    assertEquals(14.februar til 10.mars, linje.fom til linje.tom)
                     assertEquals(Endringskode.NY, linje.endringskode)
                 }
             }
@@ -668,12 +668,12 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             revurderingFebruar.arbeidsgiverOppdrag.also { oppdrag ->
                 assertEquals(2, oppdrag.size)
                 oppdrag[0].inspektør.also { linje ->
-                    assertEquals(14.februar til 9.mars, linje.fom til linje.tom)
+                    assertEquals(14.februar til 10.mars, linje.fom til linje.tom)
                     assertEquals(Endringskode.ENDR, linje.endringskode)
                     assertEquals(14.februar, linje.datoStatusFom)
                 }
                 oppdrag[1].inspektør.also { linje ->
-                    assertEquals(5.mars til 9.mars, linje.fom til linje.tom)
+                    assertEquals(5.mars til 10.mars, linje.fom til linje.tom)
                     assertEquals(Endringskode.NY, linje.endringskode)
                 }
             }
@@ -713,7 +713,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             februarutbetaling.arbeidsgiverOppdrag.also { oppdrag ->
                 assertEquals(1, oppdrag.size)
                 oppdrag[0].inspektør.also { linje ->
-                    assertEquals(14.februar til 9.mars, linje.fom til linje.tom)
+                    assertEquals(14.februar til 10.mars, linje.fom til linje.tom)
                     assertEquals(Endringskode.NY, linje.endringskode)
                 }
             }
@@ -728,12 +728,12 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             revurderingFebruar.arbeidsgiverOppdrag.also { oppdrag ->
                 assertEquals(2, oppdrag.size)
                 oppdrag[0].inspektør.also { linje ->
-                    assertEquals(14.februar til 9.mars, linje.fom til linje.tom)
+                    assertEquals(14.februar til 10.mars, linje.fom til linje.tom)
                     assertEquals(Endringskode.ENDR, linje.endringskode)
                     assertEquals(14.februar, linje.datoStatusFom)
                 }
                 oppdrag[1].inspektør.also { linje ->
-                    assertEquals(5.mars til 9.mars, linje.fom til linje.tom)
+                    assertEquals(5.mars til 10.mars, linje.fom til linje.tom)
                     assertEquals(Endringskode.NY, linje.endringskode)
                 }
             }

@@ -69,7 +69,7 @@ internal class OppdragBuilderTest {
         val result = builder.build()
 
         assertEquals(1, result.size)
-        assertEquals(20.januar til 26.januar, result[0].inspektør.fom til result[0].inspektør.tom)
+        assertEquals(20.januar til 28.januar, result[0].inspektør.fom til result[0].inspektør.tom)
     }
 
     @Test
@@ -87,7 +87,7 @@ internal class OppdragBuilderTest {
         val result = builder.build()
 
         assertEquals(1, result.size)
-        assertEquals(22.januar til 26.januar, result[0].inspektør.fom til result[0].inspektør.tom)
+        assertEquals(22.januar til 28.januar, result[0].inspektør.fom til result[0].inspektør.tom)
     }
 
     @Test

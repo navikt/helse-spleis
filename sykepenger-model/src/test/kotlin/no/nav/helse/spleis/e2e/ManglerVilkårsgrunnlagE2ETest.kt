@@ -106,7 +106,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             }
             inspektør.utbetaling(2).also { utbetalinginspektør ->
                 assertEquals(1, utbetalinginspektør.arbeidsgiverOppdrag.size)
-                assertEquals(10.mars til 30.mars, utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.periode)
+                assertEquals(10.mars til 31.mars, utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.periode)
             }
         }
     }
