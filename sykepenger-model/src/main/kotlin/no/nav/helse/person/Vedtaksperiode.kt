@@ -344,7 +344,10 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerInfotrygdHistorikk,
             SelvstendigAvventerSimulering,
             SelvstendigAvventerVilkårsprøving,
-            SelvstendigTilUtbetaling -> håndterOverlappendeSøknad(søknad, aktivitetsloggMedVedtaksperiodekontekst)
+            SelvstendigTilUtbetaling -> when (behandlinger.harFattetVedtak()) {
+                true -> håndterOverlappendeSøknadRevurdering(søknad, aktivitetsloggMedVedtaksperiodekontekst)
+                false -> håndterOverlappendeSøknad(søknad, aktivitetsloggMedVedtaksperiodekontekst)
+            }
         }
         if (aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeilEllerVerre()) forkast(søknad, aktivitetsloggMedVedtaksperiodekontekst)
         return Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode)
@@ -1617,15 +1620,12 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterSøknad(
         søknad: Søknad,
-        aktivitetslogg: IAktivitetslogg,
-        nesteTilstand: () -> Vedtaksperiodetilstand? = { null }
+        aktivitetslogg: IAktivitetslogg
     ) {
         videreførEksisterendeRefusjonsopplysninger(søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), aktivitetslogg)
         oppdaterHistorikk(søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
             søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, subsumsjonslogg)
         }
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
-        nesteTilstand()?.also { tilstand(aktivitetslogg, it) }
     }
 
     private fun håndterOverlappendeSøknad(

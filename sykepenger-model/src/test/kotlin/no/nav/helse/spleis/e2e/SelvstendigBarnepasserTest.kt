@@ -259,7 +259,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     fun `To selvstendigsøknader`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
             håndterSøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
-            håndterSøknadSelvstendig(mars, 1.mars til 16.mars, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
+            håndterSøknadSelvstendig(mars, ventetid = 1.mars til 16.mars, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
 
             assertTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
             assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))

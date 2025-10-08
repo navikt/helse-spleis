@@ -828,7 +828,7 @@ internal class Yrkesaktivitet private constructor(
     private fun senereVedtaksperioderMedFattetVedtakMedSammeAgp(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
         val arbeidsgiverperiode = vedtaksperiodeSomForsøkesAnnullert.behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.periode ?: return setOf(vedtaksperiodeSomForsøkesAnnullert)
         val vedtaksperioder = vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).filter { it.periode.start >= vedtaksperiodeSomForsøkesAnnullert.periode.start }
-        return vedtaksperioder.filter { it.behandlinger.harVærtUtbetalt() }.toSet()
+        return vedtaksperioder.filter { it.behandlinger.harFattetVedtak() }.toSet()
     }
 
     internal fun finnSisteVedtaksperiodeFørMedSammenhengendeUtbetaling(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {

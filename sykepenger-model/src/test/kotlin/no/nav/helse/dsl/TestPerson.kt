@@ -271,6 +271,7 @@ internal class TestPerson(
 
         internal fun håndterSøknadSelvstendig(
             periode: Periode,
+            sykdomsgrad: Prosentdel = 100.prosent,
             ventetid: Periode = 1.januar til 16.januar,
             arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
             pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt> = listOf(
@@ -281,7 +282,7 @@ internal class TestPerson(
             sendtTilNAVEllerArbeidsgiver: Temporal? = null,
             fraværFørSykmelding: Boolean? = null
         ) = håndterSøknad(
-            Sykdom(periode.start, periode.endInclusive, 100.prosent),
+            Sykdom(periode.start, periode.endInclusive, sykdomsgrad),
             Ventetid(ventetid),
             arbeidssituasjon = arbeidssituasjon,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,

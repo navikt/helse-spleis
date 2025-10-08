@@ -396,7 +396,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     fun `To selvstendigsøknader`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
             håndterSøknadSelvstendig(januar)
-            håndterSøknadSelvstendig(mars, 1.mars til 16.mars)
+            håndterSøknadSelvstendig(mars, ventetid = 1.mars til 16.mars)
 
             assertTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
             assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
@@ -427,6 +427,32 @@ internal class SelvstendigTest : AbstractDslTest() {
                 SELVSTENDIG_AVVENTER_SIMULERING, SELVSTENDIG_AVVENTER_GODKJENNING, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVSLUTTET)
             assertEquals(Utbetalingtype.REVURDERING, inspektør.utbetalinger(1.vedtaksperiode)[1].type)
             assertEquals(setOf(80), inspektør.sykdomstidslinje.inspektør.grader.values.toSet())
+
+        }
+    }
+
+    @Test
+    fun `korrigert søknad etter fattet vedtak`() {
+        selvstendig {
+            håndterSøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            nullstillTilstandsendringer()
+
+            håndterSøknadSelvstendig(januar, sykdomsgrad = 80.prosent)
+
+            håndterYtelser(1.vedtaksperiode)
+            assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstander(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_HISTORIKK,
+                SELVSTENDIG_AVVENTER_SIMULERING, SELVSTENDIG_AVVENTER_GODKJENNING, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVSLUTTET)
+            assertEquals(Utbetalingtype.REVURDERING, inspektør.utbetalinger(1.vedtaksperiode)[1].type)
+            assertEquals(setOf(100, 80), inspektør.sykdomstidslinje.inspektør.grader.values.toSet())
 
         }
     }
