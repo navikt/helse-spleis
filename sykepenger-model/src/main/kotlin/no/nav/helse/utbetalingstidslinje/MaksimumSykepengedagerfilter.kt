@@ -135,8 +135,6 @@ internal class MaksimumSykepengedagerfilter(
                 `§ 8-12 ledd 2`(
                     oppfylt = harTilstrekkeligOpphold,
                     dato = dagen,
-                    gjenståendeSykepengedager = gjenståendeSykepengedager,
-                    beregnetAntallOppholdsdager = oppholdFørDagen,
                     tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
                     tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
                     beregnetTidslinje = beregnetTidslinjesubsumsjon,

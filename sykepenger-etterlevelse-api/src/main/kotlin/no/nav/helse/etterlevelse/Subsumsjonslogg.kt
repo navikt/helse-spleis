@@ -342,8 +342,6 @@ fun `§ 8-12 ledd 1 punktum 1`(
 fun `§ 8-12 ledd 2`(
     oppfylt: Boolean,
     dato: LocalDate,
-    gjenståendeSykepengedager: Int,
-    beregnetAntallOppholdsdager: Int,
     tilstrekkeligOppholdISykedager: Int,
     tidslinjegrunnlag: List<List<Tidslinjedag>>,
     beregnetTidslinje: List<Tidslinjedag>
