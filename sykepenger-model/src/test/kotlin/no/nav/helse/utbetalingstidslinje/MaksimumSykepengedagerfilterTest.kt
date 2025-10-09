@@ -40,7 +40,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbe
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.NyVilkårsprøvingNødvendig
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
-import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
+import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -66,14 +66,14 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test
-    fun `vurderer ikke maksdato for infotrygdtidslinje som strekker seg ut over vedtaksperioden`() {
+    fun `vurderer maksdato for infotrygdtidslinje som strekker seg ut over vedtaksperioden`() {
         val a1 = tidslinjeOf(16.AP, 248.NAVDAGER)
         val infotrygdlinje = tidslinjeOf(200.ARB, 10.NAVDAGER, startDato = 1.januar(2019))
         val avvisteDager = listOf(a1).utbetalingsavgrenser(UNG_PERSON_FNR_2018, a1.periode(), infotrygdlinje)
         assertEquals(emptyList<Any>(), avvisteDager)
-        assertEquals(248, forbrukteDager)
-        assertEquals(0, gjenståendeDager)
-        assertEquals(setOf(28.desember), maksdatoer)
+        assertEquals(0, forbrukteDager)
+        assertEquals(248, gjenståendeDager)
+        assertEquals(setOf(28.desember, 11.desember(2019)), maksdatoer)
     }
 
     @Test

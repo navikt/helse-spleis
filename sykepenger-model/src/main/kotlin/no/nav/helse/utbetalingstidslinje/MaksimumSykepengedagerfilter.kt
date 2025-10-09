@@ -13,10 +13,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_9
-import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter.State.Karantene
-import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter.State.Syk
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
+import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
 
 internal class MaksimumSykepengedagerfilter(
     private val sekstisyvårsdagen: LocalDate,
@@ -28,20 +25,24 @@ internal class MaksimumSykepengedagerfilter(
     private val infotrygdtidslinje: Utbetalingstidslinje
 ) : UtbetalingstidslinjerFilter {
 
-    internal companion object {
-        const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26 * 7
-        private const val HISTORISK_PERIODE_I_ÅR: Long = 3
-    }
+    private val maksdatoberegning = Maksdatoberegning(
+        sekstisyvårsdagen = sekstisyvårsdagen,
+        syttiårsdagen = syttiårsdagen,
+        dødsdato = dødsdato,
+        arbeidsgiverRegler = arbeidsgiverRegler,
+        infotrygdtidslinje = infotrygdtidslinje
+    )
 
-    internal val maksdatosaker = mutableListOf<Maksdatokontekst>()
+    internal var maksdatosaker: List<Maksdatokontekst> = emptyList()
+        private set
     private var sisteVurdering = Maksdatokontekst.TomKontekst
 
-    private var state: State = State.Initiell
     private lateinit var beregnetTidslinje: Utbetalingstidslinje
     private lateinit var tidslinjegrunnlag: List<Utbetalingstidslinje>
 
     private val tidslinjegrunnlagsubsumsjon by lazy { tidslinjegrunnlag.subsumsjonsformat() }
     private val beregnetTidslinjesubsumsjon by lazy { beregnetTidslinje.subsumsjonsformat() }
+
     internal fun maksdatoresultatForVedtaksperiode(periode: Periode): Maksdatovurdering {
         return Maksdatovurdering(
             resultat = sisteVurdering
@@ -53,11 +54,6 @@ internal class MaksimumSykepengedagerfilter(
         )
     }
 
-    private fun erDød(dato: LocalDate) =
-        dødsdato != null && dødsdato < dato
-
-    private fun mistetSykepengerett(dato: LocalDate) = dato >= syttiårsdagen
-
     override fun filter(
         arbeidsgivere: List<Arbeidsgiverberegning>,
         vedtaksperiode: Periode
@@ -65,37 +61,37 @@ internal class MaksimumSykepengedagerfilter(
         tidslinjegrunnlag = arbeidsgivere.map { it.samletVedtaksperiodetidslinje } + listOf(infotrygdtidslinje.fremTilOgMed(vedtaksperiode.endInclusive))
         beregnetTidslinje = tidslinjegrunnlag.reduce(Utbetalingstidslinje::plus)
 
-        Utbetalingstidslinje.periode(tidslinjegrunnlag)
-            ?.forEach { dato ->
-                when (val dag = beregnetTidslinje[dato]) {
-                    is Utbetalingsdag.Arbeidsdag -> state.oppholdsdag(this, dag.dato)
-                    is Utbetalingsdag.ArbeidsgiverperiodeDag -> state.oppholdsdag(this, dag.dato)
-                    is Utbetalingsdag.ArbeidsgiverperiodedagNav -> state.oppholdsdag(this, dag.dato)
-                    is Utbetalingsdag.AvvistDag -> state.avvistDag(this, dag.dato)
-                    is Utbetalingsdag.ForeldetDag -> state.oppholdsdag(this, dag.dato)
-                    is Utbetalingsdag.Fridag -> state.fridag(this, dag.dato)
-                    is NavDag -> {
-                        if (erDød(dag.dato)) state.avdød(this)
-                        else if (mistetSykepengerett(dag.dato)) state(State.ForGammel)
-                        state.betalbarDag(this, dag.dato)
-                    }
+        val vurderinger = maksdatoberegning.beregn(arbeidsgivere)
 
-                    is Utbetalingsdag.NavHelgDag -> {
-                        if (erDød(dato)) state.avdød(this)
-                        else if (mistetSykepengerett(dag.dato)) state(State.ForGammel)
-                        state.sykdomshelg(this, dag.dato)
-                    }
+        // <backwards compatibility>
+        maksdatosaker = vurderinger.dropLast(1)
+        sisteVurdering = vurderinger.last()
+        // </backwards compatibility>
 
-                    is UkjentDag -> state.oppholdsdag(this, dag.dato)
-                    is Utbetalingsdag.Ventetidsdag -> state.oppholdsdag(this, dag.dato)
-                }
+        // todo: rart å subsummere alle vurderingene siden tidenes morgen?
+        vurderinger.forEach { vurdering ->
+            // Bare relevant om det er ny rett på sykepenger eller om vilkåret ikke er oppfylt
+            val harTilstrekkeligOpphold = vurdering.datoForTilstrekkeligOppholdOppnådd(TILSTREKKELIG_OPPHOLD_I_SYKEDAGER)
+            val gjenståendeSykepengedager = vurdering.gjenståendeDagerUnder67År(arbeidsgiverRegler)
+
+            if (harTilstrekkeligOpphold != null || gjenståendeSykepengedager == 0) {
+                subsumsjonslogg.logg(
+                    `§ 8-12 ledd 2`(
+                        oppfylt = harTilstrekkeligOpphold != null,
+                        dato = vurdering.vurdertTilOgMed,
+                        tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
+                        tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
+                        beregnetTidslinje = beregnetTidslinjesubsumsjon,
+                    )
+                )
             }
+        }
 
         /** går gjennom alle maksdato-sakene og avslår dager. EGENTLIG er det nok å avslå dagene
          *  fra sisteVurdering, men det er noen enhetstester som tester veldig lange
          *  tidslinjer og de forventer at alle maksdatodager avslås, uavhengig av maksdatosak
          */
-        val begrunnelser = (maksdatosaker.plusElement(sisteVurdering))
+        val begrunnelser = vurderinger
             .flatMap { maksdatosak -> maksdatosak.begrunnelseForAvslåtteDager(syttiårsdagen, dødsdato, arbeidsgiverRegler, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) }
             .groupBy(keySelector = { it.first }, valueTransform = { it.second })
 
@@ -112,244 +108,6 @@ internal class MaksimumSykepengedagerfilter(
             aktivitetslogg.info("Maksimalt antall sykedager overskrides ikke i perioden")
 
         return avvisteTidslinjer
-    }
-
-    private fun state(nyState: State) {
-        if (this.state == nyState) return
-        state.leaving(this)
-        state = nyState
-        state.entering(this)
-    }
-
-    private fun økOppholdstelling(dato: LocalDate) {
-        sisteVurdering = sisteVurdering.medOppholdsdag(dato)
-    }
-
-    private fun subsummerTilstrekkeligOppholdNådd(dagen: LocalDate, oppholdFørDagen: Int = sisteVurdering.oppholdsteller): Boolean {
-        // Nok opphold? 🤔
-        val harTilstrekkeligOpphold = oppholdFørDagen >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
-        val gjenståendeSykepengedager = sisteVurdering.gjenståendeDagerUnder67År(arbeidsgiverRegler)
-        // Bare relevant om det er ny rett på sykepenger eller om vilkåret ikke er oppfylt
-        if (harTilstrekkeligOpphold || gjenståendeSykepengedager == 0) {
-            subsumsjonslogg.logg(
-                `§ 8-12 ledd 2`(
-                    oppfylt = harTilstrekkeligOpphold,
-                    dato = dagen,
-                    tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
-                    tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
-                    beregnetTidslinje = beregnetTidslinjesubsumsjon,
-                )
-            )
-        }
-        return harTilstrekkeligOpphold
-    }
-
-    private fun håndterBetalbarDag(dagen: LocalDate) {
-        sisteVurdering = sisteVurdering.inkrementer(dagen)
-        when {
-            sisteVurdering.erDagerUnder67ÅrForbrukte(arbeidsgiverRegler) || sisteVurdering.erDagerOver67ÅrForbrukte(sekstisyvårsdagen, arbeidsgiverRegler) -> state(Karantene)
-            else -> state(Syk)
-        }
-    }
-
-    private fun håndterBetalbarDagEtterFerie(dagen: LocalDate) {
-        håndterBetalbarDag(dagen)
-    }
-
-    private fun håndterBetalbarDagEtterOpphold(dagen: LocalDate) {
-        val oppholdFørDagen = sisteVurdering.oppholdsteller
-        sisteVurdering = sisteVurdering.dekrementer(dagen, dagen.minusYears(HISTORISK_PERIODE_I_ÅR))
-        subsummerTilstrekkeligOppholdNådd(dagen, oppholdFørDagen = oppholdFørDagen)
-        håndterBetalbarDag(dagen)
-    }
-
-    private fun håndterBetalbarDagEtterMaksdato(dag: LocalDate) {
-        sisteVurdering = sisteVurdering.medAvslåttDag(dag)
-    }
-
-    private interface State {
-        fun avdød(avgrenser: MaksimumSykepengedagerfilter) = avgrenser.state(Død)
-        fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate)
-        fun avvistDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) = oppholdsdag(avgrenser, dagen)
-        fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate)
-        fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate)
-        fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) = oppholdsdag(avgrenser, dagen)
-        fun entering(avgrenser: MaksimumSykepengedagerfilter) {}
-        fun leaving(avgrenser: MaksimumSykepengedagerfilter) {}
-
-        object Initiell : State {
-            override fun entering(avgrenser: MaksimumSykepengedagerfilter) {
-                avgrenser.maksdatosaker.add(avgrenser.sisteVurdering)
-                avgrenser.sisteVurdering = Maksdatokontekst.TomKontekst
-            }
-            override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
-            override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
-            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                /* starter en helt ny maksdatosak 😊 */
-                avgrenser.sisteVurdering = Maksdatokontekst(
-                    vurdertTilOgMed = dagen,
-                    startdatoSykepengerettighet = dagen,
-                    startdatoTreårsvindu = dagen.minusYears(HISTORISK_PERIODE_I_ÅR),
-                    betalteDager = setOf(dagen),
-                    oppholdsdager = emptySet(),
-                    avslåtteDager = emptySet()
-                )
-                avgrenser.state(Syk)
-            }
-        }
-
-        object Syk : State {
-            override fun entering(avgrenser: MaksimumSykepengedagerfilter) {
-                check(avgrenser.sisteVurdering.oppholdsteller == 0)
-            }
-
-            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.håndterBetalbarDag(dagen)
-            }
-
-            override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                /* verken forbrukt dag eller oppholdsdag 😌 */
-            }
-
-            override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.økOppholdstelling(dagen)
-                avgrenser.state(Opphold)
-            }
-
-            override fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.økOppholdstelling(dagen)
-                avgrenser.state(OppholdFri)
-            }
-        }
-
-        object Opphold : State {
-
-            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.håndterBetalbarDagEtterOpphold(dagen)
-            }
-
-            override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.økOppholdstelling(dagen)
-                oppholdsdag(avgrenser, dagen)
-            }
-
-            override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.økOppholdstelling(dagen)
-                if (!avgrenser.subsummerTilstrekkeligOppholdNådd(dagen)) return
-                avgrenser.state(Initiell)
-            }
-        }
-
-        object OppholdFri : State {
-            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.håndterBetalbarDagEtterFerie(dagen)
-            }
-
-            override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                /* verken forbrukt dag eller oppholdsdag 😌 */
-            }
-
-            override fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.økOppholdstelling(dagen)
-                if (!avgrenser.subsummerTilstrekkeligOppholdNådd(dagen)) return
-                avgrenser.state(Initiell)
-            }
-
-            override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.økOppholdstelling(dagen)
-                if (!avgrenser.subsummerTilstrekkeligOppholdNådd(dagen)) return avgrenser.state(Opphold)
-                avgrenser.state(Initiell)
-            }
-        }
-
-        object Karantene : State {
-            override fun entering(avgrenser: MaksimumSykepengedagerfilter) {
-                check(avgrenser.sisteVurdering.oppholdsteller == 0)
-            }
-
-            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.håndterBetalbarDagEtterMaksdato(dagen)
-                vurderTilstrekkeligOppholdNådd(avgrenser)
-            }
-
-            override fun avvistDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.håndterBetalbarDagEtterMaksdato(dagen)
-                vurderTilstrekkeligOppholdNådd(avgrenser)
-            }
-
-            override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.økOppholdstelling(dagen)
-                /* helg skal ikke medføre ny rettighet */
-                vurderTilstrekkeligOppholdNådd(avgrenser)
-            }
-
-            override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.økOppholdstelling(dagen)
-                if (!avgrenser.subsummerTilstrekkeligOppholdNådd(dagen)) return
-                avgrenser.state(Initiell)
-            }
-
-            override fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.økOppholdstelling(dagen)
-                /* helg skal ikke medføre ny rettighet */
-                vurderTilstrekkeligOppholdNådd(avgrenser)
-            }
-
-            private fun vurderTilstrekkeligOppholdNådd(avgrenser: MaksimumSykepengedagerfilter) {
-                if (avgrenser.sisteVurdering.oppholdsteller < TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) return
-                avgrenser.state(KaranteneTilstrekkeligOppholdNådd)
-            }
-        }
-
-        object KaranteneTilstrekkeligOppholdNådd : State {
-            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avvistDag(avgrenser, dagen)
-            }
-
-            override fun avvistDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.håndterBetalbarDagEtterMaksdato(dagen)
-            }
-
-            override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
-            override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.state(Initiell)
-            }
-
-            override fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
-        }
-
-        object ForGammel : State {
-            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                over70(avgrenser, dagen)
-            }
-
-            override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                over70(avgrenser, dagen)
-            }
-
-            override fun avdød(avgrenser: MaksimumSykepengedagerfilter) {}
-
-            override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
-            override fun leaving(avgrenser: MaksimumSykepengedagerfilter) = throw IllegalStateException("Kan ikke gå ut fra state ForGammel")
-            private fun over70(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.håndterBetalbarDagEtterMaksdato(dagen)
-            }
-        }
-        object Død : State {
-            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                død(avgrenser, dagen)
-            }
-
-            override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                død(avgrenser, dagen)
-            }
-
-            override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
-            override fun leaving(avgrenser: MaksimumSykepengedagerfilter) = throw IllegalStateException("Kan ikke gå ut fra state Død")
-            private fun død(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.håndterBetalbarDagEtterMaksdato(dagen)
-            }
-        }
     }
 }
 
