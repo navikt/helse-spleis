@@ -12,24 +12,23 @@ import no.nav.helse.nesteDag
 import no.nav.helse.økonomi.Inntekt
 
 data class Minsteinntektsvurdering(
-    val redusertYtelseAlder: LocalDate,
     val minsteinntektkravTilFylte67: Inntekt,
     val minsteinntektkravEtterFylte67: Inntekt,
     val erUnderMinsteinntektskravTilFylte67: Boolean,
     val erUnderMinsteinntektEtterFylte67: Boolean
 ) {
 
-    fun erUnderMinsteinntektskrav(vedtaksperiode: Periode): Boolean {
+    fun erUnderMinsteinntektskrav(sekstisyvårsdagen: LocalDate, vedtaksperiode: Periode): Boolean {
         if (!erUnderMinsteinntektskravTilFylte67 && !erUnderMinsteinntektEtterFylte67) return false
-        if (erUnderMinsteinntektskravTilFylte67 && vedtaksperiode.erInnenforMinsteinntektskravTilFylte67()) return true
-        return erUnderMinsteinntektEtterFylte67 && vedtaksperiode.erInnenforMinsteinntektskravEtterFylte67()
+        if (erUnderMinsteinntektskravTilFylte67 && vedtaksperiode.erInnenforMinsteinntektskravTilFylte67(sekstisyvårsdagen)) return true
+        return erUnderMinsteinntektEtterFylte67 && vedtaksperiode.erInnenforMinsteinntektskravEtterFylte67(sekstisyvårsdagen)
     }
 
-    private fun Periode.erInnenforMinsteinntektskravTilFylte67() = this.start <= redusertYtelseAlder
-    private fun Periode.erInnenforMinsteinntektskravEtterFylte67() = this.endInclusive > redusertYtelseAlder
+    private fun Periode.erInnenforMinsteinntektskravTilFylte67(sekstisyvårsdagen: LocalDate) = this.start <= sekstisyvårsdagen
+    private fun Periode.erInnenforMinsteinntektskravEtterFylte67(sekstisyvårsdagen: LocalDate) = this.endInclusive > sekstisyvårsdagen
 
-    fun subsummere(subsumsjonslogg: Subsumsjonslogg, skjæringstidspunkt: LocalDate, beregningsgrunnlag: Inntekt, vedtaksperiode: Periode) {
-        if (vedtaksperiode.erInnenforMinsteinntektskravTilFylte67()) {
+    fun subsummere(subsumsjonslogg: Subsumsjonslogg, skjæringstidspunkt: LocalDate, beregningsgrunnlag: Inntekt, sekstisyvårsdagen: LocalDate, vedtaksperiode: Periode) {
+        if (vedtaksperiode.erInnenforMinsteinntektskravTilFylte67(sekstisyvårsdagen)) {
             subsumsjonslogg.logg(
                 `§ 8-3 ledd 2 punktum 1`(
                     oppfylt = !erUnderMinsteinntektskravTilFylte67,
@@ -40,14 +39,14 @@ data class Minsteinntektsvurdering(
             )
         }
 
-        if (vedtaksperiode.erInnenforMinsteinntektskravEtterFylte67()) {
+        if (vedtaksperiode.erInnenforMinsteinntektskravEtterFylte67(sekstisyvårsdagen)) {
             subsumsjonslogg
                 .logg(
                     `§ 8-51 ledd 2`(
                         oppfylt = !erUnderMinsteinntektEtterFylte67,
-                        utfallFom = maxOf(redusertYtelseAlder.nesteDag, vedtaksperiode.start),
+                        utfallFom = maxOf(sekstisyvårsdagen.nesteDag, vedtaksperiode.start),
                         utfallTom = vedtaksperiode.endInclusive,
-                        sekstisyvårsdag = redusertYtelseAlder,
+                        sekstisyvårsdag = sekstisyvårsdagen,
                         periodeFom = vedtaksperiode.start,
                         periodeTom = vedtaksperiode.endInclusive,
                         beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
@@ -58,14 +57,13 @@ data class Minsteinntektsvurdering(
     }
 
     companion object {
-        fun lagMinsteinntektsvurdering(skjæringstidspunkt: LocalDate, sykepengegrunnlag: Inntekt, redusertYtelseAlder: LocalDate): Minsteinntektsvurdering {
+        fun lagMinsteinntektsvurdering(skjæringstidspunkt: LocalDate, sykepengegrunnlag: Inntekt): Minsteinntektsvurdering {
             val minsteinntektkravTilFylte67 = halvG.minsteinntekt(skjæringstidspunkt)
             val minsteinntektkravEtterFylte67 = `2G`.minsteinntekt(skjæringstidspunkt)
             val erUnderMinsteinntektskravTilFylte67 = sykepengegrunnlag < minsteinntektkravTilFylte67
             val erUnderMinsteinntektEtterFylte67 = sykepengegrunnlag < minsteinntektkravEtterFylte67
 
             return Minsteinntektsvurdering(
-                redusertYtelseAlder = redusertYtelseAlder,
                 minsteinntektkravTilFylte67 = minsteinntektkravTilFylte67,
                 minsteinntektkravEtterFylte67 = minsteinntektkravEtterFylte67,
                 erUnderMinsteinntektskravTilFylte67 = erUnderMinsteinntektskravTilFylte67,
@@ -76,7 +74,7 @@ data class Minsteinntektsvurdering(
 }
 
 internal class Minsteinntektfilter(
-    private val redusertYtelseAlder: LocalDate,
+    private val sekstisyvårsdagen: LocalDate,
     private val erUnderMinsteinntektskravTilFylte67: Boolean,
     private val erUnderMinsteinntektEtterFylte67: Boolean
 ) : UtbetalingstidslinjerFilter {
@@ -92,11 +90,11 @@ internal class Minsteinntektfilter(
 
     private fun List<Arbeidsgiverberegning>.avvisMinsteinntektTilFylte67(): List<Arbeidsgiverberegning> {
         if (!erUnderMinsteinntektskravTilFylte67) return this
-        return avvis(listOf(LocalDate.MIN til redusertYtelseAlder), Begrunnelse.MinimumInntekt)
+        return avvis(listOf(LocalDate.MIN til sekstisyvårsdagen), Begrunnelse.MinimumInntekt)
     }
 
     private fun List<Arbeidsgiverberegning>.avvisMinsteinntektEtterFylte67(): List<Arbeidsgiverberegning> {
         if (!erUnderMinsteinntektEtterFylte67) return this
-        return avvis(listOf(redusertYtelseAlder.nesteDag til LocalDate.MAX), Begrunnelse.MinimumInntektOver67)
+        return avvis(listOf(sekstisyvårsdagen.nesteDag til LocalDate.MAX), Begrunnelse.MinimumInntektOver67)
     }
 }

@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
@@ -20,7 +19,9 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 
 internal class MaksimumSykepengedagerfilter(
-    private val alder: Alder,
+    private val sekstisyvårsdagen: LocalDate,
+    private val syttiårsdagen: LocalDate,
+    private val dødsdato: LocalDate?,
     private val subsumsjonslogg: Subsumsjonslogg,
     private val aktivitetslogg: IAktivitetslogg,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
@@ -45,12 +46,17 @@ internal class MaksimumSykepengedagerfilter(
         return Maksdatovurdering(
             resultat = sisteVurdering
                 .avgrensTil(periode.endInclusive)
-                .beregnMaksdato(alder, arbeidsgiverRegler),
+                .beregnMaksdato(sekstisyvårsdagen, syttiårsdagen, dødsdato, arbeidsgiverRegler),
             tidslinjegrunnlagsubsumsjon = tidslinjegrunnlagsubsumsjon,
             beregnetTidslinjesubsumsjon = beregnetTidslinjesubsumsjon,
-            syttiårsdag = alder.syttiårsdagen
+            syttiårsdag = syttiårsdagen
         )
     }
+
+    private fun erDød(dato: LocalDate) =
+        dødsdato != null && dødsdato < dato
+
+    private fun mistetSykepengerett(dato: LocalDate) = dato >= syttiårsdagen
 
     override fun filter(
         arbeidsgivere: List<Arbeidsgiverberegning>,
@@ -69,14 +75,14 @@ internal class MaksimumSykepengedagerfilter(
                     is Utbetalingsdag.ForeldetDag -> state.oppholdsdag(this, dag.dato)
                     is Utbetalingsdag.Fridag -> state.fridag(this, dag.dato)
                     is NavDag -> {
-                        if (alder.dødsdato != null && alder.dødsdato < dag.dato) state.avdød(this)
-                        else if (alder.mistetSykepengerett(dag.dato)) state(State.ForGammel)
+                        if (erDød(dag.dato)) state.avdød(this)
+                        else if (mistetSykepengerett(dag.dato)) state(State.ForGammel)
                         state.betalbarDag(this, dag.dato)
                     }
 
                     is Utbetalingsdag.NavHelgDag -> {
-                        if (alder.dødsdato != null && alder.dødsdato < dag.dato) state.avdød(this)
-                        else if (alder.mistetSykepengerett(dag.dato)) state(State.ForGammel)
+                        if (erDød(dato)) state.avdød(this)
+                        else if (mistetSykepengerett(dag.dato)) state(State.ForGammel)
                         state.sykdomshelg(this, dag.dato)
                     }
 
@@ -90,7 +96,7 @@ internal class MaksimumSykepengedagerfilter(
          *  tidslinjer og de forventer at alle maksdatodager avslås, uavhengig av maksdatosak
          */
         val begrunnelser = (maksdatosaker.plusElement(sisteVurdering))
-            .flatMap { maksdatosak -> maksdatosak.begrunnelseForAvslåtteDager(alder, arbeidsgiverRegler, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) }
+            .flatMap { maksdatosak -> maksdatosak.begrunnelseForAvslåtteDager(syttiårsdagen, dødsdato, arbeidsgiverRegler, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) }
             .groupBy(keySelector = { it.first }, valueTransform = { it.second })
 
         val avvisteTidslinjer = begrunnelser.entries.fold(arbeidsgivere) { result, (begrunnelse, dager) ->
@@ -143,7 +149,7 @@ internal class MaksimumSykepengedagerfilter(
     private fun håndterBetalbarDag(dagen: LocalDate) {
         sisteVurdering = sisteVurdering.inkrementer(dagen)
         when {
-            sisteVurdering.erDagerUnder67ÅrForbrukte(arbeidsgiverRegler) || sisteVurdering.erDagerOver67ÅrForbrukte(alder, arbeidsgiverRegler) -> state(Karantene)
+            sisteVurdering.erDagerUnder67ÅrForbrukte(arbeidsgiverRegler) || sisteVurdering.erDagerOver67ÅrForbrukte(sekstisyvårsdagen, arbeidsgiverRegler) -> state(Karantene)
             else -> state(Syk)
         }
     }

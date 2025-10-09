@@ -4,7 +4,6 @@ import java.time.DayOfWeek.MONDAY
 import java.time.DayOfWeek.SATURDAY
 import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
-import no.nav.helse.Alder
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.plus
@@ -28,13 +27,12 @@ internal data class Maksdatokontekst(
     internal fun erDagerUnder67ÅrForbrukte(regler: ArbeidsgiverRegler) =
             gjenståendeDagerUnder67År(regler) == 0
 
-    internal fun erDagerOver67ÅrForbrukte(alder: Alder, regler: ArbeidsgiverRegler) =
-        gjenståendeDagerOver67År(alder, regler) == 0
+    internal fun erDagerOver67ÅrForbrukte(sekstisyvårsdagen: LocalDate, regler: ArbeidsgiverRegler) =
+        gjenståendeDagerOver67År(sekstisyvårsdagen, regler) == 0
 
     internal fun gjenståendeDagerUnder67År(regler: ArbeidsgiverRegler) = regler.maksSykepengedager() - forbrukteDager
-    internal fun gjenståendeDagerOver67År(alder: Alder, regler: ArbeidsgiverRegler): Int {
-        val redusertYtelseAlder = alder.redusertYtelseAlder
-        val forbrukteDagerOver67 = betalteDager.count { it > redusertYtelseAlder }
+    internal fun gjenståendeDagerOver67År(sekstisyvårsdagen: LocalDate, regler: ArbeidsgiverRegler): Int {
+        val forbrukteDagerOver67 = betalteDager.count { it > sekstisyvårsdagen }
         return regler.maksSykepengedagerOver67() - forbrukteDagerOver67
     }
 
@@ -49,12 +47,12 @@ internal data class Maksdatokontekst(
         return avslåtteDager.any { it > datoForTilstrekkeligOpphold && it in vedtaksperiode }
     }
 
-    internal fun begrunnelseForAvslåtteDager(alder: Alder, regler: ArbeidsgiverRegler, tilstrekkeligOpphold: Int): List<Pair<Begrunnelse, LocalDate>> {
+    internal fun begrunnelseForAvslåtteDager(syttiårsdagen: LocalDate, dødsdato: LocalDate?, regler: ArbeidsgiverRegler, tilstrekkeligOpphold: Int): List<Pair<Begrunnelse, LocalDate>> {
         val datoForTilstrekkeligOppholdOppnådd = datoForTilstrekkeligOppholdOppnådd(tilstrekkeligOpphold)
         return avslåtteDager.map { avslåttDag ->
             val begrunnelseForAvslåttDag = when {
-                alder.mistetSykepengerett(avslåttDag) -> Begrunnelse.Over70
-                alder.dødsdato != null && alder.dødsdato < avslåttDag -> Begrunnelse.EtterDødsdato
+                avslåttDag >= syttiårsdagen -> Begrunnelse.Over70
+                dødsdato != null && dødsdato < avslåttDag -> Begrunnelse.EtterDødsdato
                 datoForTilstrekkeligOppholdOppnådd != null && avslåttDag > datoForTilstrekkeligOppholdOppnådd -> Begrunnelse.NyVilkårsprøvingNødvendig
                 erDagerUnder67ÅrForbrukte(regler) -> Begrunnelse.SykepengedagerOppbrukt
                 else -> Begrunnelse.SykepengedagerOppbruktOver67
@@ -109,7 +107,9 @@ internal data class Maksdatokontekst(
     )
 
     internal fun beregnMaksdato(
-        alder: Alder,
+        sekstisyvårsdagen: LocalDate,
+        syttiårsdagen: LocalDate,
+        dødsdato: LocalDate?,
         regler: ArbeidsgiverRegler
     ): Maksdatoresultat {
         fun LocalDate.forrigeVirkedagFør() = minusDays(
@@ -126,12 +126,12 @@ internal data class Maksdatokontekst(
             else -> this
         }
 
-        val harNåddMaks = erDagerOver67ÅrForbrukte(alder, regler) || erDagerUnder67ÅrForbrukte(regler)
+        val harNåddMaks = erDagerOver67ÅrForbrukte(sekstisyvårsdagen, regler) || erDagerUnder67ÅrForbrukte(regler)
         val forrigeMaksdato = if (harNåddMaks) betalteDager.last() else null
         val forrigeVirkedag = forrigeMaksdato ?: vurdertTilOgMed.sisteVirkedagInklusiv()
 
         val maksdatoOrdinærRett = forrigeVirkedag + gjenståendeDagerUnder67År(regler).ukedager
-        val maksdatoBegrensetRett = maxOf(forrigeVirkedag, alder.redusertYtelseAlder.sisteVirkedagInklusiv()) + gjenståendeDagerOver67År(alder, regler).ukedager
+        val maksdatoBegrensetRett = maxOf(forrigeVirkedag, sekstisyvårsdagen.sisteVirkedagInklusiv()) + gjenståendeDagerOver67År(sekstisyvårsdagen, regler).ukedager
 
         val hjemmelsbegrunnelse: Maksdatoresultat.Bestemmelse
         val maksdato: LocalDate
@@ -140,19 +140,19 @@ internal data class Maksdatokontekst(
         // med mindre man allerede har brukt opp alt tidligere
         when {
             maksdatoOrdinærRett <= maksdatoBegrensetRett -> {
-                maksdato = listOfNotNull(maksdatoOrdinærRett, alder.dødsdato).min()
+                maksdato = listOfNotNull(maksdatoOrdinærRett, dødsdato).min()
                 gjenståendeDager = gjenståendeDagerUnder67År(regler)
                 hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.ORDINÆR_RETT
             }
 
-            maksdatoBegrensetRett <= alder.syttiårsdagen.forrigeVirkedagFør() -> {
-                maksdato = listOfNotNull(maksdatoBegrensetRett, alder.dødsdato).min()
+            maksdatoBegrensetRett <= syttiårsdagen.forrigeVirkedagFør() -> {
+                maksdato = listOfNotNull(maksdatoBegrensetRett, dødsdato).min()
                 gjenståendeDager = ukedager(forrigeVirkedag, maksdato)
                 hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.BEGRENSET_RETT
             }
 
             else -> {
-                maksdato = alder.syttiårsdagen.forrigeVirkedagFør()
+                maksdato = syttiårsdagen.forrigeVirkedagFør()
                 gjenståendeDager = ukedager(forrigeVirkedag, maksdato)
                 hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.SYTTI_ÅR
             }

@@ -20,18 +20,18 @@ import org.junit.jupiter.api.Test
 
 class MinsteinntektfilterTest {
     private companion object {
-        private val redusertYtelseAlder = 1.januar
+        private val sekstisyvårsdagen = 1.januar
     }
 
     @Test
     fun `avviser ikke dager dersom vurdert ok`() {
-        val tidslinjer = listOf(tidslinjeOf(2.NAV, startDato = redusertYtelseAlder))
+        val tidslinjer = listOf(tidslinjeOf(2.NAV, startDato = sekstisyvårsdagen))
         assertEquals(0, avvisteDager(tidslinjer, OPPFYLLER_KRAV_FØR_OG_ETTER_67).size)
     }
 
     @Test
     fun `ikke tilstrekkelig inntekt over 67 år`() {
-        val tidslinjer = listOf(tidslinjeOf(2.NAV, startDato = redusertYtelseAlder))
+        val tidslinjer = listOf(tidslinjeOf(2.NAV, startDato = sekstisyvårsdagen))
         val avvisteDager = avvisteDager(tidslinjer, OPPFYLLER_KRAV_TIL_67_MEN_IKKE_ETTER)
         assertEquals(1, avvisteDager.size)
         assertEquals(listOf(Begrunnelse.MinimumInntektOver67), avvisteDager.single().begrunnelser)
@@ -39,7 +39,7 @@ class MinsteinntektfilterTest {
 
     @Test
     fun `ikke tilstrekkelig inntekt til 67 år`() {
-        val tidslinjer = listOf(tidslinjeOf(2.NAV, startDato = redusertYtelseAlder))
+        val tidslinjer = listOf(tidslinjeOf(2.NAV, startDato = sekstisyvårsdagen))
         val avvisteDager = avvisteDager(tidslinjer, OPPFYLLER_IKKE_KRAV_TIL_67)
         assertEquals(2, avvisteDager.size)
         assertEquals(listOf(Begrunnelse.MinimumInntekt), avvisteDager.first().begrunnelser)
@@ -69,10 +69,10 @@ class MinsteinntektfilterTest {
             OPPFYLLER_KRAV_TIL_67_MEN_IKKE_ETTER -> `2G`.minsteinntekt(skjæringstidspunkt) - 1.daglig
             OPPFYLLER_KRAV_FØR_OG_ETTER_67 -> `2G`.minsteinntekt(skjæringstidspunkt)
         }
-        val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, inntekt, redusertYtelseAlder)
+        val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, inntekt)
 
         val filter = Minsteinntektfilter(
-            redusertYtelseAlder = minsteinntektsvurdering.redusertYtelseAlder,
+            sekstisyvårsdagen = sekstisyvårsdagen,
             erUnderMinsteinntektskravTilFylte67 = minsteinntektsvurdering.erUnderMinsteinntektskravTilFylte67,
             erUnderMinsteinntektEtterFylte67 = minsteinntektsvurdering.erUnderMinsteinntektEtterFylte67
         )

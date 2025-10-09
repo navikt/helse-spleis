@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import java.util.*
-import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
@@ -864,8 +863,17 @@ internal class MaksimumSykepengedagerfilterTest {
         ).reduce(
             Periode::plus
         )
-        val alder = if (dødsdato == null) fødselsdato.alder else fødselsdato.alder.medDød(dødsdato)
-        val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(alder, EmptyLog, aktivitetslogg, NormalArbeidstaker, personTidslinje)
+        val sekstisyvårsdagen = fødselsdato.plusYears(67)
+        val syttiårsdagen = fødselsdato.plusYears(70)
+        val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(
+            sekstisyvårsdagen = sekstisyvårsdagen,
+            syttiårsdagen = syttiårsdagen,
+            dødsdato = dødsdato,
+            subsumsjonslogg = EmptyLog,
+            aktivitetslogg = aktivitetslogg,
+            arbeidsgiverRegler = NormalArbeidstaker,
+            infotrygdtidslinje = personTidslinje
+        )
         val tidslinjer = this.mapIndexed { index, it ->
             Arbeidsgiverberegning(
                 yrkesaktivitet = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a${index+1}"),
@@ -885,7 +893,7 @@ internal class MaksimumSykepengedagerfilterTest {
 
         val maksdatoresultat = maksimumSykepengedagerfilter.maksdatoresultatForVedtaksperiode(filterperiode).resultat
         maksdatoer = maksimumSykepengedagerfilter.maksdatosaker
-            .map { it.beregnMaksdato(alder, NormalArbeidstaker) }
+            .map { it.beregnMaksdato(sekstisyvårsdagen, syttiårsdagen, dødsdato, NormalArbeidstaker) }
             .map { it.maksdato }
             .plusElement(maksdatoresultat.maksdato)
             .toSet()

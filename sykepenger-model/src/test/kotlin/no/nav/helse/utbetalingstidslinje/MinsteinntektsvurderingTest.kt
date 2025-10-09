@@ -20,12 +20,11 @@ internal class MinsteinntektsvurderingTest {
         val minsteinntektkravTilFylte67 = halvG.minsteinntekt(skjæringstidspunkt)
         val vurdering = lagMinsteinntektsvurdering(
             skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = minsteinntektkravTilFylte67,
-            redusertYtelseAlder = 1.april
+            sykepengegrunnlag = minsteinntektkravTilFylte67
         )
         assertFalse(vurdering.erUnderMinsteinntektskravTilFylte67)
         assertTrue(vurdering.erUnderMinsteinntektEtterFylte67)
-        assertFalse(vurdering.erUnderMinsteinntektskrav(februar))
+        assertFalse(vurdering.erUnderMinsteinntektskrav(1.april, februar))
     }
 
     @Test
@@ -34,12 +33,11 @@ internal class MinsteinntektsvurderingTest {
         val minsteinntektkravTilFylte67 = `2G`.minsteinntekt(skjæringstidspunkt)
         val vurdering = lagMinsteinntektsvurdering(
             skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = minsteinntektkravTilFylte67,
-            redusertYtelseAlder = 1.januar
+            sykepengegrunnlag = minsteinntektkravTilFylte67
         )
         assertFalse(vurdering.erUnderMinsteinntektskravTilFylte67)
         assertFalse(vurdering.erUnderMinsteinntektEtterFylte67)
-        assertFalse(vurdering.erUnderMinsteinntektskrav(februar))
+        assertFalse(vurdering.erUnderMinsteinntektskrav(1.januar, februar))
     }
 
     @Test
@@ -48,13 +46,12 @@ internal class MinsteinntektsvurderingTest {
         val minsteinntektkravTilFylte67 = halvG.minsteinntekt(skjæringstidspunkt)
         val vurdering = lagMinsteinntektsvurdering(
             skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = minsteinntektkravTilFylte67,
-            redusertYtelseAlder = 1.februar
+            sykepengegrunnlag = minsteinntektkravTilFylte67
         )
         assertFalse(vurdering.erUnderMinsteinntektskravTilFylte67)
         assertTrue(vurdering.erUnderMinsteinntektEtterFylte67)
-        assertFalse(vurdering.erUnderMinsteinntektskrav(1.februar.somPeriode()))
-        assertTrue(vurdering.erUnderMinsteinntektskrav(2.februar.somPeriode()))
+        assertFalse(vurdering.erUnderMinsteinntektskrav(1.februar, 1.februar.somPeriode()))
+        assertTrue(vurdering.erUnderMinsteinntektskrav(1.februar, 2.februar.somPeriode()))
     }
 
     @Test
@@ -63,12 +60,11 @@ internal class MinsteinntektsvurderingTest {
         val minsteinntektkravTilFylte67 = halvG.minsteinntekt(skjæringstidspunkt)
         val vurdering = lagMinsteinntektsvurdering(
             skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = minsteinntektkravTilFylte67 - 1.daglig,
-            redusertYtelseAlder = 1.april
+            sykepengegrunnlag = minsteinntektkravTilFylte67 - 1.daglig
         )
         assertTrue(vurdering.erUnderMinsteinntektskravTilFylte67)
         assertTrue(vurdering.erUnderMinsteinntektEtterFylte67)
-        assertTrue(vurdering.erUnderMinsteinntektskrav(februar))
+        assertTrue(vurdering.erUnderMinsteinntektskrav(1.april, februar))
     }
 
     @Test
@@ -77,11 +73,10 @@ internal class MinsteinntektsvurderingTest {
         val minsteinntektkravTilFylte67 = `2G`.minsteinntekt(skjæringstidspunkt)
         val vurdering = lagMinsteinntektsvurdering(
             skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = minsteinntektkravTilFylte67 - 1.daglig,
-            redusertYtelseAlder = 10.februar
+            sykepengegrunnlag = minsteinntektkravTilFylte67 - 1.daglig
         )
         assertFalse(vurdering.erUnderMinsteinntektskravTilFylte67)
         assertTrue(vurdering.erUnderMinsteinntektEtterFylte67)
-        assertTrue(vurdering.erUnderMinsteinntektskrav(februar))
+        assertTrue(vurdering.erUnderMinsteinntektskrav(10.februar, februar))
     }
 }

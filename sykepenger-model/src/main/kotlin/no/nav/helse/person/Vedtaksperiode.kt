@@ -1037,8 +1037,7 @@ internal class Vedtaksperiode private constructor(
         val sykepengegrunnlag = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag
         val beregningsgrunnlag = grunnlagsdata.inntektsgrunnlag.beregningsgrunnlag
         val medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus
-        val redusertYtelseAlder = person.alder.redusertYtelseAlder
-        val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, sykepengegrunnlag, redusertYtelseAlder)
+        val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, sykepengegrunnlag)
         // grunnlaget for maksdatoberegning er alt som har skjedd før,
         // frem til og med vedtaksperioden som beregnes
         val historisktidslinje = person.vedtaksperioder { it.periode.endInclusive < periode.start }
@@ -1050,7 +1049,9 @@ internal class Vedtaksperiode private constructor(
             harOpptjening = harOpptjening,
             sykepengegrunnlag = sykepengegrunnlag,
             medlemskapstatus = medlemskapstatus,
-            redusertYtelseAlder = minsteinntektsvurdering.redusertYtelseAlder,
+            sekstisyvårsdagen = person.alder.redusertYtelseAlder,
+            syttiårsdagen = person.alder.syttiårsdagen,
+            dødsdato = person.alder.dødsdato,
             erUnderMinsteinntektskravTilFylte67 = minsteinntektsvurdering.erUnderMinsteinntektskravTilFylte67,
             erUnderMinsteinntektEtterFylte67 = minsteinntektsvurdering.erUnderMinsteinntektEtterFylte67,
             historisktidslinje = historisktidslinje,
@@ -1072,8 +1073,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         // steg 5: lage varsler ved gitte situasjoner
-        if (minsteinntektsvurdering.erUnderMinsteinntektskrav(periode)) aktivitetslogg.varsel(RV_SV_1)
-        else aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
+        if (minsteinntektsvurdering.erUnderMinsteinntektskrav(person.alder.redusertYtelseAlder, periode))
+            aktivitetslogg.varsel(RV_SV_1)
+        else
+            aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
 
         if (person.alder.dødsdato != null && person.alder.dødsdato in periode) {
             aktivitetslogg.info("Utbetaling stoppet etter ${person.alder.dødsdato} grunnet dødsfall")
@@ -1098,7 +1101,7 @@ internal class Vedtaksperiode private constructor(
         ytelser.valider(aktivitetslogg, periode, skjæringstidspunkt, behandlinger.maksdato.maksdato, erForlengelse())
 
         // steg 6: subsummere ting
-        minsteinntektsvurdering.subsummere(subsumsjonslogg, skjæringstidspunkt, beregningsgrunnlag, periode)
+        minsteinntektsvurdering.subsummere(subsumsjonslogg, skjæringstidspunkt, beregningsgrunnlag, person.alder.redusertYtelseAlder, periode)
 
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(ytelser, aktivitetslogg)
 
@@ -2406,17 +2409,27 @@ internal class Vedtaksperiode private constructor(
         sykepengegrunnlag: Inntekt,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus?,
         harOpptjening: Boolean,
-        redusertYtelseAlder: LocalDate,
+        sekstisyvårsdagen: LocalDate,
+        syttiårsdagen: LocalDate,
+        dødsdato: LocalDate?,
         erUnderMinsteinntektskravTilFylte67: Boolean,
         erUnderMinsteinntektEtterFylte67: Boolean,
         historisktidslinje: Utbetalingstidslinje,
         perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>
     ): List<BeregnetPeriode> {
-        val maksdatofilter = MaksimumSykepengedagerfilter(person.alder, subsumsjonslogg, aktivitetslogg, person.regler, historisktidslinje)
+        val maksdatofilter = MaksimumSykepengedagerfilter(
+            sekstisyvårsdagen = sekstisyvårsdagen,
+            syttiårsdagen = syttiårsdagen,
+            dødsdato = dødsdato,
+            subsumsjonslogg = subsumsjonslogg,
+            aktivitetslogg = aktivitetslogg,
+            arbeidsgiverRegler = person.regler,
+            infotrygdtidslinje = historisktidslinje
+        )
         val filtere = listOf(
             Sykdomsgradfilter(perioderMedMinimumSykdomsgradVurdertOK, subsumsjonslogg, aktivitetslogg),
             Minsteinntektfilter(
-                redusertYtelseAlder = redusertYtelseAlder,
+                sekstisyvårsdagen = sekstisyvårsdagen,
                 erUnderMinsteinntektskravTilFylte67 = erUnderMinsteinntektskravTilFylte67,
                 erUnderMinsteinntektEtterFylte67 = erUnderMinsteinntektEtterFylte67,
             ),
