@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.util.*
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.NAV
@@ -11,7 +10,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class AvvisInngangsvilkårfilterTest {
+class OpptjeningfilterTest {
     @Test
     fun `avviser ikke dager dersom vurdert ok`() {
         val tidslinjer = listOf(tidslinjeOf(1.NAV))
@@ -36,13 +35,9 @@ class AvvisInngangsvilkårfilterTest {
 
     private fun avvisteDager(
         tidslinjer: List<Utbetalingstidslinje>,
-        manglerOpptjening: Boolean = false,
-        manglerMedlemskap: Boolean = false
+        manglerOpptjening: Boolean = false
     ): List<Utbetalingsdag.AvvistDag> {
-        val medlemskapstatus = if (manglerMedlemskap) Medlemskapsvurdering.Medlemskapstatus.Nei else Medlemskapsvurdering.Medlemskapstatus.Ja
-
-        val filter = AvvisInngangsvilkårfilter(
-            medlemskapstatus = medlemskapstatus,
+        val filter = Opptjeningfilter(
             harOpptjening = !manglerOpptjening
         )
         val arbeidsgivere = tidslinjer.mapIndexed { index, it ->

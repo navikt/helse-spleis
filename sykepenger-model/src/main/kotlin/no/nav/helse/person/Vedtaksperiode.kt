@@ -168,10 +168,11 @@ import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
-import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
+import no.nav.helse.utbetalingstidslinje.Opptjeningfilter
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
+import no.nav.helse.utbetalingstidslinje.Medlemskapsfilter
 import no.nav.helse.utbetalingstidslinje.Minsteinntektfilter
 import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering.Companion.lagMinsteinntektsvurdering
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
@@ -2419,8 +2420,10 @@ internal class Vedtaksperiode private constructor(
                 erUnderMinsteinntektskravTilFylte67 = erUnderMinsteinntektskravTilFylte67,
                 erUnderMinsteinntektEtterFylte67 = erUnderMinsteinntektEtterFylte67,
             ),
-            AvvisInngangsvilkårfilter(
+            Medlemskapsfilter(
                 medlemskapstatus = medlemskapstatus,
+            ),
+            Opptjeningfilter(
                 harOpptjening = harOpptjening
             ),
             maksdatofilter,
