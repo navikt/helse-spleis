@@ -96,11 +96,12 @@ class AvvisInngangsvilkårfilterTest {
         )
         val medlemskapstatus = if (manglerMedlemskap) Medlemskapsvurdering.Medlemskapstatus.Nei else Medlemskapsvurdering.Medlemskapstatus.Ja
         val redusertYtelseAlder: LocalDate = ALDER.redusertYtelseAlder
-        val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, periode(tidslinjer)!!, inntektsgrunnlag.sykepengegrunnlag, redusertYtelseAlder)
+        val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, inntektsgrunnlag.sykepengegrunnlag, redusertYtelseAlder)
 
         val filter = AvvisInngangsvilkårfilter(
-            periodeTilFylte67UnderMinsteinntekt = minsteinntektsvurdering.periodeTilFylte67UnderMinsteinntekt,
-            periodeEtterFylte67UnderMinsteinntekt = minsteinntektsvurdering.periodeEtterFylte67UnderMinsteinntekt,
+            redusertYtelseAlder = minsteinntektsvurdering.redusertYtelseAlder,
+            erUnderMinsteinntektskravTilFylte67 = minsteinntektsvurdering.erUnderMinsteinntektskravTilFylte67,
+            erUnderMinsteinntektEtterFylte67 = minsteinntektsvurdering.erUnderMinsteinntektEtterFylte67,
             medlemskapstatus = medlemskapstatus,
             harOpptjening = !manglerOpptjening
         )

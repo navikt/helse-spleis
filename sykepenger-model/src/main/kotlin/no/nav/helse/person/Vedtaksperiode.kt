@@ -1036,7 +1036,7 @@ internal class Vedtaksperiode private constructor(
         val beregningsgrunnlag = grunnlagsdata.inntektsgrunnlag.beregningsgrunnlag
         val medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus
         val redusertYtelseAlder = person.alder.redusertYtelseAlder
-        val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, beregningsperiode, sykepengegrunnlag, redusertYtelseAlder)
+        val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, sykepengegrunnlag, redusertYtelseAlder)
         // grunnlaget for maksdatoberegning er alt som har skjedd før,
         // frem til og med vedtaksperioden som beregnes
         val historisktidslinje = person.vedtaksperioder { it.periode.endInclusive < periode.start }
@@ -1048,8 +1048,9 @@ internal class Vedtaksperiode private constructor(
             harOpptjening = harOpptjening,
             sykepengegrunnlag = sykepengegrunnlag,
             medlemskapstatus = medlemskapstatus,
-            periodeTilFylte67UnderMinsteinntekt = minsteinntektsvurdering.periodeTilFylte67UnderMinsteinntekt,
-            periodeEtterFylte67UnderMinsteinntekt = minsteinntektsvurdering.periodeEtterFylte67UnderMinsteinntekt,
+            redusertYtelseAlder = minsteinntektsvurdering.redusertYtelseAlder,
+            erUnderMinsteinntektskravTilFylte67 = minsteinntektsvurdering.erUnderMinsteinntektskravTilFylte67,
+            erUnderMinsteinntektEtterFylte67 = minsteinntektsvurdering.erUnderMinsteinntektEtterFylte67,
             historisktidslinje = historisktidslinje,
             perioderMedMinimumSykdomsgradVurdertOK = person.minimumSykdomsgradsvurdering.perioder
         )
@@ -1069,7 +1070,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         // steg 5: lage varsler ved gitte situasjoner
-        if (minsteinntektsvurdering.erUnderMinsteinntektskrav) aktivitetslogg.varsel(RV_SV_1)
+        if (minsteinntektsvurdering.erUnderMinsteinntektskrav(periode)) aktivitetslogg.varsel(RV_SV_1)
         else aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
 
         if (person.alder.dødsdato != null && person.alder.dødsdato in periode) {
@@ -1095,7 +1096,7 @@ internal class Vedtaksperiode private constructor(
         ytelser.valider(aktivitetslogg, periode, skjæringstidspunkt, behandlinger.maksdato.maksdato, erForlengelse())
 
         // steg 6: subsummere ting
-        minsteinntektsvurdering.subsummere(subsumsjonslogg, skjæringstidspunkt, beregningsgrunnlag, redusertYtelseAlder, periode)
+        minsteinntektsvurdering.subsummere(subsumsjonslogg, skjæringstidspunkt, beregningsgrunnlag, periode)
 
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(ytelser, aktivitetslogg)
 
@@ -2403,8 +2404,9 @@ internal class Vedtaksperiode private constructor(
         sykepengegrunnlag: Inntekt,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus?,
         harOpptjening: Boolean,
-        periodeTilFylte67UnderMinsteinntekt: Periode?,
-        periodeEtterFylte67UnderMinsteinntekt: Periode?,
+        redusertYtelseAlder: LocalDate,
+        erUnderMinsteinntektskravTilFylte67: Boolean,
+        erUnderMinsteinntektEtterFylte67: Boolean,
         historisktidslinje: Utbetalingstidslinje,
         perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>
     ): List<BeregnetPeriode> {
@@ -2412,8 +2414,9 @@ internal class Vedtaksperiode private constructor(
         val filtere = listOf(
             Sykdomsgradfilter(perioderMedMinimumSykdomsgradVurdertOK, subsumsjonslogg, aktivitetslogg),
             AvvisInngangsvilkårfilter(
-                periodeTilFylte67UnderMinsteinntekt = periodeTilFylte67UnderMinsteinntekt,
-                periodeEtterFylte67UnderMinsteinntekt = periodeEtterFylte67UnderMinsteinntekt,
+                redusertYtelseAlder = redusertYtelseAlder,
+                erUnderMinsteinntektskravTilFylte67 = erUnderMinsteinntektskravTilFylte67,
+                erUnderMinsteinntektEtterFylte67 = erUnderMinsteinntektEtterFylte67,
                 medlemskapstatus = medlemskapstatus,
                 harOpptjening = harOpptjening
             ),

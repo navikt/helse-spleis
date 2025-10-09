@@ -110,13 +110,16 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
                 assertEquals(0, utbetalingstidslinjeInspektør.avvistDagTeller)
             }
-            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
         }
         a2 {
+            håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
                 assertEquals(9, utbetalingstidslinjeInspektør.avvistDagTeller)
                 assertEquals((16.februar til 28.februar).filterNot { it.erHelg() }, utbetalingstidslinjeInspektør.avvistedatoer)
