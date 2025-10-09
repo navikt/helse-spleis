@@ -172,6 +172,7 @@ import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
+import no.nav.helse.utbetalingstidslinje.Minsteinntektfilter
 import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering.Companion.lagMinsteinntektsvurdering
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.UberegnetVedtaksperiode
@@ -2413,10 +2414,12 @@ internal class Vedtaksperiode private constructor(
         val maksdatofilter = MaksimumSykepengedagerfilter(person.alder, subsumsjonslogg, aktivitetslogg, person.regler, historisktidslinje)
         val filtere = listOf(
             Sykdomsgradfilter(perioderMedMinimumSykdomsgradVurdertOK, subsumsjonslogg, aktivitetslogg),
-            AvvisInngangsvilkårfilter(
+            Minsteinntektfilter(
                 redusertYtelseAlder = redusertYtelseAlder,
                 erUnderMinsteinntektskravTilFylte67 = erUnderMinsteinntektskravTilFylte67,
                 erUnderMinsteinntektEtterFylte67 = erUnderMinsteinntektEtterFylte67,
+            ),
+            AvvisInngangsvilkårfilter(
                 medlemskapstatus = medlemskapstatus,
                 harOpptjening = harOpptjening
             ),
