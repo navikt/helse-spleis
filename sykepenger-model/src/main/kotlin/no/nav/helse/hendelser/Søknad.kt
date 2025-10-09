@@ -274,6 +274,7 @@ class Søknad(
         }
 
         val forberedendeVilkårsgrunnlag = when (arbeidssituasjon) {
+            Behandlinger.Behandling.Endring.Arbeidssituasjon.BARNEPASSER,
             Behandlinger.Behandling.Endring.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> {
                 when (fraværFørSykmelding) {
                     true -> {
@@ -289,7 +290,6 @@ class Søknad(
             Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSTAKER,
             Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSLEDIG,
             Behandlinger.Behandling.Endring.Arbeidssituasjon.FRILANSER,
-            Behandlinger.Behandling.Endring.Arbeidssituasjon.BARNEPASSER,
             Behandlinger.Behandling.Endring.Arbeidssituasjon.FISKER,
             Behandlinger.Behandling.Endring.Arbeidssituasjon.JORDBRUKER,
             Behandlinger.Behandling.Endring.Arbeidssituasjon.ANNET -> null
