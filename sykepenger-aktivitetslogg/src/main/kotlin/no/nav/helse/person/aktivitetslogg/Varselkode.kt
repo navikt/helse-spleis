@@ -66,7 +66,7 @@ enum class Varselkode(
     RV_SØ_44("I søknaden er det oppgitt at den sykmeldte har et arbeidsforhold som ikke er registrert i AA-registeret."),
 
     // Selvstendig søknader
-    RV_SØ_45("Selvstendigsøknad med inntektstype vi ikke støtter"),
+    RV_SØ_45("Selvstendigsøknad med flere typer pensjonsgivende inntekter"),
     RV_SØ_46("Selvstendigsøknad med fravær før sykmelding"),
 
     // OO: Out-of-order
@@ -313,7 +313,7 @@ enum class Varselkode(
         val `Støtter ikke søknadstypen` = RV_SØ_39
         val `Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader` = RV_SØ_42
         val `Arbeidsledigsøknad er lagt til grunn` = RV_SØ_43
-        val `Selvstendigsøknad med inntektstype vi ikke støtter` = RV_SØ_45
+        val `Selvstendigsøknad med flere typer pensjonsgivende inntekter` = RV_SØ_45
 
         val `Tilkommen inntekt som ikke støttes`= RV_IV_9
         val `Tilkommen inntekt som støttes` = RV_SV_5

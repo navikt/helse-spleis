@@ -15,7 +15,7 @@ import no.nav.helse.etterlevelse.`§ 8-9 ledd 1`
 import no.nav.helse.hendelser.Avsender.SYKMELDT
 import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.Søknad.PensjonsgivendeInntekt.Companion.harAndreInntekterEnnNæringsinntekt
+import no.nav.helse.hendelser.Søknad.PensjonsgivendeInntekt.Companion.harFlereTyperPensjonsgivendeInntekt
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
 import no.nav.helse.person.Behandlinger
@@ -28,7 +28,7 @@ import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøknad er lagt til grunn`
-import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med inntektstype vi ikke støtter`
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med flere typer pensjonsgivende inntekter`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som ikke støttes`
@@ -179,7 +179,7 @@ class Søknad(
         val næringsinntekter = pensjonsgivendeInntekter?.filter { it.erFerdigLignet }
         if (næringsinntekter == null || næringsinntekter.size < 3) aktivitetslogg.funksjonellFeil(Varselkode.RV_IV_12)
 
-        if (pensjonsgivendeInntekter?.harAndreInntekterEnnNæringsinntekt() == true) aktivitetslogg.funksjonellFeil(`Selvstendigsøknad med inntektstype vi ikke støtter`)
+        if (pensjonsgivendeInntekter?.harFlereTyperPensjonsgivendeInntekt() == true) aktivitetslogg.funksjonellFeil(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`)
 
         if (ventetid == null) {
             aktivitetslogg.info("Søknaden har ikke ventetid")
@@ -464,8 +464,11 @@ class Søknad(
         val erFerdigLignet: Boolean
     ) {
         companion object {
-            fun List<PensjonsgivendeInntekt>.harAndreInntekterEnnNæringsinntekt() =
-                any { it.lønnsinntekt != Inntekt.INGEN || it.lønnsinntektBarePensjonsdel != Inntekt.INGEN || it.næringsinntektFraFiskeFangstEllerFamiliebarnehage != Inntekt.INGEN }
+            fun List<PensjonsgivendeInntekt>.harFlereTyperPensjonsgivendeInntekt() =
+                any { pensjonsgivendeInntekt ->
+                    listOf(pensjonsgivendeInntekt.næringsinntekt, pensjonsgivendeInntekt.næringsinntektFraFiskeFangstEllerFamiliebarnehage, pensjonsgivendeInntekt.lønnsinntekt, pensjonsgivendeInntekt.lønnsinntektBarePensjonsdel)
+                        .count { it != Inntekt.INGEN } > 1
+                }
         }
     }
 

@@ -132,9 +132,8 @@ internal class SelvstendigTest : AbstractDslTest() {
         }
     }
 
-
     @Test
-    fun `Kaster ut søknader når det er oppgitt lønnsinntekter`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Kaster ut søknader når det også er oppgitt lønnsinntekter`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
             håndterSøknadSelvstendig(
                 periode = januar,
