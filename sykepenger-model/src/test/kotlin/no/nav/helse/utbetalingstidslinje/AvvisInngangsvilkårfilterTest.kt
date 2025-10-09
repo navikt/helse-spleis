@@ -18,7 +18,6 @@ import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering.Companion.lagMinsteinntektsvurdering
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
@@ -44,7 +43,7 @@ class AvvisInngangsvilkårfilterTest {
         val tidslinjer = listOf(tidslinjeOf(1.NAV))
         val avvisteDager = avvisteDager(tidslinjer, manglerOpptjening = true)
         assertEquals(1, avvisteDager.size)
-        assertNotNull(avvisteDager.first().erAvvistMed(Begrunnelse.ManglerOpptjening))
+        assertEquals(listOf(Begrunnelse.ManglerOpptjening), avvisteDager.single().begrunnelser)
     }
 
     @Test
@@ -52,8 +51,8 @@ class AvvisInngangsvilkårfilterTest {
         val tidslinjer = listOf(tidslinjeOf(2.NAV, startDato = ALDER.redusertYtelseAlder))
         val avvisteDager = avvisteDager(tidslinjer, manglerTilstrekkeligInntekt = true)
         assertEquals(2, avvisteDager.size)
-        assertNotNull(avvisteDager.first().erAvvistMed(Begrunnelse.MinimumInntekt))
-        assertNotNull(avvisteDager.last().erAvvistMed(Begrunnelse.MinimumInntektOver67))
+        assertEquals(listOf(Begrunnelse.MinimumInntekt), avvisteDager.first().begrunnelser)
+        assertEquals(listOf(Begrunnelse.MinimumInntektOver67), avvisteDager.last().begrunnelser)
     }
 
     @Test
@@ -61,10 +60,7 @@ class AvvisInngangsvilkårfilterTest {
         val tidslinjer = listOf(tidslinjeOf(1.NAV))
         val avvisteDager = avvisteDager(tidslinjer, manglerOpptjening = true, manglerTilstrekkeligInntekt = true)
         assertEquals(1, avvisteDager.size)
-        avvisteDager.first().also {
-            assertNotNull(it.erAvvistMed(Begrunnelse.MinimumInntekt))
-            assertNotNull(it.erAvvistMed(Begrunnelse.ManglerOpptjening))
-        }
+        assertEquals(listOf(Begrunnelse.MinimumInntekt, Begrunnelse.ManglerOpptjening), avvisteDager.single().begrunnelser)
     }
 
     private fun avvisteDager(

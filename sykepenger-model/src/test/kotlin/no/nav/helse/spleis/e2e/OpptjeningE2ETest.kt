@@ -33,8 +33,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_3
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.ManglerOpptjening
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -183,9 +181,8 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertVarsler(1.vedtaksperiode, RV_OV_1)
-            with(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[8.mai]) {
-                assertTrue(this is AvvistDag)
-                erAvvistMed(ManglerOpptjening)
+            with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
+                assertEquals(listOf(ManglerOpptjening), begrunnelse(8.mai))
             }
         }
     }
@@ -195,8 +192,8 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         setupOpptjeningFraOffentligYtelse(ansattTom = 31.mars)
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
-            with(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[8.mai]) {
-                assertTrue(this is NavDag)
+            with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
+                assertTrue(erNavdag(8.mai))
             }
         }
     }

@@ -63,7 +63,6 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlagFlereArbeidsgivere
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.nyPeriode
-import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -1479,7 +1478,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         val utbetalingstidslinje = inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode)
 
         assertEquals(0.daglig, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.personbeløp)
-        assertNotNull(utbetalingstidslinje[31.mai(2023)].erAvvistMed(Begrunnelse.MinimumSykdomsgrad))
+        with(utbetalingstidslinje.inspektør) {
+            assertEquals(listOf(Begrunnelse.MinimumSykdomsgrad), begrunnelse(31.mai(2023)))
+        }
         assertEquals(17, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.totalGrad)
     }
 }

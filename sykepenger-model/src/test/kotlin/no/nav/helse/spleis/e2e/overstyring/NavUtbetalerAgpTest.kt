@@ -68,7 +68,6 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.assertInstanceOf
-import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.til
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -550,8 +549,10 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         (1.januar til 31.januar).filterNot { it.erHelg() }.forEach {
             assertTrue(inspektør.sykdomstidslinje[it] is Sykedag)
         }
-        (januar).filterNot { it.erHelg() }.forEach {
-            assertNotNull(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it].erAvvistMed(Begrunnelse.MinimumInntekt))
+        with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
+            (januar).filterNot { it.erHelg() }.forEach {
+                assertEquals(listOf(Begrunnelse.MinimumInntekt), begrunnelse(it))
+            }
         }
     }
 }
