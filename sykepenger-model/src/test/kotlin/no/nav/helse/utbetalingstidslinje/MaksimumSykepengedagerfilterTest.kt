@@ -5,7 +5,6 @@ import java.util.*
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
@@ -890,10 +889,8 @@ internal class MaksimumSykepengedagerfilterTest {
             maksdatoberegning = maksdatoberegning,
             syttiårsdagen = syttiårsdagen,
             dødsdato = dødsdato,
-            subsumsjonslogg = EmptyLog,
             aktivitetslogg = aktivitetslogg,
-            arbeidsgiverRegler = NormalArbeidstaker,
-            infotrygdtidslinje = personTidslinje
+            arbeidsgiverRegler = NormalArbeidstaker
         )
         val tidslinjer = this.mapIndexed { index, it ->
             Arbeidsgiverberegning(
@@ -912,12 +909,7 @@ internal class MaksimumSykepengedagerfilterTest {
             .filter(tidslinjer, filterperiode)
             .map { it.samletVedtaksperiodetidslinje }
 
-        val maksdatoresultat = Maksdatovurdering(
-            resultat = maksdatoberegning.beregnMaksdatoBegrensetTilPeriode(filterperiode),
-            tidslinjegrunnlagsubsumsjon = emptyList(),
-            beregnetTidslinjesubsumsjon = emptyList(),
-            syttiårsdag = syttiårsdagen
-        ).resultat
+        val maksdatoresultat = maksdatoberegning.beregnMaksdatoBegrensetTilPeriode(filterperiode)
 
         maksdatoer = maksdatoberegning.maksdatosaker
             .map { it.beregnMaksdato(sekstisyvårsdagen, syttiårsdagen, dødsdato, NormalArbeidstaker) }

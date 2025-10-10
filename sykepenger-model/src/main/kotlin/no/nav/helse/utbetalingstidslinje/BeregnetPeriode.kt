@@ -6,7 +6,7 @@ import no.nav.helse.person.inntekt.Inntektskilde
 
 internal data class BeregnetPeriode(
     val vedtaksperiodeId: UUID,
-    val maksdatovurdering: Maksdatovurdering,
+    val maksdatoresultat: Maksdatoresultat,
     val utbetalingstidslinje: Utbetalingstidslinje,
     val inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>
 )

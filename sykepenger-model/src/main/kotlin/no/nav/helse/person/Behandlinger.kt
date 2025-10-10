@@ -862,7 +862,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 grunnlagsdata = grunnlagsdata,
                 utbetaling = utbetaling,
                 utbetalingstidslinje = beregning.utbetalingstidslinje.subset(this.periode),
-                maksdatoresultat = beregning.maksdatovurdering.resultat,
+                maksdatoresultat = beregning.maksdatoresultat,
                 inntektjusteringer = beregning.inntekterForBeregning
             )
 
@@ -1143,9 +1143,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 aktivitetslogg = aktivitetslogg,
                 utbetalingstidslinje = beregning.utbetalingstidslinje,
                 klassekodeBruker = klassekodeBruker,
-                maksdato = beregning.maksdatovurdering.resultat.maksdato,
-                forbrukteSykedager = beregning.maksdatovurdering.resultat.antallForbrukteDager,
-                gjenståendeSykedager = beregning.maksdatovurdering.resultat.gjenståendeDager,
+                maksdato = beregning.maksdatoresultat.maksdato,
+                forbrukteSykedager = beregning.maksdatoresultat.antallForbrukteDager,
+                gjenståendeSykedager = beregning.maksdatoresultat.gjenståendeDager,
                 periode = periode,
                 type = utbetalingtype
             )

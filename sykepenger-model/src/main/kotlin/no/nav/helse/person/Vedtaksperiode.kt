@@ -13,10 +13,15 @@ import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.Regelverkslogg
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
+import no.nav.helse.etterlevelse.`§ 8-12 ledd 1 punktum 1`
+import no.nav.helse.etterlevelse.`§ 8-12 ledd 2`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav a`
 import no.nav.helse.etterlevelse.`§ 8-29`
+import no.nav.helse.etterlevelse.`§ 8-3 ledd 1 punktum 2`
+import no.nav.helse.etterlevelse.`§ 8-51 ledd 3`
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
@@ -49,6 +54,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
@@ -168,11 +174,14 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Opptjeningfilter
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning
-import no.nav.helse.utbetalingstidslinje.Maksdatovurdering
+import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
+import no.nav.helse.utbetalingstidslinje.Maksdatokontekst
+import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Medlemskapsfilter
@@ -2291,7 +2300,6 @@ internal class Vedtaksperiode private constructor(
         )
         val subsumsjonen = Utbetalingstidslinjesubsumsjon(this.subsumsjonslogg, this.sykdomstidslinje, beregning.utbetalingstidslinje)
         subsumsjonen.subsummer(periode, this.yrkesaktivitet.yrkesaktivitetstype)
-        beregning.maksdatovurdering.subsummer(subsumsjonslogg, periode)
         loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(yrkesaktivitetSomBeregner, aktivitetslogg)
     }
 
@@ -2446,10 +2454,8 @@ internal class Vedtaksperiode private constructor(
                 maksdatoberegning = maksdatoberegning,
                 syttiårsdagen = syttiårsdagen,
                 dødsdato = dødsdato,
-                subsumsjonslogg = subsumsjonslogg,
                 aktivitetslogg = aktivitetslogg,
-                arbeidsgiverRegler = person.regler,
-                infotrygdtidslinje = historisktidslinje
+                arbeidsgiverRegler = person.regler
             ),
             MaksimumUtbetalingFilter(
                 sykepengegrunnlagBegrenset6G = sykepengegrunnlag
@@ -2460,26 +2466,31 @@ internal class Vedtaksperiode private constructor(
             filter.filter(tidslinjer, periode)
         }
 
-        val tidslinjegrunnlag = uberegnetTidslinjePerArbeidsgiver.map { it.samletVedtaksperiodetidslinje }.plusElement(historisktidslinje)
-        val tidslinjegrunnlagsubsumsjon = tidslinjegrunnlag.subsumsjonsformat()
-        val beregnetTidslinjesubsumsjon = tidslinjegrunnlag.reduce(Utbetalingstidslinje::plus).subsumsjonsformat()
-
-        return beregnetTidslinjePerArbeidsgiver.flatMap {
-            it.vedtaksperioder.map { vedtaksperiodeberegning ->
-                val maksdatoresultat = Maksdatovurdering(
-                    resultat = maksdatoberegning.beregnMaksdatoBegrensetTilPeriode(vedtaksperiodeberegning.periode),
-                    tidslinjegrunnlagsubsumsjon = tidslinjegrunnlagsubsumsjon,
-                    beregnetTidslinjesubsumsjon = beregnetTidslinjesubsumsjon,
-                    syttiårsdag = syttiårsdagen
-                )
-                BeregnetPeriode(
-                    vedtaksperiodeId = vedtaksperiodeberegning.vedtaksperiodeId,
-                    utbetalingstidslinje = vedtaksperiodeberegning.utbetalingstidslinje,
-                    maksdatovurdering = maksdatoresultat,
-                    inntekterForBeregning = vedtaksperiodeberegning.inntekterForBeregning
+        return beregnetTidslinjePerArbeidsgiver
+            .flatMap {
+                it.vedtaksperioder.map { vedtaksperiodeberegning ->
+                    val maksdatoresultat = maksdatoberegning.beregnMaksdatoBegrensetTilPeriode(vedtaksperiodeberegning.periode)
+                    BeregnetPeriode(
+                        vedtaksperiodeId = vedtaksperiodeberegning.vedtaksperiodeId,
+                        utbetalingstidslinje = vedtaksperiodeberegning.utbetalingstidslinje,
+                        maksdatoresultat = maksdatoresultat,
+                        inntekterForBeregning = vedtaksperiodeberegning.inntekterForBeregning
+                    )
+                }
+            }
+            .also {
+                val maksdatoForVedtaksperiode = it.single { it.vedtaksperiodeId == this.id }.maksdatoresultat
+                maksdatosubsummering(
+                    subsumsjonslogg = subsumsjonslogg,
+                    periode = periode,
+                    syttiårsdagen = person.alder.syttiårsdagen,
+                    regler = person.regler,
+                    uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
+                    historisktidslinje = historisktidslinje,
+                    resultat = maksdatoForVedtaksperiode,
+                    maksdatosaker = maksdatoberegning.maksdatosaker
                 )
             }
-        }
     }
 
     internal fun håndterOverstyringIgangsattRevurderingArbeidstaker(
@@ -2892,3 +2903,89 @@ internal data class VedtaksperiodeView(
 internal val HendelseMetadata.behandlingkilde
     get() =
         Behandlingkilde(meldingsreferanseId, innsendt, registrert, avsender)
+
+private fun maksdatosubsummering(
+    subsumsjonslogg: Subsumsjonslogg,
+    periode: Periode,
+    syttiårsdagen: LocalDate,
+    regler: ArbeidsgiverRegler,
+    uberegnetTidslinjePerArbeidsgiver: List<Arbeidsgiverberegning>,
+    historisktidslinje: Utbetalingstidslinje,
+    resultat: Maksdatoresultat,
+    maksdatosaker: List<Maksdatokontekst>
+) {
+    val tidslinjegrunnlag = uberegnetTidslinjePerArbeidsgiver.map { it.samletVedtaksperiodetidslinje }.plusElement(historisktidslinje)
+    val tidslinjegrunnlagsubsumsjon = tidslinjegrunnlag.subsumsjonsformat()
+    val beregnetTidslinjesubsumsjon = tidslinjegrunnlag.reduce(Utbetalingstidslinje::plus).subsumsjonsformat()
+
+    // todo: rart å subsummere alle vurderingene siden tidenes morgen?
+    maksdatosaker.forEach { vurdering ->
+        // Bare relevant om det er ny rett på sykepenger eller om vilkåret ikke er oppfylt
+        val harTilstrekkeligOpphold = vurdering.datoForTilstrekkeligOppholdOppnådd(TILSTREKKELIG_OPPHOLD_I_SYKEDAGER)
+        val gjenståendeSykepengedager = vurdering.gjenståendeDagerUnder67År(regler)
+
+        if (harTilstrekkeligOpphold != null || gjenståendeSykepengedager == 0) {
+            subsumsjonslogg.logg(
+                `§ 8-12 ledd 2`(
+                    oppfylt = harTilstrekkeligOpphold != null,
+                    dato = vurdering.vurdertTilOgMed,
+                    tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
+                    tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
+                    beregnetTidslinje = beregnetTidslinjesubsumsjon,
+                )
+            )
+        }
+    }
+
+    val førSyttiårsdagen = fun(subsumsjonslogg: Subsumsjonslogg, utfallTom: LocalDate) {
+        subsumsjonslogg.logg(
+            `§ 8-3 ledd 1 punktum 2`(
+                oppfylt = true,
+                syttiårsdagen = syttiårsdagen,
+                utfallFom = periode.start,
+                utfallTom = utfallTom,
+                tidslinjeFom = periode.start,
+                tidslinjeTom = periode.endInclusive,
+                avvistePerioder = emptyList()
+            )
+        )
+    }
+
+    when (resultat.bestemmelse) {
+        Maksdatoresultat.Bestemmelse.IKKE_VURDERT -> error("ugyldig situasjon ${resultat.bestemmelse}")
+        Maksdatoresultat.Bestemmelse.ORDINÆR_RETT -> {
+            `§ 8-12 ledd 1 punktum 1`(periode, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon, resultat.gjenståendeDager, resultat.antallForbrukteDager, resultat.maksdato, resultat.startdatoSykepengerettighet ?: LocalDate.MIN).forEach {
+                subsumsjonslogg.logg(it)
+            }
+            førSyttiårsdagen(subsumsjonslogg, periode.endInclusive)
+        }
+
+        Maksdatoresultat.Bestemmelse.BEGRENSET_RETT -> {
+            `§ 8-51 ledd 3`(periode, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon, resultat.gjenståendeDager, resultat.antallForbrukteDager, resultat.maksdato, resultat.startdatoSykepengerettighet ?: LocalDate.MIN).forEach {
+                subsumsjonslogg.logg(it)
+            }
+            førSyttiårsdagen(subsumsjonslogg, syttiårsdagen.forrigeDag)
+        }
+
+        Maksdatoresultat.Bestemmelse.SYTTI_ÅR -> {
+            if (periode.start < syttiårsdagen) {
+                førSyttiårsdagen(subsumsjonslogg, syttiårsdagen.forrigeDag)
+            }
+
+            val avvisteDagerFraOgMedSøtti = resultat.avslåtteDager.flatten().filter { it >= syttiårsdagen }
+            if (avvisteDagerFraOgMedSøtti.isNotEmpty()) {
+                subsumsjonslogg.logg(
+                    `§ 8-3 ledd 1 punktum 2`(
+                        oppfylt = false,
+                        syttiårsdagen = syttiårsdagen,
+                        utfallFom = maxOf(syttiårsdagen, periode.start),
+                        utfallTom = periode.endInclusive,
+                        tidslinjeFom = periode.start,
+                        tidslinjeTom = periode.endInclusive,
+                        avvistePerioder = avvisteDagerFraOgMedSøtti.grupperSammenhengendePerioder()
+                    )
+                )
+            }
+        }
+    }
+}
