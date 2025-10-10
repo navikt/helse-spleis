@@ -106,9 +106,10 @@ fun `§ 8-2 ledd 1`(
  */
 fun `§ 8-2 ledd 1 - selvstendig næringsdrivende`(
     skjæringstidspunkt: LocalDate,
+    oppfylt: Boolean
 ) = Subsumsjon.enkelSubsumsjon(
     lovverk = "folketrygdloven",
-    utfall = Utfall.VILKAR_UAVKLART,
+    utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
     versjon = LocalDate.of(2020, 6, 12),
     paragraf = PARAGRAF_8_2,
     ledd = 1.ledd,

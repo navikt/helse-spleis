@@ -125,6 +125,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
+            selvstendigOpptjening,
             subsumsjonslogg
         )
         historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
@@ -147,7 +148,12 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
 
-        vilkårsgrunnlag.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, subsumsjonslogg)
+        vilkårsgrunnlag.valider(
+            Aktivitetslogg(),
+            10000.månedlig.sykepengegrunnlag,
+            selvstendigOpptjening,
+            subsumsjonslogg
+        )
         SubsumsjonInspektør(regelverkslogg).assertVurdert(paragraf = PARAGRAF_8_2, ledd = 1.ledd, versjon = 12.juni(2020))
     }
 
@@ -177,11 +183,13 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag1.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
+            selvstendigOpptjening,
             subsumsjonslogg
         )
         vilkårsgrunnlag2.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
+            selvstendigOpptjening,
             subsumsjonslogg
         )
 
@@ -222,8 +230,18 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
 
-        vilkårsgrunnlag1.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, subsumsjonslogg)
-        vilkårsgrunnlag2.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, subsumsjonslogg)
+        vilkårsgrunnlag1.valider(
+            Aktivitetslogg(),
+            10000.månedlig.sykepengegrunnlag,
+            selvstendigOpptjening,
+            subsumsjonslogg
+        )
+        vilkårsgrunnlag2.valider(
+            Aktivitetslogg(),
+            10000.månedlig.sykepengegrunnlag,
+            selvstendigOpptjening,
+            subsumsjonslogg
+        )
         historikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
         historikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
@@ -246,6 +264,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
+            selvstendigOpptjening,
             subsumsjonslogg
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
@@ -270,6 +289,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
+            selvstendigOpptjening,
             subsumsjonslogg
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
