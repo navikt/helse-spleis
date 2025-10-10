@@ -164,6 +164,99 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test
+    fun `forbrukte dager før 67 år`() {
+        tidslinjeOf(11.NAVDAGER, startDato = 1.desember(2017)).also { tidslinje ->
+            assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
+            assertEquals(setOf(11.januar + 60.ukedager), maksdatoer)
+            assertEquals(79, gjenståendeDager)
+        }
+        tidslinjeOf(10.NAV).also { tidslinje ->
+            assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
+            assertEquals(setOf(11.januar + 60.ukedager), maksdatoer)
+            assertEquals(61, gjenståendeDager)
+        }
+    }
+
+    @Test
+    fun `sjekk 60 dagers grense for 67 åringer`() {
+        val tidslinje = tidslinjeOf(11.NAV, 61.NAVDAGER)
+        assertEquals(listOf(6.april), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
+    }
+
+    @Test
+    fun `sjekk 60 dagers grense for 67 åringer med 26 ukers opphold`() {
+        val tidslinje = tidslinjeOf(10.NAV, 60.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).ARB, 60.NAVDAGER)
+        assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
+    }
+
+    @Test
+    fun `sjekk at sykepenger er oppbrukt når personen fyller 67 år`() {
+        val tidslinje = tidslinjeOf(248.NAVDAGER, 10.NAVDAGER, startDato = 31.januar(2017))
+        assertEquals(10, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018).size)
+    }
+
+    @Test
+    fun `sjekk at sykepenger er oppbrukt etter at personen har fylt 67 år`() {
+        val tidslinje = tidslinjeOf(11.NAV, 61.NAVDAGER)
+        assertEquals(1, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018).size)
+    }
+
+    @Test
+    fun `hvis gjenstående sykepengedager er under 60 ved fylte 67 begrunnes avslag med 8-12`() {
+        val tidslinje = tidslinjeOf(248.NAVDAGER, 2.NAVDAGER, startDato = 23.februar(2017))
+        val avvisteDager = tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018)
+        assertEquals(2, avvisteDager.size)
+        assertTrue(tidslinje.inspektør.avvistedager.all { it.begrunnelser.single() == SykepengedagerOppbrukt })
+    }
+
+    @Test
+    fun `bruke opp alt fom 67 år`() {
+        val tidslinje = tidslinjeOf(188.NAVDAGER, 61.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).ARB, 61.NAVDAGER, 36.ARB, 365.ARB, 365.ARB, 1.NAVDAGER, startDato = 30.mars(2017))
+        assertEquals(listOf(13.mars, 5.desember, 11.januar(2021)), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
+        val inspektør = avvisteTidslinjer.single().inspektør
+        assertEquals(listOf(SykepengedagerOppbrukt), inspektør.begrunnelse(13.mars))
+        assertEquals(listOf(Begrunnelse.SykepengedagerOppbruktOver67), inspektør.begrunnelse(5.desember))
+        assertEquals(listOf(Begrunnelse.Over70), inspektør.begrunnelse(11.januar(2021)))
+    }
+
+    @Test
+    fun `hvis gjenstående sykepengedager er over 60 ved fylte 67 begrunnes avslag med 8-51`() {
+        val tidslinje = tidslinjeOf(11.NAV, 60.NAVDAGER, 2.NAVDAGER)
+        val avvisteDager = tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018)
+        assertEquals(2, avvisteDager.size)
+        assertTrue(tidslinje.inspektør.avvistedager.all { it.begrunnelser.single() == Begrunnelse.SykepengedagerOppbruktOver67 })
+    }
+
+    @Test
+    fun `begrunnelsen følger tidspunkt for når sykepengedagene brukes opp, også om det er gap mellom`() {
+        val tidslinje = tidslinjeOf(248.NAVDAGER, 25.ARB, 2.NAVDAGER, startDato = 23.februar(2017))
+        val avvisteDager = tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018)
+        assertEquals(2, avvisteDager.size)
+        assertTrue(tidslinje.inspektør.avvistedager.all { it.begrunnelser.single() == SykepengedagerOppbrukt })
+    }
+
+    @Test
+    fun `begrunnelse ved flere oppbrukte rettigheter - hel tidslinje`() {
+        val tidslinje = tidslinjeOf(248.NAVDAGER, 1.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).ARB, 60.NAVDAGER, 1.NAVDAGER, startDato = 23.februar(2017))
+        val avvisteDager = tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018)
+        assertEquals(2, avvisteDager.size)
+        assertEquals(SykepengedagerOppbrukt, avvisteTidslinjer.first().inspektør.avvistedager.first().begrunnelser.single())
+        assertEquals(Begrunnelse.SykepengedagerOppbruktOver67, avvisteTidslinjer.first().inspektør.avvistedager.last().begrunnelser.single())
+    }
+
+    @Test
+    fun `sjekk at 26 uker med syk etter karantene ikke starter utbetaling gammel person`() {
+        val tidslinje = tidslinjeOf(11.NAV, 60.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).NAVDAGER, 60.NAVDAGER)
+        assertEquals(TILSTREKKELIG_OPPHOLD_I_SYKEDAGER + 60, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018).size)
+    }
+
+    @Test
+    fun `sjekk at 26 uker med syk etter karantene starter utbetaling for gammel person etter første arbeidsdag`() {
+        val tidslinje = tidslinjeOf(11.NAV, 60.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).NAVDAGER, 1.ARB, 60.NAVDAGER)
+        assertEquals(TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018).size)
+    }
+
+    @Test
     fun `avslår dager etter dødsfall - akkurat 70 år`() {
         val tidslinje = tidslinjeOf(16.AP, 10.NAV)
         val avslåtteDager = tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018, dødsdato = 10.januar)
@@ -183,6 +276,31 @@ internal class MaksimumSykepengedagerfilterTest {
         avslåtteDager.map {
             assertEquals(listOf(Begrunnelse.Over70), begrunnelse(it))
         }
+    }
+
+    @Test
+    fun `utbetaling stopper når du blir 70 år`() {
+        val tidslinje = tidslinjeOf(11.NAV)
+        assertEquals(listOf(10.januar, 11.januar), tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018))
+    }
+
+    @Test
+    fun `kan ikke bli syk på 70årsdagen`() {
+        val tidslinje = tidslinjeOf(9.UTELATE, 2.NAVDAGER)
+        assertEquals(listOf(10.januar, 11.januar), tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018))
+    }
+
+    @Test
+    fun `kan ikke bli syk etter 70årsdagen`() {
+        val tidslinje = tidslinjeOf(10.UTELATE, 2.NAVDAGER)
+        assertEquals(listOf(11.januar, 12.januar), tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018))
+    }
+
+    @Test
+    fun `begrunnelse ved fylte 70`() {
+        val tidslinje = tidslinjeOf(11.NAV)
+        assertEquals(2, tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018).size)
+        assertTrue(tidslinje.inspektør.avvistedager.all { it.begrunnelser.single() == Begrunnelse.Over70 })
     }
 
     @Test
@@ -417,24 +535,6 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test
-    fun `utbetaling stopper når du blir 70 år`() {
-        val tidslinje = tidslinjeOf(11.NAV)
-        assertEquals(listOf(10.januar, 11.januar), tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018))
-    }
-
-    @Test
-    fun `kan ikke bli syk på 70årsdagen`() {
-        val tidslinje = tidslinjeOf(9.UTELATE, 2.NAVDAGER)
-        assertEquals(listOf(10.januar, 11.januar), tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018))
-    }
-
-    @Test
-    fun `kan ikke bli syk etter 70årsdagen`() {
-        val tidslinje = tidslinjeOf(10.UTELATE, 2.NAVDAGER)
-        assertEquals(listOf(11.januar, 12.januar), tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018))
-    }
-
-    @Test
     fun `noe som helst sykdom i opphold resetter teller`() {
         val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, (24 * 7).ARB, 7.NAV, (2 * 7).ARB, 10.NAV)
         assertEquals(5, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
@@ -453,32 +553,6 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test
-    fun `forbrukte dager før 67 år`() {
-        tidslinjeOf(11.NAVDAGER, startDato = 1.desember(2017)).also { tidslinje ->
-            assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
-            assertEquals(setOf(11.januar + 60.ukedager), maksdatoer)
-            assertEquals(79, gjenståendeDager)
-        }
-        tidslinjeOf(10.NAV).also { tidslinje ->
-            assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
-            assertEquals(setOf(11.januar + 60.ukedager), maksdatoer)
-            assertEquals(61, gjenståendeDager)
-        }
-    }
-
-    @Test
-    fun `sjekk 60 dagers grense for 67 åringer`() {
-        val tidslinje = tidslinjeOf(11.NAV, 61.NAVDAGER)
-        assertEquals(listOf(6.april), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
-    }
-
-    @Test
-    fun `sjekk 60 dagers grense for 67 åringer med 26 ukers opphold`() {
-        val tidslinje = tidslinjeOf(10.NAV, 60.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).ARB, 60.NAVDAGER)
-        assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
-    }
-
-    @Test
     fun `sjekk at 26 uker med syk etter karantene ikke starter utbetaling`() {
         val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).NAVDAGER, 60.NAVDAGER)
         assertEquals(TILSTREKKELIG_OPPHOLD_I_SYKEDAGER + 60, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
@@ -488,80 +562,6 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `sjekk at 26 uker med syk etter karantene starter utbetaling etter første arbeidsdag`() {
         val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).NAVDAGER, 1.ARB, 60.NAVDAGER)
         assertEquals(TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
-    }
-
-    @Test
-    fun `sjekk at sykepenger er oppbrukt når personen fyller 67 år`() {
-        val tidslinje = tidslinjeOf(248.NAVDAGER, 10.NAVDAGER, startDato = 31.januar(2017))
-        assertEquals(10, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018).size)
-    }
-
-    @Test
-    fun `sjekk at sykepenger er oppbrukt etter at personen har fylt 67 år`() {
-        val tidslinje = tidslinjeOf(11.NAV, 61.NAVDAGER)
-        assertEquals(1, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018).size)
-    }
-
-    @Test
-    fun `hvis gjenstående sykepengedager er under 60 ved fylte 67 begrunnes avslag med 8-12`() {
-        val tidslinje = tidslinjeOf(248.NAVDAGER, 2.NAVDAGER, startDato = 23.februar(2017))
-        val avvisteDager = tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018)
-        assertEquals(2, avvisteDager.size)
-        assertTrue(tidslinje.inspektør.avvistedager.all { it.begrunnelser.single() == SykepengedagerOppbrukt })
-    }
-
-    @Test
-    fun `bruke opp alt fom 67 år`() {
-        val tidslinje = tidslinjeOf(188.NAVDAGER, 61.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).ARB, 61.NAVDAGER, 36.ARB, 365.ARB, 365.ARB, 1.NAVDAGER, startDato = 30.mars(2017))
-        assertEquals(listOf(13.mars, 5.desember, 11.januar(2021)), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
-        val inspektør = avvisteTidslinjer.single().inspektør
-        assertEquals(listOf(SykepengedagerOppbrukt), inspektør.begrunnelse(13.mars))
-        assertEquals(listOf(Begrunnelse.SykepengedagerOppbruktOver67), inspektør.begrunnelse(5.desember))
-        assertEquals(listOf(Begrunnelse.Over70), inspektør.begrunnelse(11.januar(2021)))
-    }
-
-    @Test
-    fun `hvis gjenstående sykepengedager er over 60 ved fylte 67 begrunnes avslag med 8-51`() {
-        val tidslinje = tidslinjeOf(11.NAV, 60.NAVDAGER, 2.NAVDAGER)
-        val avvisteDager = tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018)
-        assertEquals(2, avvisteDager.size)
-        assertTrue(tidslinje.inspektør.avvistedager.all { it.begrunnelser.single() == Begrunnelse.SykepengedagerOppbruktOver67 })
-    }
-
-    @Test
-    fun `begrunnelsen følger tidspunkt for når sykepengedagene brukes opp, også om det er gap mellom`() {
-        val tidslinje = tidslinjeOf(248.NAVDAGER, 25.ARB, 2.NAVDAGER, startDato = 23.februar(2017))
-        val avvisteDager = tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018)
-        assertEquals(2, avvisteDager.size)
-        assertTrue(tidslinje.inspektør.avvistedager.all { it.begrunnelser.single() == SykepengedagerOppbrukt })
-    }
-
-    @Test
-    fun `begrunnelse ved flere oppbrukte rettigheter - hel tidslinje`() {
-        val tidslinje = tidslinjeOf(248.NAVDAGER, 1.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).ARB, 60.NAVDAGER, 1.NAVDAGER, startDato = 23.februar(2017))
-        val avvisteDager = tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018)
-        assertEquals(2, avvisteDager.size)
-        assertEquals(SykepengedagerOppbrukt, avvisteTidslinjer.first().inspektør.avvistedager.first().begrunnelser.single())
-        assertEquals(Begrunnelse.SykepengedagerOppbruktOver67, avvisteTidslinjer.first().inspektør.avvistedager.last().begrunnelser.single())
-    }
-
-    @Test
-    fun `begrunnelse ved fylte 70`() {
-        val tidslinje = tidslinjeOf(11.NAV)
-        assertEquals(2, tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018).size)
-        assertTrue(tidslinje.inspektør.avvistedager.all { it.begrunnelser.single() == Begrunnelse.Over70 })
-    }
-
-    @Test
-    fun `sjekk at 26 uker med syk etter karantene ikke starter utbetaling gammel person`() {
-        val tidslinje = tidslinjeOf(11.NAV, 60.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).NAVDAGER, 60.NAVDAGER)
-        assertEquals(TILSTREKKELIG_OPPHOLD_I_SYKEDAGER + 60, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018).size)
-    }
-
-    @Test
-    fun `sjekk at 26 uker med syk etter karantene starter utbetaling for gammel person etter første arbeidsdag`() {
-        val tidslinje = tidslinjeOf(11.NAV, 60.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).NAVDAGER, 1.ARB, 60.NAVDAGER)
-        assertEquals(TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018).size)
     }
 
     @Test
