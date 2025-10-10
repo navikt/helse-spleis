@@ -16,7 +16,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_9
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
 
 internal class MaksimumSykepengedagerfilter(
-    private val sekstisyvårsdagen: LocalDate,
+    private val maksdatoberegning: Maksdatoberegning,
     private val syttiårsdagen: LocalDate,
     private val dødsdato: LocalDate?,
     private val subsumsjonslogg: Subsumsjonslogg,
@@ -25,34 +25,11 @@ internal class MaksimumSykepengedagerfilter(
     private val infotrygdtidslinje: Utbetalingstidslinje
 ) : UtbetalingstidslinjerFilter {
 
-    private val maksdatoberegning = Maksdatoberegning(
-        sekstisyvårsdagen = sekstisyvårsdagen,
-        syttiårsdagen = syttiårsdagen,
-        dødsdato = dødsdato,
-        arbeidsgiverRegler = arbeidsgiverRegler,
-        infotrygdtidslinje = infotrygdtidslinje
-    )
-
-    internal var maksdatosaker: List<Maksdatokontekst> = emptyList()
-        private set
-    private var sisteVurdering = Maksdatokontekst.TomKontekst
-
     private lateinit var beregnetTidslinje: Utbetalingstidslinje
     private lateinit var tidslinjegrunnlag: List<Utbetalingstidslinje>
 
     private val tidslinjegrunnlagsubsumsjon by lazy { tidslinjegrunnlag.subsumsjonsformat() }
     private val beregnetTidslinjesubsumsjon by lazy { beregnetTidslinje.subsumsjonsformat() }
-
-    internal fun maksdatoresultatForVedtaksperiode(periode: Periode): Maksdatovurdering {
-        return Maksdatovurdering(
-            resultat = sisteVurdering
-                .avgrensTil(periode.endInclusive)
-                .beregnMaksdato(sekstisyvårsdagen, syttiårsdagen, dødsdato, arbeidsgiverRegler),
-            tidslinjegrunnlagsubsumsjon = tidslinjegrunnlagsubsumsjon,
-            beregnetTidslinjesubsumsjon = beregnetTidslinjesubsumsjon,
-            syttiårsdag = syttiårsdagen
-        )
-    }
 
     override fun filter(
         arbeidsgivere: List<Arbeidsgiverberegning>,
@@ -62,11 +39,6 @@ internal class MaksimumSykepengedagerfilter(
         beregnetTidslinje = tidslinjegrunnlag.reduce(Utbetalingstidslinje::plus)
 
         val vurderinger = maksdatoberegning.beregn(arbeidsgivere)
-
-        // <backwards compatibility>
-        maksdatosaker = vurderinger.dropLast(1)
-        sisteVurdering = vurderinger.last()
-        // </backwards compatibility>
 
         // todo: rart å subsummere alle vurderingene siden tidenes morgen?
         vurderinger.forEach { vurdering ->
@@ -98,6 +70,8 @@ internal class MaksimumSykepengedagerfilter(
         val avvisteTidslinjer = begrunnelser.entries.fold(arbeidsgivere) { result, (begrunnelse, dager) ->
             result.avvis(dager.grupperSammenhengendePerioder(), begrunnelse)
         }
+
+        val sisteVurdering = vurderinger.last()
 
         if (sisteVurdering.fremdelesSykEtterTilstrekkeligOpphold(vedtaksperiode, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER)) {
             aktivitetslogg.funksjonellFeil(RV_VV_9)

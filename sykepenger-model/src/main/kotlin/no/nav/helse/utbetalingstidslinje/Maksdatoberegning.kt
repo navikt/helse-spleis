@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.Karantene
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.Syk
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -18,10 +19,18 @@ internal class Maksdatoberegning(
         private const val HISTORISK_PERIODE_I_ÅR: Long = 3
     }
 
-    internal val maksdatosaker = mutableListOf<Maksdatokontekst>()
-    private var sisteVurdering = Maksdatokontekst.TomKontekst
+    private val _maksdatosaker = mutableListOf<Maksdatokontekst>()
+    internal var sisteVurdering = Maksdatokontekst.TomKontekst
+        private set
+    internal val maksdatosaker get() = _maksdatosaker.plusElement(sisteVurdering)
 
     private var state: State = State.Initiell
+
+    internal fun beregnMaksdatoBegrensetTilPeriode(periode: Periode): Maksdatoresultat {
+        return sisteVurdering
+            .avgrensTil(periode.endInclusive)
+            .beregnMaksdato(sekstisyvårsdagen, syttiårsdagen, dødsdato, arbeidsgiverRegler)
+    }
 
     private fun erDød(dato: LocalDate) =
         dødsdato != null && dødsdato < dato
@@ -58,7 +67,7 @@ internal class Maksdatoberegning(
                 }
             }
 
-        return maksdatosaker.plusElement(sisteVurdering)
+        return maksdatosaker
     }
 
     private fun state(nyState: State) {
@@ -105,7 +114,7 @@ internal class Maksdatoberegning(
 
         object Initiell : State {
             override fun entering(avgrenser: Maksdatoberegning) {
-                avgrenser.maksdatosaker.add(avgrenser.sisteVurdering)
+                avgrenser._maksdatosaker.add(avgrenser.sisteVurdering)
                 avgrenser.sisteVurdering = Maksdatokontekst.TomKontekst
             }
             override fun oppholdsdag(avgrenser: Maksdatoberegning, dagen: LocalDate) {

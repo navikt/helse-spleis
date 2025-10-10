@@ -73,16 +73,16 @@ internal class MaksimumSykepengedagerfilterTest {
         assertEquals(emptyList<Any>(), avvisteDager)
         assertEquals(0, forbrukteDager)
         assertEquals(248, gjenståendeDager)
-        assertEquals(setOf(28.desember, 11.desember(2019)), maksdatoer)
+        assertEquals(setOf(28.desember, 1.juli(2020)), maksdatoer)
     }
 
     @Test
-    fun `avviser ikke dager som strekker seg forbi arbeidsgiver som beregner utbetalinger`() {
+    fun `avviser dager som strekker seg forbi arbeidsgiver som beregner utbetalinger`() {
         val a1 = tidslinjeOf(16.AP, 248.NAVDAGER)
         val a2 = tidslinjeOf(16.AP, 250.NAVDAGER, 182.ARB, 10.NAV)
         val avvisteDager = listOf(a1, a2).utbetalingsavgrenser(UNG_PERSON_FNR_2018, a1.periode())
         assertEquals(listOf(31.desember, 1.januar(2019)), avvisteDager)
-        assertEquals(setOf(28.desember, 11.desember(2019)), maksdatoer)
+        assertEquals(setOf(28.desember, 12.juni(2020)), maksdatoer)
     }
 
     @Test
@@ -877,8 +877,17 @@ internal class MaksimumSykepengedagerfilterTest {
         )
         val sekstisyvårsdagen = fødselsdato.plusYears(67)
         val syttiårsdagen = fødselsdato.plusYears(70)
-        val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(
+
+        val maksdatoberegning = Maksdatoberegning(
             sekstisyvårsdagen = sekstisyvårsdagen,
+            syttiårsdagen = syttiårsdagen,
+            dødsdato = dødsdato,
+            arbeidsgiverRegler = NormalArbeidstaker,
+            infotrygdtidslinje = personTidslinje
+        )
+
+        val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(
+            maksdatoberegning = maksdatoberegning,
             syttiårsdagen = syttiårsdagen,
             dødsdato = dødsdato,
             subsumsjonslogg = EmptyLog,
@@ -903,11 +912,16 @@ internal class MaksimumSykepengedagerfilterTest {
             .filter(tidslinjer, filterperiode)
             .map { it.samletVedtaksperiodetidslinje }
 
-        val maksdatoresultat = maksimumSykepengedagerfilter.maksdatoresultatForVedtaksperiode(filterperiode).resultat
-        maksdatoer = maksimumSykepengedagerfilter.maksdatosaker
+        val maksdatoresultat = Maksdatovurdering(
+            resultat = maksdatoberegning.beregnMaksdatoBegrensetTilPeriode(filterperiode),
+            tidslinjegrunnlagsubsumsjon = emptyList(),
+            beregnetTidslinjesubsumsjon = emptyList(),
+            syttiårsdag = syttiårsdagen
+        ).resultat
+
+        maksdatoer = maksdatoberegning.maksdatosaker
             .map { it.beregnMaksdato(sekstisyvårsdagen, syttiårsdagen, dødsdato, NormalArbeidstaker) }
             .map { it.maksdato }
-            .plusElement(maksdatoresultat.maksdato)
             .toSet()
         forbrukteDager = maksdatoresultat.antallForbrukteDager
         gjenståendeDager = maksdatoresultat.gjenståendeDager

@@ -13,6 +13,7 @@ import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.Regelverkslogg
+import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav a`
 import no.nav.helse.etterlevelse.`§ 8-29`
@@ -170,6 +171,8 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Opptjeningfilter
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
+import no.nav.helse.utbetalingstidslinje.Maksdatoberegning
+import no.nav.helse.utbetalingstidslinje.Maksdatovurdering
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Medlemskapsfilter
@@ -1043,6 +1046,8 @@ internal class Vedtaksperiode private constructor(
         val historisktidslinje = person.vedtaksperioder { it.periode.endInclusive < periode.start }
             .map { it.behandlinger.utbetalingstidslinje() }
             .fold(person.infotrygdhistorikk.utbetalingstidslinje(), Utbetalingstidslinje::plus)
+            .fremTilOgMed(periode.endInclusive)
+
         val beregnetTidslinjePerVedtaksperiode = filtrerUtbetalingstidslinjer(
             aktivitetslogg = aktivitetslogg,
             uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
@@ -2417,12 +2422,10 @@ internal class Vedtaksperiode private constructor(
         historisktidslinje: Utbetalingstidslinje,
         perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>
     ): List<BeregnetPeriode> {
-        val maksdatofilter = MaksimumSykepengedagerfilter(
+        val maksdatoberegning = Maksdatoberegning(
             sekstisyvårsdagen = sekstisyvårsdagen,
             syttiårsdagen = syttiårsdagen,
             dødsdato = dødsdato,
-            subsumsjonslogg = subsumsjonslogg,
-            aktivitetslogg = aktivitetslogg,
             arbeidsgiverRegler = person.regler,
             infotrygdtidslinje = historisktidslinje
         )
@@ -2439,7 +2442,15 @@ internal class Vedtaksperiode private constructor(
             Opptjeningfilter(
                 harOpptjening = harOpptjening
             ),
-            maksdatofilter,
+            MaksimumSykepengedagerfilter(
+                maksdatoberegning = maksdatoberegning,
+                syttiårsdagen = syttiårsdagen,
+                dødsdato = dødsdato,
+                subsumsjonslogg = subsumsjonslogg,
+                aktivitetslogg = aktivitetslogg,
+                arbeidsgiverRegler = person.regler,
+                infotrygdtidslinje = historisktidslinje
+            ),
             MaksimumUtbetalingFilter(
                 sykepengegrunnlagBegrenset6G = sykepengegrunnlag
             )
@@ -2449,12 +2460,22 @@ internal class Vedtaksperiode private constructor(
             filter.filter(tidslinjer, periode)
         }
 
+        val tidslinjegrunnlag = uberegnetTidslinjePerArbeidsgiver.map { it.samletVedtaksperiodetidslinje }.plusElement(historisktidslinje)
+        val tidslinjegrunnlagsubsumsjon = tidslinjegrunnlag.subsumsjonsformat()
+        val beregnetTidslinjesubsumsjon = tidslinjegrunnlag.reduce(Utbetalingstidslinje::plus).subsumsjonsformat()
+
         return beregnetTidslinjePerArbeidsgiver.flatMap {
             it.vedtaksperioder.map { vedtaksperiodeberegning ->
+                val maksdatoresultat = Maksdatovurdering(
+                    resultat = maksdatoberegning.beregnMaksdatoBegrensetTilPeriode(vedtaksperiodeberegning.periode),
+                    tidslinjegrunnlagsubsumsjon = tidslinjegrunnlagsubsumsjon,
+                    beregnetTidslinjesubsumsjon = beregnetTidslinjesubsumsjon,
+                    syttiårsdag = syttiårsdagen
+                )
                 BeregnetPeriode(
                     vedtaksperiodeId = vedtaksperiodeberegning.vedtaksperiodeId,
                     utbetalingstidslinje = vedtaksperiodeberegning.utbetalingstidslinje,
-                    maksdatovurdering = maksdatofilter.maksdatoresultatForVedtaksperiode(vedtaksperiodeberegning.periode),
+                    maksdatovurdering = maksdatoresultat,
                     inntekterForBeregning = vedtaksperiodeberegning.inntekterForBeregning
                 )
             }
