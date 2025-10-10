@@ -141,7 +141,7 @@ internal data class Maksdatokontekst(
         when {
             maksdatoOrdinærRett <= maksdatoBegrensetRett -> {
                 maksdato = listOfNotNull(maksdatoOrdinærRett, dødsdato).min()
-                gjenståendeDager = gjenståendeDagerUnder67År(regler)
+                gjenståendeDager = ukedager(forrigeVirkedag, maksdato)
                 hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.ORDINÆR_RETT
             }
 

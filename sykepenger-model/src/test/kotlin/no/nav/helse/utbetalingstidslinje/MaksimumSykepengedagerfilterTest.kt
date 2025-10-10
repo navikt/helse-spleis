@@ -90,10 +90,22 @@ internal class MaksimumSykepengedagerfilterTest {
         val tidslinje = tidslinjeOf(16.AP, 10.NAV)
         val avslåtteDager = tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, dødsdato = 20.januar)
         assertEquals(listOf(22.januar, 23.januar, 24.januar, 25.januar, 26.januar), avslåtteDager)
+        assertEquals(0, gjenståendeDager)
         assertEquals(setOf(20.januar), maksdatoer)
         avslåtteDager.map {
             assertEquals(listOf(Begrunnelse.EtterDødsdato), begrunnelse(it))
         }
+    }
+
+    @Test
+    fun `under 67 år - dødsdato i fremtiden`() {
+        val tidslinje = tidslinjeOf(16.AP, 10.NAV)
+        val avslåtteDager = tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, dødsdato = 31.januar)
+
+        assertEquals(emptyList<Nothing>(), avslåtteDager)
+        assertEquals(8, forbrukteDager)
+        assertEquals(3, gjenståendeDager)
+        assertEquals(setOf(31.januar), maksdatoer)
     }
 
     @Test
