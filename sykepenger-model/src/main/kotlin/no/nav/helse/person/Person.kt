@@ -85,8 +85,8 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.view.PersonView
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler
+import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler.Companion.NormalArbeidstaker
 
 class Person private constructor(
     personidentifikator: Personidentifikator,
@@ -97,7 +97,7 @@ class Person private constructor(
     internal val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val regelverkslogg: Regelverkslogg,
     private val tidligereBehandlinger: List<Person> = emptyList(),
-    internal val regler: ArbeidsgiverRegler = NormalArbeidstaker,
+    internal val regler: MaksimumSykepengedagerregler = NormalArbeidstaker,
     internal val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering = MinimumSykdomsgradsvurdering()
 ) : Aktivitetskontekst {
     companion object {
@@ -134,7 +134,7 @@ class Person private constructor(
         personidentifikator: Personidentifikator,
         alder: Alder,
         regelverkslogg: Regelverkslogg,
-        regler: ArbeidsgiverRegler
+        regler: MaksimumSykepengedagerregler
     ) : this(
         personidentifikator,
         alder,

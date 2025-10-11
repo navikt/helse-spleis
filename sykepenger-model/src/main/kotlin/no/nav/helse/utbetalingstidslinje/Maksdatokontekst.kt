@@ -25,14 +25,14 @@ internal data class Maksdatokontekst(
 
     internal val oppholdsteller = oppholdsdager.size
     internal val forbrukteDager = betalteDager.size
-    internal fun erDagerUnder67ÅrForbrukte(regler: ArbeidsgiverRegler) =
+    internal fun erDagerUnder67ÅrForbrukte(regler: MaksimumSykepengedagerregler) =
             gjenståendeDagerUnder67År(regler) == 0
 
-    internal fun erDagerOver67ÅrForbrukte(sekstisyvårsdagen: LocalDate, regler: ArbeidsgiverRegler) =
+    internal fun erDagerOver67ÅrForbrukte(sekstisyvårsdagen: LocalDate, regler: MaksimumSykepengedagerregler) =
         gjenståendeDagerOver67År(sekstisyvårsdagen, regler) == 0
 
-    internal fun gjenståendeDagerUnder67År(regler: ArbeidsgiverRegler) = regler.maksSykepengedager() - forbrukteDager
-    internal fun gjenståendeDagerOver67År(sekstisyvårsdagen: LocalDate, regler: ArbeidsgiverRegler): Int {
+    internal fun gjenståendeDagerUnder67År(regler: MaksimumSykepengedagerregler) = regler.maksSykepengedager() - forbrukteDager
+    internal fun gjenståendeDagerOver67År(sekstisyvårsdagen: LocalDate, regler: MaksimumSykepengedagerregler): Int {
         val forbrukteDagerOver67 = betalteDager.count { it > sekstisyvårsdagen }
         return regler.maksSykepengedagerOver67() - forbrukteDagerOver67
     }
@@ -99,7 +99,7 @@ internal data class Maksdatokontekst(
         sekstisyvårsdagen: LocalDate,
         syttiårsdagen: LocalDate,
         dødsdato: LocalDate?,
-        regler: ArbeidsgiverRegler
+        regler: MaksimumSykepengedagerregler
     ): Maksdatoresultat {
         fun LocalDate.forrigeVirkedagFør() = minusDays(
             when (dayOfWeek) {

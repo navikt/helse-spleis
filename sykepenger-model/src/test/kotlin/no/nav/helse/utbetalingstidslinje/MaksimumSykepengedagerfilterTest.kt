@@ -31,7 +31,7 @@ import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.Utbetalingsdager
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.ukedager
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.NyVilkårsprøvingNødvendig
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
@@ -830,7 +830,7 @@ internal class MaksimumSykepengedagerfilterTest {
             sekstisyvårsdagen = sekstisyvårsdagen,
             syttiårsdagen = syttiårsdagen,
             dødsdato = dødsdato,
-            arbeidsgiverRegler = NormalArbeidstaker,
+            regler = NormalArbeidstaker,
             infotrygdtidslinje = personTidslinje
         )
 

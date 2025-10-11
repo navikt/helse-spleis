@@ -32,7 +32,7 @@ import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.Utbetalingsdager
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.ukedager
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
@@ -56,12 +56,8 @@ internal class MaksdatoberegningTest {
     @Test
     fun `vurderer maksdato med eget regelsett`() {
         val tidslinje = tidslinjeOf(16.AP, 10.NAV)
-        val avslåtteDager = tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, regler = object : ArbeidsgiverRegler {
-            override fun burdeStarteNyArbeidsgiverperiode(oppholdsdagerBrukt: Int): Boolean = TODO("Not yet implemented")
-            override fun arbeidsgiverperiodenGjennomført(arbeidsgiverperiodedagerBrukt: Int): Boolean = TODO("Not yet implemented")
-
+        val avslåtteDager = tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, regler = object : MaksimumSykepengedagerregler {
             override fun maksSykepengedager() = 5
-
             override fun maksSykepengedagerOver67() = 5
         })
         assertEquals((24.januar til 26.januar).utenHelg(), avslåtteDager)
@@ -1185,7 +1181,7 @@ internal class MaksdatoberegningTest {
         fødselsdato: LocalDate,
         personTidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
         dødsdato: LocalDate? = null,
-        regler: ArbeidsgiverRegler = NormalArbeidstaker
+        regler: MaksimumSykepengedagerregler = NormalArbeidstaker
     ): List<LocalDate> {
         return listOf(this).utbetalingsavgrenser(fødselsdato, personTidslinje, dødsdato, regler).single()
     }
@@ -1194,7 +1190,7 @@ internal class MaksdatoberegningTest {
         fødselsdato: LocalDate,
         personTidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
         dødsdato: LocalDate? = null,
-        regler: ArbeidsgiverRegler = NormalArbeidstaker
+        regler: MaksimumSykepengedagerregler = NormalArbeidstaker
     ): List<List<LocalDate>> {
         val sekstisyvårsdagen = fødselsdato.plusYears(67)
         val syttiårsdagen = fødselsdato.plusYears(70)
@@ -1203,7 +1199,7 @@ internal class MaksdatoberegningTest {
             sekstisyvårsdagen = sekstisyvårsdagen,
             syttiårsdagen = syttiårsdagen,
             dødsdato = dødsdato,
-            arbeidsgiverRegler = regler,
+            regler = regler,
             infotrygdtidslinje = personTidslinje
         )
 

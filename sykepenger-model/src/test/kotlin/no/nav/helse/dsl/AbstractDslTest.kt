@@ -37,7 +37,7 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
@@ -585,9 +585,7 @@ internal abstract class AbstractDslTest {
 
     protected fun dto() = testperson.dto()
 
-    private fun regler(maksSykedager: Int, maksSykedagerOver67: Int = maksSykedager): ArbeidsgiverRegler = object : ArbeidsgiverRegler {
-        override fun burdeStarteNyArbeidsgiverperiode(oppholdsdagerBrukt: Int) = oppholdsdagerBrukt >= 16
-        override fun arbeidsgiverperiodenGjennomført(arbeidsgiverperiodedagerBrukt: Int) = arbeidsgiverperiodedagerBrukt >= 16
+    private fun regler(maksSykedager: Int, maksSykedagerOver67: Int = maksSykedager): MaksimumSykepengedagerregler = object : MaksimumSykepengedagerregler {
         override fun maksSykepengedager() = maksSykedager
         override fun maksSykepengedagerOver67() = maksSykedagerOver67
     }

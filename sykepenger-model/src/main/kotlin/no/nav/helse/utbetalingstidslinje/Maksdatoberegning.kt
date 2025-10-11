@@ -14,7 +14,7 @@ internal class Maksdatoberegning(
     private val sekstisyvårsdagen: LocalDate,
     private val syttiårsdagen: LocalDate,
     private val dødsdato: LocalDate?,
-    private val arbeidsgiverRegler: ArbeidsgiverRegler,
+    private val regler: MaksimumSykepengedagerregler,
     private val infotrygdtidslinje: Utbetalingstidslinje
 ) {
     internal companion object {
@@ -32,7 +32,7 @@ internal class Maksdatoberegning(
     internal fun beregnMaksdatoBegrensetTilPeriode(periode: Periode): Maksdatoresultat {
         return sisteVurdering
             .avgrensTil(periode.endInclusive)
-            .beregnMaksdato(sekstisyvårsdagen, syttiårsdagen, dødsdato, arbeidsgiverRegler)
+            .beregnMaksdato(sekstisyvårsdagen, syttiårsdagen, dødsdato, regler)
     }
 
     private fun vurderStopp(dato: LocalDate) {
@@ -93,8 +93,8 @@ internal class Maksdatoberegning(
     private fun håndterBetalbarDag(dagen: LocalDate) {
         sisteVurdering = sisteVurdering.inkrementer(dagen)
         when {
-            sisteVurdering.erDagerUnder67ÅrForbrukte(arbeidsgiverRegler) -> state(Karantene)
-            sisteVurdering.erDagerOver67ÅrForbrukte(sekstisyvårsdagen, arbeidsgiverRegler) -> state(KaranteneOver67)
+            sisteVurdering.erDagerUnder67ÅrForbrukte(regler) -> state(Karantene)
+            sisteVurdering.erDagerOver67ÅrForbrukte(sekstisyvårsdagen, regler) -> state(KaranteneOver67)
             else -> state(Syk)
         }
     }

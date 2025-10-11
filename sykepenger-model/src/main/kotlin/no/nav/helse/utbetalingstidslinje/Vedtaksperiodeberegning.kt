@@ -62,13 +62,13 @@ internal fun filtrerUtbetalingstidslinjer(
     erUnderMinsteinntektEtterFylte67: Boolean,
     historisktidslinje: Utbetalingstidslinje,
     perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
-    regler: ArbeidsgiverRegler
+    regler: MaksimumSykepengedagerregler
 ): List<BeregnetPeriode> {
     val maksdatoberegning = Maksdatoberegning(
         sekstisyvårsdagen = sekstisyvårsdagen,
         syttiårsdagen = syttiårsdagen,
         dødsdato = dødsdato,
-        arbeidsgiverRegler =regler,
+        regler =regler,
         infotrygdtidslinje = historisktidslinje
     )
     val filtere = listOf(

@@ -8,7 +8,6 @@ import kotlin.properties.Delegates
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO
@@ -24,7 +23,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.REVURDERING
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -65,17 +63,16 @@ internal class UtkastTilVedtakBuilder(
     private lateinit var behandlingId: UUID
     internal fun behandlingId(behandlingId: UUID) = apply { this.behandlingId = behandlingId }
     private lateinit var periode: Periode
-    internal fun periode(arbeidsgiverperiode: List<Periode>, periode: Periode) = apply {
+    internal fun periode(arbeidsgiverperiode: List<Periode>, arbeidsgiverperiodeFerdigAvklart: Boolean, periode: Periode) = apply {
         this.periode = periode
 
-        val gjennomført = NormalArbeidstaker.arbeidsgiverperiodenGjennomført(arbeidsgiverperiode.periode()?.count() ?: 0)
         val arbeidsgiverperiodePåstartetITidligerePeriode = arbeidsgiverperiode.isNotEmpty() && periode.start >= arbeidsgiverperiode.last().endInclusive
 
         // flex viser denne teksten hvis vi har tagget med 'IngenNyArbeidsgiverperiode':
         //      Det er tidligere utbetalt en hel arbeidsgiverperiode.
         //      Etter dette har vi vurdert at du ikke har gjenopptatt arbeidet og deretter vært friskmeldt i mer enn 16 dager.
         //      NAV har derfor utbetalt sykepenger fra første dag du ble sykmeldt.
-        val utbetalingFraFørsteDagEtterAGP = !harPeriodeRettFør && gjennomført && arbeidsgiverperiodePåstartetITidligerePeriode
+        val utbetalingFraFørsteDagEtterAGP = !harPeriodeRettFør && arbeidsgiverperiodeFerdigAvklart && arbeidsgiverperiodePåstartetITidligerePeriode
         if (utbetalingFraFørsteDagEtterAGP) {
             tags.add(Tag.IngenNyArbeidsgiverperiode)
         }

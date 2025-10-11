@@ -33,7 +33,7 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -97,9 +97,7 @@ internal abstract class AbstractEndToEndTest {
         inntektsmeldinger.clear()
     }
 
-    private fun regler(maksSykedager: Int): ArbeidsgiverRegler = object : ArbeidsgiverRegler {
-        override fun burdeStarteNyArbeidsgiverperiode(oppholdsdagerBrukt: Int) = oppholdsdagerBrukt >= 16
-        override fun arbeidsgiverperiodenGjennomført(arbeidsgiverperiodedagerBrukt: Int) = arbeidsgiverperiodedagerBrukt >= 16
+    private fun regler(maksSykedager: Int): MaksimumSykepengedagerregler = object : MaksimumSykepengedagerregler {
         override fun maksSykepengedager() = maksSykedager
         override fun maksSykepengedagerOver67() = maksSykedager
     }

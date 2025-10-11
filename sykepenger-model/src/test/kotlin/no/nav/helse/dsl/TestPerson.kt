@@ -60,8 +60,8 @@ import no.nav.helse.spill_av_im.Forespørsel
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler
+import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -82,7 +82,7 @@ internal class TestPerson(
         fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
         jurist: SubsumsjonsListLog,
         deferredLog: DeferredLog = DeferredLog(),
-        regler: ArbeidsgiverRegler = NormalArbeidstaker
+        regler: MaksimumSykepengedagerregler = NormalArbeidstaker
     ) : this(observatør, Person(personidentifikator, fødselsdato.alder, jurist, regler), deferredLog)
 
     internal companion object {
