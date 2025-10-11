@@ -16,12 +16,8 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.plus
 import no.nav.helse.september
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
-import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
@@ -41,9 +37,7 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse.NyVilkårsprøvingNødvendi
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class MaksimumSykepengedagerfilterTest {
@@ -57,12 +51,6 @@ internal class MaksimumSykepengedagerfilterTest {
     private var forbrukteDager = -1
     private var gjenståendeDager = -1
     private lateinit var avvisteTidslinjer: List<Utbetalingstidslinje>
-    private lateinit var aktivitetslogg: Aktivitetslogg
-
-    @BeforeEach
-    internal fun setup() {
-        aktivitetslogg = Aktivitetslogg()
-    }
 
     @Test
     fun `vurderer maksdato for infotrygdtidslinje som strekker seg ut over vedtaksperioden`() {
@@ -324,7 +312,6 @@ internal class MaksimumSykepengedagerfilterTest {
         val tidslinje = tidslinjeOf(16.NAP, 249.NAVDAGER)
         assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
         assertEquals(setOf(28.desember), maksdatoer)
-        aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
     }
 
     @Test
@@ -343,7 +330,6 @@ internal class MaksimumSykepengedagerfilterTest {
             ).flatten(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
         )
         assertEquals(setOf(12.desember), maksdatoer)
-        aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
     }
 
     @Test
@@ -455,7 +441,6 @@ internal class MaksimumSykepengedagerfilterTest {
         val tidslinje = tidslinjeOf(16.AP, 249.NAVDAGER)
         assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
         assertEquals(setOf(28.desember), maksdatoer)
-        aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
     }
 
     @Test
@@ -463,16 +448,6 @@ internal class MaksimumSykepengedagerfilterTest {
         val persontidslinje = tidslinjeOf(16.AP, 247.NAVDAGER)
         val tidslinje = tidslinjeOf(2.NAVDAGER, startDato = persontidslinje.periode().endInclusive.plusDays(1))
         assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = persontidslinje))
-        aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
-    }
-
-    @Test
-    fun `ingen warning om avvist dag ikke er innenfor perioden`() {
-        val tidslinje = tidslinjeOf(16.AP, 249.NAVDAGER)
-        assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, Periode(1.januar, 30.desember)))
-        assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, Periode(1.januar, 31.desember)))
-        assertTrue(aktivitetslogg.aktiviteter.isNotEmpty())
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -773,40 +748,14 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test
-    fun `error dersom 26 uker med sammenhengende sykdom etter maksdato`() {
+    fun `avslag dersom 26 uker med sammenhengende sykdom etter maksdato`() {
         val tidslinje = tidslinjeOf(248.NAVDAGER, 182.NAV, 1.NAVDAGER)
         tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
         val utbetalingstidslinjeInspektør = avvisteTidslinjer.single().inspektør
         utbetalingstidslinjeInspektør.avvistedatoer.dropLast(1).forEach { dato ->
             assertEquals(listOf(SykepengedagerOppbrukt), utbetalingstidslinjeInspektør.begrunnelse(dato))
         }
-        aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_VV_9)
         assertEquals(listOf(NyVilkårsprøvingNødvendig), utbetalingstidslinjeInspektør.begrunnelse(utbetalingstidslinjeInspektør.avvistedatoer.last()))
-    }
-
-    @Test
-    fun `ikke error dersom 26 uker med sammenhengende sykdom etter maksdato og utenfor vedtaksperioden`() {
-        val tidslinje = tidslinjeOf(248.NAVDAGER, 182.NAV, 1.NAVDAGER)
-        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, tidslinje.periode().start til tidslinje.periode().endInclusive.minusDays(1))
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
-    }
-
-    @Test
-    fun `ikke error dersom 26 uker med sammenhengende sykdom etter maksdato og eldre enn vedtaksperioden`() {
-        val tidslinje = tidslinjeOf(248.NAVDAGER, 182.NAV, 1.NAVDAGER, 1.ARB, 31.NAV)
-        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, 14.juni(2019) til 15.juli(2019))
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
-    }
-
-    @Test
-    fun `ikke error dersom sykedager oppbrukt fram til 26 uker med sammenhengende sykdom etter maksdato`() {
-        val tidslinje = tidslinjeOf(248.NAVDAGER, 182.NAV)
-        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
-        tidslinje.inspektør.avvistedatoer.forEach { dato ->
-            assertEquals(listOf(SykepengedagerOppbrukt), tidslinje.inspektør.begrunnelse(dato))
-        }
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
-        assertFalse(tidslinje.last().dato.erHelg())
     }
 
     // No 26 week gap with base of 246 NAV days
@@ -886,8 +835,7 @@ internal class MaksimumSykepengedagerfilterTest {
         )
 
         val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(
-            maksdatoberegning = maksdatoberegning,
-            aktivitetslogg = aktivitetslogg
+            maksdatoberegning = maksdatoberegning
         )
         val tidslinjer = this.mapIndexed { index, it ->
             Arbeidsgiverberegning(

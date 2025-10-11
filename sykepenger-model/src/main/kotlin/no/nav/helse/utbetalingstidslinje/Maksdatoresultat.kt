@@ -5,6 +5,7 @@ import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.deserialisering.MaksdatoresultatInnDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
 
 data class Maksdatoresultat(
     val vurdertTilOgMed: LocalDate,
@@ -18,6 +19,9 @@ data class Maksdatoresultat(
     val gjenståendeDager: Int
 ) {
     val antallForbrukteDager = forbrukteDager.sumOf { it.count() }
+
+    val sisteNødvendigeOppholdsdag = oppholdsdager.flatten().getOrNull(TILSTREKKELIG_OPPHOLD_I_SYKEDAGER - 1)
+    val fremdelesSykEtterTilstrekkeligOpphold = sisteNødvendigeOppholdsdag != null && oppholdsdager.isNotEmpty() && avslåtteDager.any { it.endInclusive > sisteNødvendigeOppholdsdag }
 
     enum class Bestemmelse { IKKE_VURDERT, ORDINÆR_RETT, BEGRENSET_RETT, SYTTI_ÅR }
     companion object {

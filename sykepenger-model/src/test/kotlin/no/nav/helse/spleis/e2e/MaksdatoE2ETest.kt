@@ -3,12 +3,16 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -95,6 +99,37 @@ internal class MaksdatoE2ETest : AbstractDslTest() {
             assertIngenInfo("Maksimalt antall sykedager overskrides ikke i perioden", 2.vedtaksperiode.filter())
             assertIngenFunksjonelleFeil()
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+        }
+    }
+
+    @Test
+    fun `maksdato inntreffer på annen arbeidsgiver`() {
+        medMaksSykedager(12)
+        a1 {
+            nyPeriode(januar)
+        }
+        a2 {
+            nyPeriode(31.januar til 28.februar)
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()), OppgittArbeidgiverperiode(listOf(31.januar til 15.februar)))
+        }
+        a1 {
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()), OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)))
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertIngenInfo("Maks antall sykepengedager er nådd i perioden", 1.vedtaksperiode.filter())
+            assertInfo("Maksimalt antall sykedager overskrides ikke i perioden", 1.vedtaksperiode.filter())
+            assertIngenFunksjonelleFeil()
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+
+            assertInfo("Maks antall sykepengedager er nådd i perioden", 1.vedtaksperiode.filter())
+            assertIngenInfo("Maksimalt antall sykedager overskrides ikke i perioden", 1.vedtaksperiode.filter())
+            assertIngenFunksjonelleFeil()
         }
     }
 

@@ -115,6 +115,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_9
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
@@ -1096,6 +1097,13 @@ internal class Vedtaksperiode private constructor(
         if (person.alder.dødsdato != null && person.alder.dødsdato in periode) {
             aktivitetslogg.info("Utbetaling stoppet etter ${person.alder.dødsdato} grunnet dødsfall")
         }
+
+        if (behandlinger.maksdato.fremdelesSykEtterTilstrekkeligOpphold)
+            aktivitetslogg.funksjonellFeil(RV_VV_9)
+        if (behandlinger.maksdato.avslåtteDager.any { periode.overlapperMed(it) })
+            aktivitetslogg.info("Maks antall sykepengedager er nådd i perioden")
+        else
+            aktivitetslogg.info("Maksimalt antall sykedager overskrides ikke i perioden")
 
         when (yrkesaktivitet.yrkesaktivitetstype) {
             is Arbeidstaker -> grunnlagsdata.valider(aktivitetslogg, yrkesaktivitet.organisasjonsnummer)
@@ -2453,8 +2461,7 @@ internal class Vedtaksperiode private constructor(
                 harOpptjening = harOpptjening
             ),
             MaksimumSykepengedagerfilter(
-                maksdatoberegning = maksdatoberegning,
-                aktivitetslogg = aktivitetslogg
+                maksdatoberegning = maksdatoberegning
             ),
             MaksimumUtbetalingFilter(
                 sykepengegrunnlagBegrenset6G = sykepengegrunnlag
@@ -2477,8 +2484,8 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
             }
-            .also {
-                val maksdatoForVedtaksperiode = it.single { it.vedtaksperiodeId == this.id }.maksdatoresultat
+            .also { resultat ->
+                val maksdatoForVedtaksperiode = resultat.single { it.vedtaksperiodeId == this.id }.maksdatoresultat
                 maksdatosubsummering(
                     subsumsjonslogg = subsumsjonslogg,
                     periode = periode,
