@@ -6,6 +6,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.etterlevelse.FOLKETRYGDLOVENS_OPPRINNELSESDATO
 import no.nav.helse.etterlevelse.Ledd
@@ -21,6 +22,7 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_35
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_48
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
 import no.nav.helse.etterlevelse.Punktum.Companion.punktum
+import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -85,18 +87,24 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
 
     @Test
     fun `§ 8-12 ledd 2 - Vurdering av ny rett til sykepenger`() = Toggle.SelvstendigNæringsdrivende.enable {
-        selvstendig {
+        a1 {
             nyttVedtak(1.mai(2017) til 31.mai(2017))
+        }
+        selvstendig {
             håndterSøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
-            SubsumsjonInspektør(jurist).assertOppfylt(
+            SubsumsjonInspektør(jurist).assertPaaIndeks(
+                index = 1,
+                forventetAntall = 2,
+                utfall = Subsumsjon.Utfall.VILKAR_OPPFYLT,
+                lovverk = "folketrygdloven",
                 paragraf = PARAGRAF_8_12,
                 ledd = LEDD_2,
                 versjon = 21.mai(2021),
                 input = mapOf(
-                    "dato" to LocalDate.of(2017, 11, 29),
+                    "dato" to LocalDate.of(2018, 1, 31),
                     "tilstrekkeligOppholdISykedager" to TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
                     "tidslinjegrunnlag" to listOf(
                         listOf(
