@@ -1,8 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import java.util.*
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig.somOrganisasjonsnummer
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.inntekt.InntekterForBeregning
@@ -46,6 +48,68 @@ internal fun lagUtbetalingstidslinjePerArbeidsgiver(vedtaksperioder: List<Ubereg
     // resultatet er én utbetalingstidslinje per arbeidsgiver som garantert dekker perioden ${vedtaksperiode.periode}, dog kan
     // andre arbeidsgivere dekke litt før/litt etter, avhengig av perioden til vedtaksperiodene som overlapper
     return inntekterForBeregning.hensyntattAlleInntektskilder(utbetalingstidslinjer)
+}
+
+internal fun filtrerUtbetalingstidslinjer(
+    uberegnetTidslinjePerArbeidsgiver: List<Arbeidsgiverberegning>,
+    sykepengegrunnlag: Inntekt,
+    medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus?,
+    harOpptjening: Boolean,
+    sekstisyvårsdagen: LocalDate,
+    syttiårsdagen: LocalDate,
+    dødsdato: LocalDate?,
+    erUnderMinsteinntektskravTilFylte67: Boolean,
+    erUnderMinsteinntektEtterFylte67: Boolean,
+    historisktidslinje: Utbetalingstidslinje,
+    perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
+    regler: ArbeidsgiverRegler
+): List<BeregnetPeriode> {
+    val maksdatoberegning = Maksdatoberegning(
+        sekstisyvårsdagen = sekstisyvårsdagen,
+        syttiårsdagen = syttiårsdagen,
+        dødsdato = dødsdato,
+        arbeidsgiverRegler =regler,
+        infotrygdtidslinje = historisktidslinje
+    )
+    val filtere = listOf(
+        Sykdomsgradfilter(
+            perioderMedMinimumSykdomsgradVurdertOK = perioderMedMinimumSykdomsgradVurdertOK
+        ),
+        Minsteinntektfilter(
+            sekstisyvårsdagen = sekstisyvårsdagen,
+            erUnderMinsteinntektskravTilFylte67 = erUnderMinsteinntektskravTilFylte67,
+            erUnderMinsteinntektEtterFylte67 = erUnderMinsteinntektEtterFylte67,
+        ),
+        Medlemskapsfilter(
+            medlemskapstatus = medlemskapstatus,
+        ),
+        Opptjeningfilter(
+            harOpptjening = harOpptjening
+        ),
+        MaksimumSykepengedagerfilter(
+            maksdatoberegning = maksdatoberegning
+        ),
+        MaksimumUtbetalingFilter(
+            sykepengegrunnlagBegrenset6G = sykepengegrunnlag
+        )
+    )
+
+    val beregnetTidslinjePerArbeidsgiver = filtere.fold(uberegnetTidslinjePerArbeidsgiver) { tidslinjer, filter ->
+        filter.filter(tidslinjer)
+    }
+
+    return beregnetTidslinjePerArbeidsgiver
+        .flatMap {
+            it.vedtaksperioder.map { vedtaksperiodeberegning ->
+                val maksdatoresultat = maksdatoberegning.beregnMaksdatoBegrensetTilPeriode(vedtaksperiodeberegning.periode)
+                BeregnetPeriode(
+                    vedtaksperiodeId = vedtaksperiodeberegning.vedtaksperiodeId,
+                    utbetalingstidslinje = vedtaksperiodeberegning.utbetalingstidslinje,
+                    maksdatoresultat = maksdatoresultat,
+                    inntekterForBeregning = vedtaksperiodeberegning.inntekterForBeregning
+                )
+            }
+        }
 }
 
 private fun lagUtbetalingstidslinjeForVedtaksperiode(vedtaksperiode: UberegnetVedtaksperiode, inntekt: Inntekt, inntektjusteringer: Beløpstidslinje, alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>): Vedtaksperiodeberegning {

@@ -198,6 +198,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
+import no.nav.helse.utbetalingstidslinje.filtrerUtbetalingstidslinjer
 import no.nav.helse.utbetalingstidslinje.lagUtbetalingstidslinjePerArbeidsgiver
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
@@ -1066,7 +1067,6 @@ internal class Vedtaksperiode private constructor(
             .fremTilOgMed(periode.endInclusive)
 
         val beregnetTidslinjePerVedtaksperiode = filtrerUtbetalingstidslinjer(
-            aktivitetslogg = aktivitetslogg,
             uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
             harOpptjening = harOpptjening,
             sykepengegrunnlag = sykepengegrunnlag,
@@ -2447,67 +2447,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun harSammeUtbetalingSom(annenVedtaksperiode: Vedtaksperiode) = behandlinger.harSammeUtbetalingSom(annenVedtaksperiode)
-
-    private fun filtrerUtbetalingstidslinjer(
-        aktivitetslogg: IAktivitetslogg,
-        uberegnetTidslinjePerArbeidsgiver: List<Arbeidsgiverberegning>,
-        sykepengegrunnlag: Inntekt,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus?,
-        harOpptjening: Boolean,
-        sekstisyvårsdagen: LocalDate,
-        syttiårsdagen: LocalDate,
-        dødsdato: LocalDate?,
-        erUnderMinsteinntektskravTilFylte67: Boolean,
-        erUnderMinsteinntektEtterFylte67: Boolean,
-        historisktidslinje: Utbetalingstidslinje,
-        perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
-        regler: ArbeidsgiverRegler
-    ): List<BeregnetPeriode> {
-        val maksdatoberegning = Maksdatoberegning(
-            sekstisyvårsdagen = sekstisyvårsdagen,
-            syttiårsdagen = syttiårsdagen,
-            dødsdato = dødsdato,
-            arbeidsgiverRegler =regler,
-            infotrygdtidslinje = historisktidslinje
-        )
-        val filtere = listOf(
-            Sykdomsgradfilter(perioderMedMinimumSykdomsgradVurdertOK),
-            Minsteinntektfilter(
-                sekstisyvårsdagen = sekstisyvårsdagen,
-                erUnderMinsteinntektskravTilFylte67 = erUnderMinsteinntektskravTilFylte67,
-                erUnderMinsteinntektEtterFylte67 = erUnderMinsteinntektEtterFylte67,
-            ),
-            Medlemskapsfilter(
-                medlemskapstatus = medlemskapstatus,
-            ),
-            Opptjeningfilter(
-                harOpptjening = harOpptjening
-            ),
-            MaksimumSykepengedagerfilter(
-                maksdatoberegning = maksdatoberegning
-            ),
-            MaksimumUtbetalingFilter(
-                sykepengegrunnlagBegrenset6G = sykepengegrunnlag
-            )
-        )
-
-        val beregnetTidslinjePerArbeidsgiver = filtere.fold(uberegnetTidslinjePerArbeidsgiver) { tidslinjer, filter ->
-            filter.filter(tidslinjer)
-        }
-
-        return beregnetTidslinjePerArbeidsgiver
-            .flatMap {
-                it.vedtaksperioder.map { vedtaksperiodeberegning ->
-                    val maksdatoresultat = maksdatoberegning.beregnMaksdatoBegrensetTilPeriode(vedtaksperiodeberegning.periode)
-                    BeregnetPeriode(
-                        vedtaksperiodeId = vedtaksperiodeberegning.vedtaksperiodeId,
-                        utbetalingstidslinje = vedtaksperiodeberegning.utbetalingstidslinje,
-                        maksdatoresultat = maksdatoresultat,
-                        inntekterForBeregning = vedtaksperiodeberegning.inntekterForBeregning
-                    )
-                }
-            }
-    }
 
     internal fun håndterOverstyringIgangsattRevurderingArbeidstaker(
         revurdering: Revurderingseventyr,
