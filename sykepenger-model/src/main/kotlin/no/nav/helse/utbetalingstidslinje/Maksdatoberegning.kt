@@ -2,6 +2,8 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.Død
+import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.ForGammel
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.Karantene
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.Syk
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -32,10 +34,23 @@ internal class Maksdatoberegning(
             .beregnMaksdato(sekstisyvårsdagen, syttiårsdagen, dødsdato, arbeidsgiverRegler)
     }
 
-    private fun erDød(dato: LocalDate) =
-        dødsdato != null && dødsdato < dato
-
-    private fun mistetSykepengerett(dato: LocalDate) = dato >= syttiårsdagen
+    private fun vurderStopp(dato: LocalDate) {
+        when (state) {
+            State.Initiell,
+            Karantene,
+            State.KaranteneTilstrekkeligOppholdNådd,
+            State.Opphold,
+            State.OppholdFri,
+            Syk -> when {
+                syttiårsdagen <= dato -> state(ForGammel)
+                dødsdato != null && dødsdato < dato -> state(Død)
+            }
+            ForGammel,
+            Død -> {
+                // vurderer ikke lenger stopp fordi vi er i en sluttilstand
+            }
+        }
+    }
 
     fun beregn(arbeidsgivere: List<Arbeidsgiverberegning>): List<Maksdatokontekst> {
         val tidslinjegrunnlag = arbeidsgivere.map { it.samletVedtaksperiodetidslinje }.plusElement(infotrygdtidslinje)
@@ -43,6 +58,8 @@ internal class Maksdatoberegning(
 
         Utbetalingstidslinje.periode(tidslinjegrunnlag)
             ?.forEach { dato ->
+                vurderStopp(dato)
+
                 when (val dag = beregnetTidslinje[dato]) {
                     is Utbetalingsdag.Arbeidsdag -> state.oppholdsdag(this, dag.dato)
                     is Utbetalingsdag.ArbeidsgiverperiodeDag -> state.oppholdsdag(this, dag.dato)
@@ -50,18 +67,8 @@ internal class Maksdatoberegning(
                     is Utbetalingsdag.AvvistDag -> state.avvistDag(this, dag.dato)
                     is Utbetalingsdag.ForeldetDag -> state.oppholdsdag(this, dag.dato)
                     is Utbetalingsdag.Fridag -> state.fridag(this, dag.dato)
-                    is NavDag -> {
-                        if (erDød(dag.dato)) state.avdød(this)
-                        else if (mistetSykepengerett(dag.dato)) state(State.ForGammel)
-                        state.betalbarDag(this, dag.dato)
-                    }
-
-                    is Utbetalingsdag.NavHelgDag -> {
-                        if (erDød(dato)) state.avdød(this)
-                        else if (mistetSykepengerett(dag.dato)) state(State.ForGammel)
-                        state.sykdomshelg(this, dag.dato)
-                    }
-
+                    is NavDag -> state.betalbarDag(this, dag.dato)
+                    is Utbetalingsdag.NavHelgDag -> state.sykdomshelg(this, dag.dato)
                     is UkjentDag -> state.oppholdsdag(this, dag.dato)
                     is Utbetalingsdag.Ventetidsdag -> state.oppholdsdag(this, dag.dato)
                 }
@@ -102,8 +109,7 @@ internal class Maksdatoberegning(
         sisteVurdering = sisteVurdering.medAvslåttDag(dag)
     }
 
-    private interface State {
-        fun avdød(avgrenser: Maksdatoberegning) = avgrenser.state(Død)
+    private sealed interface State {
         fun betalbarDag(avgrenser: Maksdatoberegning, dagen: LocalDate)
         fun avvistDag(avgrenser: Maksdatoberegning, dagen: LocalDate) = oppholdsdag(avgrenser, dagen)
         fun oppholdsdag(avgrenser: Maksdatoberegning, dagen: LocalDate)
@@ -263,8 +269,6 @@ internal class Maksdatoberegning(
             override fun sykdomshelg(avgrenser: Maksdatoberegning, dagen: LocalDate) {
                 over70(avgrenser, dagen)
             }
-
-            override fun avdød(avgrenser: Maksdatoberegning) {}
 
             override fun oppholdsdag(avgrenser: Maksdatoberegning, dagen: LocalDate) {}
             override fun leaving(avgrenser: Maksdatoberegning) = throw IllegalStateException("Kan ikke gå ut fra state ForGammel")
