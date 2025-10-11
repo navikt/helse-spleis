@@ -16,10 +16,11 @@ internal data class Maksdatokontekst(
     val startdatoTreårsvindu: LocalDate,
     val betalteDager: Set<LocalDate>,
     val oppholdsdager: Set<LocalDate>,
-    val avslåtteDager: Set<LocalDate>
+    val avslåtteDager: Set<LocalDate>,
+    val begrunnelser: Map<LocalDate, Begrunnelse>
 ) {
     companion object {
-        val TomKontekst = Maksdatokontekst(LocalDate.MIN, LocalDate.MIN, LocalDate.MIN, emptySet(), emptySet(), emptySet())
+        val TomKontekst = Maksdatokontekst(LocalDate.MIN, LocalDate.MIN, LocalDate.MIN, emptySet(), emptySet(), emptySet(), emptyMap())
     }
 
     internal val oppholdsteller = oppholdsdager.size
@@ -47,20 +48,6 @@ internal data class Maksdatokontekst(
         return avslåtteDager.any { it > datoForTilstrekkeligOpphold && it in vedtaksperiode }
     }
 
-    internal fun begrunnelseForAvslåtteDager(syttiårsdagen: LocalDate, dødsdato: LocalDate?, regler: ArbeidsgiverRegler, tilstrekkeligOpphold: Int): List<Pair<Begrunnelse, LocalDate>> {
-        val datoForTilstrekkeligOppholdOppnådd = datoForTilstrekkeligOppholdOppnådd(tilstrekkeligOpphold)
-        return avslåtteDager.map { avslåttDag ->
-            val begrunnelseForAvslåttDag = when {
-                avslåttDag >= syttiårsdagen -> Begrunnelse.Over70
-                dødsdato != null && dødsdato < avslåttDag -> Begrunnelse.EtterDødsdato
-                datoForTilstrekkeligOppholdOppnådd != null && avslåttDag > datoForTilstrekkeligOppholdOppnådd -> Begrunnelse.NyVilkårsprøvingNødvendig
-                erDagerUnder67ÅrForbrukte(regler) -> Begrunnelse.SykepengedagerOppbrukt
-                else -> Begrunnelse.SykepengedagerOppbruktOver67
-            }
-            begrunnelseForAvslåttDag to avslåttDag
-        }
-    }
-
     internal fun avgrensTil(vurderingTilOgMed: LocalDate): Maksdatokontekst {
         /** etter at vi har telt ferdig så skal hver vedtaksperiode få et maksdatoresultat som tar utgangspunkt i
          *  siste dag i sin periode. enten så "spoler vi tilbake" saken, eller så vyer vi fremover.
@@ -74,7 +61,8 @@ internal data class Maksdatokontekst(
         vurdertTilOgMed = vurderingTilOgMed,
         betalteDager = betalteDager.filter { it <= vurderingTilOgMed }.toSet(),
         oppholdsdager = oppholdsdager.filter { it <= vurderingTilOgMed }.toSet(),
-        avslåtteDager = avslåtteDager.filter { it <= vurderingTilOgMed }.toSet()
+        avslåtteDager = avslåtteDager.filter { it <= vurderingTilOgMed }.toSet(),
+        begrunnelser = begrunnelser.filterKeys { it <= vurderingTilOgMed }
     )
 
     private fun vyFremover(vurderingTilOgMed: LocalDate) = copy(
@@ -100,10 +88,11 @@ internal data class Maksdatokontekst(
         oppholdsdager = oppholdsdager + dato
     )
 
-    internal fun medAvslåttDag(dato: LocalDate) = copy(
+    internal fun medAvslåttDag(dato: LocalDate, begrunnelse: Begrunnelse) = copy(
         vurdertTilOgMed = dato,
         avslåtteDager = this.avslåtteDager + dato,
-        oppholdsdager = oppholdsdager + dato
+        oppholdsdager = oppholdsdager + dato,
+        begrunnelser = this.begrunnelser.plus(dato to begrunnelse)
     )
 
     internal fun beregnMaksdato(

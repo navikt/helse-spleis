@@ -887,10 +887,7 @@ internal class MaksimumSykepengedagerfilterTest {
 
         val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(
             maksdatoberegning = maksdatoberegning,
-            syttiårsdagen = syttiårsdagen,
-            dødsdato = dødsdato,
-            aktivitetslogg = aktivitetslogg,
-            arbeidsgiverRegler = NormalArbeidstaker
+            aktivitetslogg = aktivitetslogg
         )
         val tidslinjer = this.mapIndexed { index, it ->
             Arbeidsgiverberegning(

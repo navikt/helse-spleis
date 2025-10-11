@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.Død
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.ForGammel
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.Karantene
+import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.KaranteneOver67
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.Syk
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
@@ -38,6 +39,7 @@ internal class Maksdatoberegning(
         when (state) {
             State.Initiell,
             Karantene,
+            KaranteneOver67,
             State.KaranteneTilstrekkeligOppholdNådd,
             State.Opphold,
             State.OppholdFri,
@@ -91,7 +93,8 @@ internal class Maksdatoberegning(
     private fun håndterBetalbarDag(dagen: LocalDate) {
         sisteVurdering = sisteVurdering.inkrementer(dagen)
         when {
-            sisteVurdering.erDagerUnder67ÅrForbrukte(arbeidsgiverRegler) || sisteVurdering.erDagerOver67ÅrForbrukte(sekstisyvårsdagen, arbeidsgiverRegler) -> state(Karantene)
+            sisteVurdering.erDagerUnder67ÅrForbrukte(arbeidsgiverRegler) -> state(Karantene)
+            sisteVurdering.erDagerOver67ÅrForbrukte(sekstisyvårsdagen, arbeidsgiverRegler) -> state(KaranteneOver67)
             else -> state(Syk)
         }
     }
@@ -106,7 +109,23 @@ internal class Maksdatoberegning(
     }
 
     private fun håndterBetalbarDagEtterMaksdato(dag: LocalDate) {
-        sisteVurdering = sisteVurdering.medAvslåttDag(dag)
+        val begrunnelse = when (state) {
+            State.Død -> Begrunnelse.EtterDødsdato
+            State.ForGammel -> Begrunnelse.Over70
+            Karantene -> Begrunnelse.SykepengedagerOppbrukt
+            KaranteneOver67 -> Begrunnelse.SykepengedagerOppbruktOver67
+            State.KaranteneTilstrekkeligOppholdNådd -> Begrunnelse.NyVilkårsprøvingNødvendig
+            State.Initiell,
+            State.Opphold,
+            State.OppholdFri,
+            Syk -> error("Forventer ikke avslag i tilstand $state")
+        }
+        sisteVurdering = sisteVurdering.medAvslåttDag(dag, begrunnelse)
+    }
+
+    private fun vurderTilstrekkeligOppholdNådd(avgrenser: Maksdatoberegning, nesteTilstand: State, tilstandHvisIkkeNokOpphold: State? = null) {
+        if (avgrenser.sisteVurdering.oppholdsteller >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) return avgrenser.state(nesteTilstand)
+        if (tilstandHvisIkkeNokOpphold != null) avgrenser.state(tilstandHvisIkkeNokOpphold)
     }
 
     private sealed interface State {
@@ -135,7 +154,8 @@ internal class Maksdatoberegning(
                     startdatoTreårsvindu = dagen.minusYears(HISTORISK_PERIODE_I_ÅR),
                     betalteDager = setOf(dagen),
                     oppholdsdager = emptySet(),
-                    avslåtteDager = emptySet()
+                    avslåtteDager = emptySet(),
+                    begrunnelser = emptyMap()
                 )
                 avgrenser.state(Syk)
             }
@@ -178,8 +198,7 @@ internal class Maksdatoberegning(
 
             override fun oppholdsdag(avgrenser: Maksdatoberegning, dagen: LocalDate) {
                 avgrenser.økOppholdstelling(dagen)
-                if (avgrenser.sisteVurdering.oppholdsteller < TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) return
-                avgrenser.state(Initiell)
+                avgrenser.vurderTilstrekkeligOppholdNådd(avgrenser, Initiell)
             }
         }
 
@@ -194,14 +213,12 @@ internal class Maksdatoberegning(
 
             override fun fridag(avgrenser: Maksdatoberegning, dagen: LocalDate) {
                 avgrenser.økOppholdstelling(dagen)
-                if (avgrenser.sisteVurdering.oppholdsteller < TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) return
-                avgrenser.state(Initiell)
+                avgrenser.vurderTilstrekkeligOppholdNådd(avgrenser, Initiell)
             }
 
             override fun oppholdsdag(avgrenser: Maksdatoberegning, dagen: LocalDate) {
                 avgrenser.økOppholdstelling(dagen)
-                if (avgrenser.sisteVurdering.oppholdsteller < TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) return avgrenser.state(Opphold)
-                avgrenser.state(Initiell)
+                avgrenser.vurderTilstrekkeligOppholdNådd(avgrenser, Initiell, Opphold)
             }
         }
 
@@ -212,37 +229,33 @@ internal class Maksdatoberegning(
 
             override fun betalbarDag(avgrenser: Maksdatoberegning, dagen: LocalDate) {
                 avgrenser.håndterBetalbarDagEtterMaksdato(dagen)
-                vurderTilstrekkeligOppholdNådd(avgrenser)
+                avgrenser.vurderTilstrekkeligOppholdNådd(avgrenser, KaranteneTilstrekkeligOppholdNådd)
             }
 
             override fun avvistDag(avgrenser: Maksdatoberegning, dagen: LocalDate) {
                 avgrenser.håndterBetalbarDagEtterMaksdato(dagen)
-                vurderTilstrekkeligOppholdNådd(avgrenser)
+                avgrenser.vurderTilstrekkeligOppholdNådd(avgrenser, KaranteneTilstrekkeligOppholdNådd)
             }
 
             override fun sykdomshelg(avgrenser: Maksdatoberegning, dagen: LocalDate) {
                 avgrenser.økOppholdstelling(dagen)
                 /* helg skal ikke medføre ny rettighet */
-                vurderTilstrekkeligOppholdNådd(avgrenser)
+                avgrenser.vurderTilstrekkeligOppholdNådd(avgrenser, KaranteneTilstrekkeligOppholdNådd)
             }
 
             override fun oppholdsdag(avgrenser: Maksdatoberegning, dagen: LocalDate) {
                 avgrenser.økOppholdstelling(dagen)
-                if (avgrenser.sisteVurdering.oppholdsteller < TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) return
-                avgrenser.state(Initiell)
+                avgrenser.vurderTilstrekkeligOppholdNådd(avgrenser, Initiell)
             }
 
             override fun fridag(avgrenser: Maksdatoberegning, dagen: LocalDate) {
                 avgrenser.økOppholdstelling(dagen)
                 /* helg skal ikke medføre ny rettighet */
-                vurderTilstrekkeligOppholdNådd(avgrenser)
-            }
-
-            private fun vurderTilstrekkeligOppholdNådd(avgrenser: Maksdatoberegning) {
-                if (avgrenser.sisteVurdering.oppholdsteller < TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) return
-                avgrenser.state(KaranteneTilstrekkeligOppholdNådd)
+                avgrenser.vurderTilstrekkeligOppholdNådd(avgrenser, KaranteneTilstrekkeligOppholdNådd)
             }
         }
+
+        object KaranteneOver67 : State by Karantene
 
         object KaranteneTilstrekkeligOppholdNådd : State {
             override fun betalbarDag(avgrenser: Maksdatoberegning, dagen: LocalDate) {

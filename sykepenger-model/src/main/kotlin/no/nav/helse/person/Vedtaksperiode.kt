@@ -1069,7 +1069,8 @@ internal class Vedtaksperiode private constructor(
             erUnderMinsteinntektskravTilFylte67 = minsteinntektsvurdering.erUnderMinsteinntektskravTilFylte67,
             erUnderMinsteinntektEtterFylte67 = minsteinntektsvurdering.erUnderMinsteinntektEtterFylte67,
             historisktidslinje = historisktidslinje,
-            perioderMedMinimumSykdomsgradVurdertOK = person.minimumSykdomsgradsvurdering.perioder
+            perioderMedMinimumSykdomsgradVurdertOK = person.minimumSykdomsgradsvurdering.perioder,
+            regler = person.regler
         )
         // steg 4: lag et utbetalingsobjekt for vedtaksperioder som ikke har fått det enda (én per arbeidsgiver)
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
@@ -2428,13 +2429,14 @@ internal class Vedtaksperiode private constructor(
         erUnderMinsteinntektskravTilFylte67: Boolean,
         erUnderMinsteinntektEtterFylte67: Boolean,
         historisktidslinje: Utbetalingstidslinje,
-        perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>
+        perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
+        regler: ArbeidsgiverRegler
     ): List<BeregnetPeriode> {
         val maksdatoberegning = Maksdatoberegning(
             sekstisyvårsdagen = sekstisyvårsdagen,
             syttiårsdagen = syttiårsdagen,
             dødsdato = dødsdato,
-            arbeidsgiverRegler = person.regler,
+            arbeidsgiverRegler =regler,
             infotrygdtidslinje = historisktidslinje
         )
         val filtere = listOf(
@@ -2452,10 +2454,7 @@ internal class Vedtaksperiode private constructor(
             ),
             MaksimumSykepengedagerfilter(
                 maksdatoberegning = maksdatoberegning,
-                syttiårsdagen = syttiårsdagen,
-                dødsdato = dødsdato,
-                aktivitetslogg = aktivitetslogg,
-                arbeidsgiverRegler = person.regler
+                aktivitetslogg = aktivitetslogg
             ),
             MaksimumUtbetalingFilter(
                 sykepengegrunnlagBegrenset6G = sykepengegrunnlag
@@ -2483,8 +2482,8 @@ internal class Vedtaksperiode private constructor(
                 maksdatosubsummering(
                     subsumsjonslogg = subsumsjonslogg,
                     periode = periode,
-                    syttiårsdagen = person.alder.syttiårsdagen,
-                    regler = person.regler,
+                    syttiårsdagen = syttiårsdagen,
+                    regler = regler,
                     uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
                     historisktidslinje = historisktidslinje,
                     resultat = maksdatoForVedtaksperiode,

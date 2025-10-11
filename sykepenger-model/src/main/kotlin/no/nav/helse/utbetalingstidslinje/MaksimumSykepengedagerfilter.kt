@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.LocalDate
+import kotlin.collections.component1
+import kotlin.collections.component2
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -9,10 +10,7 @@ import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKEL
 
 internal class MaksimumSykepengedagerfilter(
     private val maksdatoberegning: Maksdatoberegning,
-    private val syttiårsdagen: LocalDate,
-    private val dødsdato: LocalDate?,
-    private val aktivitetslogg: IAktivitetslogg,
-    private val arbeidsgiverRegler: ArbeidsgiverRegler
+    private val aktivitetslogg: IAktivitetslogg
 ) : UtbetalingstidslinjerFilter {
 
     override fun filter(
@@ -26,7 +24,9 @@ internal class MaksimumSykepengedagerfilter(
          *  tidslinjer og de forventer at alle maksdatodager avslås, uavhengig av maksdatosak
          */
         val begrunnelser = vurderinger
-            .flatMap { maksdatosak -> maksdatosak.begrunnelseForAvslåtteDager(syttiårsdagen, dødsdato, arbeidsgiverRegler, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) }
+            .flatMap { maksdatosak ->
+                maksdatosak.begrunnelser.map { (begrunnelse, dato) -> dato to begrunnelse }
+            }
             .groupBy(keySelector = { it.first }, valueTransform = { it.second })
 
         val avvisteTidslinjer = begrunnelser.entries.fold(arbeidsgivere) { result, (begrunnelse, dager) ->

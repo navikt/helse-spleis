@@ -34,6 +34,7 @@ import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.ukedager
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
+import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -102,6 +103,10 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(3), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(20.januar), maksdatoer)
+
+        avslåtteDager.map {
+            assertEquals(Begrunnelse.EtterDødsdato, begrunnelse(it))
+        }
     }
 
     @Test
@@ -124,6 +129,8 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(248), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(12.desember), maksdatoer)
+        assertEquals(SykepengedagerOppbrukt, begrunnelse(13.desember))
+        assertEquals(Begrunnelse.EtterDødsdato, begrunnelse(14.desember))
     }
 
     @Test
@@ -135,6 +142,10 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(248), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(12.desember), maksdatoer)
+        assertEquals(SykepengedagerOppbrukt, begrunnelse(13.desember))
+        avslåtteDager.drop(1).forEach {
+            assertEquals(Begrunnelse.EtterDødsdato, begrunnelse(it)) { "Feil begrunnelse for $it" }
+        }
     }
 
     @Test
@@ -146,6 +157,9 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(3), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(20.januar), maksdatoer)
+        avslåtteDager.map {
+            assertEquals(Begrunnelse.EtterDødsdato, begrunnelse(it)) { "Feil begrunnelse for $it" }
+        }
     }
 
     @Test
@@ -168,6 +182,8 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(60), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(5.april), maksdatoer)
+        assertEquals(Begrunnelse.SykepengedagerOppbruktOver67, begrunnelse(6.april))
+        assertEquals(Begrunnelse.EtterDødsdato, begrunnelse(9.april))
     }
 
     @Test
@@ -179,6 +195,10 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(60), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(5.april), maksdatoer)
+        assertEquals(Begrunnelse.SykepengedagerOppbruktOver67, begrunnelse(6.april))
+        avslåtteDager.drop(1).forEach {
+            assertEquals(Begrunnelse.EtterDødsdato, begrunnelse(it)) { "Feil begrunnelse for $it" }
+        }
     }
 
     @Test
@@ -254,6 +274,9 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(248), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(5.februar), maksdatoer)
+        avslåtteDager.forEach {
+            assertEquals(SykepengedagerOppbrukt, begrunnelse(it)) { "Feil begrunnelse for $it" }
+        }
     }
 
     @Test
@@ -265,6 +288,9 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(248, 60, 0), forbrukteDager)
         assertEquals(listOf(0, 0, 0), gjenståendeDager)
         assertEquals(listOf(12.mars, 4.desember, 8.januar(2021)), maksdatoer)
+        assertEquals(SykepengedagerOppbrukt, begrunnelse(13.mars))
+        assertEquals(Begrunnelse.SykepengedagerOppbruktOver67, begrunnelse(5.desember))
+        assertEquals(Begrunnelse.Over70, begrunnelse(11.januar(2021)))
     }
 
     @Test
@@ -276,6 +302,9 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(69), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(5.april), maksdatoer)
+        avslåtteDager.forEach {
+            assertEquals(Begrunnelse.SykepengedagerOppbruktOver67, begrunnelse(it)) { "Feil begrunnelse for $it" }
+        }
     }
 
     @Test
@@ -287,6 +316,9 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(248), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(5.februar), maksdatoer)
+        avslåtteDager.forEach {
+            assertEquals(SykepengedagerOppbrukt, begrunnelse(it)) { "Feil begrunnelse for $it" }
+        }
     }
 
     @Test
@@ -298,6 +330,8 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(248, 60), forbrukteDager)
         assertEquals(listOf(0, 0), gjenståendeDager)
         assertEquals(listOf(5.februar, 30.oktober), maksdatoer)
+        assertEquals(SykepengedagerOppbrukt, begrunnelse(6.februar))
+        assertEquals(Begrunnelse.SykepengedagerOppbruktOver67, begrunnelse(31.oktober))
     }
 
     @Test
@@ -333,6 +367,9 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(0), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(9.januar), maksdatoer)
+        avslåtteDager.map {
+            assertEquals(Begrunnelse.Over70, begrunnelse(it)) { "Feil begrunnelse for $it" }
+        }
     }
 
     @Test
@@ -344,6 +381,9 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(0), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(9.januar), maksdatoer)
+        avslåtteDager.map {
+            assertEquals(Begrunnelse.Over70, begrunnelse(it)) { "Feil begrunnelse for $it" }
+        }
     }
 
     @Test
@@ -388,6 +428,9 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(7), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(9.januar), maksdatoer)
+        avslåtteDager.map {
+            assertEquals(Begrunnelse.Over70, begrunnelse(it)) { "Feil begrunnelse for $it" }
+        }
     }
 
     @Test
@@ -410,6 +453,9 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(248), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(26.juni(2019)), maksdatoer)
+        avvisteDager.map {
+            assertEquals(SykepengedagerOppbrukt, begrunnelse(it)) { "Feil begrunnelse for $it" }
+        }
     }
 
     @Test
@@ -465,6 +511,8 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(248), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(28.desember), maksdatoer)
+        assertEquals(SykepengedagerOppbrukt, begrunnelse(28.juni(2019)))
+        assertEquals(Begrunnelse.NyVilkårsprøvingNødvendig, begrunnelse(29.juni(2019)))
     }
 
     @Test
@@ -556,6 +604,11 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(248, 248), forbrukteDager)
         assertEquals(listOf(0, 0), gjenståendeDager)
         assertEquals(listOf(3.juli(2017), 31.desember), maksdatoer)
+        avslåtteDager.map { dager ->
+            dager.forEach {
+                assertEquals(SykepengedagerOppbrukt, begrunnelse(it)) { "Feil begrunnelse for $it" }
+            }
+        }
     }
 
     @Test
@@ -738,6 +791,12 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(248), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(28.desember), maksdatoer)
+        avslåtteDager.take(130).map {
+            assertEquals(Begrunnelse.SykepengedagerOppbrukt, begrunnelse(it)) { "Feil begrunnelse for $it" }
+        }
+        avslåtteDager.drop(130).map {
+            assertEquals(Begrunnelse.NyVilkårsprøvingNødvendig, begrunnelse(it)) { "Feil begrunnelse for $it" }
+        }
     }
 
     @Test
@@ -1115,6 +1174,10 @@ internal class MaksdatoberegningTest {
             90.ARB,
             *utbetalingsdager
         )
+    }
+
+    private fun begrunnelse(dato: LocalDate): Begrunnelse? {
+        return vurderinger.firstNotNullOfOrNull { it.begrunnelser[dato] }
     }
 
     private fun Periode.utenHelg() = filterNot { it.erHelg() }
