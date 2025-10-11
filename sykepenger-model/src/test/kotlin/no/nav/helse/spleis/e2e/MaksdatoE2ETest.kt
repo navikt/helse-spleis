@@ -1,22 +1,27 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.april
+import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -67,49 +72,98 @@ internal class MaksdatoE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `avviser perioder med sammenhengende sykdom etter 26 uker fra maksdato`() {
+    fun `maksdato inntreffer siste utbetalte dag i perioden`() {
+        medMaksSykedager(11)
         a1 {
-            var forrigePeriode = januar
-            nyttVedtak(forrigePeriode, 100.prosent)
-            // setter opp vedtaksperioder frem til maksdato
-            repeat(11) { _ ->
-                forrigePeriode = nestePeriode(forrigePeriode)
-                forlengVedtak(forrigePeriode)
-            }
+            nyttVedtak(januar)
+
+            assertIngenInfo("Maks antall sykepengedager er nådd i perioden", 1.vedtaksperiode.filter())
+            assertInfo("Maksimalt antall sykedager overskrides ikke i perioden", 1.vedtaksperiode.filter())
+            assertIngenFunksjonelleFeil()
+            assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+        }
+    }
+
+    @Test
+    fun `maksdato inntreffer i forlengelsen`() {
+        medMaksSykedager(12)
+        a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+
+            assertInfo("Maks antall sykepengedager er nådd i perioden", 2.vedtaksperiode.filter())
+            assertIngenInfo("Maksimalt antall sykedager overskrides ikke i perioden", 2.vedtaksperiode.filter())
+            assertIngenFunksjonelleFeil()
+            assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+        }
+    }
+
+    @Test
+    fun `sammenhengende sykdom etter 26 uker fra maksdato - under 67 år`() {
+        medMaksSykedager(10)
+        a1 {
+            nyttVedtak(januar)
             // setter opp vedtaksperioder 182 dager etter maksdato
-            repeat(6) { _ ->
-                forrigePeriode = nestePeriode(forrigePeriode)
-                val vedtaksperiode = nyPeriode(forrigePeriode, 100.prosent)
-                håndterYtelser(vedtaksperiode)
-                håndterUtbetalingsgodkjenning(vedtaksperiode)
-            }
+            forlengVedtakUtenUtbetaling(februar)
+            forlengVedtakUtenUtbetaling(mars)
+            forlengVedtakUtenUtbetaling(april)
+            forlengVedtakUtenUtbetaling(mai)
+            forlengVedtakUtenUtbetaling(juni)
+            forlengVedtakUtenUtbetaling(juli)
+
+            assertEquals(Maksdatoresultat.Bestemmelse.ORDINÆR_RETT, inspektør(1.vedtaksperiode).maksdatoer.single().bestemmelse)
+            val oppholdsdagerJuli = inspektør(7.vedtaksperiode).maksdatoer.single().oppholdsdager
+            assertEquals(182, oppholdsdagerJuli.sumOf { it.count() })
+            assertEquals(31.juli, oppholdsdagerJuli.last().endInclusive)
 
             // oppretter forlengelse fom 182 dager etter maksdato
-            nyPeriodeMedYtelser(forrigePeriode)
-            val siste = observatør.sisteVedtaksperiodeId(a1)
-            assertFunksjonellFeil(Varselkode.RV_VV_9, siste.filter())
-            assertSisteTilstand(siste, TIL_INFOTRYGD) {
+            nyPeriode(august)
+            håndterYtelser(8.vedtaksperiode)
+
+            assertInfo("Maks antall sykepengedager er nådd i perioden", 8.vedtaksperiode.filter())
+            assertIngenInfo("Maksimalt antall sykedager overskrides ikke i perioden", 8.vedtaksperiode.filter())
+            assertFunksjonellFeil(Varselkode.RV_VV_9, 8.vedtaksperiode.filter())
+            assertSisteTilstand(8.vedtaksperiode, TIL_INFOTRYGD) {
                 "Disse periodene skal kastes ut pr nå"
             }
         }
     }
 
-    private fun nyPeriode(forrigePeriode: Periode): Periode {
-        val nestePeriode = nestePeriode(forrigePeriode)
-        håndterSykmelding(Sykmeldingsperiode(nestePeriode.start, nestePeriode.endInclusive))
-        håndterSøknad(nestePeriode)
-        return nestePeriode
+    @Test
+    fun `sammenhengende sykdom etter 26 uker fra maksdato - over 67 år`() {
+        val PERSON_67_ÅR_11_JANUAR_2018 = 11.januar(1951)
+        medMaksSykedager(248, maksSykedagerOver67 = 10, fødselsdato = PERSON_67_ÅR_11_JANUAR_2018)
+        a1 {
+            nyttVedtak(januar)
+            // setter opp vedtaksperioder 182 dager etter maksdato
+            forlengVedtakUtenUtbetaling(februar)
+            forlengVedtakUtenUtbetaling(mars)
+            forlengVedtakUtenUtbetaling(april)
+            forlengVedtakUtenUtbetaling(mai)
+            forlengVedtakUtenUtbetaling(juni)
+            forlengVedtakUtenUtbetaling(juli)
+
+            assertEquals(Maksdatoresultat.Bestemmelse.BEGRENSET_RETT, inspektør(1.vedtaksperiode).maksdatoer.single().bestemmelse)
+            val oppholdsdagerJuli = inspektør(7.vedtaksperiode).maksdatoer.single().oppholdsdager
+            assertEquals(182, oppholdsdagerJuli.sumOf { it.count() })
+            assertEquals(31.juli, oppholdsdagerJuli.last().endInclusive)
+
+            // oppretter forlengelse fom 182 dager etter maksdato
+            nyPeriode(august)
+            håndterYtelser(8.vedtaksperiode)
+
+            assertInfo("Maks antall sykepengedager er nådd i perioden", 8.vedtaksperiode.filter())
+            assertIngenInfo("Maksimalt antall sykedager overskrides ikke i perioden", 8.vedtaksperiode.filter())
+            assertFunksjonellFeil(Varselkode.RV_VV_9, 8.vedtaksperiode.filter())
+            assertSisteTilstand(8.vedtaksperiode, TIL_INFOTRYGD) {
+                "Disse periodene skal kastes ut pr nå"
+            }
+        }
     }
 
-    private fun nyPeriodeMedYtelser(forrigePeriode: Periode): Periode {
-        val nestePeriode = nyPeriode(forrigePeriode)
-        val id = observatør.sisteVedtaksperiodeId(a1)
-        håndterYtelser(id)
-        return nestePeriode
-    }
-
-    private fun nestePeriode(forrigePeriode: Periode): Periode {
-        val nesteMåned = forrigePeriode.start.plusMonths(1)
-        return nesteMåned til nesteMåned.plusDays(nesteMåned.lengthOfMonth().toLong() - 1)
+    private fun TestPerson.TestArbeidsgiver.forlengVedtakUtenUtbetaling(periode: Periode) {
+        val vedtaksperiode = nyPeriode(periode)
+        håndterYtelser(vedtaksperiode)
+        håndterUtbetalingsgodkjenning(vedtaksperiode)
     }
 }

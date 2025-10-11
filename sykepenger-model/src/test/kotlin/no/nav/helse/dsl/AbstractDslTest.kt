@@ -585,11 +585,11 @@ internal abstract class AbstractDslTest {
 
     protected fun dto() = testperson.dto()
 
-    private fun regler(maksSykedager: Int): ArbeidsgiverRegler = object : ArbeidsgiverRegler {
+    private fun regler(maksSykedager: Int, maksSykedagerOver67: Int = maksSykedager): ArbeidsgiverRegler = object : ArbeidsgiverRegler {
         override fun burdeStarteNyArbeidsgiverperiode(oppholdsdagerBrukt: Int) = oppholdsdagerBrukt >= 16
         override fun arbeidsgiverperiodenGjennomført(arbeidsgiverperiodedagerBrukt: Int) = arbeidsgiverperiodedagerBrukt >= 16
         override fun maksSykepengedager() = maksSykedager
-        override fun maksSykepengedagerOver67() = maksSykedager
+        override fun maksSykepengedagerOver67() = maksSykedagerOver67
     }
 
     protected fun medJSONPerson(filsti: String, skjemaversjon: Int) {
@@ -616,8 +616,8 @@ internal abstract class AbstractDslTest {
         testperson = TestPerson(observatør = observatør, personidentifikator = personidentifikator, deferredLog = deferredLog, jurist = jurist)
     }
 
-    protected fun medMaksSykedager(maksSykedager: Int) {
-        testperson = TestPerson(observatør = observatør, deferredLog = deferredLog, jurist = jurist, regler = regler(maksSykedager))
+    protected fun medMaksSykedager(maksSykedager: Int, maksSykedagerOver67: Int = maksSykedager, fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO) {
+        testperson = TestPerson(observatør = observatør, fødselsdato = fødselsdato, deferredLog = deferredLog, jurist = jurist, regler = regler(maksSykedager, maksSykedagerOver67))
     }
 
     @BeforeEach
