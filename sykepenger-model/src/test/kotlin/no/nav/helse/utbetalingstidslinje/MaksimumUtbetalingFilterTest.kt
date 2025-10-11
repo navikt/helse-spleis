@@ -71,7 +71,7 @@ internal class MaksimumUtbetalingFilterTest {
         val filter = MaksimumUtbetalingFilter(sykepengegrunnlag)
 
         return filter
-            .filter(input, this.periode())
+            .filter(input)
             .single()
             .vedtaksperioder
             .single()

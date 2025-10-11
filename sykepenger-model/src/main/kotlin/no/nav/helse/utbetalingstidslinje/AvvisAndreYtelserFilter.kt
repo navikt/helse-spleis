@@ -12,10 +12,7 @@ internal class AvvisAndreYtelserFilter(
     private val omsorgspenger: List<Periode>,
 ) : UtbetalingstidslinjerFilter {
 
-    override fun filter(
-        arbeidsgivere: List<Arbeidsgiverberegning>,
-        vedtaksperiode: Periode
-    ): List<Arbeidsgiverberegning> {
+    override fun filter(arbeidsgivere: List<Arbeidsgiverberegning>): List<Arbeidsgiverberegning> {
         return arbeidsgivere
             .avvis(foreldrepenger, Begrunnelse.AndreYtelserForeldrepenger)
             .avvis(svangerskapspenger, Begrunnelse.AndreYtelserSvangerskapspenger)

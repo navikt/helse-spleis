@@ -64,7 +64,7 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal) : Compara
 
     fun toDouble() = brøkdel.multiply(HUNDRE_PROSENT, mc).toDouble()
 
-    internal fun erUnderGrensen() = this < GRENSE
+    fun erUnderGrensen() = this < GRENSE
 
     fun dto() = ProsentdelDto(prosentDesimal = brøkdel.toDouble())
 }

@@ -147,6 +147,6 @@ internal class ØkonomiDagTest {
             )
         }
         return MaksimumUtbetalingFilter(sykepengegrunnlagBegrenset6G)
-            .filter(input, periode).map { it.vedtaksperioder.single().utbetalingstidslinje }
+            .filter(input).map { it.vedtaksperioder.single().utbetalingstidslinje }
     }
 }

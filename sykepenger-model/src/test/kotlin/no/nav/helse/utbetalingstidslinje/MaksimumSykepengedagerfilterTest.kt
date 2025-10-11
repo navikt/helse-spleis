@@ -851,7 +851,7 @@ internal class MaksimumSykepengedagerfilterTest {
             )
         }
         avvisteTidslinjer = maksimumSykepengedagerfilter
-            .filter(tidslinjer, filterperiode)
+            .filter(tidslinjer)
             .map { it.samletVedtaksperiodetidslinje }
 
         val maksdatoresultat = maksdatoberegning.beregnMaksdatoBegrensetTilPeriode(filterperiode)

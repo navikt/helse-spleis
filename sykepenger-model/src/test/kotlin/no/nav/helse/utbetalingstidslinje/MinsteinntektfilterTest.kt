@@ -13,7 +13,6 @@ import no.nav.helse.utbetalingstidslinje.MinsteinntektfilterTest.Minsteinntekt.O
 import no.nav.helse.utbetalingstidslinje.MinsteinntektfilterTest.Minsteinntekt.OPPFYLLER_KRAV_FØR_OG_ETTER_67
 import no.nav.helse.utbetalingstidslinje.MinsteinntektfilterTest.Minsteinntekt.OPPFYLLER_KRAV_TIL_67_MEN_IKKE_ETTER
 import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering.Companion.lagMinsteinntektsvurdering
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -89,7 +88,7 @@ class MinsteinntektfilterTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         }
-        val avviste = filter.filter(arbeidsgivere, periode(tidslinjer)!!)
+        val avviste = filter.filter(arbeidsgivere)
         return avviste.flatMap {
             it.vedtaksperioder.single().utbetalingstidslinje.inspektør.avvistedager
         }

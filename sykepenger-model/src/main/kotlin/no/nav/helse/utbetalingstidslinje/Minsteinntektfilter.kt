@@ -79,10 +79,7 @@ internal class Minsteinntektfilter(
     private val erUnderMinsteinntektEtterFylte67: Boolean
 ) : UtbetalingstidslinjerFilter {
 
-    override fun filter(
-        arbeidsgivere: List<Arbeidsgiverberegning>,
-        vedtaksperiode: Periode
-    ): List<Arbeidsgiverberegning> {
+    override fun filter(arbeidsgivere: List<Arbeidsgiverberegning>): List<Arbeidsgiverberegning> {
         return arbeidsgivere
             .avvisMinsteinntektTilFylte67()
             .avvisMinsteinntektEtterFylte67()

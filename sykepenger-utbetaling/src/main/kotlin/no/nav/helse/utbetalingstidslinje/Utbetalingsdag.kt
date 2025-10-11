@@ -27,8 +27,6 @@ sealed class Utbetalingsdag(
     protected open fun avvisDag(begrunnelse: Begrunnelse) = AvvistDag(dato, økonomi, listOf(begrunnelse))
     internal abstract fun kopierMed(økonomi: Økonomi): Utbetalingsdag
 
-    open fun erAvvistMed(begrunnelse: Begrunnelse): AvvistDag? = null
-
     class ArbeidsgiverperiodeDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 30
         override fun kopierMed(økonomi: Økonomi) = ArbeidsgiverperiodeDag(dato, økonomi)
@@ -139,7 +137,6 @@ sealed class Utbetalingsdag(
             AvvistDag(dato, økonomi, this.begrunnelser + begrunnelse)
 
 
-        override fun erAvvistMed(begrunnelse: Begrunnelse) = takeIf { begrunnelse in begrunnelser }
         override fun kopierMed(økonomi: Økonomi) = AvvistDag(dato, økonomi, begrunnelser)
         override fun dto(dato: LocalDate, økonomi: ØkonomiUtDto) =
             UtbetalingsdagUtDto.AvvistDagDto(dato, økonomi, begrunnelser.map { it.dto() })

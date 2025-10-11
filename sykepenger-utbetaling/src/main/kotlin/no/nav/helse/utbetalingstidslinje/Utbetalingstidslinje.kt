@@ -56,12 +56,6 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
             .takeUnless { it.isEmpty() }
             ?.reduce(Periode::plus)
 
-        fun avvisteDager(
-            tidslinjer: List<Utbetalingstidslinje>,
-            periode: Periode,
-            begrunnelse: Begrunnelse
-        ) = tidslinjer.flatMap { it.subset(periode) }.mapNotNull { it.erAvvistMed(begrunnelse) }
-
         fun betale(sykepengegrunnlagBegrenset6G: Inntekt, tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
             return beregnDagForDag(tidslinjer) {
                 it.betal(sykepengegrunnlagBegrenset6G)

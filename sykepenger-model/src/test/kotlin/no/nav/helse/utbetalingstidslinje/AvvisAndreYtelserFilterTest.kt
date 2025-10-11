@@ -37,7 +37,7 @@ internal class AvvisAndreYtelserFilterTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         )
-        val result = filter.filter(tidslinjer, januar).single().samletVedtaksperiodetidslinje.inspektør
+        val result = filter.filter(tidslinjer).single().samletVedtaksperiodetidslinje.inspektør
 
         assertEquals(7, result.avvistDagTeller)
         assertEquals(Begrunnelse.AndreYtelserForeldrepenger, result.begrunnelse(1.januar).single())

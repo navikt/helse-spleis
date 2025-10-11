@@ -2,17 +2,13 @@ package no.nav.helse.utbetalingstidslinje
 
 import kotlin.collections.component1
 import kotlin.collections.component2
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 
 internal class MaksimumSykepengedagerfilter(
     private val maksdatoberegning: Maksdatoberegning
 ) : UtbetalingstidslinjerFilter {
 
-    override fun filter(
-        arbeidsgivere: List<Arbeidsgiverberegning>,
-        vedtaksperiode: Periode
-    ): List<Arbeidsgiverberegning> {
+    override fun filter(arbeidsgivere: List<Arbeidsgiverberegning>): List<Arbeidsgiverberegning> {
         val vurderinger = maksdatoberegning.beregn(arbeidsgivere)
 
         /** går gjennom alle maksdato-sakene og avslår dager. EGENTLIG er det nok å avslå dagene

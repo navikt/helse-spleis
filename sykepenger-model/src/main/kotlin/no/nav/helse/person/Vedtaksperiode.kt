@@ -17,6 +17,8 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
 import no.nav.helse.etterlevelse.`§ 8-12 ledd 1 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-12 ledd 2`
+import no.nav.helse.etterlevelse.`§ 8-13 ledd 1`
+import no.nav.helse.etterlevelse.`§ 8-13 ledd 2`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav a`
 import no.nav.helse.etterlevelse.`§ 8-29`
@@ -115,6 +117,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_17
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_9
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -177,6 +181,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
+import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.utbetalingstidslinje.Opptjeningfilter
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning
@@ -189,12 +194,15 @@ import no.nav.helse.utbetalingstidslinje.Minsteinntektfilter
 import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering.Companion.lagMinsteinntektsvurdering
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.UberegnetVedtaksperiode
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
 import no.nav.helse.utbetalingstidslinje.lagUtbetalingstidslinjePerArbeidsgiver
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class Vedtaksperiode private constructor(
@@ -1088,6 +1096,13 @@ internal class Vedtaksperiode private constructor(
         }
 
         // steg 5: lage varsler ved gitte situasjoner
+        if (beregnetTidslinjePerVedtaksperiode.any { it.utbetalingstidslinje.any { dag -> dag.dato in periode && dag is NavDag && dag.økonomi.totalSykdomsgrad.erUnderGrensen() } })
+            aktivitetslogg.varsel(RV_VV_17)
+        if (beregnetTidslinjePerVedtaksperiode.any { it.utbetalingstidslinje.any { dag -> dag.dato in periode && dag is AvvistDag && MinimumSykdomsgrad in dag.begrunnelser } })
+            aktivitetslogg.varsel(RV_VV_4)
+        else
+            aktivitetslogg.info("Ingen avviste dager på grunn av 20 % samlet sykdomsgrad-regel for denne perioden")
+
         if (minsteinntektsvurdering.erUnderMinsteinntektskrav(person.alder.redusertYtelseAlder, periode))
             aktivitetslogg.varsel(RV_SV_1)
         else
@@ -1123,6 +1138,7 @@ internal class Vedtaksperiode private constructor(
         ytelser.valider(aktivitetslogg, periode, skjæringstidspunkt, behandlinger.maksdato.maksdato, erForlengelse())
 
         // steg 6: subsummere ting
+        sykdomsgradsubsummering(subsumsjonslogg, periode, uberegnetTidslinjePerArbeidsgiver, beregnetTidslinjePerVedtaksperiode)
         minsteinntektsvurdering.subsummere(subsumsjonslogg, skjæringstidspunkt, beregningsgrunnlag, person.alder.redusertYtelseAlder, periode)
         maksdatosubsummering(
             subsumsjonslogg = subsumsjonslogg,
@@ -2455,7 +2471,7 @@ internal class Vedtaksperiode private constructor(
             infotrygdtidslinje = historisktidslinje
         )
         val filtere = listOf(
-            Sykdomsgradfilter(perioderMedMinimumSykdomsgradVurdertOK, subsumsjonslogg, aktivitetslogg),
+            Sykdomsgradfilter(perioderMedMinimumSykdomsgradVurdertOK),
             Minsteinntektfilter(
                 sekstisyvårsdagen = sekstisyvårsdagen,
                 erUnderMinsteinntektskravTilFylte67 = erUnderMinsteinntektskravTilFylte67,
@@ -2476,7 +2492,7 @@ internal class Vedtaksperiode private constructor(
         )
 
         val beregnetTidslinjePerArbeidsgiver = filtere.fold(uberegnetTidslinjePerArbeidsgiver) { tidslinjer, filter ->
-            filter.filter(tidslinjer, periode)
+            filter.filter(tidslinjer)
         }
 
         return beregnetTidslinjePerArbeidsgiver
@@ -2903,6 +2919,31 @@ internal data class VedtaksperiodeView(
 internal val HendelseMetadata.behandlingkilde
     get() =
         Behandlingkilde(meldingsreferanseId, innsendt, registrert, avsender)
+
+private fun sykdomsgradsubsummering(
+    subsumsjonslogg: Subsumsjonslogg,
+    periode: Periode,
+    uberegnetTidslinjePerArbeidsgiver: List<Arbeidsgiverberegning>,
+    beregnetTidslinjePerVedtaksperiode: List<BeregnetPeriode>
+) {
+    val tidslinjerForSubsumsjon = uberegnetTidslinjePerArbeidsgiver.map { it.samletVedtaksperiodetidslinje }.subsumsjonsformat()
+
+    val avvistePerioder = beregnetTidslinjePerVedtaksperiode
+        .map { it.utbetalingstidslinje.subset(periode) }
+        .flatMap { tidslinje ->
+            tidslinje
+                .filter { dag ->
+                    dag is AvvistDag && MinimumSykdomsgrad in dag.begrunnelser
+                }
+        }
+        .map { it.dato }
+        .grupperSammenhengendePerioder()
+
+    subsumsjonslogg.logg(`§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, Prosentdel.GRENSE.toDouble(), avvistePerioder))
+    `§ 8-13 ledd 1`(periode, avvistePerioder, tidslinjerForSubsumsjon).forEach {
+        subsumsjonslogg.logg(it)
+    }
+}
 
 private fun maksdatosubsummering(
     subsumsjonslogg: Subsumsjonslogg,

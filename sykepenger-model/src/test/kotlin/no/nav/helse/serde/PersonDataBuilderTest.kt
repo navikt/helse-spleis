@@ -196,7 +196,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             )
         )
         val tidslinje = MaksimumUtbetalingFilter(sykepengegrunnlag)
-            .filter(input, januar).single()
+            .filter(input).single()
         val dto = tidslinje.vedtaksperioder.single().utbetalingstidslinje.dto()
         assertEquals(10, dto.dager.size)
         dto.dager[0].also { dag ->

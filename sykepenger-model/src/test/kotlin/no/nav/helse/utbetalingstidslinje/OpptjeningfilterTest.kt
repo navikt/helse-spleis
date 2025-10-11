@@ -6,7 +6,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -53,7 +52,7 @@ class OpptjeningfilterTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         }
-        val avviste = filter.filter(arbeidsgivere, periode(tidslinjer)!!)
+        val avviste = filter.filter(arbeidsgivere)
         return avviste.flatMap {
             it.vedtaksperioder.single().utbetalingstidslinje.inspektør.avvistedager
         }
