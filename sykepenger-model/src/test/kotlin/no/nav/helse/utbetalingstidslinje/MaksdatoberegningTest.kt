@@ -1218,7 +1218,7 @@ internal class MaksdatoberegningTest {
         }
         vurderinger = maksdatoberegning.beregn(tidslinjer)
         maksdatoresultater = vurderinger
-            .map { it.beregnMaksdato(sekstisyvårsdagen, syttiårsdagen, dødsdato, regler) }
+            .map { it.beregnMaksdato(syttiårsdagen, dødsdato) }
         maksdatoer = maksdatoresultater.map {
             it.maksdato
         }

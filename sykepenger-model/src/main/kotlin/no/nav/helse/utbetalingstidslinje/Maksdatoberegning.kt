@@ -11,10 +11,10 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 
 internal class Maksdatoberegning(
-    private val sekstisyvårsdagen: LocalDate,
+    sekstisyvårsdagen: LocalDate,
     private val syttiårsdagen: LocalDate,
     private val dødsdato: LocalDate?,
-    private val regler: MaksimumSykepengedagerregler,
+    regler: MaksimumSykepengedagerregler,
     private val infotrygdtidslinje: Utbetalingstidslinje
 ) {
     internal companion object {
@@ -23,7 +23,7 @@ internal class Maksdatoberegning(
     }
 
     private val _maksdatosaker = mutableListOf<Maksdatokontekst>()
-    internal var sisteVurdering = Maksdatokontekst.TomKontekst
+    internal var sisteVurdering = Maksdatokontekst.tomKontekst(regler, sekstisyvårsdagen)
         private set
     internal val maksdatosaker get() = _maksdatosaker.plusElement(sisteVurdering)
 
@@ -32,7 +32,7 @@ internal class Maksdatoberegning(
     internal fun beregnMaksdatoBegrensetTilPeriode(periode: Periode): Maksdatoresultat {
         return sisteVurdering
             .avgrensTil(periode.endInclusive)
-            .beregnMaksdato(sekstisyvårsdagen, syttiårsdagen, dødsdato, regler)
+            .beregnMaksdato(syttiårsdagen, dødsdato)
     }
 
     private fun vurderStopp(dato: LocalDate) {
@@ -93,8 +93,8 @@ internal class Maksdatoberegning(
     private fun håndterBetalbarDag(dagen: LocalDate) {
         sisteVurdering = sisteVurdering.inkrementer(dagen)
         when {
-            sisteVurdering.erDagerUnder67ÅrForbrukte(regler) -> state(Karantene)
-            sisteVurdering.erDagerOver67ÅrForbrukte(sekstisyvårsdagen, regler) -> state(KaranteneOver67)
+            sisteVurdering.erDagerUnder67ÅrForbrukte -> state(Karantene)
+            sisteVurdering.erDagerOver67ÅrForbrukte -> state(KaranteneOver67)
             else -> state(Syk)
         }
     }
@@ -140,7 +140,7 @@ internal class Maksdatoberegning(
         object Initiell : State {
             override fun entering(avgrenser: Maksdatoberegning) {
                 avgrenser._maksdatosaker.add(avgrenser.sisteVurdering)
-                avgrenser.sisteVurdering = Maksdatokontekst.TomKontekst
+                avgrenser.sisteVurdering = avgrenser.sisteVurdering.tilbakestill()
             }
             override fun oppholdsdag(avgrenser: Maksdatoberegning, dagen: LocalDate) {
                 avgrenser.sisteVurdering = avgrenser.sisteVurdering.copy(vurdertTilOgMed = dagen)
@@ -148,15 +148,7 @@ internal class Maksdatoberegning(
             override fun sykdomshelg(avgrenser: Maksdatoberegning, dagen: LocalDate) {}
             override fun betalbarDag(avgrenser: Maksdatoberegning, dagen: LocalDate) {
                 /* starter en helt ny maksdatosak 😊 */
-                avgrenser.sisteVurdering = Maksdatokontekst(
-                    vurdertTilOgMed = dagen,
-                    startdatoSykepengerettighet = dagen,
-                    startdatoTreårsvindu = dagen.minusYears(HISTORISK_PERIODE_I_ÅR),
-                    betalteDager = setOf(dagen),
-                    oppholdsdager = emptySet(),
-                    avslåtteDager = emptySet(),
-                    begrunnelser = emptyMap()
-                )
+                avgrenser.sisteVurdering = avgrenser.sisteVurdering.nyMaksdatosak(dagen, dagen.minusYears(HISTORISK_PERIODE_I_ÅR))
                 avgrenser.state(Syk)
             }
         }

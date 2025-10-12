@@ -10,7 +10,8 @@ import no.nav.helse.plus
 import no.nav.helse.ukedager
 
 internal data class Maksdatokontekst(
-    // dato for vurderingene
+    val regler: MaksimumSykepengedagerregler,
+    val sekstisyvårsdagen: LocalDate,
     val vurdertTilOgMed: LocalDate,
     val startdatoSykepengerettighet: LocalDate,
     val startdatoTreårsvindu: LocalDate,
@@ -20,22 +21,31 @@ internal data class Maksdatokontekst(
     val begrunnelser: Map<LocalDate, Begrunnelse>
 ) {
     companion object {
-        val TomKontekst = Maksdatokontekst(LocalDate.MIN, LocalDate.MIN, LocalDate.MIN, emptySet(), emptySet(), emptySet(), emptyMap())
+        fun tomKontekst(regler: MaksimumSykepengedagerregler, sekstisyvårsdagen: LocalDate) =
+            Maksdatokontekst(
+                regler = regler,
+                sekstisyvårsdagen = sekstisyvårsdagen,
+                vurdertTilOgMed = LocalDate.MIN,
+                startdatoSykepengerettighet = LocalDate.MIN,
+                startdatoTreårsvindu = LocalDate.MIN,
+                betalteDager = emptySet(),
+                oppholdsdager = emptySet(),
+                avslåtteDager = emptySet(),
+                begrunnelser = emptyMap()
+            )
     }
 
     internal val oppholdsteller = oppholdsdager.size
+    internal val betalteDagerOver67 = betalteDager.filter { it > sekstisyvårsdagen }.toSet()
+
     internal val forbrukteDager = betalteDager.size
-    internal fun erDagerUnder67ÅrForbrukte(regler: MaksimumSykepengedagerregler) =
-            gjenståendeDagerUnder67År(regler) == 0
+    internal val forbrukteDagerOver67 = betalteDagerOver67.size
 
-    internal fun erDagerOver67ÅrForbrukte(sekstisyvårsdagen: LocalDate, regler: MaksimumSykepengedagerregler) =
-        gjenståendeDagerOver67År(sekstisyvårsdagen, regler) == 0
+    internal val gjenståendeDagerUnder67År = regler.maksSykepengedager() - forbrukteDager
+    internal val gjenståendeDagerOver67År = regler.maksSykepengedagerOver67() - forbrukteDagerOver67
 
-    internal fun gjenståendeDagerUnder67År(regler: MaksimumSykepengedagerregler) = regler.maksSykepengedager() - forbrukteDager
-    internal fun gjenståendeDagerOver67År(sekstisyvårsdagen: LocalDate, regler: MaksimumSykepengedagerregler): Int {
-        val forbrukteDagerOver67 = betalteDager.count { it > sekstisyvårsdagen }
-        return regler.maksSykepengedagerOver67() - forbrukteDagerOver67
-    }
+    internal val erDagerUnder67ÅrForbrukte = gjenståendeDagerUnder67År == 0
+    internal val erDagerOver67ÅrForbrukte = gjenståendeDagerOver67År == 0
 
     internal fun harNåddMaks(vedtaksperiode: Periode) =
         avslåtteDager.any { it in vedtaksperiode }
@@ -69,18 +79,38 @@ internal data class Maksdatokontekst(
         vurdertTilOgMed = vurderingTilOgMed
     )
 
+    internal fun tilbakestill() = copy(
+        vurdertTilOgMed = LocalDate.MIN,
+        startdatoSykepengerettighet = LocalDate.MIN,
+        startdatoTreårsvindu = LocalDate.MIN,
+        betalteDager = emptySet(),
+        oppholdsdager = emptySet(),
+        avslåtteDager = emptySet(),
+        begrunnelser = emptyMap()
+    )
+
+    internal fun nyMaksdatosak(dagen: LocalDate, startdatoTreårsvindu: LocalDate): Maksdatokontekst {
+        return this
+            .copy(startdatoSykepengerettighet = dagen)
+            .medNyStartdatoTreårsvindu(startdatoTreårsvindu)
+            .inkrementer(dagen)
+    }
+
     internal fun inkrementer(dato: LocalDate) = copy(
         vurdertTilOgMed = dato,
         betalteDager = betalteDager.plus(dato),
         oppholdsdager = emptySet()
     )
 
+    internal fun dekrementer(dato: LocalDate, nyStartdatoTreårsvindu: LocalDate) =
+        this
+            .medNyStartdatoTreårsvindu(nyStartdatoTreårsvindu)
+            .inkrementer(dato)
+
     // tilgir forbrukte dager som følge av at treårsvinduet forskyves
-    internal fun dekrementer(dato: LocalDate, nyStartdatoTreårsvindu: LocalDate) = copy(
-        vurdertTilOgMed = dato,
+    private fun medNyStartdatoTreårsvindu(nyStartdatoTreårsvindu: LocalDate) = copy(
         startdatoTreårsvindu = nyStartdatoTreårsvindu,
-        betalteDager = betalteDager.filter { it >= nyStartdatoTreårsvindu }.toSet() + dato,
-        oppholdsdager = emptySet()
+        betalteDager = betalteDager.filter { it >= nyStartdatoTreårsvindu }.toSet()
     )
 
     internal fun medOppholdsdag(dato: LocalDate) = copy(
@@ -95,12 +125,7 @@ internal data class Maksdatokontekst(
         begrunnelser = this.begrunnelser.plus(dato to begrunnelse)
     )
 
-    internal fun beregnMaksdato(
-        sekstisyvårsdagen: LocalDate,
-        syttiårsdagen: LocalDate,
-        dødsdato: LocalDate?,
-        regler: MaksimumSykepengedagerregler
-    ): Maksdatoresultat {
+    internal fun beregnMaksdato(syttiårsdagen: LocalDate, dødsdato: LocalDate?): Maksdatoresultat {
         fun LocalDate.forrigeVirkedagFør() = minusDays(
             when (dayOfWeek) {
                 SUNDAY -> 2
@@ -115,12 +140,12 @@ internal data class Maksdatokontekst(
             else -> this
         }
 
-        val harNåddMaks = erDagerOver67ÅrForbrukte(sekstisyvårsdagen, regler) || erDagerUnder67ÅrForbrukte(regler)
+        val harNåddMaks = gjenståendeDagerOver67År == 0 || gjenståendeDagerUnder67År == 0
         val forrigeMaksdato = if (harNåddMaks) betalteDager.last() else null
         val forrigeVirkedag = forrigeMaksdato ?: vurdertTilOgMed.sisteVirkedagInklusiv()
 
-        val maksdatoOrdinærRett = forrigeVirkedag + gjenståendeDagerUnder67År(regler).ukedager
-        val maksdatoBegrensetRett = maxOf(forrigeVirkedag, sekstisyvårsdagen.sisteVirkedagInklusiv()) + gjenståendeDagerOver67År(sekstisyvårsdagen, regler).ukedager
+        val maksdatoOrdinærRett = forrigeVirkedag + gjenståendeDagerUnder67År.ukedager
+        val maksdatoBegrensetRett = maxOf(forrigeVirkedag, sekstisyvårsdagen.sisteVirkedagInklusiv()) + gjenståendeDagerOver67År.ukedager
 
         val hjemmelsbegrunnelse: Maksdatoresultat.Bestemmelse
         val maksdato: LocalDate
