@@ -369,6 +369,20 @@ internal class MaksdatoberegningTest {
     }
 
     @Test
+    fun `avslår dager etter dødsfall - rett før 70 år`() {
+        val tidslinje = tidslinjeOf(16.AP, 10.NAV)
+        val avslåtteDager = tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018, dødsdato = 4.januar)
+
+        assertEquals((17.januar til 26.januar).toList(), avslåtteDager)
+        assertEquals(listOf(0), forbrukteDager)
+        assertEquals(listOf(0), gjenståendeDager)
+        assertEquals(listOf(4.januar), maksdatoer)
+        avslåtteDager.map {
+            assertEquals(Begrunnelse.EtterDødsdato, begrunnelse(it)) { "Feil begrunnelse for $it" }
+        }
+    }
+
+    @Test
     fun `avslår dager etter dødsfall - over 70 år`() {
         val tidslinje = tidslinjeOf(16.AP, 10.NAV)
         val avslåtteDager = tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018, dødsdato = 18.januar)

@@ -166,7 +166,7 @@ internal data class Maksdatokontekst(
             }
 
             else -> {
-                maksdato = syttiårsdagen.forrigeVirkedagFør()
+                maksdato = listOfNotNull(syttiårsdagen.forrigeVirkedagFør(), dødsdato).min()
                 gjenståendeDager = ukedager(forrigeVirkedag, maksdato)
                 hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.SYTTI_ÅR
             }

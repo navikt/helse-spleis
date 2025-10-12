@@ -102,6 +102,15 @@ internal class MaksdatokontekstTest {
         assertEquals(5.januar, kontekst.beregnMaksdato(syttiårsdagen, null).maksdato)
     }
 
+    @Test
+    fun `dødsdato rett før 70 år - maksdato inntreffer på dødsdato`() {
+        val syttiårsdagen = 7.januar
+        val sekstisyvårsdagen = syttiårsdagen.minusYears(3)
+        val dødsdato = 3.januar
+        val kontekst = medBetalteDager(antallBetalteDager = 0, sekstisyvårsdagen, sisteVurderteDag = 1.januar)
+        assertEquals(dødsdato, kontekst.beregnMaksdato(syttiårsdagen, dødsdato).maksdato)
+    }
+
     private fun medBetalteDager(antallBetalteDager: Int, sekstisyvårsdagen: LocalDate, sisteVurderteDag: LocalDate = 1.januar, sisteBetalteDag: LocalDate = sisteVurderteDag): Maksdatokontekst {
         val tomKontekst = Maksdatokontekst
             .tomKontekst(NormalArbeidstaker, sekstisyvårsdagen)
