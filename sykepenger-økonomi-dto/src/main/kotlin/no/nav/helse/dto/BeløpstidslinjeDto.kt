@@ -2,6 +2,7 @@ package no.nav.helse.dto
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
 
 data class BeløpstidslinjeDto(val perioder: List<BeløpstidslinjeperiodeDto>) {
 
@@ -13,7 +14,7 @@ data class BeløpstidslinjeDto(val perioder: List<BeløpstidslinjeperiodeDto>) {
     }
 
     data class BeløpstidslinjedagKildeDto(
-        val meldingsreferanseId: MeldingsreferanseDto,
+        val meldingsreferanseId: UUID,
         val avsender: AvsenderDto,
         val tidsstempel: LocalDateTime
     )

@@ -5,6 +5,9 @@ import java.util.*
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
+import no.nav.helse.dsl.BeløpstidslinjeDsl.arbeidsgiver
+import no.nav.helse.dsl.BeløpstidslinjeDsl.assertBeløpstidslinje
+import no.nav.helse.dsl.BeløpstidslinjeDsl.beløpstidslinje
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.a1
@@ -47,9 +50,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -105,13 +105,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             val id1 = håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)), OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, endringer = listOf(Refusjonsendring(1.februar, 0.daglig))))
-            val kilde1 = Kilde(MeldingsreferanseId(id1), ARBEIDSGIVER, LocalDateTime.now())
+            val kilde1 = Kilde(id1, ARBEIDSGIVER, LocalDateTime.now())
             assertBeløpstidslinje(
                 Beløpstidslinje.fra(1.februar.somPeriode(), 0.daglig, kilde1),
                 inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar)
             )
             val id2 = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittRefusjon(INNTEKT, endringer = listOf(Refusjonsendring(2.februar, 0.daglig))))
-            val kilde2 = Kilde(MeldingsreferanseId(id2), ARBEIDSGIVER, LocalDateTime.now())
+            val kilde2 = Kilde(id2, ARBEIDSGIVER, LocalDateTime.now())
             assertBeløpstidslinje(
                 Beløpstidslinje.fra(1.februar.somPeriode(), INNTEKT, kilde2) + Beløpstidslinje.fra(2.februar.somPeriode(), 0.daglig, kilde2),
                 inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar)

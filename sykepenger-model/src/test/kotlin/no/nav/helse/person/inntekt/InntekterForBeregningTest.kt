@@ -4,6 +4,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.desember
+import no.nav.helse.dsl.BeløpstidslinjeDsl.arbeidsgiver
+import no.nav.helse.dsl.BeløpstidslinjeDsl.assertBeløpstidslinje
+import no.nav.helse.dsl.BeløpstidslinjeDsl.beløpstidslinje
+import no.nav.helse.dsl.BeløpstidslinjeDsl.saksbehandler
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -19,10 +23,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
@@ -246,5 +246,5 @@ class InntekterForBeregningTest {
         deaktivertFraInntektsgrunnlag(organisasjonsnummer, meldingsreferanseId.id.saksbehandler)
 
     private fun InntekterForBeregning.Builder.inntektsendringer(organisasjonsnummer: String, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, meldingsreferanseId: MeldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())) =
-        inntektsendringer(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer), fom, tom, inntekt, Kilde(meldingsreferanseId, Avsender.SYSTEM, LocalDateTime.now()))
+        inntektsendringer(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer), fom, tom, inntekt, Kilde(meldingsreferanseId.id, Avsender.SYSTEM, LocalDateTime.now()))
 }

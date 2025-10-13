@@ -1534,7 +1534,7 @@ data class PersonData(
                 tom = it.tom,
                 dagligBeløp = it.dagligBeløp,
                 kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(
-                    meldingsreferanseId = MeldingsreferanseDto(it.meldingsreferanseId),
+                    meldingsreferanseId = it.meldingsreferanseId,
                     avsender = it.avsender.tilDto(),
                     tidsstempel = it.tidsstempel
                 )

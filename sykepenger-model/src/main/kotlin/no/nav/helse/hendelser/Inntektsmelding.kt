@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.forrigeDag
-import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.mapWithNext
@@ -142,7 +141,7 @@ class Inntektsmelding(
     ) {
 
         internal fun refusjonstidslinje(refusjonsdato: LocalDate, meldingsreferanseId: MeldingsreferanseId, tidsstempel: LocalDateTime): Beløpstidslinje {
-            val kilde = Kilde(meldingsreferanseId, ARBEIDSGIVER, tidsstempel)
+            val kilde = Kilde(meldingsreferanseId.id, ARBEIDSGIVER, tidsstempel)
 
             val opphørIRefusjon = opphørsdato?.let {
                 val sisteRefusjonsdag = maxOf(it, refusjonsdato.forrigeDag)

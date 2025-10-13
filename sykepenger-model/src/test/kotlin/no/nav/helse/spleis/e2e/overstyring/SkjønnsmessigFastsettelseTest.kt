@@ -2,6 +2,9 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.util.*
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.BeløpstidslinjeDsl.arbeidsgiver
+import no.nav.helse.dsl.BeløpstidslinjeDsl.assertBeløpstidslinje
+import no.nav.helse.dsl.BeløpstidslinjeDsl.saksbehandler
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
@@ -15,7 +18,6 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
@@ -25,9 +27,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig

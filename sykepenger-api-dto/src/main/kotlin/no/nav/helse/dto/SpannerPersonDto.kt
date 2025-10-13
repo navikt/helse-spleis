@@ -1783,7 +1783,7 @@ private fun BeløpstidslinjeDto.tilPersonData() = SpannerPersonDto.Beløpstidsli
             fom = it.fom,
             tom = it.tom,
             dagligBeløp = it.dagligBeløp,
-            meldingsreferanseId = it.kilde.meldingsreferanseId.id,
+            meldingsreferanseId = it.kilde.meldingsreferanseId,
             avsender = it.kilde.avsender.tilPersonData(),
             tidsstempel = it.kilde.tidsstempel
         )

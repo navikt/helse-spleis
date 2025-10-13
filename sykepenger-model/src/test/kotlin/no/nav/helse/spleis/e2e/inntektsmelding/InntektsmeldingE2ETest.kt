@@ -8,6 +8,9 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.den
 import no.nav.helse.desember
+import no.nav.helse.dsl.BeløpstidslinjeDsl.arbeidsgiver
+import no.nav.helse.dsl.BeløpstidslinjeDsl.assertBeløpstidslinje
+import no.nav.helse.dsl.BeløpstidslinjeDsl.beløpstidslinje
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -49,9 +52,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -143,7 +143,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         this@InntektsmeldingE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        val imKilde = Kilde(MeldingsreferanseId(im), ARBEIDSGIVER, MIN)
+        val imKilde = Kilde(im, ARBEIDSGIVER, MIN)
 
         assertBeløpstidslinje(
             expected = Beløpstidslinje.fra(januar, INNTEKT, imKilde),
@@ -194,7 +194,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Bruker feil refusjonsopplysninger når arbeidsgiver fyller små hull & opplyser om opphør frem i tid`() {
         håndterSøknad(14.mars(2025) til 21.mars(2025))
         val im = håndterInntektsmelding(listOf(12.mars(2025) til 27.mars(2025)), refusjon = Refusjon(INNTEKT, 13.april(2025)))
-        val imKilde = Kilde(MeldingsreferanseId(im), ARBEIDSGIVER, MIN)
+        val imKilde = Kilde(im, ARBEIDSGIVER, MIN)
 
         håndterSøknad(24.mars(2025) til 28.mars(2025))
         håndterVilkårsgrunnlag(2.vedtaksperiode)

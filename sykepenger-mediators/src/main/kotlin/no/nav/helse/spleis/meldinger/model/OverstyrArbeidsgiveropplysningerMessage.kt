@@ -97,7 +97,7 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
                 val tom = node.path("tom").asOptionalLocalDate()
                 if (tom == null) strekkbar = true
                 val beløp = node.path("beløp").asDouble().månedlig
-                val refusjonstidslinje = Beløpstidslinje.fra(fom til (tom ?: fom), beløp, Kilde(meldingsreferanseId, SAKSBEHANDLER, opprettet))
+                val refusjonstidslinje = Beløpstidslinje.fra(fom til (tom ?: fom), beløp, Kilde(meldingsreferanseId.id, SAKSBEHANDLER, opprettet))
                 refusjonstidslinje + acc
             }
             return refusjonstidslinje to strekkbar

@@ -490,7 +490,7 @@ internal class SpeilGenerasjonerBuilder(
                     fom = nåværende.fom,
                     tom = neste?.fom?.forrigeDag,
                     beløp = nåværende.dagligBeløp.daglig.månedlig,
-                    meldingsreferanseId = nåværende.kilde.meldingsreferanseId.id
+                    meldingsreferanseId = nåværende.kilde.meldingsreferanseId
                 )
             }
         }

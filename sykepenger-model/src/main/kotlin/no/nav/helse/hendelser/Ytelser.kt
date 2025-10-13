@@ -63,7 +63,7 @@ class Ytelser(
     }
 
     internal fun inntektsendringer(): List<Triple<Behandlingsporing.Yrkesaktivitet, Kilde, InntekterForBeregning.Inntektsperiode>> {
-        val kilde = Kilde(metadata.meldingsreferanseId, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
+        val kilde = Kilde(metadata.meldingsreferanseId.id, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
         return inntekterForBeregning.inntektsperioder.map { inntektsperiode ->
             val yrkesaktivitet = when (inntektsperiode.inntektskilde) {
                 "SELVSTENDIG" -> Behandlingsporing.Yrkesaktivitet.Selvstendig

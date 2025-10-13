@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.BeløpstidslinjeDsl.perioderMedBeløp
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
@@ -43,7 +44,6 @@ import no.nav.helse.person.BehandlingView.TilstandView.VEDTAK_IVERKSATT
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
-import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -90,7 +90,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             val refusjonsopplysningerPeriode = refusjonsopplysninger.perioderMedBeløp.single()
             assertEquals(1.januar til 31.januar, refusjonsopplysningerPeriode)
             assertTrue(refusjonsopplysninger.subset(1.januar til 9.januar).all { it.beløp == INNTEKT })
-            assertTrue(refusjonsopplysninger.subset(10.januar til 31.januar).all { it.beløp == INGEN && it.kilde.meldingsreferanseId.id == korrigertIm })
+            assertTrue(refusjonsopplysninger.subset(10.januar til 31.januar).all { it.beløp == INGEN && it.kilde.meldingsreferanseId == korrigertIm })
         }
     }
 
