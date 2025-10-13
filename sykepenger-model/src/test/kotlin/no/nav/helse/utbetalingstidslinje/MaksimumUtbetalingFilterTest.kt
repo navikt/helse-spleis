@@ -18,7 +18,7 @@ internal class MaksimumUtbetalingFilterTest {
     @Test
     fun `når inntekt er under 6G blir utbetaling lik inntekt`() {
         val inntekt = 1200.daglig
-        val tidslinje = tidslinjeOf(12.NAV(inntekt)).betal(inntekt)
+        val tidslinje = tidslinjeOf(12.NAV(inntekt.daglig)).betal(inntekt)
         assertEquals(12000.0, tidslinje.inspektør.totalUtbetaling())
     }
 
@@ -26,7 +26,7 @@ internal class MaksimumUtbetalingFilterTest {
     fun `når inntekt er over 6G blir utbetaling lik 6G`() {
         val inntektOver6G = 3500.daglig
         val `6G`= 2161.daglig
-        val tidslinje = tidslinjeOf(12.NAV(inntektOver6G)).betal(`6G`)
+        val tidslinje = tidslinjeOf(12.NAV(inntektOver6G.daglig)).betal(`6G`)
         assertEquals(21610.0, tidslinje.inspektør.totalUtbetaling())
     }
 

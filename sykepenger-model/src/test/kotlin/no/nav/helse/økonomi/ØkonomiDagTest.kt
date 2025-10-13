@@ -62,13 +62,13 @@ internal class ØkonomiDagTest {
     @Test
     fun `liten inntekt`() {
         val inntekt = 5000.månedlig
-        val a1 = tidslinjeOf(1.NAV(inntekt))
+        val a1 = tidslinjeOf(1.NAV(inntekt.daglig))
         val (a) = listOf(a1).betal(inntekt)
         assertØkonomi(a, 231.0, 0.0)
-        val b1 = tidslinjeOf(1.NAV(inntekt, 50))
+        val b1 = tidslinjeOf(1.NAV(inntekt.daglig, 50))
         val (b) = listOf(b1).betal(inntekt)
         assertØkonomi(b, 115.0, 0.0)
-        val c1 = tidslinjeOf(1.NAV(inntekt, refusjonsbeløp = inntekt / 2))
+        val c1 = tidslinjeOf(1.NAV(inntekt.daglig, refusjonsbeløp = (inntekt / 2).daglig))
         val (c) = listOf(c1).betal(inntekt)
         assertØkonomi(c, 115.0, 115.0)
     }

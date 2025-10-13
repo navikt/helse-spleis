@@ -4,7 +4,10 @@ plugins {
 
 dependencies {
     // bruker "api" sånn at avhengigheten blir kopiert ut til konsumenter av denne modulen
+    api(project(":sykepenger-primitiver"))
     api(project(":sykepenger-økonomi-dto"))
+
+    testImplementation(testFixtures(project(":sykepenger-primitiver")))
 }
 
 configure<JavaPluginExtension> {

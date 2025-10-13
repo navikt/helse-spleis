@@ -10,13 +10,15 @@ dependencies {
     implementation(project(":sykepenger-primitiver"))
     implementation(project(":sykepenger-aktivitetslogg"))
     implementation(project(":sykepenger-økonomi"))
-    testFixturesImplementation(project(":sykepenger-aktivitetslogg"))
-    testFixturesImplementation(project(":sykepenger-primitiver"))
-    testFixturesImplementation(project(":sykepenger-økonomi"))
-    testFixturesImplementation(testFixtures(project(":sykepenger-økonomi")))
+
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {
         exclude("com.fasterxml.jackson.core")
         exclude("com.fasterxml.jackson.dataformat")
     }
+
+    testImplementation(testFixtures(project(":sykepenger-økonomi")))
+
+    testFixturesImplementation(project(":sykepenger-aktivitetslogg"))
+    testFixturesImplementation(project(":sykepenger-primitiver"))
 }

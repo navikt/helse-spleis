@@ -52,7 +52,6 @@ fun Int.NAP(dekningsgrunnlag: Int, grad: Number = 100.0) = Utbetalingsdager(
 
 val Int.NAV get() = this.NAV(1200)
 fun Int.NAV(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) = NAV({ this }, dekningsgrunnlag.daglig, grad, refusjonsbeløp.daglig)
-fun Int.NAV(dekningsgrunnlag: Inntekt, grad: Number = 100.0, refusjonsbeløp: Inntekt = dekningsgrunnlag) = NAV({ this }, dekningsgrunnlag, grad, refusjonsbeløp)
 
 private fun NAV(antallDager: (LocalDate) -> Int, dekningsgrunnlag: Inntekt, grad: Number = 100.0, refusjonsbeløp: Inntekt = dekningsgrunnlag) = Utbetalingsdager(
     antallDager = antallDager,
