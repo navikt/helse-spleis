@@ -23,7 +23,7 @@ internal data class SelvstendigInntektsopplysning(
 
         private fun SelvstendigInntektsopplysning.kilde() = Kilde(
             avsender = if (skjønnsmessigFastsatt != null) Avsender.SAKSBEHANDLER else Avsender.SYSTEM,
-            meldingsreferanseId = fastsattÅrsinntektInntektsdata.hendelseId.id,
+            meldingsreferanseId = fastsattÅrsinntektInntektsdata.hendelseId,
             tidsstempel = fastsattÅrsinntektInntektsdata.tidsstempel
         )
 

@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.dsl.BeløpstidslinjeDsl.beløpstidslinje
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode
@@ -12,6 +11,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.AIG

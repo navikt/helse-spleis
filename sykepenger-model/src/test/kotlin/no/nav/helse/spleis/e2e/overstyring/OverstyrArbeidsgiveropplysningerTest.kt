@@ -1,10 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.util.UUID
-import no.nav.helse.dsl.BeløpstidslinjeDsl.arbeidsgiver
-import no.nav.helse.dsl.BeløpstidslinjeDsl.assertBeløpstidslinje
-import no.nav.helse.dsl.BeløpstidslinjeDsl.beløpstidslinje
-import no.nav.helse.dsl.BeløpstidslinjeDsl.saksbehandler
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -20,6 +16,10 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING

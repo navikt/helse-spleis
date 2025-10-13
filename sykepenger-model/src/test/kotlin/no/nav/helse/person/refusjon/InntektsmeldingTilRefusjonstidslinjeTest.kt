@@ -74,7 +74,7 @@ internal class InntektsmeldingTilRefusjonstidslinjeTest {
     }
 
     private companion object {
-        private val meldingsreferanseId = UUID.fromString("00000000-0000-0000-0000-000000000000")
+        private val meldingsreferanseId = MeldingsreferanseId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
         private val mottatt = 1.januar.atStartOfDay()
         private val kilde = Kilde(meldingsreferanseId, Avsender.ARBEIDSGIVER, mottatt)
 
@@ -87,6 +87,6 @@ internal class InntektsmeldingTilRefusjonstidslinjeTest {
             beløp = refusjonsbeløp,
             opphørsdato = opphørsdato,
             endringerIRefusjon = endringerIRefusjon.map { Inntektsmelding.Refusjon.EndringIRefusjon(it.value, it.key) }
-        ).refusjonstidslinje(førsteFraværsdag, MeldingsreferanseId(meldingsreferanseId), mottatt)
+        ).refusjonstidslinje(førsteFraværsdag, meldingsreferanseId, mottatt)
     }
 }

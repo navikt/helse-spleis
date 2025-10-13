@@ -2,8 +2,6 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import java.util.*
 import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.BeløpstidslinjeDsl.arbeidsgiver
-import no.nav.helse.dsl.BeløpstidslinjeDsl.assertBeløpstidslinje
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
@@ -25,6 +23,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

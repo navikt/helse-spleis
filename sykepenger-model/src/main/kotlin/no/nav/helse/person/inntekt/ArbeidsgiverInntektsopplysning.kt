@@ -94,7 +94,7 @@ internal data class ArbeidsgiverInntektsopplysning(
 
         private fun ArbeidsgiverInntektsopplysning.kilde() = Kilde(
             avsender = if (korrigertInntekt != null || skjønnsmessigFastsatt != null) Avsender.SAKSBEHANDLER else Avsender.ARBEIDSGIVER,
-            meldingsreferanseId = fastsattÅrsinntektInntektsdata.hendelseId.id,
+            meldingsreferanseId = fastsattÅrsinntektInntektsdata.hendelseId,
             tidsstempel = fastsattÅrsinntektInntektsdata.tidsstempel
         )
 

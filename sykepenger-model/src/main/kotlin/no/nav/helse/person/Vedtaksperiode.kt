@@ -714,7 +714,7 @@ internal class Vedtaksperiode private constructor(
         val refusjonstidslinje = alle.sortedBy { it.fom }.mapWithNext { nåværende, neste ->
             // Om vi har et neste element tar vi dens forrige dag. Ellers tar vi den største datoen av det vi kjenner til og nåværende fom'en
             val tom = neste?.fom?.forrigeDag ?: (listOfNotNull(sisteTom, nåværende.fom).max())
-            Beløpstidslinje.fra(periode = nåværende.fom til tom, beløp = nåværende.beløp, kilde = Kilde(hendelse.metadata.meldingsreferanseId.id, Avsender.ARBEIDSGIVER, hendelse.metadata.innsendt))
+            Beløpstidslinje.fra(periode = nåværende.fom til tom, beløp = nåværende.beløp, kilde = Kilde(hendelse.metadata.meldingsreferanseId, Avsender.ARBEIDSGIVER, hendelse.metadata.innsendt))
         }.reduce(Beløpstidslinje::plus)
         val servitør = Refusjonsservitør.fra(refusjonstidslinje)
 
@@ -1253,7 +1253,7 @@ internal class Vedtaksperiode private constructor(
             periode = periode,
             beløp = INGEN,
             kilde = Kilde(
-                sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId.id,
+                sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
                 sykepengegrunnlagForArbeidsgiver.metadata.avsender,
                 sykepengegrunnlagForArbeidsgiver.metadata.innsendt
             )
@@ -2498,7 +2498,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg = aktivitetslogg,
             beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
             beregnArbeidsgiverperiode = yrkesaktivitet.beregnArbeidsgiverperiode(),
-            refusjonstidslinje = Beløpstidslinje.fra(periode, inntekt.fastsattÅrsinntekt, Kilde(inntekt.faktaavklartInntekt.inntektsdata.hendelseId.id, Avsender.ARBEIDSGIVER, inntekt.faktaavklartInntekt.inntektsdata.tidsstempel))
+            refusjonstidslinje = Beløpstidslinje.fra(periode, inntekt.fastsattÅrsinntekt, Kilde(inntekt.faktaavklartInntekt.inntektsdata.hendelseId, Avsender.ARBEIDSGIVER, inntekt.faktaavklartInntekt.inntektsdata.tidsstempel))
         )
     }
 

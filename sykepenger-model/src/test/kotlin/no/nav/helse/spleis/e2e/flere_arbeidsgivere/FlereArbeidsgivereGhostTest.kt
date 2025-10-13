@@ -4,8 +4,6 @@ import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.Arbeidstakerkilde
-import no.nav.helse.dsl.BeløpstidslinjeDsl.arbeidsgiver
-import no.nav.helse.dsl.BeløpstidslinjeDsl.assertBeløpstidslinje
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -33,6 +31,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE

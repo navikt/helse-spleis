@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.SortedMap
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
@@ -20,7 +21,7 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
     internal constructor(vararg dager: Beløpsdag) : this(dager.toList())
 
     private val periode = if (dager.isEmpty()) null else dager.firstKey() til dager.lastKey()
-    operator fun get(dato: LocalDate): Dag = dager[dato] ?: UkjentDag
+    internal operator fun get(dato: LocalDate): Dag = dager[dato] ?: UkjentDag
     override operator fun iterator(): Iterator<Dag> {
         if (periode == null) return emptyList<Dag>().iterator()
         return object : Iterator<Dag> {
@@ -34,7 +35,7 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
         else champion
     }
 
-    fun erstatt(other: Beløpstidslinje) = merge(other) { _, challenger -> challenger }
+    internal fun erstatt(other: Beløpstidslinje) = merge(other) { _, challenger -> challenger }
 
     private fun merge(other: Beløpstidslinje, strategy: (champion: Beløpsdag, challenger: Beløpsdag) -> Beløpsdag): Beløpstidslinje {
         val results = this.dager.toMutableMap()
@@ -46,18 +47,18 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
         return Beløpstidslinje(results)
     }
 
-    fun medBeløp() = Beløpstidslinje(dager.filterValues { it.beløp != INGEN })
+    internal fun medBeløp() = Beløpstidslinje(dager.filterValues { it.beløp != INGEN })
 
     internal operator fun minus(datoer: Iterable<LocalDate>) = Beløpstidslinje(this.dager.filterKeys { it !in datoer })
     internal operator fun minus(dato: LocalDate) = Beløpstidslinje(this.dager.filterKeys { it != dato })
-    operator fun minus(other: Beløpstidslinje) = Beløpstidslinje(this.dager.filterValues { it.beløp != other.dager[it.dato]?.beløp })
-    fun subset(periode: Periode): Beløpstidslinje {
+    internal operator fun minus(other: Beløpstidslinje) = Beløpstidslinje(this.dager.filterValues { it.beløp != other.dager[it.dato]?.beløp })
+    internal fun subset(periode: Periode): Beløpstidslinje {
         if (this.periode == null || !this.periode.overlapperMed(periode)) return Beløpstidslinje()
         return Beløpstidslinje(dager.subMap(periode.start, periode.endInclusive.nesteDag).toSortedMap())
     }
 
-    fun tilOgMed(dato: LocalDate) = Beløpstidslinje(dager.headMap(dato.nesteDag).toSortedMap())
-    fun fraOgMed(dato: LocalDate) = Beløpstidslinje(dager.tailMap(dato).toSortedMap())
+    internal fun tilOgMed(dato: LocalDate) = Beløpstidslinje(dager.headMap(dato.nesteDag).toSortedMap())
+    internal fun fraOgMed(dato: LocalDate) = Beløpstidslinje(dager.tailMap(dato).toSortedMap())
     private val førsteBeløpsdag = periode?.start?.let { dager.getValue(it) }
     private fun snute(snute: LocalDate) = førsteBeløpsdag?.strekkTilbake(snute) ?: Beløpstidslinje()
     private val sisteBeløpsdag = periode?.endInclusive?.let { dager.getValue(it) }
@@ -75,8 +76,8 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
         return Beløpstidslinje(fylteDager)
     }
 
-    fun fyll(periode: Periode) = fyll().strekk(periode).subset(periode)
-    fun fyll(til: LocalDate) = fyll().strekkFrem(til).tilOgMed(til)
+    internal fun fyll(periode: Periode) = fyll().strekk(periode).subset(periode)
+    internal fun fyll(til: LocalDate) = fyll().strekkFrem(til).tilOgMed(til)
 
     // Det motsatte av fyll, begrenser den til så liten som mulig, men bevarer nok til at den senere kan fylles tilbake
     internal fun forkort() = Beløpstidslinje(dager.values.distinctBy { it.beløp to it.kilde })
@@ -89,13 +90,13 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
         return (fom til tom).firstOrNull { this.dager[it]?.beløp != other.dager[it]?.beløp }
     }
 
-    fun kunIngenRefusjon() =
+    internal fun kunIngenRefusjon() =
         filterIsInstance<Beløpsdag>().let { beløpsdager ->
             if (beløpsdager.isEmpty()) false
             else beløpsdager.all { it.beløp == INGEN }
         }
 
-    fun dto() = BeløpstidslinjeDto(
+    internal fun dto() = BeløpstidslinjeDto(
         perioder = dager
             .map { (_, dag) ->
                 BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
@@ -103,7 +104,7 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
                     tom = dag.dato,
                     dagligBeløp = dag.beløp.daglig,
                     kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(
-                        meldingsreferanseId = dag.kilde.meldingsreferanseId,
+                        meldingsreferanseId = dag.kilde.meldingsreferanseId.dto(),
                         avsender = dag.kilde.avsender.dto(),
                         tidsstempel = dag.kilde.tidsstempel
                     )
@@ -120,7 +121,7 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
 
     companion object {
         fun fra(periode: Periode, beløp: Inntekt, kilde: Kilde) = Beløpstidslinje(periode.map { Beløpsdag(it, beløp, kilde) })
-        fun gjenopprett(dto: BeløpstidslinjeDto) = Beløpstidslinje(
+        internal fun gjenopprett(dto: BeløpstidslinjeDto) = Beløpstidslinje(
             dager = dto.perioder
                 .flatMap {
                     (it.fom til it.tom).map { dato ->
@@ -128,7 +129,7 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
                             dato = dato,
                             beløp = it.dagligBeløp.daglig,
                             kilde = Kilde(
-                                meldingsreferanseId = it.kilde.meldingsreferanseId,
+                                meldingsreferanseId = MeldingsreferanseId.gjenopprett(it.kilde.meldingsreferanseId),
                                 avsender = Avsender.gjenopprett(it.kilde.avsender),
                                 tidsstempel = it.kilde.tidsstempel
                             )

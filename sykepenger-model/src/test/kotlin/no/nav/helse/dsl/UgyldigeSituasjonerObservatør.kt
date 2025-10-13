@@ -2,7 +2,6 @@ package no.nav.helse.dsl
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dsl.BeløpstidslinjeDsl.perioderMedBeløp
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.BehandlingView
@@ -14,6 +13,7 @@ import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.arbeidsgiver
+import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_A_ORDNINGEN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE

@@ -8,9 +8,6 @@ dependencies {
     api(project(":sykepenger-økonomi-dto"))
 
     testImplementation(testFixtures(project(":sykepenger-primitiver")))
-
-    // fordi BeløptidslinjeDsl bruker assertEquals()
-    testFixturesImplementation("org.junit.jupiter:junit-jupiter-api:5.12.1")
 }
 
 configure<JavaPluginExtension> {
