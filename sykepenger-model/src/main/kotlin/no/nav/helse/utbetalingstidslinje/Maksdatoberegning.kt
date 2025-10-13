@@ -12,8 +12,8 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 
 internal class Maksdatoberegning(
     sekstisyvårsdagen: LocalDate,
-    private val syttiårsdagen: LocalDate,
-    private val dødsdato: LocalDate?,
+    syttiårsdagen: LocalDate,
+    dødsdato: LocalDate?,
     regler: MaksimumSykepengedagerregler,
     private val infotrygdtidslinje: Utbetalingstidslinje
 ) {
@@ -23,7 +23,7 @@ internal class Maksdatoberegning(
     }
 
     private val _maksdatosaker = mutableListOf<Maksdatokontekst>()
-    internal var sisteVurdering = Maksdatokontekst.tomKontekst(regler, sekstisyvårsdagen)
+    internal var sisteVurdering = Maksdatokontekst.tomKontekst(regler, sekstisyvårsdagen, syttiårsdagen, dødsdato)
         private set
     internal val maksdatosaker get() = _maksdatosaker.plusElement(sisteVurdering)
 
@@ -32,26 +32,7 @@ internal class Maksdatoberegning(
     internal fun beregnMaksdatoBegrensetTilPeriode(periode: Periode): Maksdatoresultat {
         return sisteVurdering
             .avgrensTil(periode.endInclusive)
-            .beregnMaksdato(syttiårsdagen, dødsdato)
-    }
-
-    private fun vurderStopp(dato: LocalDate) {
-        when (state) {
-            State.Initiell,
-            Karantene,
-            KaranteneOver67,
-            State.KaranteneTilstrekkeligOppholdNådd,
-            State.Opphold,
-            State.OppholdFri,
-            Syk -> when {
-                syttiårsdagen <= dato -> state(ForGammel)
-                dødsdato != null && dødsdato < dato -> state(Død)
-            }
-            ForGammel,
-            Død -> {
-                // vurderer ikke lenger stopp fordi vi er i en sluttilstand
-            }
-        }
+            .beregnMaksdato()
     }
 
     fun beregn(arbeidsgivere: List<Arbeidsgiverberegning>): List<Maksdatokontekst> {
@@ -60,8 +41,6 @@ internal class Maksdatoberegning(
 
         Utbetalingstidslinje.periode(tidslinjegrunnlag)
             ?.forEach { dato ->
-                vurderStopp(dato)
-
                 when (val dag = beregnetTidslinje[dato]) {
                     is Utbetalingsdag.Arbeidsdag -> state.oppholdsdag(this, dag.dato)
                     is Utbetalingsdag.ArbeidsgiverperiodeDag -> state.oppholdsdag(this, dag.dato)
@@ -91,6 +70,11 @@ internal class Maksdatoberegning(
     }
 
     private fun håndterBetalbarDag(dagen: LocalDate) {
+        sisteVurdering = sisteVurdering.copy(vurdertTilOgMed = dagen)
+
+        if (sisteVurdering.erFerdig) {
+            return håndterBetalbarDagEtterMaksdato(dagen)
+        }
         sisteVurdering = sisteVurdering.inkrementer(dagen)
         when {
             sisteVurdering.erDagerUnder67ÅrForbrukte -> state(Karantene)
@@ -109,6 +93,11 @@ internal class Maksdatoberegning(
     }
 
     private fun håndterBetalbarDagEtterMaksdato(dag: LocalDate) {
+        when {
+            sisteVurdering.blittSyttiÅr -> state(ForGammel)
+            sisteVurdering.passertDødsdato -> state(Død)
+        }
+
         val begrunnelse = when (state) {
             State.Død -> Begrunnelse.EtterDødsdato
             State.ForGammel -> Begrunnelse.Over70
@@ -148,8 +137,8 @@ internal class Maksdatoberegning(
             override fun sykdomshelg(avgrenser: Maksdatoberegning, dagen: LocalDate) {}
             override fun betalbarDag(avgrenser: Maksdatoberegning, dagen: LocalDate) {
                 /* starter en helt ny maksdatosak 😊 */
-                avgrenser.sisteVurdering = avgrenser.sisteVurdering.nyMaksdatosak(dagen, dagen.minusYears(HISTORISK_PERIODE_I_ÅR))
-                avgrenser.state(Syk)
+                avgrenser.sisteVurdering = avgrenser.sisteVurdering.copy(startdatoSykepengerettighet = dagen)
+                avgrenser.håndterBetalbarDag(dagen)
             }
         }
 

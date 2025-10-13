@@ -174,7 +174,7 @@ internal class MaksdatoberegningTest {
         val tidslinje = tidslinjeOf(62.NAVDAGER, startDato = 12.januar)
         val avslåtteDager = tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018, dødsdato = 6.april)
 
-        assertEquals((6.april til 9.april).toList(), avslåtteDager)
+        assertEquals((6.april til 9.april).utenHelg(), avslåtteDager)
         assertEquals(listOf(60), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(5.april), maksdatoer)
@@ -1232,7 +1232,7 @@ internal class MaksdatoberegningTest {
         }
         vurderinger = maksdatoberegning.beregn(tidslinjer)
         maksdatoresultater = vurderinger
-            .map { it.beregnMaksdato(syttiårsdagen, dødsdato) }
+            .map { it.beregnMaksdato() }
         maksdatoer = maksdatoresultater.map {
             it.maksdato
         }

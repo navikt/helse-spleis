@@ -12,6 +12,8 @@ import no.nav.helse.ukedager
 internal data class Maksdatokontekst(
     val regler: MaksimumSykepengedagerregler,
     val sekstisyvårsdagen: LocalDate,
+    val syttiårsdagen: LocalDate,
+    val dødsdato: LocalDate?,
     val vurdertTilOgMed: LocalDate,
     val startdatoSykepengerettighet: LocalDate,
     val startdatoTreårsvindu: LocalDate,
@@ -21,10 +23,12 @@ internal data class Maksdatokontekst(
     val begrunnelser: Map<LocalDate, Begrunnelse>
 ) {
     companion object {
-        fun tomKontekst(regler: MaksimumSykepengedagerregler, sekstisyvårsdagen: LocalDate) =
+        fun tomKontekst(regler: MaksimumSykepengedagerregler, sekstisyvårsdagen: LocalDate, syttiårsdagen: LocalDate, dødsdato: LocalDate?) =
             Maksdatokontekst(
                 regler = regler,
                 sekstisyvårsdagen = sekstisyvårsdagen,
+                syttiårsdagen = syttiårsdagen,
+                dødsdato = dødsdato,
                 vurdertTilOgMed = LocalDate.MIN,
                 startdatoSykepengerettighet = LocalDate.MIN,
                 startdatoTreårsvindu = LocalDate.MIN,
@@ -46,6 +50,11 @@ internal data class Maksdatokontekst(
 
     internal val erDagerUnder67ÅrForbrukte = gjenståendeDagerUnder67År == 0
     internal val erDagerOver67ÅrForbrukte = gjenståendeDagerOver67År == 0
+
+    internal val passertDødsdato = (dødsdato != null && vurdertTilOgMed > dødsdato)
+    internal val blittSyttiÅr = vurdertTilOgMed >= syttiårsdagen && (dødsdato == null || syttiårsdagen <= dødsdato)
+
+    internal val erFerdig = blittSyttiÅr || passertDødsdato
 
     internal fun harNåddMaks(vedtaksperiode: Periode) =
         avslåtteDager.any { it in vedtaksperiode }
@@ -93,7 +102,6 @@ internal data class Maksdatokontekst(
         return this
             .copy(startdatoSykepengerettighet = dagen)
             .medNyStartdatoTreårsvindu(startdatoTreårsvindu)
-            .inkrementer(dagen)
     }
 
     internal fun inkrementer(dato: LocalDate) = copy(
@@ -125,7 +133,7 @@ internal data class Maksdatokontekst(
         begrunnelser = this.begrunnelser.plus(dato to begrunnelse)
     )
 
-    internal fun beregnMaksdato(syttiårsdagen: LocalDate, dødsdato: LocalDate?): Maksdatoresultat {
+    internal fun beregnMaksdato(): Maksdatoresultat {
         fun LocalDate.forrigeVirkedagFør() = minusDays(
             when (dayOfWeek) {
                 SUNDAY -> 2

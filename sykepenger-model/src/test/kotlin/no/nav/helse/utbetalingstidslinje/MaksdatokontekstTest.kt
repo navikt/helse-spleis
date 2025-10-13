@@ -15,7 +15,7 @@ internal class MaksdatokontekstTest {
 
     @Test
     fun tilbakestill() {
-        val kontekst = Maksdatokontekst.tomKontekst(NormalArbeidstaker, EPOCH)
+        val kontekst = Maksdatokontekst.tomKontekst(NormalArbeidstaker, 1.januar(2021), 1.januar(2024), null)
         assertEquals(kontekst, kontekst
             .inkrementer(1.januar)
             .medOppholdsdag(2.januar)
@@ -25,7 +25,7 @@ internal class MaksdatokontekstTest {
 
     @Test
     fun inkrementer() {
-        val kontekst = Maksdatokontekst.tomKontekst(NormalArbeidstaker, EPOCH)
+        val kontekst = Maksdatokontekst.tomKontekst(NormalArbeidstaker, 1.januar(2021), 1.januar(2024), null)
         val forventet = kontekst.copy(
             vurdertTilOgMed = 3.januar,
             betalteDager = setOf(1.januar, 3.januar)
@@ -38,7 +38,8 @@ internal class MaksdatokontekstTest {
 
     @Test
     fun `forskyver treårsvindu`() {
-        val kontekst = Maksdatokontekst.tomKontekst(NormalArbeidstaker, EPOCH)
+        val kontekst = Maksdatokontekst.tomKontekst(NormalArbeidstaker, 1.januar(2021), 1.januar(2024), null)
+            .nyMaksdatosak(1.januar, EPOCH)
         val forventet = kontekst.copy(
             vurdertTilOgMed = 3.januar,
             betalteDager = setOf(2.januar, 3.januar),
@@ -54,8 +55,9 @@ internal class MaksdatokontekstTest {
     fun `gjenstående dager`() {
         val sekstisyvårsdagen = 2.januar
         val kontekst = Maksdatokontekst
-            .tomKontekst(NormalArbeidstaker, sekstisyvårsdagen)
+            .tomKontekst(NormalArbeidstaker, sekstisyvårsdagen, sekstisyvårsdagen.plusYears(3), null)
             .nyMaksdatosak(1.januar, EPOCH)
+            .inkrementer(1.januar)
             .inkrementer(2.januar)
             .inkrementer(3.januar)
 
@@ -68,38 +70,38 @@ internal class MaksdatokontekstTest {
     @Test
     fun `maksdato under 67 - ingen forbrukte dager`() {
         val sekstisyvårsdagen = 1.januar(2021)
-        val kontekst = medBetalteDager(antallBetalteDager = 0, sekstisyvårsdagen, sisteVurderteDag = 16.januar)
-        assertEquals(28.desember, kontekst.beregnMaksdato(1.januar(2024), null).maksdato)
+        val kontekst = medBetalteDager(antallBetalteDager = 0, sekstisyvårsdagen, 1.januar(2024), null, sisteVurderteDag = 16.januar)
+        assertEquals(28.desember, kontekst.beregnMaksdato().maksdato)
     }
 
     @Test
     fun `maksdato under 67 - alle dager forbrukt`() {
         val sekstisyvårsdagen = 1.januar(2021)
-        val kontekst = medBetalteDager(antallBetalteDager = 248, sekstisyvårsdagen, sisteVurderteDag = 31.januar, sisteBetalteDag = 10.januar)
-        assertEquals(10.januar, kontekst.beregnMaksdato(sekstisyvårsdagen.plusYears(3), null).maksdato)
+        val kontekst = medBetalteDager(antallBetalteDager = 248, sekstisyvårsdagen, sekstisyvårsdagen.plusYears(3), null, sisteVurderteDag = 31.januar, sisteBetalteDag = 10.januar)
+        assertEquals(10.januar, kontekst.beregnMaksdato().maksdato)
     }
 
     @Test
     fun `maksdato under 67 inntreffer på dødsdato`() {
         val sekstisyvårsdagen = 1.januar(2021)
         val dødsdato = 31.januar
-        val kontekst = medBetalteDager(antallBetalteDager = 10, sekstisyvårsdagen, sisteVurderteDag = 17.januar)
-        assertEquals(dødsdato, kontekst.beregnMaksdato(sekstisyvårsdagen.plusYears(3), dødsdato).maksdato)
+        val kontekst = medBetalteDager(antallBetalteDager = 10, sekstisyvårsdagen, sekstisyvårsdagen.plusYears(3), dødsdato, sisteVurderteDag = 17.januar)
+        assertEquals(dødsdato, kontekst.beregnMaksdato().maksdato)
     }
 
     @Test
     fun `maksdato under 67 inntreffer etter 67`() {
         val sekstisyvårsdagen = 27.september
-        val kontekst = medBetalteDager(antallBetalteDager = 0, sekstisyvårsdagen, sisteVurderteDag = 16.januar)
-        assertEquals(20.desember, kontekst.beregnMaksdato(sekstisyvårsdagen.plusYears(3), null).maksdato)
+        val kontekst = medBetalteDager(antallBetalteDager = 0, sekstisyvårsdagen, sekstisyvårsdagen.plusYears(3), null, sisteVurderteDag = 16.januar)
+        assertEquals(20.desember, kontekst.beregnMaksdato().maksdato)
     }
 
     @Test
     fun `maksdato over 67 inntreffer på 70 årsdagen`() {
         val syttiårsdagen = 7.januar
         val sekstisyvårsdagen = syttiårsdagen.minusYears(3)
-        val kontekst = medBetalteDager(antallBetalteDager = 0, sekstisyvårsdagen, sisteVurderteDag = 1.januar)
-        assertEquals(5.januar, kontekst.beregnMaksdato(syttiårsdagen, null).maksdato)
+        val kontekst = medBetalteDager(antallBetalteDager = 0, sekstisyvårsdagen, syttiårsdagen, null, sisteVurderteDag = 1.januar)
+        assertEquals(5.januar, kontekst.beregnMaksdato().maksdato)
     }
 
     @Test
@@ -107,13 +109,13 @@ internal class MaksdatokontekstTest {
         val syttiårsdagen = 7.januar
         val sekstisyvårsdagen = syttiårsdagen.minusYears(3)
         val dødsdato = 3.januar
-        val kontekst = medBetalteDager(antallBetalteDager = 0, sekstisyvårsdagen, sisteVurderteDag = 1.januar)
-        assertEquals(dødsdato, kontekst.beregnMaksdato(syttiårsdagen, dødsdato).maksdato)
+        val kontekst = medBetalteDager(antallBetalteDager = 0, sekstisyvårsdagen, syttiårsdagen, dødsdato, sisteVurderteDag = 1.januar)
+        assertEquals(dødsdato, kontekst.beregnMaksdato().maksdato)
     }
 
-    private fun medBetalteDager(antallBetalteDager: Int, sekstisyvårsdagen: LocalDate, sisteVurderteDag: LocalDate = 1.januar, sisteBetalteDag: LocalDate = sisteVurderteDag): Maksdatokontekst {
+    private fun medBetalteDager(antallBetalteDager: Int, sekstisyvårsdagen: LocalDate, syttiårsdagen: LocalDate, dødsdato: LocalDate?, sisteVurderteDag: LocalDate = 1.januar, sisteBetalteDag: LocalDate = sisteVurderteDag): Maksdatokontekst {
         val tomKontekst = Maksdatokontekst
-            .tomKontekst(NormalArbeidstaker, sekstisyvårsdagen)
+            .tomKontekst(NormalArbeidstaker, sekstisyvårsdagen, syttiårsdagen, dødsdato)
         if (antallBetalteDager == 0) return tomKontekst.copy(vurdertTilOgMed = sisteVurderteDag)
         val betalteDager = buildList {
             var dag = sisteBetalteDag

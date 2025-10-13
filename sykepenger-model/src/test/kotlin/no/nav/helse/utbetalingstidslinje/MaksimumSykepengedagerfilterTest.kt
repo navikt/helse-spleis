@@ -857,7 +857,7 @@ internal class MaksimumSykepengedagerfilterTest {
         val maksdatoresultat = maksdatoberegning.beregnMaksdatoBegrensetTilPeriode(filterperiode)
 
         maksdatoer = maksdatoberegning.maksdatosaker
-            .map { it.beregnMaksdato(syttiårsdagen, dødsdato) }
+            .map { it.beregnMaksdato() }
             .map { it.maksdato }
             .toSet()
         forbrukteDager = maksdatoresultat.antallForbrukteDager
