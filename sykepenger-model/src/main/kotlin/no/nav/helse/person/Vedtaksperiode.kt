@@ -38,7 +38,6 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig.somOrganisasjonsnummer
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
 import no.nav.helse.hendelser.DagerFraInntektsmelding
@@ -1014,7 +1013,7 @@ internal class Vedtaksperiode private constructor(
         håndterYtelser(ytelser, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk)
     }
 
-    fun inntekterForBeregning(beregningsperiode: Periode, inntektsperioder: List<Triple<Behandlingsporing.Yrkesaktivitet, Kilde, no.nav.helse.hendelser.InntekterForBeregning.Inntektsperiode>> = emptyList()): InntekterForBeregning {
+    fun inntekterForBeregning(beregningsperiode: Periode, inntektsperioder: List<Triple<Arbeidsgiverberegning.Yrkesaktivitet, Kilde, no.nav.helse.hendelser.InntekterForBeregning.Inntektsperiode>> = emptyList()): InntekterForBeregning {
         return with(InntekterForBeregning.Builder(beregningsperiode)) {
             vilkårsgrunnlag?.inntektsgrunnlag?.beverte(this)
             inntektsperioder.forEach { (yrkesaktivitet, kilde, inntektsperiode) ->
@@ -1080,7 +1079,15 @@ internal class Vedtaksperiode private constructor(
         perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
             val beregningsutfall = beregnetTidslinjePerVedtaksperiode.single { it.vedtaksperiodeId == other.id }
             val alleInntektjusteringer = inntekterForBeregning.inntektsjusteringer(other.periode)
-                .mapKeys { (yrkesaktivitet, _) -> Inntektskilde(yrkesaktivitet.somOrganisasjonsnummer) }
+                .mapKeys { (yrkesaktivitet, _) -> Inntektskilde(
+                    id = when (yrkesaktivitet) {
+                        Arbeidsgiverberegning.Yrkesaktivitet.Arbeidsledig -> "ARBEIDSLEDIG"
+                        is Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker -> yrkesaktivitet.organisasjonsnummer
+                        Arbeidsgiverberegning.Yrkesaktivitet.Frilans -> "FRILANS"
+                        Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+                    }
+                ) }
+
             other.lagNyUtbetaling(
                 yrkesaktivitetSomBeregner = this.yrkesaktivitet,
                 aktivitetslogg = other.registrerKontekst(aktivitetslogg),
@@ -2440,8 +2447,13 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun uberegnetVedtaksperiode(): UberegnetVedtaksperiode {
-        val yrkesaktivitetstype = yrkesaktivitet.yrkesaktivitetstype
-        val utbetalingstidslinjeBuilder = when (yrkesaktivitetstype) {
+        val yrkesaktivitetstype = when (yrkesaktivitet.yrkesaktivitetstype) {
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> Arbeidsgiverberegning.Yrkesaktivitet.Arbeidsledig
+            is Arbeidstaker -> Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker(yrkesaktivitet.yrkesaktivitetstype.organisasjonsnummer)
+            Behandlingsporing.Yrkesaktivitet.Frilans -> Arbeidsgiverberegning.Yrkesaktivitet.Frilans
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig
+        }
+        val utbetalingstidslinjeBuilder = when (yrkesaktivitet.yrkesaktivitetstype) {
             is Arbeidstaker -> behandlinger.utbetalingstidslinjeBuilderForArbeidstaker()
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> behandlinger.utbetalingstidslinjeBuilderForSelvstendig()
 

@@ -2,7 +2,7 @@ package no.nav.helse.serde
 
 import java.time.LocalDate
 import java.time.Year
-import java.util.UUID
+import java.util.*
 import no.nav.helse.EnableFeriepenger
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -28,7 +28,6 @@ import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.erHelg
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -173,7 +172,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         val sykepengegrunnlag = 1200.daglig
         val input = listOf(
             Arbeidsgiverberegning(
-                yrkesaktivitet = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a1"),
+                yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a1"),
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),

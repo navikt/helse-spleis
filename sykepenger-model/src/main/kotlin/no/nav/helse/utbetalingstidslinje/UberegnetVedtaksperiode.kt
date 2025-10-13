@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import java.util.*
-import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -12,7 +11,7 @@ import no.nav.helse.økonomi.Inntekt
 
 internal data class UberegnetVedtaksperiode(
     val vedtaksperiodeId: UUID,
-    val yrkesaktivitet: Behandlingsporing.Yrkesaktivitet,
+    val yrkesaktivitet: Arbeidsgiverberegning.Yrkesaktivitet,
     val periode: Periode,
     val sykdomstidslinje: Sykdomstidslinje,
     val utbetalingstidslinjeBuilder: UtbetalingstidslinjeBuilder
