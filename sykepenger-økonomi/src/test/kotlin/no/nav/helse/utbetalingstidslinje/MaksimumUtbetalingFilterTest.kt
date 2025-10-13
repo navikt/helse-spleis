@@ -1,13 +1,12 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.util.*
-import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -41,7 +40,7 @@ internal class MaksimumUtbetalingFilterTest {
 
     @Test
     fun `selv om utbetaling blir begrenset til 6G får utbetaling for tidslinje med gradert sykdom gradert utbetaling`() {
-        val sykepengegrunnlag= `6G`.beløp(1.januar)
+        val sykepengegrunnlag= 561804.årlig
         val tidslinje = tidslinjeOf(12.NAV(3500.0, 50.0)).betal(sykepengegrunnlag)
         assertEquals(10800.0, tidslinje.inspektør.totalUtbetaling())
     }

@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.util.*
-import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.NAV
@@ -36,10 +35,8 @@ class MedlemskapsfilterTest {
         tidslinjer: List<Utbetalingstidslinje>,
         manglerMedlemskap: Boolean = false
     ): List<Utbetalingsdag.AvvistDag> {
-        val medlemskapstatus = if (manglerMedlemskap) Medlemskapsvurdering.Medlemskapstatus.Nei else Medlemskapsvurdering.Medlemskapstatus.Ja
-
         val filter = Medlemskapsfilter(
-            medlemskapstatus = medlemskapstatus
+            erMedlemAvFolketrygden = !manglerMedlemskap
         )
         val arbeidsgivere = tidslinjer.mapIndexed { index, it ->
             Arbeidsgiverberegning(

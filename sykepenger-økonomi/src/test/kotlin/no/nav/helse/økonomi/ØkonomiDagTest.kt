@@ -1,9 +1,5 @@
 package no.nav.helse.økonomi
 
-import java.time.LocalDate
-import java.util.*
-import no.nav.helse.Grunnbeløp.Companion.`6G`
-import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
@@ -17,8 +13,10 @@ import no.nav.helse.utbetalingstidslinje.Vedtaksperiodeberegning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.inspectors.inspektør
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.util.UUID
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
 internal class ØkonomiDagTest {
 
@@ -74,7 +72,7 @@ internal class ØkonomiDagTest {
 
     @Test
     fun `Beløp er 6G-begrenset`() {
-        val sykepengegrunnlag = `6G`.beløp(1.januar)
+        val sykepengegrunnlag = 561804.årlig
         val a1 = tidslinjeOf(2.NAV(1200))
         val b1 = tidslinjeOf(2.NAV(1200))
         val c1 = tidslinjeOf(2.NAV(1200))
@@ -86,7 +84,7 @@ internal class ØkonomiDagTest {
 
     @Test
     fun `Beløp med arbeidsdag`() {
-        val sykepengegrunnlag = `6G`.beløp(1.januar)
+        val sykepengegrunnlag = 561804.årlig
         val a1 = tidslinjeOf(2.NAV(1200))
         val b1 = tidslinjeOf(2.NAV(1200))
         val c1 = tidslinjeOf(2.ARB(1200))
@@ -98,7 +96,7 @@ internal class ØkonomiDagTest {
 
     @Test
     fun `Beløp medNavDag som har blitt avvist`() {
-        val sykepengegrunnlag = `6G`.beløp(1.januar)
+        val sykepengegrunnlag = 561804.årlig
         val a = tidslinjeOf(2.NAV(1200))
         val b = tidslinjeOf(2.NAV(1200))
         val c = tidslinjeOf(2.NAV(1200)).avvis(listOf(januar), Begrunnelse.MinimumInntekt)
@@ -113,7 +111,7 @@ internal class ØkonomiDagTest {
 
     @Test
     fun `Beløp med avvistdager`() {
-        val sykepengegrunnlag = `6G`.beløp(1.januar)
+        val sykepengegrunnlag = 561804.årlig
         val a1 = tidslinjeOf(2.NAV(1200))
         val b1 = tidslinjeOf(2.NAV(1200))
         val c1 = tidslinjeOf(2.AVV(1200, 100))
@@ -125,16 +123,15 @@ internal class ØkonomiDagTest {
 
     private fun assertØkonomi(tidslinje: Utbetalingstidslinje, arbeidsgiverbeløp: Double?, personbeløp: Double? = 0.0) {
         tidslinje.forEach {
-            assertEquals(arbeidsgiverbeløp?.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
-            assertEquals(personbeløp?.daglig, it.økonomi.inspektør.personbeløp)
+            Assertions.assertEquals(arbeidsgiverbeløp?.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
+            Assertions.assertEquals(personbeløp?.daglig, it.økonomi.inspektør.personbeløp)
         }
     }
 
-    private fun List<Utbetalingstidslinje>.betal(sykepengegrunnlagBegrenset6G: Inntekt, virkningsdato: LocalDate = 1.januar): List<Utbetalingstidslinje> {
-        val periode = virkningsdato til virkningsdato // Brukes ikke når vi eksplisitt setter virkningsdato
+    private fun List<Utbetalingstidslinje>.betal(sykepengegrunnlagBegrenset6G: Inntekt): List<Utbetalingstidslinje> {
         val input = mapIndexed { index, it ->
             Arbeidsgiverberegning(
-                yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a${index+1}"),
+                yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a${index + 1}"),
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),

@@ -10,14 +10,14 @@ import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.Syk
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 
-internal class Maksdatoberegning(
+class Maksdatoberegning(
     sekstisyvårsdagen: LocalDate,
     private val syttiårsdagen: LocalDate,
     private val dødsdato: LocalDate?,
     regler: MaksimumSykepengedagerregler,
     private val infotrygdtidslinje: Utbetalingstidslinje
 ) {
-    internal companion object {
+    companion object {
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26 * 7
         private const val HISTORISK_PERIODE_I_ÅR: Long = 3
     }
@@ -29,7 +29,7 @@ internal class Maksdatoberegning(
 
     private var state: State = State.Initiell
 
-    internal fun beregnMaksdatoBegrensetTilPeriode(periode: Periode): BeregnetMaksdato {
+    fun beregnMaksdatoBegrensetTilPeriode(periode: Periode): BeregnetMaksdato {
         return sisteVurdering
             .avgrensTil(periode.endInclusive)
             .beregnMaksdato(syttiårsdagen, dødsdato)
@@ -54,7 +54,7 @@ internal class Maksdatoberegning(
         }
     }
 
-    fun beregn(arbeidsgivere: List<Arbeidsgiverberegning>): List<Maksdatokontekst> {
+    internal fun beregn(arbeidsgivere: List<Arbeidsgiverberegning>): List<Maksdatokontekst> {
         val tidslinjegrunnlag = arbeidsgivere.map { it.samletVedtaksperiodetidslinje }.plusElement(infotrygdtidslinje)
         val beregnetTidslinje = tidslinjegrunnlag.reduce(Utbetalingstidslinje::plus)
 

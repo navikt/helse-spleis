@@ -1,8 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.util.*
-import no.nav.helse.Grunnbeløp.Companion.`2G`
-import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.testhelpers.AVV
@@ -11,8 +9,6 @@ import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.MinsteinntektfilterTest.Minsteinntekt.OPPFYLLER_IKKE_KRAV_TIL_67
 import no.nav.helse.utbetalingstidslinje.MinsteinntektfilterTest.Minsteinntekt.OPPFYLLER_KRAV_FØR_OG_ETTER_67
 import no.nav.helse.utbetalingstidslinje.MinsteinntektfilterTest.Minsteinntekt.OPPFYLLER_KRAV_TIL_67_MEN_IKKE_ETTER
-import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering.Companion.lagMinsteinntektsvurdering
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -61,18 +57,20 @@ class MinsteinntektfilterTest {
         tidslinjer: List<Utbetalingstidslinje>,
         minsteinntektsituasjon: Minsteinntekt
     ): List<Utbetalingsdag.AvvistDag> {
-        val skjæringstidspunkt = 1.januar
-        val inntekt = when (minsteinntektsituasjon) {
-            OPPFYLLER_IKKE_KRAV_TIL_67 -> halvG.minsteinntekt(skjæringstidspunkt) - 1.daglig
-            OPPFYLLER_KRAV_TIL_67_MEN_IKKE_ETTER -> `2G`.minsteinntekt(skjæringstidspunkt) - 1.daglig
-            OPPFYLLER_KRAV_FØR_OG_ETTER_67 -> `2G`.minsteinntekt(skjæringstidspunkt)
+        val erUnderMinsteinntektskravTilFylte67 = when (minsteinntektsituasjon) {
+            OPPFYLLER_KRAV_FØR_OG_ETTER_67,
+            OPPFYLLER_KRAV_TIL_67_MEN_IKKE_ETTER -> false
+            OPPFYLLER_IKKE_KRAV_TIL_67 -> true
         }
-        val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, inntekt)
-
+        val erUnderMinsteinntektEtterFylte67 = when (minsteinntektsituasjon) {
+            OPPFYLLER_KRAV_FØR_OG_ETTER_67 -> false
+            OPPFYLLER_KRAV_TIL_67_MEN_IKKE_ETTER,
+            OPPFYLLER_IKKE_KRAV_TIL_67 -> true
+        }
         val filter = Minsteinntektfilter(
             sekstisyvårsdagen = sekstisyvårsdagen,
-            erUnderMinsteinntektskravTilFylte67 = minsteinntektsvurdering.erUnderMinsteinntektskravTilFylte67,
-            erUnderMinsteinntektEtterFylte67 = minsteinntektsvurdering.erUnderMinsteinntektEtterFylte67
+            erUnderMinsteinntektskravTilFylte67 = erUnderMinsteinntektskravTilFylte67,
+            erUnderMinsteinntektEtterFylte67 = erUnderMinsteinntektEtterFylte67
         )
         val arbeidsgivere = tidslinjer.mapIndexed { index, it ->
             Arbeidsgiverberegning(

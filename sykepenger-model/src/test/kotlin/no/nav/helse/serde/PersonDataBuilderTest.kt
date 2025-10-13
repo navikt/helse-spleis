@@ -2,7 +2,6 @@ package no.nav.helse.serde
 
 import java.time.LocalDate
 import java.time.Year
-import java.util.*
 import no.nav.helse.EnableFeriepenger
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -51,10 +50,8 @@ import no.nav.helse.testhelpers.UKJ
 import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
-import no.nav.helse.utbetalingstidslinje.Vedtaksperiodeberegning
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -170,32 +167,22 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
     @Test
     fun `dto av utbetalingstidslinje`() {
         val sykepengegrunnlag = 1200.daglig
-        val input = listOf(
-            Arbeidsgiverberegning(
-                yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a1"),
-                vedtaksperioder = listOf(
-                    Vedtaksperiodeberegning(
-                        vedtaksperiodeId = UUID.randomUUID(),
-                        utbetalingstidslinje = tidslinjeOf(
-                            1.AP,
-                            1.NAP,
-                            1.NAV(dekningsgrunnlag = 1200, refusjonsbeløp = 600.0),
-                            1.HELG,
-                            1.ARB,
-                            1.FRI,
-                            1.FOR,
-                            1.AVV(dekningsgrunnlag = 1000, begrunnelse = Begrunnelse.SykepengedagerOppbrukt),
-                            1.AVV(dekningsgrunnlag = 500, begrunnelse = Begrunnelse.MinimumInntekt),
-                            1.UKJ
-                        )
-                    )
-                ),
-                ghostOgAndreInntektskilder = emptyList()
-            )
+        val utbetalingstidslinje = tidslinjeOf(
+            1.AP,
+            1.NAP,
+            1.NAV(dekningsgrunnlag = 1200, refusjonsbeløp = 600.0),
+            1.HELG,
+            1.ARB,
+            1.FRI,
+            1.FOR,
+            1.AVV(dekningsgrunnlag = 1000, begrunnelse = Begrunnelse.SykepengedagerOppbrukt),
+            1.AVV(dekningsgrunnlag = 500, begrunnelse = Begrunnelse.MinimumInntekt),
+            1.UKJ
         )
-        val tidslinje = MaksimumUtbetalingFilter(sykepengegrunnlag)
-            .filter(input).single()
-        val dto = tidslinje.vedtaksperioder.single().utbetalingstidslinje.dto()
+        val dto = Utbetalingstidslinje
+            .betale(sykepengegrunnlag, listOf(utbetalingstidslinje))
+            .single()
+            .dto()
         assertEquals(10, dto.dager.size)
         dto.dager[0].also { dag ->
             assertEquals(1.januar, dag.dato)

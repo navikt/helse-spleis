@@ -49,6 +49,7 @@ import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -1061,7 +1062,7 @@ internal class Vedtaksperiode private constructor(
             uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
             harOpptjening = harOpptjening,
             sykepengegrunnlag = sykepengegrunnlag,
-            medlemskapstatus = medlemskapstatus,
+            erMedlemAvFolketrygden = medlemskapstatus != Medlemskapsvurdering.Medlemskapstatus.Nei,
             sekstisyvårsdagen = person.alder.redusertYtelseAlder,
             syttiårsdagen = person.alder.syttiårsdagen,
             dødsdato = person.alder.dødsdato,

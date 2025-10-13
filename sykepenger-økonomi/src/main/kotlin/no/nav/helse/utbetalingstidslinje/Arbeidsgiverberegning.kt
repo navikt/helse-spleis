@@ -12,7 +12,7 @@ data class Arbeidsgiverberegning(
     val samletVedtaksperiodetidslinje = vedtaksperiodeutbetalingstidslinjer.fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
     val samletTidslinje = vedtaksperiodeutbetalingstidslinjer.fold(samletGhostOgAndreInntektskilder, Utbetalingstidslinje::plus)
 
-    fun avvis(perioder: List<Periode>, begrunnelse: Begrunnelse) = copy(
+    internal fun avvis(perioder: List<Periode>, begrunnelse: Begrunnelse) = copy(
         vedtaksperioder = vedtaksperioder.map { vedtaksperiode ->
             vedtaksperiode.copy(
                 utbetalingstidslinje = vedtaksperiode.utbetalingstidslinje.avvis(perioder, begrunnelse)
@@ -28,7 +28,7 @@ data class Arbeidsgiverberegning(
     }
 }
 
-fun List<Arbeidsgiverberegning>.avvis(perioder: List<Periode>, begrunnelse: Begrunnelse): List<Arbeidsgiverberegning> {
+internal fun List<Arbeidsgiverberegning>.avvis(perioder: List<Periode>, begrunnelse: Begrunnelse): List<Arbeidsgiverberegning> {
     return this
         .map { arbeidsgiver ->
             arbeidsgiver.avvis(perioder, begrunnelse)
