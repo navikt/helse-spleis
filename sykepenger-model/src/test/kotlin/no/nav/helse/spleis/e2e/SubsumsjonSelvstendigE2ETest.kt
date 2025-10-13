@@ -47,7 +47,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     @Test
     fun `22-13 ledd 3 - Vurdering av foreldelse`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(januar, sendtTilNAVEllerArbeidsgiver = LocalDate.of(2018, 5, 1).atStartOfDay())
+            håndterFørstegangssøknadSelvstendig(januar, sendtTilNAVEllerArbeidsgiver = LocalDate.of(2018, 5, 1).atStartOfDay())
 
             SubsumsjonInspektør(jurist).assertIkkeOppfylt(
                 paragraf = PARAGRAF_22_13,
@@ -91,7 +91,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             nyttVedtak(1.mai(2017) til 31.mai(2017))
         }
         selvstendig {
-            håndterSøknadSelvstendig(januar)
+            håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
@@ -132,7 +132,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     @Test
     fun `§ 8-35 ledd 2 - selvstendignæringsdrivende sykepengegrunnlag`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(januar)
+            håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -158,7 +158,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     @Test
     fun `Subsumerer § 8-11 - utbetaler ikke helg`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(januar)
+            håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -182,7 +182,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     @Test
     fun `Subsumerer 8-34 ledd 1 for selvstendig uten forsikring`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(januar)
+            håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
@@ -203,7 +203,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     @Test
     fun `§ 8-51 ledd 2 - er ikke over 67 år`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(januar)
+            håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
 
             SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_51, ledd = LEDD_2)
@@ -215,7 +215,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     fun `§ 8-51 ledd 2 - har minimum inntekt over 2G - over 67 år`() = Toggle.SelvstendigNæringsdrivende.enable {
         medFødselsdato(FYLLER_68_1_JANUAR)
         selvstendig {
-            håndterSøknadSelvstendig(januar)
+            håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
@@ -243,7 +243,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     fun `§ 8-51 ledd 2 - har minimum inntekt under 2G - over 67 år`() = Toggle.SelvstendigNæringsdrivende.enable {
         medFødselsdato(FYLLER_68_1_JANUAR)
         selvstendig {
-            håndterSøknadSelvstendig(
+            håndterFørstegangssøknadSelvstendig(
                 periode = januar,
                 pensjonsgivendeInntekter = listOf(
                     Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
@@ -280,7 +280,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
         medFødselsdato(blir67Underveis)
         selvstendig {
             // inntekt mellom 0.5G og 2G - slik at kravet er oppfylt før personen fylte 67, men ikke etter
-            håndterSøknadSelvstendig(
+            håndterFørstegangssøknadSelvstendig(
                 periode = januar,
                 pensjonsgivendeInntekter = listOf(
                     Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
@@ -303,7 +303,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                 versjon = 16.desember(2011)
             )
 
-            håndterSøknadSelvstendig(februar)
+            håndterForlengelsessøknadSelvstendig(februar)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -326,7 +326,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                 output = emptyMap()
             )
 
-            håndterSøknadSelvstendig(mars)
+            håndterForlengelsessøknadSelvstendig(mars)
             håndterYtelser(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
             assertVarsler(3.vedtaksperiode, Varselkode.RV_SV_1)
@@ -366,7 +366,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
         val blir67Underveis = 1.februar(1951)
         medFødselsdato(blir67Underveis)
         selvstendig {
-            håndterSøknadSelvstendig(januar)
+            håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -374,7 +374,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterUtbetalt()
 
 
-            håndterSøknadSelvstendig(2.februar til 28.februar)
+            håndterFørstegangssøknadSelvstendig(2.februar til 28.februar)
             håndterVilkårsgrunnlagSelvstendig(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -449,7 +449,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
         val blir67Underveis = 1.februar(1951)
         medFødselsdato(blir67Underveis)
         selvstendig {
-            håndterSøknadSelvstendig(1.januar til 1.februar)
+            håndterFørstegangssøknadSelvstendig(1.januar til 1.februar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -457,7 +457,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterUtbetalt()
 
 
-            håndterSøknadSelvstendig(3.februar til 28.februar)
+            håndterFørstegangssøknadSelvstendig(3.februar til 28.februar)
             håndterVilkårsgrunnlag(2.vedtaksperiode, skatteinntekter = emptyList())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -532,26 +532,26 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
         val blir67Underveis = 1.februar(1951)
         medFødselsdato(blir67Underveis)
         selvstendig {
-            håndterSøknadSelvstendig(januar)
+            håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterSøknadSelvstendig(februar)
+            håndterForlengelsessøknadSelvstendig(februar)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterSøknadSelvstendig(mars)
+            håndterForlengelsessøknadSelvstendig(mars)
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterSøknadSelvstendig(1.april til 26.april)
+            håndterForlengelsessøknadSelvstendig(1.april til 26.april)
             håndterYtelser(4.vedtaksperiode)
             håndterSimulering(4.vedtaksperiode)
             håndterUtbetalingsgodkjenning(4.vedtaksperiode)
@@ -685,7 +685,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
         val blir67Underveis = 1.februar(1951)
         medFødselsdato(blir67Underveis)
         selvstendig {
-            håndterSøknadSelvstendig(januar)
+            håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -693,20 +693,20 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
             håndterUtbetalt()
 
 
-            håndterSøknadSelvstendig(februar)
+            håndterForlengelsessøknadSelvstendig(februar)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
 
-            håndterSøknadSelvstendig(mars)
+            håndterForlengelsessøknadSelvstendig(mars)
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterSøknadSelvstendig(1.april til 27.april)
+            håndterForlengelsessøknadSelvstendig(1.april til 27.april)
             håndterYtelser(4.vedtaksperiode)
             håndterSimulering(4.vedtaksperiode)
             håndterUtbetalingsgodkjenning(4.vedtaksperiode)
@@ -869,7 +869,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     @Test
     fun `andre ytelser i halen`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(januar)
+            håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

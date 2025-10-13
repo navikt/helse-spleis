@@ -170,6 +170,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal val maksdato get() = behandlinger.last().maksdato
     internal val dagerNavOvertarAnsvar get() = behandlinger.last().dagerNavOvertarAnsvar
     internal val faktaavklartInntekt get() = behandlinger.last().faktaavklartInntekt
+    internal val forberedendeVilkårsgrunnlag get() = behandlinger.last().forberedendeVilkårsgrunnlag
 
     internal fun analytiskDatapakke(yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, vedtaksperiodeId: UUID): AnalytiskDatapakkeEvent {
         val forrigeBehandling = behandlinger.dropLast(1).lastOrNull()
@@ -487,6 +488,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val utbetalingstidslinje get() = endringer.last().utbetalingstidslinje
         val faktaavklartInntekt get() = endringer.last().faktaavklartInntekt
         val inntektsendringer get() = endringer.last().inntektsendringer
+        val forberedendeVilkårsgrunnlag get() = endringer.last().forberedendeVilkårsgrunnlag
 
         constructor(observatører: List<BehandlingObserver>, tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde, observatører) {
             check(observatører.isNotEmpty()) {

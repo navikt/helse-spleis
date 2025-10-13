@@ -1902,9 +1902,30 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg = aktivitetslogg,
             skatteopplysninger = skatteopplysninger
         )
-        vilkårsgrunnlag.valider(aktivitetslogg, sykepengegrunnlag, subsumsjonslogg)
+        val selvstendigOpptjening = when (yrkesaktivitet.yrkesaktivitetstype) {
+            is Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
+                val erOpptjeningVurdertOk = behandlinger.forberedendeVilkårsgrunnlag?.erOpptjeningVurdertOk
+                check(erOpptjeningVurdertOk == true) { "Opptjening for selvstendige er ikke vurdert ok eller finnes ikke. Det skal vel ikke skje?" }
+                SelvstendigOpptjeningOppfylt
+            }
+
+            is Arbeidstaker -> SelvstendigOpptjeningIkkeVurdert
+
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.Frilans -> error("Hvorfor er vi her? Litt rart å vurdere selvstendigopptjening for arbeidsledige og frilans per nå")
+        }
+
+        vilkårsgrunnlag.valider(aktivitetslogg, sykepengegrunnlag, selvstendigOpptjening, subsumsjonslogg)
         val grunnlagsdata = vilkårsgrunnlag.grunnlagsdata()
-        grunnlagsdata.validerFørstegangsvurdering(aktivitetslogg)
+
+        when (yrkesaktivitet.yrkesaktivitetstype) {
+            is Arbeidstaker -> grunnlagsdata.validerFørstegangsvurderingArbeidstaker(aktivitetslogg)
+
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> grunnlagsdata.validerFørstegangsvurderingSelvstendig(aktivitetslogg, subsumsjonslogg)
+
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.Frilans -> error("Hvorfor er vi her? Litt rart å validere opptjening for arbeidsledige og frilans per nå")
+        }
         person.lagreVilkårsgrunnlag(grunnlagsdata)
         aktivitetslogg.info("Vilkårsgrunnlag vurdert")
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(vilkårsgrunnlag, aktivitetslogg)

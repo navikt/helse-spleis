@@ -277,7 +277,36 @@ internal class TestPerson(
                 }
             }
 
-        internal fun håndterSøknadSelvstendig(
+        internal fun håndterFørstegangssøknadSelvstendig(
+            periode: Periode,
+            sykdomsgrad: Prosentdel = 100.prosent,
+            ventetid: Periode = 1.januar til 16.januar,
+            arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
+            pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt> = listOf(
+                Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
+            ),
+            sendtTilNAVEllerArbeidsgiver: Temporal? = null,
+            fraværFørSykmelding: Boolean? = false,
+            harOppgittAvvikling: Boolean? = null,
+            harOppgittVarigEndring: Boolean? = null,
+            harOppgittNyIArbeidslivet: Boolean? = null,
+            harOppgittÅHaForsikring: Boolean? = null
+        ) = håndterSøknad(
+            Sykdom(periode.start, periode.endInclusive, sykdomsgrad),
+            Ventetid(ventetid),
+            arbeidssituasjon = arbeidssituasjon,
+            pensjonsgivendeInntekter = pensjonsgivendeInntekter,
+            sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
+            fraværFørSykmelding = fraværFørSykmelding,
+            harOppgittAvvikling = harOppgittAvvikling,
+            harOppgittVarigEndring = harOppgittVarigEndring,
+            harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
+            harOppgittÅHaForsikring = harOppgittÅHaForsikring
+        )
+
+        internal fun håndterForlengelsessøknadSelvstendig(
             periode: Periode,
             sykdomsgrad: Prosentdel = 100.prosent,
             ventetid: Periode = 1.januar til 16.januar,
