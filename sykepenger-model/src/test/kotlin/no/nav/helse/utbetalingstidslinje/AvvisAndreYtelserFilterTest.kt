@@ -26,7 +26,7 @@ internal class AvvisAndreYtelserFilterTest {
 
         val tidslinjer = listOf(
             Arbeidsgiverberegning(
-                yrkesaktivitet = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a1"),
+                yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a1"),
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),

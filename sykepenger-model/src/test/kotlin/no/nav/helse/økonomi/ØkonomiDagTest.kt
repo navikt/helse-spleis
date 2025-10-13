@@ -3,7 +3,6 @@ package no.nav.helse.økonomi
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`6G`
-import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.testhelpers.ARB
@@ -135,7 +134,7 @@ internal class ØkonomiDagTest {
         val periode = virkningsdato til virkningsdato // Brukes ikke når vi eksplisitt setter virkningsdato
         val input = mapIndexed { index, it ->
             Arbeidsgiverberegning(
-                yrkesaktivitet = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a${index+1}"),
+                yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a${index+1}"),
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),

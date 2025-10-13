@@ -38,7 +38,6 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig.somOrganisasjonsnummer
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
 import no.nav.helse.hendelser.DagerFraInntektsmelding
@@ -182,8 +181,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
-import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
-import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering.Companion.lagMinsteinntektsvurdering
 import no.nav.helse.utbetalingstidslinje.UberegnetVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
@@ -1013,7 +1010,7 @@ internal class Vedtaksperiode private constructor(
         håndterYtelser(ytelser, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk)
     }
 
-    fun inntekterForBeregning(beregningsperiode: Periode, inntektsperioder: List<Triple<Behandlingsporing.Yrkesaktivitet, Kilde, no.nav.helse.hendelser.InntekterForBeregning.Inntektsperiode>> = emptyList()): InntekterForBeregning {
+    fun inntekterForBeregning(beregningsperiode: Periode, inntektsperioder: List<Triple<Arbeidsgiverberegning.Yrkesaktivitet, Kilde, no.nav.helse.hendelser.InntekterForBeregning.Inntektsperiode>> = emptyList()): InntekterForBeregning {
         return with(InntekterForBeregning.Builder(beregningsperiode)) {
             vilkårsgrunnlag?.inntektsgrunnlag?.beverte(this)
             inntektsperioder.forEach { (yrkesaktivitet, kilde, inntektsperiode) ->
@@ -1079,12 +1076,38 @@ internal class Vedtaksperiode private constructor(
         perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
             val beregningsutfall = beregnetTidslinjePerVedtaksperiode.single { it.vedtaksperiodeId == other.id }
             val alleInntektjusteringer = inntekterForBeregning.inntektsjusteringer(other.periode)
-                .mapKeys { (yrkesaktivitet, _) -> Inntektskilde(yrkesaktivitet.somOrganisasjonsnummer) }
+                .mapKeys { (yrkesaktivitet, _) -> Inntektskilde(
+                    id = when (yrkesaktivitet) {
+                        Arbeidsgiverberegning.Yrkesaktivitet.Arbeidsledig -> "ARBEIDSLEDIG"
+                        is Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker -> yrkesaktivitet.organisasjonsnummer
+                        Arbeidsgiverberegning.Yrkesaktivitet.Frilans -> "FRILANS"
+                        Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+                    }
+                ) }
+
+            if (beregningsutfall.maksdatoresultat.fremdelesSykEtterTilstrekkeligOpphold)
+                aktivitetslogg.funksjonellFeil(RV_VV_9)
+
             other.lagNyUtbetaling(
                 yrkesaktivitetSomBeregner = this.yrkesaktivitet,
                 aktivitetslogg = other.registrerKontekst(aktivitetslogg),
                 beregning = BeregnetBehandling(
-                    maksdatoresultat = beregningsutfall.maksdatoresultat,
+                    maksdatoresultat = Maksdatoresultat(
+                        vurdertTilOgMed = beregningsutfall.maksdatoresultat.vurdertTilOgMed,
+                        bestemmelse = when (beregningsutfall.maksdatoresultat.bestemmelse) {
+                            no.nav.helse.utbetalingstidslinje.Maksdatoresultat.Bestemmelse.IKKE_VURDERT -> Maksdatoresultat.Bestemmelse.IKKE_VURDERT
+                            no.nav.helse.utbetalingstidslinje.Maksdatoresultat.Bestemmelse.ORDINÆR_RETT -> Maksdatoresultat.Bestemmelse.ORDINÆR_RETT
+                            no.nav.helse.utbetalingstidslinje.Maksdatoresultat.Bestemmelse.BEGRENSET_RETT -> Maksdatoresultat.Bestemmelse.BEGRENSET_RETT
+                            no.nav.helse.utbetalingstidslinje.Maksdatoresultat.Bestemmelse.SYTTI_ÅR -> Maksdatoresultat.Bestemmelse.SYTTI_ÅR
+                        },
+                        startdatoTreårsvindu = beregningsutfall.maksdatoresultat.startdatoTreårsvindu,
+                        startdatoSykepengerettighet = beregningsutfall.maksdatoresultat.startdatoSykepengerettighet,
+                        forbrukteDager = beregningsutfall.maksdatoresultat.forbrukteDager,
+                        oppholdsdager = beregningsutfall.maksdatoresultat.oppholdsdager,
+                        avslåtteDager = beregningsutfall.maksdatoresultat.avslåtteDager,
+                        maksdato = beregningsutfall.maksdatoresultat.maksdato,
+                        gjenståendeDager = beregningsutfall.maksdatoresultat.gjenståendeDager
+                    ),
                     utbetalingstidslinje = beregningsutfall.utbetalingstidslinje,
                     grunnlagsdata = grunnlagsdata,
                     alleInntektjusteringer = alleInntektjusteringer
@@ -1109,8 +1132,6 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg.info("Utbetaling stoppet etter ${person.alder.dødsdato} grunnet dødsfall")
         }
 
-        if (behandlinger.maksdato.fremdelesSykEtterTilstrekkeligOpphold)
-            aktivitetslogg.funksjonellFeil(RV_VV_9)
         if (behandlinger.maksdato.avslåtteDager.any { periode.overlapperMed(it) })
             aktivitetslogg.info("Maks antall sykepengedager er nådd i perioden")
         else
@@ -2424,8 +2445,13 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun uberegnetVedtaksperiode(): UberegnetVedtaksperiode {
-        val yrkesaktivitetstype = yrkesaktivitet.yrkesaktivitetstype
-        val utbetalingstidslinjeBuilder = when (yrkesaktivitetstype) {
+        val yrkesaktivitetstype = when (yrkesaktivitet.yrkesaktivitetstype) {
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> Arbeidsgiverberegning.Yrkesaktivitet.Arbeidsledig
+            is Arbeidstaker -> Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker(yrkesaktivitet.yrkesaktivitetstype.organisasjonsnummer)
+            Behandlingsporing.Yrkesaktivitet.Frilans -> Arbeidsgiverberegning.Yrkesaktivitet.Frilans
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig
+        }
+        val utbetalingstidslinjeBuilder = when (yrkesaktivitet.yrkesaktivitetstype) {
             is Arbeidstaker -> behandlinger.utbetalingstidslinjeBuilderForArbeidstaker()
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> behandlinger.utbetalingstidslinjeBuilderForSelvstendig()
 
@@ -2895,7 +2921,7 @@ private fun maksdatosubsummering(
         `§ 8-12 ledd 2`(
             oppfylt = resultat.startdatoSykepengerettighet != null,
             dato = resultat.vurdertTilOgMed,
-            tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
+            tilstrekkeligOppholdISykedager = 182,
             tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
             beregnetTidslinje = beregnetTidslinjesubsumsjon,
         )

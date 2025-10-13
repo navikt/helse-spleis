@@ -173,7 +173,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         val sykepengegrunnlag = 1200.daglig
         val input = listOf(
             Arbeidsgiverberegning(
-                yrkesaktivitet = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a1"),
+                yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a1"),
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),

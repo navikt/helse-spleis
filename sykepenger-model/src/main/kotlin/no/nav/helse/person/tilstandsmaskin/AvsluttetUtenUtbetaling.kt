@@ -1,10 +1,12 @@
 package no.nav.helse.person.tilstandsmaskin
 
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.behandlingkilde
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.lagUtbetalingstidslinjePerArbeidsgiver
 
 internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
@@ -19,7 +21,15 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
     private fun avsluttUtenVedtak(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         val inntekterForBeregning = vedtaksperiode.inntekterForBeregning(vedtaksperiode.periode)
         val utbetalingstidslinje = lagUtbetalingstidslinjePerArbeidsgiver(listOf(vedtaksperiode.uberegnetVedtaksperiode()), inntekterForBeregning)
-            .single { it.yrkesaktivitet == vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype }
+            .single {
+                val vedtaksperiodeYrkesaktivitet = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype
+                when (val ya = it.yrkesaktivitet) {
+                    Arbeidsgiverberegning.Yrkesaktivitet.Arbeidsledig -> vedtaksperiodeYrkesaktivitet is Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+                    is Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker -> vedtaksperiodeYrkesaktivitet is Behandlingsporing.Yrkesaktivitet.Arbeidstaker && ya.organisasjonsnummer == vedtaksperiode.yrkesaktivitet.organisasjonsnummer
+                    Arbeidsgiverberegning.Yrkesaktivitet.Frilans -> vedtaksperiodeYrkesaktivitet is Behandlingsporing.Yrkesaktivitet.Frilans
+                    Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig -> vedtaksperiodeYrkesaktivitet is Behandlingsporing.Yrkesaktivitet.Selvstendig
+                }
+            }
             .vedtaksperioder
             .single()
 

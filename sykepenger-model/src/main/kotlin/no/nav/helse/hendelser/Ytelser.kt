@@ -5,10 +5,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Kilde
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 
 class Ytelser(
     meldingsreferanseId: MeldingsreferanseId,
@@ -62,12 +62,12 @@ class Ytelser(
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
-    internal fun inntektsendringer(): List<Triple<Behandlingsporing.Yrkesaktivitet, Kilde, InntekterForBeregning.Inntektsperiode>> {
+    internal fun inntektsendringer(): List<Triple<Arbeidsgiverberegning.Yrkesaktivitet, Kilde, InntekterForBeregning.Inntektsperiode>> {
         val kilde = Kilde(metadata.meldingsreferanseId, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
         return inntekterForBeregning.inntektsperioder.map { inntektsperiode ->
             val yrkesaktivitet = when (inntektsperiode.inntektskilde) {
-                "SELVSTENDIG" -> Behandlingsporing.Yrkesaktivitet.Selvstendig
-                else -> Arbeidstaker(inntektsperiode.inntektskilde)
+                "SELVSTENDIG" -> Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig
+                else -> Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker(inntektsperiode.inntektskilde)
             }
             Triple(yrkesaktivitet, kilde, inntektsperiode)
         }

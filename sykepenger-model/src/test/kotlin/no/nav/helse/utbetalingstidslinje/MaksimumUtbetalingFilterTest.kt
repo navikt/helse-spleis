@@ -57,7 +57,7 @@ internal class MaksimumUtbetalingFilterTest {
     private fun Utbetalingstidslinje.betal(sykepengegrunnlag: Inntekt): Utbetalingstidslinje {
         val input = listOf(
             Arbeidsgiverberegning(
-                yrkesaktivitet = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a1"),
+                yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a1"),
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),
