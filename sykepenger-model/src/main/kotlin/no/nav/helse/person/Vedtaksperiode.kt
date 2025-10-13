@@ -181,6 +181,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
+import no.nav.helse.utbetalingstidslinje.BeregnetMaksdato
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
@@ -1084,7 +1085,22 @@ internal class Vedtaksperiode private constructor(
                 yrkesaktivitetSomBeregner = this.yrkesaktivitet,
                 aktivitetslogg = other.registrerKontekst(aktivitetslogg),
                 beregning = BeregnetBehandling(
-                    maksdatoresultat = beregningsutfall.maksdatoresultat,
+                    maksdatoresultat = Maksdatoresultat(
+                        vurdertTilOgMed = beregningsutfall.maksdatoresultat.vurdertTilOgMed,
+                        bestemmelse = when (beregningsutfall.maksdatoresultat.bestemmelse) {
+                            BeregnetMaksdato.Bestemmelse.IKKE_VURDERT -> Maksdatoresultat.Bestemmelse.IKKE_VURDERT
+                            BeregnetMaksdato.Bestemmelse.ORDINÆR_RETT -> Maksdatoresultat.Bestemmelse.ORDINÆR_RETT
+                            BeregnetMaksdato.Bestemmelse.BEGRENSET_RETT -> Maksdatoresultat.Bestemmelse.BEGRENSET_RETT
+                            BeregnetMaksdato.Bestemmelse.SYTTI_ÅR -> Maksdatoresultat.Bestemmelse.SYTTI_ÅR
+                        },
+                        startdatoTreårsvindu = beregningsutfall.maksdatoresultat.startdatoTreårsvindu,
+                        startdatoSykepengerettighet = beregningsutfall.maksdatoresultat.startdatoSykepengerettighet,
+                        forbrukteDager = beregningsutfall.maksdatoresultat.forbrukteDager,
+                        oppholdsdager = beregningsutfall.maksdatoresultat.oppholdsdager,
+                        avslåtteDager = beregningsutfall.maksdatoresultat.avslåtteDager,
+                        maksdato = beregningsutfall.maksdatoresultat.maksdato,
+                        gjenståendeDager = beregningsutfall.maksdatoresultat.gjenståendeDager
+                    ),
                     utbetalingstidslinje = beregningsutfall.utbetalingstidslinje,
                     grunnlagsdata = grunnlagsdata,
                     alleInntektjusteringer = alleInntektjusteringer

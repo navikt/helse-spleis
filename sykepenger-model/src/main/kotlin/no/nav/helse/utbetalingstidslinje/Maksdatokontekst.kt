@@ -125,7 +125,7 @@ internal data class Maksdatokontekst(
         begrunnelser = this.begrunnelser.plus(dato to begrunnelse)
     )
 
-    internal fun beregnMaksdato(syttiårsdagen: LocalDate, dødsdato: LocalDate?): Maksdatoresultat {
+    internal fun beregnMaksdato(syttiårsdagen: LocalDate, dødsdato: LocalDate?): BeregnetMaksdato {
         fun LocalDate.forrigeVirkedagFør() = minusDays(
             when (dayOfWeek) {
                 SUNDAY -> 2
@@ -147,7 +147,7 @@ internal data class Maksdatokontekst(
         val maksdatoOrdinærRett = forrigeVirkedag + gjenståendeDagerUnder67År.ukedager
         val maksdatoBegrensetRett = maxOf(forrigeVirkedag, sekstisyvårsdagen.sisteVirkedagInklusiv()) + gjenståendeDagerOver67År.ukedager
 
-        val hjemmelsbegrunnelse: Maksdatoresultat.Bestemmelse
+        val hjemmelsbegrunnelse: BeregnetMaksdato.Bestemmelse
         val maksdato: LocalDate
         val gjenståendeDager: Int
         // maksdato er den dagen som først inntreffer blant ordinær kvote, 67-års-kvoten og 70-årsdagen,
@@ -156,23 +156,23 @@ internal data class Maksdatokontekst(
             maksdatoOrdinærRett <= maksdatoBegrensetRett -> {
                 maksdato = listOfNotNull(maksdatoOrdinærRett, dødsdato).min()
                 gjenståendeDager = ukedager(forrigeVirkedag, maksdato)
-                hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.ORDINÆR_RETT
+                hjemmelsbegrunnelse = BeregnetMaksdato.Bestemmelse.ORDINÆR_RETT
             }
 
             maksdatoBegrensetRett <= syttiårsdagen.forrigeVirkedagFør() -> {
                 maksdato = listOfNotNull(maksdatoBegrensetRett, dødsdato).min()
                 gjenståendeDager = ukedager(forrigeVirkedag, maksdato)
-                hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.BEGRENSET_RETT
+                hjemmelsbegrunnelse = BeregnetMaksdato.Bestemmelse.BEGRENSET_RETT
             }
 
             else -> {
                 maksdato = listOfNotNull(syttiårsdagen.forrigeVirkedagFør(), dødsdato).min()
                 gjenståendeDager = ukedager(forrigeVirkedag, maksdato)
-                hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.SYTTI_ÅR
+                hjemmelsbegrunnelse = BeregnetMaksdato.Bestemmelse.SYTTI_ÅR
             }
         }
 
-        return Maksdatoresultat(
+        return BeregnetMaksdato(
             vurdertTilOgMed = vurdertTilOgMed,
             bestemmelse = hjemmelsbegrunnelse,
             startdatoTreårsvindu = startdatoTreårsvindu,

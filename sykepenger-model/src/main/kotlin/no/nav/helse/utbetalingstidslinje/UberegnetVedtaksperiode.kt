@@ -10,13 +10,6 @@ import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Inntekt
 
-data class Vedtaksperiodeberegning(
-    val vedtaksperiodeId: UUID,
-    val utbetalingstidslinje: Utbetalingstidslinje
-) {
-    val periode = utbetalingstidslinje.periode()
-}
-
 internal data class UberegnetVedtaksperiode(
     val vedtaksperiodeId: UUID,
     val yrkesaktivitet: Behandlingsporing.Yrkesaktivitet,

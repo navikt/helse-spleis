@@ -48,7 +48,7 @@ internal class MaksdatoberegningTest {
     }
 
     private lateinit var vurderinger: List<Maksdatokontekst>
-    private lateinit var maksdatoresultater: List<Maksdatoresultat>
+    private lateinit var maksdatoresultater: List<BeregnetMaksdato>
     private lateinit var maksdatoer: List<LocalDate>
     private lateinit var forbrukteDager: List<Int>
     private lateinit var gjenståendeDager: List<Int>

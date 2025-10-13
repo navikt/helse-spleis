@@ -29,7 +29,7 @@ internal class Maksdatoberegning(
 
     private var state: State = State.Initiell
 
-    internal fun beregnMaksdatoBegrensetTilPeriode(periode: Periode): Maksdatoresultat {
+    internal fun beregnMaksdatoBegrensetTilPeriode(periode: Periode): BeregnetMaksdato {
         return sisteVurdering
             .avgrensTil(periode.endInclusive)
             .beregnMaksdato(syttiårsdagen, dødsdato)

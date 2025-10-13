@@ -5,7 +5,6 @@ import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.deserialisering.MaksdatoresultatInnDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
 
 data class Maksdatoresultat(
     val vurdertTilOgMed: LocalDate,
@@ -25,6 +24,8 @@ data class Maksdatoresultat(
 
     enum class Bestemmelse { IKKE_VURDERT, ORDINÆR_RETT, BEGRENSET_RETT, SYTTI_ÅR }
     companion object {
+        private const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 182
+
         val IkkeVurdert = Maksdatoresultat(
             vurdertTilOgMed = LocalDate.MIN,
             bestemmelse = Bestemmelse.IKKE_VURDERT,
