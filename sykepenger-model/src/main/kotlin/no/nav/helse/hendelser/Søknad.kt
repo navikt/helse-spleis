@@ -304,6 +304,15 @@ class Søknad(
             Behandlinger.Behandling.Endring.Arbeidssituasjon.ANNET -> null
         }
 
+        // Vi setter forsikringstypen til 80% fra første dag hvis søker har oppgitt at de har forsikring.
+        // Dette er et gjett på at dette er den vanligste typen forsikring, så den vil bli riktig oftest.
+        // Vi har ikke data til å vite noe mer spesifikt, så dette er det beste vi kan gjøre foreløpig.
+        // TODO: Utvid when-blokka når vi har mer informasjon om forsikringstyper i søknaden
+        val selvstendigForsikring = when(harOppgittÅHaForsikring) {
+            true -> Behandlinger.Behandling.Endring.SelvstendigForsikring.ÅTTI_PROSENT_FRA_FØRSTE_DAG
+            false, null -> Behandlinger.Behandling.Endring.SelvstendigForsikring.INGEN
+        }
+
         return Vedtaksperiode(
             egenmeldingsperioder = egenmeldingsperioder(),
             metadata = metadata,
@@ -316,6 +325,7 @@ class Søknad(
             dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
             sykmeldingsperiode = sykdomsperiode,
             forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag,
+            selvstendigForsikring = selvstendigForsikring,
             regelverkslogg = regelverkslogg
         )
     }

@@ -33,5 +33,6 @@ data class BehandlingendringInnDto(
     val inntektjusteringer: Map<InntektskildeDto, BeløpstidslinjeDto>,
     val faktaavklartInntekt: SelvstendigFaktaavklartInntektInnDto?,
     val ventetid: PeriodeDto?,
-    val forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlagDto?
+    val forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlagDto?,
+    val selvstendigForsikring: SelvstendigForsikringDto?
 )

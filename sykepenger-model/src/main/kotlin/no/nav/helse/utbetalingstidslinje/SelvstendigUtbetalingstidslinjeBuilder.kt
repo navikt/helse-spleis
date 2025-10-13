@@ -13,7 +13,8 @@ import no.nav.helse.økonomi.Økonomi
 
 internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
     private val dekningsgrad: Prosentdel,
-    private val ventetid: Periode
+    private val ventetid: Periode,
+    private val harVentetidsforsikring: Boolean
 ) : UtbetalingstidslinjeBuilder {
     private fun medInntektHvisFinnes(grad: Prosentdel, næringsinntekt: Inntekt): Økonomi {
         return medInntekt(grad, næringsinntekt)
