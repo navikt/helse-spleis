@@ -125,6 +125,7 @@ internal abstract class AbstractSpeilBuilderTest {
         periode: Periode,
         ventetid: Periode,
         arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
+        fraværFørSykmelding: Boolean = false,
         pensjonsgivendeInntekter: List<PensjonsgivendeInntekt> = listOf(
             PensjonsgivendeInntekt(
                 inntektsår = Year.of(2017), næringsinntekt = 450000.årlig,
@@ -157,7 +158,8 @@ internal abstract class AbstractSpeilBuilderTest {
             sendtTilNAVEllerArbeidsgiver = 1.januar.atStartOfDay(),
             id = søknadId,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,
-            arbeidssituasjon = arbeidssituasjon
+            arbeidssituasjon = arbeidssituasjon,
+            fraværFørSykmelding = fraværFørSykmelding
         )
         søknad.håndter(Person::håndterSøknad)
 

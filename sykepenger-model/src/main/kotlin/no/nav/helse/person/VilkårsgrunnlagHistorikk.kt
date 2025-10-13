@@ -11,6 +11,7 @@ import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
+import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.forrigeDag
@@ -253,18 +254,22 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         skjæringstidspunkt: LocalDate,
         inntektsgrunnlag: Inntektsgrunnlag,
         opptjening: Opptjening,
+        val selvstendigOpptjening: SelvstendigOpptjening,
         val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         val vurdertOk: Boolean,
         val meldingsreferanseId: MeldingsreferanseId?,
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjening) {
-        internal fun validerFørstegangsvurdering(aktivitetslogg: IAktivitetslogg) {
+        internal fun validerFørstegangsvurderingArbeidstaker(aktivitetslogg: IAktivitetslogg) {
             when (opptjening) {
                 is ArbeidstakerOpptjening -> inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
-                is SelvstendigNæringsdrivendeOpptjening -> {}
+                is SelvstendigNæringsdrivendeOpptjening -> {} // TODO fjerne når vi har fjernet selvstendigopptjening herfra
                 null -> {}
             }
+        }
 
+        internal fun validerFørstegangsvurderingSelvstendig(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: BehandlingSubsumsjonslogg) {
+            selvstendigOpptjening.valider(aktivitetslogg, subsumsjonslogg, skjæringstidspunkt)
         }
 
         override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String): Boolean {
@@ -292,6 +297,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
                 inntektsgrunnlag = inntektsgrunnlag,
                 opptjening = opptjening ?: this.opptjening!!,
+                selvstendigOpptjening = selvstendigOpptjening,
                 medlemskapstatus = medlemskapstatus,
                 vurdertOk = vurdertOk,
                 meldingsreferanseId = meldingsreferanseId,
@@ -308,6 +314,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             skjæringstidspunkt = skjæringstidspunkt,
             inntektsgrunnlag = sykepengegrunnlag,
             opptjening = this.opptjening!!.dto(),
+            selvstendigOpptjening = this.selvstendigOpptjening.dto(),
             medlemskapstatus = when (medlemskapstatus) {
                 Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapsvurderingDto.Ja
                 Medlemskapsvurdering.Medlemskapstatus.Nei -> MedlemskapsvurderingDto.Nei
@@ -324,6 +331,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                     skjæringstidspunkt = dto.skjæringstidspunkt,
                     inntektsgrunnlag = Inntektsgrunnlag.gjenopprett(dto.skjæringstidspunkt, dto.inntektsgrunnlag),
                     opptjening = Opptjening.gjenopprett(dto.skjæringstidspunkt, dto.opptjening),
+                    selvstendigOpptjening = SelvstendigOpptjening.gjenopprett(dto.selvstendigOpptjening),
                     vilkårsgrunnlagId = dto.vilkårsgrunnlagId,
                     medlemskapstatus = when (dto.medlemskapstatus) {
                         MedlemskapsvurderingDto.Ja -> Medlemskapsvurdering.Medlemskapstatus.Ja

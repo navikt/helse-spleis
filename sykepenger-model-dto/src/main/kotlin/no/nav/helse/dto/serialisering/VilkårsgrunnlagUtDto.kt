@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.MeldingsreferanseDto
+import no.nav.helse.dto.SelvstendigOpptjeningDto
 
 sealed class VilkårsgrunnlagUtDto {
     abstract val vilkårsgrunnlagId: UUID
@@ -15,6 +16,7 @@ sealed class VilkårsgrunnlagUtDto {
         override val skjæringstidspunkt: LocalDate,
         override val inntektsgrunnlag: InntektsgrunnlagUtDto,
         val opptjening: OpptjeningUtDto?,
+        val selvstendigOpptjening: SelvstendigOpptjeningDto?,
         val medlemskapstatus: MedlemskapsvurderingDto,
         val vurdertOk: Boolean,
         val meldingsreferanseId: MeldingsreferanseDto?

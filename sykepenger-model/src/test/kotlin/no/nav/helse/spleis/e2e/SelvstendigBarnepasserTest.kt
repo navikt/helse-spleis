@@ -37,7 +37,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     @Test
     fun `Verifiserer sykdomstidslinje for selvstendig`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
+            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
 
         }
@@ -46,7 +46,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     @Test
     fun `Overstyrer tidslinje i halen i avventer godkjenning`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
+            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -65,7 +65,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     @Test
     fun `Overstyrer tidslinje i halen til annen ytelse i avventer godkjenning`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
+            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -84,7 +84,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     @Test
     fun `Overstyrer hele perioden til annen ytelse`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
+            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -102,7 +102,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     @Test
     fun `ventetid fra søknad lagres på behandlingen`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
+            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
 
             assertEquals(1.januar til 16.januar, inspektør.ventetid(1.vedtaksperiode))
 
@@ -112,7 +112,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     @Test
     fun `selvstendigsøknad med færre inntekter enn 3 år kastes ut`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(
+            håndterFørstegangssøknadSelvstendig(
                 periode = januar,
                 arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER,
                 pensjonsgivendeInntekter = listOf(
@@ -129,7 +129,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     @Test
     fun `selvstendigsøknad med færre enn 3 ferdiglignede år kastes ut`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(
+            håndterFørstegangssøknadSelvstendig(
                 periode = januar,
                 arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER,
                 pensjonsgivendeInntekter = listOf(
@@ -148,7 +148,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     @Test
     fun `selvstendigsøknad kastes ut frem til vi støtter det`() = Toggle.SelvstendigNæringsdrivende.disable {
         selvstendig {
-            håndterSøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
+            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
             assertFunksjonelleFeil()
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
 
@@ -158,7 +158,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     @Test
     fun `beregner korrekt utbetaling for selvstendig med inntekt under 6G og uten forskring`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
+            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
@@ -205,7 +205,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     @Test
     fun `beregner korrekt utbetaling for selvstendig med inntekt over 6G og uten forsikring`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(
+            håndterFørstegangssøknadSelvstendig(
                 periode = januar,
                 arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER,
                 pensjonsgivendeInntekter = listOf( // TODO Inntekt for barnepasser er ikke vanlig næringsinntekt, men i næringsinntektFraFiskeFangstEllerFamiliebarnehage
@@ -258,8 +258,8 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     @Test
     fun `To selvstendigsøknader`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
-            håndterSøknadSelvstendig(mars, ventetid = 1.mars til 16.mars, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
+            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
+            håndterFørstegangssøknadSelvstendig(mars, ventetid = 1.mars til 16.mars, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
 
             assertTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
             assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))

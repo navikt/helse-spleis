@@ -17,7 +17,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
     @Test
     fun `SelvstendigFaktaavklartInntekt - enda en godkjenningsbehov`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
-            håndterSøknadSelvstendig(januar)
+            håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

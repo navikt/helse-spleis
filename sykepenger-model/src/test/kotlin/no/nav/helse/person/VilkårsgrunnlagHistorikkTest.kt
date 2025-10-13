@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
@@ -64,6 +64,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 skjæringstidspunkt = skjæringstidspunkt,
                 inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
                 opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforholdFraHistorikk, skjæringstidspunkt),
+                selvstendigOpptjening = SelvstendigOpptjeningIkkeVurdert,
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 vurdertOk = true,
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -93,6 +94,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 skjæringstidspunkt = gammeltSkjæringstidspunkt,
                 inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
                 opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt),
+                selvstendigOpptjening = SelvstendigOpptjeningIkkeVurdert,
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 vurdertOk = true,
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -125,6 +127,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
+            SelvstendigOpptjeningIkkeVurdert,
             subsumsjonslogg
         )
         historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
@@ -147,7 +150,12 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
 
-        vilkårsgrunnlag.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, subsumsjonslogg)
+        vilkårsgrunnlag.valider(
+            Aktivitetslogg(),
+            10000.månedlig.sykepengegrunnlag,
+            SelvstendigOpptjeningIkkeVurdert,
+            subsumsjonslogg
+        )
         SubsumsjonInspektør(regelverkslogg).assertVurdert(paragraf = PARAGRAF_8_2, ledd = 1.ledd, versjon = 12.juni(2020))
     }
 
@@ -177,11 +185,13 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag1.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
+            SelvstendigOpptjeningIkkeVurdert,
             subsumsjonslogg
         )
         vilkårsgrunnlag2.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
+            SelvstendigOpptjeningIkkeVurdert,
             subsumsjonslogg
         )
 
@@ -222,8 +232,18 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
 
-        vilkårsgrunnlag1.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, subsumsjonslogg)
-        vilkårsgrunnlag2.valider(Aktivitetslogg(), 10000.månedlig.sykepengegrunnlag, subsumsjonslogg)
+        vilkårsgrunnlag1.valider(
+            Aktivitetslogg(),
+            10000.månedlig.sykepengegrunnlag,
+            SelvstendigOpptjeningIkkeVurdert,
+            subsumsjonslogg
+        )
+        vilkårsgrunnlag2.valider(
+            Aktivitetslogg(),
+            10000.månedlig.sykepengegrunnlag,
+            SelvstendigOpptjeningIkkeVurdert,
+            subsumsjonslogg
+        )
         historikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
         historikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
@@ -246,6 +266,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
+            SelvstendigOpptjeningIkkeVurdert,
             subsumsjonslogg
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
@@ -270,6 +291,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
+            SelvstendigOpptjeningIkkeVurdert,
             subsumsjonslogg
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())

@@ -3,8 +3,10 @@ package no.nav.helse.person
 import java.time.LocalDate
 import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
+import no.nav.helse.dto.SelvstendigOpptjeningDto
 import no.nav.helse.dto.deserialisering.OpptjeningInnDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
+import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.`§ 8-2 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-2 ledd 1 - selvstendig næringsdrivende`
@@ -24,6 +26,7 @@ import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnla
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiode
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.startdatoFor
 import no.nav.helse.person.Opptjening.Companion.TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal sealed interface Opptjening {
     val subsumsjon: Subsumsjon
@@ -45,9 +48,50 @@ internal sealed interface Opptjening {
     }
 }
 
+internal sealed interface SelvstendigOpptjening {
+    fun valider(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: BehandlingSubsumsjonslogg, skjæringstidspunkt: LocalDate)
+
+    fun dto(): SelvstendigOpptjeningDto
+
+    companion object {
+        fun gjenopprett(dto: SelvstendigOpptjeningDto): SelvstendigOpptjening {
+            return when (dto) {
+                SelvstendigOpptjeningDto.IkkeOppfylt -> SelvstendigOpptjeningIkkeOppfylt
+                SelvstendigOpptjeningDto.IkkeVurdert -> SelvstendigOpptjeningIkkeVurdert
+                SelvstendigOpptjeningDto.Oppfylt -> SelvstendigOpptjeningOppfylt
+            }
+        }
+    }
+}
+
+internal data object SelvstendigOpptjeningOppfylt : SelvstendigOpptjening {
+    override fun valider(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: BehandlingSubsumsjonslogg, skjæringstidspunkt: LocalDate) {
+        subsumsjonslogg.logg(`§ 8-2 ledd 1 - selvstendig næringsdrivende`(skjæringstidspunkt, true))
+    }
+
+    override fun dto() = SelvstendigOpptjeningDto.Oppfylt
+}
+
+internal data object SelvstendigOpptjeningIkkeOppfylt : SelvstendigOpptjening {
+    override fun valider(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: BehandlingSubsumsjonslogg, skjæringstidspunkt: LocalDate) {
+        subsumsjonslogg.logg(`§ 8-2 ledd 1 - selvstendig næringsdrivende`(skjæringstidspunkt, false))
+    }
+
+    override fun dto() = SelvstendigOpptjeningDto.IkkeOppfylt
+}
+
+internal data object SelvstendigOpptjeningIkkeVurdert : SelvstendigOpptjening {
+    override fun valider(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: BehandlingSubsumsjonslogg, skjæringstidspunkt: LocalDate) {
+        error("Må ha vurdert opptjening for selvstendig")
+    }
+
+    override fun dto() = SelvstendigOpptjeningDto.IkkeVurdert
+}
+
 internal class SelvstendigNæringsdrivendeOpptjening(private val skjæringstidspunkt: LocalDate) : Opptjening {
     override val subsumsjon = `§ 8-2 ledd 1 - selvstendig næringsdrivende`(
         skjæringstidspunkt = skjæringstidspunkt,
+        oppfylt = false // TODO bare for å få det til å kompilere
     )
 
     override fun view() = SelvstendigOpptjeningView
