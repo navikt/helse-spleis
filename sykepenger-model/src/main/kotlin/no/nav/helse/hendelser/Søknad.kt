@@ -186,7 +186,7 @@ class Søknad(
         if (harOppgittAvvikling == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_47)
         if (harOppgittNyIArbeidslivet == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_48)
         if (harOppgittVarigEndring == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_49)
-        if (harOppgittÅHaForsikring == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_50)
+        if (harOppgittÅHaForsikring == true) aktivitetslogg.varsel(Varselkode.RV_SØ_50)
 
         if (pensjonsgivendeInntekter?.harFlereTyperPensjonsgivendeInntekt() == true) aktivitetslogg.funksjonellFeil(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`)
 
@@ -316,6 +316,7 @@ class Søknad(
             dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
             sykmeldingsperiode = sykdomsperiode,
             forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag,
+            selvstendigForsikring = harOppgittÅHaForsikring,
             regelverkslogg = regelverkslogg
         )
     }

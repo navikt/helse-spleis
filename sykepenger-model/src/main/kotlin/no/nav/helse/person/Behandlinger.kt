@@ -108,9 +108,19 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         ventetid: Periode?,
         dokumentsporing: Dokumentsporing,
         behandlingkilde: Behandlingkilde,
-        forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?
+        forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?,
+        selvstendigForsikring: Boolean?
     ) {
         check(behandlinger.isEmpty())
+
+        // Hvis bruker har oppgitt å ha forsikring så sier vi at
+        // nav overtar ansvar for dagene i ventetiden
+        val dagerNavOvertarAnsvar = when (selvstendigForsikring) {
+            null,
+            false -> emptyList()
+            true -> ventetid ?.let { listOf(ventetid) } ?: emptyList()
+        }
+
         val behandling = Behandling.nyBehandling(
             observatører = this.observatører,
             sykdomstidslinje = sykdomstidslinje,
@@ -121,6 +131,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             dokumentsporing = dokumentsporing,
             sykmeldingsperiode = sykmeldingsperiode,
             ventetid = ventetid,
+            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             behandlingkilde = behandlingkilde,
             forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag
         )
@@ -164,7 +175,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             Arbeidssituasjon.ARBEIDSLEDIG,
             Arbeidssituasjon.FRILANSER -> error("Har ikke implementert dekningsgrad for $arbeidssituasjon")
         }
-        return SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(dekningsgrad, behandlinger.last().ventetid!!)
+
+        return SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(dekningsgrad, behandlinger.last().ventetid!!, behandlinger.last().dagerNavOvertarAnsvar)
     }
 
     internal val maksdato get() = behandlinger.last().maksdato
@@ -1492,6 +1504,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing: Dokumentsporing,
                 sykmeldingsperiode: Periode,
                 ventetid: Periode?,
+                dagerNavOvertarAnsvar: List<Periode>,
                 behandlingkilde: Behandlingkilde,
                 forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?
             ) =
@@ -1517,11 +1530,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             arbeidsgiverperiode = Arbeidsgiverperiodeavklaring(false, emptyList()),
                             ventetid = ventetid,
                             egenmeldingsdager = egenmeldingsdager,
-                            dagerNavOvertarAnsvar = emptyList(),
+                            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert,
                             inntektjusteringer = emptyMap(),
                             faktaavklartInntekt = faktaavklartInntekt,
-                            forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag
+                            forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag,
                         )
                     ),
                     avsluttet = null,

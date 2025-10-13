@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.erHelg
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
@@ -13,6 +14,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Ventetidsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 class UtbetalingkladdBuilder(
     tidslinje: Utbetalingstidslinje,
@@ -47,11 +49,24 @@ class UtbetalingkladdBuilder(
                 is Arbeidsdag,
                 is AvvistDag,
                 is ForeldetDag,
-                is Ventetidsdag,
                 is Fridag -> {
                     arbeidsgiveroppdragBuilder.ikkeBetalingsdag()
                     personoppdragBuilder.ikkeBetalingsdag()
                 }
+
+                is Ventetidsdag -> {
+                    arbeidsgiveroppdragBuilder.ikkeBetalingsdag()
+                    if (dag.økonomi.dekningsgrad == 0.prosent) {
+                        personoppdragBuilder.ikkeBetalingsdag()
+                    } else {
+                        if (dag.dato.erHelg()) {
+                            personoppdragBuilder.betalingshelgedag(dag.dato, dag.økonomi.brukAvrundetGrad { grad -> grad })
+                        } else {
+                            personoppdragBuilder.betalingsdag(dato = dag.dato, beløp = dag.økonomi.personbeløp!!.daglig.toInt(), grad = dag.økonomi.brukAvrundetGrad { grad -> grad })
+                        }
+                    }
+                }
+
 
                 is ArbeidsgiverperiodedagNav,
                 is NavDag -> {

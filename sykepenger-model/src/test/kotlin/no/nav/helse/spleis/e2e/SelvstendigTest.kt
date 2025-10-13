@@ -598,11 +598,27 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `kaster ut når bruker har oppgitt at hen har ventetidsforsikring`() {
+    fun `foreslår utbetaling på 80 prosent dekning ved oppgitt forsikring`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, harOppgittÅHaForsikring = true)
-            assertFunksjonellFeil(Varselkode.RV_SØ_50, 1.vedtaksperiode.filter())
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
+            assertVarsler(listOf(Varselkode.RV_SØ_50), 1.vedtaksperiode.filter())
+            utbetalingstidslinje.subset(1.januar til 16.januar).forEach { assertUtbetalingsdag(it, Utbetalingsdag.Ventetidsdag::class,100) }
+
+            inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
+                assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
+                assertEquals(1, utbetalinginspektør.personOppdrag.size)
+                utbetalinginspektør.personOppdrag.single().inspektør.also { linje ->
+                    assertEquals(1.januar til 31.januar, linje.periode)
+                    assertEquals(1417, linje.beløp)
+                    assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
+                }
+            }
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt()
         }
     }
 }

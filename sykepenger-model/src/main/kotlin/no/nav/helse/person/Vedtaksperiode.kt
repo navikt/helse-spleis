@@ -223,6 +223,7 @@ internal class Vedtaksperiode private constructor(
         inntektsendringer: Beløpstidslinje = Beløpstidslinje(),
         ventetid: Periode?,
         forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?,
+        selvstendigForsikring: Boolean?,
         regelverkslogg: Regelverkslogg
     ) : this(
         person = person,
@@ -241,7 +242,7 @@ internal class Vedtaksperiode private constructor(
     ) {
         val periode = checkNotNull(sykdomstidslinje.periode()) { "sykdomstidslinjen er tom" }
         person.vedtaksperiodeOpprettet(id, yrkesaktivitet.yrkesaktivitetstype, periode, periode.start, opprettet)
-        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, arbeidssituasjon, egenmeldingsperioder, faktaavklartInntekt, inntektsendringer, ventetid, dokumentsporing, metadata.behandlingkilde, forberedendeVilkårsgrunnlag)
+        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, arbeidssituasjon, egenmeldingsperioder, faktaavklartInntekt, inntektsendringer, ventetid, dokumentsporing, metadata.behandlingkilde, forberedendeVilkårsgrunnlag, selvstendigForsikring)
     }
 
     private val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()
