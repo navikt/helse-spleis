@@ -452,6 +452,7 @@ internal class PeriodeTest {
             listOf(1.januar til 4.januar, 16.januar til 20.januar, 27.januar til 29.januar),
             result
         )
+        assertEquals(emptyList<Periode>(), perioder.utenPerioder(perioder))
     }
 
     @Test

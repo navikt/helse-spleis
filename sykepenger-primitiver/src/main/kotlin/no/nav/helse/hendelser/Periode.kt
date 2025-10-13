@@ -88,7 +88,7 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
         fun Collection<Periode>.utenPerioder(utenPerioder: Collection<Periode>) = this
             .flatMap { gammelPeriode ->
                 utenPerioder.fold(listOf(gammelPeriode)) { result, utenPeriode ->
-                    result.dropLast(1) + result.last().uten(utenPeriode)
+                    result.dropLast(1) + (result.lastOrNull()?.uten(utenPeriode) ?: emptyList())
                 }
             }
 
