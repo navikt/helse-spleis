@@ -85,6 +85,10 @@ internal class SelvstendigHendelsefabrikk() {
         inntekterFraNyeArbeidsforhold: Boolean = false,
         pensjonsgivendeInntekter: List<PensjonsgivendeInntekt> = emptyList(),
         fraværFørSykmelding: Boolean? = null,
+        harOppgittAvvikling: Boolean? = null,
+        harOppgittNyIArbeidslivet: Boolean? = null,
+        harOppgittVarigEndring: Boolean? = null,
+        harOppgittÅHaForsikring: Boolean? = null,
         arbeidssituasjon: Søknad.Arbeidssituasjon
     ): Søknad {
         return Søknad(
@@ -107,7 +111,11 @@ internal class SelvstendigHendelsefabrikk() {
             registrert = registrert,
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,
-            fraværFørSykmelding = fraværFørSykmelding
+            fraværFørSykmelding = fraværFørSykmelding,
+            harOppgittAvvikling = harOppgittAvvikling,
+            harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
+            harOppgittVarigEndring = harOppgittVarigEndring,
+            harOppgittÅHaForsikring = harOppgittÅHaForsikring
         ).apply {
             søknader.add(this)
         }

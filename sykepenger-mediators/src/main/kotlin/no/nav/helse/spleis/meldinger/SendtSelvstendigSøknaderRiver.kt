@@ -31,6 +31,7 @@ internal class SendtSelvstendigSøknaderRiver(
             it.path("tom").asLocalDate()
         }
         message.interestedIn("egenmeldingsdagerFraSykmelding") { egenmeldinger -> egenmeldinger.map { it.asLocalDate() } }
+        message.interestedIn("selvstendigNaringsdrivende.harForsikring")
         message.interestedIn("sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys", "fravar", "papirsykmeldinger", "inntektFraNyttArbeidsforhold")
     }
 

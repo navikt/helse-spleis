@@ -104,7 +104,11 @@ internal abstract class AbstractObservableTest {
         registrert = LocalDateTime.now(),
         inntekterFraNyeArbeidsforhold = false,
         pensjonsgivendeInntekter = null,
-        fraværFørSykmelding = null
+        fraværFørSykmelding = null,
+        harOppgittAvvikling = null,
+        harOppgittNyIArbeidslivet = null,
+        harOppgittVarigEndring = null,
+        harOppgittÅHaForsikring = null
     )
 
     protected fun utbetalinghistorikk() = UtbetalingshistorikkEtterInfotrygdendring(

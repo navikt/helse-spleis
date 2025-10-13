@@ -25,6 +25,10 @@ internal class SendtSøknadBuilder(arbeidssituasjon: String) : SøknadBuilder() 
     private var utenlandskSykmelding: Boolean = false
     private var sendTilGosys: Boolean = false
     private var fraværFørSykmelding: Boolean? = null
+    private var harOppgittÅHaForsikring: Boolean? = null
+    private var harOppgittNyIArbeidslivet: Boolean? = null
+    private var harOppgittVarigEndring: Boolean? = null
+    private var harOppgittAvvikling: Boolean? = null
     private val arbeidssituasjon = when (arbeidssituasjon) {
         "SELVSTENDIG_NARINGSDRIVENDE" -> Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE
         "BARNEPASSER" -> Søknad.Arbeidssituasjon.BARNEPASSER
@@ -57,7 +61,11 @@ internal class SendtSøknadBuilder(arbeidssituasjon: String) : SøknadBuilder() 
         registrert = registrert,
         inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
         pensjonsgivendeInntekter = pensjonsgivendeInntekter,
-        fraværFørSykmelding = fraværFørSykmelding
+        fraværFørSykmelding = fraværFørSykmelding,
+        harOppgittÅHaForsikring = harOppgittÅHaForsikring,
+        harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
+        harOppgittVarigEndring = harOppgittVarigEndring,
+        harOppgittAvvikling = harOppgittAvvikling
     )
 
     internal fun pensjonsgivendeInntekter(pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>) = apply {
@@ -130,5 +138,21 @@ internal class SendtSøknadBuilder(arbeidssituasjon: String) : SøknadBuilder() 
 
     fun inntekterFraNyeArbeidsforhold(inntekterFraNyeArbeidsforhold: Boolean) {
         this.inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold
+    }
+
+    fun harOppgittÅHaForsikring(harOppgittÅHaForsikring: Boolean?) = apply {
+        this.harOppgittÅHaForsikring = harOppgittÅHaForsikring
+    }
+
+    fun harOppgittNyIArbeidslivet(harOppgittNyIArbeidslivet: Boolean?) = apply {
+        this.harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet
+    }
+
+    fun harOppgittVarigEndring(harOppgittVarigEndring: Boolean?) = apply {
+        this.harOppgittVarigEndring = harOppgittVarigEndring
+    }
+
+    fun harOppgittAvvikling(harOppgittAvvikling: Boolean?) = apply {
+        this.harOppgittAvvikling = harOppgittAvvikling
     }
 }

@@ -68,6 +68,10 @@ enum class Varselkode(
     // Selvstendig søknader
     RV_SØ_45("Selvstendigsøknad med flere typer pensjonsgivende inntekter"),
     RV_SØ_46("Selvstendigsøknad med fravær før sykmelding"),
+    RV_SØ_47("Selvstendigsøknad hvor bruker har oppgitt at virksomheten er avviklet"),
+    RV_SØ_48("Selvstendigsøknad hvor bruker har oppgitt at de er ny i arbeidslivet"),
+    RV_SØ_49("Selvstendigsøknad hvor bruker har oppgitt at de har varig endring i inntekt"),
+    RV_SØ_50("Selvstendigsøknad hvor bruker har oppgitt at de har forsikring om ventetid"),
 
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne.", avviklet = true),

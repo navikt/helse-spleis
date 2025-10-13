@@ -78,7 +78,11 @@ class Søknad(
     registrert: LocalDateTime,
     private val inntekterFraNyeArbeidsforhold: Boolean,
     private val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>?,
-    private val fraværFørSykmelding: Boolean?
+    private val fraværFørSykmelding: Boolean?,
+    private val harOppgittÅHaForsikring: Boolean?,
+    private val harOppgittNyIArbeidslivet: Boolean?,
+    private val harOppgittVarigEndring: Boolean?,
+    private val harOppgittAvvikling: Boolean?
 ) : Hendelse {
 
     override val metadata = HendelseMetadata(
@@ -178,6 +182,11 @@ class Søknad(
     private fun validerSelvstendig(aktivitetslogg: IAktivitetslogg) {
         val næringsinntekter = pensjonsgivendeInntekter?.filter { it.erFerdigLignet }
         if (næringsinntekter == null || næringsinntekter.size < 3) aktivitetslogg.funksjonellFeil(Varselkode.RV_IV_12)
+
+        if (harOppgittAvvikling == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_47)
+        if (harOppgittNyIArbeidslivet == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_48)
+        if (harOppgittVarigEndring == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_49)
+        if (harOppgittÅHaForsikring == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_50)
 
         if (pensjonsgivendeInntekter?.harFlereTyperPensjonsgivendeInntekt() == true) aktivitetslogg.funksjonellFeil(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`)
 

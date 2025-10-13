@@ -28,6 +28,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SelvstendigNaringsdrivendeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -330,8 +331,18 @@ internal abstract class AbstractEndToEndMediatorTest {
         sendTilGosys: Boolean? = false,
         egenmeldingerFraSykmelding: List<LocalDate> = emptyList(),
         ventetid: Hendelseperiode,
-        fraværFørSykmelding: Boolean? = null
+        fraværFørSykmelding: Boolean? = null,
+        harOppgittAvvikling: Boolean? = null,
+        harOppgittNyIArbeidslivet: Boolean? = null,
+        harOppgittVarigEndring: Boolean? = null,
+        harOppgittForsikring: Boolean? = null
     ): UUID {
+        val selvstendigHovedspørsmål = mapOf(
+            "INNTEKTSOPPLYSNINGER_VIRKSOMHETEN_AVVIKLET" to (harOppgittAvvikling ?: false),
+            "INNTEKTSOPPLYSNINGER_NY_I_ARBEIDSLIVET" to (harOppgittNyIArbeidslivet ?: false),
+            "INNTEKTSOPPLYSNINGER_VARIG_ENDRING" to (harOppgittVarigEndring ?: false),
+            "FRAVAR_FOR_SYKMELDINGEN_V2" to (fraværFørSykmelding ?: false)
+        )
         val (id, message) = meldingsfabrikk.lagSøknadSelvstendig(
             fnr = fnr,
             perioder = perioder,
@@ -344,7 +355,8 @@ internal abstract class AbstractEndToEndMediatorTest {
             egenmeldingerFraSykmelding = egenmeldingerFraSykmelding,
             ventetid = ventetid,
             arbeidssituasjon = arbeidssituasjon,
-            fraværFørSykmelding = fraværFørSykmelding
+            selvstendigHovedspørsmål = selvstendigHovedspørsmål,
+            harOppgittForsikring = harOppgittForsikring
         )
 
         val antallVedtaksperioderFørSøknad = testRapid.inspektør.vedtaksperiodeteller

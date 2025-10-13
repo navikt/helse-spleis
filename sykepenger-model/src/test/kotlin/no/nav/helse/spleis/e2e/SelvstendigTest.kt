@@ -516,4 +516,40 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
     }
+
+    @Test
+    fun `kaster ut når bruker har oppgitt avviklet bedrift`() {
+        selvstendig {
+            håndterSøknadSelvstendig(januar, harOppgittAvvikling = true)
+            assertFunksjonellFeil(Varselkode.RV_SØ_47, 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `kaster ut når bruker har oppgitt at hen er ny i arbeidslivet`() {
+        selvstendig {
+            håndterSøknadSelvstendig(januar, harOppgittNyIArbeidslivet = true)
+            assertFunksjonellFeil(Varselkode.RV_SØ_48, 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `kaster ut når bruker har oppgitt at hen har varig inntektsendring`() {
+        selvstendig {
+            håndterSøknadSelvstendig(januar, harOppgittVarigEndring = true)
+            assertFunksjonellFeil(Varselkode.RV_SØ_49, 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `kaster ut når bruker har oppgitt at hen har ventetidsforsikring`() {
+        selvstendig {
+            håndterSøknadSelvstendig(januar, harOppgittÅHaForsikring = true)
+            assertFunksjonellFeil(Varselkode.RV_SØ_50, 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        }
+    }
 }

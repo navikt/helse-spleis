@@ -39,6 +39,18 @@ internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val 
         val fraværFørSykmelding = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("FRAVAR_FOR_SYKMELDINGEN_V2").takeUnless { it.isMissingOrNull() }?.asBoolean()
         builder.fraværFørSykmelding(fraværFørSykmelding)
 
+        val harOppgittÅHaForsikring = packet["selvstendigNaringsdrivende"].path("harForsikring").takeUnless { it.isMissingOrNull() }?.asBoolean()
+        builder.harOppgittÅHaForsikring(harOppgittÅHaForsikring)
+
+        val harOppgittNyIArbedislivet = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("INNTEKTSOPPLYSNINGER_NY_I_ARBEIDSLIVET").takeUnless { it.isMissingOrNull() }?.asBoolean()
+        builder.harOppgittNyIArbeidslivet(harOppgittNyIArbedislivet)
+
+        val harOppgittVarigEndring = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("INNTEKTSOPPLYSNINGER_VARIG_ENDRING").takeUnless { it.isMissingOrNull() }?.asBoolean()
+        builder.harOppgittVarigEndring(harOppgittVarigEndring)
+
+        val harOppgittAvvikling = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("INNTEKTSOPPLYSNINGER_VIRKSOMHETEN_AVVIKLET").takeUnless { it.isMissingOrNull() }?.asBoolean()
+        builder.harOppgittAvvikling(harOppgittAvvikling)
+
         SendtSøknadNavMessage.byggSendtSøknad(builder, packet)
         mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
     }
