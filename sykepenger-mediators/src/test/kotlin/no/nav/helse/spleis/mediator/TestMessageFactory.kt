@@ -452,7 +452,7 @@ internal class TestMessageFactory(
         ),
         ventetid = VentetidDTO(fom = ventetid.start, tom = ventetid.endInclusive),
         hovedSporsmalSvar = selvstendigHovedspørsmål,
-        harForsikring = harOppgittForsikring ?: false
+        brukerHarOppgittForsikring = harOppgittForsikring ?: false
     )
 
     fun lagSøknadArbeidsledig(
