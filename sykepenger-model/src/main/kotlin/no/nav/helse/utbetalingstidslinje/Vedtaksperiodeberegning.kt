@@ -3,19 +3,16 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import java.util.*
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig.somOrganisasjonsnummer
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.inntekt.InntekterForBeregning
-import no.nav.helse.person.inntekt.Inntektskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Inntekt
 
 data class Vedtaksperiodeberegning(
     val vedtaksperiodeId: UUID,
-    val utbetalingstidslinje: Utbetalingstidslinje,
-    val inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>
+    val utbetalingstidslinje: Utbetalingstidslinje
 ) {
     val periode = utbetalingstidslinje.periode()
 }
@@ -32,9 +29,7 @@ internal fun lagUtbetalingstidslinjePerArbeidsgiver(vedtaksperioder: List<Ubereg
     val utbetalingstidslinjer = vedtaksperioder
         .groupBy({ it.yrkesaktivitet }) { vedtaksperiode ->
             val (fastsattÅrsinntekt, inntektjusteringer) = inntekterForBeregning.tilBeregning(vedtaksperiode.yrkesaktivitet)
-            val alleInntektjusteringer = inntekterForBeregning.inntektsjusteringer(vedtaksperiode.periode)
-                .mapKeys { (yrkesaktivitet, _) -> Inntektskilde(yrkesaktivitet.somOrganisasjonsnummer) }
-            lagUtbetalingstidslinjeForVedtaksperiode(vedtaksperiode, fastsattÅrsinntekt, inntektjusteringer, alleInntektjusteringer)
+            lagUtbetalingstidslinjeForVedtaksperiode(vedtaksperiode, fastsattÅrsinntekt, inntektjusteringer)
         }
         .map { (yrkesaktivitet, vedtaksperioder) ->
             Arbeidsgiverberegning(
@@ -105,17 +100,15 @@ internal fun filtrerUtbetalingstidslinjer(
                 BeregnetPeriode(
                     vedtaksperiodeId = vedtaksperiodeberegning.vedtaksperiodeId,
                     utbetalingstidslinje = vedtaksperiodeberegning.utbetalingstidslinje,
-                    maksdatoresultat = maksdatoresultat,
-                    inntekterForBeregning = vedtaksperiodeberegning.inntekterForBeregning
+                    maksdatoresultat = maksdatoresultat
                 )
             }
         }
 }
 
-private fun lagUtbetalingstidslinjeForVedtaksperiode(vedtaksperiode: UberegnetVedtaksperiode, inntekt: Inntekt, inntektjusteringer: Beløpstidslinje, alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>): Vedtaksperiodeberegning {
+private fun lagUtbetalingstidslinjeForVedtaksperiode(vedtaksperiode: UberegnetVedtaksperiode, inntekt: Inntekt, inntektjusteringer: Beløpstidslinje): Vedtaksperiodeberegning {
     return Vedtaksperiodeberegning(
         vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId,
-        utbetalingstidslinje = vedtaksperiode.utbetalingstidslinjeBuilder.result(vedtaksperiode.sykdomstidslinje, inntekt, inntektjusteringer),
-        inntekterForBeregning = alleInntektjusteringer
+        utbetalingstidslinje = vedtaksperiode.utbetalingstidslinjeBuilder.result(vedtaksperiode.sykdomstidslinje, inntekt, inntektjusteringer)
     )
 }

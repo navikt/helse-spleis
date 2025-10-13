@@ -38,6 +38,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig.somOrganisasjonsnummer
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
 import no.nav.helse.hendelser.DagerFraInntektsmelding
@@ -85,7 +86,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrTidslinje
 import no.nav.helse.person.Dokumentsporing.Companion.søknad
 import no.nav.helse.person.Venteårsak.Companion.fordi
-import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -135,6 +135,7 @@ import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.Inntektskilde
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning
@@ -1076,12 +1077,18 @@ internal class Vedtaksperiode private constructor(
             "ugyldig situasjon: skal beregne utbetaling for vedtaksperioder med ulike skjæringstidspunkter"
         }
         perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
-            val beregning = beregnetTidslinjePerVedtaksperiode.single { it.vedtaksperiodeId == other.id }
+            val beregningsutfall = beregnetTidslinjePerVedtaksperiode.single { it.vedtaksperiodeId == other.id }
+            val alleInntektjusteringer = inntekterForBeregning.inntektsjusteringer(other.periode)
+                .mapKeys { (yrkesaktivitet, _) -> Inntektskilde(yrkesaktivitet.somOrganisasjonsnummer) }
             other.lagNyUtbetaling(
                 yrkesaktivitetSomBeregner = this.yrkesaktivitet,
                 aktivitetslogg = other.registrerKontekst(aktivitetslogg),
-                beregning = beregning,
-                grunnlagsdata = grunnlagsdata
+                beregning = BeregnetBehandling(
+                    maksdatoresultat = beregningsutfall.maksdatoresultat,
+                    utbetalingstidslinje = beregningsutfall.utbetalingstidslinje,
+                    grunnlagsdata = grunnlagsdata,
+                    alleInntektjusteringer = alleInntektjusteringer
+                )
             )
         }
 
@@ -2310,15 +2317,13 @@ internal class Vedtaksperiode private constructor(
     private fun lagNyUtbetaling(
         yrkesaktivitetSomBeregner: Yrkesaktivitet,
         aktivitetslogg: IAktivitetslogg,
-        beregning: BeregnetPeriode,
-        grunnlagsdata: VilkårsgrunnlagElement
+        beregning: BeregnetBehandling
     ) {
         behandlinger.nyUtbetaling(
             vedtaksperiodeSomLagerUtbetaling = this.id,
             yrkesaktivitet = this.yrkesaktivitet,
             aktivitetslogg = aktivitetslogg,
-            beregning = beregning,
-            grunnlagsdata = grunnlagsdata
+            beregning = beregning
         )
         val subsumsjonen = Utbetalingstidslinjesubsumsjon(this.subsumsjonslogg, this.sykdomstidslinje, beregning.utbetalingstidslinje)
         subsumsjonen.subsummer(periode, this.yrkesaktivitet.yrkesaktivitetstype)

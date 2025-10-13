@@ -122,8 +122,7 @@ internal class SykdomsgradfilterTest {
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),
-                        utbetalingstidslinje = it,
-                        inntekterForBeregning = emptyMap()
+                        utbetalingstidslinje = it
                     )
                 ),
                 ghostOgAndreInntektskilder = emptyList()

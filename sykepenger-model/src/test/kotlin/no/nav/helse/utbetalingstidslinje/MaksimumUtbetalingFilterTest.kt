@@ -61,8 +61,7 @@ internal class MaksimumUtbetalingFilterTest {
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),
-                        utbetalingstidslinje = this,
-                        inntekterForBeregning = emptyMap()
+                        utbetalingstidslinje = this
                     )
                 ),
                 ghostOgAndreInntektskilder = emptyList()

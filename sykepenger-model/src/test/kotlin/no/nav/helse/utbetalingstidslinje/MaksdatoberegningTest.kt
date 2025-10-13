@@ -1223,8 +1223,7 @@ internal class MaksdatoberegningTest {
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),
-                        utbetalingstidslinje = it,
-                        inntekterForBeregning = emptyMap()
+                        utbetalingstidslinje = it
                     )
                 ),
                 ghostOgAndreInntektskilder = emptyList()

@@ -23,7 +23,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
             .vedtaksperioder
             .single()
 
-        vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.yrkesaktivitet, aktivitetslogg, utbetalingstidslinje.utbetalingstidslinje, utbetalingstidslinje.inntekterForBeregning)
+        vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.yrkesaktivitet, aktivitetslogg, utbetalingstidslinje.utbetalingstidslinje, emptyMap())
     }
 
     override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {

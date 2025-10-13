@@ -188,8 +188,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                             1.AVV(dekningsgrunnlag = 1000, begrunnelse = Begrunnelse.SykepengedagerOppbrukt),
                             1.AVV(dekningsgrunnlag = 500, begrunnelse = Begrunnelse.MinimumInntekt),
                             1.UKJ
-                        ),
-                        inntekterForBeregning = emptyMap()
+                        )
                     )
                 ),
                 ghostOgAndreInntektskilder = emptyList()

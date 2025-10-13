@@ -47,16 +47,16 @@ class InntekterForBeregningTest {
         val a1 = Arbeidsgiverberegning(
             yrkesaktivitet = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a1"),
             vedtaksperioder = listOf(
-                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(16.AP, 8.NAV, startDato = 1.januar), emptyMap()), // 1.-24.jan
-                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(11.NAV, startDato = 7.februar), emptyMap()) // 7.-17.feb
+                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(16.AP, 8.NAV, startDato = 1.januar)), // 1.-24.jan
+                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(11.NAV, startDato = 7.februar)) // 7.-17.feb
             ),
             ghostOgAndreInntektskilder = emptyList()
         )
         val a2 = Arbeidsgiverberegning(
             yrkesaktivitet = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a2"),
             vedtaksperioder = listOf(
-                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(16.AP, 6.NAV, startDato = 20.januar), emptyMap()), // 20.jan-10.feb
-                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(11.NAV, startDato = 18.februar), emptyMap()) // 18.feb - 28.feb
+                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(16.AP, 6.NAV, startDato = 20.januar)), // 20.jan-10.feb
+                Vedtaksperiodeberegning(UUID.randomUUID(), tidslinjeOf(11.NAV, startDato = 18.februar)) // 18.feb - 28.feb
             ),
             ghostOgAndreInntektskilder = emptyList()
         )
