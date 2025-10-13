@@ -39,6 +39,7 @@ dependencies {
         exclude(group = "junit")
     }
 
+    testImplementation(testFixtures(project(":sykepenger-primitiver")))
     testImplementation(project(":sykepenger-mediators")) // for å få tilgang på db/migrations-filene
     testImplementation(libs.bundles.flyway)
 

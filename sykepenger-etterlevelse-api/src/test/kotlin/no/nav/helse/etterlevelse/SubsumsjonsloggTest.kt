@@ -1,6 +1,7 @@
 package no.nav.helse.etterlevelse
 
 import no.nav.helse.etterlevelse.Tidslinjedag.Companion.dager
+import no.nav.helse.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

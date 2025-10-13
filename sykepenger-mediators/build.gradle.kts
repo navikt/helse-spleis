@@ -22,6 +22,7 @@ dependencies {
     implementation(libs.bundles.flyway)
     implementation("com.github.navikt.tbd-libs:naisful-postgres:$tbdLibsVersion")
 
+    testImplementation(testFixtures(project(":sykepenger-primitiver")))
     testImplementation("com.github.navikt.tbd-libs:rapids-and-rivers-test:$tbdLibsVersion")
     testImplementation("com.github.navikt.tbd-libs:postgres-testdatabaser:$tbdLibsVersion")
     testImplementation("com.networknt:json-schema-validator:$jsonSchemaValidatorVersion")
