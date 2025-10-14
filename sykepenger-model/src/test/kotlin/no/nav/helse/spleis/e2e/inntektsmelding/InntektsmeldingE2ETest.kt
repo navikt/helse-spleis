@@ -132,6 +132,58 @@ import org.junit.jupiter.api.assertThrows
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
+    fun `Inntektsmelding som får spleis til å gå ned `() {
+        /***
+         * Her er noen jævlig viktige detaljer
+         * 1. Arbeidsgiverperioden må være fullført i en periode foran
+         * 2. Arbeidsgiver sender først inn inntektsmelding (les LPS/Altinn)
+         *    Den ligger og godgjør seg i Spedisjon i 30min (?)
+         * 3. Arbeidsgiver sender OGSÅ arbeidsgiveropplysninger (fra nav.no)
+         *    Den har merkelig nok en annen inntekt (veldig viktig)
+         *    Den håndteres av Spleis med en gang.
+         * 4. Nå har det gått 30min og vi håndterer inntektsmeldingen som egentlig kom først
+         *    Så de håndteres i motsatt rekkefølge av innsendingen
+         * 5. Behandling åpnes ikke pga dager, for de ligger i en annen periode
+         *    Behandling åpnes ikke pga refusjon, for det vi har har et nyere tidsstempel allerede
+         *    .. men vi forventer at en av de ovenfor har skjedd for å ha en åpen behandling å håndtere inntekten for
+         * 6. -> Feil
+         */
+        håndterSøknad(1.januar til 16.januar)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        val innsendtInntektsmelding = LocalDateTime.now()
+        val inntektInntektsmelding = 31000.månedlig
+        val innsendtArbeidsgiveropplysninger = innsendtInntektsmelding.plusMinutes(1)
+        val inntektArbeidsgiveropplysninger = 30000.månedlig
+
+        håndterSøknad(17.januar til 31.januar)
+        håndterArbeidsgiveropplysninger(
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            innsendt = innsendtArbeidsgiveropplysninger,
+            beregnetInntekt = inntektArbeidsgiveropplysninger,
+            refusjon = Refusjon(inntektArbeidsgiveropplysninger, null, emptyList())
+        )
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
+        val err = assertThrows<IllegalStateException> {
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                førsteFraværsdag = 1.januar,
+                mottatt = innsendtInntektsmelding,
+                beregnetInntekt = inntektInntektsmelding,
+                refusjon = Refusjon(inntektInntektsmelding  , null, emptyList())
+            )
+        }
+        assertEquals("forventer ikke at vedtaksperioden har en lukket behandling når inntekt håndteres", err.message)
+    }
+
+    @Test
     fun `Arbeidsgiver opplyser om endret refusjon før søknad som kommer out of order`() {
         håndterSøknad(januar)
         val im = håndterInntektsmelding(
