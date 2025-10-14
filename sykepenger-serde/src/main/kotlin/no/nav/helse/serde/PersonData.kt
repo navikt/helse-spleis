@@ -227,7 +227,7 @@ data class PersonData(
                     SelvstendigOpptjeningData.IKKE_OPPFYLT -> SelvstendigOpptjeningDto.IkkeOppfylt
                     SelvstendigOpptjeningData.IKKE_VURDERT -> SelvstendigOpptjeningDto.IkkeVurdert
                     null -> when (this.opptjening) {
-                        null -> SelvstendigOpptjeningDto.Oppfylt // Todo ikke alle er faktisk oppfylt, må gjøre noe lurt
+                        null -> SelvstendigOpptjeningDto.Oppfylt
                         else -> SelvstendigOpptjeningDto.IkkeVurdert
                     }
                 },

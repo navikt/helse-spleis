@@ -94,7 +94,7 @@ class Vilkårsgrunnlag(
     internal fun valider(aktivitetslogg: IAktivitetslogg, inntektsgrunnlag: Inntektsgrunnlag, selvstendigOpptjening: SelvstendigOpptjening, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
         arbeidsforhold.forEach { it.validerFrilans(aktivitetslogg, skjæringstidspunkt, arbeidsforhold, inntektsvurderingForSykepengegrunnlag) }
         val opptjening = opptjening()
-        subsumsjonslogg.logg(opptjening.subsumsjon)
+        if (opptjening is ArbeidstakerOpptjening) subsumsjonslogg.logg(opptjening.subsumsjon) // TODO: Må ryddes opp i
 
         if (behandlingsporing is Arbeidstaker) {
             if (!harInntektMånedenFørSkjæringstidspunkt) {
