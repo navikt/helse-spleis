@@ -12,7 +12,6 @@ import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.SykdomstidslinjeDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.deserialisering.ForberedendeVilkårsgrunnlagDto
-import no.nav.helse.dto.deserialisering.SelvstendigForsikringDto
 
 data class BehandlingendringUtDto(
     val id: UUID,
@@ -38,5 +37,4 @@ data class BehandlingendringUtDto(
     val faktaavklartInntekt: SelvstendigFaktaavklartInntektUtDto?,
     val ventetid: PeriodeDto?,
     val forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlagDto?,
-    val selvstendigForsikring: SelvstendigForsikringDto?
 )

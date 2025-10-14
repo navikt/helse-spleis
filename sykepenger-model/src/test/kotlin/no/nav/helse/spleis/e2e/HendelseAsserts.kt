@@ -52,7 +52,7 @@ internal fun <T : PersonHendelse> AbstractEndToEndTest.assertEtterspurt(løsning
 
 internal inline fun <reified R : Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Int = 100) {
     dag.let {
-        assertEquals(it::class, expectedDagtype)
+        assertEquals(expectedDagtype, it::class)
         it.økonomi.brukTotalGrad { totalGrad -> assertEquals(expectedTotalgrad, totalGrad) }
     }
 }

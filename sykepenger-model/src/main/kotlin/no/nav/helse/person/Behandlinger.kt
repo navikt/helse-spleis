@@ -10,7 +10,6 @@ import no.nav.helse.dto.deserialisering.BehandlingInnDto
 import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
 import no.nav.helse.dto.deserialisering.BehandlingerInnDto
 import no.nav.helse.dto.deserialisering.ForberedendeVilkårsgrunnlagDto
-import no.nav.helse.dto.deserialisering.SelvstendigForsikringDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.BehandlingendringUtDto
 import no.nav.helse.dto.serialisering.BehandlingerUtDto
@@ -110,9 +109,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         dokumentsporing: Dokumentsporing,
         behandlingkilde: Behandlingkilde,
         forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?,
-        selvstendigForsikring: Behandling.Endring.SelvstendigForsikring
+        selvstendigForsikring: Boolean?
     ) {
         check(behandlinger.isEmpty())
+
+        // Hvis bruker har oppgitt å ha forsikring så sier vi at
+        // nav overtar ansvar for dagene i ventetiden
+        val dagerNavOvertarAnsvar = when (selvstendigForsikring) {
+            null,
+            false -> emptyList()
+            true -> ventetid ?.let { listOf(ventetid) } ?: emptyList()
+        }
+
         val behandling = Behandling.nyBehandling(
             observatører = this.observatører,
             sykdomstidslinje = sykdomstidslinje,
@@ -123,9 +131,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             dokumentsporing = dokumentsporing,
             sykmeldingsperiode = sykmeldingsperiode,
             ventetid = ventetid,
+            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             behandlingkilde = behandlingkilde,
             forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag,
-            selvstendigForsikring = selvstendigForsikring
         )
         leggTilNyBehandling(behandling)
     }
@@ -157,14 +165,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun utbetalingstidslinjeBuilderForSelvstendig(): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode {
         val dekningsgrad = when (val arbeidssituasjon = behandlinger.last().arbeidssituasjon) {
             Arbeidssituasjon.BARNEPASSER,
-            Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> when (behandlinger.last().selvstendigForsikring) {
-                Behandling.Endring.SelvstendigForsikring.INGEN -> 80.prosent
-                Behandling.Endring.SelvstendigForsikring.ÅTTI_PROSENT_FRA_FØRSTE_DAG -> 80.prosent
-                Behandling.Endring.SelvstendigForsikring.HUNDRE_PROSENT_FRA_FØRSTE_DAG -> 100.prosent
-                Behandling.Endring.SelvstendigForsikring.HUNDRE_PROSENT_FRA_SYTTENDE_DAG -> 100.prosent
-                null -> error("Mangler informasjon om selvstendig forsikring for behandling ${behandlinger.last().id}")
-            }
-
+            Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> 80.prosent
             Arbeidssituasjon.JORDBRUKER -> 100.prosent
 
             Arbeidssituasjon.ANNET,
@@ -174,16 +175,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             Arbeidssituasjon.FRILANSER -> error("Har ikke implementert dekningsgrad for $arbeidssituasjon")
         }
 
-        val harVentetidsforsikring = when (behandlinger.last().selvstendigForsikring) {
-            Behandling.Endring.SelvstendigForsikring.INGEN,
-            Behandling.Endring.SelvstendigForsikring.HUNDRE_PROSENT_FRA_SYTTENDE_DAG -> false
-
-            Behandling.Endring.SelvstendigForsikring.ÅTTI_PROSENT_FRA_FØRSTE_DAG,
-            Behandling.Endring.SelvstendigForsikring.HUNDRE_PROSENT_FRA_FØRSTE_DAG -> true
-            null -> error("Mangler informasjon om selvstendig forsikring for behandling ${behandlinger.last().id}")
-        }
-
-        return SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(dekningsgrad, behandlinger.last().ventetid!!, harVentetidsforsikring)
+        return SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(dekningsgrad, behandlinger.last().ventetid!!, behandlinger.last().dagerNavOvertarAnsvar)
     }
 
     internal val maksdato get() = behandlinger.last().maksdato
@@ -502,7 +494,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val sykdomstidslinje get() = endringer.last().sykdomstidslinje
         val refusjonstidslinje get() = endringer.last().refusjonstidslinje
         val arbeidssituasjon get() = endringer.last().arbeidssituasjon
-        val selvstendigForsikring get() = endringer.last().selvstendigForsikring
         val ventetid get() = endringer.last().ventetid
         val utbetalingstidslinje get() = endringer.last().utbetalingstidslinje
         val faktaavklartInntekt get() = endringer.last().faktaavklartInntekt
@@ -629,7 +620,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val inntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
             val faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
             val forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?,
-            val selvstendigForsikring: SelvstendigForsikring?
         ) {
 
             fun view() = BehandlingendringView(
@@ -723,13 +713,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         }.toMap(),
                         faktaavklartInntekt = dto.faktaavklartInntekt?.let { SelvstendigFaktaavklartInntekt.gjenopprett(it) },
                         forberedendeVilkårsgrunnlag = dto.forberedendeVilkårsgrunnlag?.let { ForberedendeVilkårsgrunnlag.gjenopprett(it) },
-                        selvstendigForsikring = when (dto.selvstendigForsikring) {
-                            null -> null
-                            SelvstendigForsikringDto.HUNDRE_PROSENT_FRA_SYTTENDE_DAG -> SelvstendigForsikring.HUNDRE_PROSENT_FRA_SYTTENDE_DAG
-                            SelvstendigForsikringDto.INGEN -> SelvstendigForsikring.INGEN
-                            SelvstendigForsikringDto.ÅTTI_PROSENT_FRA_FØRSTE_DAG -> SelvstendigForsikring.ÅTTI_PROSENT_FRA_FØRSTE_DAG
-                            SelvstendigForsikringDto.HUNDRE_PROSENT_FRA_FØRSTE_DAG -> SelvstendigForsikring.HUNDRE_PROSENT_FRA_SYTTENDE_DAG
-                        }
                     )
                 }
             }
@@ -976,13 +959,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     faktaavklartInntekt = faktaavklartInntekt?.dto(),
                     ventetid = ventetid?.dto(),
                     forberedendeVilkårsgrunnlag = this.forberedendeVilkårsgrunnlag?.dto(),
-                    selvstendigForsikring = when (this.selvstendigForsikring) {
-                        null -> null
-                        SelvstendigForsikring.INGEN -> SelvstendigForsikringDto.INGEN
-                        SelvstendigForsikring.ÅTTI_PROSENT_FRA_FØRSTE_DAG -> SelvstendigForsikringDto.ÅTTI_PROSENT_FRA_FØRSTE_DAG
-                        SelvstendigForsikring.HUNDRE_PROSENT_FRA_FØRSTE_DAG -> SelvstendigForsikringDto.HUNDRE_PROSENT_FRA_FØRSTE_DAG
-                        SelvstendigForsikring.HUNDRE_PROSENT_FRA_SYTTENDE_DAG -> SelvstendigForsikringDto.HUNDRE_PROSENT_FRA_SYTTENDE_DAG
-                    }
                 )
             }
 
@@ -995,13 +971,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 FISKER,
                 JORDBRUKER,
                 ANNET
-            }
-
-            enum class SelvstendigForsikring {
-                INGEN,
-                ÅTTI_PROSENT_FRA_FØRSTE_DAG,
-                HUNDRE_PROSENT_FRA_FØRSTE_DAG,
-                HUNDRE_PROSENT_FRA_SYTTENDE_DAG
             }
 
             internal data class ForberedendeVilkårsgrunnlag(val erOpptjeningVurdertOk: Boolean) {
@@ -1532,9 +1501,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing: Dokumentsporing,
                 sykmeldingsperiode: Periode,
                 ventetid: Periode?,
+                dagerNavOvertarAnsvar: List<Periode>,
                 behandlingkilde: Behandlingkilde,
                 forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?,
-                selvstendigForsikring: Endring.SelvstendigForsikring?
             ) =
                 Behandling(
                     observatører = observatører,
@@ -1558,12 +1527,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             arbeidsgiverperiode = Arbeidsgiverperiodeavklaring(false, emptyList()),
                             ventetid = ventetid,
                             egenmeldingsdager = egenmeldingsdager,
-                            dagerNavOvertarAnsvar = emptyList(),
+                            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert,
                             inntektjusteringer = emptyMap(),
                             faktaavklartInntekt = faktaavklartInntekt,
                             forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag,
-                            selvstendigForsikring = selvstendigForsikring
                         )
                     ),
                     avsluttet = null,

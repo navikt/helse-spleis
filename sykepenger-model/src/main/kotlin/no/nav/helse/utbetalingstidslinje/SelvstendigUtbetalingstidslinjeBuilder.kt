@@ -14,7 +14,7 @@ import no.nav.helse.økonomi.Økonomi
 internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
     private val dekningsgrad: Prosentdel,
     private val ventetid: Periode,
-    private val harVentetidsforsikring: Boolean
+    private val dagerNavOvertarAnsvar: List<Periode>
 ) : UtbetalingstidslinjeBuilder {
     private fun medInntektHvisFinnes(grad: Prosentdel, næringsinntekt: Inntekt): Økonomi {
         return medInntekt(grad, næringsinntekt)
@@ -37,14 +37,16 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                 is Dag.Arbeidsdag -> arbeidsdag(builder, dag.dato, inntekt)
                 is Dag.ForeldetSykedag -> foreldetdag(builder, dag.dato, dag.grad, inntekt)
                 is Dag.FriskHelgedag -> arbeidsdag(builder, dag.dato, inntekt)
-                is Dag.SykHelgedag -> if (dag.dato in ventetid)
-                    ventetidsdag(builder, dag.dato, dag.grad, inntekt)
-                else
-                    helg(builder, dag.dato, dag.grad, inntekt)
-                is Dag.Sykedag -> if (dag.dato in ventetid)
-                    ventetidsdag(builder, dag.dato, dag.grad, inntekt)
-                else
-                    navDag(builder, dag.dato, dag.grad, inntekt)
+                is Dag.SykHelgedag ->
+                    if (dag.dato in ventetid)
+                        ventetidsdag(builder, dag.dato, dag.grad, inntekt, false)
+                    else
+                        helg(builder, dag.dato, dag.grad, inntekt)
+                is Dag.Sykedag ->
+                    if (dag.dato in ventetid)
+                        ventetidsdag(builder, dag.dato, dag.grad, inntekt, navSkalUtbetaleVentetidsDag(dag.dato))
+                    else
+                        navDag(builder, dag.dato, dag.grad, inntekt)
                 is Dag.AndreYtelser -> {
                     val begrunnelse = when (dag.ytelse) {
                         Dag.AndreYtelser.AnnenYtelse.AAP -> Begrunnelse.AndreYtelserAap
@@ -70,6 +72,10 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         return builder.build()
     }
 
+    private fun navSkalUtbetaleVentetidsDag(dato: LocalDate): Boolean {
+        return dagerNavOvertarAnsvar.any { it.contains(dato) }
+    }
+
     private fun helg(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel, næringsinntekt: Inntekt) {
         builder.addHelg(dato, medInntektHvisFinnes(grad, næringsinntekt).ikkeBetalt())
     }
@@ -82,8 +88,12 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         builder.addArbeidsdag(dato, medInntektHvisFinnes(0.prosent, næringsinntekt).ikkeBetalt())
     }
 
-    private fun ventetidsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel, næringsinntekt: Inntekt) {
-        builder.addVentetidsdag(dato, medInntektHvisFinnes(sykdomsgrad, næringsinntekt).ikkeBetalt())
+    private fun ventetidsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel, næringsinntekt: Inntekt, skalUtbetales: Boolean) {
+        if (skalUtbetales) {
+            builder.addVentetidsdag(dato, medInntektHvisFinnes(sykdomsgrad, næringsinntekt))
+        } else {
+            builder.addVentetidsdag(dato, medInntektHvisFinnes(sykdomsgrad, næringsinntekt).ikkeBetalt())
+        }
     }
 
     private fun foreldetdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel, næringsinntekt: Inntekt) {

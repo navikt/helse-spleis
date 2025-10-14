@@ -221,7 +221,7 @@ internal class Vedtaksperiode private constructor(
         inntektsendringer: Beløpstidslinje = Beløpstidslinje(),
         ventetid: Periode?,
         forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?,
-        selvstendigForsikring: Behandlinger.Behandling.Endring.SelvstendigForsikring?,
+        selvstendigForsikring: Boolean?,
         regelverkslogg: Regelverkslogg
     ) : this(
         person = person,

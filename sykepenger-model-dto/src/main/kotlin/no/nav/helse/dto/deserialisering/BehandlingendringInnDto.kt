@@ -34,5 +34,4 @@ data class BehandlingendringInnDto(
     val faktaavklartInntekt: SelvstendigFaktaavklartInntektInnDto?,
     val ventetid: PeriodeDto?,
     val forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlagDto?,
-    val selvstendigForsikring: SelvstendigForsikringDto?
 )

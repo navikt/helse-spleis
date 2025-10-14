@@ -204,14 +204,4 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             "TIL_INFOTRYGD"
         )
     }
-
-    @Test
-    fun `Kaster ut selvstendig søknad med oppgitt ventetidsforsikring`() {
-        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
-        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE, harOppgittForsikring = true)
-        assertTilstander(
-            0,
-            "TIL_INFOTRYGD"
-        )
-    }
 }
