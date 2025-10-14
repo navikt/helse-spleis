@@ -113,6 +113,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
@@ -1904,9 +1905,14 @@ internal class Vedtaksperiode private constructor(
         )
         val selvstendigOpptjening = when (yrkesaktivitet.yrkesaktivitetstype) {
             is Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
-                val erOpptjeningVurdertOk = behandlinger.forberedendeVilkårsgrunnlag?.erOpptjeningVurdertOk
-                check(erOpptjeningVurdertOk == true) { "Opptjening for selvstendige er ikke vurdert ok eller finnes ikke. Det skal vel ikke skje?" }
-                SelvstendigOpptjeningOppfylt
+                when (behandlinger.forberedendeVilkårsgrunnlag?.erOpptjeningVurdertOk) {
+                    null -> {
+                        aktivitetslogg.varsel(RV_OV_4)
+                        SelvstendigOpptjeningOppfylt
+                    }
+                    true -> SelvstendigOpptjeningOppfylt
+                    false -> error("Når sykmeldte har informert om at hen har hatt fravær før sykmelding skal søknaden være kastet ut før vi kommer hit!")
+                }
             }
 
             is Arbeidstaker -> SelvstendigOpptjeningIkkeVurdert
