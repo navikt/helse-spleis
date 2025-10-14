@@ -14,7 +14,7 @@ data class Vedtaksperiodeberegning(
 
 fun filtrerUtbetalingstidslinjer(
     uberegnetTidslinjePerArbeidsgiver: List<Arbeidsgiverberegning>,
-    sykepengegrunnlag: Inntekt,
+    sykepengegrunnlagBegrenset6G: Inntekt,
     erMedlemAvFolketrygden: Boolean,
     harOpptjening: Boolean,
     sekstisyvårsdagen: LocalDate,
@@ -52,7 +52,7 @@ fun filtrerUtbetalingstidslinjer(
             maksdatoberegning = maksdatoberegning
         ),
         MaksimumUtbetalingFilter(
-            sykepengegrunnlagBegrenset6G = sykepengegrunnlag
+            sykepengegrunnlagBegrenset6G = sykepengegrunnlagBegrenset6G
         )
     )
 

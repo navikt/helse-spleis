@@ -1061,7 +1061,7 @@ internal class Vedtaksperiode private constructor(
         val beregnetTidslinjePerVedtaksperiode = filtrerUtbetalingstidslinjer(
             uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
             harOpptjening = harOpptjening,
-            sykepengegrunnlag = sykepengegrunnlag,
+            sykepengegrunnlagBegrenset6G = sykepengegrunnlag,
             erMedlemAvFolketrygden = medlemskapstatus != Medlemskapsvurdering.Medlemskapstatus.Nei,
             sekstisyvårsdagen = person.alder.redusertYtelseAlder,
             syttiårsdagen = person.alder.syttiårsdagen,

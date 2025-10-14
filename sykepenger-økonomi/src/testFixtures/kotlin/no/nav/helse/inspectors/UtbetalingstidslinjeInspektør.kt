@@ -27,16 +27,27 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     val sistedato = utbetalingstidslinje.lastOrNull()?.dato ?: LocalDate.MAX
 
     var arbeidsdagTeller = 0
+        private set
     var arbeidsgiverperiodeDagTeller = 0
+        private set
     var ventetidDagTeller = 0
+        private set
     var arbeidsgiverperiodedagNavTeller = 0
+        private set
     var avvistDagTeller = 0
+        private set
     var fridagTeller = 0
+        private set
     var navDagTeller = 0
+        private set
     var navHelgDagTeller = 0
+        private set
     var foreldetDagTeller = 0
+        private set
     var ukjentDagTeller = 0
-    var totalUtbetaling = 0.0
+        private set
+    var totalUtbetaling = 0
+        private set
 
     val navdager = mutableListOf<NavDag>()
     val navHelgdager = mutableListOf<NavHelgDag>()
@@ -77,7 +88,7 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
         navHelgDagTeller = 0
         ukjentDagTeller = 0
         ventetidDagTeller = 0
-        totalUtbetaling = 0.0
+        totalUtbetaling = 0
 
         utbetalingstidslinje.forEach { dag ->
             when (dag) {
@@ -148,6 +159,7 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
 
     fun grad(dag: LocalDate) = økonomi.getValue(dag).brukAvrundetGrad { grad -> grad }
     fun arbeidsgiverbeløp(dag: LocalDate) = økonomi.getValue(dag).inspektør.arbeidsgiverbeløp
+    fun personbeløp(dag: LocalDate) = økonomi.getValue(dag).inspektør.personbeløp
 
     fun totalUtbetaling() = totalUtbetaling
 

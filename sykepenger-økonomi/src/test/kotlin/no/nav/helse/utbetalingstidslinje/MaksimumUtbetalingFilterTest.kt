@@ -17,7 +17,7 @@ internal class MaksimumUtbetalingFilterTest {
     fun `når inntekt er under 6G blir utbetaling lik inntekt`() {
         val inntekt = 1200.daglig
         val tidslinje = tidslinjeOf(12.NAV(inntekt.daglig)).betal(inntekt)
-        assertEquals(12000.0, tidslinje.inspektør.totalUtbetaling())
+        assertEquals(12000, tidslinje.inspektør.totalUtbetaling())
     }
 
     @Test
@@ -25,7 +25,7 @@ internal class MaksimumUtbetalingFilterTest {
         val inntektOver6G = 3500.daglig
         val `6G`= 2161.daglig
         val tidslinje = tidslinjeOf(12.NAV(inntektOver6G.daglig)).betal(`6G`)
-        assertEquals(21610.0, tidslinje.inspektør.totalUtbetaling())
+        assertEquals(21610, tidslinje.inspektør.totalUtbetaling())
     }
 
     @Test
@@ -42,14 +42,14 @@ internal class MaksimumUtbetalingFilterTest {
     fun `selv om utbetaling blir begrenset til 6G får utbetaling for tidslinje med gradert sykdom gradert utbetaling`() {
         val sykepengegrunnlag= 561804.årlig
         val tidslinje = tidslinjeOf(12.NAV(3500.0, 50.0)).betal(sykepengegrunnlag)
-        assertEquals(10800.0, tidslinje.inspektør.totalUtbetaling())
+        assertEquals(10800, tidslinje.inspektør.totalUtbetaling())
     }
 
     @Test
     fun `utbetaling for tidslinje med gradert sykdom får gradert utbetaling`() {
         val sykepengegrunnlag= 1200.daglig
         val tidslinje = tidslinjeOf(12.NAV(1200.0, 50.0)).betal(sykepengegrunnlag)
-        assertEquals(6000.0, tidslinje.inspektør.totalUtbetaling())
+        assertEquals(6000, tidslinje.inspektør.totalUtbetaling())
     }
 
     private fun Utbetalingstidslinje.betal(sykepengegrunnlag: Inntekt): Utbetalingstidslinje {
