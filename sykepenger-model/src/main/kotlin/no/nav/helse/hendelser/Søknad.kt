@@ -186,7 +186,12 @@ class Søknad(
         if (harOppgittAvvikling == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_47)
         if (harOppgittNyIArbeidslivet == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_48)
         if (harOppgittVarigEndring == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_49)
-        if (harOppgittÅHaForsikring == true) aktivitetslogg.varsel(Varselkode.RV_SØ_50)
+
+        if (harOppgittÅHaForsikring == true) {
+            if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_SØ_50)
+            else aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_50)
+        }
+
 
         if (pensjonsgivendeInntekter?.harFlereTyperPensjonsgivendeInntekt() == true) aktivitetslogg.funksjonellFeil(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`)
 

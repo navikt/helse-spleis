@@ -598,7 +598,16 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `foreslår utbetaling på 80 prosent dekning ved oppgitt forsikring`() {
+    fun `kaster ut når bruker har oppgitt at hen har oppgitt forsikring`() = Toggle.SelvstendigForsikring.disable {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar, harOppgittÅHaForsikring = true)
+            assertFunksjonellFeil(Varselkode.RV_SØ_50, 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `foreslår utbetaling på 80 prosent dekning ved oppgitt forsikring`() = Toggle.SelvstendigForsikring.enable {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, harOppgittÅHaForsikring = true)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
