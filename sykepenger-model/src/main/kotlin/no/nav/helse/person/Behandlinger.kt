@@ -133,7 +133,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             ventetid = ventetid,
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             behandlingkilde = behandlingkilde,
-            forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag,
+            forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag
         )
         leggTilNyBehandling(behandling)
     }
@@ -166,6 +166,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val dekningsgrad = when (val arbeidssituasjon = behandlinger.last().arbeidssituasjon) {
             Arbeidssituasjon.BARNEPASSER,
             Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> 80.prosent
+
             Arbeidssituasjon.JORDBRUKER -> 100.prosent
 
             Arbeidssituasjon.ANNET,
@@ -619,7 +620,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val maksdatoresultat: Maksdatoresultat,
             val inntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
             val faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
-            val forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?,
+            val forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?
         ) {
 
             fun view() = BehandlingendringView(
@@ -712,7 +713,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             Inntektskilde.gjenopprett(inntektskildeDto) to Beløpstidslinje.gjenopprett(beløpstidslinjeDto)
                         }.toMap(),
                         faktaavklartInntekt = dto.faktaavklartInntekt?.let { SelvstendigFaktaavklartInntekt.gjenopprett(it) },
-                        forberedendeVilkårsgrunnlag = dto.forberedendeVilkårsgrunnlag?.let { ForberedendeVilkårsgrunnlag.gjenopprett(it) },
+                        forberedendeVilkårsgrunnlag = dto.forberedendeVilkårsgrunnlag?.let { ForberedendeVilkårsgrunnlag.gjenopprett(it) }
                     )
                 }
             }
@@ -958,7 +959,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     }.toMap(),
                     faktaavklartInntekt = faktaavklartInntekt?.dto(),
                     ventetid = ventetid?.dto(),
-                    forberedendeVilkårsgrunnlag = this.forberedendeVilkårsgrunnlag?.dto(),
+                    forberedendeVilkårsgrunnlag = this.forberedendeVilkårsgrunnlag?.dto()
                 )
             }
 
@@ -1503,7 +1504,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 ventetid: Periode?,
                 dagerNavOvertarAnsvar: List<Periode>,
                 behandlingkilde: Behandlingkilde,
-                forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?,
+                forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?
             ) =
                 Behandling(
                     observatører = observatører,
