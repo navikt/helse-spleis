@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 
 internal data object SelvstendigAvventerGodkjenning : Vedtaksperiodetilstand {
     override val type = TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING
@@ -16,6 +17,8 @@ internal data object SelvstendigAvventerGodkjenning : Vedtaksperiodetilstand {
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+        if (vedtaksperiode.behandlinger.forberedendeVilkårsgrunnlag?.erOpptjeningVurdertOk == true) return vedtaksperiode.trengerGodkjenning(aktivitetslogg)
+        aktivitetslogg.varsel(Varselkode.RV_OV_4)
         vedtaksperiode.trengerGodkjenning(aktivitetslogg)
     }
 
