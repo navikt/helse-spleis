@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.Year
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -10,6 +11,7 @@ import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.selvstendig
+import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
@@ -29,6 +31,7 @@ import no.nav.helse.oktober
 import no.nav.helse.person.SelvstendigOpptjeningIkkeVurdert
 import no.nav.helse.person.SelvstendigOpptjeningOppfylt
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING
@@ -50,9 +53,45 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertNull
+import org.junit.jupiter.api.assertThrows
 
 internal class SelvstendigTest : AbstractDslTest() {
+
+    @Test
+    fun `Når skjæringstidspunktet flyttes til forlengelsessøknaden så går vi på tryne, for den har ikke noe forberende vilkårsgrunnlag`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+            håndterForlengelsessøknadSelvstendig(februar)
+            assertSisteTilstand(2.vedtaksperiode, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE)
+
+            håndterOverstyrTidslinje(januar.map { ManuellOverskrivingDag(it, Dagtype.Arbeidsdag) })
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+
+            assertForventetFeil(
+                forklaring = "Når skjæringstidspunktet flyttes til forlengelsessøknaden så går vi på tryne, for den har ikke noe forberende vilkårsgrunnlag",
+                nå = {
+                    val feil = assertThrows<IllegalStateException> {
+                        håndterVilkårsgrunnlagSelvstendig(2.vedtaksperiode)
+                    }
+                    assertEquals("Opptjening for selvstendige er ikke vurdert ok eller finnes ikke. Det skal vel ikke skje?", feil.message)
+                },
+                ønsket = {
+                    assertDoesNotThrow {
+                        håndterVilkårsgrunnlagSelvstendig(2.vedtaksperiode)
+                    }
+                    assertSisteTilstand(2.vedtaksperiode, SELVSTENDIG_AVVENTER_HISTORIKK)
+                }
+            )
+        }
+    }
 
     @Test
     fun `En selvstendig som er sendt til godkjenning før spørsmål om fravær før sykmelding fra søknad ble hensyntatt`() {
