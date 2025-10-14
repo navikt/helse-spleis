@@ -15,9 +15,9 @@ internal open class AnmodningOmForkastingRiver(
     override val riverName = "anmodningOmForkasting"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("organisasjonsnummer", "fødselsnummer")
+        message.requireKey("fødselsnummer", "yrkesaktivitetstype")
         message.require("vedtaksperiodeId") { UUID.fromString(it.asText()) }
-        message.interestedIn("force")
+        message.interestedIn("force", "organisasjonsnummer")
     }
 
     override fun createMessage(packet: JsonMessage) = AnmodningOmForkastingMessage(
