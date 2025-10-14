@@ -19,10 +19,11 @@ internal class AnmodningOmForkastingRiverTest : RiverTest() {
 
 
     @Language("JSON")
-    private fun json(vedtaksperiodeId: String? = UUID.randomUUID().toString()) = """
+    private fun json(vedtaksperiodeId: String? = UUID.randomUUID().toString(), yrkesaktivitetstype: String = "ARBEIDSTAKER") = """
       {
           "@event_name": "anmodning_om_forkasting",
           "@id": "${UUID.randomUUID()}",
+          "yrkesaktivitetstype": "$yrkesaktivitetstype",
           "vedtaksperiodeId": "$vedtaksperiodeId",
           "organisasjonsnummer": "orgnummer",
           "@opprettet": "2023-04-03T11:25:00",

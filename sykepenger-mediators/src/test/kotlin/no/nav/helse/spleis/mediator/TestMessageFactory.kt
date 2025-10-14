@@ -1350,10 +1350,11 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagAnmodningOmForkasting(vedtaksperiodeId: UUID = UUID.randomUUID()): Pair<String, String> {
+    fun lagAnmodningOmForkasting(vedtaksperiodeId: UUID = UUID.randomUUID(), yrkesaktivitetstype: String = "ARBEIDSTAKER"): Pair<String, String> {
         return nyHendelse(
             "anmodning_om_forkasting", mapOf(
             "fødselsnummer" to fødselsnummer,
+            "yrkesaktivitetstype" to yrkesaktivitetstype,
             "organisasjonsnummer" to organisasjonsnummer,
             "vedtaksperiodeId" to vedtaksperiodeId
         )
