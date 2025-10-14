@@ -16,7 +16,7 @@ sealed class VilkårsgrunnlagUtDto {
         override val skjæringstidspunkt: LocalDate,
         override val inntektsgrunnlag: InntektsgrunnlagUtDto,
         val opptjening: OpptjeningUtDto?,
-        val selvstendigOpptjening: SelvstendigOpptjeningDto?,
+        val selvstendigOpptjening: SelvstendigOpptjeningDto,
         val medlemskapstatus: MedlemskapsvurderingDto,
         val vurdertOk: Boolean,
         val meldingsreferanseId: MeldingsreferanseDto?
