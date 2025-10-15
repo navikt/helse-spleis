@@ -206,7 +206,6 @@ data class PersonData(
         val opptjening: OpptjeningData?,
         val selvstendigOpptjening: SelvstendigOpptjeningData?,
         val medlemskapstatus: JsonMedlemskapstatus?,
-        val vurdertOk: Boolean?,
         val meldingsreferanseId: UUID?,
         val vilkårsgrunnlagId: UUID
     ) {
@@ -232,7 +231,6 @@ data class PersonData(
                     }
                 },
                 medlemskapstatus = this.medlemskapstatus!!.tilDto(),
-                vurdertOk = this.vurdertOk!!,
                 meldingsreferanseId = this.meldingsreferanseId?.let { MeldingsreferanseDto(it) }
             )
         }

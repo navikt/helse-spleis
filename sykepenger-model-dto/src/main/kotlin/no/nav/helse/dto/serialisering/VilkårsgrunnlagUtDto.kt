@@ -18,7 +18,6 @@ sealed class VilkårsgrunnlagUtDto {
         val opptjening: OpptjeningUtDto?,
         val selvstendigOpptjening: SelvstendigOpptjeningDto,
         val medlemskapstatus: MedlemskapsvurderingDto,
-        val vurdertOk: Boolean,
         val meldingsreferanseId: MeldingsreferanseDto?
     ) : VilkårsgrunnlagUtDto()
 

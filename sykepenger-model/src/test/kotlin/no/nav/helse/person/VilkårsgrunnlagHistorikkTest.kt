@@ -63,7 +63,6 @@ internal class VilkårsgrunnlagHistorikkTest {
                 opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforholdFraHistorikk, skjæringstidspunkt),
                 selvstendigOpptjening = SelvstendigOpptjeningIkkeVurdert,
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-                vurdertOk = true,
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
@@ -93,7 +92,6 @@ internal class VilkårsgrunnlagHistorikkTest {
                 opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt),
                 selvstendigOpptjening = SelvstendigOpptjeningIkkeVurdert,
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-                vurdertOk = true,
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
                 vilkårsgrunnlagId = UUID.randomUUID()
             )

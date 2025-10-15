@@ -103,7 +103,6 @@ data class SpannerPersonDto(
         val opptjening: OpptjeningData?,
         val selvstendigOpptjening: SelvstendigOpptjening,
         val medlemskapstatus: MedlemskapstatusDto?,
-        val vurdertOk: Boolean?,
         val meldingsreferanseId: UUID?,
         val vilkårsgrunnlagId: UUID
     ) {
@@ -1664,10 +1663,6 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = VilkårsgrunnlagElementData(
             MedlemskapsvurderingDto.VetIkke -> VilkårsgrunnlagElementData.MedlemskapstatusDto.VET_IKKE
         }
 
-        else -> null
-    },
-    vurdertOk = when (this) {
-        is VilkårsgrunnlagUtDto.Spleis -> this.vurdertOk
         else -> null
     },
     meldingsreferanseId = when (this) {

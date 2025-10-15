@@ -230,7 +230,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         opptjening: Opptjening,
         val selvstendigOpptjening: SelvstendigOpptjening,
         val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
-        private val vurdertOk: Boolean, // TODO: Fjern meg
         val meldingsreferanseId: MeldingsreferanseId?,
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjening) {
@@ -293,7 +292,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 opptjening = opptjening ?: this.opptjening!!,
                 selvstendigOpptjening = selvstendigOpptjening,
                 medlemskapstatus = medlemskapstatus,
-                vurdertOk = vurdertOk,
                 meldingsreferanseId = meldingsreferanseId,
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
@@ -315,7 +313,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 Medlemskapsvurdering.Medlemskapstatus.VetIkke -> MedlemskapsvurderingDto.VetIkke
                 Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål -> MedlemskapsvurderingDto.UavklartMedBrukerspørsmål
             },
-            vurdertOk = vurdertOk,
             meldingsreferanseId = meldingsreferanseId?.dto()
         )
 
@@ -333,7 +330,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                         MedlemskapsvurderingDto.UavklartMedBrukerspørsmål -> Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål
                         MedlemskapsvurderingDto.VetIkke -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
                     },
-                    vurdertOk = dto.vurdertOk,
                     meldingsreferanseId = dto.meldingsreferanseId?.let { MeldingsreferanseId.gjenopprett(it) }
                 )
             }

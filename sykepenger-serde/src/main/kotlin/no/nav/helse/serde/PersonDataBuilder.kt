@@ -864,10 +864,6 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagE
 
         else -> null
     },
-    vurdertOk = when (this) {
-        is VilkårsgrunnlagUtDto.Spleis -> this.vurdertOk
-        else -> null
-    },
     meldingsreferanseId = when (this) {
         is VilkårsgrunnlagUtDto.Spleis -> this.meldingsreferanseId?.id
         else -> null

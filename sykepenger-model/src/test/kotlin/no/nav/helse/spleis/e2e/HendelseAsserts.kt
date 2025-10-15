@@ -166,6 +166,8 @@ internal fun Aktivitetslogg.assertIngenInfo(forventet: String, filter: Aktivitet
 internal fun Aktivitetslogg.assertVarsler(varsel: List<Varselkode>, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
     AktivitetsloggAsserts(this, assertetVarsler).assertVarsler(varsel, filter)
 
+internal fun Aktivitetslogg.assertIngenVarsler() = assertVarsler(emptyList())
+
 internal fun Aktivitetslogg.assertVarsel(varsel: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
     AktivitetsloggAsserts(this, assertetVarsler).assertVarsel(varsel, filter)
 

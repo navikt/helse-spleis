@@ -104,14 +104,12 @@ class Vilkårsgrunnlag(
             }
         }
 
-        val medlemskapsvurderingOk = medlemskapsvurdering.valider(aktivitetslogg)
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
             inntektsgrunnlag = inntektsgrunnlag,
             opptjening = opptjening,
             selvstendigOpptjening = selvstendigOpptjening,
-            medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
-            vurdertOk = medlemskapsvurderingOk,
+            medlemskapstatus = medlemskapsvurdering.validert(aktivitetslogg),
             meldingsreferanseId = metadata.meldingsreferanseId,
             vilkårsgrunnlagId = UUID.randomUUID()
         )
