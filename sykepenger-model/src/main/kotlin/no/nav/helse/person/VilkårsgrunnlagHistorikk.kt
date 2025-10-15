@@ -191,6 +191,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         internal companion object {
+            internal val VilkårsgrunnlagElement.selvstendigOpptjening get() = when(this) {
+                is Grunnlagsdata -> this.selvstendigOpptjening
+                is InfotrygdVilkårsgrunnlag -> SelvstendigOpptjeningIkkeVurdert
+            }
+
             internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {
                 val skjæringstidspunkter = elementer
                     .map { it.skjæringstidspunkt }

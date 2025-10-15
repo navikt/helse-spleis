@@ -85,6 +85,7 @@ import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrTidslinje
 import no.nav.helse.person.Dokumentsporing.Companion.søknad
 import no.nav.helse.person.Venteårsak.Companion.fordi
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.selvstendigOpptjening
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -1045,6 +1046,21 @@ internal class Vedtaksperiode private constructor(
         håndterYtelser(ytelser, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk, nesteSimuleringtilstand, nesteGodkjenningtilstand)
     }
 
+    private fun harOpptjening(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) = when (yrkesaktivitet.yrkesaktivitetstype) {
+        is Arbeidstaker -> when (val arbeidstakerOpptjening = grunnlagsdata.opptjening) {
+            is ArbeidstakerOpptjening -> arbeidstakerOpptjening.harTilstrekkeligAntallOpptjeningsdager()
+            is SelvstendigNæringsdrivendeOpptjening -> error("Mangler opptjeningsvurdering for arbeidstaker")
+            null -> true // TODO: Dette er jo liksom Infotrygd, men bør være litt mer eksplisitt syns jeg..
+        }
+        Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (grunnlagsdata.selvstendigOpptjening) {
+            SelvstendigOpptjeningOppfylt -> true
+            SelvstendigOpptjeningIkkeOppfylt -> false
+            SelvstendigOpptjeningIkkeVurdert -> error("Mangler opptjeningsvurdering for selvstendig")
+        }
+        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+        Behandlingsporing.Yrkesaktivitet.Frilans -> error("Har ikke opptjeningsvurdering for Arbeidsledig/Frilans")
+    }
+
     private fun håndterYtelser(ytelser: Ytelser, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk, nesteSimuleringtilstand: Vedtaksperiodetilstand, nesteGodkjenningtilstand: Vedtaksperiodetilstand) {
         val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
@@ -1055,11 +1071,7 @@ internal class Vedtaksperiode private constructor(
         val inntektsperioder = ytelser.inntektsendringer()
         val uberegnetTidslinjePerArbeidsgiver = lagArbeidsgiverberegning(perioderSomMåHensyntasVedBeregning, grunnlagsdata, inntektsperioder)
         // steg 3: beregn alle utbetalingstidslinjer (avslå dager, beregne maksdato og utbetalingsbeløp)
-        val harOpptjening = when (val opptjening = grunnlagsdata.opptjening) {
-            is ArbeidstakerOpptjening -> opptjening.harTilstrekkeligAntallOpptjeningsdager()
-            is SelvstendigNæringsdrivendeOpptjening -> true
-            null -> true
-        }
+        val harOpptjening = harOpptjening(grunnlagsdata)
         val sykepengegrunnlag = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag
         val beregningsgrunnlag = grunnlagsdata.inntektsgrunnlag.beregningsgrunnlag
         val medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus
