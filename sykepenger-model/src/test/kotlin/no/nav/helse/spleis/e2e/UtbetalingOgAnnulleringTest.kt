@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDateTime
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.a2
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.hendelser.Dagtype
@@ -43,6 +44,21 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `vedtaksperiode oppretter utbetaling for seg selv og andre`() {
+        nyPeriode(januar, a1)
+        nyPeriode(januar, a2)
+
+        håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a2)
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        assertEquals(1, observatør.vedtaksperiodeUtbetalinger(1.vedtaksperiode, a1).size)
+        assertEquals(1, observatør.vedtaksperiodeUtbetalinger(1.vedtaksperiode, a2).size)
+    }
 
     @Test
     fun `tillater ikke opprettelse av overlappende oppdrag`() {

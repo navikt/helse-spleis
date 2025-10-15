@@ -75,6 +75,7 @@ import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.mapWithNext
 import no.nav.helse.nesteDag
+import no.nav.helse.person.Behandlinger.Behandling.Endring
 import no.nav.helse.person.Behandlinger.Behandling.Endring.ForberedendeVilkårsgrunnlag
 import no.nav.helse.person.Behandlinger.Behandlingkilde
 import no.nav.helse.person.Behandlinger.Companion.berik
@@ -177,7 +178,9 @@ import no.nav.helse.person.tilstandsmaskin.Vedtaksperiodetilstand
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverberegningBuilder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
@@ -1099,7 +1102,7 @@ internal class Vedtaksperiode private constructor(
         )
         // steg 4: lag et utbetalingsobjekt for vedtaksperioder som ikke har fått det enda (én per arbeidsgiver)
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
-        lagUtbetalinger(aktivitetslogg, perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioder)
+        lagBeregnetBehandlinger(aktivitetslogg, perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioder)
 
         // steg 5: lage varsler ved gitte situasjoner
         vurderVarsler(aktivitetslogg, ytelser, infotrygdhistorikk, grunnlagsdata, minsteinntektsvurdering, harOpptjening, beregnetTidslinjePerVedtaksperiode)
@@ -1111,58 +1114,46 @@ internal class Vedtaksperiode private constructor(
         høstingsresultater(aktivitetslogg, nesteSimuleringtilstand, nesteGodkjenningtilstand)
     }
 
-    private fun lagUtbetalinger(
+    private fun lagBeregnetBehandlinger(
         aktivitetslogg: IAktivitetslogg,
         perioderDetSkalBeregnesUtbetalingFor: List<Vedtaksperiode>,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         beregnetTidslinjePerVedtaksperiode: List<BeregnetPeriode>,
         inntektsperioder: List<Triple<Arbeidsgiverberegning.Yrkesaktivitet, Kilde, InntekterForBeregning.Inntektsperiode>>
-    ) {
+    ): List<BeregnetBehandling> {
+        if (perioderDetSkalBeregnesUtbetalingFor.isEmpty()) return emptyList()
+
         check(perioderDetSkalBeregnesUtbetalingFor.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
             "ugyldig situasjon: skal beregne utbetaling for vedtaksperioder med ulike skjæringstidspunkter"
         }
-        perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
-            val beregningsutfall = beregnetTidslinjePerVedtaksperiode.single { it.vedtaksperiodeId == other.id }
-            val alleInntektjusteringer = inntektsperioder
-                .groupBy { (yrkesaktivitet, _) -> Inntektskilde(
-                    id = when (yrkesaktivitet) {
-                        Arbeidsgiverberegning.Yrkesaktivitet.Arbeidsledig -> "ARBEIDSLEDIG"
-                        is Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker -> yrkesaktivitet.organisasjonsnummer
-                        Arbeidsgiverberegning.Yrkesaktivitet.Frilans -> "FRILANS"
-                        Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
-                    }
-                ) }
-                .mapValues {
-                    it.value.fold(Beløpstidslinje()) { resultat, (_, kilde, inntektsperiode) ->
-                        resultat + Beløpstidslinje.fra(inntektsperiode.fom til listOfNotNull(inntektsperiode.tom, other.periode.endInclusive).min(), inntektsperiode.inntekt, kilde)
-                    }
+        val sisteTom = perioderDetSkalBeregnesUtbetalingFor.maxOf { it.periode.endInclusive }
+        val alleInntektjusteringer = inntektsperioder
+            .groupBy { (yrkesaktivitet, _) -> Inntektskilde(
+                id = when (yrkesaktivitet) {
+                    Arbeidsgiverberegning.Yrkesaktivitet.Arbeidsledig -> "ARBEIDSLEDIG"
+                    is Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker -> yrkesaktivitet.organisasjonsnummer
+                    Arbeidsgiverberegning.Yrkesaktivitet.Frilans -> "FRILANS"
+                    Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
                 }
+            ) }
+            .mapValues {
+                it.value.fold(Beløpstidslinje()) { resultat, (_, kilde, inntektsperiode) ->
+                    resultat + Beløpstidslinje.fra(inntektsperiode.fom til listOfNotNull(inntektsperiode.tom, sisteTom).min(), inntektsperiode.inntekt, kilde)
+                }
+            }
 
-            other.lagNyUtbetaling(
-                aktivitetslogg = other.registrerKontekst(aktivitetslogg),
-                beregning = BeregnetBehandling(
-                    maksdatoresultat = Maksdatoresultat(
-                        vurdertTilOgMed = beregningsutfall.maksdatoresultat.vurdertTilOgMed,
-                        bestemmelse = when (beregningsutfall.maksdatoresultat.bestemmelse) {
-                            BeregnetMaksdato.Bestemmelse.IKKE_VURDERT -> Maksdatoresultat.Bestemmelse.IKKE_VURDERT
-                            BeregnetMaksdato.Bestemmelse.ORDINÆR_RETT -> Maksdatoresultat.Bestemmelse.ORDINÆR_RETT
-                            BeregnetMaksdato.Bestemmelse.BEGRENSET_RETT -> Maksdatoresultat.Bestemmelse.BEGRENSET_RETT
-                            BeregnetMaksdato.Bestemmelse.SYTTI_ÅR -> Maksdatoresultat.Bestemmelse.SYTTI_ÅR
-                        },
-                        startdatoTreårsvindu = beregningsutfall.maksdatoresultat.startdatoTreårsvindu,
-                        startdatoSykepengerettighet = beregningsutfall.maksdatoresultat.startdatoSykepengerettighet,
-                        forbrukteDager = beregningsutfall.maksdatoresultat.forbrukteDager,
-                        oppholdsdager = beregningsutfall.maksdatoresultat.oppholdsdager,
-                        avslåtteDager = beregningsutfall.maksdatoresultat.avslåtteDager,
-                        maksdato = beregningsutfall.maksdatoresultat.maksdato,
-                        gjenståendeDager = beregningsutfall.maksdatoresultat.gjenståendeDager
-                    ),
-                    utbetalingstidslinje = beregningsutfall.utbetalingstidslinje,
+        return perioderDetSkalBeregnesUtbetalingFor
+            .map { other ->
+                val beregningsutfall = beregnetTidslinjePerVedtaksperiode.single { it.vedtaksperiodeId == other.id }
+                other.lagBeregnetBehandling(
+                    aktivitetslogg = other.registrerKontekst(aktivitetslogg),
+                    beregning = beregningsutfall,
                     grunnlagsdata = grunnlagsdata,
                     alleInntektjusteringer = alleInntektjusteringer
+                        .mapValues { (_, inntektjustering) -> inntektjustering.subset(periode).medBeløp() }
+                        .filterValues { it.isNotEmpty() }
                 )
-            )
-        }
+            }
     }
 
     private fun vurderVarsler(
@@ -1223,6 +1214,9 @@ internal class Vedtaksperiode private constructor(
         beregnetTidslinjePerVedtaksperiode: List<BeregnetPeriode>,
         historisktidslinje: Utbetalingstidslinje
     ) {
+        val subsumsjonen = Utbetalingstidslinjesubsumsjon(subsumsjonslogg, sykdomstidslinje, behandlinger.utbetalingstidslinje())
+        subsumsjonen.subsummer(periode, yrkesaktivitet.yrkesaktivitetstype)
+
         sykdomsgradsubsummering(subsumsjonslogg, periode, uberegnetTidslinjePerArbeidsgiver, beregnetTidslinjePerVedtaksperiode)
         minsteinntektsvurdering.subsummere(subsumsjonslogg, skjæringstidspunkt, beregningsgrunnlag, person.alder.redusertYtelseAlder, periode)
         maksdatosubsummering(
@@ -2416,15 +2410,47 @@ internal class Vedtaksperiode private constructor(
 
     fun slutterEtter(dato: LocalDate) = periode.slutterEtter(dato)
 
-    private fun lagNyUtbetaling(aktivitetslogg: IAktivitetslogg, beregning: BeregnetBehandling) {
-        behandlinger.nyUtbetaling(
-            vedtaksperiodeSomLagerUtbetaling = this.id,
-            yrkesaktivitet = this.yrkesaktivitet,
-            aktivitetslogg = aktivitetslogg,
-            beregning = beregning
+    private fun lagBeregnetBehandling(aktivitetslogg: IAktivitetslogg, beregning: BeregnetPeriode, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>): BeregnetBehandling {
+        val beregnetBehandling = BeregnetBehandling(
+            utbetaling = lagUtbetaling(aktivitetslogg, beregning.utbetalingstidslinje, beregning.maksdatoresultat),
+            maksdatoresultat = Maksdatoresultat.oversettFra(beregning.maksdatoresultat),
+            utbetalingstidslinje = beregning.utbetalingstidslinje,
+            grunnlagsdata = grunnlagsdata,
+            alleInntektjusteringer = alleInntektjusteringer
         )
-        val subsumsjonen = Utbetalingstidslinjesubsumsjon(this.subsumsjonslogg, this.sykdomstidslinje, beregning.utbetalingstidslinje)
-        subsumsjonen.subsummer(periode, this.yrkesaktivitet.yrkesaktivitetstype)
+        beregnetBehandling.utbetaling.nyVedtaksperiodeUtbetaling(this.id)
+        behandlinger.beregnetBehandling(aktivitetslogg, beregnetBehandling)
+        return beregnetBehandling
+    }
+
+    private fun lagUtbetaling(aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, maksdatoresultat: BeregnetMaksdato): Utbetaling {
+        val utbetalingtype = if (behandlinger.harFattetVedtak())
+            Utbetalingtype.REVURDERING
+        else
+            Utbetalingtype.UTBETALING
+
+        val klassekodeBruker = when (behandlinger.arbeidssituasjon) {
+            Endring.Arbeidssituasjon.ARBEIDSLEDIG,
+            Endring.Arbeidssituasjon.ARBEIDSTAKER -> Klassekode.SykepengerArbeidstakerOrdinær
+
+            Endring.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> Klassekode.SelvstendigNæringsdrivendeOppgavepliktig
+            Endring.Arbeidssituasjon.BARNEPASSER -> Klassekode.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
+            Endring.Arbeidssituasjon.JORDBRUKER -> Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk
+            Endring.Arbeidssituasjon.FRILANSER,
+            Endring.Arbeidssituasjon.FISKER,
+            Endring.Arbeidssituasjon.ANNET -> TODO("har ikke klassekode for ${behandlinger.arbeidssituasjon}")
+        }
+
+        return yrkesaktivitet.lagNyUtbetaling(
+            aktivitetslogg = aktivitetslogg,
+            utbetalingstidslinje = utbetalingstidslinje,
+            klassekodeBruker = klassekodeBruker,
+            maksdato = maksdatoresultat.maksdato,
+            forbrukteSykedager = maksdatoresultat.antallForbrukteDager,
+            gjenståendeSykedager = maksdatoresultat.gjenståendeDager,
+            periode = periode,
+            type = utbetalingtype
+        )
     }
 
     private fun perioderDetSkalBeregnesUtbetalingFor(): List<Vedtaksperiode> {

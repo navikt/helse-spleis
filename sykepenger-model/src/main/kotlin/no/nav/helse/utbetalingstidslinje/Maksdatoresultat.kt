@@ -53,6 +53,24 @@ data class Maksdatoresultat(
             maksdato = dto.maksdato,
             gjenståendeDager = dto.gjenståendeDager
         )
+
+        fun oversettFra(maksdatoresultat: BeregnetMaksdato) =
+            Maksdatoresultat(
+                vurdertTilOgMed = maksdatoresultat.vurdertTilOgMed,
+                bestemmelse = when (maksdatoresultat.bestemmelse) {
+                    BeregnetMaksdato.Bestemmelse.IKKE_VURDERT -> Bestemmelse.IKKE_VURDERT
+                    BeregnetMaksdato.Bestemmelse.ORDINÆR_RETT -> Bestemmelse.ORDINÆR_RETT
+                    BeregnetMaksdato.Bestemmelse.BEGRENSET_RETT -> Bestemmelse.BEGRENSET_RETT
+                    BeregnetMaksdato.Bestemmelse.SYTTI_ÅR -> Bestemmelse.SYTTI_ÅR
+                },
+                startdatoTreårsvindu = maksdatoresultat.startdatoTreårsvindu,
+                startdatoSykepengerettighet = maksdatoresultat.startdatoSykepengerettighet,
+                forbrukteDager = maksdatoresultat.forbrukteDager,
+                oppholdsdager = maksdatoresultat.oppholdsdager,
+                avslåtteDager = maksdatoresultat.avslåtteDager,
+                maksdato = maksdatoresultat.maksdato,
+                gjenståendeDager = maksdatoresultat.gjenståendeDager
+            )
     }
 
     fun dto() = MaksdatoresultatUtDto(

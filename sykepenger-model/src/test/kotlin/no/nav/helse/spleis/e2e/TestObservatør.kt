@@ -47,6 +47,8 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val sykefraværstilfelleIkkeFunnet = mutableListOf<PersonObserver.SykefraværstilfelleIkkeFunnet>()
     val analytiskDatapakkeEventer = mutableListOf<PersonObserver.AnalytiskDatapakkeEvent>()
 
+    val vedtaksperiodeUtbetalinger = mutableMapOf<String, MutableMap<UUID, List<UUID>>>()
+
     private lateinit var sisteVedtaksperiode: UUID
     private val vedtaksperioder = person?.inspektør?.vedtaksperioder()?.mapValues { (_, perioder) ->
         perioder.map { it.inspektør.id }.toMutableSet()
@@ -240,5 +242,21 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun sykefraværstilfelleIkkeFunnet(event: PersonObserver.SykefraværstilfelleIkkeFunnet) {
         sykefraværstilfelleIkkeFunnet.add(event)
+    }
+
+    override fun nyVedtaksperiodeUtbetaling(
+        organisasjonsnummer: String,
+        utbetalingId: UUID,
+        vedtaksperiodeId: UUID
+    ) {
+        vedtaksperiodeUtbetalinger
+            .getOrPut(organisasjonsnummer) { mutableMapOf() }
+            .compute(vedtaksperiodeId) { _, eksisterende ->
+                (eksisterende ?: emptyList()).plusElement(utbetalingId)
+            }
+    }
+
+    fun vedtaksperiodeUtbetalinger(vedtaksperiode: IdInnhenter, orgnummer: String): List<UUID> {
+        return vedtaksperiodeUtbetalinger[orgnummer]?.get(vedtaksperiode.id(orgnummer)) ?: emptyList()
     }
 }
