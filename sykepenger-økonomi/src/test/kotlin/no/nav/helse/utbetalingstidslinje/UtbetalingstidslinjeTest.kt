@@ -233,11 +233,4 @@ internal class UtbetalingstidslinjeTest {
             Assertions.assertEquals(expected, actual)
         }
     }
-
-    @Disabled
-    @Test
-    fun `dette burde ikke committes, tror jeg`() {
-        println(tidslinjeOf(16.AP, 15.NAV, 10.ARB, 2.FRI).toFancyString())
-        println(tidslinjeOf(16.AP, 10.ARB, 15.NAV, 2.FRI).toFancyString())
-    }
 }
