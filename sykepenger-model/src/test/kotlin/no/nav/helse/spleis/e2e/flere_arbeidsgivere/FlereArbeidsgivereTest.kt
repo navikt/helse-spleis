@@ -35,6 +35,7 @@ import no.nav.helse.mai
 import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.onsdag
+import no.nav.helse.person.GrunnlagsdataView
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
@@ -1454,7 +1455,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 {
             val vilkårsgrunnlag = a2.inspektør.vilkårsgrunnlag(1.vedtaksperiode)
             assertNotNull(vilkårsgrunnlag)
-            assertTrue(vilkårsgrunnlag.inspektør.vurdertOk)
+            assertEquals(GrunnlagsdataView.MedlemskapstatusView.Ja, vilkårsgrunnlag.inspektør.medlemskapstatus)
         }
         a1 { assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING) }
         a2 { assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING) }

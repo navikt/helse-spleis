@@ -130,7 +130,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun vilkårsgrunnlag(vedtaksperiodeId: UUID) = person.vilkårsgrunnlagFor(skjæringstidspunkt(vedtaksperiodeId))
     internal fun vilkårsgrunnlag(skjæringstidspunkt: LocalDate) = person.vilkårsgrunnlagFor(skjæringstidspunkt)
 
-    internal fun selvstendigOpptjening(vedtaksperiodeId: UUID) = (vilkårsgrunnlag(vedtaksperiodeId) as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.selvstendigOpptjening
+    internal fun selvstendigOpptjening(vedtaksperiodeId: UUID) = (vilkårsgrunnlag(vedtaksperiodeId) as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.view()?.selvstendigOpptjening
 
     internal fun sisteTilstand(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(tilstander)
 

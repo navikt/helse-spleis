@@ -26,8 +26,8 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.oktober
-import no.nav.helse.person.SelvstendigOpptjeningIkkeVurdert
-import no.nav.helse.person.SelvstendigOpptjeningOppfylt
+import no.nav.helse.person.GrunnlagsdataView.SelvstendigOpptjeningView.Oppfylt
+import no.nav.helse.person.GrunnlagsdataView.SelvstendigOpptjeningView.IkkeVurdert
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
@@ -79,7 +79,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     fun `En selvstendig som er sendt til godkjenning før spørsmål om fravær før sykmelding fra søknad ble hensyntatt`() {
         medJSONPerson("/personer/selvstendig_til_godkjennig_uten_selvstendig_opptjening.json", 331)
         selvstendig {
-            assertEquals(SelvstendigOpptjeningOppfylt, inspektør.selvstendigOpptjening(1.vedtaksperiode))
+            assertEquals(Oppfylt, inspektør.selvstendigOpptjening(1.vedtaksperiode))
         }
         assertGjenoppbygget(dto())
     }
@@ -88,7 +88,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     fun `Arbeidstaker har ikke vurdert opptjening for selvstendig`() {
         a1 {
             nyttVedtak(januar)
-            assertEquals(SelvstendigOpptjeningIkkeVurdert, inspektør.selvstendigOpptjening(1.vedtaksperiode))
+            assertEquals(IkkeVurdert, inspektør.selvstendigOpptjening(1.vedtaksperiode))
         }
         assertGjenoppbygget(dto())
 
@@ -99,7 +99,7 @@ internal class SelvstendigTest : AbstractDslTest() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
-            assertEquals(SelvstendigOpptjeningOppfylt, inspektør.selvstendigOpptjening(1.vedtaksperiode))
+            assertEquals(Oppfylt, inspektør.selvstendigOpptjening(1.vedtaksperiode))
         }
         assertGjenoppbygget(dto())
     }

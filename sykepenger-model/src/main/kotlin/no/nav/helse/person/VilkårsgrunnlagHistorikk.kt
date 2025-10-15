@@ -122,24 +122,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     ) : Aktivitetskontekst {
         internal open fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) = true
 
-        internal fun view() = VilkårsgrunnlagView(
-            vilkårsgrunnlagId = vilkårsgrunnlagId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            vurdertOk = when (this) {
-                is Grunnlagsdata -> vurdertOk
-                is InfotrygdVilkårsgrunnlag -> true
-            },
-            type = when (this) {
-                is Grunnlagsdata -> VilkårsgrunnlagView.VilkårsgrunnlagTypeView.SPLEIS
-                is InfotrygdVilkårsgrunnlag -> VilkårsgrunnlagView.VilkårsgrunnlagTypeView.INFOTRYGD
-            },
-            meldingsreferanseId = when (this) {
-                is Grunnlagsdata -> this.meldingsreferanseId
-                is InfotrygdVilkårsgrunnlag -> null
-            },
-            inntektsgrunnlag = inntektsgrunnlag.view(),
-            opptjening = opptjening?.view()
-        )
+        internal abstract fun view(): VilkårsgrunnlagView
 
         internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) = inntektsgrunnlag.erArbeidsgiverRelevant(organisasjonsnummer)
 
@@ -256,10 +239,30 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         opptjening: Opptjening,
         val selvstendigOpptjening: SelvstendigOpptjening,
         val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
-        val vurdertOk: Boolean,
+        private val vurdertOk: Boolean, // TODO: Fjern meg
         val meldingsreferanseId: MeldingsreferanseId?,
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjening) {
+
+        override fun view() = GrunnlagsdataView(
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            meldingsreferanseId = meldingsreferanseId,
+            inntektsgrunnlag = inntektsgrunnlag.view(),
+            opptjening = opptjening?.view(),
+            medlemskapstatus = when (medlemskapstatus) {
+                Medlemskapsvurdering.Medlemskapstatus.Ja -> GrunnlagsdataView.MedlemskapstatusView.Ja
+                Medlemskapsvurdering.Medlemskapstatus.Nei -> GrunnlagsdataView.MedlemskapstatusView.Nei
+                Medlemskapsvurdering.Medlemskapstatus.VetIkke -> GrunnlagsdataView.MedlemskapstatusView.VetIkke
+                Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål -> GrunnlagsdataView.MedlemskapstatusView.UavklartMedBrukerspørsmål
+            },
+            selvstendigOpptjening = when (selvstendigOpptjening) {
+                SelvstendigOpptjeningIkkeOppfylt -> GrunnlagsdataView.SelvstendigOpptjeningView.IkkeOppfylt
+                SelvstendigOpptjeningIkkeVurdert -> GrunnlagsdataView.SelvstendigOpptjeningView.IkkeVurdert
+                SelvstendigOpptjeningOppfylt -> GrunnlagsdataView.SelvstendigOpptjeningView.Oppfylt
+            }
+        )
+
         internal fun validerFørstegangsvurderingArbeidstaker(aktivitetslogg: IAktivitetslogg) {
             when (opptjening) {
                 is ArbeidstakerOpptjening -> inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
@@ -352,6 +355,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         vilkårsgrunnlagId: UUID = UUID.randomUUID()
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, null) {
 
+        override fun view() = InfotrygdView(
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            inntektsgrunnlag = inntektsgrunnlag.view(),
+            skjæringstidspunkt = skjæringstidspunkt
+        )
+
         override fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonslogg: Subsumsjonslogg) = kopierMed(
             inntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonslogg),
             opptjening = null,
@@ -405,14 +414,28 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
 internal data class VilkårsgrunnlagHistorikkView(val innslag: List<VilkårsgrunnlagInnslagView>)
 internal data class VilkårsgrunnlagInnslagView(val vilkårsgrunnlag: List<VilkårsgrunnlagView>)
-internal data class VilkårsgrunnlagView(
-    val vilkårsgrunnlagId: UUID,
-    val skjæringstidspunkt: LocalDate,
-    val vurdertOk: Boolean,
-    val type: VilkårsgrunnlagTypeView,
-    val meldingsreferanseId: MeldingsreferanseId?,
-    val inntektsgrunnlag: InntektsgrunnlagView,
-    val opptjening: OpptjeningView?
-) {
-    enum class VilkårsgrunnlagTypeView { INFOTRYGD, SPLEIS }
+
+internal sealed interface VilkårsgrunnlagView {
+    val vilkårsgrunnlagId: UUID
+    val skjæringstidspunkt: LocalDate
+    val inntektsgrunnlag: InntektsgrunnlagView
 }
+
+internal data class GrunnlagsdataView(
+    override val vilkårsgrunnlagId: UUID,
+    override val skjæringstidspunkt: LocalDate,
+    override val inntektsgrunnlag: InntektsgrunnlagView,
+    val medlemskapstatus: MedlemskapstatusView,
+    val meldingsreferanseId: MeldingsreferanseId?,
+    val opptjening: OpptjeningView?, // TODO: Bør ikke være nullable på sikt
+    val selvstendigOpptjening: SelvstendigOpptjeningView
+): VilkårsgrunnlagView {
+    enum class MedlemskapstatusView { Ja, Nei, VetIkke, UavklartMedBrukerspørsmål }
+    enum class SelvstendigOpptjeningView { Oppfylt, IkkeOppfylt, IkkeVurdert}
+}
+
+internal data class InfotrygdView(
+    override val vilkårsgrunnlagId: UUID,
+    override val skjæringstidspunkt: LocalDate,
+    override val inntektsgrunnlag: InntektsgrunnlagView,
+): VilkårsgrunnlagView

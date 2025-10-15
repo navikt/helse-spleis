@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.InfotrygdView
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
@@ -297,7 +298,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `overstyrer inntekt på Infotrygdvilkårsgrunnlag`() {
         createOvergangFraInfotrygdPerson()
-        assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.infotrygd)
+        assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.view() is InfotrygdView)
         val antallHistorikkInnslagFør = inspektør.vilkårsgrunnlagHistorikkInnslag().size
         val nyInntekt = INNTEKT * 2
         nullstillTilstandsendringer()

@@ -1,6 +1,7 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
+import no.nav.helse.person.GrunnlagsdataView
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikkView
 import no.nav.helse.person.VilkårsgrunnlagView
@@ -18,18 +19,8 @@ internal class Vilkårgrunnlagsinspektør(view: VilkårsgrunnlagHistorikkView) {
 
     internal fun antallGrunnlagsdata() = vilkårsgrunnlagTeller.map(Map.Entry<*, Int>::value).sum()
     internal fun vilkårsgrunnlagHistorikkInnslag() = vilkårsgrunnlagHistorikkInnslag.toList()
-    internal fun grunnlagsdata(skjæringstidspunkt: LocalDate) = grunnlagsdata.firstOrNull { it.first == skjæringstidspunkt }?.second ?: fail("Fant ikke grunnlagsdata på skjæringstidspunkt $skjæringstidspunkt")
+    internal fun grunnlagsdata(skjæringstidspunkt: LocalDate) = grunnlagsdata.firstOrNull { it.first == skjæringstidspunkt }?.second as? GrunnlagsdataView ?: fail("Fant ikke grunnlagsdata på skjæringstidspunkt $skjæringstidspunkt")
 }
 
-internal val VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.inspektør get() = view().inspektør
-internal val VilkårsgrunnlagView.inspektør get() = GrunnlagsdataInspektør(this)
-
-internal class GrunnlagsdataInspektør(view: VilkårsgrunnlagView) {
-    val vilkårsgrunnlagId = view.vilkårsgrunnlagId
-    val skjæringstidspunkt = view.skjæringstidspunkt
-    val infotrygd = view.type == VilkårsgrunnlagView.VilkårsgrunnlagTypeView.INFOTRYGD
-    val meldingsreferanseId = view.meldingsreferanseId
-    val inntektsgrunnlag = view.inntektsgrunnlag
-    val opptjening = view.opptjening
-    val vurdertOk = view.vurdertOk
-}
+internal val VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.inspektør get() = (view() as? GrunnlagsdataView ?: fail("Fant ikke grunnlagsdata på skjæringstidspunkt $skjæringstidspunkt"))
+internal val VilkårsgrunnlagView.inspektør get() = (this as? GrunnlagsdataView ?: fail("Fant ikke grunnlagsdata på skjæringstidspunkt $skjæringstidspunkt"))

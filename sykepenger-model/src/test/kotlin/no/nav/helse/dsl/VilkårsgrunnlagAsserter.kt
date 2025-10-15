@@ -3,7 +3,6 @@ package no.nav.helse.dsl
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.inspectors.ArbeidsgiverInntektsopplysningInspektør
-import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.SelvstendigInntektsopplysningInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
@@ -33,7 +32,7 @@ internal fun TestPerson.TestArbeidsgiver.assertInntektsgrunnlag(
     forventetAntallArbeidsgivere: Int,
     assertBlock: InntektsgrunnlagAssert.() -> Unit
 ) {
-    assertInntektsgrunnlag(inspektør.vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør, forventetAntallArbeidsgivere, assertBlock)
+    assertInntektsgrunnlag(inspektør.vilkårsgrunnlag(skjæringstidspunkt)!!.view().inntektsgrunnlag, forventetAntallArbeidsgivere, assertBlock)
 }
 
 internal fun AbstractEndToEndTest.assertInntektsgrunnlag(
@@ -41,22 +40,22 @@ internal fun AbstractEndToEndTest.assertInntektsgrunnlag(
     forventetAntallArbeidsgivere: Int,
     assertBlock: InntektsgrunnlagAssert.() -> Unit
 ) {
-    val grunnlagsdataInspektør = person.inspektør
+    val inntektsgrunnlagView = person.inspektør
         .vilkårsgrunnlagHistorikk
         .vilkårsgrunnlagHistorikkInnslag()
         .firstOrNull()
         ?.vilkårsgrunnlag
         ?.firstOrNull { it.skjæringstidspunkt == skjæringstidspunkt }
-        ?.inspektør ?: fail { "finner ikke aktivt skjæringstidspunkt $skjæringstidspunkt" }
-    assertInntektsgrunnlag(grunnlagsdataInspektør, forventetAntallArbeidsgivere, assertBlock)
+        ?.inntektsgrunnlag ?: fail { "finner ikke aktivt skjæringstidspunkt $skjæringstidspunkt" }
+
+    assertInntektsgrunnlag(inntektsgrunnlagView, forventetAntallArbeidsgivere, assertBlock)
 }
 
 private fun assertInntektsgrunnlag(
-    inspektør: GrunnlagsdataInspektør,
+    inntektsgrunnlag: InntektsgrunnlagView,
     forventetAntallArbeidsgivere: Int,
     assertBlock: InntektsgrunnlagAssert.() -> Unit
 ) {
-    val inntektsgrunnlag = inspektør.inntektsgrunnlag
     assertEquals(forventetAntallArbeidsgivere, inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size + inntektsgrunnlag.deaktiverteArbeidsforhold.size)
     InntektsgrunnlagAssert(inntektsgrunnlag).apply(assertBlock).assert()
 }

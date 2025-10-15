@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.InfotrygdView
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
@@ -168,7 +169,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
                 val førsteUtbetalingsdagIInfotrygd = 1.januar
                 assertEquals(førsteUtbetalingsdagIInfotrygd, førsteVedtaksperiode.skjæringstidspunkt)
                 assertNotNull(testperson.person.vilkårsgrunnlagFor(førsteVedtaksperiode.skjæringstidspunkt))
-                assertTrue(testperson.person.vilkårsgrunnlagFor(førsteVedtaksperiode.skjæringstidspunkt)!!.inspektør.infotrygd)
+                assertTrue(testperson.person.vilkårsgrunnlagFor(førsteVedtaksperiode.skjæringstidspunkt)?.view() is InfotrygdView)
             }
 
             assertTilstandFørInntektsmeldingHensyntas()
