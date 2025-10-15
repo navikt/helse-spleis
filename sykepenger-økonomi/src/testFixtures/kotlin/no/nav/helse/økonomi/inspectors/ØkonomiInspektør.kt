@@ -12,6 +12,7 @@ private class ØkonomiInspektørBuilder(økonomi: Økonomi) {
         økonomi.refusjonsbeløp,
         økonomi.totalSykdomsgrad.toDouble().toInt(),
         økonomi.aktuellDagsinntekt,
+        økonomi.inntektjustering,
         økonomi.arbeidsgiverbeløp,
         økonomi.personbeløp
     )
@@ -24,6 +25,7 @@ class ØkonomiInspektør(
     val arbeidsgiverRefusjonsbeløp: Inntekt,
     val totalGrad: Int,
     val aktuellDagsinntekt: Inntekt,
+    val inntektjustering: Inntekt,
     val arbeidsgiverbeløp: Inntekt?,
     val personbeløp: Inntekt?
 ) {
