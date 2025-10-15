@@ -429,6 +429,9 @@ class Person private constructor(
 
     fun håndterPersonPåminnelse(påminnelse: PersonPåminnelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler personpåminnelse")
+        if (skjæringstidspunkter.isEmpty()) {
+            skjæringstidspunkter = beregnSkjæringstidspunkt()().alle()
+        }
         håndterGjenoppta(påminnelse, aktivitetsloggMedPersonkontekst)
     }
 
