@@ -44,6 +44,7 @@ import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Hendelseskilde
+import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
@@ -183,6 +184,7 @@ import no.nav.helse.utbetalingstidslinje.BeregnetMaksdato
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
+import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering
 import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering.Companion.lagMinsteinntektsvurdering
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -190,6 +192,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
 import no.nav.helse.utbetalingstidslinje.filtrerUtbetalingstidslinjer
 import no.nav.helse.yearMonth
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -1084,6 +1087,25 @@ internal class Vedtaksperiode private constructor(
         )
         // steg 4: lag et utbetalingsobjekt for vedtaksperioder som ikke har fått det enda (én per arbeidsgiver)
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
+        lagUtbetalinger(aktivitetslogg, perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioder)
+
+        // steg 5: lage varsler ved gitte situasjoner
+        vurderVarsler(aktivitetslogg, ytelser, infotrygdhistorikk, grunnlagsdata, minsteinntektsvurdering, harOpptjening, beregnetTidslinjePerVedtaksperiode)
+        // steg 6: subsummere ting
+        subsummering(beregningsgrunnlag, minsteinntektsvurdering, uberegnetTidslinjePerArbeidsgiver, beregnetTidslinjePerVedtaksperiode, historisktidslinje)
+
+        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(ytelser, aktivitetslogg)
+
+        høstingsresultater(aktivitetslogg, nesteSimuleringtilstand, nesteGodkjenningtilstand)
+    }
+
+    private fun lagUtbetalinger(
+        aktivitetslogg: IAktivitetslogg,
+        perioderDetSkalBeregnesUtbetalingFor: List<Vedtaksperiode>,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
+        beregnetTidslinjePerVedtaksperiode: List<BeregnetPeriode>,
+        inntektsperioder: List<Triple<Arbeidsgiverberegning.Yrkesaktivitet, Kilde, InntekterForBeregning.Inntektsperiode>>
+    ) {
         check(perioderDetSkalBeregnesUtbetalingFor.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
             "ugyldig situasjon: skal beregne utbetaling for vedtaksperioder med ulike skjæringstidspunkter"
         }
@@ -1129,8 +1151,17 @@ internal class Vedtaksperiode private constructor(
                 )
             )
         }
+    }
 
-        // steg 5: lage varsler ved gitte situasjoner
+    private fun vurderVarsler(
+        aktivitetslogg: IAktivitetslogg,
+        ytelser: Ytelser,
+        infotrygdhistorikk: Infotrygdhistorikk,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
+        minsteinntektsvurdering: Minsteinntektsvurdering,
+        harOpptjening: Boolean,
+        beregnetTidslinjePerVedtaksperiode: List<BeregnetPeriode>,
+    ) {
         if (beregnetTidslinjePerVedtaksperiode.any { it.utbetalingstidslinje.any { dag -> dag.dato in periode && dag is NavDag && dag.økonomi.totalSykdomsgrad.erUnderGrensen() } })
             aktivitetslogg.varsel(RV_VV_17)
         if (beregnetTidslinjePerVedtaksperiode.any { it.utbetalingstidslinje.any { dag -> dag.dato in periode && dag is AvvistDag && MinimumSykdomsgrad in dag.begrunnelser } })
@@ -1171,8 +1202,15 @@ internal class Vedtaksperiode private constructor(
         infotrygdhistorikk.validerMedVarsel(aktivitetslogg, periode)
         infotrygdhistorikk.validerNyereOpplysninger(aktivitetslogg, periode)
         ytelser.valider(aktivitetslogg, periode, skjæringstidspunkt, behandlinger.maksdato.maksdato, erForlengelse())
+    }
 
-        // steg 6: subsummere ting
+    private fun subsummering(
+        beregningsgrunnlag: Inntekt,
+        minsteinntektsvurdering: Minsteinntektsvurdering,
+        uberegnetTidslinjePerArbeidsgiver: List<Arbeidsgiverberegning>,
+        beregnetTidslinjePerVedtaksperiode: List<BeregnetPeriode>,
+        historisktidslinje: Utbetalingstidslinje
+    ) {
         sykdomsgradsubsummering(subsumsjonslogg, periode, uberegnetTidslinjePerArbeidsgiver, beregnetTidslinjePerVedtaksperiode)
         minsteinntektsvurdering.subsummere(subsumsjonslogg, skjæringstidspunkt, beregningsgrunnlag, person.alder.redusertYtelseAlder, periode)
         maksdatosubsummering(
@@ -1183,10 +1221,6 @@ internal class Vedtaksperiode private constructor(
             historisktidslinje = historisktidslinje,
             resultat = behandlinger.maksdato
         )
-
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(ytelser, aktivitetslogg)
-
-        høstingsresultater(aktivitetslogg, nesteSimuleringtilstand, nesteGodkjenningtilstand)
     }
 
     internal fun håndterUtbetalingsavgjørelse(utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
