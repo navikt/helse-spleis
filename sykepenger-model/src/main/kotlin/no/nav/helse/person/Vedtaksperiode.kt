@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
+import kotlin.collections.last
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -116,6 +117,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_17
@@ -1105,7 +1107,7 @@ internal class Vedtaksperiode private constructor(
         lagBeregnetBehandlinger(aktivitetslogg, perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioder)
 
         // steg 5: lage varsler ved gitte situasjoner
-        vurderVarsler(aktivitetslogg, ytelser, infotrygdhistorikk, grunnlagsdata, minsteinntektsvurdering, harOpptjening, beregnetTidslinjePerVedtaksperiode)
+        vurderVarsler(aktivitetslogg, ytelser, infotrygdhistorikk, perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, minsteinntektsvurdering, harOpptjening, beregnetTidslinjePerVedtaksperiode)
         // steg 6: subsummere ting
         subsummering(beregningsgrunnlag, minsteinntektsvurdering, uberegnetTidslinjePerArbeidsgiver, beregnetTidslinjePerVedtaksperiode, historisktidslinje)
 
@@ -1160,11 +1162,21 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg,
         ytelser: Ytelser,
         infotrygdhistorikk: Infotrygdhistorikk,
+        perioderDetSkalBeregnesUtbetalingFor: List<Vedtaksperiode>,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         minsteinntektsvurdering: Minsteinntektsvurdering,
         harOpptjening: Boolean,
         beregnetTidslinjePerVedtaksperiode: List<BeregnetPeriode>,
     ) {
+        perioderDetSkalBeregnesUtbetalingFor
+            .filter {
+                val forrigeUtbetalingstidslinje = it.behandlinger.utbetalingstidslinjeFraForrigeVedtak() ?: Utbetalingstidslinje()
+                it.behandlinger.utbetalingstidslinje().negativEndringIBeløp(forrigeUtbetalingstidslinje)
+            }
+            .onEach {
+                it.registrerKontekst(aktivitetslogg).varsel(RV_UT_23)
+            }
+
         if (beregnetTidslinjePerVedtaksperiode.any { it.utbetalingstidslinje.any { dag -> dag.dato in periode && dag is NavDag && dag.økonomi.totalSykdomsgrad.erUnderGrensen() } })
             aktivitetslogg.varsel(RV_VV_17)
         if (beregnetTidslinjePerVedtaksperiode.any { it.utbetalingstidslinje.any { dag -> dag.dato in periode && dag is AvvistDag && MinimumSykdomsgrad in dag.begrunnelser } })
