@@ -1074,7 +1074,6 @@ internal class Vedtaksperiode private constructor(
                 }
 
             other.lagNyUtbetaling(
-                yrkesaktivitetSomBeregner = this.yrkesaktivitet,
                 aktivitetslogg = other.registrerKontekst(aktivitetslogg),
                 beregning = BeregnetBehandling(
                     maksdatoresultat = Maksdatoresultat(
@@ -2348,11 +2347,7 @@ internal class Vedtaksperiode private constructor(
 
     fun slutterEtter(dato: LocalDate) = periode.slutterEtter(dato)
 
-    private fun lagNyUtbetaling(
-        yrkesaktivitetSomBeregner: Yrkesaktivitet,
-        aktivitetslogg: IAktivitetslogg,
-        beregning: BeregnetBehandling
-    ) {
+    private fun lagNyUtbetaling(aktivitetslogg: IAktivitetslogg, beregning: BeregnetBehandling) {
         behandlinger.nyUtbetaling(
             vedtaksperiodeSomLagerUtbetaling = this.id,
             yrkesaktivitet = this.yrkesaktivitet,
