@@ -194,7 +194,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun egenmeldingsdager() = behandlinger.last().egenmeldingsdager
     internal fun sykdomstidslinje() = behandlinger.last().sykdomstidslinje
     internal fun refusjonstidslinje() = behandlinger.last().refusjonstidslinje
-    internal fun trekkerTilbakePenger() = siste?.trekkerTilbakePenger() == true
     internal fun utbetales() = behandlinger.any { it.erInFlight() }
     internal fun erAvsluttet() = behandlinger.last().erAvsluttet()
     internal fun erAvvist() = siste?.erAvvist() == true

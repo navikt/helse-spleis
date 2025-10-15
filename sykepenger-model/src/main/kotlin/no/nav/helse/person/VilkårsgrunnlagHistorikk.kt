@@ -38,8 +38,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     private fun sisteInnlag() = historikk.firstOrNull()
 
-    private fun forrigeInnslag() = historikk.elementAtOrNull(1)
-
     internal fun view() = VilkårsgrunnlagHistorikkView(innslag = historikk.map { it.view() })
 
     internal fun lagre(vilkårsgrunnlag: VilkårsgrunnlagElement) {
@@ -55,11 +53,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
         sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)
-
-    internal fun blitt6GBegrensetSidenSist(skjæringstidspunkt: LocalDate): Boolean {
-        if (sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)?.er6GBegrenset() == false) return false
-        return forrigeInnslag()?.vilkårsgrunnlagFor(skjæringstidspunkt)?.er6GBegrenset() == false
-    }
 
     internal class Innslag private constructor(
         internal val id: UUID,
@@ -176,8 +169,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         protected abstract fun vilkårsgrunnlagtype(): String
-
-        internal fun er6GBegrenset() = inntektsgrunnlag.er6GBegrenset()
 
         internal fun harNødvendigInntektForVilkårsprøving(organisasjonsnummer: String) =
             inntektsgrunnlag.harNødvendigInntektForVilkårsprøving(organisasjonsnummer)

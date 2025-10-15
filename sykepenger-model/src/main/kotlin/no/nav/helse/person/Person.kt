@@ -631,9 +631,6 @@ class Person private constructor(
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
         vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
 
-    internal fun blitt6GBegrensetSidenSist(skjæringstidspunkt: LocalDate) =
-        vilkårsgrunnlagHistorikk.blitt6GBegrensetSidenSist(skjæringstidspunkt)
-
     internal fun lagreVilkårsgrunnlag(vilkårsgrunnlag: VilkårsgrunnlagElement) {
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }

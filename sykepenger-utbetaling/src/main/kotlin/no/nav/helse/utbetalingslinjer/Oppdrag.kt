@@ -61,8 +61,6 @@ class Oppdrag private constructor(
                 ?.reduce(Periode::plus)
         }
 
-        fun List<Oppdrag>.trekkerTilbakePenger() = sumOf { it.nettoBeløp() } < 0
-
         fun stønadsdager(vararg oppdrag: Oppdrag): Int {
             return Utbetalingslinje.stønadsdager(oppdrag.toList().flatten())
         }

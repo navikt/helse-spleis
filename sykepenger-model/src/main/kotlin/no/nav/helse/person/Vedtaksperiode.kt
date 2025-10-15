@@ -2361,16 +2361,6 @@ internal class Vedtaksperiode private constructor(
         )
         val subsumsjonen = Utbetalingstidslinjesubsumsjon(this.subsumsjonslogg, this.sykdomstidslinje, beregning.utbetalingstidslinje)
         subsumsjonen.subsummer(periode, this.yrkesaktivitet.yrkesaktivitetstype)
-        loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(yrkesaktivitetSomBeregner, aktivitetslogg)
-    }
-
-    private fun loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(
-        yrkesaktivitetSomBeregner: Yrkesaktivitet,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        if (!behandlinger.trekkerTilbakePenger()) return
-        if (this.yrkesaktivitet === yrkesaktivitetSomBeregner && !person.blitt6GBegrensetSidenSist(skjæringstidspunkt)) return
-        aktivitetslogg.info("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere")
     }
 
     private fun perioderDetSkalBeregnesUtbetalingFor(): List<Vedtaksperiode> {
