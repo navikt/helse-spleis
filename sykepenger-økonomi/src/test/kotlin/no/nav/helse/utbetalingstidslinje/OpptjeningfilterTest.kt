@@ -1,6 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.util.*
+import java.util.UUID
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.NAV
@@ -35,12 +35,9 @@ class OpptjeningfilterTest {
         tidslinjer: List<Utbetalingstidslinje>,
         manglerOpptjening: Boolean = false
     ): List<Utbetalingsdag.AvvistDag> {
-        val filter = Opptjeningfilter(
-            harOpptjening = !manglerOpptjening
-        )
         val arbeidsgivere = tidslinjer.mapIndexed { index, it ->
             Arbeidsgiverberegning(
-                yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a${index+1}"),
+                yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a${index + 1}"),
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),
@@ -50,7 +47,8 @@ class OpptjeningfilterTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         }
-        val avviste = filter.filter(arbeidsgivere)
+
+        val avviste = arbeidsgivere.avvisOpptjening(harOpptjening = !manglerOpptjening)
         return avviste.flatMap {
             it.vedtaksperioder.single().utbetalingstidslinje.inspektør.avvistedager
         }

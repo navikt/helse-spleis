@@ -30,35 +30,21 @@ fun filtrerUtbetalingstidslinjer(
         sekstisyvårsdagen = sekstisyvårsdagen,
         syttiårsdagen = syttiårsdagen,
         dødsdato = dødsdato,
-        regler =regler,
+        regler = regler,
         infotrygdtidslinje = historisktidslinje
     )
-    val filtere = listOf(
-        Sykdomsgradfilter(
-            perioderMedMinimumSykdomsgradVurdertOK = perioderMedMinimumSykdomsgradVurdertOK
-        ),
-        Minsteinntektfilter(
+
+    val beregnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver
+        .sykdomsgradsberegning(perioderMedMinimumSykdomsgradVurdertOK)
+        .avvisMinsteinntekt(
             sekstisyvårsdagen = sekstisyvårsdagen,
             erUnderMinsteinntektskravTilFylte67 = erUnderMinsteinntektskravTilFylte67,
             erUnderMinsteinntektEtterFylte67 = erUnderMinsteinntektEtterFylte67,
-        ),
-        Medlemskapsfilter(
-            erMedlemAvFolketrygden = erMedlemAvFolketrygden,
-        ),
-        Opptjeningfilter(
-            harOpptjening = harOpptjening
-        ),
-        MaksimumSykepengedagerfilter(
-            maksdatoberegning = maksdatoberegning
-        ),
-        MaksimumUtbetalingFilter(
-            sykepengegrunnlagBegrenset6G = sykepengegrunnlagBegrenset6G
         )
-    )
-
-    val beregnetTidslinjePerArbeidsgiver = filtere.fold(uberegnetTidslinjePerArbeidsgiver) { tidslinjer, filter ->
-        filter.filter(tidslinjer)
-    }
+        .avvisMedlemskap(erMedlemAvFolketrygden)
+        .avvisOpptjening(harOpptjening)
+        .avvisMaksimumSykepengerdager(maksdatoberegning)
+        .maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G)
 
     return beregnetTidslinjePerArbeidsgiver
         .flatMap {

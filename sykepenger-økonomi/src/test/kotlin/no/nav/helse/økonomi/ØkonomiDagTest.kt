@@ -1,5 +1,6 @@
 package no.nav.helse.økonomi
 
+import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
@@ -7,16 +8,15 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Vedtaksperiodeberegning
+import no.nav.helse.utbetalingstidslinje.maksimumUtbetalingsberegning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.util.UUID
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
 internal class ØkonomiDagTest {
 
@@ -141,7 +141,7 @@ internal class ØkonomiDagTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         }
-        return MaksimumUtbetalingFilter(sykepengegrunnlagBegrenset6G)
-            .filter(input).map { it.vedtaksperioder.single().utbetalingstidslinje }
+
+        return input.maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G).map { it.vedtaksperioder.single().utbetalingstidslinje }
     }
 }

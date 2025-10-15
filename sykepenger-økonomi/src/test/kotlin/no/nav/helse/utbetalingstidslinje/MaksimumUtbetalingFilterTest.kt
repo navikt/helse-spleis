@@ -1,6 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.util.*
+import java.util.UUID
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
@@ -23,14 +23,14 @@ internal class MaksimumUtbetalingFilterTest {
     @Test
     fun `når inntekt er over 6G blir utbetaling lik 6G`() {
         val inntektOver6G = 3500.daglig
-        val `6G`= 2161.daglig
+        val `6G` = 2161.daglig
         val tidslinje = tidslinjeOf(12.NAV(inntektOver6G.daglig)).betal(`6G`)
         assertEquals(21610, tidslinje.inspektør.totalUtbetaling())
     }
 
     @Test
     fun `utbetaling for tidslinje med ulike daginntekter blir kalkulert per dag`() {
-        val sykepengegrunnlag= 3500.daglig
+        val sykepengegrunnlag = 3500.daglig
         val tidslinje = tidslinjeOf(12.NAV(3500.0), 14.NAV(1200.0))
         val m = assertThrows<IllegalStateException> {
             tidslinje.betal(sykepengegrunnlag)
@@ -40,14 +40,14 @@ internal class MaksimumUtbetalingFilterTest {
 
     @Test
     fun `selv om utbetaling blir begrenset til 6G får utbetaling for tidslinje med gradert sykdom gradert utbetaling`() {
-        val sykepengegrunnlag= 561804.årlig
+        val sykepengegrunnlag = 561804.årlig
         val tidslinje = tidslinjeOf(12.NAV(3500.0, 50.0)).betal(sykepengegrunnlag)
         assertEquals(10800, tidslinje.inspektør.totalUtbetaling())
     }
 
     @Test
     fun `utbetaling for tidslinje med gradert sykdom får gradert utbetaling`() {
-        val sykepengegrunnlag= 1200.daglig
+        val sykepengegrunnlag = 1200.daglig
         val tidslinje = tidslinjeOf(12.NAV(1200.0, 50.0)).betal(sykepengegrunnlag)
         assertEquals(6000, tidslinje.inspektør.totalUtbetaling())
     }
@@ -65,13 +65,7 @@ internal class MaksimumUtbetalingFilterTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         )
-        val filter = MaksimumUtbetalingFilter(sykepengegrunnlag)
 
-        return filter
-            .filter(input)
-            .single()
-            .vedtaksperioder
-            .single()
-            .utbetalingstidslinje
+        return input.maksimumUtbetalingsberegning(sykepengegrunnlag).single().vedtaksperioder.single().utbetalingstidslinje
     }
 }

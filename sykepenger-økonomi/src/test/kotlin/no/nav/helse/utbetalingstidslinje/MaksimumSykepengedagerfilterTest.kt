@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
@@ -833,9 +833,6 @@ internal class MaksimumSykepengedagerfilterTest {
             infotrygdtidslinje = personTidslinje
         )
 
-        val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(
-            maksdatoberegning = maksdatoberegning
-        )
         val tidslinjer = this.mapIndexed { index, it ->
             Arbeidsgiverberegning(
                 yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a${index+1}"),
@@ -848,8 +845,7 @@ internal class MaksimumSykepengedagerfilterTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         }
-        avvisteTidslinjer = maksimumSykepengedagerfilter
-            .filter(tidslinjer)
+        avvisteTidslinjer = tidslinjer.avvisMaksimumSykepengerdager(maksdatoberegning)
             .map { it.samletVedtaksperiodetidslinje }
 
         val maksdatoresultat = maksdatoberegning.beregnMaksdatoBegrensetTilPeriode(filterperiode)

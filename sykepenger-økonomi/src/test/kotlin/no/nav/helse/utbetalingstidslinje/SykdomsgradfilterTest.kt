@@ -1,6 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.util.*
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
@@ -117,7 +117,7 @@ internal class SykdomsgradfilterTest {
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
         val input = tidslinjer.mapIndexed { index, it ->
             Arbeidsgiverberegning(
-                yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a${index+1}"),
+                yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a${index + 1}"),
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),
@@ -127,8 +127,8 @@ internal class SykdomsgradfilterTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         }
-        val resultat = Sykdomsgradfilter(emptySet())
-            .filter(input)
+
+        val resultat = input.sykdomsgradsberegning(emptySet())
             .map { it.samletVedtaksperiodetidslinje }
         inspektør = resultat.inspektør(0)
         return resultat

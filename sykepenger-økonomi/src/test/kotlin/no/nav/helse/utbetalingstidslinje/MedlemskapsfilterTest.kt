@@ -1,6 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.util.*
+import java.util.UUID
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.NAV
@@ -35,9 +35,7 @@ class MedlemskapsfilterTest {
         tidslinjer: List<Utbetalingstidslinje>,
         manglerMedlemskap: Boolean = false
     ): List<Utbetalingsdag.AvvistDag> {
-        val filter = Medlemskapsfilter(
-            erMedlemAvFolketrygden = !manglerMedlemskap
-        )
+
         val arbeidsgivere = tidslinjer.mapIndexed { index, it ->
             Arbeidsgiverberegning(
                 yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a${index+1}"),
@@ -50,7 +48,8 @@ class MedlemskapsfilterTest {
                 ghostOgAndreInntektskilder = emptyList()
             )
         }
-        val avviste = filter.filter(arbeidsgivere)
+
+        val avviste = arbeidsgivere.avvisMedlemskap(!manglerMedlemskap)
         return avviste.flatMap {
             it.vedtaksperioder.single().utbetalingstidslinje.inspektør.avvistedager
         }
