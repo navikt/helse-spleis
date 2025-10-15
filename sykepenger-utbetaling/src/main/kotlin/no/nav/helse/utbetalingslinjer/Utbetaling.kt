@@ -211,11 +211,6 @@ class Utbetaling private constructor(
         if (harNegativtTotalbeløp) aktivitetslogg.varsel(Varselkode.RV_SI_3)
     }
 
-    fun håndterAnnullerUtbetalingHendelse(hendelse: AnnullerUtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        godkjenn(aktivitetsloggMedUtbetalingkontekst, hendelse.vurdering)
-    }
-
     fun annuller(hendelse: AnnullerUtbetalingHendelse, aktivitetslogg: IAktivitetslogg, alleUtbetalinger: List<Utbetaling>): Utbetaling? {
         val korrelerendeUtbetaling = alleUtbetalinger.firstOrNull { it.id == hendelse.utbetalingId } ?: return null
         if (korrelerendeUtbetaling.korrelasjonsId != this.korrelasjonsId) return null
