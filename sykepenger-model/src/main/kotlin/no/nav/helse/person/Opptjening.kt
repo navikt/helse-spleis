@@ -50,8 +50,8 @@ internal sealed interface Opptjening {
 
 internal sealed interface SelvstendigOpptjening {
     fun valider(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: BehandlingSubsumsjonslogg, skjæringstidspunkt: LocalDate)
-
     fun dto(): SelvstendigOpptjeningDto
+    fun view(): SelvstendigOpptjeningView
 
     companion object {
         fun gjenopprett(dto: SelvstendigOpptjeningDto): SelvstendigOpptjening {
@@ -68,24 +68,30 @@ internal data object SelvstendigOpptjeningOppfylt : SelvstendigOpptjening {
     override fun valider(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: BehandlingSubsumsjonslogg, skjæringstidspunkt: LocalDate) {
         subsumsjonslogg.logg(`§ 8-2 ledd 1 - selvstendig næringsdrivende`(skjæringstidspunkt, true))
     }
-
     override fun dto() = SelvstendigOpptjeningDto.Oppfylt
+    override fun view() = SelvstendigOpptjeningView.Oppfylt
 }
 
 internal data object SelvstendigOpptjeningIkkeOppfylt : SelvstendigOpptjening {
     override fun valider(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: BehandlingSubsumsjonslogg, skjæringstidspunkt: LocalDate) {
         subsumsjonslogg.logg(`§ 8-2 ledd 1 - selvstendig næringsdrivende`(skjæringstidspunkt, false))
     }
-
     override fun dto() = SelvstendigOpptjeningDto.IkkeOppfylt
+    override fun view() = SelvstendigOpptjeningView.IkkeOppfylt
 }
 
 internal data object SelvstendigOpptjeningIkkeVurdert : SelvstendigOpptjening {
     override fun valider(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: BehandlingSubsumsjonslogg, skjæringstidspunkt: LocalDate) {
         error("Må ha vurdert opptjening for selvstendig")
     }
-
     override fun dto() = SelvstendigOpptjeningDto.IkkeVurdert
+    override fun view() = SelvstendigOpptjeningView.IkkeVurdert
+}
+
+internal sealed interface SelvstendigOpptjeningView {
+    data object Oppfylt: SelvstendigOpptjeningView
+    data object IkkeOppfylt: SelvstendigOpptjeningView
+    data object IkkeVurdert: SelvstendigOpptjeningView
 }
 
 internal class SelvstendigNæringsdrivendeOpptjening(private val skjæringstidspunkt: LocalDate) : Opptjening {
@@ -94,7 +100,7 @@ internal class SelvstendigNæringsdrivendeOpptjening(private val skjæringstidsp
         oppfylt = false // TODO bare for å få det til å kompilere
     )
 
-    override fun view() = SelvstendigOpptjeningView
+    override fun view() = OpptjeningView.SelvstendigOpptjeningView
     override fun deaktiver(orgnummer: String): Opptjening {
         TODO("Not yet implemented")
     }
@@ -120,12 +126,11 @@ internal class ArbeidstakerOpptjening private constructor(
         antallOpptjeningsdager = opptjeningsdager
     )
 
-    override fun view() = ArbeidstakerOpptjeningView(arbeidsforhold = arbeidsforhold, opptjeningsdager = opptjeningsdager, erOppfylt = erOppfylt())
+    override fun view() = OpptjeningView.ArbeidstakerOpptjeningView(arbeidsforhold = arbeidsforhold, opptjeningsdager = opptjeningsdager, erOppfylt = erOppfylt())
 
     internal fun ansattVedSkjæringstidspunkt(orgnummer: String) =
         arbeidsforhold.any { it.ansattVedSkjæringstidspunkt(orgnummer, skjæringstidspunkt) }
 
-    internal fun opptjeningsdager() = opptjeningsdager
     internal fun harTilstrekkeligAntallOpptjeningsdager(): Boolean = opptjeningsdager >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
     internal fun erOppfylt(): Boolean = harTilstrekkeligAntallOpptjeningsdager()
@@ -283,6 +288,7 @@ internal class ArbeidstakerOpptjening private constructor(
     )
 }
 
-internal sealed interface OpptjeningView
-internal data class ArbeidstakerOpptjeningView(val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, val opptjeningsdager: Int, val erOppfylt: Boolean) : OpptjeningView
-internal object SelvstendigOpptjeningView : OpptjeningView
+internal sealed interface OpptjeningView {
+    data class ArbeidstakerOpptjeningView(val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, val opptjeningsdager: Int, val erOppfylt: Boolean) : OpptjeningView
+    object SelvstendigOpptjeningView : OpptjeningView
+}

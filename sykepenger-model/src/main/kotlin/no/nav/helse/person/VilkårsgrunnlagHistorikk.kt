@@ -251,11 +251,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 Medlemskapsvurdering.Medlemskapstatus.VetIkke -> GrunnlagsdataView.MedlemskapstatusView.VetIkke
                 Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål -> GrunnlagsdataView.MedlemskapstatusView.UavklartMedBrukerspørsmål
             },
-            selvstendigOpptjening = when (selvstendigOpptjening) {
-                SelvstendigOpptjeningIkkeOppfylt -> GrunnlagsdataView.SelvstendigOpptjeningView.IkkeOppfylt
-                SelvstendigOpptjeningIkkeVurdert -> GrunnlagsdataView.SelvstendigOpptjeningView.IkkeVurdert
-                SelvstendigOpptjeningOppfylt -> GrunnlagsdataView.SelvstendigOpptjeningView.Oppfylt
-            }
+            selvstendigOpptjening = selvstendigOpptjening.view()
         )
 
         internal fun validerFørstegangsvurderingArbeidstaker(aktivitetslogg: IAktivitetslogg) {
@@ -423,7 +419,6 @@ internal data class GrunnlagsdataView(
     val selvstendigOpptjening: SelvstendigOpptjeningView
 ): VilkårsgrunnlagView {
     enum class MedlemskapstatusView { Ja, Nei, VetIkke, UavklartMedBrukerspørsmål }
-    enum class SelvstendigOpptjeningView { Oppfylt, IkkeOppfylt, IkkeVurdert}
 }
 
 internal data class InfotrygdView(

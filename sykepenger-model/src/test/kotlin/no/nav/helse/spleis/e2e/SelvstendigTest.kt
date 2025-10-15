@@ -26,8 +26,8 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.oktober
-import no.nav.helse.person.GrunnlagsdataView.SelvstendigOpptjeningView.Oppfylt
-import no.nav.helse.person.GrunnlagsdataView.SelvstendigOpptjeningView.IkkeVurdert
+import no.nav.helse.person.SelvstendigOpptjeningView.IkkeVurdert
+import no.nav.helse.person.SelvstendigOpptjeningView.Oppfylt
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE

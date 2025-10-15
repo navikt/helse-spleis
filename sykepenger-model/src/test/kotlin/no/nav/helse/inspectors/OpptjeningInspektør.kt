@@ -1,7 +1,7 @@
 package no.nav.helse.inspectors
 
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.ArbeidstakerOpptjeningView
+import no.nav.helse.person.OpptjeningView.ArbeidstakerOpptjeningView
 
 internal val Opptjening.inspektør get() = OpptjeningInspektør(this.view() as ArbeidstakerOpptjeningView)
 
