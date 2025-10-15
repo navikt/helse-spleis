@@ -1,4 +1,4 @@
-package no.nav.helse.person.inntekt
+package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -26,8 +26,6 @@ import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
-import no.nav.helse.utbetalingstidslinje.Vedtaksperiodeberegning
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals

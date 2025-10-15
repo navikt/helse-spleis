@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
+import no.nav.helse.utbetalingstidslinje.InntekterForBeregning
 
 internal data class SelvstendigInntektsopplysning(
     val faktaavklartInntekt: SelvstendigFaktaavklartInntekt,

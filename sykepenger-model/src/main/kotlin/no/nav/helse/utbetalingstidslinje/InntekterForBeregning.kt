@@ -1,27 +1,14 @@
-package no.nav.helse.person.inntekt
+package no.nav.helse.utbetalingstidslinje
 
-import java.time.LocalDate
-import no.nav.helse.dto.InntektskildeDto
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Økonomi
-
-@JvmInline
-value class Inntektskilde(val id: String) {
-    fun dto() = InntektskildeDto(id)
-
-    companion object {
-        fun gjenopprett(dto: InntektskildeDto) = Inntektskilde(dto.id)
-    }
-}
+import java.time.LocalDate
 
 internal class InntekterForBeregning private constructor(
     private val yrkesaktiviteter: Set<Arbeidsgiverberegning.Yrkesaktivitet>,
@@ -30,7 +17,7 @@ internal class InntekterForBeregning private constructor(
     private val beregningsperiode: Periode
 ) {
     internal fun tilBeregning(yrkesaktivitet: Arbeidsgiverberegning.Yrkesaktivitet) =
-        (fastsattÅrsinntekter[yrkesaktivitet]?.inntekt ?: INGEN) to (inntektjusteringer[yrkesaktivitet] ?: Beløpstidslinje())
+        (fastsattÅrsinntekter[yrkesaktivitet]?.inntekt ?: Inntekt.Companion.INGEN) to (inntektjusteringer[yrkesaktivitet] ?: Beløpstidslinje())
 
     internal fun inntektsjusteringer(periode: Periode): Map<Arbeidsgiverberegning.Yrkesaktivitet, Beløpstidslinje> {
         check(periode in beregningsperiode) { "Perioden $periode er utenfor beregningsperioden $beregningsperiode" }
@@ -61,12 +48,12 @@ internal class InntekterForBeregning private constructor(
         val (fastsattÅrsinntekt, inntektjusteringer) = tilBeregning(yrkesaktivitet)
         with(Utbetalingstidslinje.Builder()) {
             periode.forEach { dato ->
-                if (dato.erHelg()) addFridag(dato, Økonomi.ikkeBetalt())
+                if (dato.erHelg()) addFridag(dato, Økonomi.Companion.ikkeBetalt())
                 else addArbeidsdag(
                     dato = dato,
-                    økonomi = Økonomi.ikkeBetalt(
+                    økonomi = Økonomi.Companion.ikkeBetalt(
                         aktuellDagsinntekt = fastsattÅrsinntekt,
-                        inntektjustering = (inntektjusteringer[dato] as? Beløpsdag)?.beløp ?: INGEN
+                        inntektjustering = (inntektjusteringer[dato] as? Beløpsdag)?.beløp ?: Inntekt.Companion.INGEN
                     ),
                 )
             }
@@ -88,7 +75,7 @@ internal class InntekterForBeregning private constructor(
         }
 
         internal fun deaktivertFraInntektsgrunnlag(organisasjonsnummer: String, opplysningskilde: Kilde) {
-            fraInntektsgrunnlag(organisasjonsnummer, INGEN, opplysningskilde)
+            fraInntektsgrunnlag(organisasjonsnummer, Inntekt.Companion.INGEN, opplysningskilde)
         }
 
         private fun leggTilInntekt(yrkesaktivitet: Arbeidsgiverberegning.Yrkesaktivitet, inntekt: InntektMedKilde) {
@@ -100,7 +87,7 @@ internal class InntekterForBeregning private constructor(
 
         internal fun inntektsendringer(yrkesaktivitet: Arbeidsgiverberegning.Yrkesaktivitet, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt, kilde: Kilde) {
             val periode = (fom til listOfNotNull(tom, beregningsperiode.endInclusive).min()).subset(beregningsperiode)
-            val inntektsendring = Beløpstidslinje.fra(periode, inntekt, kilde)
+            val inntektsendring = Beløpstidslinje.Companion.fra(periode, inntekt, kilde)
 
             yrkesaktiviteter.add(yrkesaktivitet)
             inntektjusteringer.compute(yrkesaktivitet) { _, inntekter ->

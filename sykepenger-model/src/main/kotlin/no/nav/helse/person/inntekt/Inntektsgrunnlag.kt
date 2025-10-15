@@ -39,6 +39,7 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_IKKE_6G_BEGRE
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTRYGD
 import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning.Companion.berik
 import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning.Companion.beverte
+import no.nav.helse.utbetalingstidslinje.InntekterForBeregning
 import no.nav.helse.økonomi.Inntekt
 
 internal class Inntektsgrunnlag(

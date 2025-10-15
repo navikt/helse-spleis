@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import java.util.*
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.inntekt.InntekterForBeregning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Inntekt
 
