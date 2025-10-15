@@ -59,6 +59,7 @@ data class SpannerPersonDto(
     val opprettet: LocalDateTime,
     val infotrygdhistorikk: List<InfotrygdhistorikkElementData>,
     val vilkårsgrunnlagHistorikk: List<VilkårsgrunnlagInnslagData>,
+    val skjæringstidspunkter: List<ArbeidsgiverData.PeriodeData>,
     val minimumSykdomsgradVurdering: List<MinimumSykdomsgradVurderingPeriode>,
     val dødsdato: LocalDate?
 ) {
@@ -815,6 +816,7 @@ fun PersonUtDto.tilSpannerPersonDto(): SpannerPersonDto {
         arbeidsgivere = this.arbeidsgivere.map { it.tilPersonData(vilkårsgrunnlagHistorikkDto) },
         infotrygdhistorikk = this.infotrygdhistorikk.elementer.map { it.tilPersonData() },
         vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikkDto,
+        skjæringstidspunkter = this.skjæringstidspunkter.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
         minimumSykdomsgradVurdering = minimumSykdomsgradVurdering.perioder.map { SpannerPersonDto.MinimumSykdomsgradVurderingPeriode(it.fom, it.tom) },
         dødsdato = this.alder.dødsdato
     )

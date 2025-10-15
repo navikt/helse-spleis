@@ -24,6 +24,7 @@ import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.FORELDET
 import no.nav.helse.testhelpers.H
+import no.nav.helse.testhelpers.K
 import no.nav.helse.testhelpers.P
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.U
@@ -50,6 +51,194 @@ internal class SkjæringstidspunktTest {
     }
 
     @Test
+    fun `one test case to rule them all`() {
+        // [sykdom - andre ytelser - ferie] - [sykdom]
+        resetSeed { 10.S + 10.YF + 10.F + 10.S }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    1.januar til 30.januar,
+                    31.januar til 9.februar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // [sykdom - ferie - andre ytelser] - [sykdom]
+        resetSeed { 10.S + 10.F + 10.YF + 10.S }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    1.januar til 30.januar,
+                    31.januar til 9.februar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // ferie - andre ytelser - [sykdom]
+        resetSeed { 10.F + 10.YF + 10.S }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    21.januar til 30.januar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // [sykdom] - arbeid - [sykdom]
+        resetSeed { 10.S + 10.A + 10.S }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    1.januar til 10.januar,
+                    21.januar til 30.januar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // [sykdom] - arbeid - andre ytelser - [sykdom]
+        resetSeed { 10.S + 10.A + 10.YF + 10.S }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    1.januar til 10.januar,
+                    31.januar til 9.februar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // [sykdom - ferie - sykdom]
+        resetSeed { 10.S + 10.F + 10.S }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    1.januar til 30.januar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // ferie - [sykdom]
+        resetSeed { 10.F + 10.S }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    11.januar til 20.januar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // andre ytelser - [sykdom]
+        resetSeed { 10.YF + 10.S }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    11.januar til 20.januar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // [sykdom - helg - sykdom]
+        resetSeed { 5.S + 2.opphold + 10.S }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    1.januar til 17.januar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // [sykdom - helg - ukjent ukedag - sykdom]
+        resetSeed { 5.S + 3.opphold + 10.S }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    1.januar til 7.januar,
+                    9.januar til 18.januar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // [egenmeldinger - helg - sykdom]
+        resetSeed { 5.U + 2.opphold + 10.S }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    1.januar til 17.januar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // [sykdom - ferie - egenmeldinger]
+        resetSeed { 5.S + 2.F + 10.U }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    1.januar til 17.januar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // [sykdom - ferie] - AIG
+        resetSeed { 5.S + 2.F + 10.AIG }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    1.januar til 7.januar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // [foreldet sykdom - ferie - sykdom]
+        resetSeed { 10.K + 2.F + 10.S }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    1.januar til 22.januar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // [sykdom - ferie - foreldet sykdom]
+        resetSeed { 10.S + 2.F + 10.K }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    1.januar til 22.januar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // permisjon - ferie - [sykdom]
+        resetSeed { 10.P + 2.F + 10.S }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    13.januar til 22.januar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // [sykdom - ferie - permisjon]
+        resetSeed { 10.S + 2.F + 10.P }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    1.januar til 22.januar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+
+        // [sykdom - ferie - permisjon - sykdom]
+        resetSeed { 10.S + 2.F + 5.P + 5.S }.also { tidslinjer ->
+            assertEquals(
+                listOf(
+                    1.januar til 22.januar
+                ),
+                beregnSkjæringstidspunkter(tidslinjer)
+            )
+        }
+    }
+
+    @Test
     fun `skjæringstidspunkter happy cases`() {
         // snodige egenmeldingsdager fra sykmelding
         resetSeed(11.juni(2024))
@@ -73,7 +262,7 @@ internal class SkjæringstidspunktTest {
 
         // skjæringstidspunkt for ukjent dag-hale-periode
         resetSeed()
-        assertEquals(1.januar, beregnSkjæringstidspunkt(16.S + 10.opphold, 20.januar til 31.januar))
+        assertNull(beregnSkjæringstidspunkt(16.S + 10.opphold, 20.januar til 31.januar))
 
         // ukjent dager mellom sykdomsperioder
         resetSeed()
@@ -500,6 +689,9 @@ internal class SkjæringstidspunktTest {
             organisasjonsnummer = ORGNUMMER,
             behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ORGNUMMER)
         )
+
+        private fun beregnSkjæringstidspunkter(tidslinje: Sykdomstidslinje) =
+            Skjæringstidspunkt(tidslinje).alle()
 
         private fun beregnSkjæringstidspunkt(tidslinje: Sykdomstidslinje, søkeperiode: Periode) =
             Skjæringstidspunkt(tidslinje).sisteOrNull(søkeperiode)

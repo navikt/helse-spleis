@@ -115,6 +115,7 @@ data class PersonData(
     val infotrygdhistorikk: List<InfotrygdhistorikkElementData>,
     val vilkårsgrunnlagHistorikk: List<VilkårsgrunnlagInnslagData>,
     val minimumSykdomsgradVurdering: List<MinimumSykdomsgradVurderingPeriodeData>?,
+    val skjæringstidspunkter: List<ArbeidsgiverData.PeriodeData>,
     val dødsdato: LocalDate?
 ) {
     fun tilPersonDto() = PersonInnDto(
@@ -124,6 +125,7 @@ data class PersonData(
         arbeidsgivere = this.arbeidsgivere.map { it.tilDto() },
         infotrygdhistorikk = InfotrygdhistorikkInnDto(this.infotrygdhistorikk.map { it.tilDto() }),
         vilkårsgrunnlagHistorikk = VilkårsgrunnlaghistorikkInnDto(vilkårsgrunnlagHistorikk.map { it.tilDto() }),
+        skjæringstidspunkter = skjæringstidspunkter.map { it.tilDto() },
         minimumSykdomsgradVurdering = MinimumSykdomsgradVurderingInnDto(
             perioder = minimumSykdomsgradVurdering?.map { PeriodeDto(it.fom, it.tom) } ?: emptyList()
         )

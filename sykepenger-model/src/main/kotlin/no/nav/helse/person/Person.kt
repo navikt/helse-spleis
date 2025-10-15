@@ -95,6 +95,7 @@ class Person private constructor(
     private val opprettet: LocalDateTime,
     internal val infotrygdhistorikk: Infotrygdhistorikk,
     internal val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+    skjæringstidspunkter: List<Periode>,
     private val regelverkslogg: Regelverkslogg,
     private val tidligereBehandlinger: List<Person> = emptyList(),
     internal val regler: MaksimumSykepengedagerregler = NormalArbeidstaker,
@@ -119,6 +120,7 @@ class Person private constructor(
                     dto.vilkårsgrunnlagHistorikk,
                     grunnlagsdataMap
                 ),
+                skjæringstidspunkter = dto.skjæringstidspunkter.map { Periode.gjenopprett(it) },
                 minimumSykdomsgradsvurdering = MinimumSykdomsgradsvurdering.gjenopprett(dto.minimumSykdomsgradVurdering),
                 regelverkslogg = regelverkslogg,
                 tidligereBehandlinger = tidligereBehandlinger
@@ -142,6 +144,7 @@ class Person private constructor(
         LocalDateTime.now(),
         Infotrygdhistorikk(),
         VilkårsgrunnlagHistorikk(),
+        emptyList<Periode>(),
         regelverkslogg,
         emptyList<Person>(),
         regler = regler
@@ -161,6 +164,10 @@ class Person private constructor(
     val fødselsnummer get() = personidentifikator.toString()
 
     private val observers = mutableListOf<PersonObserver>()
+
+    internal var skjæringstidspunkter: List<Periode> = skjæringstidspunkter
+        private set
+
     internal fun view() = PersonView(
         arbeidsgivere = yrkesaktiviteter.map { it.view() },
         vilkårsgrunnlaghistorikk = vilkårsgrunnlagHistorikk.view()
@@ -637,6 +644,7 @@ class Person private constructor(
 
     internal fun beregnSkjæringstidspunkt() = yrkesaktiviteter.beregnSkjæringstidspunkt(infotrygdhistorikk)
     internal fun sykdomshistorikkEndret() {
+        skjæringstidspunkter = beregnSkjæringstidspunkt()().alle()
         yrkesaktiviteter.beregnSkjæringstidspunkter(infotrygdhistorikk)
     }
 
@@ -759,6 +767,7 @@ class Person private constructor(
         opprettet = opprettet,
         infotrygdhistorikk = infotrygdhistorikk.dto(),
         vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.dto(),
+        skjæringstidspunkter = skjæringstidspunkter.map { it.dto() },
         minimumSykdomsgradVurdering = minimumSykdomsgradsvurdering.dto()
     )
 }
