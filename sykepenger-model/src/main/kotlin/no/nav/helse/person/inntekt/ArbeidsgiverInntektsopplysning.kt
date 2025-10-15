@@ -1,12 +1,11 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-15`
-import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.person.ArbeidstakerOpptjening
@@ -14,10 +13,8 @@ import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
-import no.nav.helse.utbetalingstidslinje.InntekterForBeregning
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
@@ -92,24 +89,6 @@ internal data class ArbeidsgiverInntektsopplysning(
     internal companion object {
         private fun List<ArbeidsgiverInntektsopplysning>.rullTilbakeEventuellSkjønnsmessigFastsettelse() =
             map { it.copy(skjønnsmessigFastsatt = null) }
-
-        private fun ArbeidsgiverInntektsopplysning.kilde() = Kilde(
-            avsender = if (korrigertInntekt != null || skjønnsmessigFastsatt != null) Avsender.SAKSBEHANDLER else Avsender.ARBEIDSGIVER,
-            meldingsreferanseId = fastsattÅrsinntektInntektsdata.hendelseId,
-            tidsstempel = fastsattÅrsinntektInntektsdata.tidsstempel
-        )
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.beverte(builder: InntekterForBeregning.Builder) {
-            forEach { arbeidsgiverInntektsopplysning ->
-                builder.fraInntektsgrunnlag(arbeidsgiverInntektsopplysning.orgnummer, arbeidsgiverInntektsopplysning.fastsattÅrsinntekt, arbeidsgiverInntektsopplysning.kilde())
-            }
-        }
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.beverteDeaktiverte(builder: InntekterForBeregning.Builder) {
-            forEach { deaktivertArbeidsgiverInntektsopplysning ->
-                builder.deaktivertFraInntektsgrunnlag(deaktivertArbeidsgiverInntektsopplysning.orgnummer, deaktivertArbeidsgiverInntektsopplysning.kilde())
-            }
-        }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.validerSkjønnsmessigAltEllerIntet() {
             check(all { it.skjønnsmessigFastsatt == null } || all { it.skjønnsmessigFastsatt != null }) { "Enten så må alle inntektsopplysninger var skjønnsmessig fastsatt, eller så må ingen være det" }

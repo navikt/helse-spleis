@@ -131,4 +131,12 @@ internal class ArbeidsgiverberegningBuilder {
             build()
         }
     }
+
+    private data class UberegnetVedtaksperiode(
+        val vedtaksperiodeId: UUID,
+        val yrkesaktivitet: Yrkesaktivitet,
+        val periode: Periode,
+        val sykdomstidslinje: Sykdomstidslinje,
+        val utbetalingstidslinjeBuilder: UtbetalingstidslinjeBuilder
+    )
 }
