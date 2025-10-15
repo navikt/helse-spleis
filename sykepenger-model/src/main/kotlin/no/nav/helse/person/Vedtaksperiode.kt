@@ -1005,13 +1005,44 @@ internal class Vedtaksperiode private constructor(
         if (!ytelser.erRelevant(id)) return
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
-        if (tilstand !in setOf(AvventerHistorikk, AvventerHistorikkRevurdering, SelvstendigAvventerHistorikk))
-            return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke ytelsehistorikk i %s".format(tilstand.type))
+        val (nesteSimuleringtilstand, nesteGodkjenningtilstand) = when (tilstand) {
+            Avsluttet,
+            AvsluttetUtenUtbetaling,
+            AvventerAOrdningen,
+            AvventerAnnullering,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering,
+            RevurderingFeilet,
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilUtbetaling,
+            Start,
+            TilAnnullering,
+            TilInfotrygd,
+            TilUtbetaling -> return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke ytelsehistorikk i %s".format(tilstand.type))
 
-        håndterYtelser(ytelser, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk)
+            AvventerHistorikk -> (AvventerSimulering to AvventerGodkjenning)
+            AvventerHistorikkRevurdering -> (AvventerSimuleringRevurdering to AvventerGodkjenningRevurdering)
+            SelvstendigAvventerHistorikk -> (SelvstendigAvventerSimulering to SelvstendigAvventerGodkjenning)
+        }
+
+        håndterYtelser(ytelser, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk, nesteSimuleringtilstand, nesteGodkjenningtilstand)
     }
 
-    private fun håndterYtelser(ytelser: Ytelser, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
+    private fun håndterYtelser(ytelser: Ytelser, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk, nesteSimuleringtilstand: Vedtaksperiodetilstand, nesteGodkjenningtilstand: Vedtaksperiodetilstand) {
         val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
         }
@@ -1155,15 +1186,7 @@ internal class Vedtaksperiode private constructor(
 
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(ytelser, aktivitetslogg)
 
-        val nesteTilstander = when (tilstand) {
-            AvventerHistorikk -> AvventerSimulering to AvventerGodkjenning
-            AvventerHistorikkRevurdering -> AvventerSimuleringRevurdering to AvventerGodkjenningRevurdering
-            SelvstendigAvventerHistorikk -> SelvstendigAvventerSimulering to SelvstendigAvventerGodkjenning
-            else -> error("Forventer ikke ytelsehåndtering i $tilstand")
-        }
-
-        val (simuleringtilstand, godkjenningtilstand) = nesteTilstander
-        høstingsresultater(aktivitetslogg, simuleringtilstand, godkjenningtilstand)
+        høstingsresultater(aktivitetslogg, nesteSimuleringtilstand, nesteGodkjenningtilstand)
     }
 
     internal fun håndterUtbetalingsavgjørelse(utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
