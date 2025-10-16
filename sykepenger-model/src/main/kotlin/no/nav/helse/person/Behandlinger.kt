@@ -61,7 +61,7 @@ import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
-import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
+import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingView
@@ -97,7 +97,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun initiellBehandling(
         sykmeldingsperiode: Periode,
         sykdomstidslinje: Sykdomstidslinje,
-        arbeidssituasjon: Behandling.Endring.Arbeidssituasjon,
+        arbeidssituasjon: Arbeidssituasjon,
         egenmeldingsdager: List<Periode>,
         faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
         inntektsendringer: Beløpstidslinje,
@@ -310,8 +310,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     // sørger for ny behandling når vedtaksperioden går ut av Avsluttet/AUU,
     // men bare hvis det ikke er laget en ny allerede fra før
-    fun sikreNyBehandling(yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring) {
-        leggTilNyBehandling(behandlinger.last().sikreNyBehandling(yrkesaktivitet, behandlingkilde, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode))
+    fun sikreNyBehandling(yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring) {
+        leggTilNyBehandling(behandlinger.last().sikreNyBehandling(yrkesaktivitet, behandlingkilde, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode))
     }
 
     private fun leggTilNyBehandling(behandling: Behandling?) {
@@ -360,12 +360,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlingkilde: Behandlingkilde,
         dokumentsporing: Dokumentsporing?,
         aktivitetslogg: IAktivitetslogg,
-        beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+        beregnetSkjæringstidspunkter: Skjæringstidspunkter,
         beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring,
         refusjonstidslinje: Beløpstidslinje
     ): Boolean {
         val refusjonstidslinjeFør = behandlinger.last().refusjonstidslinje
-        behandlinger.last().håndterRefusjonsopplysninger(yrkesaktivitet, behandlingkilde, dokumentsporing ?: behandlinger.forrigeDokumentsporing, aktivitetslogg, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, refusjonstidslinje)?.also {
+        behandlinger.last().håndterRefusjonsopplysninger(yrkesaktivitet, behandlingkilde, dokumentsporing ?: behandlinger.forrigeDokumentsporing, aktivitetslogg, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode, refusjonstidslinje)?.also {
             leggTilNyBehandling(it)
         }
         val refusjonstidslinjeEtter = behandlinger.last().refusjonstidslinje
@@ -379,7 +379,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlingkilde: Behandlingkilde,
         dokumentsporing: Dokumentsporing?,
         aktivitetslogg: IAktivitetslogg,
-        beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+        beregnetSkjæringstidspunkter: Skjæringstidspunkter,
         beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring,
         egenmeldingsdager: List<Periode>
     ): Boolean {
@@ -392,7 +392,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             dokumentsporing = dokumentsporing ?: behandlinger.forrigeDokumentsporing,
             hendelseSykdomstidslinje = Sykdomstidslinje(),
             aktivitetslogg = aktivitetslogg,
-            beregnSkjæringstidspunkt = beregnSkjæringstidspunkt,
+            beregnetSkjæringstidspunkter = beregnetSkjæringstidspunkter,
             beregnArbeidsgiverperiode = beregnArbeidsgiverperiode,
             egenmeldingsdager = egenmeldingsdager,
             dagerNavOvertarAnsvar = null,
@@ -410,7 +410,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         dagerNavOvertarAnsvar: List<Periode>?,
         egenmeldingsdager: List<Periode>?,
         aktivitetslogg: IAktivitetslogg,
-        beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+        beregnetSkjæringstidspunkter: Skjæringstidspunkter,
         beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring,
         validering: () -> Unit
     ) {
@@ -422,7 +422,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             egenmeldingsdager = egenmeldingsdager,
             aktivitetslogg = aktivitetslogg,
-            beregnSkjæringstidspunkt = beregnSkjæringstidspunkt,
+            beregnetSkjæringstidspunkter = beregnetSkjæringstidspunkter,
             beregnArbeidsgiverperiode = beregnArbeidsgiverperiode
         )?.also {
             leggTilNyBehandling(it)
@@ -431,8 +431,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         validering()
     }
 
-    fun beregnSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring) {
-        behandlinger.last().beregnSkjæringstidspunkt(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+    fun oppdaterSkjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring) {
+        behandlinger.last().oppdaterSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)
     }
 
     internal class Behandlingkilde(
@@ -578,14 +578,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             behandlingkilde: Behandlingkilde,
             dokumentsporing: Dokumentsporing,
             aktivitetslogg: IAktivitetslogg,
-            beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+            beregnetSkjæringstidspunkter: Skjæringstidspunkter,
             beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring,
             nyRefusjonstidslinje: Beløpstidslinje
         ): Behandling? {
             val nyeRefusjonsopplysningerForPerioden = nyRefusjonstidslinje.subset(periode)
             val benyttetRefusjonsopplysninger = (gjeldende.refusjonstidslinje + nyeRefusjonsopplysningerForPerioden).fyll(periode)
             if (benyttetRefusjonsopplysninger == gjeldende.refusjonstidslinje) return null // Ingen endring
-            return this.tilstand.håndterRefusjonsopplysninger(yrkesaktivitet, this, behandlingkilde, dokumentsporing, aktivitetslogg, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, benyttetRefusjonsopplysninger)
+            return this.tilstand.håndterRefusjonsopplysninger(yrkesaktivitet, this, behandlingkilde, dokumentsporing, aktivitetslogg, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode, benyttetRefusjonsopplysninger)
         }
 
         data class Endring(
@@ -633,8 +633,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 ventetid = ventetid,
                 forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag
             )
-
-            private fun skjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje, periode: Periode = this.periode): Pair<LocalDate, List<LocalDate>> {
+            
+            private fun skjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje, periode: Periode = this.periode): Pair<LocalDate, List<LocalDate>> {
                 val sisteSykedag = sykdomstidslinje.lastOrNull {
                     // uttømmende when-blokk (uten else) med hensikt, fordi om nye det lages nye
                     // dagtyper så vil det bli compile error og vi blir tvunget til å måtte ta stilling til den
@@ -658,7 +658,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 // trimmer friskmelding/ferie i halen bort
                 val søkeperiode = sisteSykedag?.let { periode.start til sisteSykedag } ?: periode
-                val skjæringstidspunkter = beregnSkjæringstidspunkt()
+                val skjæringstidspunkter = beregnetSkjæringstidspunkter
                     .alle(søkeperiode)
                 val fastsattSkjæringstidspunkt = skjæringstidspunkter.maxOrNull() ?: periode.start
                 return fastsattSkjæringstidspunkt to skjæringstidspunkter
@@ -758,8 +758,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 faktaavklartInntekt = faktaavklartInntekt
             )
 
-            internal fun kopierMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Endring? {
-                val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = skjæringstidspunkt(beregnSkjæringstidspunkt)
+            internal fun kopierMedNyttSkjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Endring? {
+                val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = skjæringstidspunkt(beregnetSkjæringstidspunkter)
                 val arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode)
                 if (nyttSkjæringstidspunkt == this.skjæringstidspunkt && arbeidsgiverperiode == this.arbeidsgiverperiode) return null
                 return kopierMed(
@@ -773,10 +773,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokument: Dokumentsporing,
                 dagerNavOvertarAnsvar: List<Periode>?,
                 egenmeldingsdager: List<Periode>?,
-                beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                 beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
             ): Endring {
-                val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = skjæringstidspunkt(beregnSkjæringstidspunkt, sykdomstidslinje, periode)
+                val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = skjæringstidspunkt(beregnetSkjæringstidspunkter, sykdomstidslinje, periode)
                 return kopierMed(
                     grunnlagsdata = null,
                     utbetaling = null,
@@ -798,10 +798,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 sykdomstidslinje: Sykdomstidslinje,
                 dagerNavOvertarAnsvar: List<Periode>?,
                 egenmeldingsdager: List<Periode>?,
-                beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                 beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
             ): Endring {
-                val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = skjæringstidspunkt(beregnSkjæringstidspunkt, sykdomstidslinje, periode)
+                val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = skjæringstidspunkt(beregnetSkjæringstidspunkter, sykdomstidslinje, periode)
                 return kopierMed(
                     grunnlagsdata = null,
                     utbetaling = null,
@@ -821,7 +821,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             internal fun kopierUtenUtbetaling(
-                beregnSkjæringstidspunkt: (() -> Skjæringstidspunkt)? = null,
+                beregnSkjæringstidspunkt: Skjæringstidspunkter? = null,
                 beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring = { this.arbeidsgiverperiode }
             ): Endring {
                 val beregnetSkjæringstidspunkt = beregnSkjæringstidspunkt?.let { skjæringstidspunkt(beregnSkjæringstidspunkt) }
@@ -840,7 +840,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             internal fun kopierMedRefusjonstidslinje(
                 dokument: Dokumentsporing,
                 refusjonstidslinje: Beløpstidslinje,
-                beregnSkjæringstidspunkt: (() -> Skjæringstidspunkt)? = null,
+                beregnSkjæringstidspunkt: Skjæringstidspunkter? = null,
                 beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring = { this.arbeidsgiverperiode }
             ): Endring {
                 val beregnetSkjæringstidspunkt = beregnSkjæringstidspunkt?.let { skjæringstidspunkt(beregnSkjæringstidspunkt) }
@@ -1089,8 +1089,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             endringer.add(endring)
         }
 
-        fun beregnSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring) {
-            tilstand.beregnSkjæringstidspunkt(this, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+        fun oppdaterSkjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring) {
+            tilstand.oppdaterSkjæringstidspunkt(this, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)
         }
 
         fun håndterEndring(
@@ -1101,7 +1101,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             dagerNavOvertarAnsvar: List<Periode>?,
             egenmeldingsdager: List<Periode>?,
             aktivitetslogg: IAktivitetslogg,
-            beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+            beregnetSkjæringstidspunkter: Skjæringstidspunkter,
             beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
         ): Behandling? {
             return tilstand.håndterEndring(
@@ -1113,7 +1113,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                 egenmeldingsdager = egenmeldingsdager,
                 aktivitetslogg = aktivitetslogg,
-                beregnSkjæringstidspunkt = beregnSkjæringstidspunkt,
+                beregnetSkjæringstidspunkter = beregnetSkjæringstidspunkter,
                 beregnArbeidsgiverperiode = beregnArbeidsgiverperiode
             )
         }
@@ -1124,14 +1124,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             hendelseSykdomstidslinje: Sykdomstidslinje,
             dagerNavOvertarAnsvar: List<Periode>? = null,
             egenmeldingsdager: List<Periode>? = null,
-            beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+            beregnetSkjæringstidspunkter: Skjæringstidspunkter,
             beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
         ): Endring {
             val hendelseSykdomstidslinjeFremTilOgMed = hendelseSykdomstidslinje.fremTilOgMed(periode.endInclusive)
-            val hendelseperiode = hendelseSykdomstidslinjeFremTilOgMed.periode() ?: return endringer.last().kopierUtenEndring(dokumentsporing, dagerNavOvertarAnsvar, egenmeldingsdager, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+            val hendelseperiode = hendelseSykdomstidslinjeFremTilOgMed.periode() ?: return endringer.last().kopierUtenEndring(dokumentsporing, dagerNavOvertarAnsvar, egenmeldingsdager, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)
             val oppdatertPeriode = this.periode.oppdaterFom(hendelseperiode)
-            val sykdomstidslinje = yrkesaktivitet.oppdaterSykdom(dokumentsporing.id, hendelseSykdomstidslinjeFremTilOgMed).subset(oppdatertPeriode)
-            return endringer.last().kopierMedEndring(oppdatertPeriode, dokumentsporing, sykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+            val (nySykdomstidslinje, nyeSkjæringstidspunkter) = yrkesaktivitet.oppdaterSykdom(dokumentsporing.id, hendelseSykdomstidslinjeFremTilOgMed)
+            val sykdomstidslinje = nySykdomstidslinje.subset(oppdatertPeriode)
+            return endringer.last().kopierMedEndring(oppdatertPeriode, dokumentsporing, sykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, nyeSkjæringstidspunkter, beregnArbeidsgiverperiode)
         }
 
         private fun oppdaterMedRefusjonstidslinje(dokumentsporing: Dokumentsporing, nyeRefusjonsopplysninger: Beløpstidslinje) {
@@ -1139,8 +1140,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             nyEndring(endring)
         }
 
-        private fun oppdaterMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring) {
-            val endring = endringer.last().kopierMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode) ?: return
+        private fun oppdaterMedNyttSkjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring) {
+            val endring = endringer.last().kopierMedNyttSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode) ?: return
             nyEndring(endring)
         }
 
@@ -1151,7 +1152,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             hendelseSykdomstidslinje: Sykdomstidslinje,
             dagerNavOvertarAnsvar: List<Periode>?,
             egenmeldingsdager: List<Periode>?,
-            beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+            beregnetSkjæringstidspunkter: Skjæringstidspunkter,
             arbeidsgiverperioder: (Periode) -> Arbeidsgiverperiodeavklaring
         ) {
             val endring = håndtereEndring(
@@ -1160,7 +1161,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 hendelseSykdomstidslinje = hendelseSykdomstidslinje,
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                 egenmeldingsdager = egenmeldingsdager,
-                beregnSkjæringstidspunkt = beregnSkjæringstidspunkt,
+                beregnetSkjæringstidspunkter = beregnetSkjæringstidspunkter,
                 beregnArbeidsgiverperiode = arbeidsgiverperioder
             )
             if (endring == gjeldende) return
@@ -1174,7 +1175,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             hendelseSykdomstidslinje: Sykdomstidslinje,
             dagerNavOvertarAnsvar: List<Periode>?,
             egenmeldingsdager: List<Periode>?,
-            beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+            beregnetSkjæringstidspunkter: Skjæringstidspunkter,
             beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring,
             starttilstand: Tilstand = Tilstand.Uberegnet
         ): Behandling {
@@ -1189,7 +1190,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         hendelseSykdomstidslinje = hendelseSykdomstidslinje,
                         dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                         egenmeldingsdager = egenmeldingsdager,
-                        beregnSkjæringstidspunkt = beregnSkjæringstidspunkt,
+                        beregnetSkjæringstidspunkter = beregnetSkjæringstidspunkter,
                         beregnArbeidsgiverperiode = beregnArbeidsgiverperiode
                     )
                 ),
@@ -1202,7 +1203,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             yrkesaktivitet: Yrkesaktivitet,
             behandlingkilde: Behandlingkilde,
             dokumentsporing: Dokumentsporing,
-            beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+            beregnetSkjæringstidspunkter: Skjæringstidspunkter,
             beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring,
             nyRefusjonstidslinje: Beløpstidslinje,
             starttilstand: Tilstand = Tilstand.Uberegnet
@@ -1215,7 +1216,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     endringer.last().kopierMedRefusjonstidslinje(
                         dokumentsporing,
                         nyRefusjonstidslinje,
-                        beregnSkjæringstidspunkt,
+                        beregnetSkjæringstidspunkter,
                         beregnArbeidsgiverperiode
                     )
                 ),
@@ -1228,14 +1229,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             yrkesaktivitet: Yrkesaktivitet,
             starttilstand: Tilstand,
             behandlingkilde: Behandlingkilde,
-            beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+            beregnetSkjæringstidspunkter: Skjæringstidspunkter,
             beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
         ): Behandling {
             yrkesaktivitet.låsOpp(periode)
             return Behandling(
                 observatører = this.observatører,
                 tilstand = starttilstand,
-                endringer = listOf(endringer.last().kopierUtenUtbetaling(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)),
+                endringer = listOf(endringer.last().kopierUtenUtbetaling(beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)),
                 avsluttet = null,
                 kilde = behandlingkilde
             )
@@ -1258,10 +1259,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         fun sikreNyBehandling(
             yrkesaktivitet: Yrkesaktivitet,
             behandlingkilde: Behandlingkilde,
-            beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+            beregnetSkjæringstidspunkter: Skjæringstidspunkter,
             beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
         ): Behandling? {
-            return tilstand.sikreNyBehandling(this, yrkesaktivitet, behandlingkilde, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+            return tilstand.sikreNyBehandling(this, yrkesaktivitet, behandlingkilde, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)
         }
 
         fun tillaterNyBehandling(other: Behandling): Boolean {
@@ -1516,14 +1517,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 return null
             }
 
-            fun beregnSkjæringstidspunkt(behandling: Behandling, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring) {}
+            fun oppdaterSkjæringstidspunkt(behandling: Behandling, beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring) {}
             fun håndterRefusjonsopplysninger(
                 yrkesaktivitet: Yrkesaktivitet,
                 behandling: Behandling,
                 behandlingkilde: Behandlingkilde,
                 dokumentsporing: Dokumentsporing,
                 aktivitetslogg: IAktivitetslogg,
-                beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                 beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring,
                 nyeRefusjonsopplysninger: Beløpstidslinje
             ): Behandling? {
@@ -1539,7 +1540,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dagerNavOvertarAnsvar: List<Periode>?,
                 egenmeldingsdager: List<Periode>?,
                 aktivitetslogg: IAktivitetslogg,
-                beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                 beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
             ): Behandling? {
                 error("Har ikke implementert håndtering av endring i $this")
@@ -1601,7 +1602,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing) {}
 
-            fun sikreNyBehandling(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling? {
+            fun sikreNyBehandling(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling? {
                 return null
             }
 
@@ -1622,12 +1623,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     check(behandling.utbetaling() == null) { "skal ikke ha utbetaling og være uberegnet samtidig" }
                 }
 
-                override fun beregnSkjæringstidspunkt(
+                override fun oppdaterSkjæringstidspunkt(
                     behandling: Behandling,
-                    beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                    beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                     beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
                 ) {
-                    behandling.oppdaterMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+                    behandling.oppdaterMedNyttSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)
                 }
 
                 override fun håndterRefusjonsopplysninger(
@@ -1636,7 +1637,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandlingkilde: Behandlingkilde,
                     dokumentsporing: Dokumentsporing,
                     aktivitetslogg: IAktivitetslogg,
-                    beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                    beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                     beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring,
                     nyeRefusjonsopplysninger: Beløpstidslinje
                 ): Behandling? {
@@ -1644,8 +1645,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return null
                 }
 
-                override fun håndterEndring(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, dokumentsporing: Dokumentsporing, hendelseSykdomstidslinje: Sykdomstidslinje, dagerNavOvertarAnsvar: List<Periode>?, egenmeldingsdager: List<Periode>?, aktivitetslogg: IAktivitetslogg, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling? {
-                    behandling.oppdaterMedEndring(yrkesaktivitet, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+                override fun håndterEndring(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, dokumentsporing: Dokumentsporing, hendelseSykdomstidslinje: Sykdomstidslinje, dagerNavOvertarAnsvar: List<Periode>?, egenmeldingsdager: List<Periode>?, aktivitetslogg: IAktivitetslogg, beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling? {
+                    behandling.oppdaterMedEndring(yrkesaktivitet, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)
                     return null
                 }
 
@@ -1716,12 +1717,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return super.forkastVedtaksperiode(behandling, yrkesaktivitet, behandlingkilde, aktivitetslogg)
                 }
 
-                override fun beregnSkjæringstidspunkt(
+                override fun oppdaterSkjæringstidspunkt(
                     behandling: Behandling,
-                    beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                    beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                     beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
                 ) {
-                    behandling.oppdaterMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+                    behandling.oppdaterMedNyttSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)
                 }
 
                 override fun håndterRefusjonsopplysninger(
@@ -1730,7 +1731,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandlingkilde: Behandlingkilde,
                     dokumentsporing: Dokumentsporing,
                     aktivitetslogg: IAktivitetslogg,
-                    beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                    beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                     beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring,
                     nyeRefusjonsopplysninger: Beløpstidslinje
                 ): Behandling? {
@@ -1740,9 +1741,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return null
                 }
 
-                override fun håndterEndring(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, dokumentsporing: Dokumentsporing, hendelseSykdomstidslinje: Sykdomstidslinje, dagerNavOvertarAnsvar: List<Periode>?, egenmeldingsdager: List<Periode>?, aktivitetslogg: IAktivitetslogg, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling? {
+                override fun håndterEndring(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, dokumentsporing: Dokumentsporing, hendelseSykdomstidslinje: Sykdomstidslinje, dagerNavOvertarAnsvar: List<Periode>?, egenmeldingsdager: List<Periode>?, aktivitetslogg: IAktivitetslogg, beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling? {
                     behandling.gjeldende.forkastUtbetaling(aktivitetslogg)
-                    behandling.oppdaterMedEndring(yrkesaktivitet, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+                    behandling.oppdaterMedEndring(yrkesaktivitet, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)
                     behandling.tilstand(Uberegnet, aktivitetslogg)
                     return null
                 }
@@ -1767,9 +1768,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             data object BeregnetOmgjøring : Tilstand by (Beregnet) {
-                override fun håndterEndring(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, dokumentsporing: Dokumentsporing, hendelseSykdomstidslinje: Sykdomstidslinje, dagerNavOvertarAnsvar: List<Periode>?, egenmeldingsdager: List<Periode>?, aktivitetslogg: IAktivitetslogg, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling? {
+                override fun håndterEndring(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, dokumentsporing: Dokumentsporing, hendelseSykdomstidslinje: Sykdomstidslinje, dagerNavOvertarAnsvar: List<Periode>?, egenmeldingsdager: List<Periode>?, aktivitetslogg: IAktivitetslogg, beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling? {
                     behandling.gjeldende.forkastUtbetaling(aktivitetslogg)
-                    behandling.oppdaterMedEndring(yrkesaktivitet, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+                    behandling.oppdaterMedEndring(yrkesaktivitet, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)
                     behandling.tilstand(UberegnetOmgjøring, aktivitetslogg)
                     return null
                 }
@@ -1780,7 +1781,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandlingkilde: Behandlingkilde,
                     dokumentsporing: Dokumentsporing,
                     aktivitetslogg: IAktivitetslogg,
-                    beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                    beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                     beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring,
                     nyeRefusjonsopplysninger: Beløpstidslinje
                 ): Behandling? {
@@ -1826,11 +1827,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     dagerNavOvertarAnsvar: List<Periode>?,
                     egenmeldingsdager: List<Periode>?,
                     aktivitetslogg: IAktivitetslogg,
-                    beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                    beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                     beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
                 ): Behandling? {
                     behandling.gjeldende.forkastUtbetaling(aktivitetslogg)
-                    behandling.oppdaterMedEndring(yrkesaktivitet, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+                    behandling.oppdaterMedEndring(yrkesaktivitet, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)
                     behandling.tilstand(UberegnetRevurdering, aktivitetslogg)
                     return null
                 }
@@ -1841,7 +1842,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandlingkilde: Behandlingkilde,
                     dokumentsporing: Dokumentsporing,
                     aktivitetslogg: IAktivitetslogg,
-                    beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                    beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                     beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring,
                     nyeRefusjonsopplysninger: Beløpstidslinje
                 ): Behandling? {
@@ -1869,8 +1870,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     error("Kan ikke forkaste i tilstand ${this.javaClass.simpleName}")
                 }
 
-                override fun sikreNyBehandling(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling {
-                    return behandling.sikreNyBehandling(yrkesaktivitet, UberegnetRevurdering, behandlingkilde, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+                override fun sikreNyBehandling(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling {
+                    return behandling.sikreNyBehandling(yrkesaktivitet, UberegnetRevurdering, behandlingkilde, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)
                 }
 
                 override fun tillaterNyBehandling(behandling: Behandling, other: Behandling): Boolean {
@@ -1904,8 +1905,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return true
                 }
 
-                override fun sikreNyBehandling(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling {
-                    return behandling.sikreNyBehandling(yrkesaktivitet, UberegnetRevurdering, behandlingkilde, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+                override fun sikreNyBehandling(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling {
+                    return behandling.sikreNyBehandling(yrkesaktivitet, UberegnetRevurdering, behandlingkilde, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)
                 }
 
                 override fun håndterUtbetalinghendelse(behandling: Behandling, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg): Boolean {
@@ -1923,10 +1924,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandlingkilde: Behandlingkilde,
                     dokumentsporing: Dokumentsporing,
                     aktivitetslogg: IAktivitetslogg,
-                    beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                    beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                     beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring,
                     nyeRefusjonsopplysninger: Beløpstidslinje
-                ) = behandling.nyBehandlingMedRefusjonstidslinje(yrkesaktivitet, behandlingkilde, dokumentsporing, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, nyeRefusjonsopplysninger, UberegnetRevurdering)
+                ) = behandling.nyBehandlingMedRefusjonstidslinje(yrkesaktivitet, behandlingkilde, dokumentsporing, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode, nyeRefusjonsopplysninger, UberegnetRevurdering)
 
                 override fun håndterEndring(
                     behandling: Behandling,
@@ -1937,9 +1938,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     dagerNavOvertarAnsvar: List<Periode>?,
                     egenmeldingsdager: List<Periode>?,
                     aktivitetslogg: IAktivitetslogg,
-                    beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                    beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                     beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
-                ) = behandling.nyBehandlingMedEndring(yrkesaktivitet, behandlingkilde, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, UberegnetRevurdering)
+                ) = behandling.nyBehandlingMedEndring(yrkesaktivitet, behandlingkilde, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode, UberegnetRevurdering)
 
                 override fun avsluttMedVedtak(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
                     behandling.tilstand(VedtakIverksatt, aktivitetslogg)
@@ -1984,19 +1985,19 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandlingkilde: Behandlingkilde,
                     dokumentsporing: Dokumentsporing,
                     aktivitetslogg: IAktivitetslogg,
-                    beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                    beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                     beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring,
                     nyeRefusjonsopplysninger: Beløpstidslinje
                 ): Behandling {
-                    return behandling.nyBehandlingMedRefusjonstidslinje(yrkesaktivitet, behandlingkilde, dokumentsporing, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, nyeRefusjonsopplysninger, UberegnetOmgjøring)
+                    return behandling.nyBehandlingMedRefusjonstidslinje(yrkesaktivitet, behandlingkilde, dokumentsporing, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode, nyeRefusjonsopplysninger, UberegnetOmgjøring)
                 }
 
                 override fun tillaterNyBehandling(behandling: Behandling, other: Behandling): Boolean {
                     return true
                 }
 
-                override fun sikreNyBehandling(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling {
-                    return behandling.sikreNyBehandling(yrkesaktivitet, UberegnetOmgjøring, behandlingkilde, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+                override fun sikreNyBehandling(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling {
+                    return behandling.sikreNyBehandling(yrkesaktivitet, UberegnetOmgjøring, behandlingkilde, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)
                 }
 
                 override fun validerIkkeFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {}
@@ -2010,10 +2011,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     dagerNavOvertarAnsvar: List<Periode>?,
                     egenmeldingsdager: List<Periode>?,
                     aktivitetslogg: IAktivitetslogg,
-                    beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                    beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                     beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
                 ): Behandling {
-                    return behandling.nyBehandlingMedEndring(yrkesaktivitet, behandlingkilde, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, UberegnetOmgjøring)
+                    return behandling.nyBehandlingMedEndring(yrkesaktivitet, behandlingkilde, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode, UberegnetOmgjøring)
                 }
 
                 override fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {
@@ -2050,8 +2051,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return true
                 }
 
-                override fun sikreNyBehandling(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling {
-                    return behandling.sikreNyBehandling(yrkesaktivitet, UberegnetRevurdering, behandlingkilde, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
+                override fun sikreNyBehandling(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring): Behandling {
+                    return behandling.sikreNyBehandling(yrkesaktivitet, UberegnetRevurdering, behandlingkilde, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)
                 }
 
                 override fun håndterRefusjonsopplysninger(
@@ -2060,10 +2061,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandlingkilde: Behandlingkilde,
                     dokumentsporing: Dokumentsporing,
                     aktivitetslogg: IAktivitetslogg,
-                    beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                    beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                     beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring,
                     nyeRefusjonsopplysninger: Beløpstidslinje
-                ) = behandling.nyBehandlingMedRefusjonstidslinje(yrkesaktivitet, behandlingkilde, dokumentsporing, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, nyeRefusjonsopplysninger, UberegnetRevurdering)
+                ) = behandling.nyBehandlingMedRefusjonstidslinje(yrkesaktivitet, behandlingkilde, dokumentsporing, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode, nyeRefusjonsopplysninger, UberegnetRevurdering)
 
                 override fun håndterEndring(
                     behandling: Behandling,
@@ -2074,9 +2075,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     dagerNavOvertarAnsvar: List<Periode>?,
                     egenmeldingsdager: List<Periode>?,
                     aktivitetslogg: IAktivitetslogg,
-                    beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+                    beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                     beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
-                ) = behandling.nyBehandlingMedEndring(yrkesaktivitet, behandlingkilde, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, UberegnetRevurdering)
+                ) = behandling.nyBehandlingMedEndring(yrkesaktivitet, behandlingkilde, dokumentsporing, hendelseSykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode, UberegnetRevurdering)
 
                 override fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {
                     if (behandling.avsluttet != null && behandling.vedtakFattet != null) return

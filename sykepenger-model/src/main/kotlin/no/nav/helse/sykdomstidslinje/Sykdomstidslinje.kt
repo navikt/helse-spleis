@@ -176,7 +176,7 @@ class Sykdomstidslinje private constructor(
 
     internal companion object {
         internal fun beregnSkjæringstidspunkt(tidslinjer: List<Sykdomstidslinje>) =
-            Skjæringstidspunkt(samletTidslinje(tidslinjer))
+            Skjæringstidspunkt(samletTidslinje(tidslinjer)).alle()
 
         private fun samletTidslinje(tidslinjer: List<Sykdomstidslinje>) = tidslinjer
             .map { Sykdomstidslinje(it.dager, it.periode) } // fjerner evt. låser først

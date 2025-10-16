@@ -7,7 +7,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
+import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
@@ -71,7 +71,7 @@ internal class Infotrygdhistorikk private constructor(
         return siste.utbetalingstidslinje()
     }
 
-    internal fun skjæringstidspunkt(tidslinjer: List<Sykdomstidslinje>): Skjæringstidspunkt {
+    internal fun skjæringstidspunkt(tidslinjer: List<Sykdomstidslinje>): Skjæringstidspunkter {
         return Sykdomstidslinje.beregnSkjæringstidspunkt(tidslinjer + listOf(sykdomstidslinje()))
     }
 

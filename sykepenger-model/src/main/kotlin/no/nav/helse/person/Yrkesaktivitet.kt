@@ -82,7 +82,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SAMME_ARBEIDSGIVERPERIODE
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiv
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
-import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
+import no.nav.helse.person.Vedtaksperiode.Companion.oppdatereSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.medSammeUtbetaling
@@ -109,6 +109,7 @@ import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.view.ArbeidsgiverView
 import no.nav.helse.sykdomstidslinje.Dag.Companion.bareNyeDager
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
+import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
@@ -216,17 +217,12 @@ internal class Yrkesaktivitet private constructor(
         internal fun List<Yrkesaktivitet>.venter() =
             flatMap { yrkesaktivitet -> yrkesaktivitet.vedtaksperioder.venter() }
 
-        internal fun List<Yrkesaktivitet>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk): () -> Skjæringstidspunkt =
-            {
+        internal fun List<Yrkesaktivitet>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk): Skjæringstidspunkter =
                 infotrygdhistorikk.skjæringstidspunkt(map(Yrkesaktivitet::sykdomstidslinje))
-            }
 
-        internal fun List<Yrkesaktivitet>.beregnSkjæringstidspunkter(infotrygdhistorikk: Infotrygdhistorikk) {
+        internal fun List<Yrkesaktivitet>.oppdatereSkjæringstidspunkter(beregnetSkjæringstidspunkter: Skjæringstidspunkter) {
             forEach {
-                it.vedtaksperioder.beregnSkjæringstidspunkter(
-                    beregnSkjæringstidspunkt(infotrygdhistorikk),
-                    it.beregnArbeidsgiverperiode()
-                )
+                it.vedtaksperioder.oppdatereSkjæringstidspunkter(beregnetSkjæringstidspunkter, it.beregnArbeidsgiverperiode())
             }
         }
 
@@ -1028,8 +1024,10 @@ internal class Yrkesaktivitet private constructor(
         return revurderingseventyr
     }
 
-    internal fun oppdaterSykdom(meldingsreferanseId: MeldingsreferanseId, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
-        return sykdomshistorikk.håndter(meldingsreferanseId, sykdomstidslinje)
+    internal fun oppdaterSykdom(meldingsreferanseId: MeldingsreferanseId, sykdomstidslinje: Sykdomstidslinje): Pair<Sykdomstidslinje, Skjæringstidspunkter> {
+        val nyTidslinje = sykdomshistorikk.håndter(meldingsreferanseId, sykdomstidslinje)
+        val nyeSkjæringstidspunkter = person.beregnSkjæringstidspunkter()
+        return nyTidslinje to nyeSkjæringstidspunkter
     }
 
     private fun sykdomstidslinje(): Sykdomstidslinje {
@@ -1198,7 +1196,7 @@ internal class Yrkesaktivitet private constructor(
     }
 
     internal fun finnFørsteFraværsdag(vedtaksperiode: Periode): LocalDate? {
-        return Skjæringstidspunkt(sykdomstidslinje()).sisteOrNull(vedtaksperiode)
+        return Skjæringstidspunkt(sykdomstidslinje()).alle().sisteOrNull(vedtaksperiode)
     }
 
     private fun <R> håndter(håndterer: (Vedtaksperiode) -> R?): List<R> {

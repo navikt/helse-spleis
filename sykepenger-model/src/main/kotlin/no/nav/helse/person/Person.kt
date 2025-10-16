@@ -61,7 +61,7 @@ import no.nav.helse.person.Yrkesaktivitet.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Yrkesaktivitet.Companion.avventerSøknad
 import no.nav.helse.person.Yrkesaktivitet.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Yrkesaktivitet.Companion.beregnSkjæringstidspunkt
-import no.nav.helse.person.Yrkesaktivitet.Companion.beregnSkjæringstidspunkter
+import no.nav.helse.person.Yrkesaktivitet.Companion.oppdatereSkjæringstidspunkter
 import no.nav.helse.person.Yrkesaktivitet.Companion.finn
 import no.nav.helse.person.Yrkesaktivitet.Companion.finnAnnulleringskandidater
 import no.nav.helse.person.Yrkesaktivitet.Companion.fjernSykmeldingsperiode
@@ -85,6 +85,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.view.PersonView
+import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler.Companion.NormalArbeidstaker
 
@@ -95,7 +96,7 @@ class Person private constructor(
     private val opprettet: LocalDateTime,
     internal val infotrygdhistorikk: Infotrygdhistorikk,
     internal val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
-    skjæringstidspunkter: List<Periode>,
+    skjæringstidspunkter: Skjæringstidspunkter,
     private val regelverkslogg: Regelverkslogg,
     private val tidligereBehandlinger: List<Person> = emptyList(),
     internal val regler: MaksimumSykepengedagerregler = NormalArbeidstaker,
@@ -120,7 +121,7 @@ class Person private constructor(
                     dto.vilkårsgrunnlagHistorikk,
                     grunnlagsdataMap
                 ),
-                skjæringstidspunkter = dto.skjæringstidspunkter.map { Periode.gjenopprett(it) },
+                skjæringstidspunkter = Skjæringstidspunkter.gjenopprett(dto.skjæringstidspunkter),
                 minimumSykdomsgradsvurdering = MinimumSykdomsgradsvurdering.gjenopprett(dto.minimumSykdomsgradVurdering),
                 regelverkslogg = regelverkslogg,
                 tidligereBehandlinger = tidligereBehandlinger
@@ -144,7 +145,7 @@ class Person private constructor(
         LocalDateTime.now(),
         Infotrygdhistorikk(),
         VilkårsgrunnlagHistorikk(),
-        emptyList<Periode>(),
+        Skjæringstidspunkter(emptyList()),
         regelverkslogg,
         emptyList<Person>(),
         regler = regler
@@ -165,7 +166,7 @@ class Person private constructor(
 
     private val observers = mutableListOf<PersonObserver>()
 
-    internal var skjæringstidspunkter: List<Periode> = skjæringstidspunkter
+    internal var skjæringstidspunkter: Skjæringstidspunkter = skjæringstidspunkter
         private set
 
     internal fun view() = PersonView(
@@ -317,6 +318,7 @@ class Person private constructor(
             aktivitetslogg.info("Oppfrisket Infotrygdhistorikk ble lagret, starter revurdering fra tidligste endring $tidligsteDatoForEndring")
             Revurderingseventyr.infotrygdendring(hendelse, tidligsteDatoForEndring, tidligsteDatoForEndring.somPeriode())
         }
+        beregnSkjæringstidspunkter()
         sykdomshistorikkEndret()
         emitOverlappendeInfotrygdperioder()
         if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
@@ -643,15 +645,21 @@ class Person private constructor(
     }
 
     internal fun beregnSkjæringstidspunkt() = yrkesaktiviteter.beregnSkjæringstidspunkt(infotrygdhistorikk)
+
+    internal fun beregnSkjæringstidspunkter(): Skjæringstidspunkter {
+        skjæringstidspunkter = beregnSkjæringstidspunkt()
+        return skjæringstidspunkter
+    }
+
     internal fun sykdomshistorikkEndret() {
-        skjæringstidspunkter = beregnSkjæringstidspunkt()().alle()
-        yrkesaktiviteter.beregnSkjæringstidspunkter(infotrygdhistorikk)
+        yrkesaktiviteter.oppdatereSkjæringstidspunkter(skjæringstidspunkter)
     }
 
     internal fun søppelbøtte(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, vedtaksperioderSomSkalForkastes: List<Vedtaksperiode>) {
         aktivitetslogg.info("Forkaster ${vedtaksperioderSomSkalForkastes.size} vedtaksperioder")
         infotrygdhistorikk.tøm()
         Yrkesaktivitet.søppelbøtte(yrkesaktiviteter, hendelse, aktivitetslogg, vedtaksperioderSomSkalForkastes)
+        beregnSkjæringstidspunkter()
         sykdomshistorikkEndret()
         ryddOppVilkårsgrunnlag(aktivitetslogg)
         gjenopptaBehandling(aktivitetslogg)
@@ -767,7 +775,7 @@ class Person private constructor(
         opprettet = opprettet,
         infotrygdhistorikk = infotrygdhistorikk.dto(),
         vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.dto(),
-        skjæringstidspunkter = skjæringstidspunkter.map { it.dto() },
+        skjæringstidspunkter = skjæringstidspunkter.dto(),
         minimumSykdomsgradVurdering = minimumSykdomsgradsvurdering.dto()
     )
 }

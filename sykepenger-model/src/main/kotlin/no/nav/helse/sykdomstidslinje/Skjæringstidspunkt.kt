@@ -1,18 +1,14 @@
 package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 
-internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomstidslinje) {
-
-    fun alle(): List<Periode> {
-        return finnSkjæringstidspunkt().map { it.periode }
-    }
-
+internal data class Skjæringstidspunkter(val skjæringstidspunkter: List<Periode>) {
     fun alle(søkeperiode: Periode): List<LocalDate> {
-        return alle()
+        return skjæringstidspunkter
             .filter { søkeperiode.overlapperMed(it) }
             .map { it.start }
             .reversed()
@@ -20,6 +16,20 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
 
     fun sisteOrNull(vedtaksperiode: Periode): LocalDate? {
         return alle(vedtaksperiode).firstOrNull()
+    }
+
+    fun dto() = skjæringstidspunkter.map { it.dto() }
+
+    companion object {
+        fun gjenopprett(perioder: List<PeriodeDto>) =
+            Skjæringstidspunkter(perioder.map { Periode.gjenopprett(it) })
+    }
+}
+
+internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomstidslinje) {
+
+    fun alle(): Skjæringstidspunkter {
+        return Skjæringstidspunkter(finnSkjæringstidspunkt().map { it.periode })
     }
 
     private fun finnSkjæringstidspunkt(): List<Søkekontekst> {

@@ -691,10 +691,10 @@ internal class SkjæringstidspunktTest {
         )
 
         private fun beregnSkjæringstidspunkter(tidslinje: Sykdomstidslinje) =
-            Skjæringstidspunkt(tidslinje).alle()
+            Skjæringstidspunkt(tidslinje).alle().skjæringstidspunkter
 
         private fun beregnSkjæringstidspunkt(tidslinje: Sykdomstidslinje, søkeperiode: Periode) =
-            Skjæringstidspunkt(tidslinje).sisteOrNull(søkeperiode)
+            Skjæringstidspunkt(tidslinje).alle().sisteOrNull(søkeperiode)
 
         private fun assertDagenErSkjæringstidspunkt(
             dagen: LocalDate,

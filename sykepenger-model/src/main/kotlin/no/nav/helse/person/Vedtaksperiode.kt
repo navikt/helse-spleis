@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
-import kotlin.collections.last
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -178,7 +177,7 @@ import no.nav.helse.person.tilstandsmaskin.TilUtbetaling
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.Vedtaksperiodetilstand
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
-import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
+import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -866,7 +865,7 @@ internal class Vedtaksperiode private constructor(
         behandlinger.sikreNyBehandling(
             yrkesaktivitet = yrkesaktivitet,
             behandlingkilde = hendelse.metadata.behandlingkilde,
-            beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
+            beregnetSkjæringstidspunkter = person.beregnSkjæringstidspunkt(),
             beregnArbeidsgiverperiode = yrkesaktivitet.beregnArbeidsgiverperiode()
         )
         behandlinger.oppdaterDokumentsporing(dokumentsporing(hendelse.metadata.meldingsreferanseId))
@@ -1352,7 +1351,7 @@ internal class Vedtaksperiode private constructor(
             behandlingkilde = sykepengegrunnlagForArbeidsgiver.metadata.behandlingkilde,
             dokumentsporing = inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId),
             aktivitetslogg = aktivitetslogg,
-            beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
+            beregnetSkjæringstidspunkter = person.beregnSkjæringstidspunkt(),
             beregnArbeidsgiverperiode = yrkesaktivitet.beregnArbeidsgiverperiode(),
             refusjonstidslinje = ingenRefusjon
         )
@@ -1724,7 +1723,7 @@ internal class Vedtaksperiode private constructor(
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             egenmeldingsdager = egenmeldingsdager,
             aktivitetslogg = aktivitetslogg,
-            beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
+            beregnetSkjæringstidspunkter = person.beregnSkjæringstidspunkt(),
             beregnArbeidsgiverperiode = yrkesaktivitet.beregnArbeidsgiverperiode(),
             validering = validering
         )
@@ -1739,7 +1738,7 @@ internal class Vedtaksperiode private constructor(
         behandlingkilde = hendelse.metadata.behandlingkilde,
         dokumentsporing = dokumentsporing,
         aktivitetslogg = aktivitetslogg,
-        beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
+        beregnetSkjæringstidspunkter = person.beregnSkjæringstidspunkt(),
         beregnArbeidsgiverperiode = yrkesaktivitet.beregnArbeidsgiverperiode(),
         egenmeldingsdager = egenmeldingsdager
     )
@@ -2609,7 +2608,7 @@ internal class Vedtaksperiode private constructor(
             behandlingkilde = påminnelse.metadata.behandlingkilde,
             dokumentsporing = null,
             aktivitetslogg = aktivitetslogg,
-            beregnSkjæringstidspunkt = person.beregnSkjæringstidspunkt(),
+            beregnetSkjæringstidspunkter = person.beregnSkjæringstidspunkt(),
             beregnArbeidsgiverperiode = yrkesaktivitet.beregnArbeidsgiverperiode(),
             refusjonstidslinje = Beløpstidslinje.fra(periode, inntekt.fastsattÅrsinntekt, Kilde(inntekt.faktaavklartInntekt.inntektsdata.hendelseId, Avsender.ARBEIDSGIVER, inntekt.faktaavklartInntekt.inntektsdata.tidsstempel))
         )
@@ -2754,11 +2753,11 @@ internal class Vedtaksperiode private constructor(
             return vedtaksperioder.map { it.sykmeldingsperiode }
         }
 
-        internal fun List<Vedtaksperiode>.beregnSkjæringstidspunkter(
-            beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
+        internal fun List<Vedtaksperiode>.oppdatereSkjæringstidspunkter(
+            beregnetSkjæringstidspunkter: Skjæringstidspunkter,
             beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
         ) {
-            forEach { it.behandlinger.beregnSkjæringstidspunkt(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode) }
+            forEach { it.behandlinger.oppdaterSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode) }
         }
 
         internal fun List<Vedtaksperiode>.aktiveSkjæringstidspunkter(): Set<LocalDate> {
