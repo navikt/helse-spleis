@@ -10,30 +10,17 @@ data class Arbeidsgiverperioderesultat(
     val omsluttendePeriode: Periode,
     // dager som tolkes som del av arbeidsgiverperioden
     val arbeidsgiverperiode: List<Periode>,
-    // perioder hvor det er registrert utbetaling
-    val utbetalingsperioder: List<Periode>,
-    // perioder hvor det er registrert oppholdsdager
-    val oppholdsperioder: List<Periode>,
-    // hvorvidt arbeidsgiverperiodetellingen er komplett, aka. 16 dager.
-    // hvis tellingen er fullstendig så er arbeidsgiverperiode.last() dag nr. 16.
-    val fullstendig: Boolean,
     // hvorvidt arbeidsgiverperioden er ferdig avklart (enten fordi tellingen er fullstendig eller fordi agp er avklart i Infotrygd)
     val ferdigAvklart: Boolean
 ) {
     fun utvideMed(
         dato: LocalDate,
         arbeidsgiverperiode: LocalDate? = null,
-        utbetalingsperiode: LocalDate? = null,
-        oppholdsperiode: LocalDate? = null,
-        fullstendig: Boolean? = null,
         ferdigAvklart: Boolean? = null
     ): Arbeidsgiverperioderesultat {
         return this.copy(
             omsluttendePeriode = this.omsluttendePeriode.oppdaterTom(dato),
             arbeidsgiverperiode = this.arbeidsgiverperiode.leggTil(arbeidsgiverperiode),
-            utbetalingsperioder = this.utbetalingsperioder.leggTil(utbetalingsperiode),
-            oppholdsperioder = this.oppholdsperioder.leggTil(oppholdsperiode),
-            fullstendig = fullstendig ?: this.fullstendig,
             ferdigAvklart = ferdigAvklart ?: this.ferdigAvklart
         )
     }

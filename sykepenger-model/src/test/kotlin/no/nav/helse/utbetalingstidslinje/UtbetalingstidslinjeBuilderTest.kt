@@ -56,9 +56,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 15.januar,
                 arbeidsgiverperiode = listOf(1.januar til 15.januar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = emptyList(),
-                fullstendig = false,
                 ferdigAvklart = false
             ), perioder.single()
         )
@@ -75,9 +72,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 15.januar,
                 arbeidsgiverperiode = listOf(1.januar til 15.januar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = emptyList(),
-                fullstendig = false,
                 ferdigAvklart = false
             ), perioder.single()
         )
@@ -95,9 +89,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 31.januar,
                 arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(17.januar til 31.januar),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -116,9 +107,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 31.januar,
                 arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(17.januar til 31.januar),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -139,9 +127,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 15.januar,
                 arbeidsgiverperiode = emptyList(),
-                utbetalingsperioder = listOf(1.januar til 15.januar),
-                oppholdsperioder = emptyList(),
-                fullstendig = false,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -161,9 +146,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 28.februar,
                 arbeidsgiverperiode = emptyList(),
-                utbetalingsperioder = listOf(1.januar til 5.januar, 1.februar til 28.februar),
-                oppholdsperioder = emptyList(),
-                fullstendig = false,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -182,9 +164,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 15.januar,
                 arbeidsgiverperiode = listOf(1.januar til 9.januar),
-                utbetalingsperioder = listOf(10.januar til 15.januar),
-                oppholdsperioder = emptyList(),
-                fullstendig = false,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -203,9 +182,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 15.januar,
                 arbeidsgiverperiode = emptyList(),
-                utbetalingsperioder = listOf(1.januar til 15.januar),
-                oppholdsperioder = emptyList(),
-                fullstendig = false,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -225,9 +201,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 17.januar,
                 arbeidsgiverperiode = emptyList(),
-                utbetalingsperioder = listOf(1.januar.somPeriode()),
-                oppholdsperioder = listOf(2.januar til 17.januar),
-                fullstendig = false,
                 ferdigAvklart = true
             ), perioder.first()
         )
@@ -235,9 +208,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 18.januar til 3.februar,
                 arbeidsgiverperiode = listOf(18.januar til 2.februar),
-                utbetalingsperioder = listOf(3.februar.somPeriode()),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
                 ferdigAvklart = true
             ), perioder.last()
         )
@@ -257,9 +227,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 3.februar,
                 arbeidsgiverperiode = emptyList(),
-                utbetalingsperioder = listOf(1.januar.somPeriode(), 17.januar til 3.februar),
-                oppholdsperioder = listOf(2.januar til 16.januar),
-                fullstendig = false,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -277,9 +244,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 1.februar,
                 arbeidsgiverperiode = listOf(1.januar til 9.januar),
-                utbetalingsperioder = listOf(11.januar til 1.februar),
-                oppholdsperioder = listOf(10.januar.somPeriode()),
-                fullstendig = false,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -339,9 +303,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 16.februar,
                 arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(17.januar til 31.januar),
-                oppholdsperioder = listOf(1.februar til 16.februar),
-                fullstendig = true,
                 ferdigAvklart = true,
             ), perioder.single()
         )
@@ -358,9 +319,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 1.januar til 18.januar,
                     arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                    utbetalingsperioder = listOf(17.januar til 18.januar),
-                    oppholdsperioder = emptyList(),
-                    fullstendig = true,
                     ferdigAvklart = true,
                 ), perioder.single()
             )
@@ -391,9 +349,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 1.januar til 22.januar,
                     arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                    utbetalingsperioder = listOf(17.januar til 22.januar),
-                    oppholdsperioder = emptyList(),
-                    fullstendig = true,
                     ferdigAvklart = true,
                 ), perioder.single()
             )
@@ -414,9 +369,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 22.januar,
                 arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(18.januar til 22.januar),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -433,9 +385,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 1.januar til 31.januar,
                     arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                    utbetalingsperioder = emptyList(),
-                    oppholdsperioder = emptyList(),
-                    fullstendig = true,
                     ferdigAvklart = true,
                 ), perioder.single()
             )
@@ -453,9 +402,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 31.januar,
                 arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -472,9 +418,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 11.februar,
                 arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(2.februar til 11.februar),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -494,9 +437,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 11.februar,
                 arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(2.februar til 11.februar),
-                oppholdsperioder = listOf(1.februar.somPeriode()),
-                fullstendig = true,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -516,9 +456,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 1.januar til 11.februar,
                     arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                    utbetalingsperioder = listOf(2.februar til 11.februar),
-                    oppholdsperioder = listOf(1.februar.somPeriode()),
-                    fullstendig = true,
                     ferdigAvklart = true,
                 ), perioder.single()
             )
@@ -539,9 +476,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 1.januar til 11.februar,
                     arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                    utbetalingsperioder = listOf(17.januar.somPeriode(), 3.februar til 11.februar),
-                    oppholdsperioder = listOf(2.februar.somPeriode()),
-                    fullstendig = true,
                     ferdigAvklart = true,
                 ), perioder.single()
             )
@@ -560,9 +494,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 1.januar til 31.januar,
                     arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                    utbetalingsperioder = listOf(27.januar til 31.januar),
-                    oppholdsperioder = emptyList(),
-                    fullstendig = true,
                     ferdigAvklart = true
                 ), perioder.single()
             )
@@ -581,9 +512,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 1.januar til 17.januar,
                     arbeidsgiverperiode = listOf(1.januar.somPeriode()),
-                    utbetalingsperioder = emptyList(),
-                    oppholdsperioder = listOf(2.januar til 17.januar),
-                    fullstendig = false,
                     ferdigAvklart = false
                 ), perioder.first()
             )
@@ -591,9 +519,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 18.januar til 2.februar,
                     arbeidsgiverperiode = listOf(18.januar til 2.februar),
-                    utbetalingsperioder = emptyList(),
-                    oppholdsperioder = emptyList(),
-                    fullstendig = true,
                     ferdigAvklart = true
                 ), perioder.last()
             )
@@ -614,9 +539,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 1.januar til 2.februar,
                     arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                    utbetalingsperioder = listOf(18.januar til 2.februar),
-                    oppholdsperioder = listOf(17.januar.somPeriode()),
-                    fullstendig = true,
                     ferdigAvklart = true
                 ), perioder.single()
             )
@@ -635,9 +557,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 1.januar til 17.januar,
                     arbeidsgiverperiode = listOf(1.januar.somPeriode()),
-                    utbetalingsperioder = emptyList(),
-                    oppholdsperioder = listOf(2.januar til 17.januar),
-                    fullstendig = false,
                     ferdigAvklart = false
                 ), perioder.first()
             )
@@ -645,9 +564,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 18.januar til 2.februar,
                     arbeidsgiverperiode = listOf(18.januar til 2.februar),
-                    utbetalingsperioder = emptyList(),
-                    oppholdsperioder = emptyList(),
-                    fullstendig = true,
                     ferdigAvklart = true
                 ), perioder.last()
             )
@@ -666,9 +582,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 1.januar til 22.januar,
                     arbeidsgiverperiode = listOf(1.januar til 6.januar),
-                    utbetalingsperioder = emptyList(),
-                    oppholdsperioder = listOf(7.januar til 22.januar),
-                    fullstendig = false,
                     ferdigAvklart = false
                 ), perioder.first()
             )
@@ -676,9 +589,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 23.januar til 7.februar,
                     arbeidsgiverperiode = listOf(23.januar til 7.februar),
-                    utbetalingsperioder = emptyList(),
-                    oppholdsperioder = emptyList(),
-                    fullstendig = true,
                     ferdigAvklart = true
                 ), perioder.last()
             )
@@ -697,9 +607,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 1.januar til 21.januar,
                     arbeidsgiverperiode = listOf(1.januar til 5.januar),
-                    utbetalingsperioder = emptyList(),
-                    oppholdsperioder = listOf(6.januar til 21.januar),
-                    fullstendig = false,
                     ferdigAvklart = false
                 ), perioder.first()
             )
@@ -707,9 +614,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 22.januar til 6.februar,
                     arbeidsgiverperiode = listOf(22.januar til 6.februar),
-                    utbetalingsperioder = emptyList(),
-                    oppholdsperioder = emptyList(),
-                    fullstendig = true,
                     ferdigAvklart = true
                 ), perioder.last()
             )
@@ -730,9 +634,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 1.januar til 6.februar,
                     arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                    utbetalingsperioder = listOf(22.januar til 6.februar),
-                    oppholdsperioder = listOf(21.januar.somPeriode()),
-                    fullstendig = true,
                     ferdigAvklart = true
                 ), perioder.single()
             )
@@ -750,9 +651,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 16.januar til 31.januar,
                     arbeidsgiverperiode = listOf(16.januar til 31.januar),
-                    utbetalingsperioder = emptyList(),
-                    oppholdsperioder = emptyList(),
-                    fullstendig = true,
                     ferdigAvklart = true
                 ), perioder.single()
             )
@@ -796,9 +694,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 29.januar,
                 arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(29.januar.somPeriode()),
-                oppholdsperioder = listOf(17.januar til 28.januar),
-                fullstendig = true,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -822,9 +717,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 16.januar,
                 arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -841,9 +733,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 19.januar,
                 arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = listOf(17.januar til 19.januar),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -860,9 +749,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 Arbeidsgiverperioderesultat(
                     omsluttendePeriode = 1.januar til 26.januar,
                     arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                    utbetalingsperioder = listOf(17.januar til 26.januar),
-                    oppholdsperioder = emptyList(),
-                    fullstendig = true,
                     ferdigAvklart = true
                 ), perioder.single()
             )
@@ -880,9 +766,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 18.januar,
                 arbeidsgiverperiode = listOf(1.januar til 12.januar, 17.januar til 18.januar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = listOf(13.januar til 16.januar),
-                fullstendig = false,
                 ferdigAvklart = false
             ), perioder.single()
         )
@@ -898,9 +781,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 17.januar,
                 arbeidsgiverperiode = listOf(1.januar til 16.januar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -918,9 +798,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 4.januar til 20.januar,
                 arbeidsgiverperiode = listOf(4.januar til 19.januar),
-                utbetalingsperioder = listOf(20.januar.somPeriode()),
-                oppholdsperioder = emptyList(),
-                fullstendig = true,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -937,9 +814,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 18.januar,
                 arbeidsgiverperiode = listOf(1.januar til 12.januar, 17.januar til 18.januar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = listOf(13.januar til 16.januar),
-                fullstendig = false,
                 ferdigAvklart = false
             ), perioder.single()
         )
@@ -958,9 +832,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 1.februar,
                 arbeidsgiverperiode = listOf(1.januar til 10.januar, 26.januar til 31.januar),
-                utbetalingsperioder = listOf(1.februar.somPeriode()),
-                oppholdsperioder = listOf(11.januar til 25.januar),
-                fullstendig = true,
                 ferdigAvklart = true
             ), perioder.single()
         )
@@ -979,9 +850,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 26.januar,
                 arbeidsgiverperiode = listOf(1.januar til 10.januar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = listOf(11.januar til 26.januar),
-                fullstendig = false,
                 ferdigAvklart = false
             ), perioder.first()
         )
@@ -989,9 +857,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 27.januar til 2.februar,
                 arbeidsgiverperiode = listOf(27.januar til 2.februar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = emptyList(),
-                fullstendig = false,
                 ferdigAvklart = false
             ), perioder.last()
         )
@@ -1010,9 +875,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 1.januar til 26.januar,
                 arbeidsgiverperiode = listOf(1.januar til 10.januar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = listOf(11.januar til 26.januar),
-                fullstendig = false,
                 ferdigAvklart = false
             ), perioder.first()
         )
@@ -1020,9 +882,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             Arbeidsgiverperioderesultat(
                 omsluttendePeriode = 11.februar til 17.februar,
                 arbeidsgiverperiode = listOf(11.februar til 17.februar),
-                utbetalingsperioder = emptyList(),
-                oppholdsperioder = emptyList(),
-                fullstendig = false,
                 ferdigAvklart = false
             ), perioder.last()
         )
