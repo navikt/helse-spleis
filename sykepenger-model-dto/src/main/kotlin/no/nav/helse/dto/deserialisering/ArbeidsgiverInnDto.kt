@@ -1,6 +1,7 @@
 package no.nav.helse.dto.deserialisering
 
 import java.util.UUID
+import no.nav.helse.dto.ArbeidsgiverperioderesultatDto
 import no.nav.helse.dto.RefusjonsservitørDto
 import no.nav.helse.dto.SykdomshistorikkDto
 import no.nav.helse.dto.SykmeldingsperioderDto
@@ -12,6 +13,7 @@ data class ArbeidsgiverInnDto(
     val inntektshistorikk: InntektshistorikkInnDto,
     val sykdomshistorikk: SykdomshistorikkDto,
     val sykmeldingsperioder: SykmeldingsperioderDto,
+    val arbeidsgiverperioder: List<ArbeidsgiverperioderesultatDto>,
     val vedtaksperioder: List<VedtaksperiodeInnDto>,
     val forkastede: List<ForkastetVedtaksperiodeInnDto>,
     val utbetalinger: List<UtbetalingInnDto>,

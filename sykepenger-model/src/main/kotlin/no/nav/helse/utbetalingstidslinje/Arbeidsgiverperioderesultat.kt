@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.dto.ArbeidsgiverperioderesultatDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.nesteDag
@@ -25,6 +26,12 @@ data class Arbeidsgiverperioderesultat(
         )
     }
 
+    fun dto() = ArbeidsgiverperioderesultatDto(
+        omsluttendePeriode = omsluttendePeriode.dto(),
+        arbeidsgiverperiode = arbeidsgiverperiode.map { it.dto() },
+        ferdigAvklart = ferdigAvklart
+    )
+
     companion object {
         // utvider liste av perioder med ny dato. antar at listen er sortert i stigende rekkefølge,
         // og at <dato> må være nyere enn forrige periode. strekker altså -ikke- periodene eventuelt tilbake i tid, kun frem
@@ -46,5 +53,12 @@ data class Arbeidsgiverperioderesultat(
         internal fun Iterable<Arbeidsgiverperioderesultat>.finn(periode: Periode) = lastOrNull { arbeidsgiverperiode ->
             periode.overlapperMed(arbeidsgiverperiode.omsluttendePeriode)
         }
+
+        internal fun gjenopprett(dto: ArbeidsgiverperioderesultatDto) =
+            Arbeidsgiverperioderesultat(
+                omsluttendePeriode = Periode.gjenopprett(dto.omsluttendePeriode),
+                arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) },
+                ferdigAvklart = dto.ferdigAvklart
+            )
     }
 }

@@ -141,6 +141,7 @@ internal class Yrkesaktivitet private constructor(
     private val inntektshistorikk: Inntektshistorikk,
     private val sykdomshistorikk: Sykdomshistorikk,
     private val sykmeldingsperioder: Sykmeldingsperioder,
+    arbeidsgiverperioder: List<Arbeidsgiverperioderesultat>,
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
     private val forkastede: MutableList<ForkastetVedtaksperiode>,
     private val utbetalinger: MutableList<Utbetaling>,
@@ -155,6 +156,7 @@ internal class Yrkesaktivitet private constructor(
         inntektshistorikk = Inntektshistorikk(),
         sykdomshistorikk = Sykdomshistorikk(),
         sykmeldingsperioder = Sykmeldingsperioder(),
+        arbeidsgiverperioder = emptyList(),
         vedtaksperioder = mutableListOf(),
         forkastede = mutableListOf(),
         utbetalinger = mutableListOf(),
@@ -175,6 +177,9 @@ internal class Yrkesaktivitet private constructor(
         Frilans -> YrkesaktivitetType.Frilans
         Selvstendig -> YrkesaktivitetType.Selvstendig
     }
+
+    internal var arbeidsgiverperioder: List<Arbeidsgiverperioderesultat> = arbeidsgiverperioder
+        private set
 
     init {
         utbetalinger.forEach { it.registrer(this) }
@@ -351,6 +356,7 @@ internal class Yrkesaktivitet private constructor(
                 inntektshistorikk = Inntektshistorikk.gjenopprett(dto.inntektshistorikk),
                 sykdomshistorikk = Sykdomshistorikk.gjenopprett(dto.sykdomshistorikk),
                 sykmeldingsperioder = Sykmeldingsperioder.gjenopprett(dto.sykmeldingsperioder),
+                arbeidsgiverperioder = dto.arbeidsgiverperioder.map { Arbeidsgiverperioderesultat.gjenopprett(it) },
                 vedtaksperioder = vedtaksperioder,
                 forkastede = forkastede,
                 utbetalinger = utbetalinger.toMutableList(),
@@ -1024,10 +1030,16 @@ internal class Yrkesaktivitet private constructor(
         return revurderingseventyr
     }
 
-    internal fun oppdaterSykdom(meldingsreferanseId: MeldingsreferanseId, sykdomstidslinje: Sykdomstidslinje): Pair<Sykdomstidslinje, Skjæringstidspunkter> {
+    internal fun beregnArbeidsgiverperioder(): List<Arbeidsgiverperioderesultat> {
+        arbeidsgiverperioder = arbeidsgiverperiodeFor()
+        return arbeidsgiverperioder
+    }
+
+    internal fun oppdaterSykdom(meldingsreferanseId: MeldingsreferanseId, sykdomstidslinje: Sykdomstidslinje): Triple<Sykdomstidslinje, Skjæringstidspunkter, List<Arbeidsgiverperioderesultat>> {
         val nyTidslinje = sykdomshistorikk.håndter(meldingsreferanseId, sykdomstidslinje)
+        val nyeArbeidsgiverperioder = beregnArbeidsgiverperioder()
         val nyeSkjæringstidspunkter = person.beregnSkjæringstidspunkter()
-        return nyTidslinje to nyeSkjæringstidspunkter
+        return Triple(nyTidslinje, nyeSkjæringstidspunkter, nyeArbeidsgiverperioder)
     }
 
     private fun sykdomstidslinje(): Sykdomstidslinje {
@@ -1264,6 +1276,7 @@ internal class Yrkesaktivitet private constructor(
             inntektshistorikk = inntektshistorikk.dto(),
             sykdomshistorikk = sykdomshistorikk.dto(),
             sykmeldingsperioder = sykmeldingsperioder.dto(),
+            arbeidsgiverperioder = arbeidsgiverperioder.map { it.dto() },
             vedtaksperioder = vedtaksperioderDto,
             forkastede = forkastede.map { it.dto() },
             utbetalinger = utbetalinger.map { it.dto() },

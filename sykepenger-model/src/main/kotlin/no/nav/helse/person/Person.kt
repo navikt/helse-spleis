@@ -319,6 +319,7 @@ class Person private constructor(
             Revurderingseventyr.infotrygdendring(hendelse, tidligsteDatoForEndring, tidligsteDatoForEndring.somPeriode())
         }
         beregnSkjæringstidspunkter()
+        beregnArbeidsgiverperioder()
         sykdomshistorikkEndret()
         emitOverlappendeInfotrygdperioder()
         if (revurderingseventyr != null) igangsettOverstyring(revurderingseventyr, aktivitetslogg)
@@ -644,6 +645,10 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
+    private fun beregnArbeidsgiverperioder() {
+        yrkesaktiviteter.forEach { it.beregnArbeidsgiverperioder() }
+    }
+
     internal fun beregnSkjæringstidspunkter(): Skjæringstidspunkter {
         skjæringstidspunkter = yrkesaktiviteter.beregnSkjæringstidspunkt(infotrygdhistorikk)
         return skjæringstidspunkter
@@ -658,6 +663,7 @@ class Person private constructor(
         infotrygdhistorikk.tøm()
         Yrkesaktivitet.søppelbøtte(yrkesaktiviteter, hendelse, aktivitetslogg, vedtaksperioderSomSkalForkastes)
         beregnSkjæringstidspunkter()
+        beregnArbeidsgiverperioder()
         sykdomshistorikkEndret()
         ryddOppVilkårsgrunnlag(aktivitetslogg)
         gjenopptaBehandling(aktivitetslogg)

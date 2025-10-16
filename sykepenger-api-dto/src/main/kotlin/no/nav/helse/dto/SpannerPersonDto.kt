@@ -240,6 +240,7 @@ data class SpannerPersonDto(
         val inntektshistorikk: List<InntektsmeldingData>,
         val sykdomshistorikk: List<SykdomshistorikkData>,
         val sykmeldingsperioder: List<SykmeldingsperiodeData>,
+        val arbeidsgiverperioder: List<ArbeidsgiverperioderesultatData>,
         val vedtaksperioder: List<VedtaksperiodeData>,
         val forkastede: List<ForkastetVedtaksperiodeData>,
         val utbetalinger: List<UtbetalingData>,
@@ -368,6 +369,12 @@ data class SpannerPersonDto(
                 )
             }
         }
+
+        data class ArbeidsgiverperioderesultatData(
+            val omsluttendePeriode: PeriodeData,
+            val arbeidsgiverperiode: List<PeriodeData>,
+            val ferdigAvklart: Boolean
+        )
 
         data class SykmeldingsperiodeData(
             val fom: LocalDate,
@@ -836,6 +843,7 @@ private fun ArbeidsgiverUtDto.tilPersonData(vilkårsgrunnlagHistorikk: List<Vilk
         inntektshistorikk = this.inntektshistorikk.historikk.map { it.tilPersonData() },
         sykdomshistorikk = this.sykdomshistorikk.elementer.map { it.tilPersonData() },
         sykmeldingsperioder = this.sykmeldingsperioder.tilPersonData(),
+        arbeidsgiverperioder = this.arbeidsgiverperioder.map { it.tilPersonData() },
         vedtaksperioder = this.vedtaksperioder.map { vedtaksperiode ->
             val gjeldendeEndring = vedtaksperiode.behandlinger.behandlinger.last().endringer.last()
             val vilkårsgrunnlag = gjeldendeEndring.vilkårsgrunnlagId?.let { vilkårsgrunnlagId -> vilkårsgrunnlagHistorikk.flatMap { it.vilkårsgrunnlag }.first { it.vilkårsgrunnlagId == vilkårsgrunnlagId } }
@@ -848,6 +856,12 @@ private fun ArbeidsgiverUtDto.tilPersonData(vilkårsgrunnlagHistorikk: List<Vilk
         ubrukteRefusjonsopplysninger = RefusjonservitørData(this.ubrukteRefusjonsopplysninger.ubrukteRefusjonsopplysninger.refusjonstidslinjer.mapValues { (_, dto) -> dto.tilPersonData() })
     )
 }
+
+private fun ArbeidsgiverperioderesultatDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.ArbeidsgiverperioderesultatData(
+    omsluttendePeriode = SpannerPersonDto.ArbeidsgiverData.PeriodeData(this.omsluttendePeriode.fom, this.omsluttendePeriode.tom),
+    arbeidsgiverperiode = this.arbeidsgiverperiode.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
+    ferdigAvklart = this.ferdigAvklart
+)
 
 private fun InntektDto.tilPersonData() = SpannerPersonDto.InntektDto(
     årlig = this.årlig.beløp,

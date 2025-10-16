@@ -2,6 +2,7 @@ package no.nav.helse.serde
 
 import java.time.LocalDate
 import no.nav.helse.dto.ArbeidsgiverperiodeavklaringDto
+import no.nav.helse.dto.ArbeidsgiverperioderesultatDto
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
@@ -141,11 +142,18 @@ private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
     inntektshistorikk = this.inntektshistorikk.historikk.map { it.tilPersonData() },
     sykdomshistorikk = this.sykdomshistorikk.elementer.map { it.tilPersonData() },
     sykmeldingsperioder = this.sykmeldingsperioder.tilPersonData(),
+    arbeidsgiverperioder = this.arbeidsgiverperioder.map { it.tilPersonData() },
     vedtaksperioder = this.vedtaksperioder.map { it.tilPersonData() },
     forkastede = this.forkastede.map { it.tilPersonData() },
     utbetalinger = this.utbetalinger.map { it.tilPersonData() },
     feriepengeutbetalinger = this.feriepengeutbetalinger.map { it.tilPersonData() },
     ubrukteRefusjonsopplysninger = this.ubrukteRefusjonsopplysninger.ubrukteRefusjonsopplysninger.tilPersonData(),
+)
+
+private fun ArbeidsgiverperioderesultatDto.tilPersonData() = PersonData.ArbeidsgiverData.ArbeidsgiverperioderesultatData(
+    omsluttendePeriode = PersonData.ArbeidsgiverData.PeriodeData(this.omsluttendePeriode.fom, this.omsluttendePeriode.tom),
+    arbeidsgiverperiode = this.arbeidsgiverperiode.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
+    ferdigAvklart = this.ferdigAvklart
 )
 
 private fun InntektsmeldingUtDto.tilPersonData() = PersonData.ArbeidsgiverData.InntektsmeldingData(

@@ -19,6 +19,7 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
@@ -66,6 +67,8 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingView
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperioderesultat
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperioderesultat.Companion.finn
 import no.nav.helse.utbetalingstidslinje.ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode
@@ -799,9 +802,17 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dagerNavOvertarAnsvar: List<Periode>?,
                 egenmeldingsdager: List<Periode>?,
                 beregnetSkjæringstidspunkter: Skjæringstidspunkter,
-                beregnArbeidsgiverperiode: (Periode) -> Arbeidsgiverperiodeavklaring
+                beregnetArbeidsgiverperioder: List<Arbeidsgiverperioderesultat>
             ): Endring {
                 val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = skjæringstidspunkt(beregnetSkjæringstidspunkter, sykdomstidslinje, periode)
+                val arbeidsgiverperiodeavklaring = beregnetArbeidsgiverperioder
+                    .finn(periode)
+                    ?.let {
+                        Arbeidsgiverperiodeavklaring(
+                            ferdigAvklart = it.ferdigAvklart,
+                            dager = it.arbeidsgiverperiode.grupperSammenhengendePerioder()
+                        )
+                    } ?: Arbeidsgiverperiodeavklaring(false, emptyList())
                 return kopierMed(
                     grunnlagsdata = null,
                     utbetaling = null,
@@ -812,7 +823,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     periode = periode,
                     skjæringstidspunkt = nyttSkjæringstidspunkt,
                     skjæringstidspunkter = alleSkjæringstidspunkter,
-                    arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode),
+                    arbeidsgiverperiode = arbeidsgiverperiodeavklaring,
                     dagerNavOvertarAnsvar = dagerNavOvertarAnsvar ?: this.dagerNavOvertarAnsvar,
                     egenmeldingsdager = egenmeldingsdager ?: this.egenmeldingsdager,
                     maksdatoresultat = Maksdatoresultat.IkkeVurdert,
@@ -1130,9 +1141,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val hendelseSykdomstidslinjeFremTilOgMed = hendelseSykdomstidslinje.fremTilOgMed(periode.endInclusive)
             val hendelseperiode = hendelseSykdomstidslinjeFremTilOgMed.periode() ?: return endringer.last().kopierUtenEndring(dokumentsporing, dagerNavOvertarAnsvar, egenmeldingsdager, beregnetSkjæringstidspunkter, beregnArbeidsgiverperiode)
             val oppdatertPeriode = this.periode.oppdaterFom(hendelseperiode)
-            val (nySykdomstidslinje, nyeSkjæringstidspunkter) = yrkesaktivitet.oppdaterSykdom(dokumentsporing.id, hendelseSykdomstidslinjeFremTilOgMed)
+            val (nySykdomstidslinje, nyeSkjæringstidspunkter, nyeArbeidsgiverperioder) = yrkesaktivitet.oppdaterSykdom(dokumentsporing.id, hendelseSykdomstidslinjeFremTilOgMed)
             val sykdomstidslinje = nySykdomstidslinje.subset(oppdatertPeriode)
-            return endringer.last().kopierMedEndring(oppdatertPeriode, dokumentsporing, sykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, nyeSkjæringstidspunkter, beregnArbeidsgiverperiode)
+            return endringer.last().kopierMedEndring(oppdatertPeriode, dokumentsporing, sykdomstidslinje, dagerNavOvertarAnsvar, egenmeldingsdager, nyeSkjæringstidspunkter, nyeArbeidsgiverperioder)
         }
 
         private fun oppdaterMedRefusjonstidslinje(dokumentsporing: Dokumentsporing, nyeRefusjonsopplysninger: Beløpstidslinje) {
