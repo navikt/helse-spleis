@@ -644,10 +644,8 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
-    internal fun beregnSkjæringstidspunkt() = yrkesaktiviteter.beregnSkjæringstidspunkt(infotrygdhistorikk)
-
     internal fun beregnSkjæringstidspunkter(): Skjæringstidspunkter {
-        skjæringstidspunkter = beregnSkjæringstidspunkt()
+        skjæringstidspunkter = yrkesaktiviteter.beregnSkjæringstidspunkt(infotrygdhistorikk)
         return skjæringstidspunkter
     }
 

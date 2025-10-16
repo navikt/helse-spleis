@@ -44,7 +44,7 @@ internal data object Avsluttet : Vedtaksperiodetilstand {
         vedtaksperiode.behandlinger.sikreNyBehandling(
             vedtaksperiode.yrkesaktivitet,
             revurdering.hendelse.metadata.behandlingkilde,
-            vedtaksperiode.person.beregnSkjæringstidspunkt(),
+            vedtaksperiode.person.skjæringstidspunkter,
             vedtaksperiode.yrkesaktivitet.beregnArbeidsgiverperiode()
         )
         vedtaksperiode.subsumsjonslogg.logg(`fvl § 35 ledd 1`())

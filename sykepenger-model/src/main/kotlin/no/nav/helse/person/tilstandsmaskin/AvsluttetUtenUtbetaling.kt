@@ -47,7 +47,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         vedtaksperiode.behandlinger.sikreNyBehandling(
             vedtaksperiode.yrkesaktivitet,
             revurdering.hendelse.metadata.behandlingkilde,
-            vedtaksperiode.person.beregnSkjæringstidspunkt(),
+            vedtaksperiode.person.skjæringstidspunkter,
             vedtaksperiode.yrkesaktivitet.beregnArbeidsgiverperiode()
         )
         if (vedtaksperiode.skalBehandlesISpeil()) {

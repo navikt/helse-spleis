@@ -865,7 +865,7 @@ internal class Vedtaksperiode private constructor(
         behandlinger.sikreNyBehandling(
             yrkesaktivitet = yrkesaktivitet,
             behandlingkilde = hendelse.metadata.behandlingkilde,
-            beregnetSkjæringstidspunkter = person.beregnSkjæringstidspunkt(),
+            beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
             beregnArbeidsgiverperiode = yrkesaktivitet.beregnArbeidsgiverperiode()
         )
         behandlinger.oppdaterDokumentsporing(dokumentsporing(hendelse.metadata.meldingsreferanseId))
@@ -1351,7 +1351,7 @@ internal class Vedtaksperiode private constructor(
             behandlingkilde = sykepengegrunnlagForArbeidsgiver.metadata.behandlingkilde,
             dokumentsporing = inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId),
             aktivitetslogg = aktivitetslogg,
-            beregnetSkjæringstidspunkter = person.beregnSkjæringstidspunkt(),
+            beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
             beregnArbeidsgiverperiode = yrkesaktivitet.beregnArbeidsgiverperiode(),
             refusjonstidslinje = ingenRefusjon
         )
@@ -1553,7 +1553,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse.metadata.behandlingkilde,
                 dokumentsporing,
                 aktivitetsloggMedVedtaksperiodekontekst,
-                person.beregnSkjæringstidspunkt(),
+                person.skjæringstidspunkter,
                 yrkesaktivitet.beregnArbeidsgiverperiode(),
                 refusjonstidslinje
             )) return null
@@ -1723,7 +1723,7 @@ internal class Vedtaksperiode private constructor(
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             egenmeldingsdager = egenmeldingsdager,
             aktivitetslogg = aktivitetslogg,
-            beregnetSkjæringstidspunkter = person.beregnSkjæringstidspunkt(),
+            beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
             beregnArbeidsgiverperiode = yrkesaktivitet.beregnArbeidsgiverperiode(),
             validering = validering
         )
@@ -1738,7 +1738,7 @@ internal class Vedtaksperiode private constructor(
         behandlingkilde = hendelse.metadata.behandlingkilde,
         dokumentsporing = dokumentsporing,
         aktivitetslogg = aktivitetslogg,
-        beregnetSkjæringstidspunkter = person.beregnSkjæringstidspunkt(),
+        beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
         beregnArbeidsgiverperiode = yrkesaktivitet.beregnArbeidsgiverperiode(),
         egenmeldingsdager = egenmeldingsdager
     )
@@ -2573,7 +2573,7 @@ internal class Vedtaksperiode private constructor(
         behandlinger.sikreNyBehandling(
             yrkesaktivitet,
             revurdering.hendelse.metadata.behandlingkilde,
-            person.beregnSkjæringstidspunkt(),
+            person.skjæringstidspunkter,
             yrkesaktivitet.beregnArbeidsgiverperiode()
         )
         tilstand(aktivitetslogg, nesteTilstand)
@@ -2608,7 +2608,7 @@ internal class Vedtaksperiode private constructor(
             behandlingkilde = påminnelse.metadata.behandlingkilde,
             dokumentsporing = null,
             aktivitetslogg = aktivitetslogg,
-            beregnetSkjæringstidspunkter = person.beregnSkjæringstidspunkt(),
+            beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
             beregnArbeidsgiverperiode = yrkesaktivitet.beregnArbeidsgiverperiode(),
             refusjonstidslinje = Beløpstidslinje.fra(periode, inntekt.fastsattÅrsinntekt, Kilde(inntekt.faktaavklartInntekt.inntektsdata.hendelseId, Avsender.ARBEIDSGIVER, inntekt.faktaavklartInntekt.inntektsdata.tidsstempel))
         )
@@ -2646,7 +2646,7 @@ internal class Vedtaksperiode private constructor(
             behandlingkilde,
             dokumentsporing,
             aktivitetslogg,
-            person.beregnSkjæringstidspunkt(),
+            person.skjæringstidspunkter,
             yrkesaktivitet.beregnArbeidsgiverperiode(),
             benyttetRefusjonstidslinje
         )
