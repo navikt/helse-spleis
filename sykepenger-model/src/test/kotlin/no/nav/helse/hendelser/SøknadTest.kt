@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
@@ -137,7 +137,6 @@ internal class SøknadTest {
     @Test
     fun `søknad med permisjon før perioden`() {
         søknad(Sykdom(5.januar, 10.januar, 100.prosent), Permisjon(1.januar, 10.januar))
-        assertTrue(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg).harVarslerEllerVerre())
         assertEquals(5.januar til 10.januar, søknad.sykdomstidslinje.periode())
         assertEquals(6, søknad.sykdomstidslinje.count())
     }

@@ -21,12 +21,8 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_7
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -53,7 +49,6 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest : AbstractEndToEndTest() {
         nyttVedtak(1.januar til 19.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(20.januar, 31.januar))
-        assertVarsel(RV_SØ_7, AktivitetsloggFilter.person())
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -96,7 +91,6 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest : AbstractEndToEndTest() {
             Ferie(26.januar, 31.januar)
         )
 
-        assertVarsel(Varselkode.RV_SØ_5, 1.vedtaksperiode.filter())
         assertEquals(februar, inspektør.periode(1.vedtaksperiode))
         assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
     }
@@ -111,7 +105,6 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest : AbstractEndToEndTest() {
             Ferie(26.januar, 2.februar)
         )
 
-        assertVarsel(Varselkode.RV_SØ_5, 1.vedtaksperiode.filter())
         assertEquals(februar, inspektør.periode(1.vedtaksperiode))
         assertEquals(2, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
     }
