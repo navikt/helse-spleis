@@ -4,7 +4,7 @@ import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
@@ -113,10 +113,6 @@ class Søknad(
         Behandlingsporing.Yrkesaktivitet.Frilans -> null
     }
 
-    internal companion object {
-        internal const val tidslinjegrense = 40L
-    }
-
     init {
         if (perioder.isEmpty()) error("Søknad må inneholde perioder")
         sykdomsperiode = Søknadsperiode.sykdomsperiode(perioder) ?: error("Søknad inneholder ikke sykdomsperioder")
@@ -124,7 +120,6 @@ class Søknad(
 
         sykdomstidslinje = perioder
             .map { it.sykdomstidslinje(sykdomsperiode, avskjæringsdato(), kilde) }
-            .filter { it.periode()?.start?.isAfter(sykdomsperiode.start.minusDays(tidslinjegrense)) ?: false }
             .merge(Dagturnering.SØKNAD::beste)
             .subset(sykdomsperiode)
     }
@@ -132,10 +127,6 @@ class Søknad(
     fun erRelevant(other: Periode): Boolean {
         if (other.delvisOverlappMed(sykdomsperiode)) delvisOverlappende = true
         return other.overlapperMed(sykdomsperiode)
-    }
-
-    internal fun egenmeldingsperioder(): List<Periode> {
-        return egenmeldinger
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, refusjonstidslinje: Beløpstidslinje, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
@@ -310,7 +301,7 @@ class Søknad(
         }
 
         return Vedtaksperiode(
-            egenmeldingsperioder = egenmeldingsperioder(),
+            egenmeldingsperioder = egenmeldinger,
             metadata = metadata,
             person = person,
             yrkesaktivitet = yrkesaktivitet,
