@@ -11,8 +11,7 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsgrunnlag
 import no.nav.helse.person.ArbeidstakerOpptjening
-import no.nav.helse.person.Opptjening
-import no.nav.helse.person.SelvstendigNæringsdrivendeOpptjening
+import no.nav.helse.person.ArbeidstakerOpptjeningIkkeVurdert
 import no.nav.helse.person.SelvstendigOpptjening
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -55,20 +54,6 @@ class Vilkårsgrunnlag(
         return false
     }
 
-    private fun opptjening(): Opptjening = when (behandlingsporing) {
-        is Arbeidstaker -> ArbeidstakerOpptjening.nyOpptjening(
-            grunnlag = opptjeningsgrunnlag.map { (orgnummer, ansattPerioder) ->
-                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.tilDomeneobjekt() })
-            },
-            skjæringstidspunkt = skjæringstidspunkt
-        )
-
-        Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigNæringsdrivendeOpptjening(skjæringstidspunkt)
-
-        Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> TODO()
-        Behandlingsporing.Yrkesaktivitet.Frilans -> TODO()
-    }
-
     internal fun skatteopplysninger(): List<SkatteopplysningerForSykepengegrunnlag> {
         // tar utgangspunktet i inntekter som bare stammer fra orgnr vedkommende har registrert arbeidsforhold
         return opptjeningsgrunnlag.map { (orgnummer, arbeidsforhold) ->
@@ -93,15 +78,26 @@ class Vilkårsgrunnlag(
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, inntektsgrunnlag: Inntektsgrunnlag, selvstendigOpptjening: SelvstendigOpptjening, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
         arbeidsforhold.forEach { it.validerFrilans(aktivitetslogg, skjæringstidspunkt, arbeidsforhold, inntektsvurderingForSykepengegrunnlag) }
-        val opptjening = opptjening()
-        if (opptjening is ArbeidstakerOpptjening) subsumsjonslogg.logg(opptjening.subsumsjon) // TODO: Må ryddes opp i
 
-        if (behandlingsporing is Arbeidstaker) {
-            if (!harInntektMånedenFørSkjæringstidspunkt) {
-                aktivitetslogg.varsel(Varselkode.RV_OV_3)
-            } else if (!inntektsvurderingForSykepengegrunnlag.inntekter.harInntektI(YearMonth.from(skjæringstidspunkt.minusMonths(1)))) {
-                aktivitetslogg.info("Har inntekt måneden før skjæringstidspunkt med inntekter for opptjeningsvurdering, men ikke med inntekter for sykepengegrunnlag")
+        val opptjening = when (behandlingsporing) {
+            is Arbeidstaker -> {
+                val arbeidstakerOpptjening = ArbeidstakerOpptjening.nyOpptjening(
+                    grunnlag = opptjeningsgrunnlag.map { (orgnummer, ansattPerioder) ->
+                        ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.tilDomeneobjekt() })
+                    },
+                    skjæringstidspunkt = skjæringstidspunkt
+                )
+                subsumsjonslogg.logg(arbeidstakerOpptjening.subsumsjon)
+                if (!harInntektMånedenFørSkjæringstidspunkt) {
+                    aktivitetslogg.varsel(Varselkode.RV_OV_3)
+                } else if (!inntektsvurderingForSykepengegrunnlag.inntekter.harInntektI(YearMonth.from(skjæringstidspunkt.minusMonths(1)))) {
+                    aktivitetslogg.info("Har inntekt måneden før skjæringstidspunkt med inntekter for opptjeningsvurdering, men ikke med inntekter for sykepengegrunnlag")
+                }
+                arbeidstakerOpptjening
             }
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> ArbeidstakerOpptjeningIkkeVurdert
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+            Behandlingsporing.Yrkesaktivitet.Frilans -> error("Støtter ikke Arbeidsledig/Frilans")
         }
 
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(

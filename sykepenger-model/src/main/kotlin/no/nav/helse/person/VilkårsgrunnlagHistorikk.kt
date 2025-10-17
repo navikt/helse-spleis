@@ -112,7 +112,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         val vilkårsgrunnlagId: UUID,
         val skjæringstidspunkt: LocalDate,
         val inntektsgrunnlag: Inntektsgrunnlag,
-        val opptjening: Opptjening?
+        protected val opptjening: Opptjening?
     ) : Aktivitetskontekst {
         internal open fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) = true
 
@@ -192,6 +192,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         internal companion object {
+            internal val VilkårsgrunnlagElement.arbeidstakerOpptjening get() = when (this) {
+                is Grunnlagsdata -> this.opptjening ?: ArbeidstakerOpptjeningIkkeVurdert
+                is InfotrygdVilkårsgrunnlag -> ArbeidstakerOpptjeningVurdertIInfotrygd
+            }
+
             internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {
                 val skjæringstidspunkter = elementer
                     .map { it.skjæringstidspunkt }
@@ -251,10 +256,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         )
 
         internal fun validerFørstegangsvurderingArbeidstaker(aktivitetslogg: IAktivitetslogg) {
-            when (opptjening) {
-                is ArbeidstakerOpptjening -> inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
-                is SelvstendigNæringsdrivendeOpptjening -> {} // TODO fjerne når vi har fjernet selvstendigopptjening herfra
-                null -> {}
+            when (val arbeidstakerOpptjening = arbeidstakerOpptjening) {
+                is ArbeidstakerOpptjening -> inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, arbeidstakerOpptjening)
+                ArbeidstakerOpptjeningIkkeVurdert -> error("Mangler opptjening som arbeidstaker")
+                ArbeidstakerOpptjeningVurdertIInfotrygd -> {}
             }
         }
 
@@ -264,7 +269,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String): Boolean {
-            inntektsgrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, organisasjonsnummer)
+            inntektsgrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, arbeidstakerOpptjening, organisasjonsnummer)
             return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
         }
 

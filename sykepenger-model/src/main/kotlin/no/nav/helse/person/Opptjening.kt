@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import kotlin.lazy
 import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
 import no.nav.helse.dto.SelvstendigOpptjeningDto
@@ -8,7 +9,6 @@ import no.nav.helse.dto.deserialisering.OpptjeningInnDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.`§ 8-2 ledd 1`
-import no.nav.helse.etterlevelse.`§ 8-2 ledd 1 - selvstendig næringsdrivende`
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
@@ -41,7 +41,7 @@ internal sealed interface Opptjening {
         const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
         fun gjenopprett(skjæringstidspunkt: LocalDate, opptjening: OpptjeningInnDto?): Opptjening = when (opptjening) {
             is OpptjeningInnDto -> ArbeidstakerOpptjening.gjenopprett(skjæringstidspunkt, opptjening)
-            null -> SelvstendigNæringsdrivendeOpptjening(skjæringstidspunkt)
+            null -> ArbeidstakerOpptjeningIkkeVurdert
         }
     }
 }
@@ -82,22 +82,19 @@ internal sealed interface SelvstendigOpptjeningView {
     data object IkkeVurdert: SelvstendigOpptjeningView
 }
 
-internal class SelvstendigNæringsdrivendeOpptjening(private val skjæringstidspunkt: LocalDate) : Opptjening {
-    override val subsumsjon = `§ 8-2 ledd 1 - selvstendig næringsdrivende`(
-        skjæringstidspunkt = skjæringstidspunkt,
-        oppfylt = false // TODO bare for å få det til å kompilere
-    )
-
-    override fun view() = OpptjeningView.SelvstendigOpptjeningView
-    override fun deaktiver(orgnummer: String): Opptjening {
-        TODO("Not yet implemented")
-    }
-
-    override fun aktiver(orgnummer: String): Opptjening {
-        TODO("Not yet implemented")
-    }
-
+internal object ArbeidstakerOpptjeningIkkeVurdert: Opptjening {
+    override val subsumsjon by lazy { error("ArbeidstakerOpptjeningIkkeVurdert skal ikke subsummere") }
+    override fun view() = OpptjeningView.ArbeidstakerOpptjeningIkkeVurdertView
+    override fun deaktiver(orgnummer: String) = error("ArbeidstakerOpptjeningIkkeVurdert kan ikke deaktiveres")
+    override fun aktiver(orgnummer: String) = error("ArbeidstakerOpptjeningIkkeVurdert kan ikke aktiveres")
     override fun dto(): OpptjeningUtDto? = null
+}
+internal object ArbeidstakerOpptjeningVurdertIInfotrygd: Opptjening {
+    override val subsumsjon by lazy { error("ArbeidstakerOpptjeningVurdertIInfotrygd skal ikke subsummere") }
+    override fun view() = OpptjeningView.ArbeidstakerOpptjeningVurderIInfotrygdView
+    override fun deaktiver(orgnummer: String) = error("ArbeidstakerOpptjeningVurdertIInfotrygd kan ikke deaktiveres")
+    override fun aktiver(orgnummer: String) = error("ArbeidstakerOpptjeningVurdertIInfotrygd kan ikke aktivers")
+    override fun dto(): OpptjeningUtDto? = error("ArbeidstakerOpptjeningVurdertIInfotrygd er bare noe som brukes runtime i modellen")
 }
 
 internal class ArbeidstakerOpptjening private constructor(
@@ -278,5 +275,6 @@ internal class ArbeidstakerOpptjening private constructor(
 
 internal sealed interface OpptjeningView {
     data class ArbeidstakerOpptjeningView(val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, val opptjeningsdager: Int, val erOppfylt: Boolean) : OpptjeningView
-    object SelvstendigOpptjeningView : OpptjeningView
+    object ArbeidstakerOpptjeningIkkeVurdertView : OpptjeningView
+    object ArbeidstakerOpptjeningVurderIInfotrygdView : OpptjeningView
 }

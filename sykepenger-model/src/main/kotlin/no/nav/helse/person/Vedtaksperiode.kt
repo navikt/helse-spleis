@@ -86,6 +86,7 @@ import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrTidslinje
 import no.nav.helse.person.Dokumentsporing.Companion.søknad
 import no.nav.helse.person.Venteårsak.Companion.fordi
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.arbeidstakerOpptjening
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -1049,10 +1050,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun harOpptjening(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) = when (yrkesaktivitet.yrkesaktivitetstype) {
-        is Arbeidstaker -> when (val arbeidstakerOpptjening = grunnlagsdata.opptjening) {
+        is Arbeidstaker -> when (val arbeidstakerOpptjening = grunnlagsdata.arbeidstakerOpptjening) {
             is ArbeidstakerOpptjening -> arbeidstakerOpptjening.harTilstrekkeligAntallOpptjeningsdager()
-            is SelvstendigNæringsdrivendeOpptjening -> error("Mangler opptjeningsvurdering for arbeidstaker")
-            null -> true // TODO: Dette er jo liksom Infotrygd, men bør være litt mer eksplisitt syns jeg..
+            is ArbeidstakerOpptjeningIkkeVurdert -> error("Mangler opptjeningsvurdering for arbeidstaker")
+            is ArbeidstakerOpptjeningVurdertIInfotrygd -> true
         }
         Behandlingsporing.Yrkesaktivitet.Selvstendig -> true
         Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
@@ -1195,7 +1196,6 @@ internal class Vedtaksperiode private constructor(
 
         when (yrkesaktivitet.yrkesaktivitetstype) {
             is Arbeidstaker -> grunnlagsdata.valider(aktivitetslogg, yrkesaktivitet.organisasjonsnummer)
-
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans,
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> {}
@@ -1494,7 +1494,7 @@ internal class Vedtaksperiode private constructor(
 
         endretInntektsgrunnlag.inntekter
             .forEach {
-                val opptjening = nyttGrunnlag.opptjening!! as ArbeidstakerOpptjening
+                val opptjening = nyttGrunnlag.arbeidstakerOpptjening as ArbeidstakerOpptjening
                 val opptjeningFom = opptjening.startdatoFor(it.inntektEtter.orgnummer)
                 overstyrArbeidsgiveropplysninger.subsummer(subsumsjonslogg, opptjeningFom, it.inntektEtter.orgnummer)
             }

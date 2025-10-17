@@ -12,8 +12,9 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.person.ArbeidstakerOpptjening
+import no.nav.helse.person.ArbeidstakerOpptjeningIkkeVurdert
+import no.nav.helse.person.ArbeidstakerOpptjeningVurdertIInfotrygd
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.SelvstendigNæringsdrivendeOpptjening
 import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
@@ -154,11 +155,11 @@ internal class Inntektsgrunnlag(
     internal fun harNødvendigInntektForVilkårsprøving(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.harInntekt(organisasjonsnummer)
 
-    internal fun sjekkForNyArbeidsgiver(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening?, orgnummer: String) {
-        if (opptjening == null) return
+    internal fun sjekkForNyArbeidsgiver(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening, orgnummer: String) {
         when (opptjening) {
             is ArbeidstakerOpptjening -> arbeidsgiverInntektsopplysninger.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, orgnummer)
-            is SelvstendigNæringsdrivendeOpptjening -> {}
+            ArbeidstakerOpptjeningIkkeVurdert -> error("Mangler opptjening som Arbeidestaker")
+            ArbeidstakerOpptjeningVurdertIInfotrygd -> {}
         }
     }
 
