@@ -48,32 +48,10 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
 
 internal class SelvstendigTest : AbstractDslTest() {
-
-    @Test
-    fun `Når skjæringstidspunktet flyttes til forlengelsessøknaden så får vi varsel, for den har ikke noe forberende vilkårsgrunnlag`() {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar)
-            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
-            håndterForlengelsessøknadSelvstendig(februar)
-            assertSisteTilstand(2.vedtaksperiode, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE)
-
-            håndterOverstyrTidslinje(januar.map { ManuellOverskrivingDag(it, Dagtype.Arbeidsdag) })
-            håndterYtelser(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-
-            håndterVilkårsgrunnlagSelvstendig(2.vedtaksperiode)
-            assertSisteTilstand(2.vedtaksperiode, SELVSTENDIG_AVVENTER_HISTORIKK)
-            assertVarsel(Varselkode.RV_OV_4, 2.vedtaksperiode.filter())
-        }
-    }
 
     @Test
     fun `En selvstendig som er sendt til godkjenning før spørsmål om fravær før sykmelding fra søknad ble hensyntatt`() {
@@ -296,15 +274,6 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             assertEquals(1.januar til 16.januar, inspektør.ventetid(1.vedtaksperiode))
 
-        }
-    }
-
-    @Test
-    fun `opptjeningVurdertOk lagres på behandlingen når det ikke er fravær før sykmelding`() {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar, fraværFørSykmelding = false)
-
-            assertTrue(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.single().endringer.last().forberedendeVilkårsgrunnlag!!.erOpptjeningVurdertOk)
         }
     }
 

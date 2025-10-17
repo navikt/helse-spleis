@@ -86,7 +86,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrTidslinje
 import no.nav.helse.person.Dokumentsporing.Companion.søknad
 import no.nav.helse.person.Venteårsak.Companion.fordi
-import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.selvstendigOpptjening
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -114,7 +113,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
@@ -1056,11 +1054,7 @@ internal class Vedtaksperiode private constructor(
             is SelvstendigNæringsdrivendeOpptjening -> error("Mangler opptjeningsvurdering for arbeidstaker")
             null -> true // TODO: Dette er jo liksom Infotrygd, men bør være litt mer eksplisitt syns jeg..
         }
-        Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (grunnlagsdata.selvstendigOpptjening) {
-            SelvstendigOpptjeningOppfylt -> true
-            SelvstendigOpptjeningIkkeOppfylt -> false
-            SelvstendigOpptjeningIkkeVurdert -> error("Mangler opptjeningsvurdering for selvstendig")
-        }
+        Behandlingsporing.Yrkesaktivitet.Selvstendig -> true
         Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
         Behandlingsporing.Yrkesaktivitet.Frilans -> error("Har ikke opptjeningsvurdering for Arbeidsledig/Frilans")
     }
@@ -1756,7 +1750,7 @@ internal class Vedtaksperiode private constructor(
     ) {
         videreførEksisterendeRefusjonsopplysninger(søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), aktivitetslogg)
         oppdaterHistorikk(søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
-            søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, subsumsjonslogg)
+            søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, subsumsjonslogg, skjæringstidspunkt)
         }
     }
 
@@ -1773,7 +1767,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg.info("Søknad har trigget en revurdering")
         oppdaterHistorikk(søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
             if (søknad.delvisOverlappende) aktivitetslogg.varsel(`Mottatt søknad som delvis overlapper`)
-            søknad.valider(FunksjonelleFeilTilVarsler(aktivitetslogg), vilkårsgrunnlag, refusjonstidslinje, subsumsjonslogg)
+            søknad.valider(FunksjonelleFeilTilVarsler(aktivitetslogg), vilkårsgrunnlag, refusjonstidslinje, subsumsjonslogg, skjæringstidspunkt)
         }
     }
 
@@ -1958,22 +1952,12 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg = aktivitetslogg,
             skatteopplysninger = skatteopplysninger
         )
+
         val selvstendigOpptjening = when (yrkesaktivitet.yrkesaktivitetstype) {
-            is Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
-                when (behandlinger.forberedendeVilkårsgrunnlag?.erOpptjeningVurdertOk) {
-                    null -> {
-                        aktivitetslogg.varsel(RV_OV_4)
-                        SelvstendigOpptjeningOppfylt
-                    }
-                    true -> SelvstendigOpptjeningOppfylt
-                    false -> error("Når sykmeldte har informert om at hen har hatt fravær før sykmelding skal søknaden være kastet ut før vi kommer hit!")
-                }
-            }
-
             is Arbeidstaker -> SelvstendigOpptjeningIkkeVurdert
-
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigOpptjeningOppfylt
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-            Behandlingsporing.Yrkesaktivitet.Frilans -> error("Hvorfor er vi her? Litt rart å vurdere selvstendigopptjening for arbeidsledige og frilans per nå")
+            Behandlingsporing.Yrkesaktivitet.Frilans -> error("Støtter ikke Arbeidsledig/Frilans")
         }
 
         vilkårsgrunnlag.valider(aktivitetslogg, sykepengegrunnlag, selvstendigOpptjening, subsumsjonslogg)
@@ -1981,11 +1965,9 @@ internal class Vedtaksperiode private constructor(
 
         when (yrkesaktivitet.yrkesaktivitetstype) {
             is Arbeidstaker -> grunnlagsdata.validerFørstegangsvurderingArbeidstaker(aktivitetslogg)
-
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> grunnlagsdata.validerFørstegangsvurderingSelvstendig(aktivitetslogg, subsumsjonslogg)
-
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> grunnlagsdata.validerFørstegangsvurderingSelvstendig(subsumsjonslogg)
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-            Behandlingsporing.Yrkesaktivitet.Frilans -> error("Hvorfor er vi her? Litt rart å validere opptjening for arbeidsledige og frilans per nå")
+            Behandlingsporing.Yrkesaktivitet.Frilans -> error("Støtter ikke Arbeidsledig/Frilans")
         }
         person.lagreVilkårsgrunnlag(grunnlagsdata)
         aktivitetslogg.info("Vilkårsgrunnlag vurdert")

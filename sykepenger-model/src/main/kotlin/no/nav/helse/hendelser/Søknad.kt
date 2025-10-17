@@ -128,7 +128,7 @@ class Søknad(
         return other.overlapperMed(sykdomsperiode)
     }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, refusjonstidslinje: Beløpstidslinje, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, refusjonstidslinje: Beløpstidslinje, subsumsjonslogg: Subsumsjonslogg, skjæringstidspunkt: LocalDate): IAktivitetslogg {
         valider(aktivitetslogg, subsumsjonslogg)
         validerInntektskilder(aktivitetslogg, vilkårsgrunnlag)
 
@@ -140,10 +140,10 @@ class Søknad(
 
             Arbeidssituasjon.ARBEIDSLEDIG -> validerArbeidsledig(aktivitetslogg, vilkårsgrunnlag, sykdomstidslinje.periode(), refusjonstidslinje)
             Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
-            Arbeidssituasjon.BARNEPASSER -> validerSelvstendig(aktivitetslogg)
+            Arbeidssituasjon.BARNEPASSER -> validerSelvstendig(aktivitetslogg, skjæringstidspunkt)
 
             Arbeidssituasjon.JORDBRUKER -> {
-                if (Toggle.Jordbruker.enabled) validerSelvstendig(aktivitetslogg)
+                if (Toggle.Jordbruker.enabled) validerSelvstendig(aktivitetslogg, skjæringstidspunkt)
                 else {
                     aktivitetslogg.info("Har ikke støtte for søknadstypen $arbeidssituasjon")
                     aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
@@ -169,7 +169,7 @@ class Søknad(
         aktivitetslogg.varsel(`Arbeidsledigsøknad er lagt til grunn`)
     }
 
-    private fun validerSelvstendig(aktivitetslogg: IAktivitetslogg) {
+    private fun validerSelvstendig(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
         val næringsinntekter = pensjonsgivendeInntekter?.filter { it.erFerdigLignet }
         if (næringsinntekter == null || næringsinntekter.size < 3) aktivitetslogg.funksjonellFeil(Varselkode.RV_IV_12)
 
@@ -188,6 +188,17 @@ class Søknad(
         if (ventetid == null) {
             aktivitetslogg.info("Søknaden har ikke ventetid")
             aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
+        }
+
+        vurderOpptjeningForSelvstendig(aktivitetslogg, skjæringstidspunkt)
+    }
+
+    private fun vurderOpptjeningForSelvstendig(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
+        if (skjæringstidspunkt !in sykdomsperiode) return // Da er det ikke aktuelt å sjekke
+        when (fraværFørSykmelding) {
+            true -> aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_46)
+            null -> aktivitetslogg.funksjonellFeil(Varselkode.RV_OV_4)
+            false -> {} // Da er opptjening OK
         }
     }
 
@@ -277,28 +288,6 @@ class Søknad(
             Arbeidssituasjon.ANNET -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ANNET
         }
 
-        val forberedendeVilkårsgrunnlag = when (arbeidssituasjon) {
-            Behandlinger.Behandling.Endring.Arbeidssituasjon.JORDBRUKER,
-            Behandlinger.Behandling.Endring.Arbeidssituasjon.BARNEPASSER,
-            Behandlinger.Behandling.Endring.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> {
-                when (fraværFørSykmelding) {
-                    true -> {
-                        aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_46)
-                        null
-                    }
-
-                    false -> Behandlinger.Behandling.Endring.ForberedendeVilkårsgrunnlag(erOpptjeningVurdertOk = true)
-                    else -> null
-                }
-            }
-
-            Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSTAKER,
-            Behandlinger.Behandling.Endring.Arbeidssituasjon.ARBEIDSLEDIG,
-            Behandlinger.Behandling.Endring.Arbeidssituasjon.FRILANSER,
-            Behandlinger.Behandling.Endring.Arbeidssituasjon.FISKER,
-            Behandlinger.Behandling.Endring.Arbeidssituasjon.ANNET -> null
-        }
-
         return Vedtaksperiode(
             egenmeldingsperioder = egenmeldinger,
             metadata = metadata,
@@ -310,7 +299,7 @@ class Søknad(
             ventetid = ventetid,
             dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
             sykmeldingsperiode = sykdomsperiode,
-            forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag,
+            forberedendeVilkårsgrunnlag = null,
             selvstendigForsikring = harOppgittÅHaForsikring,
             regelverkslogg = regelverkslogg
         )

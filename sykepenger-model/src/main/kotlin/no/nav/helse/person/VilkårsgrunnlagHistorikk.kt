@@ -14,6 +14,7 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
+import no.nav.helse.etterlevelse.`§ 8-2 ledd 1 - selvstendig næringsdrivende`
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -191,11 +192,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         internal companion object {
-            internal val VilkårsgrunnlagElement.selvstendigOpptjening get() = when(this) {
-                is Grunnlagsdata -> this.selvstendigOpptjening
-                is InfotrygdVilkårsgrunnlag -> SelvstendigOpptjeningIkkeVurdert
-            }
-
             internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {
                 val skjæringstidspunkter = elementer
                     .map { it.skjæringstidspunkt }
@@ -233,7 +229,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         skjæringstidspunkt: LocalDate,
         inntektsgrunnlag: Inntektsgrunnlag,
         opptjening: Opptjening,
-        val selvstendigOpptjening: SelvstendigOpptjening,
+        private val selvstendigOpptjening: SelvstendigOpptjening, // TODO: Slett meg
         val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         val meldingsreferanseId: MeldingsreferanseId?,
         vilkårsgrunnlagId: UUID
@@ -262,8 +258,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             }
         }
 
-        internal fun validerFørstegangsvurderingSelvstendig(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: BehandlingSubsumsjonslogg) {
-            selvstendigOpptjening.valider(aktivitetslogg, subsumsjonslogg, skjæringstidspunkt)
+        internal fun validerFørstegangsvurderingSelvstendig(subsumsjonslogg: BehandlingSubsumsjonslogg) {
+            // TODO: Denne subsumsjonen burde flyttes når #noen har over opptjening
+            subsumsjonslogg.logg(`§ 8-2 ledd 1 - selvstendig næringsdrivende`(skjæringstidspunkt, true))
         }
 
         override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String): Boolean {
