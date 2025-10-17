@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsgrunnlag
 import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.ArbeidstakerOpptjeningIkkeVurdert
-import no.nav.helse.person.SelvstendigOpptjening
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -76,7 +75,7 @@ class Vilkårsgrunnlag(
         }
     }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, inntektsgrunnlag: Inntektsgrunnlag, selvstendigOpptjening: SelvstendigOpptjening, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, inntektsgrunnlag: Inntektsgrunnlag, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
         arbeidsforhold.forEach { it.validerFrilans(aktivitetslogg, skjæringstidspunkt, arbeidsforhold, inntektsvurderingForSykepengegrunnlag) }
 
         val opptjening = when (behandlingsporing) {
@@ -104,7 +103,6 @@ class Vilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
             inntektsgrunnlag = inntektsgrunnlag,
             opptjening = opptjening,
-            selvstendigOpptjening = selvstendigOpptjening,
             medlemskapstatus = medlemskapsvurdering.validert(aktivitetslogg),
             meldingsreferanseId = metadata.meldingsreferanseId,
             vilkårsgrunnlagId = UUID.randomUUID()

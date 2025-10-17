@@ -24,7 +24,6 @@ import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.RefusjonsservitørDto
-import no.nav.helse.dto.SelvstendigOpptjeningDto
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.SkatteopplysningDto
 import no.nav.helse.dto.SykdomshistorikkElementDto
@@ -859,10 +858,6 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagE
         is VilkårsgrunnlagUtDto.Spleis -> this.opptjening?.tilPersonData()
         is VilkårsgrunnlagUtDto.Infotrygd -> null
     },
-    selvstendigOpptjening = when (this) {
-        is VilkårsgrunnlagUtDto.Spleis -> this.selvstendigOpptjening?.tilPersonData()
-        is VilkårsgrunnlagUtDto.Infotrygd -> null
-    },
     medlemskapstatus = when (this) {
         is VilkårsgrunnlagUtDto.Spleis -> when (this.medlemskapstatus) {
             MedlemskapsvurderingDto.Ja -> JsonMedlemskapstatus.JA
@@ -896,12 +891,6 @@ private fun OpptjeningUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElement
         )
     }
 )
-
-private fun SelvstendigOpptjeningDto.tilPersonData() = when (this) {
-    SelvstendigOpptjeningDto.IkkeOppfylt -> PersonData.VilkårsgrunnlagElementData.SelvstendigOpptjeningData.IKKE_OPPFYLT
-    SelvstendigOpptjeningDto.IkkeVurdert -> PersonData.VilkårsgrunnlagElementData.SelvstendigOpptjeningData.IKKE_VURDERT
-    SelvstendigOpptjeningDto.Oppfylt -> PersonData.VilkårsgrunnlagElementData.SelvstendigOpptjeningData.OPPFYLT
-}
 
 private fun InntektsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.InntektsgrunnlagData(
     grunnbeløp = this.`6G`.årlig.beløp,

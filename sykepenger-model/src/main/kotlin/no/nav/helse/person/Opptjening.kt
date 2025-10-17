@@ -1,10 +1,8 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import kotlin.lazy
 import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
-import no.nav.helse.dto.SelvstendigOpptjeningDto
 import no.nav.helse.dto.deserialisering.OpptjeningInnDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.etterlevelse.Subsumsjon
@@ -46,50 +44,15 @@ internal sealed interface Opptjening {
     }
 }
 
-internal sealed interface SelvstendigOpptjening {
-    fun dto(): SelvstendigOpptjeningDto
-    fun view(): SelvstendigOpptjeningView
-
-    companion object {
-        fun gjenopprett(dto: SelvstendigOpptjeningDto): SelvstendigOpptjening {
-            return when (dto) {
-                SelvstendigOpptjeningDto.IkkeOppfylt -> SelvstendigOpptjeningIkkeOppfylt
-                SelvstendigOpptjeningDto.IkkeVurdert -> SelvstendigOpptjeningIkkeVurdert
-                SelvstendigOpptjeningDto.Oppfylt -> SelvstendigOpptjeningOppfylt
-            }
-        }
-    }
-}
-
-internal data object SelvstendigOpptjeningOppfylt : SelvstendigOpptjening {
-    override fun dto() = SelvstendigOpptjeningDto.Oppfylt
-    override fun view() = SelvstendigOpptjeningView.Oppfylt
-}
-
-internal data object SelvstendigOpptjeningIkkeOppfylt : SelvstendigOpptjening {
-    override fun dto() = SelvstendigOpptjeningDto.IkkeOppfylt
-    override fun view() = SelvstendigOpptjeningView.IkkeOppfylt
-}
-
-internal data object SelvstendigOpptjeningIkkeVurdert : SelvstendigOpptjening {
-    override fun dto() = SelvstendigOpptjeningDto.IkkeVurdert
-    override fun view() = SelvstendigOpptjeningView.IkkeVurdert
-}
-
-internal sealed interface SelvstendigOpptjeningView {
-    data object Oppfylt: SelvstendigOpptjeningView
-    data object IkkeOppfylt: SelvstendigOpptjeningView
-    data object IkkeVurdert: SelvstendigOpptjeningView
-}
-
-internal object ArbeidstakerOpptjeningIkkeVurdert: Opptjening {
+internal data object ArbeidstakerOpptjeningIkkeVurdert : Opptjening {
     override val subsumsjon by lazy { error("ArbeidstakerOpptjeningIkkeVurdert skal ikke subsummere") }
     override fun view() = OpptjeningView.ArbeidstakerOpptjeningIkkeVurdertView
     override fun deaktiver(orgnummer: String) = error("ArbeidstakerOpptjeningIkkeVurdert kan ikke deaktiveres")
     override fun aktiver(orgnummer: String) = error("ArbeidstakerOpptjeningIkkeVurdert kan ikke aktiveres")
     override fun dto(): OpptjeningUtDto? = null
 }
-internal object ArbeidstakerOpptjeningVurdertIInfotrygd: Opptjening {
+
+internal data object ArbeidstakerOpptjeningVurdertIInfotrygd : Opptjening {
     override val subsumsjon by lazy { error("ArbeidstakerOpptjeningVurdertIInfotrygd skal ikke subsummere") }
     override fun view() = OpptjeningView.ArbeidstakerOpptjeningVurderIInfotrygdView
     override fun deaktiver(orgnummer: String) = error("ArbeidstakerOpptjeningVurdertIInfotrygd kan ikke deaktiveres")

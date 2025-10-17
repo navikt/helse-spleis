@@ -234,7 +234,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         skjæringstidspunkt: LocalDate,
         inntektsgrunnlag: Inntektsgrunnlag,
         opptjening: Opptjening,
-        private val selvstendigOpptjening: SelvstendigOpptjening, // TODO: Slett meg
         val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         val meldingsreferanseId: MeldingsreferanseId?,
         vilkårsgrunnlagId: UUID
@@ -252,7 +251,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 Medlemskapsvurdering.Medlemskapstatus.VetIkke -> GrunnlagsdataView.MedlemskapstatusView.VetIkke
                 Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål -> GrunnlagsdataView.MedlemskapstatusView.UavklartMedBrukerspørsmål
             },
-            selvstendigOpptjening = selvstendigOpptjening.view()
         )
 
         internal fun validerFørstegangsvurderingArbeidstaker(aktivitetslogg: IAktivitetslogg) {
@@ -293,7 +291,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
                 inntektsgrunnlag = inntektsgrunnlag,
                 opptjening = opptjening ?: this.opptjening!!,
-                selvstendigOpptjening = selvstendigOpptjening,
                 medlemskapstatus = medlemskapstatus,
                 meldingsreferanseId = meldingsreferanseId,
                 vilkårsgrunnlagId = UUID.randomUUID()
@@ -309,7 +306,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             skjæringstidspunkt = skjæringstidspunkt,
             inntektsgrunnlag = sykepengegrunnlag,
             opptjening = this.opptjening!!.dto(),
-            selvstendigOpptjening = this.selvstendigOpptjening.dto(),
             medlemskapstatus = when (medlemskapstatus) {
                 Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapsvurderingDto.Ja
                 Medlemskapsvurdering.Medlemskapstatus.Nei -> MedlemskapsvurderingDto.Nei
@@ -325,7 +321,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                     skjæringstidspunkt = dto.skjæringstidspunkt,
                     inntektsgrunnlag = Inntektsgrunnlag.gjenopprett(dto.skjæringstidspunkt, dto.inntektsgrunnlag),
                     opptjening = Opptjening.gjenopprett(dto.skjæringstidspunkt, dto.opptjening),
-                    selvstendigOpptjening = SelvstendigOpptjening.gjenopprett(dto.selvstendigOpptjening),
                     vilkårsgrunnlagId = dto.vilkårsgrunnlagId,
                     medlemskapstatus = when (dto.medlemskapstatus) {
                         MedlemskapsvurderingDto.Ja -> Medlemskapsvurdering.Medlemskapstatus.Ja
@@ -417,8 +412,7 @@ internal data class GrunnlagsdataView(
     override val inntektsgrunnlag: InntektsgrunnlagView,
     val medlemskapstatus: MedlemskapstatusView,
     val meldingsreferanseId: MeldingsreferanseId?,
-    val opptjening: OpptjeningView,
-    val selvstendigOpptjening: SelvstendigOpptjeningView
+    val opptjening: OpptjeningView
 ): VilkårsgrunnlagView {
     enum class MedlemskapstatusView { Ja, Nei, VetIkke, UavklartMedBrukerspørsmål }
 }

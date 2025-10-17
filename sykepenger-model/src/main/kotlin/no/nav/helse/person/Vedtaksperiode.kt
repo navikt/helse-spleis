@@ -1952,14 +1952,7 @@ internal class Vedtaksperiode private constructor(
             skatteopplysninger = skatteopplysninger
         )
 
-        val selvstendigOpptjening = when (yrkesaktivitet.yrkesaktivitetstype) {
-            is Arbeidstaker -> SelvstendigOpptjeningIkkeVurdert
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigOpptjeningOppfylt
-            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-            Behandlingsporing.Yrkesaktivitet.Frilans -> error("Støtter ikke Arbeidsledig/Frilans")
-        }
-
-        vilkårsgrunnlag.valider(aktivitetslogg, sykepengegrunnlag, selvstendigOpptjening, subsumsjonslogg)
+        vilkårsgrunnlag.valider(aktivitetslogg, sykepengegrunnlag, subsumsjonslogg)
         val grunnlagsdata = vilkårsgrunnlag.grunnlagsdata()
 
         when (yrkesaktivitet.yrkesaktivitetstype) {

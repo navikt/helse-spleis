@@ -8,7 +8,6 @@ import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
@@ -26,8 +25,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.oktober
-import no.nav.helse.person.SelvstendigOpptjeningView.IkkeVurdert
-import no.nav.helse.person.SelvstendigOpptjeningView.Oppfylt
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
@@ -52,35 +49,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
 
 internal class SelvstendigTest : AbstractDslTest() {
-
-    @Test
-    fun `En selvstendig som er sendt til godkjenning før spørsmål om fravær før sykmelding fra søknad ble hensyntatt`() {
-        medJSONPerson("/personer/selvstendig_til_godkjennig_uten_selvstendig_opptjening.json", 331)
-        selvstendig {
-            assertEquals(Oppfylt, inspektør.selvstendigOpptjening(1.vedtaksperiode))
-        }
-        assertGjenoppbygget(dto())
-    }
-
-    @Test
-    fun `Arbeidstaker har ikke vurdert opptjening for selvstendig`() {
-        a1 {
-            nyttVedtak(januar)
-            assertEquals(IkkeVurdert, inspektør.selvstendigOpptjening(1.vedtaksperiode))
-        }
-        assertGjenoppbygget(dto())
-
-    }
-
-    @Test
-    fun `Førstegangssøknad for selvstendig har oppfylt opptjening når de ikke har fravær før sykmelding`() = Toggle.SelvstendigNæringsdrivende.enable {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar)
-            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
-            assertEquals(Oppfylt, inspektør.selvstendigOpptjening(1.vedtaksperiode))
-        }
-        assertGjenoppbygget(dto())
-    }
 
     @Test
     fun `tar inn søknad uten ventetid, men forkaster perioden`() {

@@ -102,14 +102,12 @@ data class SpannerPersonDto(
         val type: GrunnlagsdataType,
         val inntektsgrunnlag: InntektsgrunnlagData,
         val opptjening: OpptjeningData?,
-        val selvstendigOpptjening: SelvstendigOpptjening,
         val medlemskapstatus: MedlemskapstatusDto?,
         val meldingsreferanseId: UUID?,
         val vilkårsgrunnlagId: UUID
     ) {
         enum class MedlemskapstatusDto { JA, VET_IKKE, NEI, UAVKLART_MED_BRUKERSPØRSMÅL }
         enum class GrunnlagsdataType { Infotrygd, Vilkårsprøving }
-        enum class SelvstendigOpptjening { Oppfylt, IkkeOppfylt, IkkeVurdert }
 
         data class InntektsgrunnlagData(
             val grunnbeløp: Double?,
@@ -1662,14 +1660,6 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = VilkårsgrunnlagElementData(
     opptjening = when (this) {
         is VilkårsgrunnlagUtDto.Spleis -> this.opptjening?.tilPersonData()
         is VilkårsgrunnlagUtDto.Infotrygd -> null
-    },
-    selvstendigOpptjening = when (this) {
-        is VilkårsgrunnlagUtDto.Spleis -> when (this.selvstendigOpptjening) {
-            SelvstendigOpptjeningDto.IkkeOppfylt -> VilkårsgrunnlagElementData.SelvstendigOpptjening.IkkeOppfylt
-            SelvstendigOpptjeningDto.IkkeVurdert -> VilkårsgrunnlagElementData.SelvstendigOpptjening.IkkeVurdert
-            SelvstendigOpptjeningDto.Oppfylt -> VilkårsgrunnlagElementData.SelvstendigOpptjening.Oppfylt
-        }
-        is VilkårsgrunnlagUtDto.Infotrygd -> VilkårsgrunnlagElementData.SelvstendigOpptjening.IkkeVurdert
     },
     medlemskapstatus = when (this) {
         is VilkårsgrunnlagUtDto.Spleis -> when (this.medlemskapstatus) {

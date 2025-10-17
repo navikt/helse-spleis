@@ -37,7 +37,6 @@ import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.ProsentdelDto
 import no.nav.helse.dto.RefusjonsservitørDto
-import no.nav.helse.dto.SelvstendigOpptjeningDto
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.SkatteopplysningDto
 import no.nav.helse.dto.SykdomshistorikkDto
@@ -207,7 +206,6 @@ data class PersonData(
         val type: GrunnlagsdataType,
         val inntektsgrunnlag: InntektsgrunnlagData,
         val opptjening: OpptjeningData?,
-        val selvstendigOpptjening: SelvstendigOpptjeningData?,
         val medlemskapstatus: JsonMedlemskapstatus?,
         val meldingsreferanseId: UUID?,
         val vilkårsgrunnlagId: UUID
@@ -224,15 +222,6 @@ data class PersonData(
                 skjæringstidspunkt = this.skjæringstidspunkt,
                 inntektsgrunnlag = this.inntektsgrunnlag.tilSpleisDto(),
                 opptjening = this.opptjening?.tilDto(),
-                selvstendigOpptjening = when (this.selvstendigOpptjening) {
-                    SelvstendigOpptjeningData.OPPFYLT -> SelvstendigOpptjeningDto.Oppfylt
-                    SelvstendigOpptjeningData.IKKE_OPPFYLT -> SelvstendigOpptjeningDto.IkkeOppfylt
-                    SelvstendigOpptjeningData.IKKE_VURDERT -> SelvstendigOpptjeningDto.IkkeVurdert
-                    null -> when (this.opptjening) {
-                        null -> SelvstendigOpptjeningDto.Oppfylt
-                        else -> SelvstendigOpptjeningDto.IkkeVurdert
-                    }
-                },
                 medlemskapstatus = this.medlemskapstatus!!.tilDto(),
                 meldingsreferanseId = this.meldingsreferanseId?.let { MeldingsreferanseDto(it) }
             )
@@ -514,12 +503,6 @@ data class PersonData(
                     )
                 }
             }
-        }
-
-        enum class SelvstendigOpptjeningData {
-            OPPFYLT,
-            IKKE_OPPFYLT,
-            IKKE_VURDERT
         }
     }
 
