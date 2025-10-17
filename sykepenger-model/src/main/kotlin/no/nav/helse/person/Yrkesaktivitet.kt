@@ -1147,6 +1147,7 @@ internal class Yrkesaktivitet private constructor(
         vedtaksperioder.removeAll(perioder.map { it.first })
         forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it.first, organisasjonsnummer, it.first.periode) })
         sykdomshistorikk.fjernDager(perioder.map { it.first.periode })
+        beregnArbeidsgiverperioder()
         return perioder.map { it.second }
     }
 

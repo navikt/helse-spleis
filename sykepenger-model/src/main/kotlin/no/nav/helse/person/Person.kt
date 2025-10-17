@@ -663,7 +663,6 @@ class Person private constructor(
         infotrygdhistorikk.tøm()
         Yrkesaktivitet.søppelbøtte(yrkesaktiviteter, hendelse, aktivitetslogg, vedtaksperioderSomSkalForkastes)
         beregnSkjæringstidspunkter()
-        beregnArbeidsgiverperioder()
         sykdomshistorikkEndret()
         ryddOppVilkårsgrunnlag(aktivitetslogg)
         gjenopptaBehandling(aktivitetslogg)
