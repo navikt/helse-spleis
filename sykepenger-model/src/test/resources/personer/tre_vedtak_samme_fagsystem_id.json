@@ -291,6 +291,21 @@
         }
       ],
       "sykmeldingsperioder": [],
+      "arbeidsgiverperioder": [
+        {
+          "omsluttendePeriode": {
+            "fom": [2018, 1, 3],
+            "tom": [2018, 3, 10]
+          },
+          "arbeidsgiverperiode": [
+            {
+              "fom": [2018, 1, 3],
+              "tom": [2018, 1, 18]
+            }
+          ],
+          "ferdigAvklart": true
+        }
+      ],
       "vedtaksperioder": [
         {
           "id": "f0b5a86d-9865-40bd-8f93-3db889ecfbd6",

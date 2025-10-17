@@ -7,7 +7,7 @@ internal class V333ArbeidsgiverperioderPåYrkesaktivitet : JsonMigration(333) {
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
-            (arbeidsgiver as ObjectNode).putArray("arbeidsgiverperioder")
+            (arbeidsgiver as ObjectNode).withArray("arbeidsgiverperioder")
         }
     }
 }

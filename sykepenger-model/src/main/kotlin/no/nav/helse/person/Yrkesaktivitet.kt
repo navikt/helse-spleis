@@ -1064,10 +1064,6 @@ internal class Yrkesaktivitet private constructor(
     internal fun beregnArbeidsgiverperiode() = { vedtaksperiode: Periode ->
         when (yrkesaktivitetstype) {
             is Arbeidstaker -> {
-                // todo: midlertidig løsning frem til alle yrkesaktiviteter har fått migrert arbeidsgiverperioder
-                if (arbeidsgiverperioder.isEmpty()) {
-                    beregnArbeidsgiverperioder()
-                }
                 arbeidsgiverperioder
                     .finn(vedtaksperiode)
                     ?.let {
