@@ -5,6 +5,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyPeriode
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.somPeriode
@@ -12,12 +13,26 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() {
+
+    @Test
+    fun `arbeidsgiver betviler arbeidsuførhet i korrigert inntektsmelding, forkaster periode`() {
+        a1 {
+            tilGodkjenning(januar)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "BetvilerArbeidsufoerhet")
+
+            assertEquals(listOf(1.januar til 16.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+            assertFunksjonellFeil(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
+            assertSisteForkastetTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
+        }
+    }
 
     @Test
     fun `arbeidsgiverperioden strekker seg over to perioder og inntektsmelding kommer etter søknadene`() {

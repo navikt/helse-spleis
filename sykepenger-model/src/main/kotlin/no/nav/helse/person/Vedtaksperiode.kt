@@ -3,7 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -1784,11 +1784,10 @@ internal class Vedtaksperiode private constructor(
         } else {
             håndterDager(dager, aktivitetslogg)
         }
-
         val nyAgp = behandlinger.arbeidsgiverperiode()
-        if (opprinneligAgp == nyAgp) return
+        if (opprinneligAgp != nyAgp) aktivitetslogg.varsel(RV_IM_24, "Ny agp er utregnet til å være ulik tidligere utregnet agp i ${tilstand.type.name}")
 
-        aktivitetslogg.varsel(RV_IM_24, "Ny agp er utregnet til å være ulik tidligere utregnet agp i ${tilstand.type.name}")
+        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(dager.hendelse, aktivitetslogg)
     }
 
     private fun inntektForArbeidsgiver(

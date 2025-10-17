@@ -394,15 +394,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(2.desember.somPeriode(), 4.desember til 18.desember), førsteFraværsdag = 18.desember, begrunnelseForReduksjonEllerIkkeUtbetalt = "TidligereVirksomhet")
         assertEquals(listOf(2.desember.somPeriode(), 4.desember til 6.desember), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
-        assertEquals(listOf(7.desember til 13.desember), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
-        assertEquals(listOf(18.desember.somPeriode()), inspektør.vedtaksperioder(3.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).dagerNavOvertarAnsvar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
 
         assertVarsler(listOf(RV_IM_8, RV_IM_24), 1.vedtaksperiode.filter())
-        assertVarsler(listOf(RV_IM_8, RV_IM_24), 2.vedtaksperiode.filter())
-        assertVarsler(listOf(RV_IM_8), 3.vedtaksperiode.filter())
     }
 
     @Test

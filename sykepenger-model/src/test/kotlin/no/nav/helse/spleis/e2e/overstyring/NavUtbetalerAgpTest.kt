@@ -112,11 +112,11 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         assertVarsler(listOf(RV_IM_8, RV_IM_23, RV_IM_24), 2.vedtaksperiode.filter())
         assertFunksjonellFeil(RV_IM_23, 1.vedtaksperiode.filter())
 
-        assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
+        assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S", inspektør.sykdomstidslinje.toShortString())
         assertEquals(listOf(14.april.somPeriode(), 18.april til 30.april), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
 
         assertTrue(observatør.inntektsmeldingHåndtert.any { it.first == inntektsmeldingId })
         assertFalse(observatør.inntektsmeldingIkkeHåndtert.contains(inntektsmeldingId))
