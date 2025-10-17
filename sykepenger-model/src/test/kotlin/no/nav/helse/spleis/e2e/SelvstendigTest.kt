@@ -9,7 +9,6 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.selvstendig
-import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
@@ -46,7 +45,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertNull
 
 internal class SelvstendigTest : AbstractDslTest() {
 
@@ -249,19 +247,17 @@ internal class SelvstendigTest : AbstractDslTest() {
     fun `perioden kastes ut når det er fravær før sykmelding`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, fraværFørSykmelding = true)
-
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertFunksjonelleFeil()
+            assertFunksjonellFeil(Varselkode.RV_SØ_46, 1.vedtaksperiode.filter())
+            assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
     }
 
     @Test
-    fun `lager ikke forberedende vilkårsgrunnlag når spørsmål om fravær før sykmelding ikke stilles`() {
+    fun `kaster ut når spørsmål om fravær før sykmelding ikke stilles`() {
         selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar, fraværFørSykmelding = false)
-            håndterForlengelsessøknadSelvstendig(februar)
-
-            assertNull(inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.single().endringer.last().forberedendeVilkårsgrunnlag)
+            håndterFørstegangssøknadSelvstendig(januar, fraværFørSykmelding = null)
+            assertFunksjonellFeil(Varselkode.RV_OV_4, 1.vedtaksperiode.filter())
+            assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
     }
 

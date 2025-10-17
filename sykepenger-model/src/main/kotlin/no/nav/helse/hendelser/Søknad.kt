@@ -299,7 +299,6 @@ class Søknad(
             ventetid = ventetid,
             dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
             sykmeldingsperiode = sykdomsperiode,
-            forberedendeVilkårsgrunnlag = null,
             selvstendigForsikring = harOppgittÅHaForsikring,
             regelverkslogg = regelverkslogg
         )

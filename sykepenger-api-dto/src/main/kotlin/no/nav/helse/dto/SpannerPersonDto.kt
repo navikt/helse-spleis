@@ -18,7 +18,6 @@ import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.Arbeidsgive
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.InntektsopplysningData.PensjonsgivendeInntektData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagInnslagData
-import no.nav.helse.dto.deserialisering.ForberedendeVilkårsgrunnlagDto
 import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
@@ -221,8 +220,6 @@ data class SpannerPersonDto(
             )
         }
     }
-
-    data class ForberedendeVilkårsgrunnlagData(val erOpptjeningVurdertOk: Boolean)
 
     data class InntektDto(
         val årlig: Double,
@@ -590,8 +587,7 @@ data class SpannerPersonDto(
                     val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
                     val inntektjusteringer: Map<String, BeløpstidslinjeData>,
-                    val faktaavklartInntekt: SelvstendigInntektsopplysningData.InntektsopplysningData?,
-                    val forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlagData?
+                    val faktaavklartInntekt: SelvstendigInntektsopplysningData.InntektsopplysningData?
                 )
 
                 data class ArbeidsgiverperiodeData(
@@ -1274,8 +1270,7 @@ private fun BehandlingendringUtDto.tilPersonData() =
             inntektskilde.id to beløpstidslinje.tilPersonData()
         }.toMap(),
         faktaavklartInntekt = faktaavklartInntekt?.tilPersonData(),
-        ventetid = ventetid?.let { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
-        forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag?.tilPersonData()
+        ventetid = ventetid?.let { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
     )
 
 private fun ArbeidsgiverperiodeavklaringDto.tilPersonData() = ArbeidsgiverperiodeData(
@@ -1751,8 +1746,6 @@ private fun SelvstendigFaktaavklartInntektUtDto.tilPersonData() =
         },
         anvendtGrunnbeløp = this.anvendtGrunnbeløp.tilPersonData()
     )
-
-private fun ForberedendeVilkårsgrunnlagDto.tilPersonData() = SpannerPersonDto.ForberedendeVilkårsgrunnlagData(erOpptjeningVurdertOk)
 
 private fun SaksbehandlerUtDto.tilPersonData() =
     ArbeidsgiverInntektsopplysningData.KorrigertInntektsopplysningData(

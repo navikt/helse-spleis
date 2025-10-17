@@ -34,7 +34,6 @@ import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingVurderingDto
 import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
-import no.nav.helse.dto.deserialisering.ForberedendeVilkårsgrunnlagDto
 import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
@@ -487,8 +486,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
         inntektskilde.id to beløpstidslinje.tilPersonData()
     }.toMap(),
     faktaavklartInntekt = faktaavklartInntekt?.tilPersonData(),
-    ventetid = ventetid?.let { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
-    forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag?.tilPersonData()
+    ventetid = ventetid?.let { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
 )
 
 private fun ArbeidsgiverperiodeavklaringDto.tilPersonData() = ArbeidsgiverperiodeData(
@@ -1005,4 +1003,3 @@ fun SelvstendigFaktaavklartInntektUtDto.tilPersonData(): PersonData.Vilkårsgrun
     anvendtÅrligGrunnbeløp = this.anvendtGrunnbeløp.årlig.beløp
 )
 
-fun ForberedendeVilkårsgrunnlagDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.ForberedendeVilkårsgrunnlagData(this.erOpptjeningVurdertOk)

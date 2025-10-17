@@ -45,7 +45,7 @@ internal sealed interface Opptjening {
 }
 
 internal data object ArbeidstakerOpptjeningIkkeVurdert : Opptjening {
-    override val subsumsjon by lazy { error("ArbeidstakerOpptjeningIkkeVurdert skal ikke subsummere") }
+    override val subsumsjon: Subsumsjon by lazy { error("ArbeidstakerOpptjeningIkkeVurdert skal ikke subsummere") }
     override fun view() = OpptjeningView.ArbeidstakerOpptjeningIkkeVurdertView
     override fun deaktiver(orgnummer: String) = error("ArbeidstakerOpptjeningIkkeVurdert kan ikke deaktiveres")
     override fun aktiver(orgnummer: String) = error("ArbeidstakerOpptjeningIkkeVurdert kan ikke aktiveres")
@@ -53,11 +53,11 @@ internal data object ArbeidstakerOpptjeningIkkeVurdert : Opptjening {
 }
 
 internal data object ArbeidstakerOpptjeningVurdertIInfotrygd : Opptjening {
-    override val subsumsjon by lazy { error("ArbeidstakerOpptjeningVurdertIInfotrygd skal ikke subsummere") }
+    override val subsumsjon: Subsumsjon by lazy { error("ArbeidstakerOpptjeningVurdertIInfotrygd skal ikke subsummere") }
     override fun view() = OpptjeningView.ArbeidstakerOpptjeningVurderIInfotrygdView
     override fun deaktiver(orgnummer: String) = error("ArbeidstakerOpptjeningVurdertIInfotrygd kan ikke deaktiveres")
     override fun aktiver(orgnummer: String) = error("ArbeidstakerOpptjeningVurdertIInfotrygd kan ikke aktivers")
-    override fun dto(): OpptjeningUtDto? = error("ArbeidstakerOpptjeningVurdertIInfotrygd er bare noe som brukes runtime i modellen")
+    override fun dto(): OpptjeningUtDto = error("ArbeidstakerOpptjeningVurdertIInfotrygd er bare noe som brukes runtime i modellen")
 }
 
 internal class ArbeidstakerOpptjening private constructor(

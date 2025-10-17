@@ -9,7 +9,6 @@ import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
 import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
 import no.nav.helse.dto.deserialisering.BehandlingerInnDto
-import no.nav.helse.dto.deserialisering.ForberedendeVilkårsgrunnlagDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.BehandlingendringUtDto
 import no.nav.helse.dto.serialisering.BehandlingerUtDto
@@ -34,7 +33,6 @@ import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbarInn
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentsporing
-import no.nav.helse.person.Behandlinger.Behandling.Endring.ForberedendeVilkårsgrunnlag
 import no.nav.helse.person.Dokumentsporing.Companion.eksterneIder
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
@@ -107,7 +105,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         ventetid: Periode?,
         dokumentsporing: Dokumentsporing,
         behandlingkilde: Behandlingkilde,
-        forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?,
         selvstendigForsikring: Boolean?
     ) {
         check(behandlinger.isEmpty())
@@ -131,8 +128,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             sykmeldingsperiode = sykmeldingsperiode,
             ventetid = ventetid,
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
-            behandlingkilde = behandlingkilde,
-            forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag
+            behandlingkilde = behandlingkilde
         )
         leggTilNyBehandling(behandling)
     }
@@ -606,8 +602,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val dagerNavOvertarAnsvar: List<Periode>,
             val maksdatoresultat: Maksdatoresultat,
             val inntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
-            val faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
-            val forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag? // TODO: Slett meg
+            val faktaavklartInntekt: SelvstendigFaktaavklartInntekt?
         ) {
 
             fun view() = BehandlingendringView(
@@ -627,8 +622,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 egenmeldingsdager = egenmeldingsdager,
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                 maksdatoresultat = maksdatoresultat,
-                ventetid = ventetid,
-                forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag
+                ventetid = ventetid
             )
             
             private fun skjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje, periode: Periode = this.periode): Pair<LocalDate, List<LocalDate>> {
@@ -699,8 +693,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         inntektjusteringer = dto.inntektjusteringer.map { (inntektskildeDto, beløpstidslinjeDto) ->
                             Inntektskilde.gjenopprett(inntektskildeDto) to Beløpstidslinje.gjenopprett(beløpstidslinjeDto)
                         }.toMap(),
-                        faktaavklartInntekt = dto.faktaavklartInntekt?.let { SelvstendigFaktaavklartInntekt.gjenopprett(it) },
-                        forberedendeVilkårsgrunnlag = dto.forberedendeVilkårsgrunnlag?.let { ForberedendeVilkårsgrunnlag.gjenopprett(it) }
+                        faktaavklartInntekt = dto.faktaavklartInntekt?.let { SelvstendigFaktaavklartInntekt.gjenopprett(it) }
                     )
                 }
             }
@@ -930,8 +923,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         inntektskilde.dto() to beløpstidslinje.dto()
                     }.toMap(),
                     faktaavklartInntekt = faktaavklartInntekt?.dto(),
-                    ventetid = ventetid?.dto(),
-                    forberedendeVilkårsgrunnlag = this.forberedendeVilkårsgrunnlag?.dto()
+                    ventetid = ventetid?.dto()
                 )
             }
 
@@ -944,14 +936,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 FISKER,
                 JORDBRUKER,
                 ANNET
-            }
-
-            internal data class ForberedendeVilkårsgrunnlag(val erOpptjeningVurdertOk: Boolean) {
-                companion object {
-                    fun gjenopprett(forberedendeVilkårsgrunnlagDto: ForberedendeVilkårsgrunnlagDto) = ForberedendeVilkårsgrunnlag(forberedendeVilkårsgrunnlagDto.erOpptjeningVurdertOk)
-                }
-
-                internal fun dto() = ForberedendeVilkårsgrunnlagDto(erOpptjeningVurdertOk)
             }
         }
 
@@ -1391,8 +1375,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 sykmeldingsperiode: Periode,
                 ventetid: Periode?,
                 dagerNavOvertarAnsvar: List<Periode>,
-                behandlingkilde: Behandlingkilde,
-                forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?
+                behandlingkilde: Behandlingkilde
             ) =
                 Behandling(
                     observatører = observatører,
@@ -1419,8 +1402,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert,
                             inntektjusteringer = emptyMap(),
-                            faktaavklartInntekt = faktaavklartInntekt,
-                            forberedendeVilkårsgrunnlag = forberedendeVilkårsgrunnlag,
+                            faktaavklartInntekt = faktaavklartInntekt
                         )
                     ),
                     avsluttet = null,
@@ -2207,8 +2189,7 @@ internal data class BehandlingendringView(
     val arbeidsgiverperiode: Arbeidsgiverperiodeavklaring,
     val ventetid: Periode?,
     val egenmeldingsdager: List<Periode>,
-    val maksdatoresultat: Maksdatoresultat,
-    val forberedendeVilkårsgrunnlag: ForberedendeVilkårsgrunnlag?
+    val maksdatoresultat: Maksdatoresultat
 )
 
 internal data class BehandlingkildeView(
