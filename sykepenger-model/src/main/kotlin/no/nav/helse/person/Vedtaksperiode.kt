@@ -1718,8 +1718,6 @@ internal class Vedtaksperiode private constructor(
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             egenmeldingsdager = egenmeldingsdager,
             aktivitetslogg = aktivitetslogg,
-            beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
-            beregnArbeidsgiverperiode = yrkesaktivitet.beregnArbeidsgiverperiode(),
             validering = validering
         )
         if (!haddeFlereSkjæringstidspunkt && behandlinger.harFlereSkjæringstidspunkt()) {
@@ -1733,8 +1731,6 @@ internal class Vedtaksperiode private constructor(
         behandlingkilde = hendelse.metadata.behandlingkilde,
         dokumentsporing = dokumentsporing,
         aktivitetslogg = aktivitetslogg,
-        beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
-        beregnArbeidsgiverperiode = yrkesaktivitet.beregnArbeidsgiverperiode(),
         // skal ikke hensynta egenmeldingsdager fordi vi skal nullstille dem
         egenmeldingsdager = emptyList(),
         egenmeldingsdagerAndrePerioder = emptyList()
