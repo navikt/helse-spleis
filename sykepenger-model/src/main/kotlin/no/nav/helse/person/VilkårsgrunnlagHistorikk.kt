@@ -245,7 +245,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             skjæringstidspunkt = skjæringstidspunkt,
             meldingsreferanseId = meldingsreferanseId,
             inntektsgrunnlag = inntektsgrunnlag.view(),
-            opptjening = opptjening?.view(),
+            opptjening = arbeidstakerOpptjening.view(),
             medlemskapstatus = when (medlemskapstatus) {
                 Medlemskapsvurdering.Medlemskapstatus.Ja -> GrunnlagsdataView.MedlemskapstatusView.Ja
                 Medlemskapsvurdering.Medlemskapstatus.Nei -> GrunnlagsdataView.MedlemskapstatusView.Nei
@@ -417,7 +417,7 @@ internal data class GrunnlagsdataView(
     override val inntektsgrunnlag: InntektsgrunnlagView,
     val medlemskapstatus: MedlemskapstatusView,
     val meldingsreferanseId: MeldingsreferanseId?,
-    val opptjening: OpptjeningView?, // TODO: Bør ikke være nullable på sikt
+    val opptjening: OpptjeningView,
     val selvstendigOpptjening: SelvstendigOpptjeningView
 ): VilkårsgrunnlagView {
     enum class MedlemskapstatusView { Ja, Nei, VetIkke, UavklartMedBrukerspørsmål }
