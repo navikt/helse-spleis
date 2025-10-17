@@ -1030,14 +1030,18 @@ internal class Yrkesaktivitet private constructor(
         return revurderingseventyr
     }
 
-    internal fun beregnArbeidsgiverperioder(): List<Arbeidsgiverperioderesultat> {
-        arbeidsgiverperioder = arbeidsgiverperiodeFor()
+    internal fun beregnArbeidsgiverperioder(egenmeldingsperioder: List<Periode> = vedtaksperioder.egenmeldingsperioder()): List<Arbeidsgiverperioderesultat> {
+        arbeidsgiverperioder = arbeidsgiverperiodeFor(egenmeldingsperioder)
         return arbeidsgiverperioder
     }
 
-    internal fun oppdaterSykdom(meldingsreferanseId: MeldingsreferanseId, sykdomstidslinje: Sykdomstidslinje): Triple<Sykdomstidslinje, Skjæringstidspunkter, List<Arbeidsgiverperioderesultat>> {
-        val nyTidslinje = sykdomshistorikk.håndter(meldingsreferanseId, sykdomstidslinje)
-        val nyeArbeidsgiverperioder = beregnArbeidsgiverperioder()
+    internal fun oppdaterSykdom(
+        meldingsreferanseId: MeldingsreferanseId,
+        sykdomstidslinje: Sykdomstidslinje?,
+        egenmeldingsperioder: List<Periode>
+    ): Triple<Sykdomstidslinje, Skjæringstidspunkter, List<Arbeidsgiverperioderesultat>> {
+        val nyTidslinje = sykdomstidslinje?.let { sykdomshistorikk.håndter(meldingsreferanseId, sykdomstidslinje) } ?: sykdomstidslinje()
+        val nyeArbeidsgiverperioder = beregnArbeidsgiverperioder(egenmeldingsperioder)
         val nyeSkjæringstidspunkter = person.beregnSkjæringstidspunkter()
         return Triple(nyTidslinje, nyeSkjæringstidspunkter, nyeArbeidsgiverperioder)
     }
@@ -1047,11 +1051,11 @@ internal class Yrkesaktivitet private constructor(
         return sykdomshistorikk.sykdomstidslinje()
     }
 
-    private fun arbeidsgiverperiodeFor(): List<Arbeidsgiverperioderesultat> {
+    private fun arbeidsgiverperiodeFor(egenmeldingsperioder: List<Periode>): List<Arbeidsgiverperioderesultat> {
         val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
         val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller)
         return arbeidsgiverperiodeberegner.resultat(
-            sykdomstidslinje = sykdomstidslinjeHensyntattEgenmeldinger(),
+            sykdomstidslinje = sykdomstidslinjeHensyntattEgenmeldinger(egenmeldingsperioder),
             infotrygdBetalteDager = person.infotrygdhistorikk.betaltePerioder(organisasjonsnummer),
             infotrygdFerieperioder = person.infotrygdhistorikk.friperioder()
         )
@@ -1059,23 +1063,30 @@ internal class Yrkesaktivitet private constructor(
 
     internal fun beregnArbeidsgiverperiode() = { vedtaksperiode: Periode ->
         when (yrkesaktivitetstype) {
-            is Arbeidstaker -> arbeidsgiverperiodeFor()
-                .finn(vedtaksperiode)
-                ?.let {
-                    Arbeidsgiverperiodeavklaring(
-                        ferdigAvklart = it.ferdigAvklart,
-                        dager = it.arbeidsgiverperiode.grupperSammenhengendePerioder()
-                    )
-                } ?: Arbeidsgiverperiodeavklaring(false, emptyList())
-
+            is Arbeidstaker -> {
+                // todo: midlertidig løsning frem til alle yrkesaktiviteter har fått migrert arbeidsgiverperioder
+                if (arbeidsgiverperioder.isEmpty()) {
+                    beregnArbeidsgiverperioder()
+                }
+                arbeidsgiverperioder
+                    .finn(vedtaksperiode)
+                    ?.let {
+                        Arbeidsgiverperiodeavklaring(
+                            ferdigAvklart = it.ferdigAvklart,
+                            dager = it.arbeidsgiverperiode.grupperSammenhengendePerioder()
+                        )
+                    } ?: Arbeidsgiverperiodeavklaring(false, emptyList())
+            }
             Arbeidsledig,
             Frilans,
             Selvstendig -> Arbeidsgiverperiodeavklaring(true, emptyList())
         }
     }
 
-    private fun sykdomstidslinjeHensyntattEgenmeldinger(): Sykdomstidslinje {
-        val egenmeldingsperioder = vedtaksperioder.egenmeldingsperioder()
+    internal fun egenmeldingsperioderUnntatt(unntatt: Vedtaksperiode) =
+        vedtaksperioder.filterNot { it === unntatt }.egenmeldingsperioder()
+
+    private fun sykdomstidslinjeHensyntattEgenmeldinger(egenmeldingsperioder: List<Periode>): Sykdomstidslinje {
         if (egenmeldingsperioder.isEmpty()) return sykdomstidslinje()
 
         val tøyseteKilde = Hendelseskilde(Søknad::class, MeldingsreferanseId(UUID.randomUUID()), LocalDateTime.now())

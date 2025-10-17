@@ -1714,6 +1714,7 @@ internal class Vedtaksperiode private constructor(
             behandlingkilde = behandlingkilde,
             dokumentsporing = dokumentsporing,
             hendelseSykdomstidslinje = hendelseSykdomstidslinje,
+            egenmeldingsdagerAndrePerioder = yrkesaktivitet.egenmeldingsperioderUnntatt(this),
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             egenmeldingsdager = egenmeldingsdager,
             aktivitetslogg = aktivitetslogg,
@@ -1726,7 +1727,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun håndterEgenmeldsingsdager(hendelse: Hendelse, dokumentsporing: Dokumentsporing?, aktivitetslogg: IAktivitetslogg, egenmeldingsdager: List<Periode>) = behandlinger.håndterEgenmeldingsdager(
+    private fun nullstillEgenmeldingsdager(hendelse: Hendelse, dokumentsporing: Dokumentsporing?, aktivitetslogg: IAktivitetslogg) = behandlinger.håndterEgenmeldingsdager(
         person = person,
         yrkesaktivitet = yrkesaktivitet,
         behandlingkilde = hendelse.metadata.behandlingkilde,
@@ -1734,13 +1735,15 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg = aktivitetslogg,
         beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
         beregnArbeidsgiverperiode = yrkesaktivitet.beregnArbeidsgiverperiode(),
-        egenmeldingsdager = egenmeldingsdager
+        // skal ikke hensynta egenmeldingsdager fordi vi skal nullstille dem
+        egenmeldingsdager = emptyList(),
+        egenmeldingsdagerAndrePerioder = emptyList()
     )
 
     internal fun nullstillEgenmeldingsdagerIArbeidsgiverperiode(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing?): List<Revurderingseventyr> {
         val arbeidsgiverperiode = behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.periode ?: return emptyList()
         return yrkesaktivitet.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
-            .filter { it.håndterEgenmeldsingsdager(hendelse, dokumentsporing, it.registrerKontekst(aktivitetslogg), emptyList()) }
+            .filter { it.nullstillEgenmeldingsdager(hendelse, dokumentsporing, it.registrerKontekst(aktivitetslogg)) }
             .map { Revurderingseventyr.arbeidsgiverperiode(hendelse, it.skjæringstidspunkt, it.periode) }
     }
 
