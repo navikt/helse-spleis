@@ -432,6 +432,7 @@ class Person private constructor(
 
     fun håndterPersonPåminnelse(påminnelse: PersonPåminnelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler personpåminnelse")
+        beregnArbeidsgiverperioder()
         håndterGjenoppta(påminnelse, aktivitetsloggMedPersonkontekst)
     }
 
