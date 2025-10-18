@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
@@ -50,7 +50,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.mursteinsperioder
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
@@ -82,12 +81,12 @@ import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SAMME_ARBEIDSGIVERPERIODE
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiv
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
-import no.nav.helse.person.Vedtaksperiode.Companion.oppdatereSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.medSammeUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
+import no.nav.helse.person.Vedtaksperiode.Companion.oppdatereSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
 import no.nav.helse.person.Vedtaksperiode.Companion.startdatoerPåSammenhengendeVedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.validerTilstand
@@ -128,7 +127,6 @@ import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeberegner
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperioderesultat
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperioderesultat.Companion.finn
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -227,7 +225,7 @@ internal class Yrkesaktivitet private constructor(
 
         internal fun List<Yrkesaktivitet>.oppdatereSkjæringstidspunkter(beregnetSkjæringstidspunkter: Skjæringstidspunkter) {
             forEach {
-                it.vedtaksperioder.oppdatereSkjæringstidspunkter(beregnetSkjæringstidspunkter, it.beregnArbeidsgiverperiode())
+                it.vedtaksperioder.oppdatereSkjæringstidspunkter(beregnetSkjæringstidspunkter, it.arbeidsgiverperioder)
             }
         }
 
@@ -1066,24 +1064,6 @@ internal class Yrkesaktivitet private constructor(
             infotrygdBetalteDager = person.infotrygdhistorikk.betaltePerioder(organisasjonsnummer),
             infotrygdFerieperioder = person.infotrygdhistorikk.friperioder()
         )
-    }
-
-    internal fun beregnArbeidsgiverperiode() = { vedtaksperiode: Periode ->
-        when (yrkesaktivitetstype) {
-            is Arbeidstaker -> {
-                arbeidsgiverperioder
-                    .finn(vedtaksperiode)
-                    ?.let {
-                        Arbeidsgiverperiodeavklaring(
-                            ferdigAvklart = it.ferdigAvklart,
-                            dager = it.arbeidsgiverperiode.grupperSammenhengendePerioder()
-                        )
-                    } ?: Arbeidsgiverperiodeavklaring(false, emptyList())
-            }
-            Arbeidsledig,
-            Frilans,
-            Selvstendig -> Arbeidsgiverperiodeavklaring(true, emptyList())
-        }
     }
 
     internal fun egenmeldingsperioderUnntatt(unntatt: Vedtaksperiode) =
