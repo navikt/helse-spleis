@@ -1031,8 +1031,15 @@ internal class Yrkesaktivitet private constructor(
     }
 
     internal fun beregnArbeidsgiverperioder(egenmeldingsperioder: List<Periode> = vedtaksperioder.egenmeldingsperioder()): List<Arbeidsgiverperioderesultat> {
-        arbeidsgiverperioder = arbeidsgiverperiodeFor(egenmeldingsperioder)
-        return arbeidsgiverperioder
+        when (yrkesaktivitetstype) {
+            is Arbeidstaker -> {
+                arbeidsgiverperioder = arbeidsgiverperiodeFor(egenmeldingsperioder)
+                return arbeidsgiverperioder
+            }
+            Arbeidsledig,
+            Frilans,
+            Selvstendig -> return emptyList()
+        }
     }
 
     internal fun oppdaterSykdom(
