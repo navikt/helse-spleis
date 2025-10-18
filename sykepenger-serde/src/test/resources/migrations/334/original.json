@@ -17,6 +17,27 @@
           ],
           "ferdigAvklart": true
         }
+      ],
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart" : true,
+                    "dager" : [
+                      {
+                        "fom": [2018, 1, 1],
+                        "tom": [2018, 1, 16]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
       ]
     },
     {
@@ -35,6 +56,27 @@
             }
           ],
           "ferdigAvklart": true
+        }
+      ],
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart" : true,
+                    "dager" : [
+                      {
+                        "fom": [2018, 1, 1],
+                        "tom": [2018, 1, 16]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -55,6 +97,27 @@
           ],
           "ferdigAvklart": true
         }
+      ],
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart" : true,
+                    "dager" : [
+                        {
+                            "fom": [2018, 1, 1],
+                            "tom": [2018, 1, 16]
+                        }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
       ]
     },
     {
@@ -73,6 +136,27 @@
             }
           ],
           "ferdigAvklart": true
+        }
+      ],
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart" : true,
+                    "dager" : [
+                      {
+                        "fom": [2018, 1, 1],
+                        "tom": [2018, 1, 16]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     }

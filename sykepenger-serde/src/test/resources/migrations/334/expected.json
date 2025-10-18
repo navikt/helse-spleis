@@ -17,21 +17,90 @@
           ],
           "ferdigAvklart": true
         }
+      ],
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart" : true,
+                    "dager" : [
+                      {
+                        "fom": [2018, 1, 1],
+                        "tom": [2018, 1, 16]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
       ]
     },
     {
       "organisasjonsnummer": "SELVSTENDIG",
       "yrkesaktivitetstype": "SELVSTENDIG",
-      "arbeidsgiverperioder": []
+      "arbeidsgiverperioder": [],
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart" : false,
+                    "dager" : []
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "organisasjonsnummer": "FRILANS",
       "yrkesaktivitetstype": "FRILANS",
-      "arbeidsgiverperioder": []
+      "arbeidsgiverperioder": [],
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart" : false,
+                    "dager" : []
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "organisasjonsnummer": "ARBEIDSLEDIG",
       "yrkesaktivitetstype": "ARBEIDSLEDIG",
-      "arbeidsgiverperioder": []
+      "arbeidsgiverperioder": [],
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart" : false,
+                    "dager" : []
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]}
