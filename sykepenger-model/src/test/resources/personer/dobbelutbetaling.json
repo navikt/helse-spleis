@@ -1,23 +1,48 @@
 {
   "fødselsnummer": "12029240045",
-  "fødselsdato": "1992-02-12",
+  "fødselsdato": [
+    1992,
+    2,
+    12
+  ],
   "arbeidsgivere": [
     {
       "organisasjonsnummer": "a1",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
       "id": "dffade44-943f-429b-a135-570b39efbee1",
       "inntektshistorikk": [
         {
           "id": "526ead7c-5ef7-425e-8a3f-7cb0e21a4db6",
-          "dato": "2018-01-01",
+          "dato": [
+            2018,
+            1,
+            1
+          ],
           "hendelseId": "f0cf09a5-e1f5-4cf7-8198-87214242fe2d",
           "beløp": 31000.0,
           "kilde": "Arbeidsgiver",
-          "tidsstempel": "2022-10-13T14:20:20.065167"
+          "tidsstempel": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            65167000
+          ]
         }
       ],
       "sykdomshistorikk": [
         {
-          "tidsstempel": "2022-10-13T14:20:20.229753",
+          "tidsstempel": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            229753000
+          ],
           "id": "2ec96542-4db6-4e0e-89f2-341fc423d343",
           "hendelseId": "65b3a4cb-51c5-48d6-a7de-932d291fd811",
           "hendelseSykdomstidslinje": {
@@ -27,19 +52,41 @@
                 "kilde": {
                   "type": "Søknad",
                   "id": "65b3a4cb-51c5-48d6-a7de-932d291fd811",
-                  "tidsstempel": "2018-03-17T00:00:00"
+                  "tidsstempel": [
+                    2018,
+                    3,
+                    17,
+                    0,
+                    0
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-03-17",
-                "tom": "2018-03-31",
+                "fom": [
+                  2018,
+                  3,
+                  17
+                ],
+                "tom": [
+                  2018,
+                  3,
+                  31
+                ],
                 "dato": null
               }
             ],
             "periode": {
-              "fom": "2018-03-17",
-              "tom": "2018-03-31"
+              "fom": [
+                2018,
+                3,
+                17
+              ],
+              "tom": [
+                2018,
+                3,
+                31
+              ]
             },
             "låstePerioder": []
           },
@@ -50,13 +97,27 @@
                 "kilde": {
                   "type": "Søknad",
                   "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                  "tidsstempel": "2018-01-01T00:00:00"
+                  "tidsstempel": [
+                    2018,
+                    1,
+                    1,
+                    0,
+                    0
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-01-01",
-                "tom": "2018-01-16",
+                "fom": [
+                  2018,
+                  1,
+                  1
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  16
+                ],
                 "dato": null
               },
               {
@@ -64,13 +125,27 @@
                 "kilde": {
                   "type": "Søknad",
                   "id": "a9e56d46-bdbf-4085-b537-9f87bd4105b9",
-                  "tidsstempel": "2018-01-17T00:00:00"
+                  "tidsstempel": [
+                    2018,
+                    1,
+                    17,
+                    0,
+                    0
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-01-17",
-                "tom": "2018-01-31",
+                "fom": [
+                  2018,
+                  1,
+                  17
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  31
+                ],
                 "dato": null
               },
               {
@@ -78,13 +153,27 @@
                 "kilde": {
                   "type": "Søknad",
                   "id": "53b406f0-04ce-4f00-8995-318c0339237d",
-                  "tidsstempel": "2018-03-01T00:00:00"
+                  "tidsstempel": [
+                    2018,
+                    3,
+                    1,
+                    0,
+                    0
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-03-01",
-                "tom": "2018-03-16",
+                "fom": [
+                  2018,
+                  3,
+                  1
+                ],
+                "tom": [
+                  2018,
+                  3,
+                  16
+                ],
                 "dato": null
               },
               {
@@ -92,38 +181,92 @@
                 "kilde": {
                   "type": "Søknad",
                   "id": "65b3a4cb-51c5-48d6-a7de-932d291fd811",
-                  "tidsstempel": "2018-03-17T00:00:00"
+                  "tidsstempel": [
+                    2018,
+                    3,
+                    17,
+                    0,
+                    0
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-03-17",
-                "tom": "2018-03-31",
+                "fom": [
+                  2018,
+                  3,
+                  17
+                ],
+                "tom": [
+                  2018,
+                  3,
+                  31
+                ],
                 "dato": null
               }
             ],
             "periode": {
-              "fom": "2018-01-01",
-              "tom": "2018-03-31"
+              "fom": [
+                2018,
+                1,
+                1
+              ],
+              "tom": [
+                2018,
+                3,
+                31
+              ]
             },
             "låstePerioder": [
               {
-                "fom": "2018-01-01",
-                "tom": "2018-01-16"
+                "fom": [
+                  2018,
+                  1,
+                  1
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  16
+                ]
               },
               {
-                "fom": "2018-01-17",
-                "tom": "2018-01-31"
+                "fom": [
+                  2018,
+                  1,
+                  17
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  31
+                ]
               },
               {
-                "fom": "2018-03-01",
-                "tom": "2018-03-19"
+                "fom": [
+                  2018,
+                  3,
+                  1
+                ],
+                "tom": [
+                  2018,
+                  3,
+                  19
+                ]
               }
             ]
           }
         },
         {
-          "tidsstempel": "2022-10-13T14:20:20.213513",
+          "tidsstempel": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            213513000
+          ],
           "id": "25763b0c-27f8-4adc-9579-8ffdfa9819e1",
           "hendelseId": "53b406f0-04ce-4f00-8995-318c0339237d",
           "hendelseSykdomstidslinje": {
@@ -133,19 +276,41 @@
                 "kilde": {
                   "type": "Søknad",
                   "id": "53b406f0-04ce-4f00-8995-318c0339237d",
-                  "tidsstempel": "2018-03-01T00:00:00"
+                  "tidsstempel": [
+                    2018,
+                    3,
+                    1,
+                    0,
+                    0
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-03-01",
-                "tom": "2018-03-16",
+                "fom": [
+                  2018,
+                  3,
+                  1
+                ],
+                "tom": [
+                  2018,
+                  3,
+                  16
+                ],
                 "dato": null
               }
             ],
             "periode": {
-              "fom": "2018-03-01",
-              "tom": "2018-03-16"
+              "fom": [
+                2018,
+                3,
+                1
+              ],
+              "tom": [
+                2018,
+                3,
+                16
+              ]
             },
             "låstePerioder": []
           },
@@ -156,13 +321,27 @@
                 "kilde": {
                   "type": "Søknad",
                   "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                  "tidsstempel": "2018-01-01T00:00:00"
+                  "tidsstempel": [
+                    2018,
+                    1,
+                    1,
+                    0,
+                    0
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-01-01",
-                "tom": "2018-01-16",
+                "fom": [
+                  2018,
+                  1,
+                  1
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  16
+                ],
                 "dato": null
               },
               {
@@ -170,13 +349,27 @@
                 "kilde": {
                   "type": "Søknad",
                   "id": "a9e56d46-bdbf-4085-b537-9f87bd4105b9",
-                  "tidsstempel": "2018-01-17T00:00:00"
+                  "tidsstempel": [
+                    2018,
+                    1,
+                    17,
+                    0,
+                    0
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-01-17",
-                "tom": "2018-01-31",
+                "fom": [
+                  2018,
+                  1,
+                  17
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  31
+                ],
                 "dato": null
               },
               {
@@ -184,30 +377,68 @@
                 "kilde": {
                   "type": "Søknad",
                   "id": "53b406f0-04ce-4f00-8995-318c0339237d",
-                  "tidsstempel": "2018-03-01T00:00:00"
+                  "tidsstempel": [
+                    2018,
+                    3,
+                    1,
+                    0,
+                    0
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-03-01",
-                "tom": "2018-03-16",
+                "fom": [
+                  2018,
+                  3,
+                  1
+                ],
+                "tom": [
+                  2018,
+                  3,
+                  16
+                ],
                 "dato": null
               }
             ],
             "periode": {
-              "fom": "2018-01-01",
-              "tom": "2018-03-16"
+              "fom": [
+                2018,
+                1,
+                1
+              ],
+              "tom": [
+                2018,
+                3,
+                16
+              ]
             },
             "låstePerioder": [
               {
-                "fom": "2018-01-17",
-                "tom": "2018-01-31"
+                "fom": [
+                  2018,
+                  1,
+                  17
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  31
+                ]
               }
             ]
           }
         },
         {
-          "tidsstempel": "2022-10-13T14:20:20.083639",
+          "tidsstempel": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            83639000
+          ],
           "id": "87c54591-a76e-40fc-b7c2-ce0a69dc1507",
           "hendelseId": "a9e56d46-bdbf-4085-b537-9f87bd4105b9",
           "hendelseSykdomstidslinje": {
@@ -217,19 +448,41 @@
                 "kilde": {
                   "type": "Søknad",
                   "id": "a9e56d46-bdbf-4085-b537-9f87bd4105b9",
-                  "tidsstempel": "2018-01-17T00:00:00"
+                  "tidsstempel": [
+                    2018,
+                    1,
+                    17,
+                    0,
+                    0
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-01-17",
-                "tom": "2018-01-31",
+                "fom": [
+                  2018,
+                  1,
+                  17
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  31
+                ],
                 "dato": null
               }
             ],
             "periode": {
-              "fom": "2018-01-17",
-              "tom": "2018-01-31"
+              "fom": [
+                2018,
+                1,
+                17
+              ],
+              "tom": [
+                2018,
+                1,
+                31
+              ]
             },
             "låstePerioder": []
           },
@@ -240,13 +493,27 @@
                 "kilde": {
                   "type": "Søknad",
                   "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                  "tidsstempel": "2018-01-01T00:00:00"
+                  "tidsstempel": [
+                    2018,
+                    1,
+                    1,
+                    0,
+                    0
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-01-01",
-                "tom": "2018-01-16",
+                "fom": [
+                  2018,
+                  1,
+                  1
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  16
+                ],
                 "dato": null
               },
               {
@@ -254,30 +521,68 @@
                 "kilde": {
                   "type": "Søknad",
                   "id": "a9e56d46-bdbf-4085-b537-9f87bd4105b9",
-                  "tidsstempel": "2018-01-17T00:00:00"
+                  "tidsstempel": [
+                    2018,
+                    1,
+                    17,
+                    0,
+                    0
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-01-17",
-                "tom": "2018-01-31",
+                "fom": [
+                  2018,
+                  1,
+                  17
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  31
+                ],
                 "dato": null
               }
             ],
             "periode": {
-              "fom": "2018-01-01",
-              "tom": "2018-01-31"
+              "fom": [
+                2018,
+                1,
+                1
+              ],
+              "tom": [
+                2018,
+                1,
+                31
+              ]
             },
             "låstePerioder": [
               {
-                "fom": "2018-01-17",
-                "tom": "2018-01-31"
+                "fom": [
+                  2018,
+                  1,
+                  17
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  31
+                ]
               }
             ]
           }
         },
         {
-          "tidsstempel": "2022-10-13T14:20:20.061154",
+          "tidsstempel": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            61154000
+          ],
           "id": "b2a40035-dd0b-41df-90f2-38a692dcd948",
           "hendelseId": "f0cf09a5-e1f5-4cf7-8198-87214242fe2d",
           "hendelseSykdomstidslinje": {
@@ -287,19 +592,43 @@
                 "kilde": {
                   "type": "Inntektsmelding",
                   "id": "f0cf09a5-e1f5-4cf7-8198-87214242fe2d",
-                  "tidsstempel": "2022-10-13T14:20:20.05841"
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    58410000
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-01-01",
-                "tom": "2018-01-16",
+                "fom": [
+                  2018,
+                  1,
+                  1
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  16
+                ],
                 "dato": null
               }
             ],
             "periode": {
-              "fom": "2018-01-01",
-              "tom": "2018-01-16"
+              "fom": [
+                2018,
+                1,
+                1
+              ],
+              "tom": [
+                2018,
+                1,
+                16
+              ]
             },
             "låstePerioder": []
           },
@@ -310,25 +639,55 @@
                 "kilde": {
                   "type": "Søknad",
                   "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                  "tidsstempel": "2018-01-01T00:00:00"
+                  "tidsstempel": [
+                    2018,
+                    1,
+                    1,
+                    0,
+                    0
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-01-01",
-                "tom": "2018-01-16",
+                "fom": [
+                  2018,
+                  1,
+                  1
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  16
+                ],
                 "dato": null
               }
             ],
             "periode": {
-              "fom": "2018-01-01",
-              "tom": "2018-01-16"
+              "fom": [
+                2018,
+                1,
+                1
+              ],
+              "tom": [
+                2018,
+                1,
+                16
+              ]
             },
             "låstePerioder": []
           }
         },
         {
-          "tidsstempel": "2022-10-13T14:20:20.036606",
+          "tidsstempel": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            36606000
+          ],
           "id": "380f3fc6-bb41-4653-b8e3-aa762dd3f3a9",
           "hendelseId": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
           "hendelseSykdomstidslinje": {
@@ -338,19 +697,41 @@
                 "kilde": {
                   "type": "Søknad",
                   "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                  "tidsstempel": "2018-01-01T00:00:00"
+                  "tidsstempel": [
+                    2018,
+                    1,
+                    1,
+                    0,
+                    0
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-01-01",
-                "tom": "2018-01-16",
+                "fom": [
+                  2018,
+                  1,
+                  1
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  16
+                ],
                 "dato": null
               }
             ],
             "periode": {
-              "fom": "2018-01-01",
-              "tom": "2018-01-16"
+              "fom": [
+                2018,
+                1,
+                1
+              ],
+              "tom": [
+                2018,
+                1,
+                16
+              ]
             },
             "låstePerioder": []
           },
@@ -361,51 +742,138 @@
                 "kilde": {
                   "type": "Søknad",
                   "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                  "tidsstempel": "2018-01-01T00:00:00"
+                  "tidsstempel": [
+                    2018,
+                    1,
+                    1,
+                    0,
+                    0
+                  ]
                 },
-                "grad": 100.0,
+                "grad": 1.0,
                 "other": null,
                 "melding": null,
-                "fom": "2018-01-01",
-                "tom": "2018-01-16",
+                "fom": [
+                  2018,
+                  1,
+                  1
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  16
+                ],
                 "dato": null
               }
             ],
             "periode": {
-              "fom": "2018-01-01",
-              "tom": "2018-01-16"
+              "fom": [
+                2018,
+                1,
+                1
+              ],
+              "tom": [
+                2018,
+                1,
+                16
+              ]
             },
             "låstePerioder": []
           }
         }
       ],
       "sykmeldingsperioder": [],
+      "arbeidsgiverperioder": [],
       "vedtaksperioder": [
         {
           "id": "24279c53-67fb-42fc-8b03-344dcca8e1a0",
           "tilstand": "AVSLUTTET_UTEN_UTBETALING",
-          "skjæringstidspunkt": "2018-01-01",
+          "skjæringstidspunkt": [
+            2018,
+            1,
+            1
+          ],
           "behandlinger": [
             {
               "id": "0c9af59a-d353-4123-a784-3945cd26721c",
               "tilstand": "AVSLUTTET_UTEN_VEDTAK",
               "vedtakFattet": null,
-              "avsluttet": "2022-10-13T14:20:20.07476",
+              "avsluttet": [
+                2022,
+                10,
+                13,
+                14,
+                20,
+                20,
+                74760000
+              ],
               "kilde": {
                 "meldingsreferanseId": "00000000-0000-0000-0000-000000000000",
-                "innsendt": "2022-10-13T14:20:20.032172",
-                "registrert": "2022-10-13T14:20:20.032172",
+                "innsendt": [
+                  2022,
+                  10,
+                  13,
+                  14,
+                  20,
+                  20,
+                  32172000
+                ],
+                "registrert": [
+                  2022,
+                  10,
+                  13,
+                  14,
+                  20,
+                  20,
+                  32172000
+                ],
                 "avsender": "SYSTEM"
               },
               "endringer": [
                 {
                   "id": "8ec3a0ff-715a-426b-96dc-2ff35abfb6f7",
-                  "tidsstempel": "2022-10-13T14:20:20.032172",
-                  "sykmeldingsperiodeFom": "2018-01-01",
-                  "sykmeldingsperiodeTom": "2018-01-16",
-                  "fom": "2018-01-01",
-                  "tom": "2018-01-16",
-                  "skjæringstidspunkt": "2018-01-01",
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    32172000
+                  ],
+                  "sykmeldingsperiodeFom": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "sykmeldingsperiodeTom": [
+                    2018,
+                    1,
+                    16
+                  ],
+                  "fom": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "tom": [
+                    2018,
+                    1,
+                    16
+                  ],
+                  "arbeidssituasjon": "ARBEIDSTAKER",
+                  "skjæringstidspunkt": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "skjæringstidspunkter": [
+                    [
+                      2018,
+                      1,
+                      1
+                    ]
+                  ],
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
                   "sykdomstidslinje": {
@@ -415,19 +883,41 @@
                         "kilde": {
                           "type": "Søknad",
                           "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                          "tidsstempel": "2018-01-01T00:00:00"
+                          "tidsstempel": [
+                            2018,
+                            1,
+                            1,
+                            0,
+                            0
+                          ]
                         },
-                        "grad": 100.0,
+                        "grad": 1.0,
                         "other": null,
                         "melding": null,
-                        "fom": "2018-01-01",
-                        "tom": "2018-01-16",
+                        "fom": [
+                          2018,
+                          1,
+                          1
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          16
+                        ],
                         "dato": null
                       }
                     ],
                     "periode": {
-                      "fom": "2018-01-01",
-                      "tom": "2018-01-16"
+                      "fom": [
+                        2018,
+                        1,
+                        1
+                      ],
+                      "tom": [
+                        2018,
+                        1,
+                        16
+                      ]
                     },
                     "låstePerioder": []
                   },
@@ -444,30 +934,83 @@
                     "dokumentId": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
                     "dokumenttype": "Søknad"
                   },
-                  "arbeidsgiverperioder": [],
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": false,
+                    "dager": []
+                  },
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
                   "maksdatoresultat": {
-                    "vurdertTilOgMed": "-999999999-01-01",
+                    "vurdertTilOgMed": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "bestemmelse": "IKKE_VURDERT",
-                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoTreårsvindu": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "startdatoSykepengerettighet": null,
                     "forbrukteDager": [],
                     "oppholdsdager": [],
                     "avslåtteDager": [],
-                    "maksdato": "-999999999-01-01",
-                    "gjenståendeDager": 0,
-                    "grunnlag": {
-                      "dager": []
-                    }
-                  }
+                    "maksdato": [
+                      -999999999,
+                      1,
+                      1
+                    ],
+                    "gjenståendeDager": 0
+                  },
+                  "inntektjusteringer": {},
+                  "faktaavklartInntekt": null,
+                  "ventetid": null
                 },
                 {
                   "id": "ddeef284-27a2-4c17-9b3a-4cf3069803da",
-                  "tidsstempel": "2022-10-13T14:20:20.060359",
-                  "sykmeldingsperiodeFom": "2018-01-01",
-                  "sykmeldingsperiodeTom": "2018-01-16",
-                  "fom": "2018-01-01",
-                  "tom": "2018-01-16",
-                  "skjæringstidspunkt": "2018-01-01",
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    60359000
+                  ],
+                  "sykmeldingsperiodeFom": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "sykmeldingsperiodeTom": [
+                    2018,
+                    1,
+                    16
+                  ],
+                  "fom": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "tom": [
+                    2018,
+                    1,
+                    16
+                  ],
+                  "arbeidssituasjon": "ARBEIDSTAKER",
+                  "skjæringstidspunkt": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "skjæringstidspunkter": [
+                    [
+                      2018,
+                      1,
+                      1
+                    ]
+                  ],
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
                   "sykdomstidslinje": {
@@ -477,19 +1020,41 @@
                         "kilde": {
                           "type": "Søknad",
                           "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                          "tidsstempel": "2018-01-01T00:00:00"
+                          "tidsstempel": [
+                            2018,
+                            1,
+                            1,
+                            0,
+                            0
+                          ]
                         },
-                        "grad": 100.0,
+                        "grad": 1.0,
                         "other": null,
                         "melding": null,
-                        "fom": "2018-01-01",
-                        "tom": "2018-01-16",
+                        "fom": [
+                          2018,
+                          1,
+                          1
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          16
+                        ],
                         "dato": null
                       }
                     ],
                     "periode": {
-                      "fom": "2018-01-01",
-                      "tom": "2018-01-16"
+                      "fom": [
+                        2018,
+                        1,
+                        1
+                      ],
+                      "tom": [
+                        2018,
+                        1,
+                        16
+                      ]
                     },
                     "låstePerioder": []
                   },
@@ -506,30 +1071,83 @@
                     "dokumentId": "f0cf09a5-e1f5-4cf7-8198-87214242fe2d",
                     "dokumenttype": "InntektsmeldingDager"
                   },
-                  "arbeidsgiverperioder": [],
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": false,
+                    "dager": []
+                  },
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
                   "maksdatoresultat": {
-                    "vurdertTilOgMed": "-999999999-01-01",
+                    "vurdertTilOgMed": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "bestemmelse": "IKKE_VURDERT",
-                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoTreårsvindu": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "startdatoSykepengerettighet": null,
                     "forbrukteDager": [],
                     "oppholdsdager": [],
                     "avslåtteDager": [],
-                    "maksdato": "-999999999-01-01",
-                    "gjenståendeDager": 0,
-                    "grunnlag": {
-                      "dager": []
-                    }
-                  }
+                    "maksdato": [
+                      -999999999,
+                      1,
+                      1
+                    ],
+                    "gjenståendeDager": 0
+                  },
+                  "inntektjusteringer": {},
+                  "faktaavklartInntekt": null,
+                  "ventetid": null
                 },
                 {
                   "id": "b6f5cb7e-6a4b-4e8d-bccf-bfc9c5f6569a",
-                  "tidsstempel": "2022-10-13T14:20:20.060359",
-                  "sykmeldingsperiodeFom": "2018-01-01",
-                  "sykmeldingsperiodeTom": "2018-01-16",
-                  "fom": "2018-01-01",
-                  "tom": "2018-01-16",
-                  "skjæringstidspunkt": "2018-01-01",
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    60359000
+                  ],
+                  "sykmeldingsperiodeFom": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "sykmeldingsperiodeTom": [
+                    2018,
+                    1,
+                    16
+                  ],
+                  "fom": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "tom": [
+                    2018,
+                    1,
+                    16
+                  ],
+                  "arbeidssituasjon": "ARBEIDSTAKER",
+                  "skjæringstidspunkt": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "skjæringstidspunkter": [
+                    [
+                      2018,
+                      1,
+                      1
+                    ]
+                  ],
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
                   "sykdomstidslinje": {
@@ -539,19 +1157,41 @@
                         "kilde": {
                           "type": "Søknad",
                           "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                          "tidsstempel": "2018-01-01T00:00:00"
+                          "tidsstempel": [
+                            2018,
+                            1,
+                            1,
+                            0,
+                            0
+                          ]
                         },
-                        "grad": 100.0,
+                        "grad": 1.0,
                         "other": null,
                         "melding": null,
-                        "fom": "2018-01-01",
-                        "tom": "2018-01-16",
+                        "fom": [
+                          2018,
+                          1,
+                          1
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          16
+                        ],
                         "dato": null
                       }
                     ],
                     "periode": {
-                      "fom": "2018-01-01",
-                      "tom": "2018-01-16"
+                      "fom": [
+                        2018,
+                        1,
+                        1
+                      ],
+                      "tom": [
+                        2018,
+                        1,
+                        16
+                      ]
                     },
                     "låstePerioder": []
                   },
@@ -568,30 +1208,83 @@
                     "dokumentId": "f0cf09a5-e1f5-4cf7-8198-87214242fe2d",
                     "dokumenttype": "InntektsmeldingInntekt"
                   },
-                  "arbeidsgiverperioder": [],
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": false,
+                    "dager": []
+                  },
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
                   "maksdatoresultat": {
-                    "vurdertTilOgMed": "-999999999-01-01",
+                    "vurdertTilOgMed": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "bestemmelse": "IKKE_VURDERT",
-                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoTreårsvindu": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "startdatoSykepengerettighet": null,
                     "forbrukteDager": [],
                     "oppholdsdager": [],
                     "avslåtteDager": [],
-                    "maksdato": "-999999999-01-01",
-                    "gjenståendeDager": 0,
-                    "grunnlag": {
-                      "dager": []
-                    }
-                  }
+                    "maksdato": [
+                      -999999999,
+                      1,
+                      1
+                    ],
+                    "gjenståendeDager": 0
+                  },
+                  "inntektjusteringer": {},
+                  "faktaavklartInntekt": null,
+                  "ventetid": null
                 },
                 {
                   "id": "a1c03eb1-7835-4e85-b8e4-8f2f03ee2359",
-                  "tidsstempel": "2022-10-13T14:20:20.106258",
-                  "sykmeldingsperiodeFom": "2018-01-01",
-                  "sykmeldingsperiodeTom": "2018-01-16",
-                  "fom": "2018-01-01",
-                  "tom": "2018-01-16",
-                  "skjæringstidspunkt": "2018-01-01",
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    106258000
+                  ],
+                  "sykmeldingsperiodeFom": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "sykmeldingsperiodeTom": [
+                    2018,
+                    1,
+                    16
+                  ],
+                  "fom": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "tom": [
+                    2018,
+                    1,
+                    16
+                  ],
+                  "arbeidssituasjon": "ARBEIDSTAKER",
+                  "skjæringstidspunkt": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "skjæringstidspunkter": [
+                    [
+                      2018,
+                      1,
+                      1
+                    ]
+                  ],
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
                   "sykdomstidslinje": {
@@ -601,19 +1294,41 @@
                         "kilde": {
                           "type": "Søknad",
                           "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                          "tidsstempel": "2018-01-01T00:00:00"
+                          "tidsstempel": [
+                            2018,
+                            1,
+                            1,
+                            0,
+                            0
+                          ]
                         },
-                        "grad": 100.0,
+                        "grad": 1.0,
                         "other": null,
                         "melding": null,
-                        "fom": "2018-01-01",
-                        "tom": "2018-01-16",
+                        "fom": [
+                          2018,
+                          1,
+                          1
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          16
+                        ],
                         "dato": null
                       }
                     ],
                     "periode": {
-                      "fom": "2018-01-01",
-                      "tom": "2018-01-16"
+                      "fom": [
+                        2018,
+                        1,
+                        1
+                      ],
+                      "tom": [
+                        2018,
+                        1,
+                        16
+                      ]
                     },
                     "låstePerioder": []
                   },
@@ -630,30 +1345,83 @@
                     "dokumentId": "dd5aba9b-c977-4105-b396-cbc146144523",
                     "dokumenttype": "InntektsmeldingDager"
                   },
-                  "arbeidsgiverperioder": [],
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": false,
+                    "dager": []
+                  },
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
                   "maksdatoresultat": {
-                    "vurdertTilOgMed": "-999999999-01-01",
+                    "vurdertTilOgMed": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "bestemmelse": "IKKE_VURDERT",
-                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoTreårsvindu": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "startdatoSykepengerettighet": null,
                     "forbrukteDager": [],
                     "oppholdsdager": [],
                     "avslåtteDager": [],
-                    "maksdato": "-999999999-01-01",
-                    "gjenståendeDager": 0,
-                    "grunnlag": {
-                      "dager": []
-                    }
-                  }
+                    "maksdato": [
+                      -999999999,
+                      1,
+                      1
+                    ],
+                    "gjenståendeDager": 0
+                  },
+                  "inntektjusteringer": {},
+                  "faktaavklartInntekt": null,
+                  "ventetid": null
                 },
                 {
                   "id": "345fc9c1-2206-4c44-abfb-72b997c1dd4d",
-                  "tidsstempel": "2022-10-13T14:20:20.106258",
-                  "sykmeldingsperiodeFom": "2018-01-01",
-                  "sykmeldingsperiodeTom": "2018-01-16",
-                  "fom": "2018-01-01",
-                  "tom": "2018-01-16",
-                  "skjæringstidspunkt": "2018-01-01",
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    106258000
+                  ],
+                  "sykmeldingsperiodeFom": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "sykmeldingsperiodeTom": [
+                    2018,
+                    1,
+                    16
+                  ],
+                  "fom": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "tom": [
+                    2018,
+                    1,
+                    16
+                  ],
+                  "arbeidssituasjon": "ARBEIDSTAKER",
+                  "skjæringstidspunkt": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "skjæringstidspunkter": [
+                    [
+                      2018,
+                      1,
+                      1
+                    ]
+                  ],
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
                   "sykdomstidslinje": {
@@ -663,19 +1431,41 @@
                         "kilde": {
                           "type": "Søknad",
                           "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                          "tidsstempel": "2018-01-01T00:00:00"
+                          "tidsstempel": [
+                            2018,
+                            1,
+                            1,
+                            0,
+                            0
+                          ]
                         },
-                        "grad": 100.0,
+                        "grad": 1.0,
                         "other": null,
                         "melding": null,
-                        "fom": "2018-01-01",
-                        "tom": "2018-01-16",
+                        "fom": [
+                          2018,
+                          1,
+                          1
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          16
+                        ],
                         "dato": null
                       }
                     ],
                     "periode": {
-                      "fom": "2018-01-01",
-                      "tom": "2018-01-16"
+                      "fom": [
+                        2018,
+                        1,
+                        1
+                      ],
+                      "tom": [
+                        2018,
+                        1,
+                        16
+                      ]
                     },
                     "låstePerioder": []
                   },
@@ -692,54 +1482,158 @@
                     "dokumentId": "dd5aba9b-c977-4105-b396-cbc146144523",
                     "dokumenttype": "InntektsmeldingInntekt"
                   },
-                  "arbeidsgiverperioder": [],
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": false,
+                    "dager": []
+                  },
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
                   "maksdatoresultat": {
-                    "vurdertTilOgMed": "-999999999-01-01",
+                    "vurdertTilOgMed": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "bestemmelse": "IKKE_VURDERT",
-                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoTreårsvindu": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "startdatoSykepengerettighet": null,
                     "forbrukteDager": [],
                     "oppholdsdager": [],
                     "avslåtteDager": [],
-                    "maksdato": "-999999999-01-01",
-                    "gjenståendeDager": 0,
-                    "grunnlag": {
-                      "dager": []
-                    }
-                  }
+                    "maksdato": [
+                      -999999999,
+                      1,
+                      1
+                    ],
+                    "gjenståendeDager": 0
+                  },
+                  "inntektjusteringer": {},
+                  "faktaavklartInntekt": null,
+                  "ventetid": null
                 }
               ]
             }
           ],
-          "opprettet": "2022-10-13T14:20:20.032172",
-          "oppdatert": "2022-10-13T14:20:20.07476",
-          "egenmeldingsperioder": []
+          "opprettet": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            32172000
+          ],
+          "oppdatert": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            74760000
+          ]
         },
         {
           "id": "a36d3e1a-dc0f-41af-b957-16b390273c6b",
           "tilstand": "AVSLUTTET",
-          "skjæringstidspunkt": "2018-01-01",
+          "skjæringstidspunkt": [
+            2018,
+            1,
+            1
+          ],
           "behandlinger": [
             {
               "id": "e27a2a80-f66f-4134-b463-85bbb873af4a",
               "tilstand": "VEDTAK_IVERKSATT",
-              "vedtakFattet": "2022-10-13T14:20:20.192211",
-              "avsluttet": "2022-10-13T14:20:20.204957",
+              "vedtakFattet": [
+                2022,
+                10,
+                13,
+                14,
+                20,
+                20,
+                192211000
+              ],
+              "avsluttet": [
+                2022,
+                10,
+                13,
+                14,
+                20,
+                20,
+                204957000
+              ],
               "kilde": {
                 "meldingsreferanseId": "00000000-0000-0000-0000-000000000000",
-                "innsendt": "2022-10-13T14:20:20.08307",
-                "registrert": "2022-10-13T14:20:20.08307",
+                "innsendt": [
+                  2022,
+                  10,
+                  13,
+                  14,
+                  20,
+                  20,
+                  83070000
+                ],
+                "registrert": [
+                  2022,
+                  10,
+                  13,
+                  14,
+                  20,
+                  20,
+                  83070000
+                ],
                 "avsender": "SYSTEM"
               },
               "endringer": [
                 {
                   "id": "4fc7a57b-227d-4aea-a138-e3de3d19913f",
-                  "tidsstempel": "2022-10-13T14:20:20.08307",
-                  "sykmeldingsperiodeFom": "2018-01-17",
-                  "sykmeldingsperiodeTom": "2018-01-31",
-                  "fom": "2018-01-17",
-                  "tom": "2018-01-31",
-                  "skjæringstidspunkt": "2018-01-01",
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    83070000
+                  ],
+                  "sykmeldingsperiodeFom": [
+                    2018,
+                    1,
+                    17
+                  ],
+                  "sykmeldingsperiodeTom": [
+                    2018,
+                    1,
+                    31
+                  ],
+                  "fom": [
+                    2018,
+                    1,
+                    17
+                  ],
+                  "tom": [
+                    2018,
+                    1,
+                    31
+                  ],
+                  "arbeidssituasjon": "ARBEIDSTAKER",
+                  "skjæringstidspunkt": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "skjæringstidspunkter": [
+                    [
+                      2018,
+                      1,
+                      1
+                    ]
+                  ],
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
                   "sykdomstidslinje": {
@@ -749,19 +1643,41 @@
                         "kilde": {
                           "type": "Søknad",
                           "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                          "tidsstempel": "2018-01-01T00:00:00"
+                          "tidsstempel": [
+                            2018,
+                            1,
+                            1,
+                            0,
+                            0
+                          ]
                         },
-                        "grad": 100.0,
+                        "grad": 1.0,
                         "other": null,
                         "melding": null,
-                        "fom": "2018-01-17",
-                        "tom": "2018-01-31",
+                        "fom": [
+                          2018,
+                          1,
+                          17
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          31
+                        ],
                         "dato": null
                       }
                     ],
                     "periode": {
-                      "fom": "2018-01-17",
-                      "tom": "2018-01-31"
+                      "fom": [
+                        2018,
+                        1,
+                        17
+                      ],
+                      "tom": [
+                        2018,
+                        1,
+                        31
+                      ]
                     },
                     "låstePerioder": []
                   },
@@ -778,30 +1694,83 @@
                     "dokumentId": "f0cf09a5-e1f5-4cf7-8198-87214242fe2d",
                     "dokumenttype": "InntektsmeldingDager"
                   },
-                  "arbeidsgiverperioder": [],
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": true,
+                    "dager": []
+                  },
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
                   "maksdatoresultat": {
-                    "vurdertTilOgMed": "-999999999-01-01",
+                    "vurdertTilOgMed": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "bestemmelse": "IKKE_VURDERT",
-                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoTreårsvindu": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "startdatoSykepengerettighet": null,
                     "forbrukteDager": [],
                     "oppholdsdager": [],
                     "avslåtteDager": [],
-                    "maksdato": "-999999999-01-01",
-                    "gjenståendeDager": 0,
-                    "grunnlag": {
-                      "dager": []
-                    }
-                  }
+                    "maksdato": [
+                      -999999999,
+                      1,
+                      1
+                    ],
+                    "gjenståendeDager": 0
+                  },
+                  "inntektjusteringer": {},
+                  "faktaavklartInntekt": null,
+                  "ventetid": null
                 },
                 {
                   "id": "4c63ef03-d5c0-457a-857b-9245cfcca479",
-                  "tidsstempel": "2022-10-13T14:20:20.08307",
-                  "sykmeldingsperiodeFom": "2018-01-17",
-                  "sykmeldingsperiodeTom": "2018-01-31",
-                  "fom": "2018-01-17",
-                  "tom": "2018-01-31",
-                  "skjæringstidspunkt": "2018-01-01",
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    83070000
+                  ],
+                  "sykmeldingsperiodeFom": [
+                    2018,
+                    1,
+                    17
+                  ],
+                  "sykmeldingsperiodeTom": [
+                    2018,
+                    1,
+                    31
+                  ],
+                  "fom": [
+                    2018,
+                    1,
+                    17
+                  ],
+                  "tom": [
+                    2018,
+                    1,
+                    31
+                  ],
+                  "arbeidssituasjon": "ARBEIDSTAKER",
+                  "skjæringstidspunkt": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "skjæringstidspunkter": [
+                    [
+                      2018,
+                      1,
+                      1
+                    ]
+                  ],
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
                   "sykdomstidslinje": {
@@ -811,19 +1780,41 @@
                         "kilde": {
                           "type": "Søknad",
                           "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                          "tidsstempel": "2018-01-01T00:00:00"
+                          "tidsstempel": [
+                            2018,
+                            1,
+                            1,
+                            0,
+                            0
+                          ]
                         },
-                        "grad": 100.0,
+                        "grad": 1.0,
                         "other": null,
                         "melding": null,
-                        "fom": "2018-01-17",
-                        "tom": "2018-01-31",
+                        "fom": [
+                          2018,
+                          1,
+                          17
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          31
+                        ],
                         "dato": null
                       }
                     ],
                     "periode": {
-                      "fom": "2018-01-17",
-                      "tom": "2018-01-31"
+                      "fom": [
+                        2018,
+                        1,
+                        17
+                      ],
+                      "tom": [
+                        2018,
+                        1,
+                        31
+                      ]
                     },
                     "låstePerioder": []
                   },
@@ -840,30 +1831,83 @@
                     "dokumentId": "f0cf09a5-e1f5-4cf7-8198-87214242fe2d",
                     "dokumenttype": "InntektsmeldingInntekt"
                   },
-                  "arbeidsgiverperioder": [],
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": true,
+                    "dager": []
+                  },
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
                   "maksdatoresultat": {
-                    "vurdertTilOgMed": "-999999999-01-01",
+                    "vurdertTilOgMed": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "bestemmelse": "IKKE_VURDERT",
-                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoTreårsvindu": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "startdatoSykepengerettighet": null,
                     "forbrukteDager": [],
                     "oppholdsdager": [],
                     "avslåtteDager": [],
-                    "maksdato": "-999999999-01-01",
-                    "gjenståendeDager": 0,
-                    "grunnlag": {
-                      "dager": []
-                    }
-                  }
+                    "maksdato": [
+                      -999999999,
+                      1,
+                      1
+                    ],
+                    "gjenståendeDager": 0
+                  },
+                  "inntektjusteringer": {},
+                  "faktaavklartInntekt": null,
+                  "ventetid": null
                 },
                 {
                   "id": "3f97991a-3aff-499c-b69e-62daaeb585d8",
-                  "tidsstempel": "2022-10-13T14:20:20.083639",
-                  "sykmeldingsperiodeFom": "2018-01-17",
-                  "sykmeldingsperiodeTom": "2018-01-31",
-                  "fom": "2018-01-17",
-                  "tom": "2018-01-31",
-                  "skjæringstidspunkt": "2018-01-01",
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    83639000
+                  ],
+                  "sykmeldingsperiodeFom": [
+                    2018,
+                    1,
+                    17
+                  ],
+                  "sykmeldingsperiodeTom": [
+                    2018,
+                    1,
+                    31
+                  ],
+                  "fom": [
+                    2018,
+                    1,
+                    17
+                  ],
+                  "tom": [
+                    2018,
+                    1,
+                    31
+                  ],
+                  "arbeidssituasjon": "ARBEIDSTAKER",
+                  "skjæringstidspunkt": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "skjæringstidspunkter": [
+                    [
+                      2018,
+                      1,
+                      1
+                    ]
+                  ],
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
                   "sykdomstidslinje": {
@@ -873,19 +1917,41 @@
                         "kilde": {
                           "type": "Søknad",
                           "id": "a9e56d46-bdbf-4085-b537-9f87bd4105b9",
-                          "tidsstempel": "2018-01-17T00:00:00"
+                          "tidsstempel": [
+                            2018,
+                            1,
+                            17,
+                            0,
+                            0
+                          ]
                         },
-                        "grad": 100.0,
+                        "grad": 1.0,
                         "other": null,
                         "melding": null,
-                        "fom": "2018-01-17",
-                        "tom": "2018-01-31",
+                        "fom": [
+                          2018,
+                          1,
+                          17
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          31
+                        ],
                         "dato": null
                       }
                     ],
                     "periode": {
-                      "fom": "2018-01-17",
-                      "tom": "2018-01-31"
+                      "fom": [
+                        2018,
+                        1,
+                        17
+                      ],
+                      "tom": [
+                        2018,
+                        1,
+                        31
+                      ]
                     },
                     "låstePerioder": []
                   },
@@ -902,30 +1968,83 @@
                     "dokumentId": "a9e56d46-bdbf-4085-b537-9f87bd4105b9",
                     "dokumenttype": "Søknad"
                   },
-                  "arbeidsgiverperioder": [],
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": true,
+                    "dager": []
+                  },
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
                   "maksdatoresultat": {
-                    "vurdertTilOgMed": "-999999999-01-01",
+                    "vurdertTilOgMed": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "bestemmelse": "IKKE_VURDERT",
-                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoTreårsvindu": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "startdatoSykepengerettighet": null,
                     "forbrukteDager": [],
                     "oppholdsdager": [],
                     "avslåtteDager": [],
-                    "maksdato": "-999999999-01-01",
-                    "gjenståendeDager": 0,
-                    "grunnlag": {
-                      "dager": []
-                    }
-                  }
+                    "maksdato": [
+                      -999999999,
+                      1,
+                      1
+                    ],
+                    "gjenståendeDager": 0
+                  },
+                  "inntektjusteringer": {},
+                  "faktaavklartInntekt": null,
+                  "ventetid": null
                 },
                 {
                   "id": "8415699c-e883-4e95-80c7-d70d74d7cfaa",
-                  "tidsstempel": "2022-10-13T14:20:20.106258",
-                  "sykmeldingsperiodeFom": "2018-01-17",
-                  "sykmeldingsperiodeTom": "2018-01-31",
-                  "fom": "2018-01-17",
-                  "tom": "2018-01-31",
-                  "skjæringstidspunkt": "2018-01-01",
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    106258000
+                  ],
+                  "sykmeldingsperiodeFom": [
+                    2018,
+                    1,
+                    17
+                  ],
+                  "sykmeldingsperiodeTom": [
+                    2018,
+                    1,
+                    31
+                  ],
+                  "fom": [
+                    2018,
+                    1,
+                    17
+                  ],
+                  "tom": [
+                    2018,
+                    1,
+                    31
+                  ],
+                  "arbeidssituasjon": "ARBEIDSTAKER",
+                  "skjæringstidspunkt": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "skjæringstidspunkter": [
+                    [
+                      2018,
+                      1,
+                      1
+                    ]
+                  ],
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
                   "sykdomstidslinje": {
@@ -935,19 +2054,41 @@
                         "kilde": {
                           "type": "Søknad",
                           "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                          "tidsstempel": "2018-01-01T00:00:00"
+                          "tidsstempel": [
+                            2018,
+                            1,
+                            1,
+                            0,
+                            0
+                          ]
                         },
-                        "grad": 100.0,
+                        "grad": 1.0,
                         "other": null,
                         "melding": null,
-                        "fom": "2018-01-17",
-                        "tom": "2018-01-31",
+                        "fom": [
+                          2018,
+                          1,
+                          17
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          31
+                        ],
                         "dato": null
                       }
                     ],
                     "periode": {
-                      "fom": "2018-01-17",
-                      "tom": "2018-01-31"
+                      "fom": [
+                        2018,
+                        1,
+                        17
+                      ],
+                      "tom": [
+                        2018,
+                        1,
+                        31
+                      ]
                     },
                     "låstePerioder": []
                   },
@@ -964,30 +2105,83 @@
                     "dokumentId": "dd5aba9b-c977-4105-b396-cbc146144523",
                     "dokumenttype": "InntektsmeldingDager"
                   },
-                  "arbeidsgiverperioder": [],
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": true,
+                    "dager": []
+                  },
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
                   "maksdatoresultat": {
-                    "vurdertTilOgMed": "-999999999-01-01",
+                    "vurdertTilOgMed": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "bestemmelse": "IKKE_VURDERT",
-                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoTreårsvindu": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "startdatoSykepengerettighet": null,
                     "forbrukteDager": [],
                     "oppholdsdager": [],
                     "avslåtteDager": [],
-                    "maksdato": "-999999999-01-01",
-                    "gjenståendeDager": 0,
-                    "grunnlag": {
-                      "dager": []
-                    }
-                  }
+                    "maksdato": [
+                      -999999999,
+                      1,
+                      1
+                    ],
+                    "gjenståendeDager": 0
+                  },
+                  "inntektjusteringer": {},
+                  "faktaavklartInntekt": null,
+                  "ventetid": null
                 },
                 {
                   "id": "278bb166-210e-47a6-9260-826c0ab42913",
-                  "tidsstempel": "2022-10-13T14:20:20.106258",
-                  "sykmeldingsperiodeFom": "2018-01-17",
-                  "sykmeldingsperiodeTom": "2018-01-31",
-                  "fom": "2018-01-17",
-                  "tom": "2018-01-31",
-                  "skjæringstidspunkt": "2018-01-01",
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    106258000
+                  ],
+                  "sykmeldingsperiodeFom": [
+                    2018,
+                    1,
+                    17
+                  ],
+                  "sykmeldingsperiodeTom": [
+                    2018,
+                    1,
+                    31
+                  ],
+                  "fom": [
+                    2018,
+                    1,
+                    17
+                  ],
+                  "tom": [
+                    2018,
+                    1,
+                    31
+                  ],
+                  "arbeidssituasjon": "ARBEIDSTAKER",
+                  "skjæringstidspunkt": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "skjæringstidspunkter": [
+                    [
+                      2018,
+                      1,
+                      1
+                    ]
+                  ],
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
                   "sykdomstidslinje": {
@@ -997,19 +2191,41 @@
                         "kilde": {
                           "type": "Søknad",
                           "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                          "tidsstempel": "2018-01-01T00:00:00"
+                          "tidsstempel": [
+                            2018,
+                            1,
+                            1,
+                            0,
+                            0
+                          ]
                         },
-                        "grad": 100.0,
+                        "grad": 1.0,
                         "other": null,
                         "melding": null,
-                        "fom": "2018-01-17",
-                        "tom": "2018-01-31",
+                        "fom": [
+                          2018,
+                          1,
+                          17
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          31
+                        ],
                         "dato": null
                       }
                     ],
                     "periode": {
-                      "fom": "2018-01-17",
-                      "tom": "2018-01-31"
+                      "fom": [
+                        2018,
+                        1,
+                        17
+                      ],
+                      "tom": [
+                        2018,
+                        1,
+                        31
+                      ]
                     },
                     "låstePerioder": []
                   },
@@ -1026,30 +2242,83 @@
                     "dokumentId": "dd5aba9b-c977-4105-b396-cbc146144523",
                     "dokumenttype": "InntektsmeldingInntekt"
                   },
-                  "arbeidsgiverperioder": [],
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": true,
+                    "dager": []
+                  },
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
                   "maksdatoresultat": {
-                    "vurdertTilOgMed": "-999999999-01-01",
+                    "vurdertTilOgMed": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "bestemmelse": "IKKE_VURDERT",
-                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoTreårsvindu": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "startdatoSykepengerettighet": null,
                     "forbrukteDager": [],
                     "oppholdsdager": [],
                     "avslåtteDager": [],
-                    "maksdato": "-999999999-01-01",
-                    "gjenståendeDager": 0,
-                    "grunnlag": {
-                      "dager": []
-                    }
-                  }
+                    "maksdato": [
+                      -999999999,
+                      1,
+                      1
+                    ],
+                    "gjenståendeDager": 0
+                  },
+                  "inntektjusteringer": {},
+                  "faktaavklartInntekt": null,
+                  "ventetid": null
                 },
                 {
                   "id": "278bb166-210e-47a6-9260-826c0ab42913",
-                  "tidsstempel": "2022-10-13T14:20:20.176295",
-                  "sykmeldingsperiodeFom": "2018-01-17",
-                  "sykmeldingsperiodeTom": "2018-01-31",
-                  "fom": "2018-01-17",
-                  "tom": "2018-01-31",
-                  "skjæringstidspunkt": "2018-01-01",
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    176295000
+                  ],
+                  "sykmeldingsperiodeFom": [
+                    2018,
+                    1,
+                    17
+                  ],
+                  "sykmeldingsperiodeTom": [
+                    2018,
+                    1,
+                    31
+                  ],
+                  "fom": [
+                    2018,
+                    1,
+                    17
+                  ],
+                  "tom": [
+                    2018,
+                    1,
+                    31
+                  ],
+                  "arbeidssituasjon": "ARBEIDSTAKER",
+                  "skjæringstidspunkt": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "skjæringstidspunkter": [
+                    [
+                      2018,
+                      1,
+                      1
+                    ]
+                  ],
                   "utbetalingId": "8a185ce1-349a-40f5-a891-d35cbdaf9386",
                   "vilkårsgrunnlagId": "23ea1cac-8ff4-4a33-bf02-adcf362613a0",
                   "sykdomstidslinje": {
@@ -1059,19 +2328,41 @@
                         "kilde": {
                           "type": "Søknad",
                           "id": "4d7148fc-39d0-4e19-840a-b2f5792c1a95",
-                          "tidsstempel": "2018-01-01T00:00:00"
+                          "tidsstempel": [
+                            2018,
+                            1,
+                            1,
+                            0,
+                            0
+                          ]
                         },
-                        "grad": 100.0,
+                        "grad": 1.0,
                         "other": null,
                         "melding": null,
-                        "fom": "2018-01-17",
-                        "tom": "2018-01-31",
+                        "fom": [
+                          2018,
+                          1,
+                          17
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          31
+                        ],
                         "dato": null
                       }
                     ],
                     "periode": {
-                      "fom": "2018-01-17",
-                      "tom": "2018-01-31"
+                      "fom": [
+                        2018,
+                        1,
+                        17
+                      ],
+                      "tom": [
+                        2018,
+                        1,
+                        31
+                      ]
                     },
                     "låstePerioder": []
                   },
@@ -1080,104 +2371,160 @@
                       {
                         "type": "NavDag",
                         "aktuellDagsinntekt": 1430.7692307692307,
-                        "beregningsgrunnlag": 1430.7692307692307,
-                        "dekningsgrunnlag": 1430.7692307692307,
-                        "grunnbeløpgrense": 561804.0,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
                         "begrunnelser": null,
-                        "grad": 100.0,
-                        "totalGrad": 100.0,
-                        "utbetalingsgrad": 100.0,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
                         "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
                         "arbeidsgiverbeløp": 1431.0,
                         "personbeløp": 0.0,
-                        "er6GBegrenset": false,
+                        "reservertArbeidsgiverbeløp": 1431.0,
+                        "reservertPersonbeløp": 0.0,
                         "dato": null,
-                        "fom": "2018-01-17",
-                        "tom": "2018-01-19"
+                        "fom": [
+                          2018,
+                          1,
+                          17
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          19
+                        ]
                       },
                       {
                         "type": "NavHelgDag",
                         "aktuellDagsinntekt": 0.0,
-                        "beregningsgrunnlag": 0.0,
-                        "dekningsgrunnlag": 0.0,
-                        "grunnbeløpgrense": 561804.0,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
                         "begrunnelser": null,
-                        "grad": 100.0,
-                        "totalGrad": 100.0,
-                        "utbetalingsgrad": 100.0,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
                         "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
                         "arbeidsgiverbeløp": 0.0,
                         "personbeløp": 0.0,
-                        "er6GBegrenset": false,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
                         "dato": null,
-                        "fom": "2018-01-20",
-                        "tom": "2018-01-21"
+                        "fom": [
+                          2018,
+                          1,
+                          20
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          21
+                        ]
                       },
                       {
                         "type": "NavDag",
                         "aktuellDagsinntekt": 1430.7692307692307,
-                        "beregningsgrunnlag": 1430.7692307692307,
-                        "dekningsgrunnlag": 1430.7692307692307,
-                        "grunnbeløpgrense": 561804.0,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
                         "begrunnelser": null,
-                        "grad": 100.0,
-                        "totalGrad": 100.0,
-                        "utbetalingsgrad": 100.0,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
                         "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
                         "arbeidsgiverbeløp": 1431.0,
                         "personbeløp": 0.0,
-                        "er6GBegrenset": false,
+                        "reservertArbeidsgiverbeløp": 1431.0,
+                        "reservertPersonbeløp": 0.0,
                         "dato": null,
-                        "fom": "2018-01-22",
-                        "tom": "2018-01-26"
+                        "fom": [
+                          2018,
+                          1,
+                          22
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          26
+                        ]
                       },
                       {
                         "type": "NavHelgDag",
                         "aktuellDagsinntekt": 0.0,
-                        "beregningsgrunnlag": 0.0,
-                        "dekningsgrunnlag": 0.0,
-                        "grunnbeløpgrense": 561804.0,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
                         "begrunnelser": null,
-                        "grad": 100.0,
-                        "totalGrad": 100.0,
-                        "utbetalingsgrad": 100.0,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
                         "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
                         "arbeidsgiverbeløp": 0.0,
                         "personbeløp": 0.0,
-                        "er6GBegrenset": false,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
                         "dato": null,
-                        "fom": "2018-01-27",
-                        "tom": "2018-01-28"
+                        "fom": [
+                          2018,
+                          1,
+                          27
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          28
+                        ]
                       },
                       {
                         "type": "NavDag",
                         "aktuellDagsinntekt": 1430.7692307692307,
-                        "beregningsgrunnlag": 1430.7692307692307,
-                        "dekningsgrunnlag": 1430.7692307692307,
-                        "grunnbeløpgrense": 561804.0,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
                         "begrunnelser": null,
-                        "grad": 100.0,
-                        "totalGrad": 100.0,
-                        "utbetalingsgrad": 100.0,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
                         "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
                         "arbeidsgiverbeløp": 1431.0,
                         "personbeløp": 0.0,
-                        "er6GBegrenset": false,
+                        "reservertArbeidsgiverbeløp": 1431.0,
+                        "reservertPersonbeløp": 0.0,
                         "dato": null,
-                        "fom": "2018-01-29",
-                        "tom": "2018-01-31"
+                        "fom": [
+                          2018,
+                          1,
+                          29
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          31
+                        ]
                       }
                     ]
                   },
                   "refusjonstidslinje": {
                     "perioder": [
                       {
-                        "fom": "2018-01-17",
-                        "tom": "2018-01-31",
+                        "fom": [
+                          2018,
+                          1,
+                          17
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          31
+                        ],
                         "dagligBeløp": 1430.7692307692307,
                         "meldingsreferanseId": "dd5aba9b-c977-4105-b396-cbc146144523",
                         "avsender": "ARBEIDSGIVER",
-                        "tidsstempel": "2022-10-13T14:20:20.065167"
+                        "tidsstempel": [
+                          2022,
+                          10,
+                          13,
+                          14,
+                          20,
+                          20,
+                          65167000
+                        ]
                       }
                     ]
                   },
@@ -1188,67 +2535,191 @@
                     "dokumentId": "dd5aba9b-c977-4105-b396-cbc146144523",
                     "dokumenttype": "InntektsmeldingInntekt"
                   },
-                  "arbeidsgiverperioder": [],
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": true,
+                    "dager": []
+                  },
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
                   "maksdatoresultat": {
-                    "vurdertTilOgMed": "2018-01-31",
+                    "vurdertTilOgMed": [
+                      2018,
+                      1,
+                      31
+                    ],
                     "bestemmelse": "ORDINÆR_RETT",
-                    "startdatoTreårsvindu": "2015-01-17",
-                    "startdatoSykepengerettighet": "2018-01-17",
+                    "startdatoTreårsvindu": [
+                      2015,
+                      1,
+                      17
+                    ],
+                    "startdatoSykepengerettighet": [
+                      2018,
+                      1,
+                      17
+                    ],
                     "forbrukteDager": [
                       {
-                        "fom": "2018-01-17",
-                        "tom": "2018-01-19"
+                        "fom": [
+                          2018,
+                          1,
+                          17
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          19
+                        ]
                       },
                       {
-                        "fom": "2018-01-22",
-                        "tom": "2018-01-26"
+                        "fom": [
+                          2018,
+                          1,
+                          22
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          26
+                        ]
                       },
                       {
-                        "fom": "2018-01-29",
-                        "tom": "2018-01-31"
+                        "fom": [
+                          2018,
+                          1,
+                          29
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          31
+                        ]
                       }
                     ],
                     "oppholdsdager": [],
                     "avslåtteDager": [],
-                    "maksdato": "2018-12-28",
-                    "gjenståendeDager": 237,
-                    "grunnlag": {
-                      "dager": []
-                    }
-                  }
+                    "maksdato": [
+                      2018,
+                      12,
+                      28
+                    ],
+                    "gjenståendeDager": 237
+                  },
+                  "inntektjusteringer": {},
+                  "faktaavklartInntekt": null,
+                  "ventetid": null
                 }
               ]
             }
           ],
-          "opprettet": "2022-10-13T14:20:20.08307",
-          "oppdatert": "2022-10-13T14:20:20.205172",
-          "egenmeldingsperioder": []
+          "opprettet": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            83070000
+          ],
+          "oppdatert": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            205172000
+          ]
         },
         {
           "id": "12793318-7a9f-441e-b269-9d4da920ac7b",
           "tilstand": "AVSLUTTET_UTEN_UTBETALING",
-          "skjæringstidspunkt": "2018-03-01",
+          "skjæringstidspunkt": [
+            2018,
+            3,
+            1
+          ],
           "behandlinger": [
             {
               "id": "8e799506-a232-4969-82db-b5e895a4dcba",
               "tilstand": "AVSLUTTET_UTEN_VEDTAK",
               "vedtakFattet": null,
-              "avsluttet": "2022-10-13T14:20:20.224158",
+              "avsluttet": [
+                2022,
+                10,
+                13,
+                14,
+                20,
+                20,
+                224158000
+              ],
               "kilde": {
                 "meldingsreferanseId": "00000000-0000-0000-0000-000000000000",
-                "innsendt": "2022-10-13T14:20:20.210038",
-                "registrert": "2022-10-13T14:20:20.210038",
+                "innsendt": [
+                  2022,
+                  10,
+                  13,
+                  14,
+                  20,
+                  20,
+                  210038000
+                ],
+                "registrert": [
+                  2022,
+                  10,
+                  13,
+                  14,
+                  20,
+                  20,
+                  210038000
+                ],
                 "avsender": "SYSTEM"
               },
               "endringer": [
                 {
                   "id": "dc60a7d8-bbd7-49d8-806d-33392f22aec9",
-                  "tidsstempel": "2022-10-13T14:20:20.210038",
-                  "sykmeldingsperiodeFom": "2018-03-01",
-                  "sykmeldingsperiodeTom": "2018-03-19",
-                  "fom": "2018-03-01",
-                  "tom": "2018-03-19",
-                  "skjæringstidspunkt": "2018-03-01",
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    210038000
+                  ],
+                  "sykmeldingsperiodeFom": [
+                    2018,
+                    3,
+                    1
+                  ],
+                  "sykmeldingsperiodeTom": [
+                    2018,
+                    3,
+                    19
+                  ],
+                  "fom": [
+                    2018,
+                    3,
+                    1
+                  ],
+                  "tom": [
+                    2018,
+                    3,
+                    19
+                  ],
+                  "arbeidssituasjon": "ARBEIDSTAKER",
+                  "skjæringstidspunkt": [
+                    2018,
+                    3,
+                    1
+                  ],
+                  "skjæringstidspunkter": [
+                    [
+                      2018,
+                      3,
+                      1
+                    ]
+                  ],
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
                   "sykdomstidslinje": {
@@ -1258,19 +2729,41 @@
                         "kilde": {
                           "type": "Søknad",
                           "id": "53b406f0-04ce-4f00-8995-318c0339237d",
-                          "tidsstempel": "2018-03-01T00:00:00"
+                          "tidsstempel": [
+                            2018,
+                            3,
+                            1,
+                            0,
+                            0
+                          ]
                         },
-                        "grad": 100.0,
+                        "grad": 1.0,
                         "other": null,
                         "melding": null,
-                        "fom": "2018-03-01",
-                        "tom": "2018-03-16",
+                        "fom": [
+                          2018,
+                          3,
+                          1
+                        ],
+                        "tom": [
+                          2018,
+                          3,
+                          16
+                        ],
                         "dato": null
                       }
                     ],
                     "periode": {
-                      "fom": "2018-03-01",
-                      "tom": "2018-03-19"
+                      "fom": [
+                        2018,
+                        3,
+                        1
+                      ],
+                      "tom": [
+                        2018,
+                        3,
+                        19
+                      ]
                     },
                     "låstePerioder": []
                   },
@@ -1287,33 +2780,69 @@
                     "dokumentId": "53b406f0-04ce-4f00-8995-318c0339237d",
                     "dokumenttype": "Søknad"
                   },
-                  "arbeidsgiverperioder": [],
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": false,
+                    "dager": []
+                  },
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
                   "maksdatoresultat": {
-                    "vurdertTilOgMed": "-999999999-01-01",
+                    "vurdertTilOgMed": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "bestemmelse": "IKKE_VURDERT",
-                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoTreårsvindu": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "startdatoSykepengerettighet": null,
                     "forbrukteDager": [],
                     "oppholdsdager": [],
                     "avslåtteDager": [],
-                    "maksdato": "-999999999-01-01",
-                    "gjenståendeDager": 0,
-                    "grunnlag": {
-                      "dager": []
-                    }
-                  }
+                    "maksdato": [
+                      -999999999,
+                      1,
+                      1
+                    ],
+                    "gjenståendeDager": 0
+                  },
+                  "inntektjusteringer": {},
+                  "faktaavklartInntekt": null,
+                  "ventetid": null
                 }
               ]
             }
           ],
-          "opprettet": "2022-10-13T14:20:20.210038",
-          "oppdatert": "2022-10-13T14:20:20.224158",
-          "egenmeldingsperioder": []
+          "opprettet": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            210038000
+          ],
+          "oppdatert": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            224158000
+          ]
         },
         {
           "id": "8c00bcfb-8d49-48c9-81b7-2a615a27fe36",
           "tilstand": "AVVENTER_INNTEKTSMELDING",
-          "skjæringstidspunkt": "2018-03-01",
+          "skjæringstidspunkt": [
+            2018,
+            3,
+            1
+          ],
           "behandlinger": [
             {
               "id": "9ebe070d-8e89-4e3d-9c93-50966003de5b",
@@ -1322,19 +2851,71 @@
               "avsluttet": null,
               "kilde": {
                 "meldingsreferanseId": "00000000-0000-0000-0000-000000000000",
-                "innsendt": "2022-10-13T14:20:20.228317",
-                "registrert": "2022-10-13T14:20:20.228317",
+                "innsendt": [
+                  2022,
+                  10,
+                  13,
+                  14,
+                  20,
+                  20,
+                  228317000
+                ],
+                "registrert": [
+                  2022,
+                  10,
+                  13,
+                  14,
+                  20,
+                  20,
+                  228317000
+                ],
                 "avsender": "SYSTEM"
               },
               "endringer": [
                 {
                   "id": "9206c9ab-37f8-4511-8029-b8936d714b5a",
-                  "tidsstempel": "2022-10-13T14:20:20.228317",
-                  "sykmeldingsperiodeFom": "2018-03-20",
-                  "sykmeldingsperiodeTom": "2018-03-31",
-                  "fom": "2018-03-20",
-                  "tom": "2018-03-31",
-                  "skjæringstidspunkt": "2018-03-01",
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    228317000
+                  ],
+                  "sykmeldingsperiodeFom": [
+                    2018,
+                    3,
+                    20
+                  ],
+                  "sykmeldingsperiodeTom": [
+                    2018,
+                    3,
+                    31
+                  ],
+                  "fom": [
+                    2018,
+                    3,
+                    20
+                  ],
+                  "tom": [
+                    2018,
+                    3,
+                    31
+                  ],
+                  "arbeidssituasjon": "ARBEIDSTAKER",
+                  "skjæringstidspunkt": [
+                    2018,
+                    3,
+                    1
+                  ],
+                  "skjæringstidspunkter": [
+                    [
+                      2018,
+                      3,
+                      1
+                    ]
+                  ],
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
                   "sykdomstidslinje": {
@@ -1344,19 +2925,41 @@
                         "kilde": {
                           "type": "Søknad",
                           "id": "65b3a4cb-51c5-48d6-a7de-932d291fd811",
-                          "tidsstempel": "2018-03-17T00:00:00"
+                          "tidsstempel": [
+                            2018,
+                            3,
+                            17,
+                            0,
+                            0
+                          ]
                         },
-                        "grad": 100.0,
+                        "grad": 1.0,
                         "other": null,
                         "melding": null,
-                        "fom": "2018-03-20",
-                        "tom": "2018-03-31",
+                        "fom": [
+                          2018,
+                          3,
+                          20
+                        ],
+                        "tom": [
+                          2018,
+                          3,
+                          31
+                        ],
                         "dato": null
                       }
                     ],
                     "periode": {
-                      "fom": "2018-03-20",
-                      "tom": "2018-03-31"
+                      "fom": [
+                        2018,
+                        3,
+                        20
+                      ],
+                      "tom": [
+                        2018,
+                        3,
+                        31
+                      ]
                     },
                     "låstePerioder": []
                   },
@@ -1373,28 +2976,60 @@
                     "dokumentId": "65b3a4cb-51c5-48d6-a7de-932d291fd811",
                     "dokumenttype": "Søknad"
                   },
-                  "arbeidsgiverperioder": [],
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart": false,
+                    "dager": []
+                  },
+                  "dagerNavOvertarAnsvar": [],
+                  "egenmeldingsdager": [],
                   "maksdatoresultat": {
-                    "vurdertTilOgMed": "-999999999-01-01",
+                    "vurdertTilOgMed": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "bestemmelse": "IKKE_VURDERT",
-                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoTreårsvindu": [
+                      -999999999,
+                      1,
+                      1
+                    ],
                     "startdatoSykepengerettighet": null,
                     "forbrukteDager": [],
                     "oppholdsdager": [],
                     "avslåtteDager": [],
-                    "maksdato": "-999999999-01-01",
-                    "gjenståendeDager": 0,
-                    "grunnlag": {
-                      "dager": []
-                    }
-                  }
+                    "maksdato": [
+                      -999999999,
+                      1,
+                      1
+                    ],
+                    "gjenståendeDager": 0
+                  },
+                  "inntektjusteringer": {},
+                  "faktaavklartInntekt": null,
+                  "ventetid": null
                 }
               ]
             }
           ],
-          "opprettet": "2022-10-13T14:20:20.228317",
-          "oppdatert": "2022-10-13T14:20:20.230102",
-          "egenmeldingsperioder": []
+          "opprettet": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            228317000
+          ],
+          "oppdatert": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            230102000
+          ]
         }
       ],
       "forkastede": [],
@@ -1402,118 +3037,174 @@
         {
           "id": "8a185ce1-349a-40f5-a891-d35cbdaf9386",
           "korrelasjonsId": "f6567897-dcaa-4e86-9def-2728ece5cbb1",
-          "fom": "2018-01-16",
-          "tom": "2018-01-31",
+          "fom": [
+            2018,
+            1,
+            16
+          ],
+          "tom": [
+            2018,
+            1,
+            31
+          ],
           "annulleringer": [],
           "utbetalingstidslinje": {
             "dager": [
               {
                 "type": "ArbeidsgiverperiodeDag",
                 "aktuellDagsinntekt": 1430.7692307692307,
-                "beregningsgrunnlag": 1430.7692307692307,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "grunnbeløpgrense": 561804.0,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
                 "begrunnelser": null,
                 "grad": 0.0,
                 "totalGrad": 0.0,
-                "utbetalingsgrad": 100.0,
+                "utbetalingsgrad": 1.0,
                 "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
                 "arbeidsgiverbeløp": 0.0,
                 "personbeløp": 0.0,
-                "er6GBegrenset": false,
+                "reservertArbeidsgiverbeløp": 0.0,
+                "reservertPersonbeløp": 0.0,
                 "dato": null,
-                "fom": "2018-01-01",
-                "tom": "2018-01-16"
+                "fom": [
+                  2018,
+                  1,
+                  1
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  16
+                ]
               },
               {
                 "type": "NavDag",
                 "aktuellDagsinntekt": 1430.7692307692307,
-                "beregningsgrunnlag": 1430.7692307692307,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "grunnbeløpgrense": 561804.0,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
                 "begrunnelser": null,
-                "grad": 100.0,
-                "totalGrad": 100.0,
-                "utbetalingsgrad": 100.0,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 1.0,
                 "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
                 "arbeidsgiverbeløp": 1431.0,
                 "personbeløp": 0.0,
-                "er6GBegrenset": false,
+                "reservertArbeidsgiverbeløp": 1431.0,
+                "reservertPersonbeløp": 0.0,
                 "dato": null,
-                "fom": "2018-01-17",
-                "tom": "2018-01-19"
+                "fom": [
+                  2018,
+                  1,
+                  17
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  19
+                ]
               },
               {
                 "type": "NavHelgDag",
                 "aktuellDagsinntekt": 0.0,
-                "beregningsgrunnlag": 0.0,
-                "dekningsgrunnlag": 0.0,
-                "grunnbeløpgrense": 561804.0,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
                 "begrunnelser": null,
-                "grad": 100.0,
-                "totalGrad": 100.0,
-                "utbetalingsgrad": 100.0,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 1.0,
                 "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
                 "arbeidsgiverbeløp": 0.0,
                 "personbeløp": 0.0,
-                "er6GBegrenset": false,
+                "reservertArbeidsgiverbeløp": 0.0,
+                "reservertPersonbeløp": 0.0,
                 "dato": null,
-                "fom": "2018-01-20",
-                "tom": "2018-01-21"
+                "fom": [
+                  2018,
+                  1,
+                  20
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  21
+                ]
               },
               {
                 "type": "NavDag",
                 "aktuellDagsinntekt": 1430.7692307692307,
-                "beregningsgrunnlag": 1430.7692307692307,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "grunnbeløpgrense": 561804.0,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
                 "begrunnelser": null,
-                "grad": 100.0,
-                "totalGrad": 100.0,
-                "utbetalingsgrad": 100.0,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 1.0,
                 "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
                 "arbeidsgiverbeløp": 1431.0,
                 "personbeløp": 0.0,
-                "er6GBegrenset": false,
+                "reservertArbeidsgiverbeløp": 1431.0,
+                "reservertPersonbeløp": 0.0,
                 "dato": null,
-                "fom": "2018-01-22",
-                "tom": "2018-01-26"
+                "fom": [
+                  2018,
+                  1,
+                  22
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  26
+                ]
               },
               {
                 "type": "NavHelgDag",
                 "aktuellDagsinntekt": 0.0,
-                "beregningsgrunnlag": 0.0,
-                "dekningsgrunnlag": 0.0,
-                "grunnbeløpgrense": 561804.0,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
                 "begrunnelser": null,
-                "grad": 100.0,
-                "totalGrad": 100.0,
-                "utbetalingsgrad": 100.0,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 1.0,
                 "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
                 "arbeidsgiverbeløp": 0.0,
                 "personbeløp": 0.0,
-                "er6GBegrenset": false,
+                "reservertArbeidsgiverbeløp": 0.0,
+                "reservertPersonbeløp": 0.0,
                 "dato": null,
-                "fom": "2018-01-27",
-                "tom": "2018-01-28"
+                "fom": [
+                  2018,
+                  1,
+                  27
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  28
+                ]
               },
               {
                 "type": "NavDag",
                 "aktuellDagsinntekt": 1430.7692307692307,
-                "beregningsgrunnlag": 1430.7692307692307,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "grunnbeløpgrense": 561804.0,
+                "inntektjustering": 0.0,
+                "dekningsgrad": 1.0,
                 "begrunnelser": null,
-                "grad": 100.0,
-                "totalGrad": 100.0,
-                "utbetalingsgrad": 100.0,
+                "grad": 1.0,
+                "totalGrad": 1.0,
+                "utbetalingsgrad": 1.0,
                 "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
                 "arbeidsgiverbeløp": 1431.0,
                 "personbeløp": 0.0,
-                "er6GBegrenset": false,
+                "reservertArbeidsgiverbeløp": 1431.0,
+                "reservertPersonbeløp": 0.0,
                 "dato": null,
-                "fom": "2018-01-29",
-                "tom": "2018-01-31"
+                "fom": [
+                  2018,
+                  1,
+                  29
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  31
+                ]
               }
             ]
           },
@@ -1522,9 +3213,16 @@
             "fagområde": "SPREF",
             "linjer": [
               {
-                "fom": "2018-01-17",
-                "tom": "2018-01-31",
-                "satstype": "DAG",
+                "fom": [
+                  2018,
+                  1,
+                  17
+                ],
+                "tom": [
+                  2018,
+                  1,
+                  31
+                ],
                 "sats": 1431,
                 "grad": 100,
                 "refFagsystemId": null,
@@ -1537,21 +3235,49 @@
             ],
             "fagsystemId": "VIJIDN45DND3DMAUZYQEFG7JQE",
             "endringskode": "NY",
-            "tidsstempel": "2022-10-13T14:20:20.175726",
+            "tidsstempel": [
+              2022,
+              10,
+              13,
+              14,
+              20,
+              20,
+              175726000
+            ],
             "nettoBeløp": 15741,
             "avstemmingsnøkkel": 123456,
             "status": "AKSEPTERT",
-            "overføringstidspunkt": "2022-10-13T14:20:20.201407",
+            "overføringstidspunkt": [
+              2022,
+              10,
+              13,
+              14,
+              20,
+              20,
+              201407000
+            ],
             "erSimulert": true,
             "simuleringsResultat": {
               "totalbeløp": 2000,
               "perioder": [
                 {
-                  "fom": "2018-01-17",
-                  "tom": "2018-01-20",
+                  "fom": [
+                    2018,
+                    1,
+                    17
+                  ],
+                  "tom": [
+                    2018,
+                    1,
+                    20
+                  ],
                   "utbetalinger": [
                     {
-                      "forfallsdato": "2018-01-21",
+                      "forfallsdato": [
+                        2018,
+                        1,
+                        21
+                      ],
                       "utbetalesTil": {
                         "id": "a1",
                         "navn": "Org Orgesen AS"
@@ -1559,8 +3285,16 @@
                       "feilkonto": false,
                       "detaljer": [
                         {
-                          "fom": "2018-01-17",
-                          "tom": "2018-01-20",
+                          "fom": [
+                            2018,
+                            1,
+                            17
+                          ],
+                          "tom": [
+                            2018,
+                            1,
+                            20
+                          ],
                           "konto": "81549300",
                           "beløp": 2000,
                           "klassekode": {
@@ -1590,7 +3324,15 @@
             "linjer": [],
             "fagsystemId": "OS34WU5TEBG3JAF4EYBHNXWECQ",
             "endringskode": "NY",
-            "tidsstempel": "2022-10-13T14:20:20.176201",
+            "tidsstempel": [
+              2022,
+              10,
+              13,
+              14,
+              20,
+              20,
+              176201000
+            ],
             "nettoBeløp": 0,
             "avstemmingsnøkkel": null,
             "status": null,
@@ -1598,135 +3340,185 @@
             "erSimulert": false,
             "simuleringsResultat": null
           },
-          "tidsstempel": "2022-10-13T14:20:20.176295",
+          "tidsstempel": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            176295000
+          ],
           "type": "UTBETALING",
           "status": "UTBETALT",
-          "maksdato": "2018-12-28",
+          "maksdato": [
+            2018,
+            12,
+            28
+          ],
           "forbrukteSykedager": 11,
           "gjenståendeSykedager": 237,
           "vurdering": {
             "godkjent": true,
             "ident": "Ola Nordmann",
             "epost": "ola.nordmann@nav.no",
-            "tidspunkt": "2022-10-13T14:20:20.192211",
+            "tidspunkt": [
+              2022,
+              10,
+              13,
+              14,
+              20,
+              20,
+              192211000
+            ],
             "automatiskBehandling": false
           },
-          "overføringstidspunkt": "2022-10-13T14:20:20.201407",
+          "overføringstidspunkt": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            201407000
+          ],
           "avstemmingsnøkkel": 123456,
-          "avsluttet": "2022-10-13T14:20:20.204957",
-          "oppdatert": "2022-10-13T14:20:20.204188"
+          "avsluttet": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            204957000
+          ],
+          "oppdatert": [
+            2022,
+            10,
+            13,
+            14,
+            20,
+            20,
+            204188000
+          ]
         }
       ],
       "feriepengeutbetalinger": [],
-      "refusjonshistorikk": [
-        {
-          "meldingsreferanseId": "f0cf09a5-e1f5-4cf7-8198-87214242fe2d",
-          "førsteFraværsdag": "2018-01-01",
-          "arbeidsgiverperioder": [
-            {
-              "fom": "2018-01-01",
-              "tom": "2018-01-16"
-            }
-          ],
-          "beløp": 31000.0,
-          "sisteRefusjonsdag": null,
-          "endringerIRefusjon": [],
-          "tidsstempel": "2022-10-13T14:20:20.060359"
-        },
-        {
-          "meldingsreferanseId": "dd5aba9b-c977-4105-b396-cbc146144523",
-          "førsteFraværsdag": "2018-01-17",
-          "arbeidsgiverperioder": [
-            {
-              "fom": "2018-01-17",
-              "tom": "2018-02-01"
-            }
-          ],
-          "beløp": 31000.0,
-          "sisteRefusjonsdag": null,
-          "endringerIRefusjon": [],
-          "tidsstempel": "2022-10-13T14:20:20.106258"
-        }
-      ],
       "ubrukteRefusjonsopplysninger": {}
     }
   ],
-  "opprettet": "2022-10-13T14:20:19.96361",
+  "opprettet": [
+    2022,
+    10,
+    13,
+    14,
+    20,
+    19,
+    963610000
+  ],
   "infotrygdhistorikk": [
     {
       "id": "53a05144-7c94-49e8-a606-72df4a73cd77",
-      "tidsstempel": "2022-10-13T14:20:20.14041",
+      "tidsstempel": [
+        2022,
+        10,
+        13,
+        14,
+        20,
+        20,
+        140410000
+      ],
       "hendelseId": "bf863acc-bf07-40bb-aedf-217925cb508a",
       "ferieperioder": [],
       "arbeidsgiverutbetalingsperioder": [],
       "personutbetalingsperioder": [],
-      "inntekter": [],
-      "arbeidskategorikoder": {},
-      "oppdatert": "1970-01-01T00:00:00"
+      "oppdatert": [
+        1970,
+        1,
+        1,
+        0,
+        0
+      ]
     }
   ],
   "vilkårsgrunnlagHistorikk": [
     {
       "id": "bcd63fe5-d9a4-4501-b800-571a9292496e",
-      "opprettet": "2024-03-15T08:37:20.190847",
+      "opprettet": [
+        2024,
+        3,
+        15,
+        8,
+        37,
+        20,
+        190847000
+      ],
       "vilkårsgrunnlag": [
         {
-          "skjæringstidspunkt": "2018-01-01",
+          "skjæringstidspunkt": [
+            2018,
+            1,
+            1
+          ],
           "type": "Vilkårsprøving",
           "inntektsgrunnlag": {
             "grunnbeløp": 561804.0,
             "arbeidsgiverInntektsopplysninger": [
               {
                 "orgnummer": "a1",
-                "fom": "2018-01-01",
-                "tom": "+999999999-12-31",
                 "inntektsopplysning": {
                   "id": "526ead7c-5ef7-425e-8a3f-7cb0e21a4db6",
-                  "dato": "2018-01-01",
+                  "dato": [
+                    2018,
+                    1,
+                    1
+                  ],
                   "hendelseId": "f0cf09a5-e1f5-4cf7-8198-87214242fe2d",
                   "beløp": 31000.0,
-                  "type": "ARBEIDSTAKER",
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    65167000
+                  ],
                   "kilde": "INNTEKTSMELDING",
-                  "forklaring": null,
-                  "subsumsjon": null,
-                  "tidsstempel": "2022-10-13T14:20:20.065167",
-                  "overstyrtInntektId": null,
-                  "skatteopplysninger": null,
-                  "inntektsmeldingkilde": "Arbeidsgiver"
+                  "type": "ARBEIDSTAKER",
+                  "pensjonsgivendeInntekter": null,
+                  "anvendtÅrligGrunnbeløp": null,
+                  "skatteopplysninger": null
                 },
-                "refusjonsopplysninger": [
-                  {
-                    "meldingsreferanseId": "f0cf09a5-e1f5-4cf7-8198-87214242fe2d",
-                    "fom": "2018-01-01",
-                    "tom": "2018-01-16",
-                    "beløp": 31000.0,
-                    "avsender": "ARBEIDSGIVER",
-                    "tidsstempel": "2022-10-13T14:20:20.065167"
-                  },
-                  {
-                    "meldingsreferanseId": "dd5aba9b-c977-4105-b396-cbc146144523",
-                    "fom": "2018-01-17",
-                    "tom": null,
-                    "beløp": 31000.0,
-                    "avsender": "ARBEIDSGIVER",
-                    "tidsstempel": "2022-10-13T14:20:20.065167"
-                  }
-                ]
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
               }
             ],
+            "selvstendigInntektsopplysninger": null,
             "deaktiverteArbeidsforhold": [],
-            "tilkommendeInntekter": [],
             "vurdertInfotrygd": false
           },
           "opptjening": {
-            "opptjeningFom": "1970-01-01",
-            "opptjeningTom": "2017-12-31",
+            "opptjeningFom": [
+              1970,
+              1,
+              1
+            ],
+            "opptjeningTom": [
+              2017,
+              12,
+              31
+            ],
             "arbeidsforhold": [
               {
                 "orgnummer": "a1",
                 "ansattPerioder": [
                   {
-                    "ansattFom": "1970-01-01",
+                    "ansattFom": [
+                      1970,
+                      1,
+                      1
+                    ],
                     "ansattTom": null,
                     "deaktivert": false
                   }
@@ -1735,7 +3527,6 @@
             ]
           },
           "medlemskapstatus": "JA",
-          "vurdertOk": true,
           "meldingsreferanseId": "0d84760b-8cbb-482d-80b6-a360565add3c",
           "vilkårsgrunnlagId": "23ea1cac-8ff4-4a33-bf02-adcf362613a0"
         }
@@ -1743,65 +3534,81 @@
     },
     {
       "id": "7c355743-9286-4675-923b-94238876316f",
-      "opprettet": "2022-10-13T14:20:20.132385",
+      "opprettet": [
+        2022,
+        10,
+        13,
+        14,
+        20,
+        20,
+        132385000
+      ],
       "vilkårsgrunnlag": [
         {
-          "skjæringstidspunkt": "2018-01-01",
+          "skjæringstidspunkt": [
+            2018,
+            1,
+            1
+          ],
           "type": "Vilkårsprøving",
           "inntektsgrunnlag": {
             "grunnbeløp": 561804.0,
             "arbeidsgiverInntektsopplysninger": [
               {
                 "orgnummer": "a1",
-                "fom": "2018-01-01",
-                "tom": "+999999999-12-31",
                 "inntektsopplysning": {
                   "id": "526ead7c-5ef7-425e-8a3f-7cb0e21a4db6",
-                  "dato": "2018-01-01",
+                  "dato": [
+                    2018,
+                    1,
+                    1
+                  ],
                   "hendelseId": "f0cf09a5-e1f5-4cf7-8198-87214242fe2d",
                   "beløp": 31000.0,
-                  "type":  "ARBEIDSTAKER",
+                  "tidsstempel": [
+                    2022,
+                    10,
+                    13,
+                    14,
+                    20,
+                    20,
+                    65167000
+                  ],
                   "kilde": "INNTEKTSMELDING",
-                  "forklaring": null,
-                  "subsumsjon": null,
-                  "tidsstempel": "2022-10-13T14:20:20.065167",
-                  "overstyrtInntektId": null,
-                  "skatteopplysninger": null,
-                  "inntektsmeldingkilde": "Arbeidsgiver"
+                  "type": "ARBEIDSTAKER",
+                  "pensjonsgivendeInntekter": null,
+                  "anvendtÅrligGrunnbeløp": null,
+                  "skatteopplysninger": null
                 },
-                "refusjonsopplysninger": [
-                  {
-                    "meldingsreferanseId": "f0cf09a5-e1f5-4cf7-8198-87214242fe2d",
-                    "fom": "2018-01-01",
-                    "tom": "2018-01-16",
-                    "beløp": 31000.0,
-                    "avsender": "ARBEIDSGIVER",
-                    "tidsstempel": "2022-10-13T14:20:20.065167"
-                  },
-                  {
-                    "meldingsreferanseId": "dd5aba9b-c977-4105-b396-cbc146144523",
-                    "fom": "2018-01-17",
-                    "tom": null,
-                    "beløp": 31000.0,
-                    "avsender": "ARBEIDSGIVER",
-                    "tidsstempel": "2022-10-13T14:20:20.065167"
-                  }
-                ]
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
               }
             ],
+            "selvstendigInntektsopplysninger": null,
             "deaktiverteArbeidsforhold": [],
-            "tilkommendeInntekter": [],
             "vurdertInfotrygd": false
           },
           "opptjening": {
-            "opptjeningFom": "1970-01-01",
-            "opptjeningTom": "2017-12-31",
+            "opptjeningFom": [
+              1970,
+              1,
+              1
+            ],
+            "opptjeningTom": [
+              2017,
+              12,
+              31
+            ],
             "arbeidsforhold": [
               {
                 "orgnummer": "a1",
                 "ansattPerioder": [
                   {
-                    "ansattFom": "1970-01-01",
+                    "ansattFom": [
+                      1970,
+                      1,
+                      1
+                    ],
                     "ansattTom": null,
                     "deaktivert": false
                   }
@@ -1810,7 +3617,6 @@
             ]
           },
           "medlemskapstatus": "JA",
-          "vurdertOk": true,
           "meldingsreferanseId": "0d84760b-8cbb-482d-80b6-a360565add3c",
           "vilkårsgrunnlagId": "23ea1cac-8ff4-4a33-bf02-adcf362613a0"
         }
@@ -1818,6 +3624,6 @@
     }
   ],
   "minimumSykdomsgradVurdering": [],
-  "dødsdato": null,
-  "skjemaVersjon": 312
+  "skjæringstidspunkter": [],
+  "dødsdato": null
 }

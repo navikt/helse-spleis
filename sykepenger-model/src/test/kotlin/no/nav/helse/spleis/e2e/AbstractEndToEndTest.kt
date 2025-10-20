@@ -47,8 +47,8 @@ internal abstract class AbstractEndToEndTest {
         )
 
         private fun overgangFraInfotrygdPerson(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", 334, regelverkslogg)
-        private fun pingPongPerson(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/pingpong.json", 312, regelverkslogg)
-        private fun toVedtakMedSammeFagsystemId(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/to_vedtak_samme_fagsystem_id.json", 320, regelverkslogg)
+        private fun pingPongPerson(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/pingpong.json", 334, regelverkslogg)
+        private fun toVedtakMedSammeFagsystemId(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/to_vedtak_samme_fagsystem_id.json", 334, regelverkslogg)
     }
 
     internal val assertetVarsler = Varslersamler.AssertetVarsler()

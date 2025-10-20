@@ -83,7 +83,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
          * utbetalingen hadde oppdragslinjer som strakk seg over februar og mars.
          */
         createTestPerson { regelverkslogg ->
-            gjenopprettFraJSON("/personer/revurdering-av-flere-vedtak-i-samme-utbetaling.json", 321, regelverkslogg)
+            gjenopprettFraJSON("/personer/revurdering-av-flere-vedtak-i-samme-utbetaling.json", 334, regelverkslogg)
         }
 
         this@UtbetalingOgAnnulleringTest.håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)

@@ -18,7 +18,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
@@ -114,16 +113,16 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         this@InfotrygdKorrigererE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING)
     }
 
     private fun createDobbelutbetalingPerson() = createTestPerson { jurist ->
-        gjenopprettFraJSON("/personer/dobbelutbetaling.json", 312, jurist)
+        gjenopprettFraJSON("/personer/dobbelutbetaling.json", 334, jurist)
     }
 
     private fun createAuuBlirMedIRevureringPerson() = createTestPerson { jurist ->
-        gjenopprettFraJSON("/personer/auu-blir-med-i-revurdering.json", 312, jurist)
+        gjenopprettFraJSON("/personer/auu-blir-med-i-revurdering.json", 334, jurist)
     }.also {
         UtbetalingshistorikkEtterInfotrygdendring(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
