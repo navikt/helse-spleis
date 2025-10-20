@@ -418,7 +418,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
 
     @Test
     fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga Infotrygforlengelse`() {
-        medJSONPerson("/personer/infotrygdforlengelse.json", 312)
+        medJSONPerson("/personer/infotrygdforlengelse.json", 334)
         a1 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar)))
             forlengelseTilGodkjenning(mars)
@@ -437,7 +437,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
 
     @Test
     fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga Infotrygovergang - revurdering`() {
-        medJSONPerson("/personer/infotrygdforlengelse.json", 312)
+        medJSONPerson("/personer/infotrygdforlengelse.json", 334)
         a1 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar)))
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.februar, Dagtype.Sykedag, 50)))

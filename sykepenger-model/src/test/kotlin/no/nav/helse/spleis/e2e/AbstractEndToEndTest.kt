@@ -46,7 +46,7 @@ internal abstract class AbstractEndToEndTest {
                 behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1)
         )
 
-        private fun overgangFraInfotrygdPerson(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", 312, regelverkslogg)
+        private fun overgangFraInfotrygdPerson(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", 334, regelverkslogg)
         private fun pingPongPerson(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/pingpong.json", 312, regelverkslogg)
         private fun toVedtakMedSammeFagsystemId(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/to_vedtak_samme_fagsystem_id.json", 320, regelverkslogg)
         private fun treVedtakMedSammeFagsystemId(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/tre_vedtak_samme_fagsystem_id.json", 320, regelverkslogg)
