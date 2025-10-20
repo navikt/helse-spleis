@@ -89,7 +89,7 @@ data class UtbetalingsdagDTO(
     override val dato: LocalDate,
     val personbeløp: Int,
     val arbeidsgiverbeløp: Int,
-    val totalGrad: Int
+    val totalGrad: Double
 ) : Utbetalingstidslinjedag {
     override fun utbetalingsinfo() = Utbetalingsinfo(personbeløp, arbeidsgiverbeløp, totalGrad)
 }
@@ -98,7 +98,7 @@ data class AvvistDag(
     override val type: UtbetalingstidslinjedagType = UtbetalingstidslinjedagType.AvvistDag,
     override val dato: LocalDate,
     val begrunnelser: List<BegrunnelseDTO>,
-    val totalGrad: Int
+    val totalGrad: Double
 ) : Utbetalingstidslinjedag {
     override fun utbetalingsinfo() = Utbetalingsinfo(null, null, totalGrad)
 }

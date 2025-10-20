@@ -109,19 +109,15 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to 836352.årlig, a2 to 168276.årlig))
         håndterYtelser()
 
-        // Totalgraden er her 15.81748468089681
-        // På avslagsdager tar vi toInt() -> 15
-        // Dette er nok fordi 19.99 skal gi avslag på minumum sykdomsgrad, og da er det rart å vise 20% i Speil
-        speilApi().assertTotalgrad(15, 17.januar til 19.januar, 22.januar til 26.januar, 29.januar til 31.januar)
+        speilApi().assertTotalgrad(15.81748468089681, 17.januar til 19.januar, 22.januar til 26.januar, 29.januar til 31.januar)
 
         håndterMinimumSykdomsgradsvurderingMelding(perioderMedMinimumSykdomsgradVurdertOK = setOf(17.januar til 31.januar))
         håndterYtelser()
 
-        // På utbetalingsdager tar vi toRoundInt() -> 16
-        speilApi().assertTotalgrad(16, 17.januar til 19.januar, 22.januar til 26.januar, 29.januar til 31.januar)
+        speilApi().assertTotalgrad(15.81748468089681, 17.januar til 19.januar, 22.januar til 26.januar, 29.januar til 31.januar)
     }
 
-    private fun PersonDTO.assertTotalgrad(forventet: Int, vararg perioder: Periode) {
+    private fun PersonDTO.assertTotalgrad(forventet: Double, vararg perioder: Periode) {
         val totalgrader = (arbeidsgivere[0]
             .generasjoner[0]
             .perioder[0] as BeregnetPeriode)
@@ -157,7 +153,7 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
             utbetalingsinfo = Utbetalingsinfo(
                 personbeløp = 0,
                 arbeidsgiverbeløp = 2161,
-                totalGrad = 100
+                totalGrad = 100.0
             )
         )
         assertEquals(forventetFørstedag, tidslinje.first())
@@ -448,16 +444,7 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
         håndterYtelser()
 
         val personDto = speilApi()
-        assertEquals(
-            20,
-            (personDto
-                .arbeidsgivere[0]
-                .generasjoner[0]
-                .perioder[0] as BeregnetPeriode)
-                .sammenslåttTidslinje[28]
-                .utbetalingsinfo!!
-                .totalGrad
-        )
+        assertEquals(20.0, (personDto.arbeidsgivere[0].generasjoner[0].perioder[0] as BeregnetPeriode).sammenslåttTidslinje[28].utbetalingsinfo!!.totalGrad)
     }
 
     @Test
@@ -471,16 +458,7 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
         håndterYtelser()
 
         val personDto = speilApi()
-        assertEquals(
-            19,
-            (personDto
-                .arbeidsgivere[0]
-                .generasjoner[0]
-                .perioder[0] as BeregnetPeriode)
-                .sammenslåttTidslinje[28]
-                .utbetalingsinfo!!
-                .totalGrad
-        )
+        assertEquals(19.99, (personDto.arbeidsgivere[0].generasjoner[0].perioder[0] as BeregnetPeriode).sammenslåttTidslinje[28].utbetalingsinfo!!.totalGrad)
     }
 
     @Test

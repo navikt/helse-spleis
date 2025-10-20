@@ -205,7 +205,7 @@ internal class UtbetalingstidslinjeBuilder(private val dto: Utbetalingstidslinje
                     type = UtbetalingstidslinjedagType.AvvistDag,
                     dato = it.dato,
                     begrunnelser = it.begrunnelser.map { BegrunnelseDTO.fraBegrunnelse(it) },
-                    totalGrad = (it.økonomi.totalGrad.prosentDesimal * 100).toInt()
+                    totalGrad = it.økonomi.totalGrad.prosentDesimal * 100
                 )
 
                 is UtbetalingsdagUtDto.ForeldetDagDto -> UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.ForeldetDag, dato = it.dato)
@@ -232,7 +232,7 @@ internal class UtbetalingstidslinjeBuilder(private val dto: Utbetalingstidslinje
             dato = dato,
             arbeidsgiverbeløp = økonomi.arbeidsgiverbeløp?.dagligInt?.beløp ?: 0,
             personbeløp = økonomi.personbeløp?.dagligInt?.beløp ?: 0,
-            totalGrad = (økonomi.totalGrad.prosentDesimal * 100).roundToInt()
+            totalGrad = økonomi.totalGrad.prosentDesimal * 100
         )
     }
 
