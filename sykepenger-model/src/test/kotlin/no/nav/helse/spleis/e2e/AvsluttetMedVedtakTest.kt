@@ -21,6 +21,7 @@ import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkj�
 import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -268,20 +269,6 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
             1.vedtaksperiode.assertIngenVedtakFattet()
             assertEquals(2, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
             assertEquals(setOf(søknadId, inntektsmeldingId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
-        }
-    }
-
-    @Test
-    fun `Sender avsluttet uten vedtak ved kort gap til periode med kun ferie`() {
-        a1 {
-
-            nyttVedtak(januar)
-            håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar))
-            håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), Ferie(10.februar, 28.februar))
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-
-            2.vedtaksperiode.assertIngenVedtakFattet()
-            assertEquals(0, observatør.avsluttetUtenVedtakEventer.size)
         }
     }
 

@@ -103,7 +103,13 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         }
         vedtaksperiode.videreførEksisterendeOpplysninger(hendelse.metadata.behandlingkilde, aktivitetslogg)
 
-        if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) return false
+        if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
+            if (vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte()) {
+                vedtaksperiode.tilstand(aktivitetslogg, AvventerAOrdningen)
+                return true
+            }
+            return false
+        }
         vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
         return true
     }

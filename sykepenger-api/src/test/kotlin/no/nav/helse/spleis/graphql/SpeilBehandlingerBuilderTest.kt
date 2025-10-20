@@ -2080,7 +2080,11 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterUtbetalingsgodkjenning()
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Arbeid(1.februar, 28.februar))
-        håndterArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(), vedtaksperiode = 2)
+        håndterSykepengegrunnlagForArbeidsgiver(a1, 1.februar, listOf(
+            ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2018, 1), 10000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+            ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), 10000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+            ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), 10000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+        ))
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning()
 

@@ -38,35 +38,6 @@ internal class FriskmeldtE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `friskmeldt forlengelse av kort periode`() {
-        nyPeriode(1.januar til 16.januar)
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar))
-        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), Arbeid(17.januar, 31.januar))
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(17.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
-    }
-
-    @Test
-    fun `friskmeldt forlengelse av utbetalt periode`() {
-        nyPeriode(1.januar til 20.januar)
-        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@FriskmeldtE2ETest.håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        this@FriskmeldtE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
-        håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent), Arbeid(21.januar, 31.januar))
-
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(21.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
-    }
-
-    @Test
     fun `Forlengelse med kun helg og friskmelding`() {
         nyttVedtak(1.januar til 19.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar))
