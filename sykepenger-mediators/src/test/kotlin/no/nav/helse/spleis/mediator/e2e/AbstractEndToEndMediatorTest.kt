@@ -338,9 +338,9 @@ internal abstract class AbstractEndToEndMediatorTest {
         harOppgittForsikring: Boolean? = null
     ): UUID {
         val selvstendigHovedspørsmål = mapOf(
-            "INNTEKTSOPPLYSNINGER_VIRKSOMHETEN_AVVIKLET" to (harOppgittAvvikling ?: false),
-            "INNTEKTSOPPLYSNINGER_NY_I_ARBEIDSLIVET" to (harOppgittNyIArbeidslivet ?: false),
-            "INNTEKTSOPPLYSNINGER_VARIG_ENDRING" to (harOppgittVarigEndring ?: false),
+            "NARINGSDRIVENDE_VIRKSOMHETEN_AVVIKLET" to (harOppgittAvvikling ?: false),
+            "NARINGSDRIVENDE_NY_I_ARBEIDSLIVET" to (harOppgittNyIArbeidslivet ?: false),
+            "NARINGSDRIVENDE_VARIG_ENDRING" to (harOppgittVarigEndring ?: false),
             "FRAVAR_FOR_SYKMELDINGEN_V2" to (fraværFørSykmelding ?: false)
         )
         val (id, message) = meldingsfabrikk.lagSøknadSelvstendig(

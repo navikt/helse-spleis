@@ -43,14 +43,17 @@ internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val 
         val harOppgittÅHaForsikringNyeMåten = packet["selvstendigNaringsdrivende"].path("brukerHarOppgittForsikring").takeUnless { it.isMissingOrNull() }?.asBoolean()
         builder.harOppgittÅHaForsikring((harOppgittÅHaForsikringGamleMåten == true) || (harOppgittÅHaForsikringNyeMåten == true))
 
-        val harOppgittNyIArbedislivet = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("INNTEKTSOPPLYSNINGER_NY_I_ARBEIDSLIVET").takeUnless { it.isMissingOrNull() }?.asBoolean()
-        builder.harOppgittNyIArbeidslivet(harOppgittNyIArbedislivet)
+        val harOppgittNyIArbedislivetPåGamleMåten = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("INNTEKTSOPPLYSNINGER_NY_I_ARBEIDSLIVET").takeUnless { it.isMissingOrNull() }?.asBoolean()
+        val harOppgittNyIArbedislivetPåNyeMåten = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("NARINGSDRIVENDE_NY_I_ARBEIDSLIVET").takeUnless { it.isMissingOrNull() }?.asBoolean()
+        builder.harOppgittNyIArbeidslivet((harOppgittNyIArbedislivetPåGamleMåten == true) || (harOppgittNyIArbedislivetPåNyeMåten == true))
 
-        val harOppgittVarigEndring = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("INNTEKTSOPPLYSNINGER_VARIG_ENDRING").takeUnless { it.isMissingOrNull() }?.asBoolean()
-        builder.harOppgittVarigEndring(harOppgittVarigEndring)
+        val harOppgittVarigEndringPåGamleMåten = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("INNTEKTSOPPLYSNINGER_VARIG_ENDRING").takeUnless { it.isMissingOrNull() }?.asBoolean()
+        val harOppgittVarigEndringPåNyeMåten = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("NARINGSDRIVENDE_VARIG_ENDRING").takeUnless { it.isMissingOrNull() }?.asBoolean()
+        builder.harOppgittVarigEndring((harOppgittVarigEndringPåNyeMåten == true) || (harOppgittVarigEndringPåGamleMåten == true))
 
-        val harOppgittAvvikling = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("INNTEKTSOPPLYSNINGER_VIRKSOMHETEN_AVVIKLET").takeUnless { it.isMissingOrNull() }?.asBoolean()
-        builder.harOppgittAvvikling(harOppgittAvvikling)
+        val harOppgittAvviklingPåGamleMåten = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("INNTEKTSOPPLYSNINGER_VIRKSOMHETEN_AVVIKLET").takeUnless { it.isMissingOrNull() }?.asBoolean()
+        val harOppgittAvviklingPåNyeMåten = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("NARINGSDRIVENDE_VIRKSOMHETEN_AVVIKLET").takeUnless { it.isMissingOrNull() }?.asBoolean()
+        builder.harOppgittAvvikling((harOppgittAvviklingPåGamleMåten == true) || (harOppgittAvviklingPåNyeMåten == true))
 
         SendtSøknadNavMessage.byggSendtSøknad(builder, packet)
         mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
