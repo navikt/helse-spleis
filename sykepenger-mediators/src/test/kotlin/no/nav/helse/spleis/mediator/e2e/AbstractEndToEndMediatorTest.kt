@@ -729,6 +729,11 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(message)
     }
 
+    protected fun sendAnnulleringSelvstendig(utbetalingId: String) {
+        val (_, message) = meldingsfabrikk.lagAnnulleringSelvstendig(utbetalingId)
+        testRapid.sendTestMessage(message)
+    }
+
     protected fun sendOverstyringTidslinje(dager: List<ManuellOverskrivingDag>) {
         val (_, message) = meldingsfabrikk.lagOverstyringTidslinje(dager)
         testRapid.sendTestMessage(message)

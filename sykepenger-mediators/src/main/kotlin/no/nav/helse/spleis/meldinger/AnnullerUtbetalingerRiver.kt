@@ -17,14 +17,13 @@ internal class AnnullerUtbetalingerRiver(
         message.requireKey(
             "@id",
             "fødselsnummer",
-            "organisasjonsnummer",
             "saksbehandler",
             "saksbehandler.epostaddresse",
             "saksbehandler.ident",
             "utbetalingId",
         )
         message.requireArray("begrunnelser")
-        message.interestedIn("kommentar")
+        message.interestedIn("kommentar", "yrkesaktivitetstype", "organisasjonsnummer")
     }
 
     override fun createMessage(packet: JsonMessage) = AnnulleringMessage(

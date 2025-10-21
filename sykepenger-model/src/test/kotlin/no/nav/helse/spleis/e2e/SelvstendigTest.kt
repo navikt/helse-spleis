@@ -25,6 +25,8 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_46
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING
@@ -34,6 +36,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_SIM
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Klassekode
@@ -47,6 +50,22 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SelvstendigTest : AbstractDslTest() {
+
+    @Test
+    fun `annullere selvstendig`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            nullstillTilstandsendringer()
+            håndterAnnullering(inspektør.utbetalinger[0].utbetalingId)
+            håndterUtbetalt()
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+        }
+    }
 
     @Test
     fun `tar inn søknad uten ventetid, men forkaster perioden`() {
@@ -247,7 +266,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     fun `perioden kastes ut når det er fravær før sykmelding`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, fraværFørSykmelding = true)
-            assertFunksjonellFeil(Varselkode.RV_SØ_46, 1.vedtaksperiode.filter())
+            assertFunksjonellFeil(RV_SØ_46, 1.vedtaksperiode.filter())
             assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
     }

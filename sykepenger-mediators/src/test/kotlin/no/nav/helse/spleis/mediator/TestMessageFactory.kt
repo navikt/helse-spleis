@@ -1388,6 +1388,24 @@ internal class TestMessageFactory(
         )
     }
 
+    fun lagAnnulleringSelvstendig(utbetalingId: String): Pair<String, String> {
+        return nyHendelse(
+            "annullering",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "yrkesaktivitetstype" to "selvstendig",
+                "utbetalingId" to utbetalingId,
+                "saksbehandler" to mapOf(
+                    "navn" to "Siri Saksbhandler",
+                    "epostaddresse" to "siri.saksbehandler@nav.no",
+                    "oid" to "${UUID.randomUUID()}",
+                    "ident" to "S1234567",
+                ),
+                "begrunnelser" to listOf("Annet")
+            )
+        )
+    }
+
     fun lagAnnullering(utbetalingId: String): Pair<String, String> {
         return nyHendelse(
             "annullering",
