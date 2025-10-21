@@ -52,6 +52,26 @@ import org.junit.jupiter.api.Test
 internal class SelvstendigTest : AbstractDslTest() {
 
     @Test
+    fun `annullere selvstendig i en pågående revurdering`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            nullstillTilstandsendringer()
+
+
+            håndterPåminnelse(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, flagg = setOf("ønskerReberegning"))
+            håndterYtelser(1.vedtaksperiode)
+            håndterAnnullering(inspektør.utbetalinger[0].utbetalingId)
+            håndterUtbetalt()
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_HISTORIKK, SELVSTENDIG_AVVENTER_GODKJENNING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
     fun `annullere selvstendig`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)

@@ -1433,8 +1433,15 @@ internal class Vedtaksperiode private constructor(
         when (tilstand) {
             Avsluttet,
             TilUtbetaling,
+
             SelvstendigTilUtbetaling,
             SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
 
             AvventerSimuleringRevurdering,
             AvventerGodkjenningRevurdering,
@@ -1464,12 +1471,6 @@ internal class Vedtaksperiode private constructor(
             AvventerInntektsmelding,
             AvventerSimulering,
             AvventerVilkårsprøving,
-            SelvstendigAvventerBlokkerendePeriode,
-            SelvstendigAvventerGodkjenning,
-            SelvstendigAvventerHistorikk,
-            SelvstendigAvventerInfotrygdHistorikk,
-            SelvstendigAvventerSimulering,
-            SelvstendigAvventerVilkårsprøving,
             TilAnnullering -> return null
 
             TilInfotrygd -> error("Forventet ikke annulleringshendelse i tilstand $tilstand for vedtaksperiodeId $id")
