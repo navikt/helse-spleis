@@ -221,15 +221,19 @@ internal class PersonMediator(
         queueMessage(
             JsonMessage.newMessage(
                 "planlagt_annullering",
-                mutableMapOf(
-                    "yrkesaktivitet" to event.yrkesaktivitet,
-                    "vedtaksperioder" to event.vedtaksperioder,
-                    "fom" to event.fom,
-                    "tom" to event.tom,
-                    "ident" to event.saksbehandlerIdent,
-                    "årsaker" to event.årsaker,
-                    "begrunnelse" to event.begrunnelse
-                )
+                buildMap {
+                    put("yrkesaktivitet", event.yrkesaktivitet) // TODO delete
+                    put("yrkesaktivitetstype", event.yrkesaktivitetssporing.somYrkesaktivitetstype)
+                    compute("organisasjonsnummer") { _, _ ->
+                        (event.yrkesaktivitetssporing as? Behandlingsporing.Yrkesaktivitet.Arbeidstaker)?.organisasjonsnummer
+                    }
+                    put("vedtaksperioder", event.vedtaksperioder)
+                    put("fom", event.fom)
+                    put("tom", event.tom)
+                    put("ident", event.saksbehandlerIdent)
+                    put("årsaker", event.årsaker)
+                    put("begrunnelse", event.begrunnelse)
+                }
             )
         )
     }

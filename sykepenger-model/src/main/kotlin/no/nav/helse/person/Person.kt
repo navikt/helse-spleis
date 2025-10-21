@@ -61,7 +61,6 @@ import no.nav.helse.person.Yrkesaktivitet.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Yrkesaktivitet.Companion.avventerSøknad
 import no.nav.helse.person.Yrkesaktivitet.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Yrkesaktivitet.Companion.beregnSkjæringstidspunkt
-import no.nav.helse.person.Yrkesaktivitet.Companion.oppdatereSkjæringstidspunkter
 import no.nav.helse.person.Yrkesaktivitet.Companion.finn
 import no.nav.helse.person.Yrkesaktivitet.Companion.finnAnnulleringskandidater
 import no.nav.helse.person.Yrkesaktivitet.Companion.fjernSykmeldingsperiode
@@ -73,6 +72,7 @@ import no.nav.helse.person.Yrkesaktivitet.Companion.igangsettOverstyring
 import no.nav.helse.person.Yrkesaktivitet.Companion.mursteinsperioder
 import no.nav.helse.person.Yrkesaktivitet.Companion.nestemann
 import no.nav.helse.person.Yrkesaktivitet.Companion.nåværendeVedtaksperioder
+import no.nav.helse.person.Yrkesaktivitet.Companion.oppdatereSkjæringstidspunkter
 import no.nav.helse.person.Yrkesaktivitet.Companion.tidligsteDato
 import no.nav.helse.person.Yrkesaktivitet.Companion.validerTilstand
 import no.nav.helse.person.Yrkesaktivitet.Companion.vedtaksperioder
@@ -574,7 +574,8 @@ class Person private constructor(
 
     internal fun emitPlanlagtAnnullering(annulleringskandidater: Set<Vedtaksperiode>, hendelse: AnnullerUtbetaling) {
         val planlagtAnnullering = PersonObserver.PlanlagtAnnulleringEvent(
-            yrkesaktivitet = hendelse.behandlingsporing.somOrganisasjonsnummer,
+            yrkesaktivitet = hendelse.behandlingsporing.somOrganisasjonsnummer, // TODO slettes etterhvert
+            yrkesaktivitetssporing = hendelse.behandlingsporing,
             vedtaksperioder = annulleringskandidater.map { it.id },
             fom = annulleringskandidater.minOf { it.periode.start },
             tom = annulleringskandidater.maxOf { it.periode.endInclusive },

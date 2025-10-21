@@ -19,6 +19,7 @@ interface PersonObserver {
 
     data class PlanlagtAnnulleringEvent(
         val yrkesaktivitet: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperioder: List<UUID>,
         val fom: LocalDate,
         val tom: LocalDate,
