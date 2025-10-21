@@ -44,7 +44,6 @@ import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Hendelseskilde
-import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
@@ -1114,27 +1113,23 @@ internal class Vedtaksperiode private constructor(
         perioderDetSkalBeregnesUtbetalingFor: List<Vedtaksperiode>,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         beregnetTidslinjePerVedtaksperiode: List<BeregnetPeriode>,
-        inntektsperioder: List<Triple<Arbeidsgiverberegning.Yrkesaktivitet, Kilde, InntekterForBeregning.Inntektsperiode>>
+        inntektsperioder: Map<Arbeidsgiverberegning.Yrkesaktivitet, Beløpstidslinje>
     ): List<BeregnetBehandling> {
         if (perioderDetSkalBeregnesUtbetalingFor.isEmpty()) return emptyList()
 
         check(perioderDetSkalBeregnesUtbetalingFor.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
             "ugyldig situasjon: skal beregne utbetaling for vedtaksperioder med ulike skjæringstidspunkter"
         }
-        val sisteTom = perioderDetSkalBeregnesUtbetalingFor.maxOf { it.periode.endInclusive }
         val alleInntektjusteringer = inntektsperioder
-            .groupBy { (yrkesaktivitet, _) -> Inntektskilde(
-                id = when (yrkesaktivitet) {
-                    Arbeidsgiverberegning.Yrkesaktivitet.Arbeidsledig -> "ARBEIDSLEDIG"
-                    is Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker -> yrkesaktivitet.organisasjonsnummer
-                    Arbeidsgiverberegning.Yrkesaktivitet.Frilans -> "FRILANS"
-                    Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
-                }
-            ) }
-            .mapValues {
-                it.value.fold(Beløpstidslinje()) { resultat, (_, kilde, inntektsperiode) ->
-                    resultat + Beløpstidslinje.fra(inntektsperiode.fom til listOfNotNull(inntektsperiode.tom, sisteTom).min(), inntektsperiode.inntekt, kilde)
-                }
+            .mapKeys { (yrkesaktivitet, _) ->
+                Inntektskilde(
+                    when (yrkesaktivitet) {
+                        is Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker -> yrkesaktivitet.organisasjonsnummer
+                        Arbeidsgiverberegning.Yrkesaktivitet.Frilans -> "FRILANS"
+                        Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+                        Arbeidsgiverberegning.Yrkesaktivitet.Arbeidsledig -> error("Inntektsjustering som arbeidsledig?? Merkelig")
+                    }
+                )
             }
 
         return perioderDetSkalBeregnesUtbetalingFor
@@ -3034,7 +3029,7 @@ private fun maksdatosubsummering(
     }
 }
 
-internal fun lagArbeidsgiverberegning(vedtaksperioder: List<Vedtaksperiode>, vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null, inntektsperioder: List<Triple<Arbeidsgiverberegning.Yrkesaktivitet, Kilde, no.nav.helse.hendelser.InntekterForBeregning.Inntektsperiode>> = emptyList()): List<Arbeidsgiverberegning> {
+internal fun lagArbeidsgiverberegning(vedtaksperioder: List<Vedtaksperiode>, vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null, inntektsperioder: Map<Arbeidsgiverberegning.Yrkesaktivitet, Beløpstidslinje> = emptyMap()): List<Arbeidsgiverberegning> {
     return with(ArbeidsgiverberegningBuilder()) {
         vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger?.forEach {
             fastsattÅrsinntekt(Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)
@@ -3045,13 +3040,8 @@ internal fun lagArbeidsgiverberegning(vedtaksperioder: List<Vedtaksperiode>, vil
         vilkårsgrunnlag?.inntektsgrunnlag?.selvstendigInntektsopplysning?.also {
             selvstendigNæringsdrivende(it.fastsattÅrsinntekt)
         }
-        inntektsperioder.forEach { (yrkesaktivitet, kilde, inntektsperiode) ->
-            inntektsjusteringer(
-                yrkesaktivitet = yrkesaktivitet,
-                fom = inntektsperiode.fom,
-                tom = inntektsperiode.tom,
-                inntekt = inntektsperiode.inntekt
-            )
+        inntektsperioder.forEach { (yrkesaktivitet, inntektsjustering) ->
+            inntektsjusteringer(yrkesaktivitet, inntektsjustering)
         }
         vedtaksperioder.forEach { it.medVedtaksperiode(this) }
         build()

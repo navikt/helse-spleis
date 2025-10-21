@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.til
@@ -73,7 +74,7 @@ internal class ArbeidsgiverberegningTest {
             .fastsattÅrsinntekt(Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
             .fastsattÅrsinntekt(Yrkesaktivitet.Arbeidstaker(a2), INNTEKT * 2)
             .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a3), 10.januar, 14.januar, 1500.daglig)
-            .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a3), 25.januar, null, 1500.daglig)
+            .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a3), 25.januar, 31.januar, 1500.daglig)
             .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(1.januar til 20.januar), arbeidstaker())
             .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(21.januar til 25.januar), arbeidstaker())
             .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(29.januar til 31.januar), arbeidstaker())
@@ -157,7 +158,7 @@ internal class ArbeidsgiverberegningTest {
         val yrkesaktiviteter = ArbeidsgiverberegningBuilder()
             .fastsattÅrsinntekt(Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
             .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a3), 1.januar, 10.januar, 1500.daglig)
-            .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a3), 15.januar, null, 1500.daglig)
+            .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a3), 15.januar, 20.januar, 1500.daglig)
             .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(1.januar til 20.januar), arbeidstaker())
             .build()
 
@@ -191,7 +192,7 @@ internal class ArbeidsgiverberegningTest {
     fun `tilkommet inntekt med vedtaksperioder`() {
         val yrkesaktiviteter = ArbeidsgiverberegningBuilder()
             .fastsattÅrsinntekt(Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
-            .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a1), 1.januar, null, 1500.daglig)
+            .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a1), 1.januar, 20.januar, 1500.daglig)
             .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(1.januar til 20.januar), arbeidstaker())
             .build()
 
@@ -212,7 +213,7 @@ internal class ArbeidsgiverberegningTest {
     fun `tilkommet inntekt med egne vedtaksperioder`() {
         val yrkesaktiviteter = ArbeidsgiverberegningBuilder()
             .fastsattÅrsinntekt(Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
-            .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a3), 1.januar, null, 1500.daglig)
+            .inntektsjusteringer(Yrkesaktivitet.Arbeidstaker(a3), 1.januar, 20.januar, 1500.daglig)
             .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(1.januar til 20.januar), arbeidstaker())
             .vedtaksperiode(Yrkesaktivitet.Arbeidstaker(a3), UUID.randomUUID(), sykdomstidslinje(1.januar til 10.januar), arbeidstaker())
             .build()
@@ -252,5 +253,9 @@ internal class ArbeidsgiverberegningTest {
                 Kilde(MeldingsreferanseId(UUID.randomUUID()), Avsender.ARBEIDSGIVER, LocalDateTime.now())
             )
         )
+    }
+
+    private fun ArbeidsgiverberegningBuilder.inntektsjusteringer(yrkesaktivitet: Yrkesaktivitet, fom: LocalDate, tom: LocalDate, inntekt: Inntekt) = apply {
+        inntektsjusteringer(yrkesaktivitet, Beløpstidslinje.fra(fom til tom, inntekt, Kilde(MeldingsreferanseId(UUID.randomUUID()), Avsender.SYSTEM, LocalDateTime.now())))
     }
 }

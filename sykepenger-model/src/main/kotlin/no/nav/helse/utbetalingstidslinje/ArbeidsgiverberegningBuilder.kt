@@ -1,16 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.erHelg
-import no.nav.helse.hendelser.Avsender.SYSTEM
-import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Yrkesaktivitet
 import no.nav.helse.økonomi.Inntekt
@@ -19,7 +14,7 @@ import no.nav.helse.økonomi.Økonomi
 internal class ArbeidsgiverberegningBuilder {
     private val yrkesaktiviteter = mutableSetOf<Yrkesaktivitet>()
     private val inntekter: MutableMap<Yrkesaktivitet, Inntekt> = mutableMapOf()
-    private val inntektsjusteringer: MutableMap<Yrkesaktivitet, MutableList<Triple<LocalDate, LocalDate?, Inntekt>>> = mutableMapOf()
+    private val inntektsjusteringer: MutableMap<Yrkesaktivitet, Beløpstidslinje> = mutableMapOf()
     private val vedtaksperioder: MutableMap<Yrkesaktivitet, MutableList<UberegnetVedtaksperiode>> = mutableMapOf()
 
     fun fastsattÅrsinntekt(yrkesaktivitet: Yrkesaktivitet.Arbeidstaker, inntekt: Inntekt) = apply {
@@ -36,15 +31,23 @@ internal class ArbeidsgiverberegningBuilder {
         inntekter[yrkesaktivitet] = inntekt
     }
 
-    fun inntektsjusteringer(yrkesaktivitet: Yrkesaktivitet, fom: LocalDate, tom: LocalDate?, inntekt: Inntekt) = apply {
+    fun inntektsjusteringer(yrkesaktivitet: Yrkesaktivitet, beløpstidslinje: Beløpstidslinje) = apply {
         yrkesaktiviteter.add(yrkesaktivitet)
-        inntektsjusteringer.getOrPut(yrkesaktivitet) { mutableListOf() }.add(Triple(fom, tom, inntekt))
+        inntektsjusteringer[yrkesaktivitet] = (inntektsjusteringer[yrkesaktivitet] ?: Beløpstidslinje()) + beløpstidslinje
     }
 
     fun vedtaksperiode(yrkesaktivitet: Yrkesaktivitet, vedtaksperiodeId: UUID, sykdomstidslinje: Sykdomstidslinje, builder: UtbetalingstidslinjeBuilder) = apply {
         val periode = checkNotNull(sykdomstidslinje.periode()) { "Sykdomstidslinjen kan ikke være tom" }
         yrkesaktiviteter.add(yrkesaktivitet)
         vedtaksperioder.getOrPut(yrkesaktivitet) { mutableListOf() }.add(UberegnetVedtaksperiode(vedtaksperiodeId, yrkesaktivitet, periode, sykdomstidslinje, builder))
+    }
+
+    private fun perioderMedInntektjustring(beregningsperiode: Periode, yrkesaktivitet: Yrkesaktivitet): List<Periode> {
+        val inntektsjustering =  inntektsjusteringer[yrkesaktivitet] ?: return emptyList()
+        return inntektsjustering
+            .filterIsInstance<Beløpsdag>()
+            .mapNotNull { beløpsdag -> beløpsdag.dato.takeIf { it in beregningsperiode } }
+            .grupperSammenhengendePerioder()
     }
 
     /**
@@ -58,20 +61,18 @@ internal class ArbeidsgiverberegningBuilder {
             .reduce(Periode::plus)
 
         val resultat = yrkesaktiviteter.map { yrkesaktivitet ->
-            val inntektsjusteringer = inntektsjusteringer(yrkesaktivitet, beregningsperiode)
+            val inntektsjusteringer = inntektsjusteringer[yrkesaktivitet] ?: Beløpstidslinje()
             val inntekt = inntekter[yrkesaktivitet]
             val vedtaksperioder = vedtaksperioder(yrkesaktivitet, inntekt, inntektsjusteringer)
 
             val ghostOgAndreInntektskilderperioder = if (inntekt != null)
                 listOf(beregningsperiode)
             else
-                this.inntektsjusteringer[yrkesaktivitet]
-                    ?.map { (fom, tom, _) -> fom til (listOfNotNull(tom, beregningsperiode.endInclusive).min()) }
-                    ?: emptyList()
+                perioderMedInntektjustring(beregningsperiode, yrkesaktivitet)
 
             val andreInntektskilder = ghostOgAndreInntektskilderperioder
                 .flatMap { brytOppGhostperiode(it, vedtaksperioder) }
-                .map { it to (inntektsjusteringer?.subset(it) ?: Beløpstidslinje()) }
+                .map { it to (inntektsjusteringer.subset(it)) }
                 .map { (periode, inntektsjustering) ->
                     when (inntekt) {
                         // tilkommet
@@ -90,25 +91,16 @@ internal class ArbeidsgiverberegningBuilder {
         return resultat
     }
 
-    private fun vedtaksperioder(yrkesaktivitet: Yrkesaktivitet, inntekt: Inntekt?, inntektsjusteringer: Beløpstidslinje?): List<Vedtaksperiodeberegning> {
+    private fun vedtaksperioder(yrkesaktivitet: Yrkesaktivitet, inntekt: Inntekt?, inntektsjusteringer: Beløpstidslinje): List<Vedtaksperiodeberegning> {
         return (vedtaksperioder[yrkesaktivitet]?.toList() ?: emptyList()).map {
             Vedtaksperiodeberegning(
                 vedtaksperiodeId = it.vedtaksperiodeId,
                 utbetalingstidslinje = it.utbetalingstidslinjeBuilder.result(
                     sykdomstidslinje = it.sykdomstidslinje,
                     inntekt = inntekt ?: Inntekt.INGEN,
-                    inntektjusteringer = inntektsjusteringer?.subset(it.periode) ?: Beløpstidslinje()
+                    inntektjusteringer = inntektsjusteringer.subset(it.periode)
                 )
             )
-        }
-    }
-
-    private fun inntektsjusteringer(yrkesaktivitet: Yrkesaktivitet, beregningsperiode: Periode): Beløpstidslinje? {
-        return this.inntektsjusteringer[yrkesaktivitet]?.fold(Beløpstidslinje()) { resultat, (fom, tom, inntekt) ->
-            // beløpstidslinje er en lukket tidslinje som ikke støtter åpen ende, så vi begrenser "null" til siste beregningsdato
-            val reellPeriode = fom.til(tom ?: beregningsperiode.endInclusive)
-            val kilde = Kilde(MeldingsreferanseId( UUID.randomUUID()), SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
-            resultat.erstatt(Beløpstidslinje.fra(reellPeriode, inntekt, kilde))
         }
     }
 

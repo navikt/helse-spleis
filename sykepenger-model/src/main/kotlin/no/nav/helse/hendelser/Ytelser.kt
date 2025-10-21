@@ -7,6 +7,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 
@@ -62,15 +63,20 @@ class Ytelser(
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
-    internal fun inntektsendringer(): List<Triple<Arbeidsgiverberegning.Yrkesaktivitet, Kilde, InntekterForBeregning.Inntektsperiode>> {
+    internal fun inntektsendringer(): Map<Arbeidsgiverberegning.Yrkesaktivitet, Beløpstidslinje> {
         val kilde = Kilde(metadata.meldingsreferanseId, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
-        return inntekterForBeregning.inntektsperioder.map { inntektsperiode ->
-            val yrkesaktivitet = when (inntektsperiode.inntektskilde) {
+        return inntekterForBeregning.inntektsperioder
+            .groupBy { it.inntektskilde }
+            .mapKeys { (inntektskilde, _) -> when (inntektskilde) {
                 "SELVSTENDIG" -> Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig
-                else -> Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker(inntektsperiode.inntektskilde)
+                "FRILANS" -> Arbeidsgiverberegning.Yrkesaktivitet.Frilans
+                else -> Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker(inntektskilde)
+            } }
+            .mapValues { (_, inntektsperioder) ->
+                inntektsperioder.fold(Beløpstidslinje()) { resultat, inntektsperiode ->
+                    resultat + Beløpstidslinje.fra(inntektsperiode.fom til inntektsperiode.tom, inntektsperiode.inntekt, kilde)
+                }
             }
-            Triple(yrkesaktivitet, kilde, inntektsperiode)
-        }
     }
 }
 
