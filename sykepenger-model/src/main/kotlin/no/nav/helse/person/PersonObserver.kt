@@ -18,7 +18,6 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 interface PersonObserver {
 
     data class PlanlagtAnnulleringEvent(
-        val yrkesaktivitet: String,
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperioder: List<UUID>,
         val fom: LocalDate,

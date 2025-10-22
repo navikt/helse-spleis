@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig.somOrganisasjonsnummer
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
@@ -574,7 +573,6 @@ class Person private constructor(
 
     internal fun emitPlanlagtAnnullering(annulleringskandidater: Set<Vedtaksperiode>, hendelse: AnnullerUtbetaling) {
         val planlagtAnnullering = PersonObserver.PlanlagtAnnulleringEvent(
-            yrkesaktivitet = hendelse.behandlingsporing.somOrganisasjonsnummer, // TODO slettes etterhvert
             yrkesaktivitetssporing = hendelse.behandlingsporing,
             vedtaksperioder = annulleringskandidater.map { it.id },
             fom = annulleringskandidater.minOf { it.periode.start },

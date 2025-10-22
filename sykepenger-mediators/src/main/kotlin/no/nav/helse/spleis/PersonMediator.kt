@@ -222,7 +222,6 @@ internal class PersonMediator(
             JsonMessage.newMessage(
                 "planlagt_annullering",
                 buildMap {
-                    put("yrkesaktivitet", event.yrkesaktivitet) // TODO delete
                     put("yrkesaktivitetstype", event.yrkesaktivitetssporing.somYrkesaktivitetstype)
                     compute("organisasjonsnummer") { _, _ ->
                         (event.yrkesaktivitetssporing as? Behandlingsporing.Yrkesaktivitet.Arbeidstaker)?.organisasjonsnummer
