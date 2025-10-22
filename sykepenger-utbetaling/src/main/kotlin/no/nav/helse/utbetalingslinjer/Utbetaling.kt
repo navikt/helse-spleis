@@ -12,7 +12,6 @@ import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.forrigeDag
-import no.nav.helse.hendelser.AnnullerUtbetalingHendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringHendelse
 import no.nav.helse.hendelser.UtbetalingmodulHendelse
@@ -199,20 +198,6 @@ class Utbetaling private constructor(
         val simuleringsResultat = simuleringHendelse.simuleringsResultat ?: return aktivitetslogg.info("Ingenting ble simulert")
         val harNegativtTotalbeløp = simuleringsResultat.totalbeløp < 0
         if (harNegativtTotalbeløp) aktivitetslogg.varsel(Varselkode.RV_SI_3)
-    }
-
-    fun annuller(hendelse: AnnullerUtbetalingHendelse, aktivitetslogg: IAktivitetslogg, alleUtbetalinger: List<Utbetaling>): Utbetaling? {
-        val korrelerendeUtbetaling = alleUtbetalinger.firstOrNull { it.id == hendelse.utbetalingId } ?: return null
-        if (korrelerendeUtbetaling.korrelasjonsId != this.korrelasjonsId) return null
-
-        val aktiveUtbetalinger = alleUtbetalinger.aktive()
-
-        val sisteUtbetalteForUtbetaling = checkNotNull(aktiveUtbetalinger.singleOrNull { it.hørerSammen(this) }) {
-            "Det er gjort forsøk på å annullere en utbetaling som ikke lenger er aktiv"
-        }
-
-        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(sisteUtbetalteForUtbetaling)
-        return sisteUtbetalteForUtbetaling.opphør(aktivitetsloggMedUtbetalingkontekst)
     }
 
     fun sisteAktiveMedSammeKorrelasjonsId(utbetalinger: MutableList<Utbetaling>): Utbetaling? {

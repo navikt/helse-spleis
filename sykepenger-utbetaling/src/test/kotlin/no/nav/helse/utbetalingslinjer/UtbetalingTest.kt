@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
-import no.nav.helse.hendelser.AnnullerUtbetalingHendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Saksbehandler
 import no.nav.helse.hendelser.SimuleringHendelse
@@ -507,12 +506,8 @@ internal class UtbetalingTest {
         }
     }
 
-    private fun annuller(utbetaling: Utbetaling, utbetalingId: UUID = utbetaling.inspektør.utbetalingId) =
-        utbetaling.annuller(
-            hendelse = AnnullerUtbetaling(utbetalingId),
-            Aktivitetslogg(),
-            alleUtbetalinger = listOf(utbetaling)
-        )?.also {
+    private fun annuller(utbetaling: Utbetaling) =
+        utbetaling.lagAnnulleringsutbetaling(Aktivitetslogg())?.also {
             it.opprett(aktivitetslogg)
         }
 
@@ -534,12 +529,6 @@ internal class UtbetalingTest {
         override val avstemmingsnøkkel: Long = 123456789L
         override val overføringstidspunkt: LocalDateTime = LocalDateTime.now()
         override val melding: String = ""
-    }
-
-    private class AnnullerUtbetaling(
-        override val utbetalingId: UUID
-    ) : AnnullerUtbetalingHendelse {
-        override val vurdering: Utbetaling.Vurdering = Utbetaling.Vurdering(true, "Z999999", "utbetaling@nav.no", LocalDateTime.now(), false)
     }
 
     private class Simulering(
