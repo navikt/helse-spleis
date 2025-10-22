@@ -42,14 +42,27 @@ internal class Ventetidberegner {
                     }
                 }
 
+                is Dag.Arbeidsdag,
+                is Dag.FriskHelgedag -> {
+                    if (aktivVentetid?.ferdigAvklart == true) {
+                        if (aktivVentetid.oppholdsdager.count() < MAKSIMALT_ANTALL_OPPHOLDSDAGER) {
+                            aktivVentetid = aktivVentetid.opphold(dag.dato)
+                        } else {
+                            ventetider.add(aktivVentetid.somAvklaring())
+                            aktivVentetid = null
+                        }
+                    } else if (aktivVentetid?.ferdigAvklart == false) {
+                        ventetider.add(aktivVentetid.somAvklaring())
+                        aktivVentetid = null
+                    }
+                }
+
                 is Dag.AndreYtelser,
                 is Dag.ArbeidIkkeGjenopptattDag,
-                is Dag.Arbeidsdag,
                 is Dag.ArbeidsgiverHelgedag,
                 is Dag.Arbeidsgiverdag,
                 is Dag.Feriedag,
                 is Dag.ForeldetSykedag,
-                is Dag.FriskHelgedag,
                 is Dag.Permisjonsdag,
                 is Dag.ProblemDag -> error("forventer ikke dag av type ${dag::class.simpleName} i ventetidsberegning")
             }
