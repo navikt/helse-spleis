@@ -50,6 +50,7 @@ class Utbetaling private constructor(
     private val maksdato: LocalDate,
     private val forbrukteSykedager: Int?,
     private val gjenståendeSykedager: Int?,
+    // annulleringer brukes ikke mer, men finnes av historiske årsaker da listen kan være "ikke-tom" på tidligere utbetalinger
     private val annulleringer: List<Utbetaling>,
     private var vurdering: Vurdering?,
     private var overføringstidspunkt: LocalDateTime?,
@@ -80,8 +81,7 @@ class Utbetaling private constructor(
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        korrelasjonsId: UUID = UUID.randomUUID(),
-        annulleringer: List<Utbetaling> = emptyList()
+        korrelasjonsId: UUID = UUID.randomUUID()
     ) : this(
         UUID.randomUUID(),
         korrelasjonsId,
@@ -95,14 +95,12 @@ class Utbetaling private constructor(
         maksdato,
         forbrukteSykedager,
         gjenståendeSykedager,
-        annulleringer,
+        emptyList(),
         null,
         null,
         null,
         null
-    ) {
-        check(annulleringer.all { it.type == ANNULLERING }) { "skal bare ha annulleringer" }
-    }
+    )
 
     internal var tilstand: Tilstand = tilstand
         private set
@@ -124,7 +122,7 @@ class Utbetaling private constructor(
     private fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
     private fun erAktiv() = erAvsluttet() || erInFlight()
     private fun erAktivEllerUbetalt() = erAktiv() || erUbetalt()
-    fun erInFlight() = tilstand == Overført || annulleringer.any { it.tilstand == Overført }
+    fun erInFlight() = tilstand == Overført
     fun erAnnulleringInFlight() = erAnnullering() && erInFlight()
     fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
     fun erAvvist() = tilstand == IkkeGodkjent
@@ -135,8 +133,7 @@ class Utbetaling private constructor(
     fun hørerSammen(other: Utbetaling) =
         this.korrelasjonsId == other.korrelasjonsId
 
-    fun harUtbetalinger() =
-        harOppdragMedUtbetalinger() || annulleringer.any { it.harOppdragMedUtbetalinger() }
+    fun harUtbetalinger() = harOppdragMedUtbetalinger()
 
     fun harOppdragMedUtbetalinger() =
         arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
@@ -159,15 +156,9 @@ class Utbetaling private constructor(
 
     fun håndterUtbetalingmodulHendelse(utbetaling: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        if (!relevantFor(utbetaling)) return håndterKvitteringForAnnullering(utbetaling, aktivitetsloggMedUtbetalingkontekst)
+        if (!relevantFor(utbetaling)) return
         if (harHåndtert(utbetaling)) return
         tilstand.kvittér(this, utbetaling, aktivitetsloggMedUtbetalingkontekst)
-    }
-
-    private fun håndterKvitteringForAnnullering(hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        if (annulleringer.none { it.relevantFor(hendelse) }) return
-        tilstand.kvittérAnnullering(this, hendelse, aktivitetsloggMedUtbetalingkontekst)
     }
 
     private fun relevantFor(utbetaling: UtbetalingmodulHendelse) =
@@ -191,8 +182,7 @@ class Utbetaling private constructor(
         tilstand.håndterPåminnelse(this, aktivitetsloggMedUtbetalingkontekst)
     }
 
-    fun gjelderFor(hendelse: UtbetalingmodulHendelse) =
-        relevantFor(hendelse) || annulleringer.any { it.relevantFor(hendelse) }
+    fun gjelderFor(hendelse: UtbetalingmodulHendelse) = relevantFor(hendelse)
 
     fun gjelderFor(hendelse: UtbetalingsavgjørelseHendelse) = hendelse.utbetalingId == this.id
 
@@ -299,8 +289,7 @@ class Utbetaling private constructor(
         kladd: Utbetalingkladd,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
-        gjenståendeSykedager: Int,
-        annulleringer: List<Utbetaling>
+        gjenståendeSykedager: Int
     ): Utbetaling {
         val nyttArbeidsgiveroppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, this.arbeidsgiverOppdrag, kladd.arbeidsgiveroppdrag)
         val nyttPersonoppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, this.personOppdrag, kladd.personoppdrag)
@@ -317,8 +306,7 @@ class Utbetaling private constructor(
             type = type,
             maksdato = maksdato,
             forbrukteSykedager = forbrukteSykedager,
-            gjenståendeSykedager = gjenståendeSykedager,
-            annulleringer = annulleringer
+            gjenståendeSykedager = gjenståendeSykedager
         )
     }
 
@@ -373,8 +361,7 @@ class Utbetaling private constructor(
                 kladd = vedtaksperiodekladd,
                 maksdato = maksdato,
                 forbrukteSykedager = forbrukteSykedager,
-                gjenståendeSykedager = gjenståendeSykedager,
-                annulleringer = emptyList()
+                gjenståendeSykedager = gjenståendeSykedager
             ) ?: Utbetaling(
                 periode = periode,
                 utbetalingstidslinje = utbetalingstidslinje,
@@ -383,8 +370,7 @@ class Utbetaling private constructor(
                 type = type,
                 maksdato = maksdato,
                 forbrukteSykedager = forbrukteSykedager,
-                gjenståendeSykedager = gjenståendeSykedager,
-                annulleringer = emptyList()
+                gjenståendeSykedager = gjenståendeSykedager
             )
             return utbetalingen
         }
@@ -397,8 +383,7 @@ class Utbetaling private constructor(
             type = type,
             maksdato = LocalDate.MAX,
             forbrukteSykedager = null,
-            gjenståendeSykedager = null,
-            annulleringer = emptyList()
+            gjenståendeSykedager = null
         )
 
         fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
@@ -486,7 +471,6 @@ class Utbetaling private constructor(
                 tilstand = when (dto.tilstand) {
                     UtbetalingTilstandDto.ANNULLERT -> Annullert
                     UtbetalingTilstandDto.FORKASTET -> Forkastet
-                    UtbetalingTilstandDto.GODKJENT -> Godkjent
                     UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> GodkjentUtenUtbetaling
                     UtbetalingTilstandDto.IKKE_GODKJENT -> IkkeGodkjent
                     UtbetalingTilstandDto.IKKE_UTBETALT -> Ubetalt
@@ -595,11 +579,6 @@ class Utbetaling private constructor(
             aktivitetslogg.funksjonellFeil(RV_UT_11)
         }
 
-        fun kvittérAnnullering(utbetaling: Utbetaling, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.info("Forventet ikke kvittering for annullering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
-            aktivitetslogg.funksjonellFeil(RV_UT_11)
-        }
-
         fun håndterPåminnelse(utbetaling: Utbetaling, påminnelse: IAktivitetslogg) {
             påminnelse.info("Utbetaling ble påminnet, men gjør ingenting")
         }
@@ -622,14 +601,12 @@ class Utbetaling private constructor(
     internal data object Ubetalt : Tilstand {
         override val status = Utbetalingstatus.IKKE_UTBETALT
         override fun forkast(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            utbetaling.annulleringer.forEach { it.forkast(aktivitetslogg) }
             aktivitetslogg.info("Forkaster utbetaling")
             utbetaling.tilstand(Forkastet, aktivitetslogg)
         }
 
         override fun godkjenn(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
             utbetaling.vurdering = vurdering
-            utbetaling.annulleringer.forEach { it.godkjenn(aktivitetslogg, vurdering) }
             utbetaling.tilstand(vurdering.avgjør(utbetaling), aktivitetslogg)
         }
 
@@ -638,36 +615,8 @@ class Utbetaling private constructor(
         }
 
         override fun simuler(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            utbetaling.annulleringer.forEach { it.simuler(aktivitetslogg) }
-
             utbetaling.arbeidsgiverOppdrag.simuler(aktivitetslogg, utbetaling.maksdato, systemident)
             utbetaling.personOppdrag.simuler(aktivitetslogg, utbetaling.maksdato, systemident)
-        }
-    }
-
-    internal data object Godkjent : Tilstand {
-        override val status = Utbetalingstatus.GODKJENT
-
-        override fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            check(utbetaling.annulleringer.isNotEmpty())
-        }
-
-        override fun håndterPåminnelse(utbetaling: Utbetaling, påminnelse: IAktivitetslogg) {
-            vurderNesteTilstand(utbetaling, påminnelse)
-        }
-
-        override fun kvittérAnnullering(utbetaling: Utbetaling, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
-            vurderNesteTilstand(utbetaling, aktivitetslogg)
-        }
-
-        private fun vurderNesteTilstand(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            if (utbetaling.annulleringer.any { !it.erAvsluttet() }) return
-            utbetaling.tilstand(
-                when {
-                    utbetaling.harOppdragMedUtbetalinger() -> Overført
-                    else -> GodkjentUtenUtbetaling
-                }, aktivitetslogg
-            )
         }
     }
 
@@ -820,7 +769,6 @@ class Utbetaling private constructor(
         internal fun avgjør(utbetaling: Utbetaling) =
             when {
                 !godkjent -> IkkeGodkjent
-                utbetaling.annulleringer.any { it.harUtbetalinger() } -> Godkjent
                 utbetaling.harOppdragMedUtbetalinger() -> Overført
                 utbetaling.type == ANNULLERING -> Annullert
                 else -> GodkjentUtenUtbetaling
@@ -858,7 +806,6 @@ class Utbetaling private constructor(
         tilstand = when (tilstand) {
             Annullert -> UtbetalingTilstandDto.ANNULLERT
             Forkastet -> UtbetalingTilstandDto.FORKASTET
-            Godkjent -> UtbetalingTilstandDto.GODKJENT
             GodkjentUtenUtbetaling -> UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING
             IkkeGodkjent -> UtbetalingTilstandDto.IKKE_GODKJENT
             Ny -> UtbetalingTilstandDto.NY

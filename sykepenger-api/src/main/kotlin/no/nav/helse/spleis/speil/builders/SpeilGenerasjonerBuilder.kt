@@ -282,7 +282,6 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.TIL_UTBETALING -> error("har ikke mappingregel for utbetalingstatus ${utbetalingDTO.status} og periodetilstand=$periodetilstand")
             }
 
-            Utbetalingstatus.Godkjent,
             Utbetalingstatus.Overført -> Periodetilstand.TilUtbetaling
 
             else -> error("har ikke mappingregel for ${utbetalingDTO.status}")
@@ -321,7 +320,6 @@ internal class SpeilGenerasjonerBuilder(
                     korrelasjonsId = it.korrelasjonsId,
                     status = when (it.tilstand) {
                         UtbetalingTilstandDto.ANNULLERT -> Utbetalingstatus.Annullert
-                        UtbetalingTilstandDto.GODKJENT -> Utbetalingstatus.Godkjent
                         UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> Utbetalingstatus.GodkjentUtenUtbetaling
                         UtbetalingTilstandDto.IKKE_GODKJENT -> Utbetalingstatus.IkkeGodkjent
                         UtbetalingTilstandDto.IKKE_UTBETALT -> Utbetalingstatus.Ubetalt
@@ -364,7 +362,6 @@ internal class SpeilGenerasjonerBuilder(
                     personFagsystemId = it.personOppdrag.fagsystemId,
                     utbetalingstatus = when (it.tilstand) {
                         UtbetalingTilstandDto.ANNULLERT -> Utbetalingstatus.Annullert
-                        UtbetalingTilstandDto.GODKJENT -> Utbetalingstatus.Godkjent
                         UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> Utbetalingstatus.GodkjentUtenUtbetaling
                         UtbetalingTilstandDto.IKKE_GODKJENT -> Utbetalingstatus.IkkeGodkjent
                         UtbetalingTilstandDto.IKKE_UTBETALT -> Utbetalingstatus.Ubetalt

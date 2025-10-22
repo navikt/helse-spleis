@@ -97,6 +97,7 @@ enum class GraphQLPeriodetilstand {
 enum class GraphQLUtbetalingstatus {
     Annullert,
     Forkastet,
+    // todo: ikke i bruk, men jeg tør ikke gjøre ting som påvirker graphql
     Godkjent,
     GodkjentUtenUtbetaling,
     IkkeGodkjent,

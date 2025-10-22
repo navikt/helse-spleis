@@ -549,7 +549,6 @@ private fun UtbetalingUtDto.tilPersonData() = PersonData.UtbetalingData(
     status = when (this.tilstand) {
         UtbetalingTilstandDto.ANNULLERT -> PersonData.UtbetalingData.UtbetalingstatusData.ANNULLERT
         UtbetalingTilstandDto.FORKASTET -> PersonData.UtbetalingData.UtbetalingstatusData.FORKASTET
-        UtbetalingTilstandDto.GODKJENT -> PersonData.UtbetalingData.UtbetalingstatusData.GODKJENT
         UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> PersonData.UtbetalingData.UtbetalingstatusData.GODKJENT_UTEN_UTBETALING
         UtbetalingTilstandDto.IKKE_GODKJENT -> PersonData.UtbetalingData.UtbetalingstatusData.IKKE_GODKJENT
         UtbetalingTilstandDto.IKKE_UTBETALT -> PersonData.UtbetalingData.UtbetalingstatusData.IKKE_UTBETALT

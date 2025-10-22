@@ -74,7 +74,6 @@ private data class Utbetalingsak(private val utbetalinger: List<UtbetalingInnDto
     val sisteOverførte = sortertEtterTidsstempel.lastOrNull {
         when (it.tilstand) {
             UtbetalingTilstandDto.ANNULLERT,
-            UtbetalingTilstandDto.GODKJENT,
             UtbetalingTilstandDto.OVERFØRT,
             UtbetalingTilstandDto.UTBETALT -> true
 

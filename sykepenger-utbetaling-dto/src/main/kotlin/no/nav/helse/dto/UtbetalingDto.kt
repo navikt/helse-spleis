@@ -23,7 +23,6 @@ sealed class UtbetalingTilstandDto {
     data object IKKE_GODKJENT : UtbetalingTilstandDto()
     data object OVERFØRT : UtbetalingTilstandDto()
     data object UTBETALT : UtbetalingTilstandDto()
-    data object GODKJENT : UtbetalingTilstandDto()
     data object GODKJENT_UTEN_UTBETALING : UtbetalingTilstandDto()
     data object ANNULLERT : UtbetalingTilstandDto()
     data object FORKASTET : UtbetalingTilstandDto()

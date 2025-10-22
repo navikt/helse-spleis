@@ -693,7 +693,6 @@ data class SpannerPersonDto(
             IKKE_GODKJENT,
             OVERFØRT,
             UTBETALT,
-            GODKJENT,
             GODKJENT_UTEN_UTBETALING,
             ANNULLERT,
             FORKASTET
@@ -1345,7 +1344,6 @@ private fun UtbetalingUtDto.tilPersonData() = UtbetalingData(
 private fun UtbetalingTilstandDto.tilPersonData() = when (this) {
     UtbetalingTilstandDto.ANNULLERT -> UtbetalingData.UtbetalingstatusData.ANNULLERT
     UtbetalingTilstandDto.FORKASTET -> UtbetalingData.UtbetalingstatusData.FORKASTET
-    UtbetalingTilstandDto.GODKJENT -> UtbetalingData.UtbetalingstatusData.GODKJENT
     UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> UtbetalingData.UtbetalingstatusData.GODKJENT_UTEN_UTBETALING
     UtbetalingTilstandDto.IKKE_GODKJENT -> UtbetalingData.UtbetalingstatusData.IKKE_GODKJENT
     UtbetalingTilstandDto.IKKE_UTBETALT -> UtbetalingData.UtbetalingstatusData.IKKE_UTBETALT

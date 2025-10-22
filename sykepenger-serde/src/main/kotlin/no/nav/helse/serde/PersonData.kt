@@ -1276,7 +1276,6 @@ data class PersonData(
             IKKE_GODKJENT,
             OVERFØRT,
             UTBETALT,
-            GODKJENT,
             GODKJENT_UTEN_UTBETALING,
             ANNULLERT,
             FORKASTET
@@ -1296,7 +1295,6 @@ data class PersonData(
                 UtbetalingstatusData.IKKE_GODKJENT -> UtbetalingTilstandDto.IKKE_GODKJENT
                 UtbetalingstatusData.OVERFØRT -> UtbetalingTilstandDto.OVERFØRT
                 UtbetalingstatusData.UTBETALT -> UtbetalingTilstandDto.UTBETALT
-                UtbetalingstatusData.GODKJENT -> UtbetalingTilstandDto.GODKJENT
                 UtbetalingstatusData.GODKJENT_UTEN_UTBETALING -> UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING
                 UtbetalingstatusData.ANNULLERT -> UtbetalingTilstandDto.ANNULLERT
                 UtbetalingstatusData.FORKASTET -> UtbetalingTilstandDto.FORKASTET
