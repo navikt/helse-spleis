@@ -32,17 +32,14 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøk
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med flere typer pensjonsgivende inntekter`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen`
-import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som støttes`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_17
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_29
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_30
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_44
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_YS_1
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -224,14 +221,14 @@ class Søknad(
 
     private fun validerInntekterFraNyeArbeidsforhold(aktivitetslogg: IAktivitetslogg) {
         if (!inntekterFraNyeArbeidsforhold) return
-        aktivitetslogg.varsel(`Tilkommen inntekt som støttes`)
+        aktivitetslogg.varsel(Varselkode.TilkommenInntekt.`Opplyst i søknaden om inntekter hen har hatt fra andre arbeidsgivere`)
     }
 
     private fun validerInntektskilder(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?) {
-        if (ikkeJobbetIDetSisteFraAnnetArbeidsforhold) aktivitetslogg.varsel(RV_SØ_44)
+        if (ikkeJobbetIDetSisteFraAnnetArbeidsforhold) aktivitetslogg.varsel(Varselkode.TilkommenInntekt.`Opplyst i søknaden om at hen er arbeidstaker hos annen arbeidsgiver, men ikke jobbet der de siste 14 dagene før hen ble sykmeldt`)
         if (!andreInntektskilder) return
-        if (vilkårsgrunnlag == null) return aktivitetslogg.funksjonellFeil(RV_SØ_10)
-        aktivitetslogg.varsel(RV_SØ_10)
+        if (vilkårsgrunnlag == null) return aktivitetslogg.funksjonellFeil(Varselkode.TilkommenInntekt.`Opplyst i søknaden om at hen har andre inntekskilder`)
+        aktivitetslogg.varsel(Varselkode.TilkommenInntekt.`Opplyst i søknaden om at hen har andre inntekskilder`)
     }
 
     internal fun utenlandskSykmelding(): Boolean {

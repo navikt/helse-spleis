@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO

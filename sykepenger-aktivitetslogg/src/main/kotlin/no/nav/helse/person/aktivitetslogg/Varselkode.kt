@@ -320,8 +320,6 @@ enum class Varselkode(
         val `Arbeidsledigsøknad er lagt til grunn` = RV_SØ_43
         val `Selvstendigsøknad med flere typer pensjonsgivende inntekter` = RV_SØ_45
 
-        val `Tilkommen inntekt som støttes` = RV_SV_5
-
         val `Arbeidsgiveropplysninger for forkastet periode` = RV_AO_1
         val `Arbeidsgiveropplysninger for periode som allerede har opplysninger` = RV_AO_2
 
@@ -329,5 +327,10 @@ enum class Varselkode(
             varsel(varselkode)
             info("${varselkode.name} detaljer: $detaljer")
         }
+    }
+    object TilkommenInntekt {
+        val `Opplyst i søknaden om inntekter hen har hatt fra andre arbeidsgivere`  = RV_SV_5
+        val `Opplyst i søknaden om at hen er arbeidstaker hos annen arbeidsgiver, men ikke jobbet der de siste 14 dagene før hen ble sykmeldt`= RV_SØ_44
+        val `Opplyst i søknaden om at hen har andre inntekskilder` = RV_SØ_10
     }
 }
