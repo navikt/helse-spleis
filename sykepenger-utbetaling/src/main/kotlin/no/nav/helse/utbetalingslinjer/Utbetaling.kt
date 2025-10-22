@@ -212,7 +212,8 @@ class Utbetaling private constructor(
     }
 
     fun lagAnnulleringsutbetaling(aktivitetslogg: IAktivitetslogg): Utbetaling? {
-        return tilstand.annuller(this, aktivitetslogg)
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
+        return tilstand.annuller(this, aktivitetsloggMedUtbetalingkontekst)
     }
 
     fun forkast(aktivitetslogg: IAktivitetslogg) {

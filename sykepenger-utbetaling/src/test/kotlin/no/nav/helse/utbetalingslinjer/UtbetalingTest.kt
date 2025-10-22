@@ -332,6 +332,16 @@ internal class UtbetalingTest {
     }
 
     @Test
+    fun annullering() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
+        val utbetaling = opprettUtbetaling(tidslinje)
+        val annullering = annuller(utbetaling) ?: fail { "forventet utbetaling" }
+        assertEquals(listOf(utbetaling.inspektør.utbetalingId.toString()), aktivitetslogg.aktiviteter.map { it.alleKontekster["utbetalingId"] })
+        assertTrue(annullering.inspektør.arbeidsgiverOppdrag.last().erOpphør())
+        assertTrue(annullering.inspektør.personOppdrag.isEmpty())
+    }
+
+    @Test
     fun `annullere delvis refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1200, refusjonsbeløp = 600)).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
@@ -507,7 +517,7 @@ internal class UtbetalingTest {
     }
 
     private fun annuller(utbetaling: Utbetaling) =
-        utbetaling.lagAnnulleringsutbetaling(Aktivitetslogg())?.also {
+        utbetaling.lagAnnulleringsutbetaling(aktivitetslogg)?.also {
             it.opprett(aktivitetslogg)
         }
 
