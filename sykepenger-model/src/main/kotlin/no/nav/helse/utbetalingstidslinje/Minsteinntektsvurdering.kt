@@ -11,45 +11,45 @@ import no.nav.helse.nesteDag
 import no.nav.helse.økonomi.Inntekt
 
 data class Minsteinntektsvurdering(
-    val minsteinntektkravTilFylte67: Inntekt,
-    val minsteinntektkravEtterFylte67: Inntekt,
-    val erUnderMinsteinntektskravTilFylte67: Boolean,
-    val erUnderMinsteinntektEtterFylte67: Boolean
+    val halvG: Inntekt,
+    val `2G`: Inntekt,
+    val erSykepengegrunnlagetUnderHalvG: Boolean,
+    val erSykepengegrunnlagetUnder2G: Boolean
 ) {
 
     fun erUnderMinsteinntektskrav(sekstisyvårsdagen: LocalDate, vedtaksperiode: Periode): Boolean {
-        if (!erUnderMinsteinntektskravTilFylte67 && !erUnderMinsteinntektEtterFylte67) return false
-        if (erUnderMinsteinntektskravTilFylte67 && vedtaksperiode.erInnenforMinsteinntektskravTilFylte67(sekstisyvårsdagen)) return true
-        return erUnderMinsteinntektEtterFylte67 && vedtaksperiode.erInnenforMinsteinntektskravEtterFylte67(sekstisyvårsdagen)
+        if (!erSykepengegrunnlagetUnderHalvG && !erSykepengegrunnlagetUnder2G) return false
+        if (erSykepengegrunnlagetUnderHalvG && vedtaksperiode.erFørFylte67(sekstisyvårsdagen)) return true
+        return erSykepengegrunnlagetUnder2G && vedtaksperiode.erEtterFylte67(sekstisyvårsdagen)
     }
 
-    private fun Periode.erInnenforMinsteinntektskravTilFylte67(sekstisyvårsdagen: LocalDate) = this.start <= sekstisyvårsdagen
-    private fun Periode.erInnenforMinsteinntektskravEtterFylte67(sekstisyvårsdagen: LocalDate) = this.endInclusive > sekstisyvårsdagen
+    private fun Periode.erFørFylte67(sekstisyvårsdagen: LocalDate) = this.start <= sekstisyvårsdagen
+    private fun Periode.erEtterFylte67(sekstisyvårsdagen: LocalDate) = this.endInclusive > sekstisyvårsdagen
 
     fun subsummere(subsumsjonslogg: Subsumsjonslogg, skjæringstidspunkt: LocalDate, beregningsgrunnlag: Inntekt, sekstisyvårsdagen: LocalDate, vedtaksperiode: Periode) {
-        if (vedtaksperiode.erInnenforMinsteinntektskravTilFylte67(sekstisyvårsdagen)) {
+        if (vedtaksperiode.erFørFylte67(sekstisyvårsdagen)) {
             subsumsjonslogg.logg(
                 `§ 8-3 ledd 2 punktum 1`(
-                    oppfylt = !erUnderMinsteinntektskravTilFylte67,
+                    oppfylt = !erSykepengegrunnlagetUnderHalvG,
                     skjæringstidspunkt = skjæringstidspunkt,
                     beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
-                    minimumInntektÅrlig = minsteinntektkravTilFylte67.årlig
+                    minimumInntektÅrlig = halvG.årlig
                 )
             )
         }
 
-        if (vedtaksperiode.erInnenforMinsteinntektskravEtterFylte67(sekstisyvårsdagen)) {
+        if (vedtaksperiode.erEtterFylte67(sekstisyvårsdagen)) {
             subsumsjonslogg
                 .logg(
                     `§ 8-51 ledd 2`(
-                        oppfylt = !erUnderMinsteinntektEtterFylte67,
+                        oppfylt = !erSykepengegrunnlagetUnder2G,
                         utfallFom = maxOf(sekstisyvårsdagen.nesteDag, vedtaksperiode.start),
                         utfallTom = vedtaksperiode.endInclusive,
                         sekstisyvårsdag = sekstisyvårsdagen,
                         periodeFom = vedtaksperiode.start,
                         periodeTom = vedtaksperiode.endInclusive,
                         beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
-                        minimumInntektÅrlig = minsteinntektkravEtterFylte67.årlig
+                        minimumInntektÅrlig = `2G`.årlig
                     )
                 )
         }
@@ -63,10 +63,10 @@ data class Minsteinntektsvurdering(
             val erUnderMinsteinntektEtterFylte67 = sykepengegrunnlag < minsteinntektkravEtterFylte67
 
             return Minsteinntektsvurdering(
-                minsteinntektkravTilFylte67 = minsteinntektkravTilFylte67,
-                minsteinntektkravEtterFylte67 = minsteinntektkravEtterFylte67,
-                erUnderMinsteinntektskravTilFylte67 = erUnderMinsteinntektskravTilFylte67,
-                erUnderMinsteinntektEtterFylte67 = erUnderMinsteinntektEtterFylte67
+                halvG = minsteinntektkravTilFylte67,
+                `2G` = minsteinntektkravEtterFylte67,
+                erSykepengegrunnlagetUnderHalvG = erUnderMinsteinntektskravTilFylte67,
+                erSykepengegrunnlagetUnder2G = erUnderMinsteinntektEtterFylte67
             )
         }
     }

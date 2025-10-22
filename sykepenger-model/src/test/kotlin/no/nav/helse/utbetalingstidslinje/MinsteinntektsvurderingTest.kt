@@ -22,8 +22,8 @@ internal class MinsteinntektsvurderingTest {
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = minsteinntektkravTilFylte67
         )
-        assertFalse(vurdering.erUnderMinsteinntektskravTilFylte67)
-        assertTrue(vurdering.erUnderMinsteinntektEtterFylte67)
+        assertFalse(vurdering.erSykepengegrunnlagetUnderHalvG)
+        assertTrue(vurdering.erSykepengegrunnlagetUnder2G)
         assertFalse(vurdering.erUnderMinsteinntektskrav(1.april, februar))
     }
 
@@ -35,8 +35,8 @@ internal class MinsteinntektsvurderingTest {
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = minsteinntektkravTilFylte67
         )
-        assertFalse(vurdering.erUnderMinsteinntektskravTilFylte67)
-        assertFalse(vurdering.erUnderMinsteinntektEtterFylte67)
+        assertFalse(vurdering.erSykepengegrunnlagetUnderHalvG)
+        assertFalse(vurdering.erSykepengegrunnlagetUnder2G)
         assertFalse(vurdering.erUnderMinsteinntektskrav(1.januar, februar))
     }
 
@@ -48,8 +48,8 @@ internal class MinsteinntektsvurderingTest {
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = minsteinntektkravTilFylte67
         )
-        assertFalse(vurdering.erUnderMinsteinntektskravTilFylte67)
-        assertTrue(vurdering.erUnderMinsteinntektEtterFylte67)
+        assertFalse(vurdering.erSykepengegrunnlagetUnderHalvG)
+        assertTrue(vurdering.erSykepengegrunnlagetUnder2G)
         assertFalse(vurdering.erUnderMinsteinntektskrav(1.februar, 1.februar.somPeriode()))
         assertTrue(vurdering.erUnderMinsteinntektskrav(1.februar, 2.februar.somPeriode()))
     }
@@ -62,8 +62,8 @@ internal class MinsteinntektsvurderingTest {
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = minsteinntektkravTilFylte67 - 1.daglig
         )
-        assertTrue(vurdering.erUnderMinsteinntektskravTilFylte67)
-        assertTrue(vurdering.erUnderMinsteinntektEtterFylte67)
+        assertTrue(vurdering.erSykepengegrunnlagetUnderHalvG)
+        assertTrue(vurdering.erSykepengegrunnlagetUnder2G)
         assertTrue(vurdering.erUnderMinsteinntektskrav(1.april, februar))
     }
 
@@ -75,8 +75,8 @@ internal class MinsteinntektsvurderingTest {
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = minsteinntektkravTilFylte67 - 1.daglig
         )
-        assertFalse(vurdering.erUnderMinsteinntektskravTilFylte67)
-        assertTrue(vurdering.erUnderMinsteinntektEtterFylte67)
+        assertFalse(vurdering.erSykepengegrunnlagetUnderHalvG)
+        assertTrue(vurdering.erSykepengegrunnlagetUnder2G)
         assertTrue(vurdering.erUnderMinsteinntektskrav(10.februar, februar))
     }
 }

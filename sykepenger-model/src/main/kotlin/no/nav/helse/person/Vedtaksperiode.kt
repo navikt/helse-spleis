@@ -1088,8 +1088,8 @@ internal class Vedtaksperiode private constructor(
             sekstisyvårsdagen = person.alder.redusertYtelseAlder,
             syttiårsdagen = person.alder.syttiårsdagen,
             dødsdato = person.alder.dødsdato,
-            erUnderMinsteinntektskravTilFylte67 = minsteinntektsvurdering.erUnderMinsteinntektskravTilFylte67,
-            erUnderMinsteinntektEtterFylte67 = minsteinntektsvurdering.erUnderMinsteinntektEtterFylte67,
+            erUnderMinsteinntektskravTilFylte67 = minsteinntektsvurdering.erSykepengegrunnlagetUnderHalvG,
+            erUnderMinsteinntektEtterFylte67 = minsteinntektsvurdering.erSykepengegrunnlagetUnder2G,
             historisktidslinje = historisktidslinje,
             perioderMedMinimumSykdomsgradVurdertOK = person.minimumSykdomsgradsvurdering.perioder,
             regler = person.regler
