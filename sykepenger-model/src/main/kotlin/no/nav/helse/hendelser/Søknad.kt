@@ -231,11 +231,6 @@ class Søknad(
         aktivitetslogg.varsel(Varselkode.TilkommenInntekt.`Opplyst i søknaden om at hen har andre inntekskilder`)
     }
 
-    internal fun utenlandskSykmelding(): Boolean {
-        if (utenlandskSykmelding) return true
-        return false
-    }
-
     internal fun forUng(aktivitetslogg: IAktivitetslogg, alder: Alder) = alder.forUngForÅSøke(metadata.innsendt.toLocalDate()).also {
         if (it) aktivitetslogg.funksjonellFeil(RV_SØ_17)
     }
