@@ -17,7 +17,6 @@ import no.nav.helse.feriepenger.Feriepengegrunnlagsdag.Mottaker
 import no.nav.helse.feriepenger.Feriepengegrunnlagstidslinje
 import no.nav.helse.feriepenger.Feriepengeutbetaling
 import no.nav.helse.hendelser.AnmodningOmForkasting
-import no.nav.helse.hendelser.AnnullerTomUtbetaling
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
@@ -28,45 +27,30 @@ import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.hendelser.DagerFraInntektsmelding
-import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
-import no.nav.helse.hendelser.GjenopptaBehandling
-import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Hendelseskilde
-import no.nav.helse.hendelser.IdentOpphørt
-import no.nav.helse.hendelser.Infotrygdendring
-import no.nav.helse.hendelser.Inntektsendringer
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
-import no.nav.helse.hendelser.KanIkkeBehandlesHer
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.MeldingsreferanseId
-import no.nav.helse.hendelser.Migrate
-import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
-import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.mursteinsperioder
-import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.Utbetalingpåminnelse
-import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
-import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.erLik
@@ -757,57 +741,12 @@ internal class Yrkesaktivitet private constructor(
     }
 
     internal fun lagAnnulleringsutbetaling(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, utbetalingSomSkalAnnulleres: Utbetaling): Utbetaling {
-        val annullering = utbetalingSomSkalAnnulleres.lagAnnulleringsutbetaling(aktivitetslogg)
+        val vurdering = (hendelse as? AnnullerUtbetaling)?.vurdering
+            ?: Utbetaling.Vurdering(true, "Automatisk behandlet", "tbd@nav.no", LocalDateTime.now(), true)
+        val annullering = utbetalingSomSkalAnnulleres.lagAnnulleringsutbetaling(aktivitetslogg, vurdering)
         checkNotNull(annullering) { "Klarte ikke lage annullering for utbetaling ${utbetalingSomSkalAnnulleres.id}. Det er litt rart, eller?" }
-        val vurdering = lagAnnulleringsvurdering(hendelse)
-        annullering.leggTilVurdering(vurdering)
         nyUtbetaling(aktivitetslogg, annullering)
         return annullering
-    }
-
-    private fun lagAnnulleringsvurdering(hendelse: Hendelse): Utbetaling.Vurdering {
-        return when (hendelse) {
-            is AnnullerUtbetaling -> hendelse.vurdering
-
-            is AnmodningOmForkasting,
-            is Arbeidsgiveropplysninger,
-            is AvbruttSøknad,
-            is KanIkkeBehandlesHer,
-            is Utbetalingsgodkjenning,
-            is VedtakFattet,
-            is Dødsmelding,
-            is FeriepengeutbetalingHendelse,
-            is ForkastSykmeldingsperioder,
-            is GjenopptaBehandling,
-            is Grunnbeløpsregulering,
-            is IdentOpphørt,
-            is Infotrygdendring,
-            is Inntektsendringer,
-            is Inntektsmelding,
-            is InntektsmeldingerReplay,
-            is KorrigerteArbeidsgiveropplysninger,
-            is Migrate,
-            is MinimumSykdomsgradsvurderingMelding,
-            is OverstyrArbeidsforhold,
-            is OverstyrArbeidsgiveropplysninger,
-            is SkjønnsmessigFastsettelse,
-            is OverstyrTidslinje,
-            is PersonPåminnelse,
-            is Påminnelse,
-            is Simulering,
-            is SykepengegrunnlagForArbeidsgiver,
-            is Sykmelding,
-            is Søknad,
-            is UtbetalingHendelse,
-            is Utbetalingpåminnelse,
-            is Utbetalingshistorikk,
-            is UtbetalingshistorikkEtterInfotrygdendring,
-            is UtbetalingshistorikkForFeriepenger,
-            is Vilkårsgrunnlag,
-            is AnnullerTomUtbetaling,
-            is Ytelser -> Utbetaling.Vurdering(true, "Automatisk behandlet", "tbd@nav.no", LocalDateTime.now(), true)
-
-        }
     }
 
     internal fun sisteAktiveUtbetalingMedSammeKorrelasjonsId(utbetaling: Utbetaling) = utbetaling.sisteAktiveMedSammeKorrelasjonsId(utbetalinger)

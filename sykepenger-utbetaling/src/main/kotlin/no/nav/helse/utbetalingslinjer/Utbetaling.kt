@@ -207,13 +207,48 @@ class Utbetaling private constructor(
         return sisteUtbetalteForUtbetaling
     }
 
-    fun leggTilVurdering(vurdering: Vurdering) {
-        this.vurdering = vurdering
+    fun lagAnnulleringsutbetaling(aktivitetslogg: IAktivitetslogg, vurdering: Vurdering): Utbetaling? {
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
+        return lagAnnullering(aktivitetsloggMedUtbetalingkontekst, vurdering)
     }
 
-    fun lagAnnulleringsutbetaling(aktivitetslogg: IAktivitetslogg): Utbetaling? {
-        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        return tilstand.annuller(this, aktivitetsloggMedUtbetalingkontekst)
+    private fun lagAnnullering(aktivitetslogg: IAktivitetslogg, vurdering: Vurdering): Utbetaling? {
+        return when (tilstand) {
+            Utbetalt,
+            GodkjentUtenUtbetaling -> {
+                Utbetaling(
+                    id = UUID.randomUUID(),
+                    korrelasjonsId = korrelasjonsId,
+                    periode = periode,
+                    utbetalingstidslinje = utbetalingstidslinje,
+                    arbeidsgiverOppdrag = arbeidsgiverOppdrag.annuller(aktivitetslogg),
+                    personOppdrag = personOppdrag.annuller(aktivitetslogg),
+                    tidsstempel = LocalDateTime.now(),
+                    tilstand = Ny,
+                    type = ANNULLERING,
+                    maksdato = LocalDate.MAX,
+                    forbrukteSykedager = null,
+                    gjenståendeSykedager = null,
+                    annulleringer = emptyList(),
+                    vurdering = vurdering,
+                    overføringstidspunkt = null,
+                    avstemmingsnøkkel = null,
+                    avsluttet = null
+                )
+                    .also { aktivitetslogg.info("Oppretter annullering med id ${it.id}") }
+            }
+
+            Annullert,
+            Forkastet,
+            IkkeGodkjent,
+            Ny,
+            Overført,
+            Ubetalt -> {
+                aktivitetslogg.info("Forventet ikke å annullere på utbetaling=${id} i tilstand=${this::class.simpleName}")
+                aktivitetslogg.funksjonellFeil(RV_UT_9)
+                null
+            }
+        }
     }
 
     fun forkast(aktivitetslogg: IAktivitetslogg) {
@@ -549,12 +584,6 @@ class Utbetaling private constructor(
             aktivitetslogg.funksjonellFeil(RV_UT_25)
         }
 
-        fun annuller(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg): Utbetaling? {
-            aktivitetslogg.info("Forventet ikke å annullere på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
-            aktivitetslogg.funksjonellFeil(RV_UT_9)
-            return null
-        }
-
         fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
             aktivitetslogg.funksjonellFeil(RV_UT_11)
@@ -608,18 +637,6 @@ class Utbetaling private constructor(
             utbetaling.vurdering?.avsluttetUtenUtbetaling(utbetaling)
             utbetaling.avsluttet = LocalDateTime.now()
         }
-
-        override fun annuller(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) = Utbetaling(
-            periode = utbetaling.periode,
-            utbetalingstidslinje = utbetaling.utbetalingstidslinje,
-            arbeidsgiverOppdrag = utbetaling.arbeidsgiverOppdrag.annuller(aktivitetslogg),
-            personOppdrag = utbetaling.personOppdrag.annuller(aktivitetslogg),
-            type = ANNULLERING,
-            maksdato = LocalDate.MAX,
-            forbrukteSykedager = null,
-            gjenståendeSykedager = null,
-            korrelasjonsId = utbetaling.korrelasjonsId
-        ).also { aktivitetslogg.info("Oppretter annullering med id ${it.id}") }
     }
 
     internal data object Overført : Tilstand {
@@ -654,19 +671,6 @@ class Utbetaling private constructor(
             utbetaling.vurdering?.utbetalt(utbetaling)
             utbetaling.avsluttet = LocalDateTime.now()
         }
-
-        override fun annuller(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) =
-            Utbetaling(
-                periode = utbetaling.periode,
-                utbetalingstidslinje = utbetaling.utbetalingstidslinje,
-                arbeidsgiverOppdrag = utbetaling.arbeidsgiverOppdrag.annuller(aktivitetslogg),
-                personOppdrag = utbetaling.personOppdrag.annuller(aktivitetslogg),
-                type = ANNULLERING,
-                maksdato = LocalDate.MAX,
-                forbrukteSykedager = null,
-                gjenståendeSykedager = null,
-                korrelasjonsId = utbetaling.korrelasjonsId
-            ).also { aktivitetslogg.info("Oppretter annullering med id ${it.id}") }
     }
 
     internal data object IkkeGodkjent : Tilstand {

@@ -518,7 +518,7 @@ internal class UtbetalingTest {
     }
 
     private fun annuller(utbetaling: Utbetaling) =
-        utbetaling.lagAnnulleringsutbetaling(aktivitetslogg)?.also {
+        utbetaling.lagAnnulleringsutbetaling(aktivitetslogg, Utbetaling.Vurdering(true, "Z999999", "tbd@nav.no", LocalDateTime.now(), true))?.also {
             it.opprett(aktivitetslogg)
         }
 
