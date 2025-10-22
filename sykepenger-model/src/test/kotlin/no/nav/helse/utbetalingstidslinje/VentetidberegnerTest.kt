@@ -17,7 +17,7 @@ internal class VentetidberegnerTest {
 
     @Test
     fun `ventetiden utgjør de første 16 dagene`() {
-        val tidslinje = 17.S
+        val tidslinje = resetSeed { 17.S }
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
@@ -39,7 +39,7 @@ internal class VentetidberegnerTest {
 
     @Test
     fun `ventetiden er ikke ferdig hvis det er nøyaktig 16 dager`() {
-        val tidslinje = 16.S
+        val tidslinje = resetSeed { 16.S }
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
@@ -140,7 +140,6 @@ internal class VentetidberegnerTest {
         }
     }
 
-    @Disabled
     @Test
     fun `samme ventetid hvis det er utbetalt sykepenger og inntil 15 dager opphold mellom`() {
         val tidslinje = resetSeed { 17.S + 15.opphold + 10.S }
@@ -200,7 +199,6 @@ internal class VentetidberegnerTest {
         }
     }
 
-    @Disabled
     @Test
     fun `samme ventetid hvis det er opphold i helg mellom - lørdag og søndag mellom`() {
         val tidslinje = resetSeed { 5.S + 2.opphold + 12.S }
@@ -212,7 +210,6 @@ internal class VentetidberegnerTest {
         }
     }
 
-    @Disabled
     @Test
     fun `samme ventetid hvis det er opphold i helg mellom - lørdag mellom`() {
         val tidslinje = resetSeed { 5.S + 1.opphold + 12.S }
@@ -224,7 +221,6 @@ internal class VentetidberegnerTest {
         }
     }
 
-    @Disabled
     @Test
     fun `samme ventetid hvis det er opphold i helg mellom - søndag mellom`() {
         val tidslinje = resetSeed { 6.S + 1.opphold + 12.S }

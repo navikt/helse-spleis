@@ -23,6 +23,12 @@ internal class Ventetidberegner {
                     }
                 }
 
+                is Dag.UkjentDag -> {
+                    if (dag.dato.erHelg()) {
+                        aktivVentetid = aktivVentetid?.utvid(dag.dato)
+                    }
+                }
+
                 is Dag.AndreYtelser,
                 is Dag.ArbeidIkkeGjenopptattDag,
                 is Dag.Arbeidsdag,
@@ -32,8 +38,7 @@ internal class Ventetidberegner {
                 is Dag.ForeldetSykedag,
                 is Dag.FriskHelgedag,
                 is Dag.Permisjonsdag,
-                is Dag.ProblemDag,
-                is Dag.UkjentDag -> error("forventer ikke dag av type ${dag::class.simpleName} i ventetidsberegning")
+                is Dag.ProblemDag -> error("forventer ikke dag av type ${dag::class.simpleName} i ventetidsberegning")
             }
         }
         return ventetider.toList() + listOfNotNull(aktivVentetid?.somAvklaring())
