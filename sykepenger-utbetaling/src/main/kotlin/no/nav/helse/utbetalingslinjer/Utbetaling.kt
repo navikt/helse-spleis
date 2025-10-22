@@ -211,10 +211,9 @@ class Utbetaling private constructor(
         this.vurdering = vurdering
     }
 
-    fun lagAnnulleringsutbetaling(aktivitetslogg: IAktivitetslogg) = opphør(aktivitetslogg)
-
-    private fun opphør(aktivitetslogg: IAktivitetslogg) =
-        tilstand.annuller(this, aktivitetslogg)
+    fun lagAnnulleringsutbetaling(aktivitetslogg: IAktivitetslogg): Utbetaling? {
+        return tilstand.annuller(this, aktivitetslogg)
+    }
 
     fun forkast(aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
@@ -331,12 +330,8 @@ class Utbetaling private constructor(
             }
 
             val forrigeUtbetalte = utbetalinger.aktive(periode)
+            check(forrigeUtbetalte.size <= 1) { "finner flere enn én korrelerende utbetaling for periode $periode: ${forrigeUtbetalte.map { it.id }}" }
             val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull()
-            val annulleringer = forrigeUtbetalte
-                .filterNot { it === korrelerendeUtbetaling }
-                .mapNotNull { it.opphør(aktivitetslogg) }
-
-            check(annulleringer.isEmpty()) { "det foreslås å annullere andre utbetalinger!" }
 
             val utbetalingen = korrelerendeUtbetaling?.nyUtbetaling(
                 aktivitetslogg = aktivitetslogg,
