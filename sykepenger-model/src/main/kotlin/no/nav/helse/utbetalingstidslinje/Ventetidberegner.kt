@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.utbetalingstidslinje.Ventetidberegner.Ventetidtelling.Companion.MAKSIMALT_ANTALL_OPPHOLDSDAGER
 
 internal class Ventetidberegner {
 
@@ -24,8 +25,20 @@ internal class Ventetidberegner {
                 }
 
                 is Dag.UkjentDag -> {
-                    if (dag.dato.erHelg()) {
-                        aktivVentetid = aktivVentetid?.utvid(dag.dato)
+                    if (aktivVentetid?.ferdigAvklart == true) {
+                        if (aktivVentetid.oppholdsdager.count() < MAKSIMALT_ANTALL_OPPHOLDSDAGER) {
+                            aktivVentetid = aktivVentetid.opphold(dag.dato)
+                        } else {
+                            ventetider.add(aktivVentetid.somAvklaring())
+                            aktivVentetid = null
+                        }
+                    } else if (aktivVentetid?.ferdigAvklart == false) {
+                        if (aktivVentetid.oppholdsdager.isEmpty() && dag.dato.erHelg()) {
+                            aktivVentetid = aktivVentetid.utvid(dag.dato)
+                        } else {
+                            ventetider.add(aktivVentetid.somAvklaring())
+                            aktivVentetid = null
+                        }
                     }
                 }
 
@@ -55,10 +68,12 @@ internal class Ventetidberegner {
         val ventetid = dager.take(MAKSIMALT_ANTALL_VENTETIDSDAGER)
         val ferdigAvklart = dager.size >= MAKSIMALT_ANTALL_VENTETIDSDAGER && dager.drop(MAKSIMALT_ANTALL_VENTETIDSDAGER).any { !it.erHelg() }
 
-        fun utvid(dato: LocalDate) = copy(dager = this.dager + dato)
+        fun utvid(dato: LocalDate) = copy(dager = this.dager + dato, oppholdsdager = emptySet())
+        fun opphold(dato: LocalDate) = copy(oppholdsdager = this.oppholdsdager + dato)
 
         companion object {
             const val MAKSIMALT_ANTALL_VENTETIDSDAGER = 16
+            const val MAKSIMALT_ANTALL_OPPHOLDSDAGER = 15
         }
     }
 
