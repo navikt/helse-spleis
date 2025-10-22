@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.søknad
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
@@ -43,16 +42,8 @@ internal class AndreInntektskilderTest: AbstractDslTest() {
             håndterSøknad(januar, andreInntektskilder = false)
             håndterSøknad(februar, andreInntektskilder = true)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            assertForventetFeil(
-                forklaring = "Hvorfor er om vi kaster ut eller ei avhengig av om vi har vilkårsprøvd? føles random?",
-                nå = {
-                    assertSisteForkastetTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-                },
-                ønsket = {
-                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-                    assertVarsel(Varselkode.TilkommenInntekt.`Opplyst i søknaden om at hen har andre inntekskilder`, 2.vedtaksperiode.filter())
-                }
-            )
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertVarsel(Varselkode.TilkommenInntekt.`Opplyst i søknaden om at hen har andre inntekskilder`, 2.vedtaksperiode.filter())
         }
     }
 

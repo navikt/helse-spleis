@@ -126,7 +126,7 @@ class Søknad(
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, refusjonstidslinje: Beløpstidslinje, subsumsjonslogg: Subsumsjonslogg, skjæringstidspunkt: LocalDate): IAktivitetslogg {
         valider(aktivitetslogg, subsumsjonslogg)
-        validerInntektskilder(aktivitetslogg, vilkårsgrunnlag)
+        validerInntektskilder(aktivitetslogg, skjæringstidspunkt)
 
         when (arbeidssituasjon) {
             Arbeidssituasjon.ARBEIDSTAKER,
@@ -224,10 +224,10 @@ class Søknad(
         aktivitetslogg.varsel(Varselkode.TilkommenInntekt.`Opplyst i søknaden om inntekter hen har hatt fra andre arbeidsgivere`)
     }
 
-    private fun validerInntektskilder(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?) {
+    private fun validerInntektskilder(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
         if (ikkeJobbetIDetSisteFraAnnetArbeidsforhold) aktivitetslogg.varsel(Varselkode.TilkommenInntekt.`Opplyst i søknaden om at hen er arbeidstaker hos annen arbeidsgiver, men ikke jobbet der de siste 14 dagene før hen ble sykmeldt`)
         if (!andreInntektskilder) return
-        if (vilkårsgrunnlag == null) return aktivitetslogg.funksjonellFeil(Varselkode.TilkommenInntekt.`Opplyst i søknaden om at hen har andre inntekskilder`)
+        if (skjæringstidspunkt in sykdomsperiode) return aktivitetslogg.funksjonellFeil(Varselkode.TilkommenInntekt.`Opplyst i søknaden om at hen har andre inntekskilder`)
         aktivitetslogg.varsel(Varselkode.TilkommenInntekt.`Opplyst i søknaden om at hen har andre inntekskilder`)
     }
 
