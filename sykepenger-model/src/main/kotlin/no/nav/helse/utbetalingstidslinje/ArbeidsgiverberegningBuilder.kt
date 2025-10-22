@@ -42,12 +42,9 @@ internal class ArbeidsgiverberegningBuilder {
         vedtaksperioder.getOrPut(yrkesaktivitet) { mutableListOf() }.add(UberegnetVedtaksperiode(vedtaksperiodeId, yrkesaktivitet, periode, sykdomstidslinje, builder))
     }
 
-    private fun perioderMedInntektjustring(beregningsperiode: Periode, yrkesaktivitet: Yrkesaktivitet): List<Periode> {
+    private fun perioderMedInntektjustring(yrkesaktivitet: Yrkesaktivitet): List<Periode> {
         val inntektsjustering =  inntektsjusteringer[yrkesaktivitet] ?: return emptyList()
-        return inntektsjustering
-            .filterIsInstance<Beløpsdag>()
-            .mapNotNull { beløpsdag -> beløpsdag.dato.takeIf { it in beregningsperiode } }
-            .grupperSammenhengendePerioder()
+        return inntektsjustering.filterIsInstance<Beløpsdag>().map(Beløpsdag::dato).grupperSammenhengendePerioder()
     }
 
     /**
@@ -68,7 +65,7 @@ internal class ArbeidsgiverberegningBuilder {
             val ghostOgAndreInntektskilderperioder = if (inntekt != null)
                 listOf(beregningsperiode)
             else
-                perioderMedInntektjustring(beregningsperiode, yrkesaktivitet)
+                perioderMedInntektjustring(yrkesaktivitet)
 
             val andreInntektskilder = ghostOgAndreInntektskilderperioder
                 .flatMap { brytOppGhostperiode(it, vedtaksperioder) }
