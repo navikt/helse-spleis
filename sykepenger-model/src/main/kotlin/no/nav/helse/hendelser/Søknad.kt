@@ -32,7 +32,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøk
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med flere typer pensjonsgivende inntekter`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen`
-import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som ikke støttes`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Tilkommen inntekt som støttes`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_1
@@ -225,8 +224,7 @@ class Søknad(
 
     private fun validerInntekterFraNyeArbeidsforhold(aktivitetslogg: IAktivitetslogg) {
         if (!inntekterFraNyeArbeidsforhold) return
-        if (Toggle.TilkommenInntektV4.enabled) return aktivitetslogg.varsel(`Tilkommen inntekt som støttes`)
-        aktivitetslogg.funksjonellFeil(`Tilkommen inntekt som ikke støttes`)
+        aktivitetslogg.varsel(`Tilkommen inntekt som støttes`)
     }
 
     private fun validerInntektskilder(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?) {

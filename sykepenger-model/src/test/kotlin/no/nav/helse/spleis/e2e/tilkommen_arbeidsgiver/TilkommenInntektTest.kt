@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.tilkommen_arbeidsgiver
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -23,7 +22,7 @@ import org.junit.jupiter.api.Test
 internal class TilkommenInntektTest : AbstractDslTest() {
 
     @Test
-    fun `tilkommen inntekt legges til etter perioden er utbetalt`() = Toggle.TilkommenInntektV4.enable {
+    fun `tilkommen inntekt legges til etter perioden er utbetalt`() {
         a1 {
             håndterSøknad(januar, inntekterFraNyeArbeidsforhold = true)
             håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(1.januar til 16.januar))
@@ -48,7 +47,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
     }
 
     @Test
-    fun `tilkommen inntekt på førstegangsbehandling`() = Toggle.TilkommenInntektV4.enable {
+    fun `tilkommen inntekt på førstegangsbehandling`() {
         a1 {
             håndterSøknad(januar, inntekterFraNyeArbeidsforhold = true)
             håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(1.januar til 16.januar))
@@ -69,7 +68,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
     }
 
     @Test
-    fun `tjener masse penger som tilkommen`() = Toggle.TilkommenInntektV4.enable {
+    fun `tjener masse penger som tilkommen`() {
         a1 {
             håndterSøknad(januar, inntekterFraNyeArbeidsforhold = true)
             håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(1.januar til 16.januar))

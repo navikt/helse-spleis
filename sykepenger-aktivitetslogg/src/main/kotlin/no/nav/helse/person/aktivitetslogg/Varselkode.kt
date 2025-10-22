@@ -194,7 +194,7 @@ enum class Varselkode(
     RV_IV_6("Inntekter fra mer enn én arbeidsgiver i A-ordningen siste tre måneder. Kontroller om brukeren har flere arbeidsforhold på sykmeldingstidspunktet. Flere arbeidsforhold støttes ikke av systemet.", avviklet = true),
     RV_IV_7("Det er gjenbrukt inntektsopplysninger "),
     RV_IV_8("Perioden har flere skjæringstidspunkter og det er dager hvor inntekten derfor er satt til 0 kr", avviklet = true),
-    RV_IV_9("Tilkommen inntekt som ikke er støttet"),
+    RV_IV_9("Tilkommen inntekt som ikke er støttet", avviklet = true),
     RV_IV_10("Det er foreslått inntekt fra A-ordningen for én arbeidsgiver"),
     RV_IV_11("Perioden inneholder flere skjæringstidspunkt"),
     RV_IV_12("Fant færre enn 3 år med ferdiglignede inntekter for selvstending næringsdrivende"),
@@ -320,7 +320,6 @@ enum class Varselkode(
         val `Arbeidsledigsøknad er lagt til grunn` = RV_SØ_43
         val `Selvstendigsøknad med flere typer pensjonsgivende inntekter` = RV_SØ_45
 
-        val `Tilkommen inntekt som ikke støttes`= RV_IV_9
         val `Tilkommen inntekt som støttes` = RV_SV_5
 
         val `Arbeidsgiveropplysninger for forkastet periode` = RV_AO_1

@@ -67,8 +67,6 @@ spec:
       value: "true"
     - name: SEND_FERIEPENGEOPPDRAG
       value: "true"
-    - name: TILKOMMEN_INNTEKT_V4
-      value: "true"
     - name: SELVSTENDIG_NAERINGSDRIVENDE
       value: "true"
     - name: JORDBRUKER

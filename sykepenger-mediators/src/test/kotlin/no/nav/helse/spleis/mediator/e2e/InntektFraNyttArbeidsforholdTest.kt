@@ -34,7 +34,7 @@ internal class InntektFraNyttArbeidsforholdTest : AbstractEndToEndMediatorTest()
     }
 
     @Test
-    fun `inntekt fra nytt arbeidsforhold med harJobbet = true & beløp`() = Toggle.TilkommenInntektV4.enable {
+    fun `inntekt fra nytt arbeidsforhold med harJobbet = true & beløp`() {
         nyttVedtak(1.januar, 31.januar)
 
         sendSøknad(
