@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Saksbehandler
 import no.nav.helse.hendelser.SimuleringHendelse
@@ -551,9 +552,3 @@ internal class UtbetalingTest {
         override val melding: String = "OK"
     }
 }
-
-private val frø = LocalDate.of(2018, 1, 1)
-val Int.januar get() = frø.withMonth(1).withDayOfMonth(this)
-val Int.februar get() = frø.withMonth(2).withDayOfMonth(this)
-val Int.mars get() = frø.withMonth(3).withDayOfMonth(this)
-val Int.desember get() = frø.withMonth(12).withDayOfMonth(this)

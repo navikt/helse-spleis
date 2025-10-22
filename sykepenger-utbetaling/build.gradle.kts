@@ -18,6 +18,7 @@ dependencies {
     }
 
     testImplementation(testFixtures(project(":sykepenger-økonomi")))
+    testImplementation(testFixtures(project(":sykepenger-primitiver")))
 
     testFixturesImplementation(project(":sykepenger-aktivitetslogg"))
     testFixturesImplementation(project(":sykepenger-primitiver"))
