@@ -476,7 +476,6 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     sykdomstidslinje = sykdomstidslinje.tilPersonData(),
     utbetalingstidslinje = utbetalingstidslinje.tilPersonData(),
     refusjonstidslinje = refusjonstidslinje.tilPersonData(),
-    inntektsendringer = inntektsendringer.tilPersonData(),
     dokumentsporing = dokumentsporing.tilPersonData(),
     dagerUtenNavAnsvar = dagerUtenNavAnsvar.tilPersonData(),
     dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },

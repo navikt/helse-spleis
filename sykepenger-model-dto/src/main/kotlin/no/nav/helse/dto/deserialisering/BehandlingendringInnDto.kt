@@ -23,7 +23,6 @@ data class BehandlingendringInnDto(
     val sykdomstidslinje: SykdomstidslinjeDto,
     val utbetalingstidslinje: UtbetalingstidslinjeInnDto,
     val refusjonstidslinje: BeløpstidslinjeDto,
-    val inntektsendringer: BeløpstidslinjeDto,
     val skjæringstidspunkt: LocalDate,
     val skjæringstidspunkter: List<LocalDate>,
     val dagerUtenNavAnsvar: DagerUtenNavAnsvaravklaringDto,

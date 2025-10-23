@@ -27,7 +27,6 @@ data class BehandlingendringUtDto(
     val sykdomstidslinje: SykdomstidslinjeDto,
     val utbetalingstidslinje: UtbetalingstidslinjeUtDto,
     val refusjonstidslinje: BeløpstidslinjeDto,
-    val inntektsendringer: BeløpstidslinjeDto,
     val dagerUtenNavAnsvar: DagerUtenNavAnsvaravklaringDto,
     val dagerNavOvertarAnsvar: List<PeriodeDto>,
     val egenmeldingsdager: List<PeriodeDto>,
