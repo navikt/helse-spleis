@@ -29,6 +29,30 @@ internal class VentetidberegnerTest {
     }
 
     @Test
+    fun `ventetiden utgjør de første 16 dagene - etterfølges av 15 oppholdsdager`() {
+        val tidslinje = resetSeed { 17.S + 15.A }
+        val resultat = tidslinje.ventetid()
+        assertEquals(1, resultat.size)
+        resultat[0].also {
+            assertEquals(1.januar til 16.januar, it.periode)
+            assertEquals(1.januar til 1.februar, it.omsluttendePeriode)
+            assertTrue(it.ferdigAvklart)
+        }
+    }
+
+    @Test
+    fun `ventetiden utgjør de første 16 dagene - etterfølges av 16 oppholdsdager`() {
+        val tidslinje = resetSeed { 17.S + 16.A }
+        val resultat = tidslinje.ventetid()
+        assertEquals(1, resultat.size)
+        resultat[0].also {
+            assertEquals(1.januar til 16.januar, it.periode)
+            assertEquals(1.januar til 1.februar, it.omsluttendePeriode)
+            assertTrue(it.ferdigAvklart)
+        }
+    }
+
+    @Test
     fun `ventetiden utgjør de første 16 dagene - start på lørdag`() {
         val tidslinje = resetSeed(frøDato = 6.januar) { 17.S }
         val resultat = tidslinje.ventetid()
@@ -85,6 +109,30 @@ internal class VentetidberegnerTest {
             assertEquals(4.januar til 19.januar, it.periode)
             assertEquals(4.januar til 21.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
+        }
+    }
+
+    @Test
+    fun `ventetiden er ikke ferdig før det er utbetalt sykepenger - ventetiden slutter på lørdag (helg ukjent)`() {
+        val tidslinje = resetSeed(frøDato = 4.januar) { 16.S + 2.opphold + 1.S }
+        val resultat = tidslinje.ventetid()
+        assertEquals(1, resultat.size)
+        resultat[0].also {
+            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 22.januar, it.omsluttendePeriode)
+            assertTrue(it.ferdigAvklart)
+        }
+    }
+
+    @Test
+    fun `ventetiden er ikke ferdig før det er utbetalt sykepenger - ventetiden slutter på søndag (helg ukjent)`() {
+        val tidslinje = resetSeed(frøDato = 4.januar) { 17.S + 1.opphold + 1.S }
+        val resultat = tidslinje.ventetid()
+        assertEquals(1, resultat.size)
+        resultat[0].also {
+            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 22.januar, it.omsluttendePeriode)
+            assertTrue(it.ferdigAvklart)
         }
     }
 
