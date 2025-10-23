@@ -22,7 +22,7 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
-            assertEquals(1.januar til 16.januar, it.periode)
+            assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
             assertEquals(1.januar til 17.januar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
@@ -34,7 +34,7 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
-            assertEquals(1.januar til 16.januar, it.periode)
+            assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
             assertEquals(1.januar til 1.februar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
@@ -46,7 +46,7 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
-            assertEquals(1.januar til 16.januar, it.periode)
+            assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
             assertEquals(1.januar til 1.februar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
@@ -58,7 +58,7 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
-            assertEquals(6.januar til 21.januar, it.periode)
+            assertEquals(6.januar til 21.januar, it.dagerUtenAnsvar.single())
             assertEquals(6.januar til 22.januar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
@@ -70,7 +70,7 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
-            assertEquals(1.januar til 16.januar, it.periode)
+            assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
             assertEquals(1.januar til 16.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
@@ -82,7 +82,7 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
-            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 19.januar, it.dagerUtenAnsvar.single())
             assertEquals(4.januar til 19.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
@@ -94,7 +94,7 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
-            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 19.januar, it.dagerUtenAnsvar.single())
             assertEquals(4.januar til 20.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
@@ -106,7 +106,7 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
-            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 19.januar, it.dagerUtenAnsvar.single())
             assertEquals(4.januar til 21.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
@@ -118,7 +118,7 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
-            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 19.januar, it.dagerUtenAnsvar.single())
             assertEquals(4.januar til 22.januar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
@@ -130,7 +130,7 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
-            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 19.januar, it.dagerUtenAnsvar.single())
             assertEquals(4.januar til 22.januar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
@@ -142,7 +142,7 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
-            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 19.januar, it.dagerUtenAnsvar.single())
             assertEquals(4.januar til 22.januar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
@@ -154,12 +154,12 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(2, resultat.size)
         resultat[0].also {
-            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 19.januar, it.dagerUtenAnsvar.single())
             assertEquals(4.januar til 21.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
         resultat[1].also {
-            assertEquals(23.januar til 1.februar, it.periode)
+            assertEquals(23.januar til 1.februar, it.dagerUtenAnsvar.single())
             assertEquals(23.januar til 1.februar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
@@ -171,12 +171,12 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(2, resultat.size)
         resultat[0].also {
-            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 19.januar, it.dagerUtenAnsvar.single())
             assertEquals(4.januar til 19.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
         resultat[1].also {
-            assertEquals(23.januar til 1.februar, it.periode)
+            assertEquals(23.januar til 1.februar, it.dagerUtenAnsvar.single())
             assertEquals(23.januar til 1.februar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
@@ -188,12 +188,12 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(2, resultat.size)
         resultat[0].also {
-            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 19.januar, it.dagerUtenAnsvar.single())
             assertEquals(4.januar til 21.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
         resultat[1].also {
-            assertEquals(23.januar til 1.februar, it.periode)
+            assertEquals(23.januar til 1.februar, it.dagerUtenAnsvar.single())
             assertEquals(23.januar til 1.februar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
@@ -205,12 +205,12 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(2, resultat.size)
         resultat[0].also {
-            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 19.januar, it.dagerUtenAnsvar.single())
             assertEquals(4.januar til 20.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
         resultat[1].also {
-            assertEquals(23.januar til 1.februar, it.periode)
+            assertEquals(23.januar til 1.februar, it.dagerUtenAnsvar.single())
             assertEquals(23.januar til 1.februar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
@@ -225,12 +225,12 @@ internal class VentetidberegnerTest {
             val resultat = tidslinje.ventetid()
             assertEquals(2, resultat.size)
             resultat[0].also {
-                assertEquals(4.januar til 19.januar, it.periode)
+                assertEquals(4.januar til 19.januar, it.dagerUtenAnsvar.single())
                 assertEquals(4.januar til 21.januar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
             resultat[1].also {
-                assertEquals(23.januar til 1.februar, it.periode)
+                assertEquals(23.januar til 1.februar, it.dagerUtenAnsvar.single())
                 assertEquals(23.januar til 1.februar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
@@ -246,7 +246,7 @@ internal class VentetidberegnerTest {
             val resultat = tidslinje.ventetid()
             assertEquals(1, resultat.size)
             resultat[0].also {
-                assertEquals(1.januar til 16.januar, it.periode)
+                assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
                 assertEquals(1.januar til 8.mars, it.omsluttendePeriode)
                 assertTrue(it.ferdigAvklart)
             }
@@ -262,7 +262,7 @@ internal class VentetidberegnerTest {
             val resultat = tidslinje.ventetid()
             assertEquals(1, resultat.size)
             resultat[0].also {
-                assertEquals(1.januar til 16.januar, it.periode)
+                assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
                 assertEquals(1.januar til 11.februar, it.omsluttendePeriode)
                 assertTrue(it.ferdigAvklart)
             }
@@ -278,12 +278,12 @@ internal class VentetidberegnerTest {
             val resultat = tidslinje.ventetid()
             assertEquals(2, resultat.size)
             resultat[0].also {
-                assertEquals(3.januar til 18.januar, it.periode)
+                assertEquals(3.januar til 18.januar, it.dagerUtenAnsvar.single())
                 assertEquals(3.januar til 3.februar, it.omsluttendePeriode)
                 assertTrue(it.ferdigAvklart)
             }
             resultat[1].also {
-                assertEquals(6.februar til 15.februar, it.periode)
+                assertEquals(6.februar til 15.februar, it.dagerUtenAnsvar.single())
                 assertEquals(6.februar til 15.februar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
@@ -299,12 +299,12 @@ internal class VentetidberegnerTest {
             val resultat = tidslinje.ventetid()
             assertEquals(2, resultat.size)
             resultat[0].also {
-                assertEquals(1.januar til 16.januar, it.periode)
+                assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
                 assertEquals(1.januar til 1.februar, it.omsluttendePeriode)
                 assertTrue(it.ferdigAvklart)
             }
             resultat[1].also {
-                assertEquals(3.februar til 12.februar, it.periode)
+                assertEquals(3.februar til 12.februar, it.dagerUtenAnsvar.single())
                 assertEquals(3.februar til 12.februar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
@@ -320,12 +320,12 @@ internal class VentetidberegnerTest {
             val resultat = tidslinje.ventetid()
             assertEquals(2, resultat.size)
             resultat[0].also {
-                assertEquals(1.januar til 10.januar, it.periode)
+                assertEquals(1.januar til 10.januar, it.dagerUtenAnsvar.single())
                 assertEquals(1.januar til 10.januar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
             resultat[1].also {
-                assertEquals(12.januar til 21.januar, it.periode)
+                assertEquals(12.januar til 21.januar, it.dagerUtenAnsvar.single())
                 assertEquals(12.januar til 21.januar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
@@ -338,7 +338,7 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
-            assertEquals(1.januar til 16.januar, it.periode)
+            assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
             assertEquals(1.januar til 19.januar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
@@ -350,12 +350,12 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(2, resultat.size)
         resultat[0].also {
-            assertEquals(1.januar til 5.januar, it.periode)
+            assertEquals(1.januar til 5.januar, it.dagerUtenAnsvar.single())
             assertEquals(1.januar til 5.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
         resultat[1].also {
-            assertEquals(8.januar til 19.januar, it.periode)
+            assertEquals(8.januar til 19.januar, it.dagerUtenAnsvar.single())
             assertEquals(8.januar til 19.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
@@ -367,7 +367,7 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
-            assertEquals(1.januar til 16.januar, it.periode)
+            assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
             assertEquals(1.januar til 18.januar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
@@ -379,12 +379,12 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(2, resultat.size)
         resultat[0].also {
-            assertEquals(1.januar til 5.januar, it.periode)
+            assertEquals(1.januar til 5.januar, it.dagerUtenAnsvar.single())
             assertEquals(1.januar til 5.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
         resultat[1].also {
-            assertEquals(7.januar til 18.januar, it.periode)
+            assertEquals(7.januar til 18.januar, it.dagerUtenAnsvar.single())
             assertEquals(7.januar til 18.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
@@ -396,7 +396,7 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
-            assertEquals(1.januar til 16.januar, it.periode)
+            assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
             assertEquals(1.januar til 19.januar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
@@ -408,12 +408,12 @@ internal class VentetidberegnerTest {
         val resultat = tidslinje.ventetid()
         assertEquals(2, resultat.size)
         resultat[0].also {
-            assertEquals(1.januar til 6.januar, it.periode)
+            assertEquals(1.januar til 6.januar, it.dagerUtenAnsvar.single())
             assertEquals(1.januar til 6.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
         resultat[1].also {
-            assertEquals(8.januar til 19.januar, it.periode)
+            assertEquals(8.januar til 19.januar, it.dagerUtenAnsvar.single())
             assertEquals(8.januar til 19.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
@@ -428,19 +428,19 @@ internal class VentetidberegnerTest {
             val resultat = tidslinje.ventetid()
             assertEquals(2, resultat.size)
             resultat[0].also {
-                assertEquals(1.januar til 4.januar, it.periode)
+                assertEquals(1.januar til 4.januar, it.dagerUtenAnsvar.single())
                 assertEquals(1.januar til 4.januar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
             resultat[1].also {
-                assertEquals(8.januar til 19.januar, it.periode)
+                assertEquals(8.januar til 19.januar, it.dagerUtenAnsvar.single())
                 assertEquals(8.januar til 19.januar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
         }
     }
 
-    private fun Sykdomstidslinje.ventetid(): List<Ventetidsavklaring> {
+    private fun Sykdomstidslinje.ventetid(): List<PeriodeUtenNavAnsvar> {
         val beregner = Ventetidberegner()
         return beregner.result(this)
     }

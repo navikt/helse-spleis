@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.sykdomstidslinje.Dag
@@ -18,8 +19,8 @@ import no.nav.helse.utbetalingstidslinje.Ventetidberegner.Ventetidtilstand.Vente
 
 internal class Ventetidberegner {
 
-    fun result(sykdomstidslinje: Sykdomstidslinje): List<Ventetidsavklaring> {
-        val ventetider = mutableListOf<Ventetidsavklaring>()
+    fun result(sykdomstidslinje: Sykdomstidslinje): List<PeriodeUtenNavAnsvar> {
+        val ventetider = mutableListOf<PeriodeUtenNavAnsvar>()
         var aktivVentetid: Ventetidtelling? = null
         sykdomstidslinje.forEach { dag ->
             aktivVentetid = when (dag) {
@@ -44,12 +45,12 @@ internal class Ventetidberegner {
         return ventetider.toList() + listOfNotNull(aktivVentetid?.somAvklaring())
     }
 
-    private fun avslutt(ventetider: MutableList<Ventetidsavklaring>, ventetid: Ventetidtelling, avsluttetTilstand: Ventetidtilstand): Nothing? {
+    private fun avslutt(ventetider: MutableList<PeriodeUtenNavAnsvar>, ventetid: Ventetidtelling, avsluttetTilstand: Ventetidtilstand): Nothing? {
         ventetider.add(ventetid.copy(tilstand = avsluttetTilstand).somAvklaring())
         return null
     }
 
-    private fun oppholdsdag(ventetider: MutableList<Ventetidsavklaring>, ventetid: Ventetidtelling?, dato: LocalDate, erImplsittHelg: Boolean): Ventetidtelling? {
+    private fun oppholdsdag(ventetider: MutableList<PeriodeUtenNavAnsvar>, ventetid: Ventetidtelling?, dato: LocalDate, erImplsittHelg: Boolean): Ventetidtelling? {
         return when (ventetid?.tilstand) {
             OppholdEtterVentetidFerdigAvklart -> when (MAKSIMALT_ANTALL_OPPHOLDSDAGER) {
                 (ventetid.oppholdsdager.size + 1) -> avslutt(ventetider, ventetid, TilstrekkeligOppholdFerdigAvklart)
@@ -136,16 +137,10 @@ internal class Ventetidberegner {
     }
 
     private fun Ventetidtelling.somAvklaring() =
-        Ventetidsavklaring(
+        PeriodeUtenNavAnsvar(
             omsluttendePeriode = omsluttendePeriode,
-            periode = ventetid.omsluttendePeriode,
+            dagerUtenAnsvar = ventetid.grupperSammenhengendePerioder(),
             ferdigAvklart = ferdigAvklart
         )
 
 }
-
-data class Ventetidsavklaring(
-    val omsluttendePeriode: Periode,
-    val periode: Periode?,
-    val ferdigAvklart: Boolean
-)
