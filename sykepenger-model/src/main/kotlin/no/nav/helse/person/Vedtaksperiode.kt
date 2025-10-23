@@ -1563,10 +1563,6 @@ internal class Vedtaksperiode private constructor(
         .finnVedtaksperiodeRettFør(this)
         ?.takeIf { it.skalBehandlesISpeil() } != null
 
-    internal fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(): Boolean {
-        return vilkårsgrunnlag?.harNødvendigInntektForVilkårsprøving(yrkesaktivitet.organisasjonsnummer) == false
-    }
-
     internal fun forkast(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, tvingForkasting: Boolean = false) {
         val forkastinger = forkastingskandidater(aktivitetslogg, tvingForkasting)
         person.søppelbøtte(hendelse, aktivitetslogg, forkastinger)

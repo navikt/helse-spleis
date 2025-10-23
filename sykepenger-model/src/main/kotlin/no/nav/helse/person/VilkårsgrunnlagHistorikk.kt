@@ -171,9 +171,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         protected abstract fun vilkårsgrunnlagtype(): String
 
-        internal fun harNødvendigInntektForVilkårsprøving(organisasjonsnummer: String) =
-            inntektsgrunnlag.harNødvendigInntektForVilkårsprøving(organisasjonsnummer)
-
         internal fun harGjenbrukbarInntekt(organisasjonsnummer: String) =
             inntektsgrunnlag.harGjenbrukbarInntekt(organisasjonsnummer)
 

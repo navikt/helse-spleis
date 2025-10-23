@@ -17,17 +17,17 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import no.nav.helse.økonomi.inspectors.inspektør
+import org.junit.jupiter.api.Assertions.assertTrue
 
 internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
 
@@ -38,8 +38,14 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(februar)
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertFunksjonellFeil(Varselkode.RV_SV_2, 1.vedtaksperiode.filter())
+            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar))
+            håndterYtelser(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertVarsler(1.vedtaksperiode,Varselkode.TilkommenInntekt.`Søknad fra arbeidsgiver som ikke er i sykepengegrunnlaget`, Varselkode.RV_VV_4)
+            inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.let { avvisteDager ->
+                assertEquals(8, avvisteDager.size)
+                assertTrue(avvisteDager.all { it.begrunnelser.single() == Begrunnelse.MinimumSykdomsgrad })
+            }
         }
     }
 
@@ -86,8 +92,30 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(januar)
-            assertFunksjonellFeil(Varselkode.RV_SV_2, 1.vedtaksperiode.filter())
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            assertVarsler(1.vedtaksperiode, Varselkode.TilkommenInntekt.`Søknad fra arbeidsgiver som ikke er i sykepengegrunnlaget`)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        }
+        a1 {
+            håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, false, "test"))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
         }
     }
 

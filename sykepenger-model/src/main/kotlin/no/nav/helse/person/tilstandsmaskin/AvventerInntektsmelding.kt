@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.behandlingkilde
 
 internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
@@ -96,11 +95,6 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ): Boolean {
-        if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) {
-            aktivitetslogg.funksjonellFeil(Varselkode.RV_SV_2)
-            vedtaksperiode.forkast(hendelse, aktivitetslogg)
-            return true
-        }
         vedtaksperiode.videreførEksisterendeOpplysninger(hendelse.metadata.behandlingkilde, aktivitetslogg)
 
         if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {

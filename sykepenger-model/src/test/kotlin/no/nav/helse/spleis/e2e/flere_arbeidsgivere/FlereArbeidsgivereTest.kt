@@ -768,14 +768,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         nyPeriode(1.februar til 14.februar, a1, a2)
         a1 {
             assertEquals(1.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
-            assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
         }
         a2 {
             assertEquals(1.januar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        }
-        a2 {
-            assertFunksjonellFeil(Varselkode.RV_SV_2, 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }
 

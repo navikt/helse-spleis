@@ -172,6 +172,7 @@ internal data class ArbeidsgiverInntektsopplysning(
             opptjening: ArbeidstakerOpptjening,
             orgnummer: String
         ) {
+            if (!harInntekt(orgnummer)) return aktivitetslogg.varsel(Varselkode.TilkommenInntekt.`Søknad fra arbeidsgiver som ikke er i sykepengegrunnlaget`)
             vurderSkifteAvArbeidsgiver(aktivitetslogg, opptjening, orgnummer)
         }
 

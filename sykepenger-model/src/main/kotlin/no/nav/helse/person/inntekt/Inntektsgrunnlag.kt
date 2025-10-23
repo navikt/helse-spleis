@@ -152,9 +152,6 @@ internal class Inntektsgrunnlag(
         deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.map { it.orgnummer }
     )
 
-    internal fun harNødvendigInntektForVilkårsprøving(organisasjonsnummer: String) =
-        arbeidsgiverInntektsopplysninger.harInntekt(organisasjonsnummer)
-
     internal fun vurderArbeidsgivere(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening, orgnummer: String) {
         when (opptjening) {
             is ArbeidstakerOpptjening -> arbeidsgiverInntektsopplysninger.vurderArbeidsgivere(aktivitetslogg, opptjening, orgnummer)

@@ -23,9 +23,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     fun venterpå(vedtaksperiode: Vedtaksperiode) = when (val t = tilstand(vedtaksperiode)) {
         ForventerIkkeInntekt,
         KlarForBeregning,
-        KlarForVilkårsprøving,
-        ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag -> VenterPå.Nestemann
-
+        KlarForVilkårsprøving -> VenterPå.Nestemann
         AvventerTidligereEllerOverlappendeSøknad -> VenterPå.SegSelv(Venteårsak.SØKNAD)
         is TrengerInntektsmelding -> VenterPå.SegSelv(Venteårsak.INNTEKTSMELDING)
         is TrengerInntektsmeldingAnnenPeriode -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.venter(), Venteårsak.INNTEKTSMELDING)
@@ -77,7 +75,6 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         val førstePeriodeSomTrengerInntektsmelding = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()
         return when {
             !vedtaksperiode.skalBehandlesISpeil() -> ForventerIkkeInntekt
-            vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() -> ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
             vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode) -> AvventerTidligereEllerOverlappendeSøknad
             førstePeriodeSomTrengerInntektsmelding != null -> when (førstePeriodeSomTrengerInntektsmelding) {
                 vedtaksperiode -> TrengerInntektsmelding(førstePeriodeSomTrengerInntektsmelding)
@@ -118,17 +115,6 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
             aktivitetslogg: IAktivitetslogg
         ) {
             vedtaksperiode.tilstand(aktivitetslogg, AvsluttetUtenUtbetaling)
-        }
-    }
-
-    private data object ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag : Tilstand {
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: Hendelse,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            aktivitetslogg.funksjonellFeil(Varselkode.RV_SV_2)
-            vedtaksperiode.forkast(hendelse, aktivitetslogg)
         }
     }
 
