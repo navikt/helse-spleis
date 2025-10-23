@@ -267,7 +267,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String): Boolean {
-            inntektsgrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, arbeidstakerOpptjening, organisasjonsnummer)
+            inntektsgrunnlag.vurderArbeidsgivere(aktivitetslogg, arbeidstakerOpptjening, organisasjonsnummer)
             return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
         }
 

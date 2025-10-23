@@ -127,12 +127,12 @@ internal class InntektsgrunnlagTest {
         )
 
         Aktivitetslogg().also { aktivitetslogg ->
-            inntektsgrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, a1)
+            inntektsgrunnlag.vurderArbeidsgivere(aktivitetslogg, opptjening, a1)
             aktivitetslogg.assertVarsel(RV_VV_8)
         }
 
         Aktivitetslogg().also { aktivitetslogg ->
-            inntektsgrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, a2)
+            inntektsgrunnlag.vurderArbeidsgivere(aktivitetslogg, opptjening, a2)
             aktivitetslogg.assertVarsler(emptyList())
         }
     }

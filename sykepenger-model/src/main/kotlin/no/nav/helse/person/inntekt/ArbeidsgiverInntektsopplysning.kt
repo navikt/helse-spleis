@@ -167,13 +167,21 @@ internal data class ArbeidsgiverInntektsopplysning(
                 gammelOpplysning.omregnetÅrsinntekt.beløp != nyOpplysning.omregnetÅrsinntekt.beløp
             }.any { it }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.sjekkForNyArbeidsgiver(
+        internal fun List<ArbeidsgiverInntektsopplysning>.vurderArbeidsgivere(
             aktivitetslogg: IAktivitetslogg,
             opptjening: ArbeidstakerOpptjening,
             orgnummer: String
         ) {
-            val arbeidsforholdAktivePåSkjæringstidspunktet =
-                singleOrNull { opptjening.ansattVedSkjæringstidspunkt(it.orgnummer) } ?: return
+            vurderSkifteAvArbeidsgiver(aktivitetslogg, opptjening, orgnummer)
+        }
+
+        // Denne funksjonen skjønner jeg ingenting av, ikke spør meg om den, hilsen Maxi
+        private fun List<ArbeidsgiverInntektsopplysning>.vurderSkifteAvArbeidsgiver(
+            aktivitetslogg: IAktivitetslogg,
+            opptjening: ArbeidstakerOpptjening,
+            orgnummer: String
+        ) {
+            val arbeidsforholdAktivePåSkjæringstidspunktet = singleOrNull { opptjening.ansattVedSkjæringstidspunkt(it.orgnummer) } ?: return
             if (arbeidsforholdAktivePåSkjæringstidspunktet.orgnummer == orgnummer) return
             aktivitetslogg.varsel(Varselkode.RV_VV_8)
         }

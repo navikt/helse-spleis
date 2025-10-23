@@ -29,7 +29,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagr
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedInntektsmelding
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedSaksbehandler
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.sjekkForNyArbeidsgiver
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.vurderArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.skjønnsfastsett
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.totalOmregnetÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
@@ -155,9 +155,9 @@ internal class Inntektsgrunnlag(
     internal fun harNødvendigInntektForVilkårsprøving(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.harInntekt(organisasjonsnummer)
 
-    internal fun sjekkForNyArbeidsgiver(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening, orgnummer: String) {
+    internal fun vurderArbeidsgivere(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening, orgnummer: String) {
         when (opptjening) {
-            is ArbeidstakerOpptjening -> arbeidsgiverInntektsopplysninger.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, orgnummer)
+            is ArbeidstakerOpptjening -> arbeidsgiverInntektsopplysninger.vurderArbeidsgivere(aktivitetslogg, opptjening, orgnummer)
             ArbeidstakerOpptjeningIkkeVurdert -> error("Mangler opptjening som Arbeidestaker")
             ArbeidstakerOpptjeningVurdertIInfotrygd -> {}
         }
