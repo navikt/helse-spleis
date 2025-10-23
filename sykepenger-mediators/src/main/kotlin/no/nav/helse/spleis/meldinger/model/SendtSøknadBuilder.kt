@@ -2,7 +2,6 @@ package no.nav.helse.spleis.meldinger.model
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Merknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -74,10 +73,6 @@ internal class SendtSøknadBuilder(arbeidssituasjon: String) : SøknadBuilder() 
 
     internal fun fraværFørSykmelding(fraværFørSykmelding: Boolean?) = apply {
         this.fraværFørSykmelding = fraværFørSykmelding
-    }
-
-    internal fun ventetid(ventetid: Periode) = apply {
-        perioder.add(Søknadsperiode.Ventetid(ventetid))
     }
 
     override fun inntektskilde(andreInntektskilder: Boolean) = apply {

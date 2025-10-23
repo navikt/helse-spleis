@@ -2,13 +2,11 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.Year
 import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -30,11 +28,6 @@ internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val 
             )
         }
         builder.pensjonsgivendeInntekter(pensjonsgivendeInntekter)
-        val ventetid = packet["selvstendigNaringsdrivende.ventetid"]
-        if (ventetid.isObject) {
-            val ventetidperiode = Periode(ventetid.path("fom").asLocalDate(), ventetid.path("tom").asLocalDate())
-            builder.ventetid(ventetidperiode)
-        }
 
         val fraværFørSykmelding = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("FRAVAR_FOR_SYKMELDINGEN_V2").takeUnless { it.isMissingOrNull() }?.asBoolean()
         builder.fraværFørSykmelding(fraværFørSykmelding)

@@ -29,7 +29,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ventetid
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
@@ -280,7 +279,6 @@ internal class TestPerson(
         internal fun håndterFørstegangssøknadSelvstendig(
             periode: Periode,
             sykdomsgrad: Prosentdel = 100.prosent,
-            ventetid: Periode = 1.januar til 16.januar,
             arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
             pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt> = listOf(
                 Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
@@ -295,7 +293,6 @@ internal class TestPerson(
             harOppgittÅHaForsikring: Boolean? = null
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, sykdomsgrad),
-            Ventetid(ventetid),
             arbeidssituasjon = arbeidssituasjon,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,
             sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
@@ -309,7 +306,6 @@ internal class TestPerson(
         internal fun håndterForlengelsessøknadSelvstendig(
             periode: Periode,
             sykdomsgrad: Prosentdel = 100.prosent,
-            ventetid: Periode = 1.januar til 16.januar,
             arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
             pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt> = listOf(
                 Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
@@ -324,7 +320,6 @@ internal class TestPerson(
             harOppgittÅHaForsikring: Boolean? = null
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, sykdomsgrad),
-            Ventetid(ventetid),
             arbeidssituasjon = arbeidssituasjon,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,
             sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,

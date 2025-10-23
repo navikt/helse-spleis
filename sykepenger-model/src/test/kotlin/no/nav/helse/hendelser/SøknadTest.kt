@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ventetid
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.november
@@ -62,7 +61,7 @@ internal class SøknadTest {
 
     @Test
     fun `søknad med selvstendig og ventetid`() {
-        søknad(Sykdom(1.januar, 31.januar, 100.prosent), Ventetid(1.januar til 16.januar))
+        søknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
         assertEquals(23, søknad.sykdomstidslinje.filterIsInstance<Sykedag>().size)
         assertEquals(8, søknad.sykdomstidslinje.filterIsInstance<SykHelgedag>().size)

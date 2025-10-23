@@ -25,11 +25,6 @@ internal class SendtSelvstendigSøknaderRiver(
         message.forbid("arbeidsgiver.orgnummer")
         message.require("sendtNav", JsonNode::asLocalDateTime)
         message.requireArray("selvstendigNaringsdrivende.inntekt.inntektsAar") { interestedIn("erFerdigLignet") }
-        message.interestedIn("selvstendigNaringsdrivende.ventetid") {
-            // hvis ventetid er satt så skal 'fom' og 'tom' kunne parses som dato
-            it.path("fom").asLocalDate()
-            it.path("tom").asLocalDate()
-        }
         message.interestedIn("egenmeldingsdagerFraSykmelding") { egenmeldinger -> egenmeldinger.map { it.asLocalDate() } }
         message.interestedIn("selvstendigNaringsdrivende.harForsikring")
         message.interestedIn("selvstendigNaringsdrivende.brukerHarOppgittForsikring")

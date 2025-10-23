@@ -153,7 +153,6 @@ internal abstract class AbstractSpeilBuilderTest {
         val søknadId = UUID.randomUUID()
         val søknad = selvstendigFabrikk.lagSøknad(
             Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent),
-            Søknad.Søknadsperiode.Ventetid(ventetid),
             sykmeldingSkrevet = 1.januar.atStartOfDay(),
             sendtTilNAVEllerArbeidsgiver = 1.januar.atStartOfDay(),
             id = søknadId,

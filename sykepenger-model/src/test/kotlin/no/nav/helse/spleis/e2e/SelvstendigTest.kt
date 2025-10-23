@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
@@ -96,20 +95,6 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterAnnullering(inspektør.utbetalinger[0].utbetalingId)
             håndterUtbetalt()
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
-        }
-    }
-
-    @Test
-    fun `tar inn søknad uten ventetid, men forkaster perioden`() {
-        selvstendig {
-            håndterSøknad(
-                Sykdom(1.januar, 31.januar, 100.prosent),
-                arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
-                pensjonsgivendeInntekter = emptyList()
-            )
-            assertInfo("Søknaden har ikke ventetid", 1.vedtaksperiode.filter())
-            assertFunksjonellFeil(Varselkode.RV_SØ_39, 1.vedtaksperiode.filter())
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
         }
     }
 
@@ -440,7 +425,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     fun `To selvstendigsøknader`() = Toggle.SelvstendigNæringsdrivende.enable {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
-            håndterFørstegangssøknadSelvstendig(mars, ventetid = 1.mars til 16.mars)
+            håndterFørstegangssøknadSelvstendig(mars)
 
             assertTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
             assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
@@ -496,7 +481,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_HISTORIKK,
                 SELVSTENDIG_AVVENTER_SIMULERING, SELVSTENDIG_AVVENTER_GODKJENNING, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVSLUTTET)
             assertEquals(Utbetalingtype.REVURDERING, inspektør.utbetalinger(1.vedtaksperiode)[1].type)
-            assertEquals(setOf(100, 80), inspektør.sykdomstidslinje.inspektør.grader.values.toSet())
+            assertEquals(setOf(80), inspektør.sykdomstidslinje.inspektør.grader.values.toSet())
 
         }
     }

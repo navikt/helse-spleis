@@ -51,7 +51,6 @@ import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 class Søknad(
     meldingsreferanseId: MeldingsreferanseId,
@@ -94,19 +93,6 @@ class Søknad(
         private set
     var delvisOverlappende: Boolean = false
         private set
-
-    private val ventetid = when (behandlingsporing) {
-        Behandlingsporing.Yrkesaktivitet.Selvstendig -> perioder
-            .filterIsInstance<Søknadsperiode.Ventetid>()
-            .singleOrNull()
-            ?.let { ventetid ->
-                Periode(ventetid.periode.start, ventetid.periode.endInclusive)
-            }
-
-        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-        is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
-        Behandlingsporing.Yrkesaktivitet.Frilans -> null
-    }
 
     init {
         if (perioder.isEmpty()) error("Søknad må inneholde perioder")
@@ -181,11 +167,6 @@ class Søknad(
 
         if (pensjonsgivendeInntekter?.harFlereTyperPensjonsgivendeInntekt() == true) aktivitetslogg.funksjonellFeil(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`)
 
-        if (ventetid == null) {
-            aktivitetslogg.info("Søknaden har ikke ventetid")
-            aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
-        }
-
         vurderOpptjeningForSelvstendig(aktivitetslogg, skjæringstidspunkt)
     }
 
@@ -238,7 +219,7 @@ class Søknad(
     private fun avskjæringsdato(): LocalDate =
         (opprinneligSendt ?: metadata.innsendt).toLocalDate().minusMonths(3).withDayOfMonth(1)
 
-    internal fun lagVedtaksperiode(aktivitetslogg: IAktivitetslogg, person: Person, yrkesaktivitet: Yrkesaktivitet, regelverkslogg: Regelverkslogg): Vedtaksperiode {
+    internal fun lagVedtaksperiode(person: Person, yrkesaktivitet: Yrkesaktivitet, regelverkslogg: Regelverkslogg): Vedtaksperiode {
         requireNotNull(sykdomstidslinje.periode()) { "ugyldig søknad: tidslinjen er tom" }
         val faktaavklartInntekt = when (behandlingsporing) {
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
@@ -279,11 +260,11 @@ class Søknad(
         }
 
         // Hvis bruker har oppgitt å ha forsikring så sier vi at
-        // nav overtar ansvar for dagene i ventetiden
+        // nav overtar ansvar for hele søknadsperioden
         val dagerNavOvertarAnsvar = when (harOppgittÅHaForsikring) {
             null,
             false -> emptyList()
-            true -> ventetid ?.let { listOf(ventetid) } ?: emptyList()
+            true -> listOf(sykdomsperiode)
         }
 
         return Vedtaksperiode(
@@ -343,7 +324,6 @@ class Søknad(
                             is Permisjon -> "permisjon"
                             is Sykdom -> "sykdom"
                             is Utlandsopphold -> "utlandsopphold"
-                            is Ventetid -> "ventetid"
                         }
                     )
                 }
@@ -401,11 +381,6 @@ class Søknad(
         class Arbeid(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
             override fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.arbeidsdager(periode.start, periode.endInclusive, kilde)
-        }
-
-        class Ventetid(periode: Periode) : Søknadsperiode(periode.start, periode.endInclusive) {
-            override fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
-                Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, avskjæringsdato, 100.prosent, kilde)
         }
 
         class Utlandsopphold(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {

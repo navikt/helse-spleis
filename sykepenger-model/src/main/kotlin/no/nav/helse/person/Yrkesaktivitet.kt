@@ -563,7 +563,7 @@ internal class Yrkesaktivitet private constructor(
     }
 
     private fun opprettForkastetVedtaksperiode(søknad: Søknad, aktivitetslogg: IAktivitetslogg) {
-        val vedtaksperiode = søknad.lagVedtaksperiode(aktivitetslogg, person, this, regelverkslogg)
+        val vedtaksperiode = søknad.lagVedtaksperiode(person, this, regelverkslogg)
         registrerForkastetVedtaksperiode(vedtaksperiode, søknad, aktivitetslogg)
     }
 
@@ -573,7 +573,7 @@ internal class Yrkesaktivitet private constructor(
         yrkesaktiviteter: List<Yrkesaktivitet>,
         infotrygdhistorikk: Infotrygdhistorikk
     ): Revurderingseventyr {
-        val vedtaksperiode = søknad.lagVedtaksperiode(aktivitetslogg, person, this, regelverkslogg)
+        val vedtaksperiode = søknad.lagVedtaksperiode(person, this, regelverkslogg)
         registrerNyVedtaksperiode(vedtaksperiode)
         return vedtaksperiode.håndterSøknadFørsteGang(søknad, aktivitetslogg, yrkesaktiviteter, infotrygdhistorikk)
     }
