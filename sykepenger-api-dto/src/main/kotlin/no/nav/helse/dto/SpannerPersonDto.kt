@@ -111,6 +111,7 @@ data class SpannerPersonDto(
         data class InntektsgrunnlagData(
             val grunnbeløp: Double?,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
+            val selvstendigInntektsopplysning: SelvstendigInntektsopplysningData?,
             val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
             val vurdertInfotrygd: Boolean,
             val totalOmregnetÅrsinntekt: InntektbeløpDto.Årlig,
@@ -1689,7 +1690,21 @@ private fun InntektsgrunnlagUtDto.tilPersonData() =
         vurdertInfotrygd = this.vurdertInfotrygd,
         totalOmregnetÅrsinntekt = totalOmregnetÅrsinntekt.årlig,
         beregningsgrunnlag = beregningsgrunnlag.årlig,
-        er6GBegrenset = er6GBegrenset
+        er6GBegrenset = er6GBegrenset,
+        selvstendigInntektsopplysning = this.selvstendigInntektsopplysning?.let { inntekt ->
+            SelvstendigInntektsopplysningData(
+                faktaavklartInntekt = inntekt.faktaavklartInntekt.tilPersonData(),
+                skjønnsmessigFastsatt = inntekt.skjønnsmessigFastsatt?.let { skjønn ->
+                    SelvstendigInntektsopplysningData.SkjønnsmessigFastsattData(
+                        id = skjønn.id,
+                        dato = skjønn.inntektsdata.dato,
+                        hendelseId = skjønn.inntektsdata.hendelseId.id,
+                        beløp = skjønn.inntektsdata.beløp.tilPersonData(),
+                        tidsstempel = skjønn.inntektsdata.tidsstempel
+                    )
+                }
+            )
+        }
     )
 
 private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() =
