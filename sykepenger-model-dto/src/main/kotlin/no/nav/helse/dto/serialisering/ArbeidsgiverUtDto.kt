@@ -13,7 +13,7 @@ data class ArbeidsgiverUtDto(
     val inntektshistorikk: InntektshistorikkUtDto,
     val sykdomshistorikk: SykdomshistorikkDto,
     val sykmeldingsperioder: SykmeldingsperioderDto,
-    val arbeidsgiverperioder: List<PeriodeUtenNavAnsvarDto>,
+    val perioderUtenNavAnsvar: List<PeriodeUtenNavAnsvarDto>,
     val vedtaksperioder: List<VedtaksperiodeUtDto>,
     val forkastede: List<ForkastetVedtaksperiodeUtDto>,
     val utbetalinger: List<UtbetalingUtDto>,

@@ -235,7 +235,7 @@ data class SpannerPersonDto(
         val inntektshistorikk: List<InntektsmeldingData>,
         val sykdomshistorikk: List<SykdomshistorikkData>,
         val sykmeldingsperioder: List<SykmeldingsperiodeData>,
-        val arbeidsgiverperioder: List<PeriodeUtenNavAnsvarData>,
+        val perioderUtenNavAnsvar: List<PeriodeUtenNavAnsvarData>,
         val vedtaksperioder: List<VedtaksperiodeData>,
         val forkastede: List<ForkastetVedtaksperiodeData>,
         val utbetalinger: List<UtbetalingData>,
@@ -836,7 +836,7 @@ private fun ArbeidsgiverUtDto.tilPersonData(vilkårsgrunnlagHistorikk: List<Vilk
         inntektshistorikk = this.inntektshistorikk.historikk.map { it.tilPersonData() },
         sykdomshistorikk = this.sykdomshistorikk.elementer.map { it.tilPersonData() },
         sykmeldingsperioder = this.sykmeldingsperioder.tilPersonData(),
-        arbeidsgiverperioder = this.arbeidsgiverperioder.map { it.tilPersonData() },
+        perioderUtenNavAnsvar = this.perioderUtenNavAnsvar.map { it.tilPersonData() },
         vedtaksperioder = this.vedtaksperioder.map { vedtaksperiode ->
             val gjeldendeEndring = vedtaksperiode.behandlinger.behandlinger.last().endringer.last()
             val vilkårsgrunnlag = gjeldendeEndring.vilkårsgrunnlagId?.let { vilkårsgrunnlagId -> vilkårsgrunnlagHistorikk.flatMap { it.vilkårsgrunnlag }.first { it.vilkårsgrunnlagId == vilkårsgrunnlagId } }

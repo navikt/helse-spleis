@@ -1,0 +1,38 @@
+{
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
+      "arbeidsgiverperioder": [
+        {
+          "omsluttendePeriode": {
+            "fom": [2018, 1, 3],
+            "tom": [2018, 3, 10]
+          },
+          "arbeidsgiverperiode": [
+            {
+              "fom": [2018, 1, 3],
+              "tom": [2018, 1, 18]
+            }
+          ],
+          "ferdigAvklart": true
+        }
+      ]
+    },
+    {
+      "organisasjonsnummer": "SELVSTENDIG",
+      "yrkesaktivitetstype": "SELVSTENDIG",
+      "arbeidsgiverperioder": []
+    },
+    {
+      "organisasjonsnummer": "FRILANS",
+      "yrkesaktivitetstype": "FRILANS",
+      "arbeidsgiverperioder": []
+    },
+    {
+      "organisasjonsnummer": "ARBEIDSLEDIG",
+      "yrkesaktivitetstype": "ARBEIDSLEDIG",
+      "arbeidsgiverperioder": []
+    }
+  ]
+}

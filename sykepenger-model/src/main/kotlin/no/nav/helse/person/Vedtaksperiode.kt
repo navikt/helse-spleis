@@ -863,7 +863,7 @@ internal class Vedtaksperiode private constructor(
             yrkesaktivitet = yrkesaktivitet,
             behandlingkilde = hendelse.metadata.behandlingkilde,
             beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
-            beregnetArbeidsgiverperioder = yrkesaktivitet.arbeidsgiverperioder
+            beregnetArbeidsgiverperioder = yrkesaktivitet.perioderUtenNavAnsvar
         )
         behandlinger.oppdaterDokumentsporing(dokumentsporing(hendelse.metadata.meldingsreferanseId))
     }
@@ -1340,7 +1340,7 @@ internal class Vedtaksperiode private constructor(
             dokumentsporing = inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId),
             aktivitetslogg = aktivitetslogg,
             beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
-            beregnetArbeidsgiverperioder = yrkesaktivitet.arbeidsgiverperioder,
+            beregnetArbeidsgiverperioder = yrkesaktivitet.perioderUtenNavAnsvar,
             refusjonstidslinje = ingenRefusjon
         )
     }
@@ -1543,7 +1543,7 @@ internal class Vedtaksperiode private constructor(
                 dokumentsporing,
                 aktivitetsloggMedVedtaksperiodekontekst,
                 person.skjæringstidspunkter,
-                yrkesaktivitet.arbeidsgiverperioder,
+                yrkesaktivitet.perioderUtenNavAnsvar,
                 refusjonstidslinje
             )) return null
         return Revurderingseventyr.refusjonsopplysninger(hendelse, skjæringstidspunkt, periode)
@@ -2542,7 +2542,7 @@ internal class Vedtaksperiode private constructor(
             yrkesaktivitet,
             revurdering.hendelse.metadata.behandlingkilde,
             person.skjæringstidspunkter,
-            yrkesaktivitet.arbeidsgiverperioder
+            yrkesaktivitet.perioderUtenNavAnsvar
         )
         tilstand(aktivitetslogg, nesteTilstand)
     }
@@ -2577,7 +2577,7 @@ internal class Vedtaksperiode private constructor(
             dokumentsporing = null,
             aktivitetslogg = aktivitetslogg,
             beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
-            beregnetArbeidsgiverperioder = yrkesaktivitet.arbeidsgiverperioder,
+            beregnetArbeidsgiverperioder = yrkesaktivitet.perioderUtenNavAnsvar,
             refusjonstidslinje = Beløpstidslinje.fra(periode, inntekt.fastsattÅrsinntekt, Kilde(inntekt.faktaavklartInntekt.inntektsdata.hendelseId, Avsender.ARBEIDSGIVER, inntekt.faktaavklartInntekt.inntektsdata.tidsstempel))
         )
     }
@@ -2615,7 +2615,7 @@ internal class Vedtaksperiode private constructor(
             dokumentsporing,
             aktivitetslogg,
             person.skjæringstidspunkter,
-            yrkesaktivitet.arbeidsgiverperioder,
+            yrkesaktivitet.perioderUtenNavAnsvar,
             benyttetRefusjonstidslinje
         )
     }

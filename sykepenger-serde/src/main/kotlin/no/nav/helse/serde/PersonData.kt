@@ -512,7 +512,7 @@ data class PersonData(
         val inntektshistorikk: List<InntektsmeldingData>,
         val sykdomshistorikk: List<SykdomshistorikkData>,
         val sykmeldingsperioder: List<SykmeldingsperiodeData>,
-        val arbeidsgiverperioder: List<ArbeidsgiverperioderesultatData>,
+        val perioderUtenNavAnsvar: List<PeriodeUtenNavAnsvarData>,
         val vedtaksperioder: List<VedtaksperiodeData>,
         val forkastede: List<ForkastetVedtaksperiodeData>,
         val utbetalinger: List<UtbetalingData>,
@@ -531,7 +531,7 @@ data class PersonData(
             inntektshistorikk = InntektshistorikkInnDto(this.inntektshistorikk.map { it.tilDto() }),
             sykdomshistorikk = SykdomshistorikkDto(this.sykdomshistorikk.map { it.tilDto() }),
             sykmeldingsperioder = SykmeldingsperioderDto(this.sykmeldingsperioder.map { it.tilDto() }),
-            arbeidsgiverperioder = arbeidsgiverperioder.map { it.tilDto() },
+            perioderUtenNavAnsvar = perioderUtenNavAnsvar.map { it.tilDto() },
             vedtaksperioder = this.vedtaksperioder.map { it.tilDto() },
             forkastede = this.forkastede.map { it.tilDto() },
             utbetalinger = this.utbetalinger.map { it.tilDto() },
@@ -803,7 +803,7 @@ data class PersonData(
             }
         }
 
-        data class ArbeidsgiverperioderesultatData(
+        data class PeriodeUtenNavAnsvarData(
             val omsluttendePeriode: PeriodeData,
             val arbeidsgiverperiode: List<PeriodeData>,
             val ferdigAvklart: Boolean

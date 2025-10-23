@@ -123,7 +123,7 @@ internal class Yrkesaktivitet private constructor(
     private val inntektshistorikk: Inntektshistorikk,
     private val sykdomshistorikk: Sykdomshistorikk,
     private val sykmeldingsperioder: Sykmeldingsperioder,
-    arbeidsgiverperioder: List<PeriodeUtenNavAnsvar>,
+    perioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>,
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
     private val forkastede: MutableList<ForkastetVedtaksperiode>,
     private val utbetalinger: MutableList<Utbetaling>,
@@ -138,7 +138,7 @@ internal class Yrkesaktivitet private constructor(
         inntektshistorikk = Inntektshistorikk(),
         sykdomshistorikk = Sykdomshistorikk(),
         sykmeldingsperioder = Sykmeldingsperioder(),
-        arbeidsgiverperioder = emptyList(),
+        perioderUtenNavAnsvar = emptyList(),
         vedtaksperioder = mutableListOf(),
         forkastede = mutableListOf(),
         utbetalinger = mutableListOf(),
@@ -160,7 +160,7 @@ internal class Yrkesaktivitet private constructor(
         Selvstendig -> YrkesaktivitetType.Selvstendig
     }
 
-    internal var arbeidsgiverperioder: List<PeriodeUtenNavAnsvar> = arbeidsgiverperioder
+    internal var perioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar> = perioderUtenNavAnsvar
         private set
 
     init {
@@ -209,7 +209,7 @@ internal class Yrkesaktivitet private constructor(
 
         internal fun List<Yrkesaktivitet>.oppdatereSkjæringstidspunkter(beregnetSkjæringstidspunkter: Skjæringstidspunkter) {
             forEach {
-                it.vedtaksperioder.oppdatereSkjæringstidspunkter(beregnetSkjæringstidspunkter, it.arbeidsgiverperioder)
+                it.vedtaksperioder.oppdatereSkjæringstidspunkter(beregnetSkjæringstidspunkter, it.perioderUtenNavAnsvar)
             }
         }
 
@@ -338,7 +338,7 @@ internal class Yrkesaktivitet private constructor(
                 inntektshistorikk = Inntektshistorikk.gjenopprett(dto.inntektshistorikk),
                 sykdomshistorikk = Sykdomshistorikk.gjenopprett(dto.sykdomshistorikk),
                 sykmeldingsperioder = Sykmeldingsperioder.gjenopprett(dto.sykmeldingsperioder),
-                arbeidsgiverperioder = dto.arbeidsgiverperioder.map { PeriodeUtenNavAnsvar.gjenopprett(it) },
+                perioderUtenNavAnsvar = dto.perioderUtenNavAnsvar.map { PeriodeUtenNavAnsvar.gjenopprett(it) },
                 vedtaksperioder = vedtaksperioder,
                 forkastede = forkastede,
                 utbetalinger = utbetalinger.toMutableList(),
@@ -970,8 +970,8 @@ internal class Yrkesaktivitet private constructor(
     internal fun beregnArbeidsgiverperioder(egenmeldingsperioder: List<Periode> = vedtaksperioder.egenmeldingsperioder()): List<PeriodeUtenNavAnsvar> {
         when (yrkesaktivitetstype) {
             is Arbeidstaker -> {
-                arbeidsgiverperioder = arbeidsgiverperiodeFor(egenmeldingsperioder)
-                return arbeidsgiverperioder
+                perioderUtenNavAnsvar = arbeidsgiverperiodeFor(egenmeldingsperioder)
+                return perioderUtenNavAnsvar
             }
             Arbeidsledig,
             Frilans,
@@ -1210,7 +1210,7 @@ internal class Yrkesaktivitet private constructor(
             inntektshistorikk = inntektshistorikk.dto(),
             sykdomshistorikk = sykdomshistorikk.dto(),
             sykmeldingsperioder = sykmeldingsperioder.dto(),
-            arbeidsgiverperioder = arbeidsgiverperioder.map { it.dto() },
+            perioderUtenNavAnsvar = perioderUtenNavAnsvar.map { it.dto() },
             vedtaksperioder = vedtaksperioderDto,
             forkastede = forkastede.map { it.dto() },
             utbetalinger = utbetalinger.map { it.dto() },

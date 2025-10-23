@@ -140,7 +140,7 @@ private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
     inntektshistorikk = this.inntektshistorikk.historikk.map { it.tilPersonData() },
     sykdomshistorikk = this.sykdomshistorikk.elementer.map { it.tilPersonData() },
     sykmeldingsperioder = this.sykmeldingsperioder.tilPersonData(),
-    arbeidsgiverperioder = this.arbeidsgiverperioder.map { it.tilPersonData() },
+    perioderUtenNavAnsvar = this.perioderUtenNavAnsvar.map { it.tilPersonData() },
     vedtaksperioder = this.vedtaksperioder.map { it.tilPersonData() },
     forkastede = this.forkastede.map { it.tilPersonData() },
     utbetalinger = this.utbetalinger.map { it.tilPersonData() },
@@ -148,7 +148,7 @@ private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
     ubrukteRefusjonsopplysninger = this.ubrukteRefusjonsopplysninger.ubrukteRefusjonsopplysninger.tilPersonData(),
 )
 
-private fun PeriodeUtenNavAnsvarDto.tilPersonData() = PersonData.ArbeidsgiverData.ArbeidsgiverperioderesultatData(
+private fun PeriodeUtenNavAnsvarDto.tilPersonData() = PersonData.ArbeidsgiverData.PeriodeUtenNavAnsvarData(
     omsluttendePeriode = PersonData.ArbeidsgiverData.PeriodeData(this.omsluttendePeriode.fom, this.omsluttendePeriode.tom),
     arbeidsgiverperiode = this.dagerUtenAnsvar.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     ferdigAvklart = this.ferdigAvklart
