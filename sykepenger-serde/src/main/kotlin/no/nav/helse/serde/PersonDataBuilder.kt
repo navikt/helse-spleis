@@ -2,7 +2,7 @@ package no.nav.helse.serde
 
 import java.time.LocalDate
 import no.nav.helse.dto.ArbeidsgiverperiodeavklaringDto
-import no.nav.helse.dto.ArbeidsgiverperioderesultatDto
+import no.nav.helse.dto.PeriodeUtenNavAnsvarDto
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
@@ -148,9 +148,9 @@ private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
     ubrukteRefusjonsopplysninger = this.ubrukteRefusjonsopplysninger.ubrukteRefusjonsopplysninger.tilPersonData(),
 )
 
-private fun ArbeidsgiverperioderesultatDto.tilPersonData() = PersonData.ArbeidsgiverData.ArbeidsgiverperioderesultatData(
+private fun PeriodeUtenNavAnsvarDto.tilPersonData() = PersonData.ArbeidsgiverData.ArbeidsgiverperioderesultatData(
     omsluttendePeriode = PersonData.ArbeidsgiverData.PeriodeData(this.omsluttendePeriode.fom, this.omsluttendePeriode.tom),
-    arbeidsgiverperiode = this.arbeidsgiverperiode.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
+    arbeidsgiverperiode = this.dagerUtenAnsvar.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     ferdigAvklart = this.ferdigAvklart
 )
 

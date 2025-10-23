@@ -1,34 +1,34 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import no.nav.helse.dto.ArbeidsgiverperioderesultatDto
+import no.nav.helse.dto.PeriodeUtenNavAnsvarDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.nesteDag
 
-data class Arbeidsgiverperioderesultat(
-    // perioden som dekkes av arbeidsgiverperioden, fra første kjente dag til siste kjente dag
+data class PeriodeUtenNavAnsvar(
+    // perioden som dekker første kjente dag til siste kjente dag
     val omsluttendePeriode: Periode,
-    // dager som tolkes som del av arbeidsgiverperioden
-    val arbeidsgiverperiode: List<Periode>,
-    // hvorvidt arbeidsgiverperioden er ferdig avklart (enten fordi tellingen er fullstendig eller fordi agp er avklart i Infotrygd)
+    // dager som tolkes som dager nav ikke har ansvar (arbeidsgiverperiode / ventetid)
+    val dagerUtenAnsvar: List<Periode>,
+    // hvorvidt perioden nav ikke har ansvar for er ferdig avklart
     val ferdigAvklart: Boolean
 ) {
     fun utvideMed(
         dato: LocalDate,
-        arbeidsgiverperiode: LocalDate? = null,
+        dagUtenAnsvar: LocalDate? = null,
         ferdigAvklart: Boolean? = null
-    ): Arbeidsgiverperioderesultat {
+    ): PeriodeUtenNavAnsvar {
         return this.copy(
             omsluttendePeriode = this.omsluttendePeriode.oppdaterTom(dato),
-            arbeidsgiverperiode = this.arbeidsgiverperiode.leggTil(arbeidsgiverperiode),
+            dagerUtenAnsvar = this.dagerUtenAnsvar.leggTil(dagUtenAnsvar),
             ferdigAvklart = ferdigAvklart ?: this.ferdigAvklart
         )
     }
 
-    fun dto() = ArbeidsgiverperioderesultatDto(
+    fun dto() = PeriodeUtenNavAnsvarDto(
         omsluttendePeriode = omsluttendePeriode.dto(),
-        arbeidsgiverperiode = arbeidsgiverperiode.map { it.dto() },
+        dagerUtenAnsvar = dagerUtenAnsvar.map { it.dto() },
         ferdigAvklart = ferdigAvklart
     )
 
@@ -50,14 +50,14 @@ data class Arbeidsgiverperioderesultat(
         private fun List<Periode>.oppdaterSiste(dato: LocalDate) =
             toMutableList().apply { addLast(removeLast().oppdaterTom(dato)) }
 
-        internal fun Iterable<Arbeidsgiverperioderesultat>.finn(periode: Periode) = lastOrNull { arbeidsgiverperiode ->
-            periode.overlapperMed(arbeidsgiverperiode.omsluttendePeriode)
+        internal fun Iterable<PeriodeUtenNavAnsvar>.finn(periode: Periode) = lastOrNull { periodeUtenNavAnsvar ->
+            periode.overlapperMed(periodeUtenNavAnsvar.omsluttendePeriode)
         }
 
-        internal fun gjenopprett(dto: ArbeidsgiverperioderesultatDto) =
-            Arbeidsgiverperioderesultat(
+        internal fun gjenopprett(dto: PeriodeUtenNavAnsvarDto) =
+            PeriodeUtenNavAnsvar(
                 omsluttendePeriode = Periode.gjenopprett(dto.omsluttendePeriode),
-                arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) },
+                dagerUtenAnsvar = dto.dagerUtenAnsvar.map { Periode.gjenopprett(it) },
                 ferdigAvklart = dto.ferdigAvklart
             )
     }

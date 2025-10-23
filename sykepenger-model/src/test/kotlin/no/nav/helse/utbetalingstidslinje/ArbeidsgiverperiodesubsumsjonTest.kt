@@ -196,7 +196,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller)
         val arbeidsgiverperioder = arbeidsgiverperiodeberegner.resultat(tidslinje, infotrygdBetalteDager, infotrygdFerieperioder)
         val builder = ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
-            arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder(),
+            arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.dagerUtenAnsvar }.grupperSammenhengendePerioder(),
             dagerNavOvertarAnsvar = emptyList(),
             refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje()
         )

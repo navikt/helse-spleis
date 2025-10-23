@@ -235,7 +235,7 @@ data class SpannerPersonDto(
         val inntektshistorikk: List<InntektsmeldingData>,
         val sykdomshistorikk: List<SykdomshistorikkData>,
         val sykmeldingsperioder: List<SykmeldingsperiodeData>,
-        val arbeidsgiverperioder: List<ArbeidsgiverperioderesultatData>,
+        val arbeidsgiverperioder: List<PeriodeUtenNavAnsvarData>,
         val vedtaksperioder: List<VedtaksperiodeData>,
         val forkastede: List<ForkastetVedtaksperiodeData>,
         val utbetalinger: List<UtbetalingData>,
@@ -365,9 +365,9 @@ data class SpannerPersonDto(
             }
         }
 
-        data class ArbeidsgiverperioderesultatData(
+        data class PeriodeUtenNavAnsvarData(
             val omsluttendePeriode: PeriodeData,
-            val arbeidsgiverperiode: List<PeriodeData>,
+            val dagerUtenAnsvar: List<PeriodeData>,
             val ferdigAvklart: Boolean
         )
 
@@ -850,9 +850,9 @@ private fun ArbeidsgiverUtDto.tilPersonData(vilkårsgrunnlagHistorikk: List<Vilk
     )
 }
 
-private fun ArbeidsgiverperioderesultatDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.ArbeidsgiverperioderesultatData(
+private fun PeriodeUtenNavAnsvarDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.PeriodeUtenNavAnsvarData(
     omsluttendePeriode = SpannerPersonDto.ArbeidsgiverData.PeriodeData(this.omsluttendePeriode.fom, this.omsluttendePeriode.tom),
-    arbeidsgiverperiode = this.arbeidsgiverperiode.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
+    dagerUtenAnsvar = this.dagerUtenAnsvar.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     ferdigAvklart = this.ferdigAvklart
 )
 

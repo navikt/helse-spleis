@@ -1,7 +1,7 @@
 package no.nav.helse.dto
 
-data class ArbeidsgiverperioderesultatDto(
+data class PeriodeUtenNavAnsvarDto(
     val omsluttendePeriode: PeriodeDto,
-    val arbeidsgiverperiode: List<PeriodeDto>,
+    val dagerUtenAnsvar: List<PeriodeDto>,
     val ferdigAvklart: Boolean
 )

@@ -11,7 +11,7 @@ import no.nav.helse.dto.AlderDto
 import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
 import no.nav.helse.dto.ArbeidsgiverperiodeavklaringDto
-import no.nav.helse.dto.ArbeidsgiverperioderesultatDto
+import no.nav.helse.dto.PeriodeUtenNavAnsvarDto
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
@@ -808,10 +808,10 @@ data class PersonData(
             val arbeidsgiverperiode: List<PeriodeData>,
             val ferdigAvklart: Boolean
         ) {
-            fun tilDto(): ArbeidsgiverperioderesultatDto {
-                return ArbeidsgiverperioderesultatDto(
+            fun tilDto(): PeriodeUtenNavAnsvarDto {
+                return PeriodeUtenNavAnsvarDto(
                     omsluttendePeriode = omsluttendePeriode.tilDto(),
-                    arbeidsgiverperiode = arbeidsgiverperiode.map { it.tilDto() },
+                    dagerUtenAnsvar = arbeidsgiverperiode.map { it.tilDto() },
                     ferdigAvklart = ferdigAvklart
                 )
             }

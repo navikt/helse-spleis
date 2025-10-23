@@ -181,7 +181,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverberegningBuilder
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperioderesultat
+import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.utbetalingstidslinje.BeregnetMaksdato
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
@@ -2723,7 +2723,7 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.oppdatereSkjæringstidspunkter(
             beregnetSkjæringstidspunkter: Skjæringstidspunkter,
-            beregnetArbeidsgiverperioder: List<Arbeidsgiverperioderesultat>
+            beregnetArbeidsgiverperioder: List<PeriodeUtenNavAnsvar>
         ) {
             forEach { it.behandlinger.oppdaterSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnetArbeidsgiverperioder) }
         }
