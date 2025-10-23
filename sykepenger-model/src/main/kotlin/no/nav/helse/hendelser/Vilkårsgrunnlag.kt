@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsgrunnlag
 import no.nav.helse.person.ArbeidstakerOpptjening
-import no.nav.helse.person.ArbeidstakerOpptjeningIkkeVurdert
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -94,7 +93,7 @@ class Vilkårsgrunnlag(
                 }
                 arbeidstakerOpptjening
             }
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> ArbeidstakerOpptjeningIkkeVurdert
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> null
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans -> error("Støtter ikke Arbeidsledig/Frilans")
         }

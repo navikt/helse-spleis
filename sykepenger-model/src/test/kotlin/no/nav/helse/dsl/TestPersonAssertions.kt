@@ -3,7 +3,7 @@ package no.nav.helse.dsl
 import java.time.LocalDate
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
-import no.nav.helse.person.OpptjeningView.ArbeidstakerOpptjeningView
+import no.nav.helse.person.ArbeidstakerOpptjeningView
 import no.nav.helse.testhelpers.assertNotNull
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse

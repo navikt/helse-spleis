@@ -112,7 +112,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         val vilkårsgrunnlagId: UUID,
         val skjæringstidspunkt: LocalDate,
         val inntektsgrunnlag: Inntektsgrunnlag,
-        protected val opptjening: Opptjening?
+        val opptjening: ArbeidstakerOpptjening?
     ) : Aktivitetskontekst {
         internal open fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) = true
 
@@ -143,10 +143,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         protected abstract fun kopierMed(
             inntektsgrunnlag: Inntektsgrunnlag,
-            opptjening: Opptjening?,
+            opptjening: ArbeidstakerOpptjening?,
             subsumsjonslogg: Subsumsjonslogg,
             nyttSkjæringstidspunkt: LocalDate? = null
-        ): VilkårsgrunnlagElement
+        ): Grunnlagsdata
 
         abstract fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
@@ -189,11 +189,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         internal companion object {
-            internal val VilkårsgrunnlagElement.arbeidstakerOpptjening get() = when (this) {
-                is Grunnlagsdata -> this.opptjening ?: ArbeidstakerOpptjeningIkkeVurdert
-                is InfotrygdVilkårsgrunnlag -> ArbeidstakerOpptjeningVurdertIInfotrygd
-            }
-
             internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {
                 val skjæringstidspunkter = elementer
                     .map { it.skjæringstidspunkt }
@@ -230,7 +225,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal class Grunnlagsdata(
         skjæringstidspunkt: LocalDate,
         inntektsgrunnlag: Inntektsgrunnlag,
-        opptjening: Opptjening,
+        opptjening: ArbeidstakerOpptjening?,
         val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         val meldingsreferanseId: MeldingsreferanseId?,
         vilkårsgrunnlagId: UUID
@@ -241,7 +236,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             skjæringstidspunkt = skjæringstidspunkt,
             meldingsreferanseId = meldingsreferanseId,
             inntektsgrunnlag = inntektsgrunnlag.view(),
-            opptjening = arbeidstakerOpptjening.view(),
+            opptjening = opptjening?.view(),
             medlemskapstatus = when (medlemskapstatus) {
                 Medlemskapsvurdering.Medlemskapstatus.Ja -> GrunnlagsdataView.MedlemskapstatusView.Ja
                 Medlemskapsvurdering.Medlemskapstatus.Nei -> GrunnlagsdataView.MedlemskapstatusView.Nei
@@ -251,11 +246,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         )
 
         internal fun validerFørstegangsvurderingArbeidstaker(aktivitetslogg: IAktivitetslogg) {
-            when (val arbeidstakerOpptjening = arbeidstakerOpptjening) {
-                is ArbeidstakerOpptjening -> inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, arbeidstakerOpptjening)
-                ArbeidstakerOpptjeningIkkeVurdert -> error("Mangler opptjening som arbeidstaker")
-                ArbeidstakerOpptjeningVurdertIInfotrygd -> {}
-            }
+            if (opptjening != null) inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
         }
 
         internal fun validerFørstegangsvurderingSelvstendig(subsumsjonslogg: BehandlingSubsumsjonslogg) {
@@ -264,7 +255,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String): Boolean {
-            inntektsgrunnlag.vurderArbeidsgivere(aktivitetslogg, arbeidstakerOpptjening, organisasjonsnummer)
+            inntektsgrunnlag.vurderArbeidsgivere(aktivitetslogg, opptjening, organisasjonsnummer)
             return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
         }
 
@@ -272,7 +263,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonslogg: Subsumsjonslogg) = kopierMed(
             inntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonslogg),
-            opptjening = opptjening!!.overstyrArbeidsforhold(hendelse).also {
+            opptjening = hendelse.overstyr(opptjening!!).also {
                 subsumsjonslogg.logg(it.subsumsjon)
             },
             subsumsjonslogg = subsumsjonslogg,
@@ -280,10 +271,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun kopierMed(
             inntektsgrunnlag: Inntektsgrunnlag,
-            opptjening: Opptjening?,
+            opptjening: ArbeidstakerOpptjening?,
             subsumsjonslogg: Subsumsjonslogg,
             nyttSkjæringstidspunkt: LocalDate?
-        ): VilkårsgrunnlagElement {
+        ): Grunnlagsdata {
             return Grunnlagsdata(
                 skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
                 inntektsgrunnlag = inntektsgrunnlag,
@@ -317,7 +308,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 return Grunnlagsdata(
                     skjæringstidspunkt = dto.skjæringstidspunkt,
                     inntektsgrunnlag = Inntektsgrunnlag.gjenopprett(dto.skjæringstidspunkt, dto.inntektsgrunnlag),
-                    opptjening = Opptjening.gjenopprett(dto.skjæringstidspunkt, dto.opptjening),
+                    opptjening = dto.opptjening?.let { ArbeidstakerOpptjening.gjenopprett(dto.skjæringstidspunkt, it) },
                     vilkårsgrunnlagId = dto.vilkårsgrunnlagId,
                     medlemskapstatus = when (dto.medlemskapstatus) {
                         MedlemskapsvurderingDto.Ja -> Medlemskapsvurdering.Medlemskapstatus.Ja
@@ -351,15 +342,16 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun kopierMed(
             inntektsgrunnlag: Inntektsgrunnlag,
-            opptjening: Opptjening?,
+            opptjening: ArbeidstakerOpptjening?,
             subsumsjonslogg: Subsumsjonslogg,
             nyttSkjæringstidspunkt: LocalDate?
-        ): InfotrygdVilkårsgrunnlag {
-            return InfotrygdVilkårsgrunnlag(
+        ): Grunnlagsdata {
+            error("What?")
+            /*return InfotrygdVilkårsgrunnlag(
                 skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
                 inntektsgrunnlag = inntektsgrunnlag,
                 vilkårsgrunnlagId = UUID.randomUUID()
-            )
+            )*/
         }
 
         override fun vilkårsgrunnlagtype() = "Infotrygd"
@@ -409,7 +401,7 @@ internal data class GrunnlagsdataView(
     override val inntektsgrunnlag: InntektsgrunnlagView,
     val medlemskapstatus: MedlemskapstatusView,
     val meldingsreferanseId: MeldingsreferanseId?,
-    val opptjening: OpptjeningView
+    val opptjening: ArbeidstakerOpptjeningView?
 ): VilkårsgrunnlagView {
     enum class MedlemskapstatusView { Ja, Nei, VetIkke, UavklartMedBrukerspørsmål }
 }

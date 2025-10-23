@@ -84,7 +84,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrTidslinje
 import no.nav.helse.person.Dokumentsporing.Companion.søknad
 import no.nav.helse.person.Venteårsak.Companion.fordi
-import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.arbeidstakerOpptjening
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -1046,15 +1045,8 @@ internal class Vedtaksperiode private constructor(
         håndterYtelser(ytelser, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk, nesteSimuleringtilstand, nesteGodkjenningtilstand)
     }
 
-    private fun harOpptjening(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) = when (yrkesaktivitet.yrkesaktivitetstype) {
-        is Arbeidstaker -> when (val arbeidstakerOpptjening = grunnlagsdata.arbeidstakerOpptjening) {
-            is ArbeidstakerOpptjening -> arbeidstakerOpptjening.harTilstrekkeligAntallOpptjeningsdager()
-            is ArbeidstakerOpptjeningIkkeVurdert -> error("Mangler opptjeningsvurdering for arbeidstaker")
-            is ArbeidstakerOpptjeningVurdertIInfotrygd -> true
-        }
-        Behandlingsporing.Yrkesaktivitet.Selvstendig -> true
-        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-        Behandlingsporing.Yrkesaktivitet.Frilans -> error("Har ikke opptjeningsvurdering for Arbeidsledig/Frilans")
+    private fun harOpptjening(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Boolean {
+        return (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.opptjening?.harTilstrekkeligAntallOpptjeningsdager() ?: true
     }
 
     private fun håndterYtelser(ytelser: Ytelser, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk, nesteSimuleringtilstand: Vedtaksperiodetilstand, nesteGodkjenningtilstand: Vedtaksperiodetilstand) {
@@ -1488,7 +1480,7 @@ internal class Vedtaksperiode private constructor(
 
         endretInntektsgrunnlag.inntekter
             .forEach {
-                val opptjening = nyttGrunnlag.arbeidstakerOpptjening as ArbeidstakerOpptjening
+                val opptjening = nyttGrunnlag.opptjening as ArbeidstakerOpptjening
                 val opptjeningFom = opptjening.startdatoFor(it.inntektEtter.orgnummer)
                 overstyrArbeidsgiveropplysninger.subsummer(subsumsjonslogg, opptjeningFom, it.inntektEtter.orgnummer)
             }

@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
-import no.nav.helse.person.Opptjening
+import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 
 class OverstyrArbeidsforhold(
@@ -30,7 +30,7 @@ class OverstyrArbeidsforhold(
         }
     }
 
-    internal fun overstyr(opptjening: Opptjening): Opptjening {
+    internal fun overstyr(opptjening: ArbeidstakerOpptjening): ArbeidstakerOpptjening {
         return overstyrteArbeidsforhold.fold(opptjening) { acc, overstyring ->
             overstyring.overstyr(acc)
         }
@@ -46,7 +46,7 @@ class OverstyrArbeidsforhold(
             else -> inntektsgrunnlag.aktiver(orgnummer, forklaring, subsumsjonslogg)
         }
 
-        internal fun overstyr(opptjening: Opptjening) = when (deaktivert) {
+        internal fun overstyr(opptjening: ArbeidstakerOpptjening) = when (deaktivert) {
             true -> opptjening.deaktiver(orgnummer)
             else -> opptjening.aktiver(orgnummer)
         }

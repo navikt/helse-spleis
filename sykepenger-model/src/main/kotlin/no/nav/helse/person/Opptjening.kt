@@ -5,10 +5,8 @@ import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
 import no.nav.helse.dto.deserialisering.OpptjeningInnDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
-import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.`§ 8-2 ledd 1`
 import no.nav.helse.forrigeDag
-import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -22,51 +20,16 @@ import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnla
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.inngårIOpptjening
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiode
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.startdatoFor
-import no.nav.helse.person.Opptjening.Companion.TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
-internal sealed interface Opptjening {
-    val subsumsjon: Subsumsjon
-    fun view(): OpptjeningView
-    fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold): Opptjening {
-        return hendelse.overstyr(this)
-    }
-
-    fun deaktiver(orgnummer: String): Opptjening
-    fun aktiver(orgnummer: String): Opptjening
-    fun dto(): OpptjeningUtDto?
-
-    companion object {
-        const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
-        fun gjenopprett(skjæringstidspunkt: LocalDate, opptjening: OpptjeningInnDto?): Opptjening = when (opptjening) {
-            is OpptjeningInnDto -> ArbeidstakerOpptjening.gjenopprett(skjæringstidspunkt, opptjening)
-            null -> ArbeidstakerOpptjeningIkkeVurdert
-        }
-    }
-}
-
-internal data object ArbeidstakerOpptjeningIkkeVurdert : Opptjening {
-    override val subsumsjon: Subsumsjon by lazy { error("ArbeidstakerOpptjeningIkkeVurdert skal ikke subsummere") }
-    override fun view() = OpptjeningView.ArbeidstakerOpptjeningIkkeVurdertView
-    override fun deaktiver(orgnummer: String) = error("ArbeidstakerOpptjeningIkkeVurdert kan ikke deaktiveres")
-    override fun aktiver(orgnummer: String) = error("ArbeidstakerOpptjeningIkkeVurdert kan ikke aktiveres")
-    override fun dto(): OpptjeningUtDto? = null
-}
-
-internal data object ArbeidstakerOpptjeningVurdertIInfotrygd : Opptjening {
-    override val subsumsjon: Subsumsjon by lazy { error("ArbeidstakerOpptjeningVurdertIInfotrygd skal ikke subsummere") }
-    override fun view() = OpptjeningView.ArbeidstakerOpptjeningVurderIInfotrygdView
-    override fun deaktiver(orgnummer: String) = error("ArbeidstakerOpptjeningVurdertIInfotrygd kan ikke deaktiveres")
-    override fun aktiver(orgnummer: String) = error("ArbeidstakerOpptjeningVurdertIInfotrygd kan ikke aktivers")
-    override fun dto(): OpptjeningUtDto = error("ArbeidstakerOpptjeningVurdertIInfotrygd er bare noe som brukes runtime i modellen")
-}
+private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
 
 internal class ArbeidstakerOpptjening private constructor(
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>,
     private val opptjeningsperiode: Periode
-) : Opptjening {
+) {
     private val opptjeningsdager by lazy { opptjeningsperiode.count() }
-    override val subsumsjon = `§ 8-2 ledd 1`(
+    internal val subsumsjon = `§ 8-2 ledd 1`(
         oppfylt = harTilstrekkeligAntallOpptjeningsdager(),
         skjæringstidspunkt = skjæringstidspunkt,
         tilstrekkeligAntallOpptjeningsdager = TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER,
@@ -74,7 +37,7 @@ internal class ArbeidstakerOpptjening private constructor(
         antallOpptjeningsdager = opptjeningsdager
     )
 
-    override fun view() = OpptjeningView.ArbeidstakerOpptjeningView(arbeidsforhold = arbeidsforhold, opptjeningsdager = opptjeningsdager, erOppfylt = erOppfylt())
+    internal fun view() = ArbeidstakerOpptjeningView(arbeidsforhold = arbeidsforhold, opptjeningsdager = opptjeningsdager, erOppfylt = erOppfylt())
 
     internal fun ansattVedSkjæringstidspunkt(orgnummer: String) =
         arbeidsforhold.any { it.ansattVedSkjæringstidspunkt(orgnummer, skjæringstidspunkt) }
@@ -86,11 +49,11 @@ internal class ArbeidstakerOpptjening private constructor(
     internal fun opptjeningFom() = opptjeningsperiode.start
     internal fun startdatoFor(orgnummer: String) = arbeidsforhold.startdatoFor(orgnummer, skjæringstidspunkt)
 
-    override fun deaktiver(orgnummer: String): Opptjening {
+    internal fun deaktiver(orgnummer: String): ArbeidstakerOpptjening {
         return nyOpptjening(arbeidsforhold.deaktiver(orgnummer), skjæringstidspunkt)
     }
 
-    override fun aktiver(orgnummer: String): Opptjening {
+    internal fun aktiver(orgnummer: String): ArbeidstakerOpptjening {
         return nyOpptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt)
     }
 
@@ -228,7 +191,7 @@ internal class ArbeidstakerOpptjening private constructor(
         }
     }
 
-    override fun dto(): OpptjeningUtDto = OpptjeningUtDto(
+    fun dto(): OpptjeningUtDto = OpptjeningUtDto(
         arbeidsforhold = this.arbeidsforhold.map { it.dto() },
         opptjeningsperiode = this.opptjeningsperiode.dto(),
         opptjeningsdager = opptjeningsdager,
@@ -236,8 +199,4 @@ internal class ArbeidstakerOpptjening private constructor(
     )
 }
 
-internal sealed interface OpptjeningView {
-    data class ArbeidstakerOpptjeningView(val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, val opptjeningsdager: Int, val erOppfylt: Boolean) : OpptjeningView
-    object ArbeidstakerOpptjeningIkkeVurdertView : OpptjeningView
-    object ArbeidstakerOpptjeningVurderIInfotrygdView : OpptjeningView
-}
+internal data class ArbeidstakerOpptjeningView(val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, val opptjeningsdager: Int, val erOppfylt: Boolean)

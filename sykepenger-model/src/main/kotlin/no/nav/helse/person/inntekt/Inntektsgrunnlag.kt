@@ -12,9 +12,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.person.ArbeidstakerOpptjening
-import no.nav.helse.person.ArbeidstakerOpptjeningIkkeVurdert
-import no.nav.helse.person.ArbeidstakerOpptjeningVurdertIInfotrygd
-import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
@@ -24,7 +21,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deak
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harFunksjonellEndring
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harGjenbrukbarInntekt
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedInntektsmelding
@@ -152,12 +148,8 @@ internal class Inntektsgrunnlag(
         deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.map { it.orgnummer }
     )
 
-    internal fun vurderArbeidsgivere(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening, orgnummer: String) {
-        when (opptjening) {
-            is ArbeidstakerOpptjening -> arbeidsgiverInntektsopplysninger.vurderArbeidsgivere(aktivitetslogg, opptjening, orgnummer)
-            ArbeidstakerOpptjeningIkkeVurdert -> error("Mangler opptjening som Arbeidestaker")
-            ArbeidstakerOpptjeningVurdertIInfotrygd -> {}
-        }
+    internal fun vurderArbeidsgivere(aktivitetslogg: IAktivitetslogg, opptjening: ArbeidstakerOpptjening?, orgnummer: String) {
+        if (opptjening != null) arbeidsgiverInntektsopplysninger.vurderArbeidsgivere(aktivitetslogg, opptjening, orgnummer)
     }
 
     internal fun måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg: IAktivitetslogg, opptjening: ArbeidstakerOpptjening) {
