@@ -45,7 +45,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     private val FYLLER_68_1_JANUAR = 1.januar(1950)
 
     @Test
-    fun `22-13 ledd 3 - Vurdering av foreldelse`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `22-13 ledd 3 - Vurdering av foreldelse`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, sendtTilNAVEllerArbeidsgiver = LocalDate.of(2018, 5, 1).atStartOfDay())
 
@@ -86,7 +86,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `§ 8-12 ledd 2 - Vurdering av ny rett til sykepenger`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `§ 8-12 ledd 2 - Vurdering av ny rett til sykepenger`() {
         a1 {
             nyttVedtak(1.mai(2017) til 31.mai(2017))
         }
@@ -130,7 +130,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `§ 8-35 ledd 2 - selvstendignæringsdrivende sykepengegrunnlag`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `§ 8-35 ledd 2 - selvstendignæringsdrivende sykepengegrunnlag`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -156,7 +156,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `Subsumerer § 8-11 - utbetaler ikke helg`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Subsumerer § 8-11 - utbetaler ikke helg`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -180,7 +180,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `Subsumerer 8-34 ledd 1 for selvstendig uten forsikring`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Subsumerer 8-34 ledd 1 for selvstendig uten forsikring`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -201,7 +201,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `§ 8-51 ledd 2 - er ikke over 67 år`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `§ 8-51 ledd 2 - er ikke over 67 år`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -212,7 +212,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `§ 8-51 ledd 2 - har minimum inntekt over 2G - over 67 år`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `§ 8-51 ledd 2 - har minimum inntekt over 2G - over 67 år`() {
         medFødselsdato(FYLLER_68_1_JANUAR)
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
@@ -240,7 +240,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `§ 8-51 ledd 2 - har minimum inntekt under 2G - over 67 år`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `§ 8-51 ledd 2 - har minimum inntekt under 2G - over 67 år`() {
         medFødselsdato(FYLLER_68_1_JANUAR)
         selvstendig {
             håndterFørstegangssøknadSelvstendig(
@@ -275,7 +275,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `§ 8-51 ledd 2 - avslag subsumeres når person blir 67 år underveis i sykefraværstilfellet og tjener mindre enn 2G`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `§ 8-51 ledd 2 - avslag subsumeres når person blir 67 år underveis i sykefraværstilfellet og tjener mindre enn 2G`() {
         val blir67Underveis = 5.februar(1951)
         medFødselsdato(blir67Underveis)
         selvstendig {
@@ -362,7 +362,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk på 67-årsdagen så total sykedager blir en dag mindre uten at maksdato endres`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk på 67-årsdagen så total sykedager blir en dag mindre uten at maksdato endres`() {
         val blir67Underveis = 1.februar(1951)
         medFødselsdato(blir67Underveis)
         selvstendig {
@@ -445,7 +445,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk dagen etter 67-årsdagen så maksdato flyttes en dag`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk dagen etter 67-årsdagen så maksdato flyttes en dag`() {
         val blir67Underveis = 1.februar(1951)
         medFødselsdato(blir67Underveis)
         selvstendig {
@@ -528,7 +528,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 60 dager etter fylte 67 år`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 60 dager etter fylte 67 år`() {
         val blir67Underveis = 1.februar(1951)
         medFødselsdato(blir67Underveis)
         selvstendig {
@@ -681,7 +681,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 61 dager etter fylte 67 år`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 61 dager etter fylte 67 år`() {
         val blir67Underveis = 1.februar(1951)
         medFødselsdato(blir67Underveis)
         selvstendig {
@@ -867,7 +867,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `andre ytelser i halen`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `andre ytelser i halen`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)

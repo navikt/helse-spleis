@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun selvstendigsøknad() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun selvstendigsøknad() {
         nyttVedtak(3.januar til 26.januar)
         assertTilstander(
             0,
@@ -29,7 +29,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `annullere utbetalt periode`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `annullere utbetalt periode`() {
         nyttVedtak(januar)
         val utbetalingId = testRapid.inspektør.siste("utbetaling_utbetalt").path("utbetalingId").asText()
         sendAnnulleringSelvstendig(utbetalingId)
@@ -52,14 +52,14 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `kaster ut søknad når det er fravær før sykmelding`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `kaster ut søknad når det er fravær før sykmelding`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE, fraværFørSykmelding = true)
         assertTilstander(0, "TIL_INFOTRYGD")
     }
 
     @Test
-    fun fisker() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun fisker() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.FISKER)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.FISKER)
         assertTilstander(
@@ -69,7 +69,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun jordbruker() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun jordbruker() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
         assertTilstander(
@@ -79,7 +79,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun annet() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun annet() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.ANNET)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.ANNET)
         assertTilstander(
@@ -89,7 +89,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `overstyrer tidslinje i avventer godkjenning`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `overstyrer tidslinje i avventer godkjenning`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendVilkårsgrunnlagSelvstendig(0)
@@ -131,7 +131,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
 
 
     @Test
-    fun selvstendigBarnepasserSøknad() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun selvstendigBarnepasserSøknad() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.BARNEPASSER)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.BARNEPASSER)
         sendVilkårsgrunnlagSelvstendig(0, orgnummer = "SELVSTENDIG")
@@ -153,7 +153,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `overstyrer tidslinje i avventer godkjenning for Barnepasser`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `overstyrer tidslinje i avventer godkjenning for Barnepasser`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.BARNEPASSER)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.BARNEPASSER)
         sendVilkårsgrunnlagSelvstendig(0, orgnummer = "SELVSTENDIG")

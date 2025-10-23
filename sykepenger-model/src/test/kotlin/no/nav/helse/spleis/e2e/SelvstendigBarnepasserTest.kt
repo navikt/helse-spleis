@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.Year
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.selvstendig
@@ -35,7 +34,7 @@ import org.junit.jupiter.api.Test
 internal class SelvstendigBarnepasserTest : AbstractDslTest() {
 
     @Test
-    fun `Verifiserer sykdomstidslinje for selvstendig`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Verifiserer sykdomstidslinje for selvstendig`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
@@ -44,7 +43,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Overstyrer tidslinje i halen i avventer godkjenning`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Overstyrer tidslinje i halen i avventer godkjenning`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -63,7 +62,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Overstyrer tidslinje i halen til annen ytelse i avventer godkjenning`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Overstyrer tidslinje i halen til annen ytelse i avventer godkjenning`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -82,7 +81,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Overstyrer hele perioden til annen ytelse`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Overstyrer hele perioden til annen ytelse`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -100,7 +99,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     }
 
     @Test
-    fun `ventetid fra søknad lagres på behandlingen`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `ventetid fra søknad lagres på behandlingen`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
 
@@ -110,7 +109,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     }
 
     @Test
-    fun `selvstendigsøknad med færre inntekter enn 3 år kastes ut`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `selvstendigsøknad med færre inntekter enn 3 år kastes ut`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(
                 periode = januar,
@@ -127,7 +126,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     }
 
     @Test
-    fun `selvstendigsøknad med færre enn 3 ferdiglignede år kastes ut`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `selvstendigsøknad med færre enn 3 ferdiglignede år kastes ut`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(
                 periode = januar,
@@ -144,19 +143,8 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
         }
     }
 
-
     @Test
-    fun `selvstendigsøknad kastes ut frem til vi støtter det`() = Toggle.SelvstendigNæringsdrivende.disable {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
-            assertFunksjonelleFeil()
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
-
-        }
-    }
-
-    @Test
-    fun `beregner korrekt utbetaling for selvstendig med inntekt under 6G og uten forskring`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `beregner korrekt utbetaling for selvstendig med inntekt under 6G og uten forskring`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -203,7 +191,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     }
 
     @Test
-    fun `beregner korrekt utbetaling for selvstendig med inntekt over 6G og uten forsikring`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `beregner korrekt utbetaling for selvstendig med inntekt over 6G og uten forsikring`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(
                 periode = januar,
@@ -256,7 +244,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
     }
 
     @Test
-    fun `To selvstendigsøknader`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `To selvstendigsøknader`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
             håndterFørstegangssøknadSelvstendig(mars, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)

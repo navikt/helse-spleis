@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -23,11 +22,7 @@ internal sealed interface YrkesaktivitetType {
     }
 
     data object Selvstendig : YrkesaktivitetType {
-        override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg): Boolean {
-            if (Toggle.SelvstendigNæringsdrivende.enabled) return false
-            aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
-            return true
-        }
+        override fun erYrkesaktivitetenIkkeStøttet(aktivitetslogg: IAktivitetslogg) = false
     }
 
     data object Arbeidsledig : YrkesaktivitetType {

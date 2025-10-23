@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.selvstendig
@@ -15,7 +14,7 @@ import org.junit.jupiter.api.Test
 
 internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
     @Test
-    fun `SelvstendigFaktaavklartInntekt - enda en godkjenningsbehov`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `SelvstendigFaktaavklartInntekt - enda en godkjenningsbehov`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())

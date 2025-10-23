@@ -150,7 +150,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Kaster ut selvstendigperiode når det finnes ghosts`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Kaster ut selvstendigperiode når det finnes ghosts`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlag(
@@ -166,7 +166,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Kaster ut søknader når det også er oppgitt lønnsinntekter`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Kaster ut søknader når det også er oppgitt lønnsinntekter`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(
                 periode = januar,
@@ -182,7 +182,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Person med frilanserinntekt i løpet av de siste 3 månedene sendes til infotrygd`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Person med frilanserinntekt i løpet av de siste 3 månedene sendes til infotrygd`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlag(
@@ -205,7 +205,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Verifiserer sykdomstidslinje for selvstendig`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Verifiserer sykdomstidslinje for selvstendig`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
@@ -214,7 +214,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Overstyrer tidslinje i halen i avventer godkjenning`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Overstyrer tidslinje i halen i avventer godkjenning`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -233,7 +233,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Overstyrer tidslinje i halen til annen ytelse i avventer godkjenning`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Overstyrer tidslinje i halen til annen ytelse i avventer godkjenning`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -252,7 +252,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Overstyrer hele perioden til annen ytelse`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `Overstyrer hele perioden til annen ytelse`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -270,7 +270,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `ventetid fra søknad lagres på behandlingen`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `ventetid fra søknad lagres på behandlingen`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
 
@@ -298,7 +298,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `selvstendigsøknad med færre inntekter enn 3 år kastes ut`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `selvstendigsøknad med færre inntekter enn 3 år kastes ut`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(
                 periode = januar,
@@ -313,17 +313,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `selvstendigsøknad kastes ut frem til vi støtter det`() = Toggle.SelvstendigNæringsdrivende.disable {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar)
-            assertFunksjonelleFeil()
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
-
-        }
-    }
-
-    @Test
-    fun `beregner korrekt utbetaling for selvstendig med inntekt under 6G og uten forskring`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `beregner korrekt utbetaling for selvstendig med inntekt under 6G og uten forskring`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -370,7 +360,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `beregner korrekt utbetaling for selvstendig med inntekt over 6G og uten forsikring`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `beregner korrekt utbetaling for selvstendig med inntekt over 6G og uten forsikring`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(
                 periode = januar,
@@ -422,7 +412,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `To selvstendigsøknader`() = Toggle.SelvstendigNæringsdrivende.enable {
+    fun `To selvstendigsøknader`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterFørstegangssøknadSelvstendig(mars)
