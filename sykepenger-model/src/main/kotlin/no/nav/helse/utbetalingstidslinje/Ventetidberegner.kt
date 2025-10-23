@@ -4,7 +4,6 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -26,18 +25,21 @@ internal class Ventetidberegner {
             aktivVentetid = when (dag) {
                 is Dag.Sykedag -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvklart)
                 is Dag.SykHelgedag -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvventerUtbetaltDag)
+                is Dag.ForeldetSykedag -> when (dag.dato.erHelg()) {
+                    true -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvventerUtbetaltDag)
+                    false -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvklart)
+                }
 
                 is Dag.UkjentDag -> oppholdsdag(ventetider, aktivVentetid, dag.dato, dag.dato.erHelg())
 
                 is Dag.Arbeidsdag,
-                is Dag.FriskHelgedag -> oppholdsdag(ventetider, aktivVentetid, dag.dato, false)
+                is Dag.FriskHelgedag,
+                is Dag.AndreYtelser -> oppholdsdag(ventetider, aktivVentetid, dag.dato, false)
 
-                is Dag.AndreYtelser,
                 is Dag.ArbeidIkkeGjenopptattDag,
                 is Dag.ArbeidsgiverHelgedag,
                 is Dag.Arbeidsgiverdag,
                 is Dag.Feriedag,
-                is Dag.ForeldetSykedag,
                 is Dag.Permisjonsdag,
                 is Dag.ProblemDag -> error("forventer ikke dag av type ${dag::class.simpleName} i ventetidsberegning")
             }

@@ -6,7 +6,9 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
+import no.nav.helse.testhelpers.FORELDET
 import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.YF
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -15,6 +17,18 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VentetidberegnerTest {
+
+    @Test
+    fun `ventetiden utgjør de første 16 dagene - foreldet`() {
+        val tidslinje = resetSeed { 17.FORELDET }
+        val resultat = tidslinje.ventetid()
+        assertEquals(1, resultat.size)
+        resultat[0].also {
+            assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
+            assertEquals(1.januar til 17.januar, it.omsluttendePeriode)
+            assertTrue(it.ferdigAvklart)
+        }
+    }
 
     @Test
     fun `ventetiden utgjør de første 16 dagene`() {
@@ -41,8 +55,32 @@ internal class VentetidberegnerTest {
     }
 
     @Test
+    fun `ventetiden utgjør de første 16 dagene - etterfølges av 15 andre ytelser`() {
+        val tidslinje = resetSeed { 17.S + 15.YF }
+        val resultat = tidslinje.ventetid()
+        assertEquals(1, resultat.size)
+        resultat[0].also {
+            assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
+            assertEquals(1.januar til 1.februar, it.omsluttendePeriode)
+            assertTrue(it.ferdigAvklart)
+        }
+    }
+
+    @Test
     fun `ventetiden utgjør de første 16 dagene - etterfølges av 16 oppholdsdager`() {
         val tidslinje = resetSeed { 17.S + 16.A }
+        val resultat = tidslinje.ventetid()
+        assertEquals(1, resultat.size)
+        resultat[0].also {
+            assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
+            assertEquals(1.januar til 1.februar, it.omsluttendePeriode)
+            assertTrue(it.ferdigAvklart)
+        }
+    }
+
+    @Test
+    fun `ventetiden utgjør de første 16 dagene - etterfølges av 16 andre ytelser`() {
+        val tidslinje = resetSeed { 17.S + 16.YF }
         val resultat = tidslinje.ventetid()
         assertEquals(1, resultat.size)
         resultat[0].also {
