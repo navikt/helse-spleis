@@ -158,10 +158,10 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun sykmeldingsperioder() = sykmeldingsperioder.toList()
 
-    internal fun arbeidsgiverperioden(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.arbeidsgiverperiode
-    internal fun arbeidsgiverperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioden(vedtaksperiodeIdInnhenter)
-    internal fun arbeidsgiverperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioder(vedtaksperiodeIdInnhenter)
-    internal fun arbeidsgiverperiode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.arbeidsgiverperiode
+    internal fun venteperioden(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.dagerUtenNavAnsvar
+    internal fun venteperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = venteperioden(vedtaksperiodeIdInnhenter)
+    internal fun venteperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = venteperioder(vedtaksperiodeIdInnhenter)
+    internal fun venteperiode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.dagerUtenNavAnsvar
 
     internal fun ventetid(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.ventetid
 

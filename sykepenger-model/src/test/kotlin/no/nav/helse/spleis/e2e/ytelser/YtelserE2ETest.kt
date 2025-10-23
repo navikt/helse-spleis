@@ -74,9 +74,9 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(listOf(1.juli til 16.juli), vedtaksperiodeId = 3.vedtaksperiode)
             håndterVilkårsgrunnlag(3.vedtaksperiode)
 
-            assertEquals(listOf(1.juli til 16.juli), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.arbeidsgiverperiode)
+            assertEquals(listOf(1.juli til 16.juli), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.dagerUtenNavAnsvar)
             håndterYtelser(3.vedtaksperiode)
-            assertEquals(listOf(1.juli til 16.juli), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.arbeidsgiverperiode)
+            assertEquals(listOf(1.juli til 16.juli), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.dagerUtenNavAnsvar)
 
             håndterSimulering(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
@@ -85,7 +85,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterOverstyrTidslinje(juli.map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
             håndterYtelser(3.vedtaksperiode)
 
-            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.arbeidsgiverperiode)
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.dagerUtenNavAnsvar)
             val juliutbetaling = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør
             val korrelasjonsIdJuli = juliutbetaling.korrelasjonsId
 

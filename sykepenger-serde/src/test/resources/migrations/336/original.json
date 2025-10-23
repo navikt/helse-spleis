@@ -1,0 +1,130 @@
+{
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
+      "perioderUtenNavAnsvar": [
+        {
+          "omsluttendePeriode": {
+            "fom": [2018, 1, 3],
+            "tom": [2018, 3, 10]
+          },
+          "arbeidsgiverperiode": [
+            {
+              "fom": [2018, 1, 3],
+              "tom": [2018, 1, 18]
+            }
+          ],
+          "ferdigAvklart": true
+        }
+      ],
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart" : true,
+                    "dager" : [
+                      {
+                        "fom": [2018, 1, 1],
+                        "tom": [2018, 1, 16]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "behandlinger": [
+              {
+                "endringer": [
+                  {
+                    "arbeidsgiverperiode": {
+                      "ferdigAvklart" : true,
+                      "dager" : [
+                        {
+                          "fom": [2018, 1, 1],
+                          "tom": [2018, 1, 16]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "organisasjonsnummer": "SELVSTENDIG",
+      "yrkesaktivitetstype": "SELVSTENDIG",
+      "perioderUtenNavAnsvar": [],
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart" : false,
+                    "dager" : []
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "organisasjonsnummer": "FRILANS",
+      "yrkesaktivitetstype": "FRILANS",
+      "perioderUtenNavAnsvar": [],
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart" : false,
+                    "dager" : []
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "organisasjonsnummer": "ARBEIDSLEDIG",
+      "yrkesaktivitetstype": "ARBEIDSLEDIG",
+      "perioderUtenNavAnsvar": [],
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "arbeidsgiverperiode": {
+                    "ferdigAvklart" : false,
+                    "dager" : []
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

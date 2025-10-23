@@ -1,7 +1,7 @@
 package no.nav.helse.serde
 
 import java.time.LocalDate
-import no.nav.helse.dto.ArbeidsgiverperiodeavklaringDto
+import no.nav.helse.dto.DagerUtenNavAnsvaravklaringDto
 import no.nav.helse.dto.PeriodeUtenNavAnsvarDto
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.AvsenderDto
@@ -68,8 +68,8 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingData.InntektsmeldingKildeDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.ArbeidsgiverperiodeData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.ArbeidssituasjonData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.PeriodeUtenNavAnsvarData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_ANNULLERING
@@ -150,7 +150,7 @@ private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
 
 private fun PeriodeUtenNavAnsvarDto.tilPersonData() = PersonData.ArbeidsgiverData.PeriodeUtenNavAnsvarData(
     omsluttendePeriode = PersonData.ArbeidsgiverData.PeriodeData(this.omsluttendePeriode.fom, this.omsluttendePeriode.tom),
-    arbeidsgiverperiode = this.dagerUtenAnsvar.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
+    dagerUtenNavAnsvar = this.dagerUtenAnsvar.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     ferdigAvklart = this.ferdigAvklart
 )
 
@@ -478,7 +478,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     refusjonstidslinje = refusjonstidslinje.tilPersonData(),
     inntektsendringer = inntektsendringer.tilPersonData(),
     dokumentsporing = dokumentsporing.tilPersonData(),
-    arbeidsgiverperiode = arbeidsgiverperiode.tilPersonData(),
+    dagerUtenNavAnsvar = dagerUtenNavAnsvar.tilPersonData(),
     dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     egenmeldingsdager = egenmeldingsdager.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     maksdatoresultat = maksdatoresultat.tilPersonData(),
@@ -489,7 +489,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     ventetid = ventetid?.let { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
 )
 
-private fun ArbeidsgiverperiodeavklaringDto.tilPersonData() = ArbeidsgiverperiodeData(
+private fun DagerUtenNavAnsvaravklaringDto.tilPersonData() = PeriodeUtenNavAnsvarData(
     ferdigAvklart = this.ferdigAvklart,
     dager = this.dager.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
 )

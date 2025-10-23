@@ -133,10 +133,10 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     fun `Arbeidsgiverperiode utført i Infotrygd med kort gap til periode i Spleis som utbetales i Infotrygd mens den står til godkjenning`() {
         nyttVedtak(10.februar til 28.februar)
         val februarKorrelasjonsId = gjeldendeKorrelasjonsId(1.vedtaksperiode)
-        assertEquals(listOf(10.februar til 25.februar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(listOf(10.februar til 25.februar), inspektør.venteperiode(1.vedtaksperiode))
 
         this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
-        assertEquals(emptyList<Periode>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(emptyList<Periode>(), inspektør.venteperiode(1.vedtaksperiode))
 
         this@InfotrygdTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -153,7 +153,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null),
             arbeidsgiverperioder = null
         )
-        assertEquals(emptyList<Periode>(), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        assertEquals(emptyList<Periode>(), inspektør.venteperiode(2.vedtaksperiode))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         this@InfotrygdTest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -161,7 +161,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
         // Mens Mars står til godkjenning utbetales den i Infotrygd
         this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar), ArbeidsgiverUtbetalingsperiode(a1, 10.mars, 31.mars))
-        assertEquals(emptyList<Periode>(), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        assertEquals(emptyList<Periode>(), inspektør.venteperiode(2.vedtaksperiode))
         this@InfotrygdTest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         assertNotEquals(februarKorrelasjonsId, gjeldendeKorrelasjonsId(2.vedtaksperiode))
@@ -183,13 +183,13 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         håndterArbeidsgiveropplysninger(listOf(1.juli til 16.juli), vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode)
 
-        assertEquals(listOf(1.juli til 16.juli), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.arbeidsgiverperiode)
+        assertEquals(listOf(1.juli til 16.juli), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.dagerUtenNavAnsvar)
 
         this@InfotrygdTest.håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar), ArbeidsgiverUtbetalingsperiode(a1, 1.juli, 31.juli))
 
-        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.arbeidsgiverperiode)
+        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.dagerUtenNavAnsvar)
 
         this@InfotrygdTest.håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -207,7 +207,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
         val nyKorrelasjonsIdJuli = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
         assertNotEquals(korrelasjonsIdMars, nyKorrelasjonsIdJuli)
-        assertEquals(listOf(1.juli til 16.juli), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.arbeidsgiverperiode)
+        assertEquals(listOf(1.juli til 16.juli), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.dagerUtenNavAnsvar)
         assertVarsler(listOf(RV_UT_23, RV_IT_3), 3.vedtaksperiode.filter())
     }
 
@@ -235,7 +235,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         // etter siste infotrygdutbetaling, og eventuelle utbetalinger som ligger mellom blir annullert.
         // Før var dette en riktig antagelse fordi tom AGP som ikke skyltes Infotrygd skulle til AUU
         // Men det er gjort en endring slik at en periode som har vært beregnet aldri skal inn i AUU
-        assertEquals(emptyList<Periode>(), inspektør.arbeidsgiverperiode(4.vedtaksperiode))
+        assertEquals(emptyList<Periode>(), inspektør.venteperiode(4.vedtaksperiode))
 
         // hvis denne vedtaksperioden går til godkjenning så har det tidligere hendt
         // at vi har laget et feilaktig annulleringsoppdrag

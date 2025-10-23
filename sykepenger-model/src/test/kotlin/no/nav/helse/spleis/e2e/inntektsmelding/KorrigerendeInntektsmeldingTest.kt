@@ -64,7 +64,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
 
@@ -91,7 +91,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
         this@KorrigerendeInntektsmeldingTest.håndterYtelser(1.vedtaksperiode)
@@ -110,7 +110,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     fun `Korrigerende inntektsmelding som strekker agp fremover`() {
         nyttVedtak(januar)
         håndterInntektsmelding(listOf(2.januar til 17.januar))
-        assertEquals(listOf(2.januar til 17.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -329,11 +329,11 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     fun `Endring i siste del av agp`() {
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         nyttVedtak(10.januar til 31.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        val agpFør = inspektør.arbeidsgiverperiode(2.vedtaksperiode)
+        val agpFør = inspektør.venteperiode(2.vedtaksperiode)
         håndterInntektsmelding(
             listOf(12.januar til 27.januar)
         )
-        val agpEtter = inspektør.arbeidsgiverperiode(2.vedtaksperiode)
+        val agpEtter = inspektør.venteperiode(2.vedtaksperiode)
 
         assertEquals(listOf(1.januar til 5.januar, 10.januar til 20.januar), agpFør)
         assertEquals(listOf(1.januar til 5.januar, 12.januar til 22.januar), agpEtter)

@@ -97,8 +97,8 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(setOf(1.januar, 10.mars), inspektør.vilkårsgrunnlaghistorikk().aktiveSpleisSkjæringstidspunkt)
 
-            assertEquals(emptyList<Periode>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-            assertEquals(emptyList<Periode>(), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+            assertEquals(emptyList<Periode>(), inspektør.venteperiode(1.vedtaksperiode))
+            assertEquals(emptyList<Periode>(), inspektør.venteperiode(2.vedtaksperiode))
 
             håndterYtelser(2.vedtaksperiode)
             inspektør.utbetaling(1).also { utbetalinginspektør ->

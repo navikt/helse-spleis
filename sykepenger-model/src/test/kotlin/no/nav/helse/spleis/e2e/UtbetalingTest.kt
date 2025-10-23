@@ -75,12 +75,12 @@ internal class UtbetalingTest : AbstractDslTest() {
 
             assertEquals(4.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(4.januar til 22.januar, inspektør.periode(1.vedtaksperiode))
-            assertEquals(listOf(4.januar til 19.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+            assertEquals(listOf(4.januar til 19.januar), inspektør.venteperiode(1.vedtaksperiode))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
             assertEquals(4.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
             assertEquals(23.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
-            assertEquals(listOf(4.januar til 19.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+            assertEquals(listOf(4.januar til 19.januar), inspektør.venteperiode(2.vedtaksperiode))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -115,8 +115,8 @@ internal class UtbetalingTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_VV_4, 2.vedtaksperiode.filter())
 
             // Arbeidsgiverperioden blir beregnet riktig
-            assertEquals(listOf(1.januar til 16.januar), inspektør(a1).arbeidsgiverperiode(1.vedtaksperiode))
-            assertEquals(listOf(1.desember til 16.desember), inspektør(a1).arbeidsgiverperiode(2.vedtaksperiode))
+            assertEquals(listOf(1.januar til 16.januar), inspektør(a1).venteperiode(1.vedtaksperiode))
+            assertEquals(listOf(1.desember til 16.desember), inspektør(a1).venteperiode(2.vedtaksperiode))
 
             assertEquals(2, inspektør(a1).antallUtbetalinger)
             assertEquals(1.januar til 31.januar, inspektør(a1).utbetaling(0).periode)

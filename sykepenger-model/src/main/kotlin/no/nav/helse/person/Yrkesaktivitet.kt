@@ -113,6 +113,7 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeberegner
 import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Ventetidberegner
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.HundreProsent
 
@@ -765,7 +766,7 @@ internal class Yrkesaktivitet private constructor(
 
     // Utbetalinger gjort på "ny rigg" (én utbetaling per vedtaksperiode)
     private fun senereVedtaksperioderMedFattetVedtakMedSammeAgp(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
-        val arbeidsgiverperiode = vedtaksperiodeSomForsøkesAnnullert.behandlinger.arbeidsgiverperiode().arbeidsgiverperiode.periode ?: return setOf(vedtaksperiodeSomForsøkesAnnullert)
+        val arbeidsgiverperiode = vedtaksperiodeSomForsøkesAnnullert.behandlinger.ventedager().dagerUtenNavAnsvar.periode ?: return setOf(vedtaksperiodeSomForsøkesAnnullert)
         val vedtaksperioder = vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).filter { it.periode.start >= vedtaksperiodeSomForsøkesAnnullert.periode.start }
         return vedtaksperioder.filter { it.behandlinger.harFattetVedtak() }.toSet()
     }
@@ -967,16 +968,19 @@ internal class Yrkesaktivitet private constructor(
         return revurderingseventyr
     }
 
-    internal fun beregnArbeidsgiverperioder(egenmeldingsperioder: List<Periode> = vedtaksperioder.egenmeldingsperioder()): List<PeriodeUtenNavAnsvar> {
+    internal fun beregnPerioderUtenNavAnsvar(egenmeldingsperioder: List<Periode> = vedtaksperioder.egenmeldingsperioder()): List<PeriodeUtenNavAnsvar> {
         when (yrkesaktivitetstype) {
             is Arbeidstaker -> {
                 perioderUtenNavAnsvar = arbeidsgiverperiodeFor(egenmeldingsperioder)
-                return perioderUtenNavAnsvar
+            }
+            Selvstendig -> {
+                val beregner = Ventetidberegner()
+                perioderUtenNavAnsvar = beregner.result(sykdomstidslinje())
             }
             Arbeidsledig,
-            Frilans,
-            Selvstendig -> return emptyList()
+            Frilans -> {}
         }
+        return perioderUtenNavAnsvar
     }
 
     internal fun oppdaterSykdom(
@@ -985,7 +989,7 @@ internal class Yrkesaktivitet private constructor(
         egenmeldingsperioder: List<Periode>
     ): Triple<Sykdomstidslinje, Skjæringstidspunkter, List<PeriodeUtenNavAnsvar>> {
         val nyTidslinje = sykdomstidslinje?.let { sykdomshistorikk.håndter(meldingsreferanseId, sykdomstidslinje) } ?: sykdomstidslinje()
-        val nyeArbeidsgiverperioder = beregnArbeidsgiverperioder(egenmeldingsperioder)
+        val nyeArbeidsgiverperioder = beregnPerioderUtenNavAnsvar(egenmeldingsperioder)
         val nyeSkjæringstidspunkter = person.beregnSkjæringstidspunkter()
         return Triple(nyTidslinje, nyeSkjæringstidspunkter, nyeArbeidsgiverperioder)
     }
@@ -1069,7 +1073,7 @@ internal class Yrkesaktivitet private constructor(
         vedtaksperioder.removeAll(perioder.map { it.first })
         forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it.first, organisasjonsnummer, it.first.periode) })
         sykdomshistorikk.fjernDager(perioder.map { it.first.periode })
-        beregnArbeidsgiverperioder()
+        beregnPerioderUtenNavAnsvar()
         return perioder.map { it.second }
     }
 

@@ -197,7 +197,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
                 SELVSTENDIG_TIL_UTBETALING,
                 SELVSTENDIG_AVSLUTTET
             )
-            assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
 
         }
     }
@@ -250,7 +250,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
                 SELVSTENDIG_TIL_UTBETALING,
                 SELVSTENDIG_AVSLUTTET
             )
-            assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
 
         }
     }
@@ -262,9 +262,9 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(mars, ventetid = 1.mars til 16.mars, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
 
             assertTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
-            assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
             assertTilstander(2.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE)
-            assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+            assertEquals(listOf(1.mars til 16.mars), inspektør.venteperiode(2.vedtaksperiode))
 
         }
     }

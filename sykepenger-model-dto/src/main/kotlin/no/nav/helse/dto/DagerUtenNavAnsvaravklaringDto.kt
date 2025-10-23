@@ -1,6 +1,6 @@
 package no.nav.helse.dto
 
-data class ArbeidsgiverperiodeavklaringDto(
+data class DagerUtenNavAnsvaravklaringDto(
     val ferdigAvklart: Boolean,
     val dager: List<PeriodeDto>
 )

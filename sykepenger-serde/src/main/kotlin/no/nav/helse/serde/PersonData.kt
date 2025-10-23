@@ -10,7 +10,7 @@ import kotlin.streams.asSequence
 import no.nav.helse.dto.AlderDto
 import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
-import no.nav.helse.dto.ArbeidsgiverperiodeavklaringDto
+import no.nav.helse.dto.DagerUtenNavAnsvaravklaringDto
 import no.nav.helse.dto.PeriodeUtenNavAnsvarDto
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.AvsenderDto
@@ -805,13 +805,13 @@ data class PersonData(
 
         data class PeriodeUtenNavAnsvarData(
             val omsluttendePeriode: PeriodeData,
-            val arbeidsgiverperiode: List<PeriodeData>,
+            val dagerUtenNavAnsvar: List<PeriodeData>,
             val ferdigAvklart: Boolean
         ) {
             fun tilDto(): PeriodeUtenNavAnsvarDto {
                 return PeriodeUtenNavAnsvarDto(
                     omsluttendePeriode = omsluttendePeriode.tilDto(),
-                    dagerUtenAnsvar = arbeidsgiverperiode.map { it.tilDto() },
+                    dagerUtenAnsvar = dagerUtenNavAnsvar.map { it.tilDto() },
                     ferdigAvklart = ferdigAvklart
                 )
             }
@@ -1062,7 +1062,7 @@ data class PersonData(
                     val refusjonstidslinje: BeløpstidslinjeData,
                     val inntektsendringer: BeløpstidslinjeData,
                     val dokumentsporing: DokumentsporingData,
-                    val arbeidsgiverperiode: ArbeidsgiverperiodeData,
+                    val dagerUtenNavAnsvar: PeriodeUtenNavAnsvarData,
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
                     val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
@@ -1094,7 +1094,7 @@ data class PersonData(
                         inntektsendringer = this.inntektsendringer.tilDto(),
                         skjæringstidspunkt = skjæringstidspunkt,
                         skjæringstidspunkter = skjæringstidspunkter,
-                        arbeidsgiverperiode = arbeidsgiverperiode.tilDto(),
+                        dagerUtenNavAnsvar = dagerUtenNavAnsvar.tilDto(),
                         dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map { it.tilDto() },
                         egenmeldingsdager = egenmeldingsdager.map { it.tilDto() },
                         maksdatoresultat = maksdatoresultat.tilDto(),
@@ -1105,11 +1105,11 @@ data class PersonData(
                         ventetid = ventetid?.tilDto()
                     )
 
-                    data class ArbeidsgiverperiodeData(
+                    data class PeriodeUtenNavAnsvarData(
                         val ferdigAvklart: Boolean,
                         val dager: List<PeriodeData>
                     ) {
-                        fun tilDto() = ArbeidsgiverperiodeavklaringDto(
+                        fun tilDto() = DagerUtenNavAnsvaravklaringDto(
                             ferdigAvklart = this.ferdigAvklart,
                             dager = this.dager.map { it.tilDto() }
                         )

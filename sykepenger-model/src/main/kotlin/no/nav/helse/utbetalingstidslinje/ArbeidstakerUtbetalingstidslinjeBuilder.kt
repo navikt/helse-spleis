@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Arbeidsgiverperiodeavklaring
+import no.nav.helse.person.DagerUtenNavAnsvaravklaring
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Dag
@@ -14,12 +14,12 @@ import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 
-internal data class ArbeidsgiverperiodeForVedtaksperiode(
+internal data class VentedagerForVedtaksperiode(
     val vedtaksperiode: Periode,
-    val arbeidsgiverperiode: Arbeidsgiverperiodeavklaring,
+    val dagerUtenNavAnsvar: DagerUtenNavAnsvaravklaring,
     val dagerNavOvertarAnsvar: List<Periode>
 ) {
-    val erUtenforAGP = arbeidsgiverperiode.ferdigAvklart && (arbeidsgiverperiode.periode == null || vedtaksperiode.endInclusive > arbeidsgiverperiode.periode.endInclusive)
+    val erUtenforAGP = dagerUtenNavAnsvar.ferdigAvklart && (dagerUtenNavAnsvar.periode == null || vedtaksperiode.endInclusive > dagerUtenNavAnsvar.periode.endInclusive)
     val navSkalOvertaAGP = dagerNavOvertarAnsvar.any { it.overlapperMed(vedtaksperiode) }
 
     val skalFatteVedtak = erUtenforAGP || navSkalOvertaAGP

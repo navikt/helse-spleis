@@ -13,7 +13,7 @@ import no.nav.helse.økonomi.Økonomi
 
 internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
     private val dekningsgrad: Prosentdel,
-    private val ventetid: Periode,
+    private val ventetid: Periode?,
     private val dagerNavOvertarAnsvar: List<Periode>
 ) : UtbetalingstidslinjeBuilder {
     private fun medInntektHvisFinnes(grad: Prosentdel, næringsinntekt: Inntekt): Økonomi {
@@ -38,12 +38,12 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                 is Dag.ForeldetSykedag -> foreldetdag(builder, dag.dato, dag.grad, inntekt)
                 is Dag.FriskHelgedag -> arbeidsdag(builder, dag.dato, inntekt)
                 is Dag.SykHelgedag ->
-                    if (dag.dato in ventetid)
+                    if (ventetid?.contains(dag.dato) == true )
                         ventetidsdag(builder, dag.dato, dag.grad, inntekt, false)
                     else
                         helg(builder, dag.dato, dag.grad, inntekt)
                 is Dag.Sykedag ->
-                    if (dag.dato in ventetid)
+                    if (ventetid?.contains(dag.dato) == true )
                         ventetidsdag(builder, dag.dato, dag.grad, inntekt, navSkalUtbetaleVentetidsDag(dag.dato))
                     else
                         navDag(builder, dag.dato, dag.grad, inntekt)

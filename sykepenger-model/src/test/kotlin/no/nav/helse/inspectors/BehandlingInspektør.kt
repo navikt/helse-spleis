@@ -30,7 +30,7 @@ internal class BehandlingInspektør(view: BehandlingView) {
                 inntektsendringer = it.inntektsendringer,
                 skjæringstidspunkt = it.skjæringstidspunkt,
                 sykdomstidslinje = it.sykdomstidslinje,
-                arbeidsgiverperiode = it.arbeidsgiverperiode.dager,
+                dagerUtenNavAnsvar = it.dagerUtenNavAnsvar.dager,
                 sykmeldingsperiode = it.sykmeldingsperiode,
                 ventetid = it.ventetid
             )
@@ -42,7 +42,7 @@ internal class BehandlingInspektør(view: BehandlingView) {
         kilde = Behandling.Behandlingkilde(view.kilde.meldingsreferanseId.id, view.kilde.innsendt, view.kilde.registert, view.kilde.avsender)
     )
 
-    internal val arbeidsgiverperiode get() = behandling.endringer.last().arbeidsgiverperiode
+    internal val dagerUtenNavAnsvar get() = behandling.endringer.last().dagerUtenNavAnsvar
     internal val utbetalingstidslinje get() = behandling.endringer.last().utbetalingstidslinje
 
     data class Behandling(
@@ -66,7 +66,7 @@ internal class BehandlingInspektør(view: BehandlingView) {
             val inntektsendringer: Beløpstidslinje,
             val skjæringstidspunkt: LocalDate,
             val sykdomstidslinje: Sykdomstidslinje,
-            val arbeidsgiverperiode: List<Periode>,
+            val dagerUtenNavAnsvar: List<Periode>,
             val sykmeldingsperiode: Periode,
             val ventetid: Periode?
         )

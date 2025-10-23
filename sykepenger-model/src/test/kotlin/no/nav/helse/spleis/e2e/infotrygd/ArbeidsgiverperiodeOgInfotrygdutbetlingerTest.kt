@@ -70,6 +70,6 @@ internal class ArbeidsgiverperiodeOgInfotrygdutbetlingerTest: AbstractDslTest() 
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(orgnummer, infotrygdutbetaling, infotrygdutbetaling))
         val vedtaksperiodeId = håndterSøknad(vedtaksperiode)!!
         if (vedtaksperiode.overlapperMed(infotrygdutbetaling.somPeriode())) assertVarsler(vedtaksperiodeId, RV_IT_3)
-        inspektør.arbeidsgiverperiode(vedtaksperiodeId)
+        inspektør.venteperiode(vedtaksperiodeId)
     }
 }

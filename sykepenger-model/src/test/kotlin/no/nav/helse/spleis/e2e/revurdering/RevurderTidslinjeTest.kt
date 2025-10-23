@@ -955,7 +955,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         this@RevurderTidslinjeTest.håndterYtelser(1.vedtaksperiode)
 
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
-        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
 
         val utbetaling1 = inspektør.utbetaling(0)
         val revurdering = inspektør.utbetaling(1)

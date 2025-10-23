@@ -52,6 +52,18 @@ import org.junit.jupiter.api.Test
 internal class SelvstendigTest : AbstractDslTest() {
 
     @Test
+    fun `foreldet søknad`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar, sendtTilNAVEllerArbeidsgiver = LocalDate.of(2018, 5, 1).atStartOfDay())
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            assertVarsler(listOf(Varselkode.RV_SØ_2), 1.vedtaksperiode.filter())
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertEquals(1.januar til 16.januar, inspektør.ventetid(1.vedtaksperiode))
+        }
+    }
+
+    @Test
     fun `annullere selvstendig i en pågående revurdering`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
@@ -367,7 +379,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                 SELVSTENDIG_TIL_UTBETALING,
                 SELVSTENDIG_AVSLUTTET
             )
-            assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
 
         }
     }
@@ -419,7 +431,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                 SELVSTENDIG_TIL_UTBETALING,
                 SELVSTENDIG_AVSLUTTET
             )
-            assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
 
         }
     }
@@ -431,9 +443,9 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(mars, ventetid = 1.mars til 16.mars)
 
             assertTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
-            assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
             assertTilstander(2.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE)
-            assertEquals(emptyList<Nothing>(), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+            assertEquals(listOf(1.mars til 16.mars), inspektør.venteperiode(2.vedtaksperiode))
 
         }
     }

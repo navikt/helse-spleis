@@ -645,7 +645,7 @@ class Person private constructor(
     }
 
     private fun beregnArbeidsgiverperioder() {
-        yrkesaktiviteter.forEach { it.beregnArbeidsgiverperioder() }
+        yrkesaktiviteter.forEach { it.beregnPerioderUtenNavAnsvar() }
     }
 
     internal fun beregnSkjæringstidspunkter(): Skjæringstidspunkter {
