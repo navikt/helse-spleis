@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
@@ -22,6 +23,7 @@ internal class VentetidberegnerTest {
         assertEquals(1, resultat.size)
         resultat[0].also {
             assertEquals(1.januar til 16.januar, it.periode)
+            assertEquals(1.januar til 17.januar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
     }
@@ -33,6 +35,7 @@ internal class VentetidberegnerTest {
         assertEquals(1, resultat.size)
         resultat[0].also {
             assertEquals(6.januar til 21.januar, it.periode)
+            assertEquals(6.januar til 22.januar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
     }
@@ -44,6 +47,7 @@ internal class VentetidberegnerTest {
         assertEquals(1, resultat.size)
         resultat[0].also {
             assertEquals(1.januar til 16.januar, it.periode)
+            assertEquals(1.januar til 16.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
     }
@@ -55,6 +59,7 @@ internal class VentetidberegnerTest {
         assertEquals(1, resultat.size)
         resultat[0].also {
             assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 19.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
     }
@@ -66,6 +71,7 @@ internal class VentetidberegnerTest {
         assertEquals(1, resultat.size)
         resultat[0].also {
             assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 20.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
     }
@@ -77,6 +83,7 @@ internal class VentetidberegnerTest {
         assertEquals(1, resultat.size)
         resultat[0].also {
             assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 21.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
     }
@@ -88,45 +95,76 @@ internal class VentetidberegnerTest {
         assertEquals(1, resultat.size)
         resultat[0].also {
             assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 22.januar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
     }
 
     @Test
-    fun `starter ny ventetid hvis forrige ventetid på 16 dager slutter på fredag`() {
-        listOf(
-            resetSeed(frøDato = 4.januar) { 16.S + 3.opphold + 10.S },
-            resetSeed(frøDato = 4.januar) { 16.S + 3.A + 10.S }
-        ).forEach { tidslinje ->
-            val resultat = tidslinje.ventetid()
-            assertEquals(2, resultat.size)
-            resultat[0].also {
-                assertEquals(4.januar til 19.januar, it.periode)
-                assertFalse(it.ferdigAvklart)
-            }
-            resultat[1].also {
-                assertEquals(23.januar til 1.februar, it.periode)
-                assertFalse(it.ferdigAvklart)
-            }
+    fun `starter ny ventetid hvis forrige ventetid på 16 dager slutter på fredag (helg er ukjent)`() {
+        val tidslinje = resetSeed(frøDato = 4.januar) { 16.S + 3.opphold + 10.S }
+        val resultat = tidslinje.ventetid()
+        assertEquals(2, resultat.size)
+        resultat[0].also {
+            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 21.januar, it.omsluttendePeriode)
+            assertFalse(it.ferdigAvklart)
+        }
+        resultat[1].also {
+            assertEquals(23.januar til 1.februar, it.periode)
+            assertEquals(23.januar til 1.februar, it.omsluttendePeriode)
+            assertFalse(it.ferdigAvklart)
         }
     }
 
     @Test
-    fun `starter ny ventetid hvis forrige ventetid på 16 dager slutter på lørdag`() {
-        listOf(
-            resetSeed(frøDato = 4.januar) { 17.S + 2.opphold + 10.S },
-            resetSeed(frøDato = 4.januar) { 17.S + 2.A + 10.S },
-        ).forEach { tidslinje ->
-            val resultat = tidslinje.ventetid()
-            assertEquals(2, resultat.size)
-            resultat[0].also {
-                assertEquals(4.januar til 19.januar, it.periode)
-                assertFalse(it.ferdigAvklart)
-            }
-            resultat[1].also {
-                assertEquals(23.januar til 1.februar, it.periode)
-                assertFalse(it.ferdigAvklart)
-            }
+    fun `starter ny ventetid hvis forrige ventetid på 16 dager slutter på fredag (helg er arbeid)`() {
+        val tidslinje = resetSeed(frøDato = 4.januar) { 16.S + 3.A + 10.S }
+        val resultat = tidslinje.ventetid()
+        assertEquals(2, resultat.size)
+        resultat[0].also {
+            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 19.januar, it.omsluttendePeriode)
+            assertFalse(it.ferdigAvklart)
+        }
+        resultat[1].also {
+            assertEquals(23.januar til 1.februar, it.periode)
+            assertEquals(23.januar til 1.februar, it.omsluttendePeriode)
+            assertFalse(it.ferdigAvklart)
+        }
+    }
+
+    @Test
+    fun `starter ny ventetid hvis forrige ventetid på 16 dager slutter på lørdag (helg er ukjent)`() {
+        val tidslinje = resetSeed(frøDato = 4.januar) { 17.S + 2.opphold + 10.S }
+        val resultat = tidslinje.ventetid()
+        assertEquals(2, resultat.size)
+        resultat[0].also {
+            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 21.januar, it.omsluttendePeriode)
+            assertFalse(it.ferdigAvklart)
+        }
+        resultat[1].also {
+            assertEquals(23.januar til 1.februar, it.periode)
+            assertEquals(23.januar til 1.februar, it.omsluttendePeriode)
+            assertFalse(it.ferdigAvklart)
+        }
+    }
+
+    @Test
+    fun `starter ny ventetid hvis forrige ventetid på 16 dager slutter på lørdag (helg er arbeid)`() {
+        val tidslinje = resetSeed(frøDato = 4.januar) { 17.S + 2.A + 10.S }
+        val resultat = tidslinje.ventetid()
+        assertEquals(2, resultat.size)
+        resultat[0].also {
+            assertEquals(4.januar til 19.januar, it.periode)
+            assertEquals(4.januar til 20.januar, it.omsluttendePeriode)
+            assertFalse(it.ferdigAvklart)
+        }
+        resultat[1].also {
+            assertEquals(23.januar til 1.februar, it.periode)
+            assertEquals(23.januar til 1.februar, it.omsluttendePeriode)
+            assertFalse(it.ferdigAvklart)
         }
     }
 
@@ -140,10 +178,12 @@ internal class VentetidberegnerTest {
             assertEquals(2, resultat.size)
             resultat[0].also {
                 assertEquals(4.januar til 19.januar, it.periode)
+                assertEquals(4.januar til 21.januar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
             resultat[1].also {
                 assertEquals(23.januar til 1.februar, it.periode)
+                assertEquals(23.januar til 1.februar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
         }
@@ -159,6 +199,7 @@ internal class VentetidberegnerTest {
             assertEquals(1, resultat.size)
             resultat[0].also {
                 assertEquals(1.januar til 16.januar, it.periode)
+                assertEquals(1.januar til 8.mars, it.omsluttendePeriode)
                 assertTrue(it.ferdigAvklart)
             }
         }
@@ -174,6 +215,7 @@ internal class VentetidberegnerTest {
             assertEquals(1, resultat.size)
             resultat[0].also {
                 assertEquals(1.januar til 16.januar, it.periode)
+                assertEquals(1.januar til 11.februar, it.omsluttendePeriode)
                 assertTrue(it.ferdigAvklart)
             }
         }
@@ -189,10 +231,12 @@ internal class VentetidberegnerTest {
             assertEquals(2, resultat.size)
             resultat[0].also {
                 assertEquals(3.januar til 18.januar, it.periode)
+                assertEquals(3.januar til 3.februar, it.omsluttendePeriode)
                 assertTrue(it.ferdigAvklart)
             }
             resultat[1].also {
                 assertEquals(6.februar til 15.februar, it.periode)
+                assertEquals(6.februar til 15.februar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
         }
@@ -208,10 +252,12 @@ internal class VentetidberegnerTest {
             assertEquals(2, resultat.size)
             resultat[0].also {
                 assertEquals(1.januar til 16.januar, it.periode)
+                assertEquals(1.januar til 1.februar, it.omsluttendePeriode)
                 assertTrue(it.ferdigAvklart)
             }
             resultat[1].also {
                 assertEquals(3.februar til 12.februar, it.periode)
+                assertEquals(3.februar til 12.februar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
         }
@@ -227,10 +273,12 @@ internal class VentetidberegnerTest {
             assertEquals(2, resultat.size)
             resultat[0].also {
                 assertEquals(1.januar til 10.januar, it.periode)
+                assertEquals(1.januar til 10.januar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
             resultat[1].also {
                 assertEquals(12.januar til 21.januar, it.periode)
+                assertEquals(12.januar til 21.januar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
         }
@@ -243,6 +291,7 @@ internal class VentetidberegnerTest {
         assertEquals(1, resultat.size)
         resultat[0].also {
             assertEquals(1.januar til 16.januar, it.periode)
+            assertEquals(1.januar til 19.januar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
     }
@@ -254,10 +303,12 @@ internal class VentetidberegnerTest {
         assertEquals(2, resultat.size)
         resultat[0].also {
             assertEquals(1.januar til 5.januar, it.periode)
+            assertEquals(1.januar til 5.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
         resultat[1].also {
             assertEquals(8.januar til 19.januar, it.periode)
+            assertEquals(8.januar til 19.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
     }
@@ -269,6 +320,7 @@ internal class VentetidberegnerTest {
         assertEquals(1, resultat.size)
         resultat[0].also {
             assertEquals(1.januar til 16.januar, it.periode)
+            assertEquals(1.januar til 18.januar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
     }
@@ -280,10 +332,12 @@ internal class VentetidberegnerTest {
         assertEquals(2, resultat.size)
         resultat[0].also {
             assertEquals(1.januar til 5.januar, it.periode)
+            assertEquals(1.januar til 5.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
         resultat[1].also {
             assertEquals(7.januar til 18.januar, it.periode)
+            assertEquals(7.januar til 18.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
     }
@@ -295,6 +349,7 @@ internal class VentetidberegnerTest {
         assertEquals(1, resultat.size)
         resultat[0].also {
             assertEquals(1.januar til 16.januar, it.periode)
+            assertEquals(1.januar til 19.januar, it.omsluttendePeriode)
             assertTrue(it.ferdigAvklart)
         }
     }
@@ -306,10 +361,12 @@ internal class VentetidberegnerTest {
         assertEquals(2, resultat.size)
         resultat[0].also {
             assertEquals(1.januar til 6.januar, it.periode)
+            assertEquals(1.januar til 6.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
         resultat[1].also {
             assertEquals(8.januar til 19.januar, it.periode)
+            assertEquals(8.januar til 19.januar, it.omsluttendePeriode)
             assertFalse(it.ferdigAvklart)
         }
     }
@@ -324,10 +381,12 @@ internal class VentetidberegnerTest {
             assertEquals(2, resultat.size)
             resultat[0].also {
                 assertEquals(1.januar til 4.januar, it.periode)
+                assertEquals(1.januar til 4.januar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
             resultat[1].also {
                 assertEquals(8.januar til 19.januar, it.periode)
+                assertEquals(8.januar til 19.januar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
         }
