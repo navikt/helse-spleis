@@ -163,8 +163,6 @@ internal class TestArbeidsgiverInspektør(
     internal fun venteperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = venteperioder(vedtaksperiodeIdInnhenter)
     internal fun venteperiode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.dagerUtenNavAnsvar
 
-    internal fun ventetid(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.ventetid
-
     internal fun egenmeldingsdager(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).egenmeldingsdager
     internal fun egenmeldingsdager(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).egenmeldingsdager
 

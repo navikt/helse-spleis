@@ -278,6 +278,14 @@ class Søknad(
             Arbeidssituasjon.ANNET -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ANNET
         }
 
+        // Hvis bruker har oppgitt å ha forsikring så sier vi at
+        // nav overtar ansvar for dagene i ventetiden
+        val dagerNavOvertarAnsvar = when (harOppgittÅHaForsikring) {
+            null,
+            false -> emptyList()
+            true -> ventetid ?.let { listOf(ventetid) } ?: emptyList()
+        }
+
         return Vedtaksperiode(
             egenmeldingsperioder = egenmeldinger,
             metadata = metadata,
@@ -286,10 +294,9 @@ class Søknad(
             sykdomstidslinje = sykdomstidslinje,
             arbeidssituasjon = arbeidssituasjon,
             faktaavklartInntekt = faktaavklartInntekt,
-            ventetid = ventetid,
             dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
             sykmeldingsperiode = sykdomsperiode,
-            selvstendigForsikring = harOppgittÅHaForsikring,
+            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             regelverkslogg = regelverkslogg
         )
     }

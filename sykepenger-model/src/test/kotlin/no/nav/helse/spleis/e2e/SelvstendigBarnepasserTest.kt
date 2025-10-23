@@ -104,7 +104,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
 
-            assertEquals(1.januar til 16.januar, inspektør.ventetid(1.vedtaksperiode))
+            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
 
         }
     }

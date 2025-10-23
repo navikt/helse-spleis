@@ -1067,8 +1067,7 @@ data class PersonData(
                     val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
                     val inntektjusteringer: Map<String, BeløpstidslinjeData>,
-                    val faktaavklartInntekt: VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.InntektsopplysningData?,
-                    val ventetid: PeriodeData?
+                    val faktaavklartInntekt: VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.InntektsopplysningData?
                 ) {
                     fun tilDto() = BehandlingendringInnDto(
                         id = this.id,
@@ -1101,8 +1100,7 @@ data class PersonData(
                         inntektjusteringer = inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
                             InntektskildeDto(inntektskilde) to beløpstidslinje.tilDto()
                         }.toMap(),
-                        faktaavklartInntekt = faktaavklartInntekt?.tilDto(),
-                        ventetid = ventetid?.tilDto()
+                        faktaavklartInntekt = faktaavklartInntekt?.tilDto()
                     )
 
                     data class PeriodeUtenNavAnsvarData(

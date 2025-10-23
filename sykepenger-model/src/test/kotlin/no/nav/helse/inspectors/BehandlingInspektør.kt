@@ -31,8 +31,7 @@ internal class BehandlingInspektør(view: BehandlingView) {
                 skjæringstidspunkt = it.skjæringstidspunkt,
                 sykdomstidslinje = it.sykdomstidslinje,
                 dagerUtenNavAnsvar = it.dagerUtenNavAnsvar.dager,
-                sykmeldingsperiode = it.sykmeldingsperiode,
-                ventetid = it.ventetid
+                sykmeldingsperiode = it.sykmeldingsperiode
             )
         },
         periode = view.periode,
@@ -67,8 +66,7 @@ internal class BehandlingInspektør(view: BehandlingView) {
             val skjæringstidspunkt: LocalDate,
             val sykdomstidslinje: Sykdomstidslinje,
             val dagerUtenNavAnsvar: List<Periode>,
-            val sykmeldingsperiode: Periode,
-            val ventetid: Periode?
+            val sykmeldingsperiode: Periode
         )
 
         data class Behandlingkilde(

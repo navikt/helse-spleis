@@ -485,8 +485,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     inntektjusteringer = inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
         inntektskilde.id to beløpstidslinje.tilPersonData()
     }.toMap(),
-    faktaavklartInntekt = faktaavklartInntekt?.tilPersonData(),
-    ventetid = ventetid?.let { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
+    faktaavklartInntekt = faktaavklartInntekt?.tilPersonData()
 )
 
 private fun DagerUtenNavAnsvaravklaringDto.tilPersonData() = PeriodeUtenNavAnsvarData(

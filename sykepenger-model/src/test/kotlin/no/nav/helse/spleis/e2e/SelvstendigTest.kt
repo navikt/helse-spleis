@@ -59,7 +59,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_SØ_2), 1.vedtaksperiode.filter())
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            assertEquals(1.januar til 16.januar, inspektør.ventetid(1.vedtaksperiode))
+            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
         }
     }
 
@@ -289,7 +289,7 @@ internal class SelvstendigTest : AbstractDslTest() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
 
-            assertEquals(1.januar til 16.januar, inspektør.ventetid(1.vedtaksperiode))
+            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
 
         }
     }

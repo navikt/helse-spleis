@@ -386,7 +386,6 @@ data class SpannerPersonDto(
             val egenmeldingsdager: List<PeriodeData>,
             val utbetalingstidslinje: List<Any>,
             val dagerUtenNavAnsvar: VedtaksperiodeData.BehandlingData.PeriodeUtenNavAnsvarData,
-            val ventetid: PeriodeData?,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             val forbrukteDager: Long,
             val gjenståendeDager: Int,
@@ -420,7 +419,6 @@ data class SpannerPersonDto(
                     Gjeldende(
                         skjæringstidspunkt = skjæringstidspunkt,
                         dagerUtenNavAnsvar = gjeldendeEndring.dagerUtenNavAnsvar,
-                        ventetid = gjeldendeEndring.ventetid,
                         refusjonstidslinje = gjeldendeEndring.refusjonstidslinje.perioder,
                         inntektsendringer = gjeldendeEndring.inntektsendringer.perioder,
                         refusjonstidslinjeHensyntattUbrukteRefusjonsopplysninger = if (behandling.id == sisteBehandlingId) sisteRefusjonstidslinje!!.perioder else emptyList(),
@@ -582,7 +580,6 @@ data class SpannerPersonDto(
                     val inntektsendringer: BeløpstidslinjeData,
                     val dokumentsporing: DokumentsporingData,
                     val dagerUtenNavAnsvar: PeriodeUtenNavAnsvarData,
-                    val ventetid: PeriodeData?,
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
                     val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
@@ -1268,8 +1265,7 @@ private fun BehandlingendringUtDto.tilPersonData() =
         inntektjusteringer = inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
             inntektskilde.id to beløpstidslinje.tilPersonData()
         }.toMap(),
-        faktaavklartInntekt = faktaavklartInntekt?.tilPersonData(),
-        ventetid = ventetid?.let { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
+        faktaavklartInntekt = faktaavklartInntekt?.tilPersonData()
     )
 
 private fun DagerUtenNavAnsvaravklaringDto.tilPersonData() = PeriodeUtenNavAnsvarData(

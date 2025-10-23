@@ -102,21 +102,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         egenmeldingsdager: List<Periode>,
         faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
         inntektsendringer: Beløpstidslinje,
-        ventetid: Periode?,
         dokumentsporing: Dokumentsporing,
         behandlingkilde: Behandlingkilde,
-        selvstendigForsikring: Boolean?
+        dagerNavOvertarAnsvar: List<Periode>
     ) {
         check(behandlinger.isEmpty())
-
-        // Hvis bruker har oppgitt å ha forsikring så sier vi at
-        // nav overtar ansvar for dagene i ventetiden
-        val dagerNavOvertarAnsvar = when (selvstendigForsikring) {
-            null,
-            false -> emptyList()
-            true -> ventetid ?.let { listOf(ventetid) } ?: emptyList()
-        }
-
         val behandling = Behandling.nyBehandling(
             observatører = this.observatører,
             sykdomstidslinje = sykdomstidslinje,
@@ -126,7 +116,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             inntektsendringer = inntektsendringer,
             dokumentsporing = dokumentsporing,
             sykmeldingsperiode = sykmeldingsperiode,
-            ventetid = ventetid,
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             behandlingkilde = behandlingkilde
         )
@@ -484,7 +473,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val sykdomstidslinje get() = endringer.last().sykdomstidslinje
         val refusjonstidslinje get() = endringer.last().refusjonstidslinje
         val arbeidssituasjon get() = endringer.last().arbeidssituasjon
-        val ventetid get() = endringer.last().ventetid
         val utbetalingstidslinje get() = endringer.last().utbetalingstidslinje
         val faktaavklartInntekt get() = endringer.last().faktaavklartInntekt
         val inntektsendringer get() = endringer.last().inntektsendringer
@@ -604,7 +592,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val skjæringstidspunkter: List<LocalDate>,
             val egenmeldingsdager: List<Periode>,
             val dagerUtenNavAnsvar: DagerUtenNavAnsvaravklaring,
-            val ventetid: Periode?,
             val dagerNavOvertarAnsvar: List<Periode>,
             val maksdatoresultat: Maksdatoresultat,
             val inntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
@@ -627,8 +614,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dagerUtenNavAnsvar = dagerUtenNavAnsvar,
                 egenmeldingsdager = egenmeldingsdager,
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
-                maksdatoresultat = maksdatoresultat,
-                ventetid = ventetid
+                maksdatoresultat = maksdatoresultat
             )
 
             private fun dagerUtenNavAnsvar(beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>): DagerUtenNavAnsvaravklaring {
@@ -700,7 +686,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         skjæringstidspunkt = dto.skjæringstidspunkt,
                         skjæringstidspunkter = dto.skjæringstidspunkter,
                         dagerUtenNavAnsvar = DagerUtenNavAnsvaravklaring.gjenopprett(dto.dagerUtenNavAnsvar),
-                        ventetid = dto.ventetid?.let { Periode.gjenopprett(it) },
                         egenmeldingsdager = dto.egenmeldingsdager.map { Periode.gjenopprett(it) },
                         dagerNavOvertarAnsvar = dto.dagerNavOvertarAnsvar.map { Periode.gjenopprett(it) },
                         maksdatoresultat = dto.maksdatoresultat.let { Maksdatoresultat.gjenopprett(it) },
@@ -931,8 +916,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     inntektjusteringer = this.inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
                         inntektskilde.dto() to beløpstidslinje.dto()
                     }.toMap(),
-                    faktaavklartInntekt = faktaavklartInntekt?.dto(),
-                    ventetid = ventetid?.dto()
+                    faktaavklartInntekt = faktaavklartInntekt?.dto()
                 )
             }
 
@@ -1382,7 +1366,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 inntektsendringer: Beløpstidslinje,
                 dokumentsporing: Dokumentsporing,
                 sykmeldingsperiode: Periode,
-                ventetid: Periode?,
                 dagerNavOvertarAnsvar: List<Periode>,
                 behandlingkilde: Behandlingkilde
             ) =
@@ -1406,7 +1389,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             skjæringstidspunkt = IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT,
                             skjæringstidspunkter = emptyList(),
                             dagerUtenNavAnsvar = DagerUtenNavAnsvaravklaring(false, emptyList()),
-                            ventetid = ventetid,
                             egenmeldingsdager = egenmeldingsdager,
                             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert,
@@ -2196,7 +2178,6 @@ internal data class BehandlingendringView(
     val skjæringstidspunkter: List<LocalDate>,
     val dagerNavOvertarAnsvar: List<Periode>,
     val dagerUtenNavAnsvar: DagerUtenNavAnsvaravklaring,
-    val ventetid: Periode?,
     val egenmeldingsdager: List<Periode>,
     val maksdatoresultat: Maksdatoresultat
 )
