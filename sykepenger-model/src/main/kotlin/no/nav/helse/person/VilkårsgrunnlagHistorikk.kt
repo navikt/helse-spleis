@@ -293,7 +293,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             skjæringstidspunkt = skjæringstidspunkt,
             inntektsgrunnlag = sykepengegrunnlag,
-            opptjening = this.opptjening!!.dto(),
+            opptjening = this.opptjening?.dto(),
             medlemskapstatus = when (medlemskapstatus) {
                 Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapsvurderingDto.Ja
                 Medlemskapsvurdering.Medlemskapstatus.Nei -> MedlemskapsvurderingDto.Nei
