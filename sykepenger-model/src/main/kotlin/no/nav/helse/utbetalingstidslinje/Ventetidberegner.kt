@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Ventetidberegner.Ventetidtelling.Companion.MAKSIMALT_ANTALL_OPPHOLDSDAGER
@@ -18,7 +19,7 @@ internal class Ventetidberegner {
                 is Dag.SykHelgedag,
                 is Dag.Sykedag -> {
                     if (aktivVentetid == null) {
-                        aktivVentetid = Ventetidtelling(setOf(dag.dato), oppholdsdager = emptySet())
+                        aktivVentetid = Ventetidtelling.ny(dag.dato)
                     } else {
                         aktivVentetid = aktivVentetid.utvid(dag.dato)
                     }
@@ -71,34 +72,47 @@ internal class Ventetidberegner {
     }
 
     private data class Ventetidtelling(
+        val omsluttendePeriode: Periode,
         val dager: Set<LocalDate>,
         val oppholdsdager: Set<LocalDate>
     ) {
-        init {
-            check(dager.isNotEmpty()) { "kan ikke ha tomme dager" }
-        }
-
         val ventetid = dager.take(MAKSIMALT_ANTALL_VENTETIDSDAGER)
         val ferdigAvklart = dager.size >= MAKSIMALT_ANTALL_VENTETIDSDAGER && dager.drop(MAKSIMALT_ANTALL_VENTETIDSDAGER).any { !it.erHelg() }
 
-        fun utvid(dato: LocalDate) = copy(dager = this.dager + dato, oppholdsdager = emptySet())
-        fun opphold(dato: LocalDate) = copy(oppholdsdager = this.oppholdsdager + dato)
+        fun utvid(dato: LocalDate) = copy(
+            omsluttendePeriode = omsluttendePeriode.oppdaterTom(dato),
+            dager = this.dager + dato,
+            oppholdsdager = emptySet()
+        )
+        fun opphold(dato: LocalDate) = copy(
+            omsluttendePeriode = omsluttendePeriode.oppdaterTom(dato),
+            oppholdsdager = this.oppholdsdager + dato
+        )
 
         companion object {
             const val MAKSIMALT_ANTALL_VENTETIDSDAGER = 16
             const val MAKSIMALT_ANTALL_OPPHOLDSDAGER = 15
+
+            fun ny(dato: LocalDate) =
+                Ventetidtelling(
+                    omsluttendePeriode = dato.somPeriode(),
+                    dager = setOf(dato),
+                    oppholdsdager = emptySet()
+                )
         }
     }
 
     private fun Ventetidtelling.somAvklaring() =
         Ventetidsavklaring(
-            periode = ventetid.omsluttendePeriode!!,
+            omsluttendePeriode = omsluttendePeriode,
+            periode = ventetid.omsluttendePeriode,
             ferdigAvklart = ferdigAvklart
         )
 
 }
 
 data class Ventetidsavklaring(
-    val periode: Periode,
+    val omsluttendePeriode: Periode,
+    val periode: Periode?,
     val ferdigAvklart: Boolean
 )
