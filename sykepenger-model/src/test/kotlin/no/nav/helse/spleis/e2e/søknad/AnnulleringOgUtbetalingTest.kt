@@ -52,8 +52,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         håndterYtelser(2.vedtaksperiode)
 
         assertEquals(4, inspektør.antallUtbetalinger)
-        val marsutbetalingen = inspektør.utbetaling(1)
-        håndterAnnullering(marsutbetalingen.utbetalingId)
+        håndterAnnullering(2.vedtaksperiode)
         håndterUtbetalt()
 
         assertEquals(5, inspektør.antallUtbetalinger)

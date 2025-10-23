@@ -7,7 +7,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -55,7 +54,7 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
     fun `vedtaksperiode annullert`() {
         nyttVedtak()
 
-        sendAnnullering(testRapid.inspektør.etterspurteBehov(Aktivitet.Behov.Behovtype.Utbetaling).path("utbetalingId").asText())
+        sendAnnullering(0)
         sendUtbetaling()
 
         val meldingOmAnnullertVedtaksperiode = testRapid.inspektør.meldinger("vedtaksperiode_annullert").first()

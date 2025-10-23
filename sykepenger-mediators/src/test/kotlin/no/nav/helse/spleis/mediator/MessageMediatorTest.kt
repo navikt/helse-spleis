@@ -4,7 +4,7 @@ import io.mockk.mockk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -81,7 +81,7 @@ internal class MessageMediatorTest {
 
     @Test
     fun `annullerer utbetaling`() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagAnnullering(UUID.randomUUID().toString()))
+        testRapid.sendTestMessage(meldingsfabrikk.lagAnnullering(UUID.randomUUID()))
         assertTrue(hendelseMediator.lestAnnullerUtbetaling)
     }
 

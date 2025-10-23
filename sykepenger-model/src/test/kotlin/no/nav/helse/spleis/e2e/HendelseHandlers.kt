@@ -911,8 +911,8 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
 }
 
 internal fun AbstractEndToEndTest.håndterAnnullerUtbetaling(
+    vedtaksperiodeId: IdInnhenter = 1.vedtaksperiode,
     orgnummer: String = a1,
-    utbetalingId: UUID = inspektør.sisteUtbetaling().utbetalingId,
     opprettet: LocalDateTime = LocalDateTime.now()
 ) {
     AnnullerUtbetaling(
@@ -920,7 +920,7 @@ internal fun AbstractEndToEndTest.håndterAnnullerUtbetaling(
         behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
             organisasjonsnummer = orgnummer
         ),
-        utbetalingId = utbetalingId,
+        vedtaksperiodeId = vedtaksperiodeId.id(orgnummer),
         saksbehandlerIdent = "Ola Nordmann",
         saksbehandlerEpost = "tbd@nav.no",
         opprettet = opprettet,

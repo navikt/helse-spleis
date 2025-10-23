@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Dagtype
@@ -31,8 +30,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `annullere utbetalt periode`() {
         nyttVedtak(januar)
-        val utbetalingId = testRapid.inspektør.siste("utbetaling_utbetalt").path("utbetalingId").asText()
-        sendAnnulleringSelvstendig(utbetalingId)
+        sendAnnulleringSelvstendig(0)
         sendUtbetaling()
         assertTilstander(
             0,

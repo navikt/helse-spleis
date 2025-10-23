@@ -32,7 +32,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.oktober
@@ -110,7 +109,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
 
             håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2018))
 
-            håndterAnnullering(inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingId)
+            håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
             håndterSykmelding(Sykmeldingsperiode(1.august, 5.august))
         }

@@ -11,7 +11,7 @@ import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
 
 internal class AnnulleringMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
-    private val utbetalingId = packet["utbetalingId"].asText().trim().toUUID()
+    private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText().toUUID()
     private val saksbehandler = Saksbehandler.fraJson(packet["saksbehandler"])
     private val årsaker = packet["begrunnelser"].map { it.asText() }
     private val begrunnelse = packet["kommentar"].takeUnless { it.isMissingOrNull() }?.asText() ?: ""
@@ -20,7 +20,7 @@ internal class AnnulleringMessage(packet: JsonMessage, override val meldingspori
         get() = AnnullerUtbetaling(
             meldingsporing.id,
             behandlingsporing,
-            utbetalingId,
+            vedtaksperiodeId,
             saksbehandler.ident,
             saksbehandler.epostadresse,
             opprettet,

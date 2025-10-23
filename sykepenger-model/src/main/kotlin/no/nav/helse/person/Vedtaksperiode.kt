@@ -180,7 +180,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverberegningBuilder
-import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.utbetalingstidslinje.BeregnetMaksdato
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
@@ -188,6 +187,7 @@ import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKEL
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering
 import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering.Companion.lagMinsteinntektsvurdering
+import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -276,7 +276,7 @@ internal class Vedtaksperiode private constructor(
         behandlinger = behandlinger.view(),
         førsteFraværsdag = førsteFraværsdag,
         skalBehandlesISpeil = skalBehandlesISpeil(),
-        annulleringskandidater = person.finnAnnulleringskandidater(this)
+        annulleringskandidater = yrkesaktivitet.finnAnnulleringskandidater(this.id)
     )
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
@@ -2882,7 +2882,7 @@ internal class Vedtaksperiode private constructor(
         venteårsak = nestemann?.vedtaksperiodeVenter?.let { this.vedtaksperiodeVenter?.dto(it) },
         opprettet = opprettet,
         oppdatert = oppdatert,
-        annulleringskandidater = person.finnAnnulleringskandidater(this).map { AnnulleringskandidatDto(it.id, it.yrkesaktivitet.organisasjonsnummer, it.periode.start, it.periode.endInclusive) }
+        annulleringskandidater = yrkesaktivitet.finnAnnulleringskandidater(this.id).map { AnnulleringskandidatDto(it.id, it.yrkesaktivitet.organisasjonsnummer, it.periode.start, it.periode.endInclusive) }
     )
 
     private fun IAktivitetslogg.medFeilSomVarslerHvisNødvendig() =

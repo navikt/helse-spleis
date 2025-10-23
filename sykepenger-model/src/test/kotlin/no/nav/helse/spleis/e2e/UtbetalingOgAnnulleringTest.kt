@@ -111,7 +111,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         nyttVedtak(mars)
         tilGodkjenning(januar, a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ANNULLERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
     }
@@ -125,7 +125,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         this@UtbetalingOgAnnulleringTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
 
-        håndterAnnullerUtbetaling(a1)
+        håndterAnnullerUtbetaling()
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetaling(1).tilstand)
     }
@@ -179,8 +179,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         this@UtbetalingOgAnnulleringTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        val utbetalingId = inspektør.sisteUtbetaling().utbetalingId
-        håndterAnnullerUtbetaling(utbetalingId = utbetalingId)
+        håndterAnnullerUtbetaling()
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(20.februar, 20.mars))
@@ -221,7 +220,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         this@UtbetalingOgAnnulleringTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
 
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling()
         assertEquals(3, inspektør.antallUtbetalinger)
         assertTrue(inspektør.utbetaling(2).erAnnullering)
     }
@@ -242,7 +241,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         this@UtbetalingOgAnnulleringTest.håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         this@UtbetalingOgAnnulleringTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(2.vedtaksperiode))
+        håndterAnnullerUtbetaling(2.vedtaksperiode)
         assertEquals(2, inspektør.antallUtbetalinger)
         assertFalse(inspektør.utbetaling(1).erAnnullering)
     }
@@ -414,8 +413,8 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         this@UtbetalingOgAnnulleringTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode)) // Stale
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode), opprettet = LocalDateTime.now().plusHours(3))
+        håndterAnnullerUtbetaling() // Stale
+        håndterAnnullerUtbetaling(opprettet = LocalDateTime.now().plusHours(3))
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
 
         assertTrue(inspektør.sisteUtbetaling().erAnnullering)

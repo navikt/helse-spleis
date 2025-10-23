@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.BehandlingView.TilstandView.ANNULLERT_PERIODE
 import no.nav.helse.person.BehandlingView.TilstandView.TIL_INFOTRYGD
@@ -87,7 +86,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
     fun `annullering oppretter ny behandling som forkastes`() {
         a1 {
             nyttVedtak(januar)
-            håndterAnnullering(inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.utbetalingId)
+            håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()
@@ -122,7 +121,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
-            håndterAnnullering(inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingId)
+            håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()

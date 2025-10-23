@@ -76,8 +76,7 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `vedtak annulleres`() {
         nyttVedtak(1.januar, 31.januar)
-        val utbetalingId = testRapid.inspektør.siste("utbetaling_utbetalt").path("utbetalingId").asText()
-        sendAnnullering(utbetalingId)
+        sendAnnullering(0)
         sendUtbetaling()
 
         val behandlingOpprettet = testRapid.inspektør.meldinger("behandling_opprettet")

@@ -61,7 +61,6 @@ import no.nav.helse.person.Yrkesaktivitet.Companion.avventerSøknad
 import no.nav.helse.person.Yrkesaktivitet.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Yrkesaktivitet.Companion.beregnSkjæringstidspunkt
 import no.nav.helse.person.Yrkesaktivitet.Companion.finn
-import no.nav.helse.person.Yrkesaktivitet.Companion.finnAnnulleringskandidater
 import no.nav.helse.person.Yrkesaktivitet.Companion.fjernSykmeldingsperiode
 import no.nav.helse.person.Yrkesaktivitet.Companion.gjenopptaBehandling
 import no.nav.helse.person.Yrkesaktivitet.Companion.håndterOverstyrInntektsgrunnlag
@@ -500,8 +499,6 @@ class Person private constructor(
     internal fun annullert(event: PersonObserver.UtbetalingAnnullertEvent) {
         observers.forEach { it.annullering(event) }
     }
-
-    internal fun finnAnnulleringskandidater(vedtaksperiode: Vedtaksperiode) = yrkesaktiviteter.finnAnnulleringskandidater(vedtaksperiode)
 
     internal fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {
         observers.forEach { it.vedtaksperiodePåminnet(vedtaksperiodeId, organisasjonsnummer, påminnelse) }

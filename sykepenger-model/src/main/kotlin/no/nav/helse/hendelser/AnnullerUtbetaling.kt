@@ -8,7 +8,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 class AnnullerUtbetaling(
     meldingsreferanseId: MeldingsreferanseId,
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
-    val utbetalingId: UUID,
+    val vedtaksperiodeId: UUID,
     val saksbehandlerIdent: String,
     saksbehandlerEpost: String,
     internal val opprettet: LocalDateTime,

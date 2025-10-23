@@ -29,8 +29,7 @@ internal class AnnullerUtbetalingerRiverRiverTest : RiverTest() {
     "@event_name": "annullering",
     "fødselsnummer": "08127411111",
     "organisasjonsnummer": "orgnummer",
-    "fagsystemId": "ABCD1234",
-    "utbetalingId": "${UUID.randomUUID()}",
+    "vedtaksperiodeId": "${UUID.randomUUID()}",
     "saksbehandler": {
         "navn": "Siri Saksbhandler",
         "epostaddresse": "siri.saksbehandler@nav.no",

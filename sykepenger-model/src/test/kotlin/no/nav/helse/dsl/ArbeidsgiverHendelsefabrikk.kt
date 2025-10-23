@@ -445,11 +445,11 @@ internal class ArbeidsgiverHendelsefabrikk(
             overføringstidspunkt = LocalDateTime.now()
         )
 
-    internal fun lagAnnullering(utbetalingId: UUID) =
+    internal fun lagAnnullering(vedtaksperiodeId: UUID) =
         AnnullerUtbetaling(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             behandlingsporing = behandlingsporing,
-            utbetalingId = utbetalingId,
+            vedtaksperiodeId = vedtaksperiodeId,
             saksbehandlerIdent = "Ola Nordmann",
             saksbehandlerEpost = "tbd@nav.no",
             opprettet = LocalDateTime.now(),

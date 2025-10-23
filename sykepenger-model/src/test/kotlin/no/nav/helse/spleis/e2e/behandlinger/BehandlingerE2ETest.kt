@@ -214,7 +214,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-            håndterAnnullering(inspektør.utbetaling(0).utbetalingId)
+            håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
             assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetaling(1).tilstand)
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
@@ -743,7 +743,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             nyttVedtak(15.mars til 10.april)
             nyttVedtak(august)
 
-            håndterAnnullering(inspektør.utbetalinger(3.vedtaksperiode).single().inspektør.utbetalingId)
+            håndterAnnullering(3.vedtaksperiode)
 
             assertVarsel(RV_RV_7, 4.vedtaksperiode.filter())
             assertVarsel(RV_RV_7, 5.vedtaksperiode.filter())

@@ -20,7 +20,7 @@ internal class AnnullerUtbetalingerRiver(
             "saksbehandler",
             "saksbehandler.epostaddresse",
             "saksbehandler.ident",
-            "utbetalingId",
+            "vedtaksperiodeId"
         )
         message.requireArray("begrunnelser")
         message.interestedIn("kommentar", "yrkesaktivitetstype", "organisasjonsnummer")

@@ -64,10 +64,10 @@ import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingView
-import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
-import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar.Companion.finn
 import no.nav.helse.utbetalingstidslinje.ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
+import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
+import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar.Companion.finn
 import no.nav.helse.utbetalingstidslinje.SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.VentedagerForVedtaksperiode
@@ -87,7 +87,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     private val siste get() = behandlinger.lastOrNull()?.utbetaling()
 
     internal fun sisteUtbetalteUtbetaling() = behandlinger.lastOrNull { it.erFattetVedtak() }?.utbetaling()
-    internal fun harNoenBehandlingUtbetaling(utbetalingsId: UUID) = behandlinger.any { it.utbetaling()?.id == utbetalingsId }
 
     internal fun harFattetVedtak() = behandlinger.any { it.erFattetVedtak() }
 

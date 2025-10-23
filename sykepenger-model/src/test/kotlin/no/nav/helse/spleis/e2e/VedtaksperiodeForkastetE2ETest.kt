@@ -49,7 +49,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         this@VedtaksperiodeForkastetE2ETest.håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
-        håndterAnnullerUtbetaling(a1)
+        håndterAnnullerUtbetaling()
         håndterUtbetalt()
         assertEquals(1, observatør.forkastedePerioder())
         assertEquals(TIL_ANNULLERING, observatør.forkastet(3.vedtaksperiode.id(a1)).gjeldendeTilstand)

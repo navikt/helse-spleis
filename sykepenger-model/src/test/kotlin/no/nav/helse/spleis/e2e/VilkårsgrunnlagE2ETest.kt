@@ -68,7 +68,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
             håndterUtbetalt()
             assertVilkårsgrunnlagFraSpleisFor(1.januar)
 
-            håndterAnnullering(inspektør.sisteUtbetaling().utbetalingId)
+            håndterAnnullering(2.vedtaksperiode)
             håndterUtbetalt()
             assertVilkårsgrunnlagFraSpleisFor(1.januar)
         }
@@ -97,7 +97,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             assertVilkårsgrunnlagFraSpleisFor(1.januar)
-            håndterAnnullering(inspektør.sisteUtbetaling().utbetalingId)
+            håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
             assertIngenVilkårsgrunnlagFraSpleis()
         }

@@ -83,8 +83,8 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
     fun `mapper annullerte utbetalinger på beregnede annullerte perioder`() {
-        val sisteutbetaling = nyttVedtak(1.januar, 31.januar)
-        håndterAnnullerUtbetaling(sisteutbetaling)
+        nyttVedtak(1.januar, 31.januar)
+        håndterAnnullerUtbetaling()
         generasjoner(a1) {
             0.generasjon {
                 this.annullertPeriode(0).also {
@@ -516,12 +516,12 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
     fun `annullerer feilet revurdering`() {
-        val utbetaling = nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.januar, 31.januar)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterYtelserTilGodkjenning()
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
-        håndterAnnullerUtbetaling(utbetaling)
+        håndterAnnullerUtbetaling()
 
         generasjoner {
             assertEquals(3, size)
@@ -633,8 +633,8 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
     fun `én periode som blir annullert`() {
-        val utbetaling = nyttVedtak(1.januar, 31.januar)
-        håndterAnnullerUtbetaling(utbetaling)
+        nyttVedtak(1.januar, 31.januar)
+        håndterAnnullerUtbetaling()
 
         generasjoner {
             assertEquals(2, size)
@@ -652,8 +652,8 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     @Test
     fun `en periode som blir annullert`() {
         nyttVedtak(1.januar, 31.januar)
-        val utbetaling = forlengVedtak(1.februar, 28.februar)
-        håndterAnnullerUtbetaling(utbetaling)
+        forlengVedtak(1.februar, 28.februar)
+        håndterAnnullerUtbetaling(2)
 
         generasjoner {
             assertEquals(2, size)
@@ -673,8 +673,8 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     @Test
     fun `en periode som blir annullert - deretter nye perioder`() {
         nyttVedtak(1.januar, 31.januar)
-        val utbetaling = forlengVedtak(1.februar, 28.februar)
-        håndterAnnullerUtbetaling(utbetaling)
+        forlengVedtak(1.februar, 28.februar)
+        håndterAnnullerUtbetaling(2)
         håndterUtbetalt()
 
         nyttVedtak(1.april, 30.april, vedtaksperiode = 3)
@@ -698,8 +698,8 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     @Test
     fun `to arbeidsgiverperioder - siste blir annullert`() {
         nyttVedtak(1.januar, 31.januar)
-        val utbetaling = nyttVedtak(1.mars, 31.mars, vedtaksperiode = 2)
-        håndterAnnullerUtbetaling(utbetaling)
+        nyttVedtak(1.mars, 31.mars, vedtaksperiode = 2)
+        håndterAnnullerUtbetaling(2)
 
         generasjoner {
             assertEquals(2, size)
@@ -1163,11 +1163,11 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
     fun `Annullering av revurdering feilet`() {
-        val utbetaling = nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.januar, 31.januar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
         håndterYtelserTilGodkjenning()
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
-        håndterAnnullerUtbetaling(utbetaling)
+        håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
 
@@ -1479,7 +1479,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     @Test
     fun `annullering av revurdert periode i til godkjenning`() {
         nyttVedtak(1.mars, 31.mars)
-        val utbetaling = nyttVedtak(1.mai, 31.mai, vedtaksperiode = 2)
+        nyttVedtak(1.mai, 31.mai, vedtaksperiode = 2)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.mai, Dagtype.Feriedag)))
         håndterYtelserTilGodkjenning()
@@ -1487,7 +1487,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.mai, Dagtype.Feriedag)))
         håndterYtelserTilGodkjenning()
 
-        håndterAnnullerUtbetaling(utbetaling)
+        håndterAnnullerUtbetaling(2)
         håndterUtbetalt()
 
         generasjoner {
@@ -1508,10 +1508,10 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     @Test
     fun `annullering etter utbetaling underkjent`() {
         nyttVedtak(1.mars, 31.mars)
-        val utbetalig = forlengVedtak(1.april, 30.april)
+        forlengVedtak(1.april, 30.april)
         forlengTilGodkjenning(1.mai, 31.mai)
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
-        håndterAnnullerUtbetaling(utbetalig)
+        håndterAnnullerUtbetaling(2)
         håndterUtbetalt()
 
         generasjoner {
@@ -1531,8 +1531,8 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
     fun `annullering av flere perioder`() {
-        val førsteUtbetaling = nyttVedtak(1.mars, 31.mars)
-        val sisteUtbetaling = nyttVedtak(1.mai, 31.mai, vedtaksperiode = 2)
+        nyttVedtak(1.mars, 31.mars)
+        nyttVedtak(1.mai, 31.mai, vedtaksperiode = 2)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.mai, Dagtype.Feriedag)))
         håndterYtelserTilGodkjenning()
@@ -1540,10 +1540,10 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.mai, Dagtype.Feriedag)))
         håndterYtelserTilGodkjenning()
 
-        håndterAnnullerUtbetaling(sisteUtbetaling)
+        håndterAnnullerUtbetaling(2)
         håndterUtbetalt()
 
-        håndterAnnullerUtbetaling(førsteUtbetaling)
+        håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
         generasjoner {
@@ -1563,8 +1563,8 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
     fun `annullering av enda flere perioder`() {
-        val førsteUtbetaling = nyttVedtak(1.mars, 31.mars)
-        val sisteUtbetaling = nyttVedtak(1.mai, 31.mai, vedtaksperiode = 2)
+        nyttVedtak(1.mars, 31.mars)
+        nyttVedtak(1.mai, 31.mai, vedtaksperiode = 2)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.mai, Dagtype.Feriedag)))
         håndterYtelserTilGodkjenning()
@@ -1572,15 +1572,15 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.mai, Dagtype.Feriedag)))
         håndterYtelserTilGodkjenning()
 
-        håndterAnnullerUtbetaling(sisteUtbetaling)
+        håndterAnnullerUtbetaling(2)
         håndterUtbetalt()
 
-        håndterAnnullerUtbetaling(førsteUtbetaling)
+        håndterAnnullerUtbetaling(1)
         håndterUtbetalt()
 
-        val utbetaling = nyttVedtak(1.juli, 31.juli, vedtaksperiode = 3)
+        nyttVedtak(1.juli, 31.juli, vedtaksperiode = 3)
 
-        håndterAnnullerUtbetaling(utbetaling)
+        håndterAnnullerUtbetaling(3)
         håndterUtbetalt()
 
         generasjoner {
@@ -1607,15 +1607,15 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
     fun `flere perioder der første blir annullert, deretter ny periode, deretter annullering igjen`() {
-        val januarutbetaling = nyttVedtak(1.januar, 31.januar)
-        val marsutbetaling = nyttVedtak(1.mars, 31.mars, vedtaksperiode = 2)
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.mars, 31.mars, vedtaksperiode = 2)
 
-        håndterAnnullerUtbetaling(marsutbetaling)
+        håndterAnnullerUtbetaling(2)
         håndterUtbetalt()
 
-        val maiutbetaling = nyttVedtak(1.mai, 31.mai, vedtaksperiode = 3)
+        nyttVedtak(1.mai, 31.mai, vedtaksperiode = 3)
 
-        håndterAnnullerUtbetaling(maiutbetaling)
+        håndterAnnullerUtbetaling(3)
         håndterUtbetalt()
 
         generasjoner {
@@ -1639,7 +1639,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             }
         }
 
-        håndterAnnullerUtbetaling(januarutbetaling)
+        håndterAnnullerUtbetaling(1)
         håndterUtbetalt()
 
         generasjoner {
@@ -1666,19 +1666,19 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
     fun `flere perioder der første blir annullert, deretter ny periode, deretter annullering igjen 2`() {
-        val januarutbetaling = nyttVedtak(1.januar, 31.januar)
-        val marsutbetaling = nyttVedtak(1.mars, 31.mars, vedtaksperiode = 2)
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.mars, 31.mars, vedtaksperiode = 2)
 
-        håndterAnnullerUtbetaling(marsutbetaling)
+        håndterAnnullerUtbetaling(2)
         håndterUtbetalt()
 
-        val maiutbetaling = nyttVedtak(1.mai, 31.mai, vedtaksperiode = 3)
+        nyttVedtak(1.mai, 31.mai, vedtaksperiode = 3)
 
-        håndterAnnullerUtbetaling(maiutbetaling)
+        håndterAnnullerUtbetaling(3)
         håndterUtbetalt()
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
-        val sisteutbetaling = håndterYtelserTilUtbetalt()
+        håndterYtelserTilUtbetalt()
 
         generasjoner {
             assertEquals(3, size)
@@ -1701,7 +1701,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             }
         }
 
-        håndterAnnullerUtbetaling(sisteutbetaling)
+        håndterAnnullerUtbetaling(1)
         håndterUtbetalt()
 
         generasjoner {

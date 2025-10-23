@@ -28,7 +28,6 @@ import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.SelvstendigNaringsdrivendeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -724,13 +723,13 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(message)
     }
 
-    protected fun sendAnnullering(utbetalingId: String) {
-        val (_, message) = meldingsfabrikk.lagAnnullering(utbetalingId)
+    protected fun sendAnnullering(vedtaksperiodeIndeks: Int) {
+        val (_, message) = meldingsfabrikk.lagAnnullering(testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks))
         testRapid.sendTestMessage(message)
     }
 
-    protected fun sendAnnulleringSelvstendig(utbetalingId: String) {
-        val (_, message) = meldingsfabrikk.lagAnnulleringSelvstendig(utbetalingId)
+    protected fun sendAnnulleringSelvstendig(vedtaksperiodeIndeks: Int) {
+        val (_, message) = meldingsfabrikk.lagAnnulleringSelvstendig(testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks))
         testRapid.sendTestMessage(message)
     }
 

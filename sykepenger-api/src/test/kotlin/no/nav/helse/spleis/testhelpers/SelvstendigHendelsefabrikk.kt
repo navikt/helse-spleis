@@ -305,7 +305,7 @@ internal class SelvstendigHendelsefabrikk() {
         AnnullerUtbetaling(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             behandlingsporing = Behandlingsporing.Yrkesaktivitet.Selvstendig,
-            utbetalingId = utbetalingId,
+            vedtaksperiodeId = utbetalingId,
             saksbehandlerIdent = "Ola Nordmann",
             saksbehandlerEpost = "tbd@nav.no",
             opprettet = LocalDateTime.now(),

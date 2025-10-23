@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
@@ -110,8 +110,8 @@ import no.nav.helse.utbetalingslinjer.UtbetalingkladdBuilder
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeberegner
-import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
+import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Ventetidberegner
 import no.nav.helse.økonomi.Inntekt
@@ -199,8 +199,6 @@ internal class Yrkesaktivitet private constructor(
                 }
             }
         }
-
-        internal fun List<Yrkesaktivitet>.finnAnnulleringskandidater(vedtaksperiode: Vedtaksperiode) = flatMap { it.finnAnnulleringskandidater(vedtaksperiode) }.toSet()
 
         internal fun List<Yrkesaktivitet>.venter() =
             flatMap { yrkesaktivitet -> yrkesaktivitet.vedtaksperioder.venter() }
@@ -372,8 +370,6 @@ internal class Yrkesaktivitet private constructor(
             return yrkesaktivitetType
         }
     }
-
-    private fun finnVedtaksperiodeForUtbetaling(utbetalingId: UUID) = vedtaksperioder.firstOrNull { it.behandlinger.harNoenBehandlingUtbetaling(utbetalingId) }
 
     internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): Boolean {
         return avklarInntekt(skjæringstidspunkt, vedtaksperioder) != null
@@ -752,8 +748,8 @@ internal class Yrkesaktivitet private constructor(
 
     internal fun sisteAktiveUtbetalingMedSammeKorrelasjonsId(utbetaling: Utbetaling) = utbetaling.sisteAktiveMedSammeKorrelasjonsId(utbetalinger)
 
-    internal fun finnAnnulleringskandidater(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode): Set<Vedtaksperiode> {
-        if (vedtaksperioder.none { it === vedtaksperiodeSomForsøkesAnnullert }) return emptySet()
+    internal fun finnAnnulleringskandidater(vedtaksperiodeIdSomForsøkesAnnullert: UUID): Set<Vedtaksperiode> {
+        val vedtaksperiodeSomForsøkesAnnullert = vedtaksperioder.firstOrNull { it.id == vedtaksperiodeIdSomForsøkesAnnullert } ?: return emptySet()
         // senereVedtaksperioderMedSammeAgp() burde funnet alle vedtaksperioder uavhengig av utbetalingsrigg
         // MEN vi føler oss litt usikre på om denne klarer å finne alle perioder som ville linket seg på en annen utbetaling på tidligere utbetalingsrigg
         return senereVedtaksperioderMedFattetVedtakMedSammeAgp(vedtaksperiodeSomForsøkesAnnullert) + senereVedtaksperioderMedSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert)
@@ -779,9 +775,7 @@ internal class Yrkesaktivitet private constructor(
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         aktivitetsloggMedArbeidsgiverkontekst.info("Håndterer annullering")
 
-        val utbetalingId = hendelse.utbetalingId
-        val vedtaksperiodeSomSkalAnnulleres = finnVedtaksperiodeForUtbetaling(utbetalingId) ?: error("Fant ikke vedtaksperiode for utbetaling $utbetalingId")
-        val annulleringskandidater = finnAnnulleringskandidater(vedtaksperiodeSomSkalAnnulleres)
+        val annulleringskandidater = finnAnnulleringskandidater(hendelse.vedtaksperiodeId)
 
         if (annulleringskandidater.isEmpty()) return null
         person.emitPlanlagtAnnullering(annulleringskandidater, hendelse)

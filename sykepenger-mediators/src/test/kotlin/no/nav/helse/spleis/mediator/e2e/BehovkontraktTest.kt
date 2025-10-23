@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.til
@@ -166,7 +165,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
-        sendAnnullering(testRapid.inspektør.etterspurteBehov(Utbetaling).path("utbetalingId").asText())
+        sendAnnullering(0)
         val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
         assertUtbetalingBehov(behov, Utbetaling)
         assertUtbetalingdetaljer(behov, true)

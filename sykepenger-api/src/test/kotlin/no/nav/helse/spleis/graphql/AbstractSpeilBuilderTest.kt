@@ -575,8 +575,8 @@ internal abstract class AbstractSpeilBuilderTest {
         return håndterUtbetalt(status)
     }
 
-    protected fun håndterAnnullerUtbetaling(behov: Utbetalingbehov) {
-        fabrikker.getValue(behov.orgnummer).lagAnnullering(behov.utbetalingId)
+    protected fun håndterAnnullerUtbetaling(vedtaksperiodeId: Int = 1, orgnummer: String = a1) {
+        fabrikker.getValue(orgnummer).lagAnnullering(vedtaksperiodeId.vedtaksperiode(orgnummer))
             .håndter(Person::håndterAnnulerUtbetaling)
     }
 

@@ -31,7 +31,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         forlengVedtak(februar)
 
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(2.vedtaksperiode))
+        håndterAnnullerUtbetaling(2.vedtaksperiode)
         håndterUtbetalt()
 
         assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
@@ -51,7 +51,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         forlengVedtak(februar)
         nyttVedtak(april, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
-        håndterAnnullerUtbetaling()
+        håndterAnnullerUtbetaling(3.vedtaksperiode)
         håndterUtbetalt()
 
         assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)

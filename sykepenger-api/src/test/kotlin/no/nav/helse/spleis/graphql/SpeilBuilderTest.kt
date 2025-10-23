@@ -223,8 +223,8 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
     fun `annullert periode skal ikke ha vilkårsgrunnlagsId`() {
-        val utbetaling = nyttVedtak(1.januar, 31.januar)
-        håndterAnnullerUtbetaling(utbetaling)
+        nyttVedtak(1.januar, 31.januar)
+        håndterAnnullerUtbetaling()
         val personDto = speilApi()
         val generasjoner = personDto.arbeidsgivere.first().generasjoner
         assertEquals(2, generasjoner.size)

@@ -231,7 +231,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
-        sendAnnullering(utbetalingId.toString())
+        sendAnnullering(0)
         sendUtbetaling()
         @Language("JSON")
         val forventet = """
@@ -272,7 +272,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK, forventedeFagområder = setOf("SPREF", "SP"))
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
-        sendAnnullering(utbetalingId.toString())
+        sendAnnullering(0)
         sendUtbetaling()
         @Language("JSON")
         val forventet = """
@@ -311,7 +311,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK, forventedeFagområder = setOf("SP"))
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
-        sendAnnullering(utbetalingId.toString())
+        sendAnnullering(0)
         sendUtbetaling()
         @Language("JSON")
         val forventet = """

@@ -247,9 +247,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         )
         assertEquals(utbetalingslinje, inspektør.feriepengeoppdrag.utbetalingslinjer)
 
-        håndterAnnullerUtbetaling(
-            utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode) // Er personoppdraget som annuleres men gjøres basert på fagsystemid på arbeidsgiveroppdraget 🤷‍
-        )
+        håndterAnnullerUtbetaling(vedtaksperiodeId = 1.vedtaksperiode)
         håndterUtbetalt()
         // Andre kjøring ❤️
         this@FeriepengeE2ETest.håndterUtbetalingshistorikkForFeriepenger(

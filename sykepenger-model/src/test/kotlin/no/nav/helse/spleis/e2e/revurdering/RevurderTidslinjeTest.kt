@@ -148,7 +148,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt(Oppdragstatus.AVVIST)
 
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetaling(2).utbetalingId)
+        håndterAnnullerUtbetaling()
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVVENTER_ANNULLERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_ANNULLERING)
     }
@@ -166,7 +166,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         }
         assertVarsler(listOf(RV_UT_23, Varselkode.RV_UT_24), 1.vedtaksperiode.filter())
         nullstillTilstandsendringer()
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetaling(2).utbetalingId)
+        håndterAnnullerUtbetaling()
         håndterUtbetalt()
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING)

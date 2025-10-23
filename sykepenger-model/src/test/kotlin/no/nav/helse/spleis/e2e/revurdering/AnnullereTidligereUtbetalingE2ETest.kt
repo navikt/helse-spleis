@@ -8,8 +8,8 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -23,9 +23,8 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
     fun `annullere tidligere utbetaling på samme arbeidsgiver`() {
         a1 {
             nyttVedtak(januar)
-            val utbetalingId = inspektør.utbetaling(0).utbetalingId
             nyttVedtak(mars)
-            håndterAnnullering(utbetalingId)
+            håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
             assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
@@ -37,9 +36,8 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
     fun `revurdering mens annullere tidligere utbetaling`() {
         a1 {
             nyttVedtak(januar)
-            val utbetalingId = inspektør.utbetaling(0).utbetalingId
             nyttVedtak(mars)
-            håndterAnnullering(utbetalingId)
+            håndterAnnullering(1.vedtaksperiode)
             val err = assertThrows<IllegalStateException> {
                 håndterSøknad(januar)
             }
@@ -53,8 +51,7 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             nyttVedtak(mars)
-            val utbetalingId = inspektør.utbetaling(1).utbetalingId
-            håndterAnnullering(utbetalingId)
+            håndterAnnullering(2.vedtaksperiode)
             håndterSøknad(januar)
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, TilstandType.TIL_ANNULLERING)
@@ -66,7 +63,6 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
         }
-        val utbetalingId = inspektør.utbetaling(0).utbetalingId
         a2 {
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))
             håndterInntektsmelding(listOf(1.mars til 16.mars))
@@ -77,7 +73,7 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
             håndterUtbetalt()
         }
         a1 {
-            håndterAnnullering(utbetalingId)
+            håndterAnnullering(1.vedtaksperiode)
             assertIngenFunksjonelleFeil()
             assertEquals(Utbetalingtype.ANNULLERING, inspektør.sisteUtbetaling().type)
         }

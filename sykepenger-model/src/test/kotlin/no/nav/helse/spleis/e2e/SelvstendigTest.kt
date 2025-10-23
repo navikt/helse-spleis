@@ -76,7 +76,7 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterPåminnelse(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, flagg = setOf("ønskerReberegning"))
             håndterYtelser(1.vedtaksperiode)
-            håndterAnnullering(inspektør.utbetalinger[0].utbetalingId)
+            håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_HISTORIKK, SELVSTENDIG_AVVENTER_GODKJENNING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
         }
@@ -92,7 +92,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             nullstillTilstandsendringer()
-            håndterAnnullering(inspektør.utbetalinger[0].utbetalingId)
+            håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
         }

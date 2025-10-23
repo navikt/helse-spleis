@@ -636,8 +636,8 @@ internal class TestPerson(
             }
         }
 
-        internal fun håndterAnnullering(utbetalingId: UUID) {
-            arbeidsgiverHendelsefabrikk.lagAnnullering(utbetalingId).håndter(Person::håndterAnnulerUtbetaling)
+        internal fun håndterAnnullering(vedtaksperiodeId: UUID) {
+            arbeidsgiverHendelsefabrikk.lagAnnullering(vedtaksperiodeId).håndter(Person::håndterAnnulerUtbetaling)
         }
 
         internal fun håndterIdentOpphørt(nyttFnr: Personidentifikator) {

@@ -403,13 +403,13 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             overføringstidspunkt = LocalDateTime.now()
         )
 
-    internal fun lagAnnullering(utbetalingId: UUID) =
+    internal fun lagAnnullering(vedtaksperiodeId: UUID) =
         AnnullerUtbetaling(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
                 organisasjonsnummer = organisasjonsnummer
             ),
-            utbetalingId = utbetalingId,
+            vedtaksperiodeId = vedtaksperiodeId,
             saksbehandlerIdent = "Ola Nordmann",
             saksbehandlerEpost = "tbd@nav.no",
             opprettet = LocalDateTime.now(),
