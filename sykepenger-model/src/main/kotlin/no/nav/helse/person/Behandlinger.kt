@@ -474,7 +474,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val arbeidssituasjon get() = endringer.last().arbeidssituasjon
         val utbetalingstidslinje get() = endringer.last().utbetalingstidslinje
         val faktaavklartInntekt get() = endringer.last().faktaavklartInntekt
-        val inntektsendringer get() = endringer.last().inntektsendringer
+        val inntektsjusteringer get() = endringer.last().inntektjusteringer
 
         constructor(observatører: List<BehandlingObserver>, tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde, observatører) {
             check(observatører.isNotEmpty()) {
@@ -553,7 +553,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     antallDager = this.maksdato.gjenståendeDager,
                     nettoDager = this.maksdato.gjenståendeDager - (forrigeBehandling?.maksdato?.gjenståendeDager ?: 0)
                 ),
-                harAndreInntekterIBeregning = this.inntektsendringer.isNotEmpty()
+                harAndreInntekterIBeregning = this.inntektsjusteringer.isNotEmpty()
             )
         }
 
