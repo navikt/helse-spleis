@@ -172,7 +172,7 @@ internal class SpeilGenerasjonerBuilder(
             opprettet = vedtaksperiode.opprettet,
             behandlingOpprettet = generasjon.endringer.first().tidsstempel,
             oppdatert = vedtaksperiode.oppdatert,
-            periodetilstand = utledePeriodetilstand(vedtaksperiode.tilstand, utbetaling, utbetalingstidslinje),
+            periodetilstand = utledePeriodetilstand(vedtaksperiode.tilstand, generasjon.tilstand, utbetalingstidslinje),
             skjæringstidspunkt = skjæringstidspunkt,
             hendelser = dokumenterTilOgMedDenneGenerasjonen(vedtaksperiode, generasjon),
             maksdato = sisteEndring.maksdatoresultat.maksdato,
@@ -240,15 +240,20 @@ internal class SpeilGenerasjonerBuilder(
     private fun List<Utbetalingstidslinjedag>.sisteNavDag() =
         lastOrNull { it.type == UtbetalingstidslinjedagType.NavDag }
 
-    private fun utledePeriodetilstand(periodetilstand: VedtaksperiodetilstandDto, utbetalingDTO: Utbetaling, avgrensetUtbetalingstidslinje: List<Utbetalingstidslinjedag>) =
-        when (utbetalingDTO.status) {
-            Utbetalingstatus.IkkeGodkjent -> Periodetilstand.RevurderingFeilet
-            Utbetalingstatus.Utbetalt, Utbetalingstatus.GodkjentUtenUtbetaling -> when {
+    private fun utledePeriodetilstand(periodetilstand: VedtaksperiodetilstandDto, behandlingtilstandDto: BehandlingtilstandDto, avgrensetUtbetalingstidslinje: List<Utbetalingstidslinjedag>) =
+        when (behandlingtilstandDto) {
+            BehandlingtilstandDto.REVURDERT_VEDTAK_AVVIST -> Periodetilstand.RevurderingFeilet
+
+            BehandlingtilstandDto.VEDTAK_FATTET -> Periodetilstand.TilUtbetaling
+
+            BehandlingtilstandDto.VEDTAK_IVERKSATT -> when {
                 avgrensetUtbetalingstidslinje.none { it.utbetalingsinfo()?.harUtbetaling() == true } -> Periodetilstand.IngenUtbetaling
                 else -> Periodetilstand.Utbetalt
             }
 
-            Utbetalingstatus.Ubetalt -> when (periodetilstand) {
+            BehandlingtilstandDto.BEREGNET,
+            BehandlingtilstandDto.BEREGNET_OMGJØRING,
+            BehandlingtilstandDto.BEREGNET_REVURDERING -> when (periodetilstand) {
                 VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING,
                 VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING,
                 VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> Periodetilstand.TilGodkjenning
@@ -266,6 +271,9 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
                 VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> Periodetilstand.VenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (førstegangsvurdering)
 
+                VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING,
+                VedtaksperiodetilstandDto.TIL_UTBETALING -> Periodetilstand.TilUtbetaling
+
                 VedtaksperiodetilstandDto.AVSLUTTET,
                 VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET,
                 VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING,
@@ -278,15 +286,11 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.START,
                 VedtaksperiodetilstandDto.SELVSTENDIG_START,
                 VedtaksperiodetilstandDto.TIL_INFOTRYGD,
-                VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING,
                 VedtaksperiodetilstandDto.AVVENTER_ANNULLERING,
-                VedtaksperiodetilstandDto.TIL_ANNULLERING,
-                VedtaksperiodetilstandDto.TIL_UTBETALING -> error("har ikke mappingregel for utbetalingstatus ${utbetalingDTO.status} og periodetilstand=$periodetilstand")
+                VedtaksperiodetilstandDto.TIL_ANNULLERING -> error("har ikke mappingregel for utbetalingstatus $behandlingtilstandDto og periodetilstand=$periodetilstand")
             }
 
-            Utbetalingstatus.Overført -> Periodetilstand.TilUtbetaling
-
-            else -> error("har ikke mappingregel for ${utbetalingDTO.status}")
+            else -> error("har ikke mappingregel for $behandlingtilstandDto")
         }
 
     private fun periodevilkår(
