@@ -1,0 +1,72 @@
+{
+  "fødselsnummer": "fnr",
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "tilstand": "AVSLUTTET_UTEN_UTBETALING",
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "fom": [2018, 1, 1],
+                  "tom": [2018, 1, 16]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tilstand": "AVSLUTTET",
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "fom": [2018, 1, 17],
+                  "tom": [2018, 1, 31]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "utbetalinger": [
+        {
+          "fom": [2018, 1, 1],
+          "tom": [2018, 1, 31],
+          "status": "UTBETALT",
+          "id": "utbetaling_1",
+          "korrelasjonsId": "korrelasjon_1"
+        },
+        {
+          "fom": [2018, 1, 1],
+          "tom": [2018, 3, 31],
+          "status": "UTBETALT",
+          "id": "utbetaling_2",
+          "korrelasjonsId": "korrelasjon_1"
+        },
+        {
+          "fom": [2018, 1, 1],
+          "tom": [2018, 3, 31],
+          "status": "ANNULLERT",
+          "id": "utbetaling_3",
+          "korrelasjonsId": "korrelasjon_2"
+        },
+        {
+          "fom": [2018, 1, 1],
+          "tom": [2018, 3, 31],
+          "status": "GODKJENT_UTEN_UTBETALING",
+          "id": "utbetaling_4",
+          "korrelasjonsId": "korrelasjon_3"
+        },
+        {
+          "fom": [2018, 4, 1],
+          "tom": [2018, 10, 31],
+          "status": "GODKJENT_UTEN_UTBETALING",
+          "id": "utbetaling_4",
+          "korrelasjonsId": "korrelasjon_4"
+        }
+      ]
+    }
+  ]
+}

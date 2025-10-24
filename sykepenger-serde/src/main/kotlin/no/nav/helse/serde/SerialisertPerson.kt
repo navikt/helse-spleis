@@ -61,6 +61,7 @@ import no.nav.helse.serde.migration.V334ArbeidsgiverperioderKunPåArbeidstakere
 import no.nav.helse.serde.migration.V335PerioderUtenNavAnsvar
 import no.nav.helse.serde.migration.V336PerioderUtenNavAnsvarPåBehandling
 import no.nav.helse.serde.migration.V337FjernerRevurderingFeilet
+import no.nav.helse.serde.migration.V338JustereFomPåUtbetalinger
 import no.nav.helse.serde.migration.migrate
 
 class SerialisertPerson(
@@ -124,7 +125,8 @@ class SerialisertPerson(
             V334ArbeidsgiverperioderKunPåArbeidstakere(),
             V335PerioderUtenNavAnsvar(),
             V336PerioderUtenNavAnsvarPåBehandling(),
-            V337FjernerRevurderingFeilet()
+            V337FjernerRevurderingFeilet(),
+            V338JustereFomPåUtbetalinger()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
