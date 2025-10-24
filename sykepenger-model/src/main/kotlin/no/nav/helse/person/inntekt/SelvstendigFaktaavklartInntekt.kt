@@ -10,11 +10,11 @@ import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
 internal data class SelvstendigFaktaavklartInntekt(
-    val id: UUID,
-    val inntektsdata: Inntektsdata,
+    override val id: UUID,
+    override val inntektsdata: Inntektsdata,
     val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>,
     val anvendtGrunnbeløp: Inntekt
-) {
+) : FaktaavklartInntekt {
     init {
         check(pensjonsgivendeInntekter.size <= 3) {
             "Selvstendig kan ikke ha mer enn tre inntekter"
@@ -106,8 +106,8 @@ internal data class SelvstendigFaktaavklartInntekt(
     internal fun view() = SelvstendigFaktaavklartInntektView(id, inntektsgrunnlag)
 
     internal data class SelvstendigFaktaavklartInntektView(
-        val id: UUID,
+        override val id: UUID,
         val inntektsgrunnlag: Inntekt
-    )
+    ) : FaktaavklartInntektView
 
 }

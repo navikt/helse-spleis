@@ -7,9 +7,9 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.RefusjonservitørData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData
-import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.PeriodeUtenNavAnsvarData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.ArbeidssituasjonData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
+import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.PeriodeUtenNavAnsvarData
 import no.nav.helse.dto.SpannerPersonDto.UtbetalingData
 import no.nav.helse.dto.SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData
@@ -1260,7 +1260,7 @@ private fun BehandlingendringUtDto.tilPersonData() =
         inntektjusteringer = inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
             inntektskilde.id to beløpstidslinje.tilPersonData()
         }.toMap(),
-        faktaavklartInntekt = faktaavklartInntekt?.tilPersonData()
+        faktaavklartInntekt = (faktaavklartInntekt as? SelvstendigFaktaavklartInntektUtDto)?.tilPersonData()
     )
 
 private fun DagerUtenNavAnsvaravklaringDto.tilPersonData() = PeriodeUtenNavAnsvarData(

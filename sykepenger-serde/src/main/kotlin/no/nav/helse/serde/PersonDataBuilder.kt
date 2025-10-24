@@ -1,14 +1,13 @@
 package no.nav.helse.serde
 
 import java.time.LocalDate
-import no.nav.helse.dto.DagerUtenNavAnsvaravklaringDto
-import no.nav.helse.dto.PeriodeUtenNavAnsvarDto
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.BeløpstidslinjeDto
+import no.nav.helse.dto.DagerUtenNavAnsvaravklaringDto
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.DokumenttypeDto
 import no.nav.helse.dto.EndringskodeDto
@@ -23,6 +22,7 @@ import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.OppdragstatusDto
+import no.nav.helse.dto.PeriodeUtenNavAnsvarDto
 import no.nav.helse.dto.RefusjonsservitørDto
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.SkatteopplysningDto
@@ -41,6 +41,7 @@ import no.nav.helse.dto.serialisering.ArbeidstakerFaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.BehandlingendringUtDto
+import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.FeriepengeUtDto
 import no.nav.helse.dto.serialisering.FeriepengeoppdragUtDto
 import no.nav.helse.dto.serialisering.FeriepengeutbetalingslinjeUtDto
@@ -998,3 +999,20 @@ fun SelvstendigFaktaavklartInntektUtDto.tilPersonData(): PersonData.Vilkårsgrun
     anvendtÅrligGrunnbeløp = this.anvendtGrunnbeløp.årlig.beløp
 )
 
+fun FaktaavklartInntektUtDto.tilPersonData(): PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.FaktaavklartInntektData {
+    val type = when (this) {
+        is SelvstendigFaktaavklartInntektUtDto -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.FaktaavklartInntektTypeData.SELVSTENDIG_NÆRINGSDRIVENDE
+    }
+    return PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.FaktaavklartInntektData(
+        type = type,
+        id = this.id,
+        dato = this.inntektsdata.dato,
+        hendelseId = this.inntektsdata.hendelseId.id,
+        beløp = this.inntektsdata.beløp.månedligDouble.beløp,
+        tidsstempel = this.inntektsdata.tidsstempel,
+        pensjonsgivendeInntekter = this.pensjonsgivendeInntekter.map {
+            PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.FaktaavklartInntektData.PensjonsgivendeInntektData(it.årstall.value, it.beløp.årlig.beløp)
+        },
+        anvendtÅrligGrunnbeløp = this.anvendtGrunnbeløp.årlig.beløp
+    )
+}

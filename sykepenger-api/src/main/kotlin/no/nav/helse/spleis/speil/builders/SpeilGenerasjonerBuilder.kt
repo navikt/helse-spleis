@@ -14,6 +14,7 @@ import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
+import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.UbrukteRefusjonsopplysningerUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.forrigeDag
@@ -123,7 +124,7 @@ internal class SpeilGenerasjonerBuilder(
             oppdatert = sisteEndring.tidsstempel,
             skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
             hendelser = dokumenterTilOgMedDenneGenerasjonen(vedtaksperiode, generasjon),
-            pensjonsgivendeInntekter = sisteEndring.faktaavklartInntekt?.pensjonsgivendeInntekter ?: emptyList(),
+            pensjonsgivendeInntekter = (sisteEndring.faktaavklartInntekt as? SelvstendigFaktaavklartInntektUtDto)?.pensjonsgivendeInntekter ?: emptyList(),
             periodetilstand = periodetilstand ?: generasjon.avsluttet?.let { Periodetilstand.IngenUtbetaling } ?: when (vedtaksperiode.tilstand) {
                 is VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> Periodetilstand.UtbetaltVenterPåAnnenPeriode
 
@@ -181,7 +182,7 @@ internal class SpeilGenerasjonerBuilder(
             periodevilkår = periodevilkår(sisteSykepengedag, sisteEndring.maksdatoresultat, alder, skjæringstidspunkt),
             vilkårsgrunnlagId = sisteEndring.vilkårsgrunnlagId!!,
             refusjonstidslinje = mapRefusjonstidslinje(arbeidsgiverUtDto.ubrukteRefusjonsopplysninger, generasjon.id, sisteEndring.refusjonstidslinje),
-            pensjonsgivendeInntekter = sisteEndring.faktaavklartInntekt?.pensjonsgivendeInntekter ?: emptyList(),
+            pensjonsgivendeInntekter = (sisteEndring.faktaavklartInntekt as? SelvstendigFaktaavklartInntektUtDto)?.pensjonsgivendeInntekter ?: emptyList(),
             annulleringskandidater = vedtaksperiode.annulleringskandidater
         )
     }
@@ -209,7 +210,7 @@ internal class SpeilGenerasjonerBuilder(
             periodetilstand = annulleringen.periodetilstand,
             hendelser = dokumenterTilOgMedDenneGenerasjonen(vedtaksperiode, generasjon),
             beregningId = annulleringen.id,
-            pensjonsgivendeInntekter = sisteEndring.faktaavklartInntekt?.pensjonsgivendeInntekter ?: emptyList(),
+            pensjonsgivendeInntekter = (sisteEndring.faktaavklartInntekt as? SelvstendigFaktaavklartInntektUtDto)?.pensjonsgivendeInntekter ?: emptyList(),
             utbetaling = Utbetaling(
                 annulleringen.id,
                 Utbetalingtype.ANNULLERING,

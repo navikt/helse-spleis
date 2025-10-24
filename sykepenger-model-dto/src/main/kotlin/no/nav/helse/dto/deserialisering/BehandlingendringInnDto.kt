@@ -3,9 +3,9 @@ package no.nav.helse.dto.deserialisering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dto.DagerUtenNavAnsvaravklaringDto
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.BeløpstidslinjeDto
+import no.nav.helse.dto.DagerUtenNavAnsvaravklaringDto
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.InntektskildeDto
 import no.nav.helse.dto.PeriodeDto
@@ -30,5 +30,5 @@ data class BehandlingendringInnDto(
     val dagerNavOvertarAnsvar: List<PeriodeDto>,
     val maksdatoresultat: MaksdatoresultatInnDto,
     val inntektjusteringer: Map<InntektskildeDto, BeløpstidslinjeDto>,
-    val faktaavklartInntekt: SelvstendigFaktaavklartInntektInnDto?
+    val faktaavklartInntekt: FaktaavklartInntektInnDto?
 )
