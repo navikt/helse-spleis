@@ -227,7 +227,7 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `tom historikk validerer`() {
         assertTrue(historikk.validerMedFunksjonellFeil(aktivitetslogg, 1.januar til 31.januar))
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
     }
 
     @Test
@@ -242,7 +242,7 @@ internal class InfotrygdhistorikkTest {
         )
         Aktivitetslogg().also {
             historikk.validerNyereOpplysninger(it, 1.januar til 31.januar)
-            assertFalse(it.harFunksjonelleFeilEllerVerre())
+            assertFalse(it.harFunksjonelleFeil())
             it.assertVarsel(Varselkode.RV_IT_1)
         }
         Aktivitetslogg().also {

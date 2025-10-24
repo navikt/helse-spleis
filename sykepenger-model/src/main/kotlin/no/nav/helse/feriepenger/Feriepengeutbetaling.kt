@@ -85,7 +85,7 @@ internal class Feriepengeutbetaling private constructor(
             Oppdragstatus.AVVIST,
             Oppdragstatus.FEIL -> aktivitetslogg.info("Utbetaling feilet med status ${utbetalingHendelse.status}. Feilmelding fra Oppdragsystemet: ${utbetalingHendelse.melding}")
         }
-        val utbetaltOk = !aktivitetslogg.harFunksjonelleFeilEllerVerre()
+        val utbetaltOk = !aktivitetslogg.harFunksjonelleFeil()
         lagreInformasjon(utbetalingHendelse, aktivitetslogg, utbetaltOk)
 
         if (!utbetaltOk) {

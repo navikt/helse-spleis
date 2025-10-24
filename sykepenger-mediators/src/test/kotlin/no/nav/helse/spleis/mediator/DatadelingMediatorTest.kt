@@ -67,15 +67,11 @@ internal class DatadelingMediatorTest {
         aktivitetslogg.info("Dette er en infomelding")
         aktivitetslogg.varsel(RV_SØ_1)
         aktivitetslogg.funksjonellFeil(RV_VT_1)
-        try {
-            aktivitetslogg.logiskFeil("Dette er en severe")
-        } catch (_: Exception) {
-        }
         datadelingMediator.ferdigstill(testRapid)
 
         assertEquals(1, testRapid.inspektør.antall())
         val aktiviteter = testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet")["aktiviteter"]
-        assertEquals(4, aktiviteter.size())
+        assertEquals(3, aktiviteter.size())
     }
 
     @Test
@@ -91,17 +87,12 @@ internal class DatadelingMediatorTest {
         aktivitetslogg.info("Dette er en infomelding")
         aktivitetslogg.varsel(RV_SØ_1)
         aktivitetslogg.funksjonellFeil(RV_VT_1)
-        try {
-            aktivitetslogg.logiskFeil("Dette er en infomelding")
-        } catch (_: Exception) {
-        }
         datadelingMediator.ferdigstill(testRapid)
 
         val info = testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet")["aktiviteter"]
         assertEquals("INFO", info[0]["nivå"].asText())
         assertEquals("VARSEL", info[1]["nivå"].asText())
         assertEquals("FUNKSJONELL_FEIL", info[2]["nivå"].asText())
-        assertEquals("LOGISK_FEIL", info[3]["nivå"].asText())
     }
 
     private class TestKontekst(

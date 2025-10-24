@@ -70,7 +70,7 @@ internal class SøknadTest {
     @Test
     fun `søknad med bare sykdom`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent))
-        assertFalse(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar).harFunksjonelleFeilEllerVerre())
+        assertFalse(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar).harFunksjonelleFeil())
         assertEquals(10, søknad.sykdomstidslinje.count())
     }
 
@@ -116,20 +116,20 @@ internal class SøknadTest {
     fun `17 år på søknadstidspunkt gir error`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), hendelsefabrikk = fyller18År2NovemberHendelsefabrikk, sendtTilNAVEllerArbeidsgiver = 1.november)
         assertTrue(søknad.forUng(aktivitetslogg, november2.alder))
-        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertTrue(aktivitetslogg.harFunksjonelleFeil())
     }
 
     @Test
     fun `18 år på søknadstidspunkt gir ikke error`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), hendelsefabrikk = fyller18År2NovemberHendelsefabrikk, sendtTilNAVEllerArbeidsgiver = 2.november)
         assertFalse(søknad.forUng(aktivitetslogg, november2.alder))
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
     }
 
     @Test
     fun `søknad med permisjon`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Permisjon(5.januar, 10.januar))
-        assertFalse(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar).harFunksjonelleFeilEllerVerre())
+        assertFalse(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar).harFunksjonelleFeil())
         assertEquals(10, søknad.sykdomstidslinje.count())
     }
 
@@ -148,7 +148,7 @@ internal class SøknadTest {
     @Test
     fun `søknad med papirsykmelding`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Papirsykmelding(1.januar, 10.januar))
-        assertTrue(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar).harFunksjonelleFeilEllerVerre())
+        assertTrue(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar).harFunksjonelleFeil())
         assertEquals(10, søknad.sykdomstidslinje.count())
         assertEquals(10, søknad.sykdomstidslinje.filterIsInstance<ProblemDag>().size)
     }
@@ -156,13 +156,13 @@ internal class SøknadTest {
     @Test
     fun `sykdomsgrad under 100 støttes`() {
         søknad(Sykdom(1.januar, 10.januar, 50.prosent))
-        assertFalse(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar).harFunksjonelleFeilEllerVerre())
+        assertFalse(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar).harFunksjonelleFeil())
     }
 
     @Test
     fun `sykdom faktiskgrad under 100 støttes`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent, 50.prosent))
-        assertFalse(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar).harFunksjonelleFeilEllerVerre())
+        assertFalse(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar).harFunksjonelleFeil())
     }
 
     @Test
@@ -190,7 +190,7 @@ internal class SøknadTest {
     @Test
     fun `søknad uten andre inntektskilder`() {
         søknad(Sykdom(5.januar, 12.januar, 100.prosent), andreInntektskilder = false)
-        assertFalse(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 5.januar).harFunksjonelleFeilEllerVerre())
+        assertFalse(søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 5.januar).harFunksjonelleFeil())
     }
 
     @Test
@@ -212,14 +212,14 @@ internal class SøknadTest {
     fun `angitt arbeidsgrad kan føre til lavere sykegrad enn graden fra sykmelding`() {
         søknad(Sykdom(1.januar, 31.januar, 20.prosent, 81.prosent))
         søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar)
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
     }
 
     @Test
     fun `angitt arbeidsgrad kan føre til lik sykegrad som graden fra sykmelding`() {
         søknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent))
         søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar)
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
     }
 
     @Test
@@ -267,7 +267,7 @@ internal class SøknadTest {
         søknad(Sykdom(1.januar, 1.mai, 100.prosent))
         søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar)
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
     }
 
     @Test

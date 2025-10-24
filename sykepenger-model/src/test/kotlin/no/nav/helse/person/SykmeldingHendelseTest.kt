@@ -14,8 +14,8 @@ internal class SykmeldingHendelseTest : AbstractEndToEndTest() {
     fun `Sykmelding skaper Arbeidsgiver og Sykmeldingsperiode`() {
         val aktivitetslogg = Aktivitetslogg()
         person.håndterSykmelding(sykmelding(Sykmeldingsperiode(1.januar, 5.januar)), aktivitetslogg)
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
         assertEquals(1, inspektør.sykmeldingsperioder().size)
     }
@@ -25,8 +25,8 @@ internal class SykmeldingHendelseTest : AbstractEndToEndTest() {
         val aktivitetslogg = Aktivitetslogg()
         person.håndterSykmelding(sykmelding(Sykmeldingsperiode(1.januar, 5.januar)), aktivitetslogg)
         person.håndterSykmelding(sykmelding(Sykmeldingsperiode(6.januar, 10.januar)), aktivitetslogg)
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
         assertEquals(2, inspektør.sykmeldingsperioder().size)
     }

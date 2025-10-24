@@ -50,6 +50,6 @@ internal class ArbeidsavklaringspengerTest {
     private fun undersøke(vararg AAPperioder: Periode): Boolean {
         aktivitetslogg = Aktivitetslogg()
         val aap = Arbeidsavklaringspenger(AAPperioder.toList())
-        return aap.valider(aktivitetslogg, skjæringstidspunkt, periode).harFunksjonelleFeilEllerVerre()
+        return aap.valider(aktivitetslogg, skjæringstidspunkt, periode).harFunksjonelleFeil()
     }
 }

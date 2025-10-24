@@ -65,7 +65,7 @@ class InfotrygdhistorikkElement private constructor(
     internal fun validerMedFunksjonellFeil(aktivitetslogg: IAktivitetslogg, periode: Periode): Boolean {
         aktivitetslogg.info("Sjekker utbetalte perioder")
         perioder.forEach { it.valider(aktivitetslogg, periode, IAktivitetslogg::funksjonellFeil) }
-        return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
+        return !aktivitetslogg.harFunksjonelleFeil()
     }
 
     internal fun validerMedVarsel(aktivitetslogg: IAktivitetslogg, periode: Periode) {

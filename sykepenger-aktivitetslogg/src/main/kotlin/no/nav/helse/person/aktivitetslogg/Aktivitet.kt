@@ -277,16 +277,4 @@ sealed class Aktivitet(
                 FunksjonellFeil(UUID.randomUUID(), kontekster, kode, melding)
         }
     }
-
-    class LogiskFeil private constructor(
-        id: UUID,
-        kontekster: List<SpesifikkKontekst>,
-        melding: String,
-        tidsstempel: LocalDateTime = LocalDateTime.now()
-    ) : Aktivitet(id, 100, 'S', melding, tidsstempel, kontekster) {
-        companion object {
-            internal fun opprett(kontekster: List<SpesifikkKontekst>, melding: String) =
-                LogiskFeil(UUID.randomUUID(), kontekster, melding)
-        }
-    }
 }

@@ -309,7 +309,7 @@ internal class Vedtaksperiode private constructor(
         håndterSøknad(søknad, aktivitetsloggMedVedtaksperiodekontekst)
         aktivitetsloggMedVedtaksperiodekontekst.info("Fullført behandling av søknad")
 
-        if (aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeilEllerVerre()) forkast(søknad, aktivitetslogg)
+        if (aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeil()) forkast(søknad, aktivitetslogg)
         return Revurderingseventyr.nyPeriode(søknad, skjæringstidspunkt, behandlinger.egenmeldingsdager().plusElement(periode).periode()!!)
     }
 
@@ -360,7 +360,7 @@ internal class Vedtaksperiode private constructor(
                 false -> håndterOverlappendeSøknad(søknad, aktivitetsloggMedVedtaksperiodekontekst)
             }
         }
-        if (aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeilEllerVerre()) forkast(søknad, aktivitetsloggMedVedtaksperiodekontekst)
+        if (aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeil()) forkast(søknad, aktivitetsloggMedVedtaksperiodekontekst)
         return Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode)
     }
 
@@ -587,7 +587,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndterArbeidsgiveropplysninger(eventyr: List<List<Revurderingseventyr>>, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         person.emitInntektsmeldingHåndtert(hendelse.metadata.meldingsreferanseId.id, id, yrkesaktivitet.organisasjonsnummer)
         val tidligsteEventyr = eventyr.flatten().tidligsteEventyr()
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) forkast(hendelse, aktivitetslogg)
+        if (aktivitetslogg.harFunksjonelleFeil()) forkast(hendelse, aktivitetslogg)
         return tidligsteEventyr
     }
 
@@ -1093,7 +1093,7 @@ internal class Vedtaksperiode private constructor(
         // steg 6: subsummere ting
         subsummering(beregningsgrunnlag, minsteinntektsvurdering, uberegnetTidslinjePerArbeidsgiver, beregnetTidslinjePerVedtaksperiode, historisktidslinje)
 
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(ytelser, aktivitetslogg)
+        if (aktivitetslogg.harFunksjonelleFeil()) return forkast(ytelser, aktivitetslogg)
 
         høstingsresultater(aktivitetslogg, nesteSimuleringtilstand, nesteGodkjenningtilstand)
     }
@@ -1761,7 +1761,7 @@ internal class Vedtaksperiode private constructor(
         val nyAgp = behandlinger.ventedager()
         if (opprinneligAgp != nyAgp) aktivitetslogg.varsel(RV_IM_24, "Ny agp er utregnet til å være ulik tidligere utregnet agp i ${tilstand.type.name}")
 
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(dager.hendelse, aktivitetslogg)
+        if (aktivitetslogg.harFunksjonelleFeil()) return forkast(dager.hendelse, aktivitetslogg)
     }
 
     private fun inntektForArbeidsgiver(
@@ -1944,12 +1944,12 @@ internal class Vedtaksperiode private constructor(
         }
         person.lagreVilkårsgrunnlag(grunnlagsdata)
         aktivitetslogg.info("Vilkårsgrunnlag vurdert")
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return forkast(vilkårsgrunnlag, aktivitetslogg)
+        if (aktivitetslogg.harFunksjonelleFeil()) return forkast(vilkårsgrunnlag, aktivitetslogg)
         tilstand(aktivitetslogg, nesteTilstand)
     }
 
     internal fun håndterUtbetalingHendelse(aktivitetslogg: IAktivitetslogg) {
-        if (!aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
+        if (!aktivitetslogg.harFunksjonelleFeil()) return
         aktivitetslogg.funksjonellFeil(RV_UT_5)
     }
 

@@ -112,13 +112,7 @@ internal class HendelseMediator(
     private val behovMediator = BehovMediator(sikkerLogg)
 
     override fun behandle(message: HendelseMessage, context: MessageContext) {
-        try {
-            message.behandle(this, context)
-        } catch (err: Aktivitetslogg.AktivitetException) {
-            withMDC(err.kontekst()) {
-                sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}\n\t${message.toJson()}", err)
-            }
-        }
+        message.behandle(this, context)
     }
 
     override fun behandle(
@@ -680,7 +674,7 @@ internal class HendelseMediator(
         subsumsjonMediator.ferdigstill(subsumsjonsproducer)
         datadelingMediator.ferdigstill(context)
         if (aktivitetslogg.aktiviteter.isEmpty()) return
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) sikkerLogg.info("aktivitetslogg inneholder errors:\n$aktivitetslogg")
+        if (aktivitetslogg.harFunksjonelleFeil()) sikkerLogg.info("aktivitetslogg inneholder errors:\n$aktivitetslogg")
         else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n$aktivitetslogg")
         behovMediator.håndter(context, message, aktivitetslogg)
     }

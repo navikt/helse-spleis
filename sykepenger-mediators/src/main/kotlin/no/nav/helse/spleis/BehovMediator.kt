@@ -9,7 +9,7 @@ import org.slf4j.Logger
 
 internal class BehovMediator(private val sikkerLogg: Logger) {
     internal fun håndter(context: MessageContext, message: HendelseMessage, aktivitetslogg: Aktivitetslogg) {
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
+        if (aktivitetslogg.harFunksjonelleFeil()) return
         if (aktivitetslogg.behov.isEmpty()) return
         aktivitetslogg
             .behov

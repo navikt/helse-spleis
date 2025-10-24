@@ -50,6 +50,6 @@ class DagpengerTest {
     private fun undersøke(vararg perioder: Periode): Boolean {
         aktivitetslogg = Aktivitetslogg()
         val dagpenger = Dagpenger(perioder.toList())
-        return dagpenger.valider(aktivitetslogg, førsteFraværsdag, periode).harFunksjonelleFeilEllerVerre()
+        return dagpenger.valider(aktivitetslogg, førsteFraværsdag, periode).harFunksjonelleFeil()
     }
 }

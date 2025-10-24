@@ -106,11 +106,6 @@ internal class AktivitetsloggAsserts(
         assertTrue(errors.isEmpty(), "forventet ingen errors. Errors: \n${errors.joinToString("\n")}")
     }
 
-    internal fun assertLogiskFeil(severe: String, filter: AktivitetsloggFilter) {
-        val severes = collectLogiskeFeil(filter)
-        assertTrue(severes.contains(severe), "fant ikke forventet severe. Severes:\n${severes.joinToString("\n")}")
-    }
-
     internal fun assertHarTag(vedtaksperiode: UUID, forventetTag: String) {
         val tags = aktivitetslogg.hentFeltFraBehov<Set<String>>(
             vedtaksperiodeId = vedtaksperiode,
@@ -153,9 +148,5 @@ internal class AktivitetsloggAsserts(
 
     private fun collectFunksjonelleFeil(filter: AktivitetsloggFilter): List<String> {
         return aktivitetslogg.funksjonellFeil.collectStrings(filter)
-    }
-
-    private fun collectLogiskeFeil(filter: AktivitetsloggFilter): List<String> {
-        return aktivitetslogg.logiskFeil.collectStrings(filter)
     }
 }

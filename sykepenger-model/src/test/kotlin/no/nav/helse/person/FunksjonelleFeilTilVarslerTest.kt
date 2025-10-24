@@ -22,8 +22,8 @@ internal class FunksjonelleFeilTilVarslerTest {
     fun `error blir error om det logges på kilden`() {
         val funksjonelleFeilTilVarsler = FunksjonelleFeilTilVarsler(aktivitetslogg)
         aktivitetslogg.funksjonellFeil(RV_VT_1)
-        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
-        assertTrue(funksjonelleFeilTilVarsler.harFunksjonelleFeilEllerVerre())
+        assertTrue(aktivitetslogg.harFunksjonelleFeil())
+        assertTrue(funksjonelleFeilTilVarsler.harFunksjonelleFeil())
     }
 
     @Test
@@ -31,8 +31,8 @@ internal class FunksjonelleFeilTilVarslerTest {
         val funksjonelleFeilTilVarsler = FunksjonelleFeilTilVarsler(aktivitetslogg)
         funksjonelleFeilTilVarsler.funksjonellFeil(RV_VT_1)
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
         assertTrue(funksjonelleFeilTilVarsler.harVarslerEllerVerre())
-        assertFalse(funksjonelleFeilTilVarsler.harFunksjonelleFeilEllerVerre())
+        assertFalse(funksjonelleFeilTilVarsler.harFunksjonelleFeil())
     }
 }

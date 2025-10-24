@@ -149,7 +149,6 @@ internal fun AbstractEndToEndTest.assertFunksjonellFeil(varselkode: Varselkode, 
 internal fun AbstractEndToEndTest.assertFunksjonelleFeil(filter: AktivitetsloggFilter) = personlogg.assertFunksjonelleFeil(filter, assertetVarsler)
 internal fun AbstractEndToEndTest.assertIngenFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = personlogg.assertIngenFunksjonellFeil(varselkode, filter, assertetVarsler)
 internal fun AbstractEndToEndTest.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = personlogg.assertIngenFunksjonelleFeil(filter, assertetVarsler)
-internal fun AbstractEndToEndTest.assertLogiskFeil(severe: String, filter: AktivitetsloggFilter) = personlogg.assertLogiskFeil(severe, filter, assertetVarsler)
 internal fun <T> AbstractEndToEndTest.assertVarsler(filter: AktivitetsloggFilter, før: List<Varselkode> = emptyList(), etter: List<Varselkode>, block: () -> T): T{
     assertVarsler(før, filter)
     val resultat = block()
@@ -182,9 +181,6 @@ internal fun Aktivitetslogg.assertIngenFunksjonellFeil(varselkode: Varselkode, f
 
 internal fun Aktivitetslogg.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
     AktivitetsloggAsserts(this, assertetVarsler).assertIngenFunksjonelleFeil(filter)
-
-internal fun Aktivitetslogg.assertLogiskFeil(severe: String, filter: AktivitetsloggFilter, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
-    AktivitetsloggAsserts(this, assertetVarsler).assertLogiskFeil(severe, filter)
 
 internal fun Aktivitetslogg.assertHarTag(vedtaksperiode: IdInnhenter, orgnummer: String = a1, forventetTag: String, assertetVarsler: Varslersamler.AssertetVarsler = Varslersamler.AssertetVarsler()) =
     AktivitetsloggAsserts(this, assertetVarsler).assertHarTag(vedtaksperiode.id(orgnummer), forventetTag)

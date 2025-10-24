@@ -331,7 +331,7 @@ internal class InntektsmeldingTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = ""
         )
         dager.validerArbeidsgiverperiode(aktivitetslogg, 1.januar til 10.januar, null)
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
     }
 
     @Test

@@ -27,7 +27,6 @@ internal class DatadelingMediator(
             when (aktivitet) {
                 is Aktivitet.Behov -> aktivitetMap("BEHOV", aktivitet)
                 is Aktivitet.Info -> aktivitetMap("INFO", aktivitet)
-                is Aktivitet.LogiskFeil -> aktivitetMap("LOGISK_FEIL", aktivitet)
                 is Aktivitet.FunksjonellFeil -> {
                     if (aktivitet.kode.avviklet) sikkerlogg.warn("${aktivitet.kode} er ikke avviklet, men i bruk i spleis. Endre?")
                     aktivitetMap("FUNKSJONELL_FEIL", aktivitet) + mapOf("varselkode" to aktivitet.kode.name)

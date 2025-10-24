@@ -41,7 +41,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         aktivitetslogg: IAktivitetslogg
     ) {
         vedtaksperiode.håndterDager(dager, aktivitetslogg)
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
+        if (aktivitetslogg.harFunksjonelleFeil()) return vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
     }
 
     override fun igangsettOverstyring(

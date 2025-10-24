@@ -18,16 +18,16 @@ internal class Validation private constructor(private val aktivitetslogg: IAktiv
     }
 
     internal inline fun valider(kode: Varselkode? = null, isValid: Validation.() -> Boolean) {
-        if (harFunksjonelleFeilEllerVerre()) return
+        if (harFunksjonelleFeil()) return
         if (isValid(this)) return
         onValidationFailed(kode)
     }
 
     internal inline fun onSuccess(successBlock: Validation.() -> Unit) {
-        if (!harFunksjonelleFeilEllerVerre()) successBlock(this)
+        if (!harFunksjonelleFeil()) successBlock(this)
     }
 
-    override fun harFunksjonelleFeilEllerVerre() = hasErrors || aktivitetslogg.harFunksjonelleFeilEllerVerre()
+    override fun harFunksjonelleFeil() = hasErrors || aktivitetslogg.harFunksjonelleFeil()
 
     private fun onValidationFailed(kode: Varselkode?) {
         hasErrors = true

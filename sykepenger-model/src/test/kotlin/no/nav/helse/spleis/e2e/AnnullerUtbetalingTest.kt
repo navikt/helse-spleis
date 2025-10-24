@@ -22,7 +22,6 @@ import no.nav.helse.mars
 import no.nav.helse.person.BehandlingView
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
@@ -1055,8 +1054,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     fun `avvis hvis arbeidsgiver er ukjent`() {
         a1 {
             nyttVedtak(3.januar til 26.januar, 100.prosent)
-            assertThrows<Aktivitetslogg.AktivitetException> { håndterAnnullering(vedtaksperiodeId = UUID.randomUUID(), orgnummer = a2) }
-            assertTrue(testperson.personlogg.harFunksjonelleFeilEllerVerre(), testperson.personlogg.toString())
+            assertThrows<IllegalStateException> { håndterAnnullering(vedtaksperiodeId = UUID.randomUUID(), orgnummer = a2) }
         }
     }
 
@@ -1073,7 +1071,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             val statusForUtbetaling = (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"]
             assertEquals("OPPH", statusForUtbetaling)
             håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
-            assertFalse(testperson.personlogg.harFunksjonelleFeilEllerVerre())
+            assertFalse(testperson.personlogg.harFunksjonelleFeil())
             assertEquals(2, inspektør.antallUtbetalinger)
             assertEquals(1, testperson.personlogg.behov.size - behovTeller)
             inspektør.utbetaling(1).arbeidsgiverOppdrag.inspektør.also {
@@ -1149,7 +1147,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt(status = Oppdragstatus.FEIL)
-            assertFalse(testperson.personlogg.harFunksjonelleFeilEllerVerre())
+            assertFalse(testperson.personlogg.harFunksjonelleFeil())
             assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetaling(1).tilstand)
             assertSisteTilstand(1.vedtaksperiode, TIL_ANNULLERING)
         }
@@ -1162,7 +1160,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt(status = Oppdragstatus.AVVIST)
-            assertFalse(testperson.personlogg.harFunksjonelleFeilEllerVerre())
+            assertFalse(testperson.personlogg.harFunksjonelleFeil())
             assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetaling(1).tilstand)
             assertSisteTilstand(1.vedtaksperiode, TIL_ANNULLERING)
         }
@@ -1175,7 +1173,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
-            assertFalse(testperson.personlogg.harFunksjonelleFeilEllerVerre(), testperson.personlogg.toString())
+            assertFalse(testperson.personlogg.harFunksjonelleFeil(), testperson.personlogg.toString())
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
         }
     }
@@ -1193,7 +1191,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             // Annuler 1 mars til 20 mars
             håndterAnnullering(3.vedtaksperiode)
             håndterUtbetalt()
-            assertFalse(testperson.personlogg.harFunksjonelleFeilEllerVerre(), testperson.personlogg.toString())
+            assertFalse(testperson.personlogg.harFunksjonelleFeil(), testperson.personlogg.toString())
             assertEquals(1, testperson.personlogg.behov.size - behovTeller, testperson.personlogg.toString())
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
             assertTilstander(2.vedtaksperiode, AVSLUTTET)
@@ -1286,7 +1284,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
             assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
-            assertFalse(testperson.personlogg.harFunksjonelleFeilEllerVerre())
+            assertFalse(testperson.personlogg.harFunksjonelleFeil())
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
         }

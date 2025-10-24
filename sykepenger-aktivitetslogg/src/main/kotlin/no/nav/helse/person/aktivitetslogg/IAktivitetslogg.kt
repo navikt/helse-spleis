@@ -5,10 +5,9 @@ interface IAktivitetslogg {
     fun behov(type: Aktivitet.Behov.Behovtype, melding: String, detaljer: Map<String, Any?> = emptyMap())
     fun varsel(kode: Varselkode)
     fun funksjonellFeil(kode: Varselkode)
-    fun logiskFeil(melding: String, vararg params: Any?): Nothing
 
     fun harVarslerEllerVerre(): Boolean
-    fun harFunksjonelleFeilEllerVerre(): Boolean
+    fun harFunksjonelleFeil(): Boolean
 
     fun kontekst(kontekst: Aktivitetskontekst): IAktivitetslogg
 }

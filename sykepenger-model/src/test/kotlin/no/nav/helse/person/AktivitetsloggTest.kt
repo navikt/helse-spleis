@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 
 internal class AktivitetsloggTest {
 
@@ -45,16 +44,7 @@ internal class AktivitetsloggTest {
 
     @Test
     fun `har ingen feil ved default`() {
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
-    }
-
-    @Test
-    fun `severe oppdaget og kaster exception`() {
-        val melding = "Severe error"
-        assertThrows<Aktivitetslogg.AktivitetException> { aktivitetslogg.logiskFeil(melding) }
-        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
-        assertTrue(aktivitetslogg.toString().contains(melding))
-        assertLogiskFeil(melding)
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
     }
 
     @Test
@@ -101,7 +91,7 @@ internal class AktivitetsloggTest {
     @Test
     fun `error oppdaget`() {
         aktivitetslogg.funksjonellFeil(RV_VT_1)
-        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertTrue(aktivitetslogg.harFunksjonelleFeil())
         assertTrue(aktivitetslogg.toString().contains("Gir opp fordi tilstanden er nådd makstid"))
         assertFunksjonellFeil("Gir opp fordi tilstanden er nådd makstid")
     }
@@ -109,7 +99,7 @@ internal class AktivitetsloggTest {
     @Test
     fun `warning oppdaget`() {
         aktivitetslogg.varsel(RV_SØ_1)
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
         assertVarsel(RV_SØ_1)
     }
 
@@ -216,10 +206,6 @@ internal class AktivitetsloggTest {
 
     private fun assertFunksjonellFeil(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         assertEquals(1, aktivitetslogg.aktiviteter.count { it is Aktivitet.FunksjonellFeil && message in it.toString() })
-    }
-
-    private fun assertLogiskFeil(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
-        assertEquals(1, aktivitetslogg.aktiviteter.count { it is Aktivitet.LogiskFeil && message in it.toString() })
     }
 
     private class TestKontekst(

@@ -15,11 +15,10 @@ data class Aktivitetslogg(
     val info get() = aktiviteter.filterIsInstance<Info>()
     val varsel get() = aktiviteter.filterIsInstance<Varsel>()
     val funksjonellFeil get() = aktiviteter.filterIsInstance<FunksjonellFeil>()
-    val logiskFeil get() = aktiviteter.filterIsInstance<LogiskFeil>()
 
     override fun info(melding: String, vararg params: Any?) {
         val formatertMelding = if (params.isEmpty()) melding else String.format(melding, *params)
-        add(Aktivitet.Info.opprett(kontekster.toSpesifikk(), formatertMelding))
+        add(Info.opprett(kontekster.toSpesifikk(), formatertMelding))
     }
 
     override fun varsel(kode: Varselkode) {
@@ -34,12 +33,6 @@ data class Aktivitetslogg(
         add(kode.funksjonellFeil(kontekster.toSpesifikk()))
     }
 
-    override fun logiskFeil(melding: String, vararg params: Any?): Nothing {
-        add(Aktivitet.LogiskFeil.opprett(kontekster.toSpesifikk(), String.format(melding, *params)))
-
-        throw AktivitetException(this)
-    }
-
     private fun add(aktivitet: Aktivitet) {
         this.aktiviteter.add(aktivitet)
         forelder?.add(aktivitet)
@@ -47,9 +40,9 @@ data class Aktivitetslogg(
 
     private fun Collection<Aktivitetskontekst>.toSpesifikk() = this.map { it.toSpesifikkKontekst() }
 
-    override fun harVarslerEllerVerre() = varsel.isNotEmpty() || harFunksjonelleFeilEllerVerre()
+    override fun harVarslerEllerVerre() = varsel.isNotEmpty() || harFunksjonelleFeil()
 
-    override fun harFunksjonelleFeilEllerVerre() = funksjonellFeil.isNotEmpty() || logiskFeil.isNotEmpty()
+    override fun harFunksjonelleFeil() = funksjonellFeil.isNotEmpty()
 
     override fun toString() = this.aktiviteter.joinToString(separator = "\n") { "$it" }
 
@@ -59,15 +52,4 @@ data class Aktivitetslogg(
         val nyeKontekster = (if (index >= 0) kontekster.take(index) else kontekster).plusElement(kontekst)
         return copy(forelder = this, kontekster = nyeKontekster, aktiviteter = aktiviteter.toMutableList())
     }
-
-    class AktivitetException internal constructor(private val aktivitetslogg: Aktivitetslogg) :
-        RuntimeException(aktivitetslogg.toString()) {
-
-        fun kontekst() = aktivitetslogg.kontekster.fold(mutableMapOf<String, String>()) { result, kontekst ->
-            result.apply { putAll(kontekst.toSpesifikkKontekst().kontekstMap) }
-        }
-
-        fun aktivitetslogg() = aktivitetslogg
-    }
-
 }

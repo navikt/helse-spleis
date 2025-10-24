@@ -133,14 +133,6 @@ class SpannerEtterTestInterceptor : TestWatcher {
                     kontekster = it.kontekster.associateBy({ it.kontekstType }, { it.kontekstMap })
                 )
 
-                is Aktivitet.LogiskFeil -> AktivitetDto(
-                    id = 0,
-                    nivå = "LOGISK_FEIL",
-                    tekst = it.melding,
-                    tidsstempel = it.tidsstempel.format(tidsstempelformat),
-                    kontekster = it.kontekster.associateBy({ it.kontekstType }, { it.kontekstMap })
-                )
-
                 is Aktivitet.Varsel -> AktivitetDto(
                     id = 0,
                     nivå = "VARSEL",

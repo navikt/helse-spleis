@@ -39,7 +39,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
             aktivitetslogg
         )
         vedtaksperiode.håndterDager(dager, aktivitetslogg)
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(
+        if (aktivitetslogg.harFunksjonelleFeil()) return vedtaksperiode.forkast(
             dager.hendelse,
             aktivitetslogg
         )

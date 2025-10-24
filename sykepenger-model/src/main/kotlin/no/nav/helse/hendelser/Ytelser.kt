@@ -60,7 +60,7 @@ class Ytelser(
         if (opplæringspenger.overlapper(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)) aktivitetslogg.varsel(Varselkode.`Overlapper med opplæringspenger`)
         if (institusjonsopphold.overlapper(aktivitetslogg, periodeForOverlappsjekk)) aktivitetslogg.funksjonellFeil(Varselkode.`Overlapper med institusjonsopphold`)
 
-        return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
+        return !aktivitetslogg.harFunksjonelleFeil()
     }
 
     internal fun inntektsendringer(): Map<Arbeidsgiverberegning.Yrkesaktivitet, Beløpstidslinje> {

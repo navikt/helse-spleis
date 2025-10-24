@@ -256,7 +256,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String): Boolean {
             inntektsgrunnlag.vurderArbeidsgivere(aktivitetslogg, opptjening, organisasjonsnummer)
-            return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
+            return !aktivitetslogg.harFunksjonelleFeil()
         }
 
         override fun vilkårsgrunnlagtype() = "Spleis"

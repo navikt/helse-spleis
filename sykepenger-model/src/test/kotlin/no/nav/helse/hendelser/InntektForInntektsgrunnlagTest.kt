@@ -65,7 +65,7 @@ internal class InntektForInntektsgrunnlagTest {
         val inntektForSykepengegrunnlag = lagStandardSykepengegrunnlag("orgnummer", 31000.månedlig, 1.april(2017))
         val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer", 1.januar(2017), 28.februar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
         arbeidsforhold.validerFrilans(aktivitetslogg, 1.februar(2017), emptyList(), inntektForSykepengegrunnlag)
-        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertTrue(aktivitetslogg.harFunksjonelleFeil())
     }
 
     @Test
@@ -85,7 +85,7 @@ internal class InntektForInntektsgrunnlagTest {
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
         val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer", 1.februar(2017), 28.februar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
         arbeidsforhold.validerFrilans(aktivitetslogg, 1.februar(2017), emptyList(), inntektForSykepengegrunnlag)
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
     }
 
     @Test
@@ -94,7 +94,7 @@ internal class InntektForInntektsgrunnlagTest {
         val inntektForSykepengegrunnlag = lagStandardSykepengegrunnlag("orgnummer", 31000.månedlig, 1.april(2017))
         val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer2", 1.januar(2017), 31.januar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
         arbeidsforhold.validerFrilans(aktivitetslogg, 1.februar(2017), emptyList(), inntektForSykepengegrunnlag)
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
     }
 
     @Test
@@ -103,7 +103,7 @@ internal class InntektForInntektsgrunnlagTest {
         val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer", 1.januar(2017), 31.januar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
         val aktivitetslogg = Aktivitetslogg()
         arbeidsforhold.validerFrilans(aktivitetslogg, 1.april(2017), emptyList(), inntektForSykepengegrunnlag)
-        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertTrue(aktivitetslogg.harFunksjonelleFeil())
     }
 
     @Test
@@ -112,6 +112,6 @@ internal class InntektForInntektsgrunnlagTest {
         val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer2", 1.januar(2017), 31.januar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
         val aktivitetslogg = Aktivitetslogg()
         arbeidsforhold.validerFrilans(aktivitetslogg, 1.april(2017), emptyList(), inntektForSykepengegrunnlag)
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertFalse(aktivitetslogg.harFunksjonelleFeil())
     }
 }

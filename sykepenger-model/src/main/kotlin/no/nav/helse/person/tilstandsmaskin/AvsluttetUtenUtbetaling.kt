@@ -77,7 +77,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
     ) {
         vedtaksperiode.håndterDager(dager, aktivitetslogg)
 
-        if (!aktivitetslogg.harFunksjonelleFeilEllerVerre()) return
+        if (!aktivitetslogg.harFunksjonelleFeil()) return
         if (!vedtaksperiode.kanForkastes()) return
         vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
     }
