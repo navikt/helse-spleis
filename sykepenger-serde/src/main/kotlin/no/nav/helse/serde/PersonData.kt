@@ -1408,6 +1408,8 @@ data class PersonData(
                 "SPATORD" -> KlassekodeDto.SykepengerArbeidstakerOrdinær
                 "SPSND-OP" -> KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig
                 "SPSNDDM-OP" -> KlassekodeDto.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
+                "SPSNDFISK" -> KlassekodeDto.SelvstendigNæringsdrivendeFisker
+                "SPSNDJORD" -> KlassekodeDto.SelvstendigNæringsdrivendeJordbrukOgSkogbruk
                 else -> error("Ukjent klassekode: ${this.klassekode}")
             },
             datoStatusFom = this.datoStatusFom
