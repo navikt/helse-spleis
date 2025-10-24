@@ -79,6 +79,7 @@ import no.nav.helse.person.Vedtaksperiode.VedtaksperiodeForkastetEventBuilder
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsgiveropplysninger for forkastet periode`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsgiveropplysninger for periode som allerede har opplysninger`
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -153,12 +154,6 @@ internal class Yrkesaktivitet private constructor(
         is Arbeidstaker -> yrkesaktivitetstype.organisasjonsnummer
         Frilans -> "FRILANS"
         Selvstendig -> "SELVSTENDIG"
-    }
-    private val yrkesaktivitetType = when (yrkesaktivitetstype) {
-        Arbeidsledig -> YrkesaktivitetType.Arbeidsledig
-        is Arbeidstaker -> YrkesaktivitetType.Arbeidstaker
-        Frilans -> YrkesaktivitetType.Frilans
-        Selvstendig -> YrkesaktivitetType.Selvstendig
     }
 
     internal var perioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar> = perioderUtenNavAnsvar
@@ -492,7 +487,13 @@ internal class Yrkesaktivitet private constructor(
     internal fun håndterSykmelding(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedYrkesaktivitetkontekst = aktivitetslogg.kontekst(this)
         håndter { it.håndterSykmelding(sykmelding) }
-        yrkesaktivitetType.håndterSykmelding(sykmelding, aktivitetsloggMedYrkesaktivitetkontekst, sykmeldingsperioder)
+
+        when (yrkesaktivitetstype) {
+            Arbeidsledig -> aktivitetsloggMedYrkesaktivitetkontekst.info("Lagrer _ikke_ sykmeldingsperiode ${sykmelding.periode()} ettersom det er en sykmelding som arbeidsledig.")
+            is Arbeidstaker,
+            Frilans,
+            Selvstendig -> sykmeldingsperioder.lagre(sykmelding, aktivitetsloggMedYrkesaktivitetkontekst)
+        }
     }
 
     internal fun håndterAvbruttSøknad(avbruttSøknad: AvbruttSøknad, aktivitetslogg: IAktivitetslogg) {
@@ -518,7 +519,13 @@ internal class Yrkesaktivitet private constructor(
         yrkesaktiviteter: List<Yrkesaktivitet>
     ) {
         // Sjekker først egen arbeidsgiver
-        if (yrkesaktivitetType.erYrkesaktivitetenIkkeStøttet(aktivitetslogg)) return
+        when (yrkesaktivitetstype) {
+            is Arbeidstaker,
+            Selvstendig -> {} // :)
+
+            Arbeidsledig,
+            Frilans -> return aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
+        }
         if (forkastede.blokkererBehandlingAv(nyPeriode, organisasjonsnummer, aktivitetslogg)) return
         // Også alle etterpå
         yrkesaktiviteter.any { arbeidsgiver ->
