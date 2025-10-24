@@ -22,7 +22,6 @@ internal class SendtFiskerSøknaderRiver(
 
     override fun validate(message: JsonMessage) {
         message.requireKey("id")
-        message.forbid("arbeidsgiver.orgnummer")
         message.require("sendtNav", JsonNode::asLocalDateTime)
         message.interestedIn("egenmeldingsdagerFraSykmelding") { egenmeldinger -> egenmeldinger.map { it.asLocalDate() } }
         message.interestedIn("sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys", "fravar", "papirsykmeldinger", "inntektFraNyttArbeidsforhold")

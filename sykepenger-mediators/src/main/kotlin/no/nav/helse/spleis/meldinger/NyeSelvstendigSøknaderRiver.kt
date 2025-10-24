@@ -17,7 +17,6 @@ internal class NyeSelvstendigSøknaderRiver(
         message.requireKey("sykmeldingId", "arbeidssituasjon")
         message.requireValue("status", "NY")
         message.interestedIn("fremtidig_søknad")
-        message.forbid("arbeidsgiver.orgnummer")
     }
 
     override fun createMessage(packet: JsonMessage) = NySelvstendigSøknadMessage(
