@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
@@ -8,18 +7,16 @@ import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSi
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_GODKJENT
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.UTBETALT
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -118,17 +115,11 @@ internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
             håndterUtbetalt()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
-            val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
-                assertThrows<IllegalStateException> {
-                    håndterKanIkkeBehandlesHer(1.vedtaksperiode)
-                }
+            assertThrows<IllegalStateException> {
+                håndterKanIkkeBehandlesHer(1.vedtaksperiode)
             }
 
-            assertForventetFeil(
-                forklaring = "Får funksjonelle feil på at vi ikke forventer godkjenning",
-                nå = { assertTrue(nyeFunksjonelleFeil) },
-                ønsket = { assertFalse(nyeFunksjonelleFeil) }
-            )
+            assertIngenFunksjonelleFeil()
         }
     }
 
@@ -139,17 +130,11 @@ internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
             assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING)
 
-            val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
-                assertThrows<IllegalStateException> {
-                    håndterKanIkkeBehandlesHer(1.vedtaksperiode)
-                }
+            assertThrows<IllegalStateException> {
+                håndterKanIkkeBehandlesHer(1.vedtaksperiode)
             }
 
-            assertForventetFeil(
-                forklaring = "Får funksjonelle feil på at vi ikke forventer godkjenning",
-                nå = { assertTrue(nyeFunksjonelleFeil) },
-                ønsket = { assertFalse(nyeFunksjonelleFeil) }
-            )
+            assertIngenFunksjonelleFeil()
         }
     }
 
@@ -162,17 +147,10 @@ internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
             val utbetalingId = inspektør.sisteUtbetalingId { 1.vedtaksperiode }
             assertEquals(IKKE_GODKJENT, inspektør.utbetaling(0).tilstand)
 
-            val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
-                assertThrows<IllegalStateException> {
-                    håndterKanIkkeBehandlesHer(1.vedtaksperiode, utbetalingId)
-                }
+            assertThrows<IllegalStateException> {
+                håndterKanIkkeBehandlesHer(1.vedtaksperiode, utbetalingId)
             }
-
-            assertForventetFeil(
-                forklaring = "Får funksjonelle feil på at vi ikke forventer godkjenning",
-                nå = { assertTrue(nyeFunksjonelleFeil) },
-                ønsket = { assertFalse(nyeFunksjonelleFeil) }
-            )
+            assertIngenFunksjonelleFeil()
         }
     }
 }

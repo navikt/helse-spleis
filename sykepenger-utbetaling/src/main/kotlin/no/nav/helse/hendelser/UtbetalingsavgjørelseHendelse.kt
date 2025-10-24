@@ -3,8 +3,6 @@ package no.nav.helse.hendelser
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_18
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_19
 import no.nav.helse.utbetalingslinjer.Utbetaling.Vurdering
 
 interface UtbetalingsavgjørelseHendelse {
@@ -37,12 +35,10 @@ private val UtbetalingsavgjørelseHendelse.manueltBehandlet get() = !automatiser
 fun UtbetalingsavgjørelseHendelse.valider(aktivitetslogg: IAktivitetslogg) {
     when {
         avvist && manueltBehandlet -> {
-            aktivitetslogg.funksjonellFeil(RV_UT_19)
             aktivitetslogg.info("Utbetaling markert som ikke godkjent av saksbehandler ${saksbehandler()} $avgjørelsestidspunkt")
         }
 
         avvist && automatisert -> {
-            aktivitetslogg.funksjonellFeil(RV_UT_18)
             aktivitetslogg.info("Utbetaling markert som ikke godkjent automatisk $avgjørelsestidspunkt")
         }
 
