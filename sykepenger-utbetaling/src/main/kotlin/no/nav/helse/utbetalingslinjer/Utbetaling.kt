@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.KlassekodeDto
@@ -24,12 +24,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_11
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_12
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_25
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_6
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -207,12 +201,12 @@ class Utbetaling private constructor(
         return sisteUtbetalteForUtbetaling
     }
 
-    fun lagAnnulleringsutbetaling(aktivitetslogg: IAktivitetslogg, vurdering: Vurdering): Utbetaling? {
+    fun lagAnnulleringsutbetaling(aktivitetslogg: IAktivitetslogg, vurdering: Vurdering): Utbetaling {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         return lagAnnullering(aktivitetsloggMedUtbetalingkontekst, vurdering)
     }
 
-    private fun lagAnnullering(aktivitetslogg: IAktivitetslogg, vurdering: Vurdering): Utbetaling? {
+    private fun lagAnnullering(aktivitetslogg: IAktivitetslogg, vurdering: Vurdering): Utbetaling {
         return when (tilstand) {
             Utbetalt,
             GodkjentUtenUtbetaling -> {
@@ -243,11 +237,7 @@ class Utbetaling private constructor(
             IkkeGodkjent,
             Ny,
             Overført,
-            Ubetalt -> {
-                aktivitetslogg.info("Forventet ikke å annullere på utbetaling=${id} i tilstand=${this::class.simpleName}")
-                aktivitetslogg.funksjonellFeil(RV_UT_9)
-                null
-            }
+            Ubetalt -> error("Forventet ikke å annullere på utbetaling=${id} i tilstand=${this::class.simpleName}")
         }
     }
 
@@ -563,8 +553,7 @@ class Utbetaling private constructor(
         fun forkast(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {}
 
         fun opprett(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.info("Forventet ikke å opprette utbetaling i tilstand=${this::class.simpleName}")
-            aktivitetslogg.funksjonellFeil(RV_UT_6)
+            error("Forventet ikke å opprette utbetaling i tilstand=${this::class.simpleName}")
         }
 
         fun godkjenn(
@@ -572,21 +561,18 @@ class Utbetaling private constructor(
             aktivitetslogg: IAktivitetslogg,
             vurdering: Vurdering
         ) {
-            aktivitetslogg.info("Forventet ikke godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
-            aktivitetslogg.funksjonellFeil(RV_UT_7)
+            error("Forventet ikke godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
         fun overfør(
             utbetaling: Utbetaling,
             aktivitetslogg: IAktivitetslogg
         ) {
-            aktivitetslogg.info("Forventet ikke å overføre utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
-            aktivitetslogg.funksjonellFeil(RV_UT_25)
+            error("Forventet ikke å overføre utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
         fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.info("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
-            aktivitetslogg.funksjonellFeil(RV_UT_11)
+            error("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
         fun håndterPåminnelse(utbetaling: Utbetaling, påminnelse: IAktivitetslogg) {
@@ -594,8 +580,7 @@ class Utbetaling private constructor(
         }
 
         fun simuler(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.info("Forventet ikke simulering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
-            aktivitetslogg.funksjonellFeil(RV_UT_12)
+            error("Forventet ikke simulering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
         fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {}

@@ -41,7 +41,7 @@ import no.nav.helse.økonomi.inspectors.inspektør
 internal class UtbetalingstidslinjeBuilderTest {
     @Test
     fun problemdag() {
-        assertThrows<ProblemdagException> {
+        assertThrows<IllegalStateException> {
             undersøke(1.PROBLEM)
         }
     }

@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
 
@@ -118,7 +119,9 @@ internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
             val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
-                håndterKanIkkeBehandlesHer(1.vedtaksperiode)
+                assertThrows<IllegalStateException> {
+                    håndterKanIkkeBehandlesHer(1.vedtaksperiode)
+                }
             }
 
             assertForventetFeil(
@@ -137,7 +140,9 @@ internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING)
 
             val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
-                håndterKanIkkeBehandlesHer(1.vedtaksperiode)
+                assertThrows<IllegalStateException> {
+                    håndterKanIkkeBehandlesHer(1.vedtaksperiode)
+                }
             }
 
             assertForventetFeil(
@@ -158,7 +163,9 @@ internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
             assertEquals(IKKE_GODKJENT, inspektør.utbetaling(0).tilstand)
 
             val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
-                håndterKanIkkeBehandlesHer(1.vedtaksperiode, utbetalingId)
+                assertThrows<IllegalStateException> {
+                    håndterKanIkkeBehandlesHer(1.vedtaksperiode, utbetalingId)
+                }
             }
 
             assertForventetFeil(

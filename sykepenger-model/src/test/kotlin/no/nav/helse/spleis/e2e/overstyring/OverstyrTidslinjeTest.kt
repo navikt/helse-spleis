@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
+import java.lang.IllegalStateException
 import java.time.LocalDate
 import kotlin.reflect.KClass
 import no.nav.helse.august
@@ -74,6 +75,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
@@ -408,7 +410,9 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         this@OverstyrTidslinjeTest.håndterOverstyrTidslinje(listOf(manuellSykedag(2.januar), manuellArbeidsgiverdag(24.januar), manuellFeriedag(25.januar)))
-        this@OverstyrTidslinjeTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        assertThrows<IllegalStateException> {
+            this@OverstyrTidslinjeTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        }
         assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
     }
 
