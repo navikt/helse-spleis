@@ -6,7 +6,6 @@ import java.util.UUID
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.dto.BeløpstidslinjeDto.BeløpstidslinjeperiodeDto
-import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingtypeDto
@@ -25,7 +24,6 @@ import no.nav.helse.spleis.speil.dto.AlderDTO
 import no.nav.helse.spleis.speil.dto.AnnullertPeriode
 import no.nav.helse.spleis.speil.dto.AnnullertUtbetaling
 import no.nav.helse.spleis.speil.dto.BeregnetPeriode
-import no.nav.helse.spleis.speil.dto.EndringskodeDTO
 import no.nav.helse.spleis.speil.dto.Periodetilstand
 import no.nav.helse.spleis.speil.dto.Refusjonselement
 import no.nav.helse.spleis.speil.dto.SpeilGenerasjonDTO
@@ -178,7 +176,7 @@ internal class SpeilGenerasjonerBuilder(
             maksdato = sisteEndring.maksdatoresultat.maksdato,
             forbrukteSykedager = sisteEndring.maksdatoresultat.forbrukteDager.antallDager(),
             gjenståendeDager = sisteEndring.maksdatoresultat.gjenståendeDager,
-            beregningId = utbetaling.id,
+            beregningId = sisteEndring.id,
             utbetaling = utbetaling,
             periodevilkår = periodevilkår(sisteSykepengedag, sisteEndring.maksdatoresultat, alder, skjæringstidspunkt),
             vilkårsgrunnlagId = sisteEndring.vilkårsgrunnlagId!!,
@@ -215,7 +213,6 @@ internal class SpeilGenerasjonerBuilder(
             utbetaling = Utbetaling(
                 annulleringen.id,
                 Utbetalingtype.ANNULLERING,
-                annulleringen.korrelasjonsId,
                 annulleringen.utbetalingstatus,
                 0,
                 0,
@@ -323,7 +320,6 @@ internal class SpeilGenerasjonerBuilder(
                         UtbetalingtypeDto.UTBETALING -> Utbetalingtype.UTBETALING
                         else -> error("Forventer ikke mapping for utbetalingtype=${it.type}")
                     },
-                    korrelasjonsId = it.korrelasjonsId,
                     status = when (it.tilstand) {
                         UtbetalingTilstandDto.ANNULLERT -> Utbetalingstatus.Annullert
                         UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> Utbetalingstatus.GodkjentUtenUtbetaling
@@ -415,19 +411,6 @@ internal class SpeilGenerasjonerBuilder(
                                 )
                             }
                         )
-                    }
-                )
-            },
-            utbetalingslinjer = dto.linjer.map { linje ->
-                SpeilOppdrag.Utbetalingslinje(
-                    fom = linje.fom,
-                    tom = linje.tom,
-                    dagsats = linje.beløp,
-                    grad = linje.grad,
-                    endringskode = when (linje.endringskode) {
-                        EndringskodeDto.ENDR -> EndringskodeDTO.ENDR
-                        EndringskodeDto.NY -> EndringskodeDTO.NY
-                        EndringskodeDto.UEND -> EndringskodeDTO.UEND
                     }
                 )
             }

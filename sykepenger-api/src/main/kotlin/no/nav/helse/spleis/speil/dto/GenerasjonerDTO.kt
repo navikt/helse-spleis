@@ -237,8 +237,7 @@ data class SpeilOppdrag(
     val fagsystemId: String,
     val tidsstempel: LocalDateTime,
     val nettobeløp: Int,
-    val simulering: Simulering?,
-    val utbetalingslinjer: List<Utbetalingslinje>
+    val simulering: Simulering?
 ) {
     data class Simulering(
         val totalbeløp: Int,
@@ -274,14 +273,6 @@ data class SpeilOppdrag(
         val utbetalingstype: String,
         val refunderesOrgNr: String
     )
-
-    data class Utbetalingslinje(
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val dagsats: Int,
-        val grad: Int,
-        val endringskode: EndringskodeDTO
-    )
 }
 
 enum class Utbetalingstatus {
@@ -304,7 +295,6 @@ enum class Utbetalingtype {
 class Utbetaling(
     val id: UUID,
     val type: Utbetalingtype,
-    val korrelasjonsId: UUID,
     val status: Utbetalingstatus,
     val arbeidsgiverNettoBeløp: Int,
     val personNettoBeløp: Int,
