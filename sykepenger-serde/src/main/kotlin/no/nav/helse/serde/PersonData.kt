@@ -10,14 +10,13 @@ import kotlin.streams.asSequence
 import no.nav.helse.dto.AlderDto
 import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
-import no.nav.helse.dto.DagerUtenNavAnsvaravklaringDto
-import no.nav.helse.dto.PeriodeUtenNavAnsvarDto
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.BeløpstidslinjeDto
+import no.nav.helse.dto.DagerUtenNavAnsvaravklaringDto
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.DokumenttypeDto
 import no.nav.helse.dto.EndringskodeDto
@@ -35,6 +34,7 @@ import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.MeldingsreferanseDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.PeriodeDto
+import no.nav.helse.dto.PeriodeUtenNavAnsvarDto
 import no.nav.helse.dto.ProsentdelDto
 import no.nav.helse.dto.RefusjonsservitørDto
 import no.nav.helse.dto.SimuleringResultatDto
@@ -69,6 +69,7 @@ import no.nav.helse.dto.deserialisering.ArbeidstakerinntektskildeInnDto.AOrdning
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
 import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
 import no.nav.helse.dto.deserialisering.BehandlingerInnDto
+import no.nav.helse.dto.deserialisering.FaktaavklartInntektInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeoppdragInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeutbetalinggrunnlagInnDto
@@ -104,6 +105,7 @@ import no.nav.helse.dto.deserialisering.VilkårsgrunnlaghistorikkInnDto
 import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
+import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.SkatteopplysningData
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 
 data class PersonData(
@@ -1120,6 +1122,41 @@ data class PersonData(
                         JORDBRUKER,
                         FISKER,
                         ANNET
+                    }
+
+                    enum class FaktaavklartInntektTypeData {
+                        ARBEIDSTAKER,
+                        SELVSTENDIG_NÆRINGSDRIVENDE
+                    }
+
+                    data class FaktaavklartInntektData(
+                        val type: FaktaavklartInntektTypeData?,
+                        val id: UUID,
+                        val dato: LocalDate,
+                        val hendelseId: UUID,
+                        val beløp: Double,
+                        val tidsstempel: LocalDateTime,
+                        val pensjonsgivendeInntekter: List<PensjonsgivendeInntektData>?,
+                        val anvendtÅrligGrunnbeløp: Double?,
+                        val skatteopplysninger: List<SkatteopplysningData>?
+                    ) {
+                        data class PensjonsgivendeInntektData(val årstall: Int, val årligBeløp: Double)
+
+                        fun tilDto(): FaktaavklartInntektInnDto {
+                            when (type)
+                            val inntektsdata = InntektsdataInnDto(
+                                hendelseId = MeldingsreferanseDto(this.hendelseId),
+                                dato = this.dato,
+                                beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
+                                tidsstempel = this.tidsstempel
+                            )
+                            return SelvstendigFaktaavklartInntektInnDto(
+                                id = this.id,
+                                inntektsdata = inntektsdata,
+                                pensjonsgivendeInntekter = this.pensjonsgivendeInntekter!!.map { SelvstendigFaktaavklartInntektInnDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) },
+                                anvendtGrunnbeløp = InntektbeløpDto.Årlig(this.anvendtÅrligGrunnbeløp!!),
+                            )
+                        }
                     }
                 }
             }

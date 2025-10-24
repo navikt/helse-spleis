@@ -45,6 +45,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
+import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt.SelvstendigFaktaavklartInntektView
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
@@ -591,7 +592,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val dagerNavOvertarAnsvar: List<Periode>,
             val maksdatoresultat: Maksdatoresultat,
             val inntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
-            val faktaavklartInntekt: SelvstendigFaktaavklartInntekt?
+            val faktaavklartInntekt: FaktaavklartInntekt?
         ) {
 
             fun view() = BehandlingendringView(
@@ -717,7 +718,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 egenmeldingsdager: List<Periode> = this.egenmeldingsdager,
                 maksdatoresultat: Maksdatoresultat = this.maksdatoresultat,
                 inntektjusteringer: Map<Inntektskilde, Beløpstidslinje> = this.inntektjusteringer,
-                faktaavklartInntekt: SelvstendigFaktaavklartInntekt? = this.faktaavklartInntekt
+                faktaavklartInntekt: FaktaavklartInntekt? = this.faktaavklartInntekt
             ) = copy(
                 id = UUID.randomUUID(),
                 tidsstempel = LocalDateTime.now(),
@@ -856,7 +857,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utkastTilVedtakBuilder
                     .utbetalingsinformasjon(utbetaling, utbetalingstidslinje, sykdomstidslinje, refusjonstidslinje)
                     .sykepengerettighet(maksdatoresultat.antallForbrukteDager, maksdatoresultat.gjenståendeDager, maksdatoresultat.maksdato)
-                faktaavklartInntekt?.let {
+                (faktaavklartInntekt as? SelvstendigFaktaavklartInntekt)?.let {
                     utkastTilVedtakBuilder.pensjonsgivendeInntekter(it.pensjonsgivendeInntekter)
                 }
                 grunnlagsdata.berik(utkastTilVedtakBuilder)
@@ -907,7 +908,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     inntektjusteringer = this.inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
                         inntektskilde.dto() to beløpstidslinje.dto()
                     }.toMap(),
-                    faktaavklartInntekt = faktaavklartInntekt?.dto()
+                    faktaavklartInntekt = when (val fi = faktaavklartInntekt) {
+                        is SelvstendigFaktaavklartInntekt -> fi.dto()
+                        null -> null
+                    }
                 )
             }
 
