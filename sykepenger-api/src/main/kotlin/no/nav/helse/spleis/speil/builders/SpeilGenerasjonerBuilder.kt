@@ -1,16 +1,19 @@
 package no.nav.helse.spleis.speil.builders
 
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.dto.BeløpstidslinjeDto.BeløpstidslinjeperiodeDto
 import no.nav.helse.dto.EndringskodeDto
+import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
+import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.UbrukteRefusjonsopplysningerUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
@@ -172,9 +175,12 @@ internal class SpeilGenerasjonerBuilder(
             periodetilstand = utledePeriodetilstand(vedtaksperiode.tilstand, utbetaling, utbetalingstidslinje),
             skjæringstidspunkt = skjæringstidspunkt,
             hendelser = dokumenterTilOgMedDenneGenerasjonen(vedtaksperiode, generasjon),
+            maksdato = sisteEndring.maksdatoresultat.maksdato,
+            forbrukteSykedager = sisteEndring.maksdatoresultat.forbrukteDager.antallDager(),
+            gjenståendeDager = sisteEndring.maksdatoresultat.gjenståendeDager,
             beregningId = utbetaling.id,
             utbetaling = utbetaling,
-            periodevilkår = periodevilkår(sisteSykepengedag, utbetaling, alder, skjæringstidspunkt),
+            periodevilkår = periodevilkår(sisteSykepengedag, sisteEndring.maksdatoresultat, alder, skjæringstidspunkt),
             vilkårsgrunnlagId = sisteEndring.vilkårsgrunnlagId!!,
             refusjonstidslinje = mapRefusjonstidslinje(arbeidsgiverUtDto.ubrukteRefusjonsopplysninger, generasjon.id, sisteEndring.refusjonstidslinje),
             pensjonsgivendeInntekter = sisteEndring.faktaavklartInntekt?.pensjonsgivendeInntekter ?: emptyList(),
@@ -210,9 +216,6 @@ internal class SpeilGenerasjonerBuilder(
                 annulleringen.id,
                 Utbetalingtype.ANNULLERING,
                 annulleringen.korrelasjonsId,
-                LocalDate.MAX,
-                0,
-                0,
                 annulleringen.utbetalingstatus,
                 0,
                 0,
@@ -288,16 +291,16 @@ internal class SpeilGenerasjonerBuilder(
 
     private fun periodevilkår(
         sisteSykepengedag: LocalDate,
-        utbetaling: Utbetaling,
+        maksdatoresultat: MaksdatoresultatUtDto,
         alder: AlderDTO,
         skjæringstidspunkt: LocalDate
     ): BeregnetPeriode.Vilkår {
         val sykepengedager = BeregnetPeriode.Sykepengedager(
             skjæringstidspunkt,
-            utbetaling.maksdato,
-            utbetaling.forbrukteSykedager,
-            utbetaling.gjenståendeDager,
-            utbetaling.maksdato > sisteSykepengedag
+            maksdatoresultat.maksdato,
+            maksdatoresultat.forbrukteDager.antallDager(),
+            maksdatoresultat.gjenståendeDager,
+            maksdatoresultat.maksdato > sisteSykepengedag
         )
         val alderSisteSykepengedag = alder.alderPåDato(sisteSykepengedag).let {
             BeregnetPeriode.Alder(it, it < 70)
@@ -326,9 +329,6 @@ internal class SpeilGenerasjonerBuilder(
                         UtbetalingTilstandDto.UTBETALT -> Utbetalingstatus.Utbetalt
                         else -> return@mapNotNull null
                     },
-                    maksdato = it.maksdato,
-                    forbrukteSykedager = it.forbrukteSykedager!!,
-                    gjenståendeDager = it.gjenståendeSykedager!!,
                     arbeidsgiverNettoBeløp = it.arbeidsgiverOppdrag.nettoBeløp,
                     arbeidsgiverFagsystemId = it.arbeidsgiverOppdrag.fagsystemId,
                     personNettoBeløp = it.personOppdrag.nettoBeløp,
@@ -492,3 +492,5 @@ internal class SpeilGenerasjonerBuilder(
         }
     }
 }
+
+private fun Collection<PeriodeDto>.antallDager() = sumOf { ChronoUnit.DAYS.between(it.fom, it.tom.plusDays(1)) }.toInt()

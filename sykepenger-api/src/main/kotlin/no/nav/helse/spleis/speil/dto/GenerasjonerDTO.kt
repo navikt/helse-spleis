@@ -144,6 +144,9 @@ data class BeregnetPeriode(
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
     override val hendelser: Set<UUID>,
+    val maksdato: LocalDate,
+    val forbrukteSykedager: Int,
+    val gjenståendeDager: Int,
     // todo: feltet brukes så og si ikke i speil, kan fjernes fra graphql
     // verdien av ID-en brukes ifm. å lage en unik ID for notatet om utbetalingene.
     val beregningId: UUID,
@@ -302,9 +305,6 @@ class Utbetaling(
     val id: UUID,
     val type: Utbetalingtype,
     val korrelasjonsId: UUID,
-    val maksdato: LocalDate,
-    val forbrukteSykedager: Int,
-    val gjenståendeDager: Int,
     val status: Utbetalingstatus,
     val arbeidsgiverNettoBeløp: Int,
     val personNettoBeløp: Int,
