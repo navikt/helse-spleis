@@ -158,7 +158,8 @@ data class Utbetalingslinje(
             this.tom == other.tom &&
             this.beløp == other.beløp &&
             this.grad == other.grad &&
-            this.datoStatusFom == other.datoStatusFom
+            this.datoStatusFom == other.datoStatusFom &&
+            this.klassekode == other.klassekode
     }
 
     fun kanEndreEksisterendeLinje(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
@@ -223,7 +224,8 @@ data class Utbetalingslinje(
         "refFagsystemId" to refFagsystemId,
         "statuskode" to statuskode,
         "datoStatusFom" to datoStatusFom?.toString(),
-        "klassekode" to klassekode.verdi
+        "klassekode" to klassekode.verdi,
+        "datoKlassifikFom" to fom.toString(),
     )
 
     fun dto() = UtbetalingslinjeUtDto(

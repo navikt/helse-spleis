@@ -1111,6 +1111,37 @@ internal class UtbetalingslinjeForskjellTest {
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
+    @Test
+    fun `endrer linje når klassekode er eneste forskjell`() {
+        val original = linjer(1.januar to 10.januar klassekode Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk)
+        val oppdatert = linjer(1.januar to 10.januar klassekode Klassekode.SelvstendigNæringsdrivendeFisker)
+        val actual = oppdatert - original
+        assertUtbetalinger(
+            linjer(1.januar to 10.januar endrer original.last()),
+            actual
+        )
+
+        assertEquals(original.fagsystemId, actual.fagsystemId)
+        assertEquals(ENDR, actual.endringskode)
+    }
+
+    @Test
+    fun `lager ny linje når klassekode og periode er ulik`() {
+        val original = linjer(1.januar to 10.januar klassekode Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk)
+        val oppdatert = linjer(2.januar to 10.januar klassekode Klassekode.SelvstendigNæringsdrivendeFisker)
+        val actual = oppdatert - original
+        assertUtbetalinger(
+            linjer(
+                1.januar to 10.januar endrer original.last() opphører 1.januar,
+                2.januar to 10.januar pekerPå original.last()
+            ),
+            actual
+        )
+
+        assertEquals(original.fagsystemId, actual.fagsystemId)
+        assertEquals(ENDR, actual.endringskode)
+    }
+
     private fun tomtOppdrag(fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID())) =
         Oppdrag(ORGNUMMER, SykepengerRefusjon, fagsystemId = fagsystemId)
 
@@ -1176,12 +1207,17 @@ internal class UtbetalingslinjeForskjellTest {
         private val fom: LocalDate,
         private val tom: LocalDate
     ) {
+        private var klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
         private var delytelseId = 1
         private var endringskode: Endringskode = NY
         private var grad: Int = 100
         private var dagsats = 1200
         private var datoStatusFom: LocalDate? = null
         private var refDelytelseId: Int? = null
+
+        infix fun klassekode(kode: Klassekode) = apply {
+            this.klassekode = kode
+        }
 
         infix fun grad(percentage: Number): TestUtbetalingslinje {
             grad = percentage.toDouble().roundToInt()
@@ -1227,7 +1263,7 @@ internal class UtbetalingslinjeForskjellTest {
                 tom = tom,
                 beløp = dagsats,
                 grad = grad,
-                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
+                klassekode = klassekode,
                 endringskode = endringskode,
                 datoStatusFom = datoStatusFom,
                 refDelytelseId = refDelytelseId,
