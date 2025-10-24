@@ -7,12 +7,13 @@ import no.nav.helse.dto.deserialisering.ArbeidstakerFaktaavklartInntektInnDto
 import no.nav.helse.dto.serialisering.ArbeidstakerFaktaavklartInntektUtDto
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
+import no.nav.helse.økonomi.Inntekt
 
 internal data class ArbeidstakerFaktaavklartInntekt(
-    val id: UUID,
-    val inntektsdata: Inntektsdata,
+    override val id: UUID,
+    override val inntektsdata: Inntektsdata,
     val inntektsopplysningskilde: Arbeidstakerinntektskilde
-) {
+) : FaktaavklartInntekt {
     internal fun funksjoneltLik(other: ArbeidstakerFaktaavklartInntekt): Boolean {
         if (!this.inntektsdata.funksjoneltLik(other.inntektsdata)) return false
         return this.inntektsopplysningskilde::class == other.inntektsopplysningskilde::class
@@ -52,5 +53,8 @@ internal data class ArbeidstakerFaktaavklartInntekt(
             inntektsopplysningskilde = Arbeidstakerinntektskilde.gjenopprett(dto.inntektsopplysningskilde)
         )
     }
+
+    internal fun view() = ArbeistakerFaktaavklartInntektView(id, inntektsdata.beløp)
 }
 
+internal class ArbeistakerFaktaavklartInntektView(override val id: UUID, val inntekt: Inntekt) : FaktaavklartInntektView

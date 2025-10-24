@@ -70,6 +70,9 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingData.InntektsmeldingKildeDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.ArbeidssituasjonData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.FaktaavklartInntektTypeData.ARBEIDSTAKER_AORDNINGEN
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.FaktaavklartInntektTypeData.ARBEIDSTAKER_ARBEIDSGIVER
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.FaktaavklartInntektTypeData.SELVSTENDIG_NÆRINGSDRIVENDE
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.PeriodeUtenNavAnsvarData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET_UTEN_UTBETALING
@@ -1000,19 +1003,38 @@ fun SelvstendigFaktaavklartInntektUtDto.tilPersonData(): PersonData.Vilkårsgrun
 )
 
 fun FaktaavklartInntektUtDto.tilPersonData(): PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.FaktaavklartInntektData {
-    val type = when (this) {
-        is SelvstendigFaktaavklartInntektUtDto -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.FaktaavklartInntektTypeData.SELVSTENDIG_NÆRINGSDRIVENDE
+    return when (this) {
+        is SelvstendigFaktaavklartInntektUtDto -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.FaktaavklartInntektData(
+            type = SELVSTENDIG_NÆRINGSDRIVENDE,
+            id = this.id,
+            dato = this.inntektsdata.dato,
+            hendelseId = this.inntektsdata.hendelseId.id,
+            beløp = this.inntektsdata.beløp.månedligDouble.beløp,
+            tidsstempel = this.inntektsdata.tidsstempel,
+            pensjonsgivendeInntekter = this.pensjonsgivendeInntekter.map {
+                PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.FaktaavklartInntektData.PensjonsgivendeInntektData(it.årstall.value, it.beløp.årlig.beløp)
+            },
+            anvendtÅrligGrunnbeløp = this.anvendtGrunnbeløp.årlig.beløp,
+            skatteopplysninger = null
+        )
+
+        is ArbeidstakerFaktaavklartInntektUtDto -> {
+            val (type, skatteopplysninger) = when (val io = this.inntektsopplysningskilde) {
+                is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> ARBEIDSTAKER_AORDNINGEN to io.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
+                ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> ARBEIDSTAKER_ARBEIDSGIVER to null
+                ArbeidstakerinntektskildeUtDto.InfotrygdDto -> error("Skal ikke lagre infotrygd-inntekter på behandlingene")
+            }
+            PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.FaktaavklartInntektData(
+                type = type,
+                id = this.id,
+                dato = this.inntektsdata.dato,
+                hendelseId = this.inntektsdata.hendelseId.id,
+                beløp = this.inntektsdata.beløp.månedligDouble.beløp,
+                tidsstempel = this.inntektsdata.tidsstempel,
+                pensjonsgivendeInntekter = null,
+                anvendtÅrligGrunnbeløp = null,
+                skatteopplysninger = skatteopplysninger
+            )
+        }
     }
-    return PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.FaktaavklartInntektData(
-        type = type,
-        id = this.id,
-        dato = this.inntektsdata.dato,
-        hendelseId = this.inntektsdata.hendelseId.id,
-        beløp = this.inntektsdata.beløp.månedligDouble.beløp,
-        tidsstempel = this.inntektsdata.tidsstempel,
-        pensjonsgivendeInntekter = this.pensjonsgivendeInntekter.map {
-            PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.FaktaavklartInntektData.PensjonsgivendeInntektData(it.årstall.value, it.beløp.årlig.beløp)
-        },
-        anvendtÅrligGrunnbeløp = this.anvendtGrunnbeløp.årlig.beløp
-    )
 }

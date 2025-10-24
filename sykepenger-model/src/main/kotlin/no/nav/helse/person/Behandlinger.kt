@@ -6,6 +6,7 @@ import java.util.*
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
+import no.nav.helse.dto.deserialisering.ArbeidstakerFaktaavklartInntektInnDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
 import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
 import no.nav.helse.dto.deserialisering.BehandlingerInnDto
@@ -46,9 +47,10 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
+import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
+import no.nav.helse.person.inntekt.FaktaavklartInntektView
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
-import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt.SelvstendigFaktaavklartInntektView
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidIkkeGjenopptattDag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
@@ -521,6 +523,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             endringer = endringer.map { it.view() },
             faktaavklartInntekt = when (val fi = faktaavklartInntekt) {
                 is SelvstendigFaktaavklartInntekt -> fi.view()
+                is ArbeidstakerFaktaavklartInntekt -> fi.view()
                 null -> null
             }
         )
@@ -694,6 +697,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         faktaavklartInntekt = dto.faktaavklartInntekt?.let {
                             when (it) {
                                 is SelvstendigFaktaavklartInntektInnDto -> SelvstendigFaktaavklartInntekt.gjenopprett(it)
+                                is ArbeidstakerFaktaavklartInntektInnDto -> ArbeidstakerFaktaavklartInntekt.gjenopprett(it)
                             }
                         }
                     )
@@ -918,6 +922,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     }.toMap(),
                     faktaavklartInntekt = when (val fi = faktaavklartInntekt) {
                         is SelvstendigFaktaavklartInntekt -> fi.dto()
+                        is ArbeidstakerFaktaavklartInntekt -> fi.dto()
                         null -> null
                     }
                 )
@@ -2153,7 +2158,7 @@ internal data class BehandlingView(
     val kilde: BehandlingkildeView,
     val tilstand: TilstandView,
     val endringer: List<BehandlingendringView>,
-    val faktaavklartInntekt: SelvstendigFaktaavklartInntektView?
+    val faktaavklartInntekt: FaktaavklartInntektView?
 ) {
     enum class TilstandView {
         ANNULLERT_PERIODE, AVSLUTTET_UTEN_VEDTAK,

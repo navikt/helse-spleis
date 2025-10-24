@@ -105,6 +105,7 @@ import no.nav.helse.dto.deserialisering.VilkårsgrunnlaghistorikkInnDto
 import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
+import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 
 data class PersonData(
@@ -1122,7 +1123,9 @@ data class PersonData(
                     }
 
                     enum class FaktaavklartInntektTypeData {
-                        SELVSTENDIG_NÆRINGSDRIVENDE
+                        SELVSTENDIG_NÆRINGSDRIVENDE,
+                        ARBEIDSTAKER_ARBEIDSGIVER,
+                        ARBEIDSTAKER_AORDNINGEN
                     }
 
                     data class FaktaavklartInntektData(
@@ -1133,27 +1136,38 @@ data class PersonData(
                         val beløp: Double,
                         val tidsstempel: LocalDateTime,
                         val pensjonsgivendeInntekter: List<PensjonsgivendeInntektData>?,
-                        val anvendtÅrligGrunnbeløp: Double?
+                        val anvendtÅrligGrunnbeløp: Double?,
+                        val skatteopplysninger: List<SkatteopplysningData>?
                     ) {
                         data class PensjonsgivendeInntektData(val årstall: Int, val årligBeløp: Double)
 
                         fun tilDto(): FaktaavklartInntektInnDto {
-                            when (type) {
+                            val inntektsdata = InntektsdataInnDto(
+                                hendelseId = MeldingsreferanseDto(this.hendelseId),
+                                dato = this.dato,
+                                beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
+                                tidsstempel = this.tidsstempel
+                            )
+                            return when (type) {
+                                FaktaavklartInntektTypeData.ARBEIDSTAKER_ARBEIDSGIVER -> ArbeidstakerFaktaavklartInntektInnDto(
+                                    id = this.id,
+                                    inntektsdata = inntektsdata,
+                                    inntektsopplysningskilde = ArbeidstakerinntektskildeInnDto.ArbeidsgiverDto
+                                )
+
+                                FaktaavklartInntektTypeData.ARBEIDSTAKER_AORDNINGEN -> ArbeidstakerFaktaavklartInntektInnDto(
+                                    id = this.id,
+                                    inntektsdata = inntektsdata,
+                                    inntektsopplysningskilde = AOrdningenDto(skatteopplysninger?.map { it.tilDto() } ?: emptyList())
+                                )
+
                                 FaktaavklartInntektTypeData.SELVSTENDIG_NÆRINGSDRIVENDE,
-                                null -> {
-                                    val inntektsdata = InntektsdataInnDto(
-                                        hendelseId = MeldingsreferanseDto(this.hendelseId),
-                                        dato = this.dato,
-                                        beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
-                                        tidsstempel = this.tidsstempel
-                                    )
-                                    return SelvstendigFaktaavklartInntektInnDto(
-                                        id = this.id,
-                                        inntektsdata = inntektsdata,
-                                        pensjonsgivendeInntekter = this.pensjonsgivendeInntekter!!.map { SelvstendigFaktaavklartInntektInnDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) },
-                                        anvendtGrunnbeløp = InntektbeløpDto.Årlig(this.anvendtÅrligGrunnbeløp!!),
-                                    )
-                                }
+                                null -> SelvstendigFaktaavklartInntektInnDto(
+                                    id = this.id,
+                                    inntektsdata = inntektsdata,
+                                    pensjonsgivendeInntekter = this.pensjonsgivendeInntekter!!.map { SelvstendigFaktaavklartInntektInnDto.PensjonsgivendeInntektDto(Year.of(it.årstall), InntektbeløpDto.Årlig(it.årligBeløp)) },
+                                    anvendtGrunnbeløp = InntektbeløpDto.Årlig(this.anvendtÅrligGrunnbeløp!!),
+                                )
                             }
                         }
                     }
