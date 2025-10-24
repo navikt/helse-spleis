@@ -50,7 +50,6 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -551,7 +550,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertDiff(0)
         assertTrue(inspektør.utbetaling(1).personOppdrag.harUtbetalinger())
         assertTrue(inspektør.utbetaling(1).arbeidsgiverOppdrag.harUtbetalinger()) // opphører arbeidsgiveroppdraget
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).personOppdrag))
+        assertEquals(17.januar til 31.januar, inspektør.utbetaling(1).personOppdrag.inspektør.periode)
         assertEquals(17.januar, inspektør.utbetaling(1).arbeidsgiverOppdrag.first().inspektør.datoStatusFom)
 
         assertEquals(15741, inspektør.utbetaling(1).personOppdrag.nettoBeløp())
@@ -575,8 +574,8 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertDiff(0)
         assertTrue(inspektør.utbetaling(1).personOppdrag.harUtbetalinger())
         assertTrue(inspektør.utbetaling(1).arbeidsgiverOppdrag.harUtbetalinger()) // opphører arbeidsgiveroppdraget
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).personOppdrag))
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).arbeidsgiverOppdrag))
+        assertEquals(17.januar til 31.januar, inspektør.utbetaling(1).personOppdrag.inspektør.periode)
+        assertEquals(17.januar til 31.januar, inspektør.utbetaling(1).arbeidsgiverOppdrag.inspektør.periode)
 
         assertEquals(3047, inspektør.utbetaling(1).personOppdrag.nettoBeløp())
         assertEquals(-3047, inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())

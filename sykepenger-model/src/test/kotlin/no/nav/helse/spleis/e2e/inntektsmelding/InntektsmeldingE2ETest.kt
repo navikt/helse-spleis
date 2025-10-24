@@ -112,7 +112,6 @@ import no.nav.helse.søndag
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.til
 import no.nav.helse.torsdag
-import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -1884,7 +1883,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertFalse(inspektør.utbetaling(0).personOppdrag.harUtbetalinger())
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(0).arbeidsgiverOppdrag))
+        assertEquals(17.januar til 31.januar, inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør.periode)
 
         håndterInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
@@ -1910,7 +1909,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         assertTrue(inspektør.utbetaling(1).personOppdrag.harUtbetalinger())
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).personOppdrag))
+        assertEquals(17.januar til 31.januar, inspektør.utbetaling(1).personOppdrag.inspektør.periode)
     }
 
     @Test

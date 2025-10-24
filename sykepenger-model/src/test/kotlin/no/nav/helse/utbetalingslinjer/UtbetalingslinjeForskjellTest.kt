@@ -10,14 +10,11 @@ import no.nav.helse.dto.FagområdeDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingslinjeInnDto
 import no.nav.helse.februar
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
-import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
@@ -40,37 +37,6 @@ internal class UtbetalingslinjeForskjellTest {
     @BeforeEach
     fun setup() {
         aktivitetslogg = Aktivitetslogg()
-    }
-
-    @Test
-    fun `periode uten siste arbeidsgiverdag`() {
-        val oppdrag1 = linjer(2.januar to 5.januar)
-        val oppdrag2 = linjer(1.februar to 28.februar)
-        assertEquals(2.januar til 28.februar, Oppdrag.periode(oppdrag1, oppdrag2))
-    }
-
-    @Test
-    fun `periode med siste arbeidsgiverdag`() {
-        val oppdrag1 = linjer(2.januar to 5.januar)
-        val oppdrag2 = linjer(1.februar to 28.februar)
-        assertEquals(2.januar til 28.februar, Oppdrag.periode(oppdrag1, oppdrag2))
-    }
-
-    @Test
-    fun `periode med tomt oppdrag`() {
-        val oppdrag1 = linjer(2.januar to 5.januar)
-        val oppdrag2 = linjer()
-        val oppdrag3 = linjer()
-        assertEquals(2.januar til 5.januar, Oppdrag.periode(oppdrag1, oppdrag2))
-        assertEquals(2.januar til 5.januar, Oppdrag.periode(oppdrag1, oppdrag3))
-        assertNull(Oppdrag.periode(oppdrag2, oppdrag3))
-    }
-
-    @Test
-    fun `periode med bare tomme oppdrag`() {
-        assertNull(Oppdrag.periode())
-        assertNull(Oppdrag.periode(linjer()))
-        assertNull(Oppdrag.periode(linjer(), linjer()))
     }
 
     @Test
@@ -249,7 +215,7 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun `overtar fagsystemId fra et tomt oppdrag`() {
-        val original = tomtOppdrag(sisteArbeidsgiverdag = 4.februar)
+        val original = tomtOppdrag()
         val recalculated = linjer(5.februar to 9.februar)
         val actual = recalculated - original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
@@ -260,7 +226,7 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun `overtar fagsystemId fra et tomt oppdrag når siste arbeidsgiverdag er ulik`() {
-        val original = tomtOppdrag(sisteArbeidsgiverdag = 1.mars)
+        val original = tomtOppdrag()
         val recalculated = linjer(5.februar to 9.februar)
         val actual = recalculated - original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
@@ -755,29 +721,29 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(5.januar, revised[0].tom)
         assertEquals(UEND, revised[0].endringskode)
         assertNull(revised[0].datoStatusFom)
-        assertEquals(1, revised[0].id)
-        assertNull(revised[0].refId)
+        assertEquals(1, revised[0].delytelseId)
+        assertNull(revised[0].refDelytelseId)
 
         assertEquals(8.januar, revised[1].fom)
         assertEquals(13.januar, revised[1].tom)
         assertEquals(UEND, revised[1].endringskode)
         assertNull(revised[1].datoStatusFom)
-        assertEquals(revised[0].id + 1, revised[1].id)
-        assertEquals(revised[0].id, revised[1].refId)
+        assertEquals(revised[0].delytelseId + 1, revised[1].delytelseId)
+        assertEquals(revised[0].delytelseId, revised[1].refDelytelseId)
 
         assertEquals(23.januar, revised[2].fom)
         assertEquals(26.januar, revised[2].tom)
         assertEquals(ENDR, revised[2].endringskode)
         assertNull(revised[2].datoStatusFom)
-        assertEquals(revised[1].id + 1, revised[2].id)
-        assertNull(revised[2].refId)
+        assertEquals(revised[1].delytelseId + 1, revised[2].delytelseId)
+        assertNull(revised[2].refDelytelseId)
 
         assertEquals(1.februar, revised[3].fom)
         assertEquals(5.februar, revised[3].tom)
         assertNull(revised[3].datoStatusFom)
         assertEquals(NY, revised[3].endringskode)
-        assertEquals(revised[2].id + 1, revised[3].id)
-        assertEquals(revised[2].id, revised[3].refId)
+        assertEquals(revised[2].delytelseId + 1, revised[3].delytelseId)
+        assertEquals(revised[2].delytelseId, revised[3].refDelytelseId)
     }
 
     @Test
@@ -792,8 +758,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(ENDR, actual.endringskode)
         assertEquals(UEND, actual[0].endringskode)
         assertEquals(NY, actual[1].endringskode)
-        assertEquals(original[0].id, actual[1].refId)
-        assertEquals(original[0].id + 1, actual[1].id)
+        assertEquals(original[0].delytelseId, actual[1].refDelytelseId)
+        assertEquals(original[0].delytelseId + 1, actual[1].delytelseId)
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
@@ -809,8 +775,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(ENDR, actual.endringskode)
         assertEquals(NY, actual[0].endringskode)
         assertEquals(NY, actual[1].endringskode)
-        assertEquals(original[0].id + 1, actual[0].id)  // chained off of last of original
-        assertEquals(actual[0].id + 1, actual[1].id)
+        assertEquals(original[0].delytelseId + 1, actual[0].delytelseId)  // chained off of last of original
+        assertEquals(actual[0].delytelseId + 1, actual[1].delytelseId)
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
@@ -826,8 +792,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(ENDR, actual.endringskode)
         assertEquals(NY, actual[0].endringskode)
         assertEquals(NY, actual[1].endringskode)
-        assertEquals(original[0].id + 1, actual[0].id)  // chained off of last of original
-        assertEquals(actual[0].id + 1, actual[1].id)
+        assertEquals(original[0].delytelseId + 1, actual[0].delytelseId)  // chained off of last of original
+        assertEquals(actual[0].delytelseId + 1, actual[1].delytelseId)
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
@@ -848,11 +814,11 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(intermediate.fagsystemId, actual.fagsystemId)
 
-        assertEquals(original[0].id, actual[0].id)
+        assertEquals(original[0].delytelseId, actual[0].delytelseId)
         assertEquals(NY, original[0].endringskode)
         assertEquals(ENDR, intermediate[0].endringskode)
 
-        assertEquals(original[0].id + 1, actual[1].id)
+        assertEquals(original[0].delytelseId + 1, actual[1].delytelseId)
         assertEquals(UEND, actual[0].endringskode)
         assertEquals(NY, actual[1].endringskode)
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
@@ -1145,20 +1111,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
-    private fun tomtOppdrag(fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()), sisteArbeidsgiverdag: LocalDate? = null) =
+    private fun tomtOppdrag(fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID())) =
         Oppdrag(ORGNUMMER, SykepengerRefusjon, fagsystemId = fagsystemId)
-
-    private val Oppdrag.endringskode get() = this.get<Endringskode>("endringskode")
-
-    private val Utbetalingslinje.endringskode get() = this.get<Endringskode>("endringskode")
-
-    private val Utbetalingslinje.id get() = this.get<Int>("delytelseId")
-
-    private val Utbetalingslinje.refId get() = this.get<Int?>("refDelytelseId")
-
-    private val Oppdrag.fagsystemId get() = this.get<String>("fagsystemId")
-
-    private val Utbetalingslinje.datoStatusFom get() = this.get<LocalDate?>("datoStatusFom")
 
     private fun assertUtbetalinger(expected: Oppdrag, actual: Oppdrag) {
         assertEquals(expected.size, actual.size, "Utbetalingslinjer er i forskjellige størrelser")
@@ -1169,8 +1123,8 @@ internal class UtbetalingslinjeForskjellTest {
             assertEquals(a.grad, b.grad, "grad stemmer ikke overens")
             assertEquals(a.datoStatusFom, b.datoStatusFom)
             assertEquals(a.endringskode, b.endringskode) { "endringskode ${b.endringskode} matcher ikke forventet ${a.endringskode}" }
-            assertEquals(a.id, b.id) { "delytelseid ${b.id} matcher ikke forventet ${a.id} for ${a.fom} - ${a.tom}" }
-            assertEquals(a.refId, b.refId) { "refdelytelseid ${b.refId} matcher ikke forventet ${a.refId}" }
+            assertEquals(a.delytelseId, b.delytelseId) { "delytelseid ${b.delytelseId} matcher ikke forventet ${a.delytelseId} for ${a.fom} - ${a.tom}" }
+            assertEquals(a.refDelytelseId, b.refDelytelseId) { "refdelytelseid ${b.refDelytelseId} matcher ikke forventet ${a.refDelytelseId}" }
         }
     }
 
@@ -1250,8 +1204,8 @@ internal class UtbetalingslinjeForskjellTest {
         }
 
         infix fun pekerPå(other: Utbetalingslinje): TestUtbetalingslinje {
-            delytelseId = other.id + 1
-            refDelytelseId = other.id
+            delytelseId = other.delytelseId + 1
+            refDelytelseId = other.delytelseId
             return this
         }
 
@@ -1263,7 +1217,7 @@ internal class UtbetalingslinjeForskjellTest {
 
         infix fun endrer(other: Utbetalingslinje): TestUtbetalingslinje {
             endringskode(ENDR)
-            delytelseId = other.id
+            delytelseId = other.delytelseId
             return this
         }
 

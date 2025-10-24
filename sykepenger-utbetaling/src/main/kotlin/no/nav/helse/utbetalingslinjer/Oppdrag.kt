@@ -9,7 +9,6 @@ import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringHendelse
 import no.nav.helse.hendelser.UtbetalingmodulHendelse
 import no.nav.helse.hendelser.til
@@ -54,13 +53,6 @@ class Oppdrag private constructor(
         private set
 
     companion object {
-        fun periode(vararg oppdrag: Oppdrag): Periode? {
-            return oppdrag
-                .mapNotNull { it.linjeperiode }
-                .takeIf(List<*>::isNotEmpty)
-                ?.reduce(Periode::plus)
-        }
-
         fun stønadsdager(vararg oppdrag: Oppdrag): Int {
             return Utbetalingslinje.stønadsdager(oppdrag.toList().flatten())
         }
@@ -72,7 +64,6 @@ class Oppdrag private constructor(
 
         fun ingenFeil(vararg oppdrag: Oppdrag) = oppdrag.none { it.status in listOf(AVVIST, FEIL) }
         fun harFeil(vararg oppdrag: Oppdrag) = oppdrag.any { it.status in listOf(AVVIST, FEIL) }
-        fun kanIkkeForsøkesPåNy(vararg oppdrag: Oppdrag) = oppdrag.any { it.status == AVVIST }
 
         fun gjenopprett(dto: OppdragInnDto): Oppdrag {
             return Oppdrag(
