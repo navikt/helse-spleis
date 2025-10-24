@@ -367,6 +367,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         return endret
     }
 
+    internal fun håndterFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt) {
+        behandlinger.last().håndterFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt)
+    }
+
     internal fun håndterEgenmeldingsdager(
         person: Person,
         yrkesaktivitet: Yrkesaktivitet,
@@ -578,6 +582,28 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val benyttetRefusjonsopplysninger = (gjeldende.refusjonstidslinje + nyeRefusjonsopplysningerForPerioden).fyll(periode)
             if (benyttetRefusjonsopplysninger == gjeldende.refusjonstidslinje) return null // Ingen endring
             return this.tilstand.håndterRefusjonsopplysninger(yrkesaktivitet, this, behandlingkilde, dokumentsporing, aktivitetslogg, beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar, benyttetRefusjonsopplysninger)
+        }
+
+        fun håndterFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt) {
+            when (tilstand) {
+                Tilstand.Uberegnet -> oppdaterMedFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt)
+
+                Tilstand.AnnullertPeriode,
+                Tilstand.AvsluttetUtenVedtak,
+                Tilstand.Beregnet,
+                Tilstand.BeregnetAnnullering,
+                Tilstand.BeregnetOmgjøring,
+                Tilstand.BeregnetRevurdering,
+                Tilstand.OverførtAnnullering,
+                Tilstand.RevurdertVedtakAvvist,
+                Tilstand.TilInfotrygd,
+                Tilstand.UberegnetAnnullering,
+                Tilstand.UberegnetOmgjøring,
+                Tilstand.UberegnetRevurdering,
+                Tilstand.VedtakFattet,
+                Tilstand.VedtakIverksatt -> {
+                }
+            }
         }
 
         data class Endring(
@@ -831,6 +857,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     inntektjusteringer = emptyMap()
                 )
             }
+
+            internal fun kopierMedFaktaavklartInntekt(
+                arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
+            ) = kopierMed(
+                faktaavklartInntekt = arbeidstakerFaktaavklartInntekt
+            )
 
             internal fun kopierMedUtbetaling(beregning: BeregnetBehandling) = kopierMed(
                 grunnlagsdata = beregning.grunnlagsdata,
@@ -1108,6 +1140,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         private fun oppdaterMedRefusjonstidslinje(dokumentsporing: Dokumentsporing, nyeRefusjonsopplysninger: Beløpstidslinje) {
             val endring = endringer.last().kopierMedRefusjonstidslinje(dokumentsporing, nyeRefusjonsopplysninger)
+            nyEndring(endring)
+        }
+
+        private fun oppdaterMedFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt) {
+            val endring = endringer.last().kopierMedFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt)
             nyEndring(endring)
         }
 

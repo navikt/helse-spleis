@@ -730,6 +730,9 @@ internal class Vedtaksperiode private constructor(
             beløp = oppgittInntekt.inntekt,
             tidsstempel = LocalDateTime.now()
         )
+
+        val faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt(id = UUID.randomUUID(), inntektsdata = inntektsdata, inntektsopplysningskilde = Arbeidstakerinntektskilde.Arbeidsgiver)
+        behandlinger.håndterFaktaavklartInntekt(faktaavklartInntekt)
         inntektshistorikk.leggTil(
             Inntektsmeldinginntekt(
                 id = UUID.randomUUID(),
