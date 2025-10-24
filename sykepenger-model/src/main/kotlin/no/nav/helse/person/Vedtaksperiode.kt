@@ -156,7 +156,6 @@ import no.nav.helse.person.tilstandsmaskin.AvventerSimulering
 import no.nav.helse.person.tilstandsmaskin.AvventerSimuleringRevurdering
 import no.nav.helse.person.tilstandsmaskin.AvventerVilkårsprøving
 import no.nav.helse.person.tilstandsmaskin.AvventerVilkårsprøvingRevurdering
-import no.nav.helse.person.tilstandsmaskin.RevurderingFeilet
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvsluttet
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerBlokkerendePeriode
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerGodkjenning
@@ -218,7 +217,7 @@ internal class Vedtaksperiode private constructor(
         sykdomstidslinje: Sykdomstidslinje,
         dokumentsporing: Dokumentsporing,
         sykmeldingsperiode: Periode,
-        arbeidssituasjon: Behandlinger.Behandling.Endring.Arbeidssituasjon,
+        arbeidssituasjon: Endring.Arbeidssituasjon,
         faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
         dagerNavOvertarAnsvar: List<Periode>,
         regelverkslogg: Regelverkslogg
@@ -341,7 +340,6 @@ internal class Vedtaksperiode private constructor(
             }
 
             Start,
-            RevurderingFeilet,
             AvventerAnnullering,
             TilAnnullering,
             TilInfotrygd -> error("Kan ikke håndtere søknad mens perioden er i $tilstand")
@@ -405,7 +403,6 @@ internal class Vedtaksperiode private constructor(
                 Revurderingseventyr.sykdomstidslinje(hendelse, this.skjæringstidspunkt, this.periode)
             }
 
-            RevurderingFeilet,
             Start,
             AvventerAnnullering,
             TilAnnullering,
@@ -440,7 +437,6 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
             AvventerVilkårsprøvingRevurdering,
-            RevurderingFeilet,
             Start,
             TilInfotrygd,
             AvventerAnnullering,
@@ -554,7 +550,6 @@ internal class Vedtaksperiode private constructor(
             }
 
             Avsluttet,
-            RevurderingFeilet,
             Start,
             TilInfotrygd -> {
                 aktivitetsloggMedVedtaksperiodekontekst.info("Replayer ikke inntektsmelding fordi tilstanden er $tilstand.")
@@ -969,7 +964,6 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
             AvventerVilkårsprøvingRevurdering,
-            RevurderingFeilet,
             Start,
             TilUtbetaling,
             AvventerAnnullering,
@@ -1022,7 +1016,6 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
             AvventerVilkårsprøvingRevurdering,
-            RevurderingFeilet,
             SelvstendigAvsluttet,
             SelvstendigAvventerBlokkerendePeriode,
             SelvstendigAvventerGodkjenning,
@@ -1288,7 +1281,6 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
             AvventerVilkårsprøvingRevurdering,
-            RevurderingFeilet,
             Start,
             TilInfotrygd,
             AvventerAnnullering,
@@ -1430,7 +1422,6 @@ internal class Vedtaksperiode private constructor(
 
             AvventerSimuleringRevurdering,
             AvventerGodkjenningRevurdering,
-            RevurderingFeilet,
 
             AvventerVilkårsprøvingRevurdering,
             AvventerHistorikkRevurdering,
@@ -1604,7 +1595,6 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
             AvventerVilkårsprøvingRevurdering,
-            RevurderingFeilet,
             TilInfotrygd,
             AvventerAnnullering,
             TilUtbetaling,
@@ -2307,11 +2297,6 @@ internal class Vedtaksperiode private constructor(
                 false -> VenterPå.SegSelv(Venteårsak.GODKJENNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
             }
 
-            RevurderingFeilet -> when (kanForkastes()) {
-                true -> null
-                false -> VenterPå.SegSelv(Venteårsak.HJELP)
-            }
-
             SelvstendigAvventerGodkjenning -> when (behandlinger.erAvvist()) {
                 true -> VenterPå.SegSelv(Venteårsak.HJELP)
                 false -> VenterPå.SegSelv(Venteårsak.GODKJENNING)
@@ -2768,7 +2753,6 @@ internal class Vedtaksperiode private constructor(
                     VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> AvventerSimuleringRevurdering
                     VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> AvventerVilkårsprøving
                     VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> AvventerVilkårsprøvingRevurdering
-                    VedtaksperiodetilstandDto.REVURDERING_FEILET -> RevurderingFeilet
                     VedtaksperiodetilstandDto.START -> Start
                     VedtaksperiodetilstandDto.TIL_INFOTRYGD -> TilInfotrygd
                     VedtaksperiodetilstandDto.TIL_UTBETALING -> TilUtbetaling
@@ -2855,7 +2839,6 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING
             AvventerVilkårsprøving -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING
             AvventerVilkårsprøvingRevurdering -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING
-            RevurderingFeilet -> VedtaksperiodetilstandDto.REVURDERING_FEILET
             Start -> VedtaksperiodetilstandDto.START
             TilInfotrygd -> VedtaksperiodetilstandDto.TIL_INFOTRYGD
             TilUtbetaling -> VedtaksperiodetilstandDto.TIL_UTBETALING

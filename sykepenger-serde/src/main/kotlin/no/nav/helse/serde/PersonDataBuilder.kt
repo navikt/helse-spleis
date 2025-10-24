@@ -86,7 +86,6 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Tilstan
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_VILKÅRSPRØVING_REVURDERING
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.REVURDERING_FEILET
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVSLUTTET
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_GODKJENNING
@@ -387,7 +386,6 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
         VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> AVVENTER_SIMULERING_REVURDERING
         VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> AVVENTER_VILKÅRSPRØVING
         VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> AVVENTER_VILKÅRSPRØVING_REVURDERING
-        VedtaksperiodetilstandDto.REVURDERING_FEILET -> REVURDERING_FEILET
         VedtaksperiodetilstandDto.START -> START
         VedtaksperiodetilstandDto.TIL_INFOTRYGD -> TIL_INFOTRYGD
         VedtaksperiodetilstandDto.TIL_UTBETALING -> TIL_UTBETALING
