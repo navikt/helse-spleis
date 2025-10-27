@@ -34,9 +34,11 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
     private val førsteDato get() = utbetalingsdager.firstKey()
     private val sisteDato get() = utbetalingsdager.lastKey()
     val totalbeløpPerson = this
+        .filter { it is NavDag || it is ArbeidsgiverperiodedagNav }
         .mapNotNull { it.økonomi.personbeløp }
         .summer()
     val totalbeløpRefusjon = this
+        .filter { it is NavDag || it is ArbeidsgiverperiodedagNav }
         .mapNotNull { it.økonomi.arbeidsgiverbeløp }
         .summer()
     val totalbeløp = totalbeløpPerson + totalbeløpRefusjon

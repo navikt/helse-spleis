@@ -95,15 +95,15 @@ internal class UtbetalingTest {
 
         assertEquals(utbetaling2Inspektør.korrelasjonsId, utbetaling1Inspektør.korrelasjonsId)
 
-        assertEquals(1, utbetaling1Inspektør.arbeidsgiverOppdrag.size)
-        utbetaling1Inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+        assertEquals(1, utbetaling1Inspektør.personOppdrag.size)
+        utbetaling1Inspektør.personOppdrag[0].inspektør.also { linje ->
             assertEquals(1.februar til 1.februar, linje.fom til linje.tom)
             assertEquals(NY, linje.endringskode)
             assertEquals(1, linje.delytelseId)
             assertNull(linje.refDelytelseId)
         }
-        assertEquals(1, utbetaling2Inspektør.arbeidsgiverOppdrag.size)
-        utbetaling2Inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+        assertEquals(1, utbetaling2Inspektør.personOppdrag.size)
+        utbetaling2Inspektør.personOppdrag[0].inspektør.also { linje ->
             assertEquals(1.februar til 1.februar, linje.fom til linje.tom)
             assertEquals(ENDR, linje.endringskode)
             assertEquals("OPPH", linje.statuskode)

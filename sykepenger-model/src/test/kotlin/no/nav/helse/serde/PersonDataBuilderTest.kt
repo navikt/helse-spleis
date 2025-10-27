@@ -195,15 +195,15 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             assertEquals(2.januar, dag.dato)
             assertEquals(1.0, dag.økonomi.grad.prosentDesimal)
             assertEquals(1.0, dag.økonomi.totalGrad.prosentDesimal)
+            assertEquals(IngenBeløp, dag.økonomi.arbeidsgiverbeløp)
             assertEquals(
                 InntektDto(
                     InntektbeløpDto.Årlig(beløp = 312000.0),
                     InntektbeløpDto.MånedligDouble(beløp = 26000.0),
                     InntektbeløpDto.DagligDouble(beløp = 1200.0),
                     InntektbeløpDto.DagligInt(beløp = 1200)
-                ), dag.økonomi.arbeidsgiverbeløp
+                ), dag.økonomi.personbeløp
             )
-            assertEquals(IngenBeløp, dag.økonomi.personbeløp)
             assertInstanceOf<UtbetalingsdagUtDto.ArbeidsgiverperiodeDagNavDto>(dag)
         }
         dto.dager[2].also { dag ->

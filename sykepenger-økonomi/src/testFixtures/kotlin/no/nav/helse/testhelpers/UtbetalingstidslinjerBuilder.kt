@@ -47,6 +47,7 @@ fun Int.NAP(dekningsgrunnlag: Int, grad: Number = 100.0) = Utbetalingsdager(
     addDagFun = Utbetalingstidslinje.Builder::addArbeidsgiverperiodedagNav,
     addHelgFun = Utbetalingstidslinje.Builder::addArbeidsgiverperiodedag,
     dekningsgrunnlag = dekningsgrunnlag.daglig,
+    arbeidsgiverbeløp = INGEN,
     grad = grad
 )
 

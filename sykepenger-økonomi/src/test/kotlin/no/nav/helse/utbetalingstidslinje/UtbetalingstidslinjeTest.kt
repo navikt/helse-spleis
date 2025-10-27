@@ -6,24 +6,24 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.testhelpers.AP
-import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.math.MathContext
+import no.nav.helse.testhelpers.NAP
+import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class UtbetalingstidslinjeTest {
 
     @Test
     fun subsetting() {
-        Assertions.assertEquals(1.januar til 5.januar, tidslinjeOf(5.NAV).subset(1.januar til 5.januar).periode())
-        Assertions.assertEquals(4.januar.somPeriode(), tidslinjeOf(5.NAV).subset(4.januar.somPeriode()).periode())
-        Assertions.assertEquals(
+        assertEquals(1.januar til 5.januar, tidslinjeOf(5.NAV).subset(1.januar til 5.januar).periode())
+        assertEquals(4.januar.somPeriode(), tidslinjeOf(5.NAV).subset(4.januar.somPeriode()).periode())
+        assertEquals(
             1.januar til 5.januar,
             tidslinjeOf(5.NAV).subset(31.desember(2017) til 6.januar).periode()
         )
@@ -32,26 +32,42 @@ internal class UtbetalingstidslinjeTest {
 
     @Test
     fun fraOgMed() {
-        Assertions.assertEquals(3.januar til 5.januar, tidslinjeOf(5.NAV).fraOgMed(3.januar).periode())
-        Assertions.assertEquals(0, tidslinjeOf(5.NAV).fraOgMed(6.januar).size)
-        Assertions.assertEquals(1.januar til 5.januar, tidslinjeOf(5.NAV).fraOgMed(31.desember(2017)).periode())
+        assertEquals(3.januar til 5.januar, tidslinjeOf(5.NAV).fraOgMed(3.januar).periode())
+        assertEquals(0, tidslinjeOf(5.NAV).fraOgMed(6.januar).size)
+        assertEquals(1.januar til 5.januar, tidslinjeOf(5.NAV).fraOgMed(31.desember(2017)).periode())
     }
 
     @Test
     fun fremTilOgMed() {
-        Assertions.assertEquals(1.januar til 2.januar, tidslinjeOf(5.NAV).fremTilOgMed(2.januar).periode())
-        Assertions.assertEquals(1.januar til 5.januar, tidslinjeOf(5.NAV).fremTilOgMed(6.januar).periode())
-        Assertions.assertEquals(0, tidslinjeOf(5.NAV).fremTilOgMed(31.desember(2017)).size)
+        assertEquals(1.januar til 2.januar, tidslinjeOf(5.NAV).fremTilOgMed(2.januar).periode())
+        assertEquals(1.januar til 5.januar, tidslinjeOf(5.NAV).fremTilOgMed(6.januar).periode())
+        assertEquals(0, tidslinjeOf(5.NAV).fremTilOgMed(31.desember(2017)).size)
     }
 
     @Test
     fun plus() {
-        Assertions.assertEquals(0, (tidslinjeOf() + tidslinjeOf()).size)
-        Assertions.assertEquals(1.januar til 5.januar, (tidslinjeOf() + tidslinjeOf(5.NAV)).periode())
-        Assertions.assertEquals(
+        assertEquals(0, (tidslinjeOf() + tidslinjeOf()).size)
+        assertEquals(1.januar til 5.januar, (tidslinjeOf() + tidslinjeOf(5.NAV)).periode())
+        assertEquals(
             1.januar til 10.januar,
             (tidslinjeOf(3.NAV) + tidslinjeOf(5.NAV, startDato = 6.januar)).periode()
         )
+    }
+
+    @Test
+    fun `totalbeløp summerer opp dager som kan utbetales`() {
+        val inntekt = 1000.daglig
+        val fullRefusjon = Utbetalingstidslinje.betale(inntekt, listOf(
+            tidslinjeOf(
+                10.AP(dekningsgrunnlag = inntekt.dagligInt),
+                6.NAP(dekningsgrunnlag = inntekt.dagligInt),
+                5.NAV(dekningsgrunnlag = inntekt.dagligInt, refusjonsbeløp = inntekt.dagligInt),
+                1.FRI(dekningsgrunnlag = inntekt.dagligInt),
+                4.NAV(dekningsgrunnlag = inntekt.dagligInt, refusjonsbeløp = 0)
+            )
+        )).single()
+        assertEquals(inntekt * 3, fullRefusjon.totalbeløpRefusjon)
+        assertEquals(inntekt * 8, fullRefusjon.totalbeløpPerson)
     }
 
     @Test
@@ -160,7 +176,7 @@ internal class UtbetalingstidslinjeTest {
 
         input.forEachIndexed { index, input ->
             Assertions.assertNull(input[1.januar].økonomi.inspektør.arbeidsgiverbeløp) { "den uberegnede listen skal ikke modifiseres" }
-            Assertions.assertEquals(1081, result[index][1.januar].økonomi.inspektør.arbeidsgiverbeløp?.dagligInt)
+            assertEquals(1081, result[index][1.januar].økonomi.inspektør.arbeidsgiverbeløp?.dagligInt)
         }
     }
 
@@ -173,15 +189,15 @@ internal class UtbetalingstidslinjeTest {
             val tredje = andre.avvis(listOf(periode), Begrunnelse.ManglerMedlemskap)
             periode.forEach { dato ->
                 val dag = tredje[dato] as Utbetalingsdag.AvvistDag
-                Assertions.assertEquals(3, dag.begrunnelser.size)
+                assertEquals(3, dag.begrunnelser.size)
             }
         }
     }
 
     @Test
     fun `samlet periode`() {
-        Assertions.assertEquals(1.januar til 1.januar, Utbetalingstidslinje.periode(listOf(tidslinjeOf(1.NAV))))
-        Assertions.assertEquals(
+        assertEquals(1.januar til 1.januar, Utbetalingstidslinje.periode(listOf(tidslinjeOf(1.NAV))))
+        assertEquals(
             1.desember(2017) til 7.mars, Utbetalingstidslinje.periode(
                 listOf(
                     tidslinjeOf(7.NAV),
@@ -205,7 +221,7 @@ internal class UtbetalingstidslinjeTest {
             val expected = (100 / 6.0).toBigDecimal(mc)
             result.forEach {
                 val actual = it[dato].økonomi.inspektør.totalGrad.toBigDecimal(mc)
-                Assertions.assertEquals(expected.toInt(), actual.toInt())
+                assertEquals(expected.toInt(), actual.toInt())
             }
         }
 
@@ -215,7 +231,7 @@ internal class UtbetalingstidslinjeTest {
             val expected = (250 / 3.0).toBigDecimal(mc)
             result.forEach {
                 val actual = it[dato].økonomi.inspektør.totalGrad.toBigDecimal(mc)
-                Assertions.assertEquals(expected.toInt(), actual.toInt())
+                assertEquals(expected.toInt(), actual.toInt())
             }
         }
     }
@@ -230,7 +246,7 @@ internal class UtbetalingstidslinjeTest {
         1.januar.also { dato ->
             val expected = 50
             val actual = result[0][dato].økonomi.inspektør.totalGrad
-            Assertions.assertEquals(expected, actual)
+            assertEquals(expected, actual)
         }
     }
 }
