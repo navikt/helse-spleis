@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.util.UUID
+import no.nav.helse.økonomi.Inntekt
 
 sealed interface FaktaavklartInntekt {
     val id: UUID
@@ -8,5 +9,6 @@ sealed interface FaktaavklartInntekt {
 }
 
 sealed interface FaktaavklartInntektView {
-    val id: UUID
+    val hendelseId: UUID
+    val beløp: Inntekt
 }

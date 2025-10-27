@@ -290,7 +290,8 @@ internal class TestPerson(
             harOppgittAvvikling: Boolean? = null,
             harOppgittVarigEndring: Boolean? = null,
             harOppgittNyIArbeidslivet: Boolean? = null,
-            harOppgittÅHaForsikring: Boolean? = null
+            harOppgittÅHaForsikring: Boolean? = null,
+            søknadId: UUID = UUID.randomUUID()
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, sykdomsgrad),
             arbeidssituasjon = arbeidssituasjon,
@@ -300,7 +301,8 @@ internal class TestPerson(
             harOppgittAvvikling = harOppgittAvvikling,
             harOppgittVarigEndring = harOppgittVarigEndring,
             harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
-            harOppgittÅHaForsikring = harOppgittÅHaForsikring
+            harOppgittÅHaForsikring = harOppgittÅHaForsikring,
+            søknadId = søknadId
         )
 
         internal fun håndterForlengelsessøknadSelvstendig(

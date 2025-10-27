@@ -54,7 +54,7 @@ internal data class ArbeidstakerFaktaavklartInntekt(
         )
     }
 
-    internal fun view() = ArbeistakerFaktaavklartInntektView(id, inntektsdata.beløp)
-}
+    internal fun view() = ArbeistakerFaktaavklartInntektView(inntektsdata.hendelseId.id, inntektsdata.beløp)
 
-internal class ArbeistakerFaktaavklartInntektView(override val id: UUID, val inntekt: Inntekt) : FaktaavklartInntektView
+    internal class ArbeistakerFaktaavklartInntektView(override val hendelseId: UUID, override val beløp: Inntekt) : FaktaavklartInntektView
+}

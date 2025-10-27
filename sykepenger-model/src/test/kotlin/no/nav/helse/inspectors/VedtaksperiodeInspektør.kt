@@ -23,6 +23,8 @@ internal class VedtaksperiodeInspektør(view: VedtaksperiodeView) {
 
     internal val sykdomstidslinje get() = behandlinger.last().endringer.last().sykdomstidslinje
 
+    internal val faktaavklartInntekt = view.behandlinger.behandlinger.last().faktaavklartInntekt
+
     internal val maksdatoer = view.behandlinger.behandlinger
         .flatMap { it.endringer.map { it.maksdatoresultat } }
         .filter { it.bestemmelse != Bestemmelse.IKKE_VURDERT }
