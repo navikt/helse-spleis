@@ -1599,6 +1599,114 @@ data class PersonData(
     }
 
     data class BeløpstidslinjeperiodeData(val fom: LocalDate, val tom: LocalDate, val dagligBeløp: Double, val meldingsreferanseId: UUID, val avsender: AvsenderData, val tidsstempel: LocalDateTime)
+
+    data class FaktaavklartInntektMjauData(
+        val id: UUID,
+        val dato: LocalDate,
+        val hendelseId: UUID,
+        val beløp: Double,
+        val tidsstempel: LocalDateTime,
+        val kilde: InntektsopplysningskildeData?,
+        val type: InntektsopplysningstypeData,
+        val pensjonsgivendeInntekter: List<PensjonsgivendeInntektData>?,
+        val anvendtÅrligGrunnbeløp: Double?,
+        val skatteopplysninger: List<SkatteopplysningData>?
+    ) {
+
+        fun tilDto(): FaktaavklartInntektInnDto {
+            val (faktiskType, faktiskKilde) = when (type) {
+                InntektsopplysningstypeData.ARBEIDSTAKER -> InntektsopplysningstypeData.ARBEIDSTAKER to checkNotNull(kilde) { "Arbeidstakerinntekter skal alltid ha kilde" }
+                InntektsopplysningstypeData.SELVSTENDIG,
+                InntektsopplysningstypeData.SELVSTENDIG_NÆRINGSDRIVENDE -> InntektsopplysningstypeData.SELVSTENDIG to null
+
+                InntektsopplysningstypeData.ARBEIDSTAKER_ARBEIDSGIVER -> InntektsopplysningstypeData.ARBEIDSTAKER to InntektsopplysningskildeData.INNTEKTSMELDING
+                InntektsopplysningstypeData.ARBEIDSTAKER_AORDNINGEN -> InntektsopplysningstypeData.ARBEIDSTAKER to InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG
+            }
+
+            val inntektsdata = InntektsdataInnDto(
+                hendelseId = MeldingsreferanseDto(this.hendelseId),
+                dato = this.dato,
+                beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
+                tidsstempel = this.tidsstempel
+            )
+
+            return when (faktiskType) {
+                InntektsopplysningstypeData.ARBEIDSTAKER -> ArbeidstakerFaktaavklartInntektInnDto(
+                    id = id,
+                    inntektsdata = inntektsdata,
+                    inntektsopplysningskilde = when (checkNotNull(faktiskKilde) { "For arbeidstaker har vi alltid kilde" }) {
+                        InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> AOrdningenDto(skatteopplysninger?.map { it.tilDto() } ?: emptyList())
+                        InntektsopplysningskildeData.INFOTRYGD -> ArbeidstakerinntektskildeInnDto.InfotrygdDto
+                        InntektsopplysningskildeData.INNTEKTSMELDING -> ArbeidstakerinntektskildeInnDto.ArbeidsgiverDto
+                    }
+                )
+
+                InntektsopplysningstypeData.SELVSTENDIG -> SelvstendigFaktaavklartInntektInnDto(
+                    id = id,
+                    inntektsdata = inntektsdata,
+                    pensjonsgivendeInntekter = checkNotNull(pensjonsgivendeInntekter) { "Selvstendiginntekt skal ha pensjonsgivende inntekter" }.map { it.tilDto() },
+                    anvendtGrunnbeløp = InntektbeløpDto.Årlig(checkNotNull(anvendtÅrligGrunnbeløp) { "Selvstendiginntekt skal ha anvendt grunnbeløp" })
+                )
+
+                InntektsopplysningstypeData.SELVSTENDIG_NÆRINGSDRIVENDE,
+                InntektsopplysningstypeData.ARBEIDSTAKER_ARBEIDSGIVER,
+                InntektsopplysningstypeData.ARBEIDSTAKER_AORDNINGEN -> error("Dette skal vel ikke skje?")
+            }
+        }
+
+        enum class InntektsopplysningstypeData {
+            // I inntektsgrunnlaget har vi disse kildene
+            ARBEIDSTAKER,
+            SELVSTENDIG,
+
+            // Vi har laget disse verdiene på faktaavklart inntekt på behandling. De er egentlig en sammenslått type og kilde.
+            SELVSTENDIG_NÆRINGSDRIVENDE,
+            ARBEIDSTAKER_ARBEIDSGIVER,
+            ARBEIDSTAKER_AORDNINGEN
+        }
+
+        enum class InntektsopplysningskildeData {
+            SKATT_SYKEPENGEGRUNNLAG,
+            INFOTRYGD,
+            INNTEKTSMELDING
+        }
+
+        data class PensjonsgivendeInntektData(val årstall: Int, val årligBeløp: Double) {
+            fun tilDto() = SelvstendigFaktaavklartInntektInnDto.PensjonsgivendeInntektDto(Year.of(årstall), InntektbeløpDto.Årlig(årligBeløp))
+        }
+
+        data class SkatteopplysningData(
+            val hendelseId: UUID,
+            val beløp: Double,
+            val måned: YearMonth,
+            val type: InntekttypeData,
+            val fordel: String,
+            val beskrivelse: String,
+            val tidsstempel: LocalDateTime
+        ) {
+            enum class InntekttypeData {
+                LØNNSINNTEKT,
+                NÆRINGSINNTEKT,
+                PENSJON_ELLER_TRYGD,
+                YTELSE_FRA_OFFENTLIGE
+            }
+
+            fun tilDto() = SkatteopplysningDto(
+                hendelseId = MeldingsreferanseDto(this.hendelseId),
+                beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
+                måned = this.måned,
+                type = when (type) {
+                    InntekttypeData.LØNNSINNTEKT -> InntekttypeDto.LØNNSINNTEKT
+                    InntekttypeData.NÆRINGSINNTEKT -> InntekttypeDto.NÆRINGSINNTEKT
+                    InntekttypeData.PENSJON_ELLER_TRYGD -> InntekttypeDto.PENSJON_ELLER_TRYGD
+                    InntekttypeData.YTELSE_FRA_OFFENTLIGE -> InntekttypeDto.YTELSE_FRA_OFFENTLIGE
+                },
+                fordel = fordel,
+                beskrivelse = beskrivelse,
+                tidsstempel = tidsstempel
+            )
+        }
+    }
 }
 
 private fun LocalDate.erHelg() = dayOfWeek in setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)

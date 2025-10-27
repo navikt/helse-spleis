@@ -104,6 +104,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Tilstan
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.TIL_INFOTRYGD
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.TIL_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.YrkesaktivitetTypeData
+import no.nav.helse.serde.PersonData.FaktaavklartInntektMjauData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.UtbetalingsdagData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsopplysningskildeData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsopplysningstypeData
@@ -1037,4 +1038,75 @@ fun FaktaavklartInntektUtDto.tilPersonData(): PersonData.ArbeidsgiverData.Vedtak
             )
         }
     }
+}
+
+data object FaktaavklartInntekt {
+    fun FaktaavklartInntektUtDto.tilPersonData(): FaktaavklartInntektMjauData {
+        return when (this) {
+            is ArbeidstakerFaktaavklartInntektUtDto -> {
+                when (val kilde = this.inntektsopplysningskilde) {
+                    is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> lagPersonData(
+                        type = FaktaavklartInntektMjauData.InntektsopplysningstypeData.ARBEIDSTAKER,
+                        kilde = FaktaavklartInntektMjauData.InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG,
+                        skatteopplysninger = kilde.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
+                    )
+
+                    ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> lagPersonData(
+                        type = FaktaavklartInntektMjauData.InntektsopplysningstypeData.ARBEIDSTAKER,
+                        kilde = FaktaavklartInntektMjauData.InntektsopplysningskildeData.INNTEKTSMELDING
+                    )
+
+                    ArbeidstakerinntektskildeUtDto.InfotrygdDto -> lagPersonData(
+                        type = FaktaavklartInntektMjauData.InntektsopplysningstypeData.ARBEIDSTAKER,
+                        kilde = FaktaavklartInntektMjauData.InntektsopplysningskildeData.INFOTRYGD
+                    )
+                }
+            }
+
+            is SelvstendigFaktaavklartInntektUtDto -> lagPersonData(
+                type = FaktaavklartInntektMjauData.InntektsopplysningstypeData.SELVSTENDIG,
+                pensjonsgivendeInntekter = this.pensjonsgivendeInntekter.map { it.tilPersonData() },
+                anvendtÅrligGrunnbeløp = this.anvendtGrunnbeløp.årlig.beløp
+            )
+        }
+    }
+
+    private fun FaktaavklartInntektUtDto.lagPersonData(
+        type: FaktaavklartInntektMjauData.InntektsopplysningstypeData,
+        kilde: FaktaavklartInntektMjauData.InntektsopplysningskildeData? = null,
+        pensjonsgivendeInntekter: List<FaktaavklartInntektMjauData.PensjonsgivendeInntektData>? = null,
+        anvendtÅrligGrunnbeløp: Double? = null,
+        skatteopplysninger: List<FaktaavklartInntektMjauData.SkatteopplysningData>? = null
+    ) = FaktaavklartInntektMjauData(
+        id = this.id,
+        dato = this.inntektsdata.dato,
+        hendelseId = this.inntektsdata.hendelseId.id,
+        beløp = this.inntektsdata.beløp.månedligDouble.beløp,
+        tidsstempel = this.inntektsdata.tidsstempel,
+        type = type,
+        kilde = kilde,
+        pensjonsgivendeInntekter = pensjonsgivendeInntekter,
+        anvendtÅrligGrunnbeløp = anvendtÅrligGrunnbeløp,
+        skatteopplysninger = skatteopplysninger
+    )
+
+    private fun SkatteopplysningDto.tilPersonDataSkattopplysning() = FaktaavklartInntektMjauData.SkatteopplysningData(
+        hendelseId = this.hendelseId.id,
+        beløp = this.beløp.beløp,
+        måned = this.måned,
+        type = when (this.type) {
+            InntekttypeDto.LØNNSINNTEKT -> FaktaavklartInntektMjauData.SkatteopplysningData.InntekttypeData.LØNNSINNTEKT
+            InntekttypeDto.NÆRINGSINNTEKT -> FaktaavklartInntektMjauData.SkatteopplysningData.InntekttypeData.NÆRINGSINNTEKT
+            InntekttypeDto.PENSJON_ELLER_TRYGD -> FaktaavklartInntektMjauData.SkatteopplysningData.InntekttypeData.PENSJON_ELLER_TRYGD
+            InntekttypeDto.YTELSE_FRA_OFFENTLIGE -> FaktaavklartInntektMjauData.SkatteopplysningData.InntekttypeData.YTELSE_FRA_OFFENTLIGE
+        },
+        fordel = this.fordel,
+        beskrivelse = this.beskrivelse,
+        tidsstempel = this.tidsstempel
+    )
+
+    private fun SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto.tilPersonData() = FaktaavklartInntektMjauData.PensjonsgivendeInntektData(
+        årstall = this.årstall.value,
+        årligBeløp = this.beløp.årlig.beløp
+    )
 }
