@@ -273,7 +273,8 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.TIL_UTBETALING -> Periodetilstand.TilUtbetaling
 
                 VedtaksperiodetilstandDto.AVSLUTTET,
-                VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET,
+                VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET -> Periodetilstand.Utbetalt
+
                 VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING,
                 VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK,
                 VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
