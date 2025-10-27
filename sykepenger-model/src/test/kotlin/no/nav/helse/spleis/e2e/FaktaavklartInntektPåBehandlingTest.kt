@@ -109,17 +109,8 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             val hendelseIdKorrigerendeArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, Arbeidsgiveropplysning.OppgittInntekt(INNTEKT * 1.1))
             (inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView).also { faktaavklartInntekt ->
                 assertNotNull(faktaavklartInntekt)
-                assertForventetFeil(
-                    forklaring = "Tar ikke inn inntekter fra korrigerende arbeidsgiveropplysninger",
-                    nå = {
-                        assertEquals(INNTEKT, faktaavklartInntekt.beløp)
-                        assertEquals(hendelseIdArbeidsgiveropplysninger, faktaavklartInntekt.hendelseId)
-                    },
-                    ønsket = {
-                        assertEquals(INNTEKT * 1.1, faktaavklartInntekt.beløp)
-                        assertEquals(hendelseIdKorrigerendeArbeidsgiveropplysninger, faktaavklartInntekt.hendelseId)
-                    }
-                )
+                assertEquals(INNTEKT * 1.1, faktaavklartInntekt.beløp)
+                assertEquals(hendelseIdKorrigerendeArbeidsgiveropplysninger, faktaavklartInntekt.hendelseId)
             }
         }
     }

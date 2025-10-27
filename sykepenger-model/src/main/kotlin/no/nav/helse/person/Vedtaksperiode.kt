@@ -596,7 +596,7 @@ internal class Vedtaksperiode private constructor(
             nullstillEgenmeldingsdagerIArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst, inntektsmeldingDager(arbeidsgiveropplysninger.metadata.meldingsreferanseId)),
             håndterOppgittArbeidsgiverperiode(arbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst),
             håndterOppgittRefusjon(arbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst, ubrukteRefusjonsopplysninger),
-            håndterOppgittInntekt(arbeidsgiveropplysninger, inntektshistorikk),
+            håndterOppgittInntekt(arbeidsgiveropplysninger, inntektshistorikk, aktivitetsloggMedVedtaksperiodekontekst),
             håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
             håndterIkkeUtbetaltArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
             håndterRedusertUtbetaltBeløpIArbeidsgiverperioden(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
@@ -614,7 +614,7 @@ internal class Vedtaksperiode private constructor(
 
         val eventyr = listOf(
             håndterOppgittRefusjon(korrigerteArbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst, ubrukteRefusjonsopplysninger),
-            håndterOppgittInntekt(korrigerteArbeidsgiveropplysninger, inntektshistorikk),
+            håndterOppgittInntekt(korrigerteArbeidsgiveropplysninger, inntektshistorikk, aktivitetsloggMedVedtaksperiodekontekst),
             håndterKorrigertArbeidsgiverperiode(korrigerteArbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
             håndterKorrigertOpphørAvNaturalytelser(korrigerteArbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
         )
@@ -718,7 +718,7 @@ internal class Vedtaksperiode private constructor(
         return eventyr
     }
 
-    private fun <T> håndterOppgittInntekt(hendelse: T, inntektshistorikk: Inntektshistorikk): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
+    private fun <T> håndterOppgittInntekt(hendelse: T, inntektshistorikk: Inntektshistorikk, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
         val oppgittInntekt = hendelse.filterIsInstance<OppgittInntekt>().singleOrNull() ?: return emptyList()
 
         val inntektsdata = Inntektsdata(
@@ -729,7 +729,7 @@ internal class Vedtaksperiode private constructor(
         )
 
         val faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt(id = UUID.randomUUID(), inntektsdata = inntektsdata, inntektsopplysningskilde = Arbeidstakerinntektskilde.Arbeidsgiver)
-        behandlinger.håndterFaktaavklartInntekt(faktaavklartInntekt)
+        behandlinger.håndterFaktaavklartInntekt(faktaavklartInntekt, yrkesaktivitet, hendelse.metadata.behandlingkilde, aktivitetslogg)
         inntektshistorikk.leggTil(
             Inntektsmeldinginntekt(
                 id = UUID.randomUUID(),

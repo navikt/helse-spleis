@@ -378,8 +378,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         return endret
     }
 
-    internal fun håndterFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt) {
-        behandlinger.last().håndterFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt)
+    internal fun håndterFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg) {
+        behandlinger.last().håndterFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt, yrkesaktivitet, behandlingkilde, aktivitetslogg)?.also {
+            leggTilNyBehandling(it)
+        }
     }
 
     internal fun håndterEgenmeldingsdager(
@@ -629,25 +631,51 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return this.tilstand.håndterRefusjonsopplysninger(yrkesaktivitet, this, behandlingkilde, dokumentsporing, aktivitetslogg, beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar, benyttetRefusjonsopplysninger)
         }
 
-        fun håndterFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt) {
-            when (tilstand) {
-                Tilstand.Uberegnet -> oppdaterMedFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt)
-
-                Tilstand.AnnullertPeriode,
-                Tilstand.AvsluttetUtenVedtak,
-                Tilstand.Beregnet,
-                Tilstand.BeregnetAnnullering,
-                Tilstand.BeregnetOmgjøring,
-                Tilstand.BeregnetRevurdering,
-                Tilstand.OverførtAnnullering,
-                Tilstand.RevurdertVedtakAvvist,
-                Tilstand.TilInfotrygd,
-                Tilstand.UberegnetAnnullering,
+        fun håndterFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
+            return when (tilstand) {
                 Tilstand.UberegnetOmgjøring,
                 Tilstand.UberegnetRevurdering,
+                Tilstand.Uberegnet -> {
+                    oppdaterMedFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt)
+                    null
+                }
+
+                Tilstand.Beregnet -> {
+                    gjeldende.forkastUtbetaling(aktivitetslogg)
+                    oppdaterMedFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt)
+                    tilstand(Tilstand.Uberegnet, aktivitetslogg)
+                    null
+                }
+
+                Tilstand.BeregnetOmgjøring -> {
+                    gjeldende.forkastUtbetaling(aktivitetslogg)
+                    oppdaterMedFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt)
+                    tilstand(Tilstand.UberegnetOmgjøring, aktivitetslogg)
+                    null
+                }
+
+                Tilstand.BeregnetRevurdering -> {
+                    gjeldende.forkastUtbetaling(aktivitetslogg)
+                    oppdaterMedFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt)
+                    tilstand(Tilstand.UberegnetRevurdering, aktivitetslogg)
+                    null
+                }
+
+                Tilstand.AvsluttetUtenVedtak -> {
+                    nyBehandlingMedFaktaavklartInntekt(behandlingkilde, arbeidstakerFaktaavklartInntekt, Tilstand.UberegnetOmgjøring, yrkesaktivitet)
+                }
+
                 Tilstand.VedtakFattet,
                 Tilstand.VedtakIverksatt -> {
+                    nyBehandlingMedFaktaavklartInntekt(behandlingkilde, arbeidstakerFaktaavklartInntekt, Tilstand.UberegnetRevurdering, yrkesaktivitet)
                 }
+
+                Tilstand.RevurdertVedtakAvvist,
+                Tilstand.OverførtAnnullering,
+                Tilstand.BeregnetAnnullering,
+                Tilstand.UberegnetAnnullering,
+                Tilstand.AnnullertPeriode,
+                Tilstand.TilInfotrygd -> error("Forventer ikke å håndtere faktaavklart inntekt i ${tilstand::class}")
             }
         }
 
@@ -906,7 +934,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             internal fun kopierMedFaktaavklartInntekt(
                 arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
             ) = kopierMed(
-                faktaavklartInntekt = arbeidstakerFaktaavklartInntekt
+                grunnlagsdata = null,
+                utbetaling = null,
+                utbetalingstidslinje = Utbetalingstidslinje(),
+                maksdatoresultat = Maksdatoresultat.IkkeVurdert,
+                faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
+                inntektjusteringer = emptyMap()
             )
 
             internal fun kopierMedBeregning(beregning: BeregnetBehandling) = kopierMed(
@@ -1274,6 +1307,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 kilde = behandlingkilde
             )
         }
+
+        private fun nyBehandlingMedFaktaavklartInntekt(behandlingkilde: Behandlingkilde, faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, starttilstand: Tilstand, yrkesaktivitet: Yrkesaktivitet): Behandling {
+            yrkesaktivitet.låsOpp(periode)
+            return Behandling(
+                observatører = this.observatører,
+                tilstand = starttilstand,
+                endringer = listOf(endringer.last().kopierMedFaktaavklartInntekt(faktaavklartInntekt)),
+                avsluttet = null,
+                kilde = behandlingkilde
+            )
+        }
+
 
         private fun sikreNyBehandling(
             yrkesaktivitet: Yrkesaktivitet,
