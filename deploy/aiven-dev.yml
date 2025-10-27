@@ -283,4 +283,7 @@ spec:
         - team: tbd
           application: spesidaler-opprydding-dev
           access: readwrite
+        - team: tbd
+          application: sparkel-forsikring
+          access: readwrite
 
