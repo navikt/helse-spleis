@@ -174,13 +174,10 @@ import no.nav.helse.person.tilstandsmaskin.Vedtaksperiodetilstand
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverberegningBuilder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
-import no.nav.helse.utbetalingstidslinje.BeregnetMaksdato
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
@@ -2365,45 +2362,16 @@ internal class Vedtaksperiode private constructor(
 
     private fun lagBeregnetBehandling(aktivitetslogg: IAktivitetslogg, beregning: BeregnetPeriode, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>): BeregnetBehandling {
         val beregnetBehandling = BeregnetBehandling(
-            utbetaling = lagUtbetaling(aktivitetslogg, beregning.utbetalingstidslinje, beregning.maksdatoresultat),
             maksdatoresultat = Maksdatoresultat.oversettFra(beregning.maksdatoresultat),
             utbetalingstidslinje = beregning.utbetalingstidslinje,
             grunnlagsdata = grunnlagsdata,
             alleInntektjusteringer = alleInntektjusteringer
         )
-        beregnetBehandling.utbetaling.nyVedtaksperiodeUtbetaling(this.id)
         behandlinger.beregnetBehandling(aktivitetslogg, beregnetBehandling)
+        val utbetaling = behandlinger.lagUtbetaling(aktivitetslogg, yrkesaktivitet.utbetalinger, yrkesaktivitet.organisasjonsnummer, person.fødselsnummer)
+        yrkesaktivitet.leggTilNyUtbetaling(aktivitetslogg, utbetaling)
+        utbetaling.nyVedtaksperiodeUtbetaling(this.id)
         return beregnetBehandling
-    }
-
-    private fun lagUtbetaling(aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, maksdatoresultat: BeregnetMaksdato): Utbetaling {
-        val utbetalingtype = if (behandlinger.harFattetVedtak())
-            Utbetalingtype.REVURDERING
-        else
-            Utbetalingtype.UTBETALING
-
-        val klassekodeBruker = when (behandlinger.arbeidssituasjon) {
-            Endring.Arbeidssituasjon.ARBEIDSLEDIG,
-            Endring.Arbeidssituasjon.ARBEIDSTAKER -> Klassekode.SykepengerArbeidstakerOrdinær
-
-            Endring.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> Klassekode.SelvstendigNæringsdrivendeOppgavepliktig
-            Endring.Arbeidssituasjon.BARNEPASSER -> Klassekode.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
-            Endring.Arbeidssituasjon.JORDBRUKER -> Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk
-            Endring.Arbeidssituasjon.FRILANSER,
-            Endring.Arbeidssituasjon.FISKER,
-            Endring.Arbeidssituasjon.ANNET -> TODO("har ikke klassekode for ${behandlinger.arbeidssituasjon}")
-        }
-
-        return yrkesaktivitet.lagNyUtbetaling(
-            aktivitetslogg = aktivitetslogg,
-            utbetalingstidslinje = utbetalingstidslinje,
-            klassekodeBruker = klassekodeBruker,
-            maksdato = maksdatoresultat.maksdato,
-            forbrukteSykedager = maksdatoresultat.antallForbrukteDager,
-            gjenståendeSykedager = maksdatoresultat.gjenståendeDager,
-            periode = periode,
-            type = utbetalingtype
-        )
     }
 
     private fun perioderDetSkalBeregnesUtbetalingFor(): List<Vedtaksperiode> {

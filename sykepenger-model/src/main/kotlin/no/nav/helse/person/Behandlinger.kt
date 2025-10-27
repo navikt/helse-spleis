@@ -66,8 +66,12 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingView
+import no.nav.helse.utbetalingslinjer.Utbetalingkladd
+import no.nav.helse.utbetalingslinjer.UtbetalingkladdBuilder
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
@@ -258,6 +262,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     ) {
         behandlinger.last().utbetaling(aktivitetslogg, beregning)
     }
+
+    internal fun lagUtbetaling(
+        aktivitetslogg: IAktivitetslogg,
+        utbetalinger: List<Utbetaling>,
+        mottakerRefusjon: String,
+        mottakerBruker: String
+    ) = behandlinger.last().lagUtbetaling(aktivitetslogg, utbetalinger, mottakerRefusjon, mottakerBruker)
 
     internal fun forkast(yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, automatiskBehandling: Boolean, aktivitetslogg: IAktivitetslogg) {
         leggTilNyBehandling(behandlinger.last().forkastVedtaksperiode(yrkesaktivitet, behandlingkilde, aktivitetslogg))
@@ -569,6 +580,40 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         fun utbetalingstidslinje() = gjeldende.utbetalingstidslinje
 
+        fun lagUtbetaling(
+            aktivitetslogg: IAktivitetslogg,
+            utbetalinger: List<Utbetaling>,
+            mottakerRefusjon: String,
+            mottakerBruker: String
+        ) = when (tilstand) {
+            Tilstand.Beregnet,
+            Tilstand.BeregnetOmgjøring,
+            Tilstand.BeregnetRevurdering -> {
+                val utbetalingen = BeregnetBehandling(
+                    maksdatoresultat = gjeldende.maksdatoresultat,
+                    utbetalingstidslinje = gjeldende.utbetalingstidslinje,
+                    grunnlagsdata = gjeldende.grunnlagsdata!!,
+                    alleInntektjusteringer = gjeldende.inntektjusteringer
+                ).lagUtbetaling(aktivitetslogg, gjeldende.periode, utbetalinger, mottakerRefusjon, mottakerBruker, tilstand is Tilstand.BeregnetRevurdering, gjeldende.arbeidssituasjon)
+
+                this.nyEndring(gjeldende.kopierMedUtbetaling(utbetalingen))
+                utbetalingen
+            }
+
+            Tilstand.AnnullertPeriode,
+            Tilstand.AvsluttetUtenVedtak,
+            Tilstand.BeregnetAnnullering,
+            Tilstand.OverførtAnnullering,
+            Tilstand.RevurdertVedtakAvvist,
+            Tilstand.TilInfotrygd,
+            Tilstand.Uberegnet,
+            Tilstand.UberegnetAnnullering,
+            Tilstand.UberegnetOmgjøring,
+            Tilstand.UberegnetRevurdering,
+            Tilstand.VedtakFattet,
+            Tilstand.VedtakIverksatt -> error("Forventer ikke å lage utbetaling i tilstand $tilstand")
+        }
+
         internal fun håndterRefusjonsopplysninger(
             yrkesaktivitet: Yrkesaktivitet,
             behandlingkilde: Behandlingkilde,
@@ -864,13 +909,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 faktaavklartInntekt = arbeidstakerFaktaavklartInntekt
             )
 
-            internal fun kopierMedUtbetaling(beregning: BeregnetBehandling) = kopierMed(
+            internal fun kopierMedBeregning(beregning: BeregnetBehandling) = kopierMed(
                 grunnlagsdata = beregning.grunnlagsdata,
-                utbetaling = beregning.utbetaling,
                 utbetalingstidslinje = beregning.utbetalingstidslinje.subset(this.periode),
                 maksdatoresultat = beregning.maksdatoresultat,
                 inntektjusteringer = beregning.alleInntektjusteringer
             )
+
+            internal fun kopierMedUtbetaling(utbetaling: Utbetaling) = kopierMed(utbetaling = utbetaling)
 
             internal fun kopierMedAnnullering(grunnlagsdata: VilkårsgrunnlagElement, annullering: Utbetaling) = kopierMed(
                 grunnlagsdata = grunnlagsdata,
@@ -1042,7 +1088,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         fun utbetaling(
             aktivitetslogg: IAktivitetslogg,
             beregning: BeregnetBehandling
-        ) = tilstand.utbetaling(this, aktivitetslogg, beregning)
+        ) = tilstand.beregning(this, aktivitetslogg, beregning)
 
         internal fun håndterAnnullering(yrkesaktivitet: Yrkesaktivitet, behandlingskilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
             return this.tilstand.håndterAnnullering(this, yrkesaktivitet, behandlingskilde, aktivitetslogg)
@@ -1464,7 +1510,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             internal fun List<Behandling>.grunnbeløpsregulert(): Boolean {
                 val gjeldende = gjeldendeEndring().takeIf { it.grunnlagsdata != null } ?: return false
-                val forrige = forrigeEndringMed { it.tidsstempel < gjeldende.tidsstempel && it.grunnlagsdata != null } ?: return false
+                val forrige = forrigeEndringMed { it.tidsstempel < gjeldende.tidsstempel && it.grunnlagsdata != null && it.utbetaling != null } ?: return false
                 if (forrige.skjæringstidspunkt != gjeldende.skjæringstidspunkt) return false
                 return listOf(forrige.grunnlagsdata!!, gjeldende.grunnlagsdata!!).harUlikeGrunnbeløp()
             }
@@ -1589,12 +1635,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 error("Støtter ikke å forkaste utbetaling utbetaling i $this")
             }
 
-            fun utbetaling(
+            fun beregning(
                 behandling: Behandling,
                 aktivitetslogg: IAktivitetslogg,
                 beregning: BeregnetBehandling
             ) {
-                error("Støtter ikke å opprette utbetaling i $this")
+                error("Støtter ikke å beregne behandlingen i $this")
             }
 
             fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing) {}
@@ -1651,12 +1697,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.kopierMedDokument(dokument)
 
                 override fun utenUtbetaling(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {}
-                override fun utbetaling(
+                override fun beregning(
                     behandling: Behandling,
                     aktivitetslogg: IAktivitetslogg,
                     beregning: BeregnetBehandling
                 ) {
-                    behandling.nyEndring(behandling.gjeldende.kopierMedUtbetaling(beregning))
+                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning))
                     behandling.tilstand(Beregnet, aktivitetslogg)
                 }
 
@@ -1669,12 +1715,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             data object UberegnetOmgjøring : Tilstand by (Uberegnet) {
                 override fun behandlingOpprettet(behandling: Behandling) = behandling.emitNyBehandlingOpprettet(PersonObserver.BehandlingOpprettetEvent.Type.Omgjøring)
-                override fun utbetaling(
+                override fun beregning(
                     behandling: Behandling,
                     aktivitetslogg: IAktivitetslogg,
                     beregning: BeregnetBehandling,
                 ) {
-                    behandling.nyEndring(behandling.gjeldende.kopierMedUtbetaling(beregning))
+                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning))
                     behandling.tilstand(BeregnetOmgjøring, aktivitetslogg)
                 }
             }
@@ -1682,12 +1728,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             data object UberegnetRevurdering : Tilstand by (Uberegnet) {
                 override fun behandlingOpprettet(behandling: Behandling) = behandling.emitNyBehandlingOpprettet(PersonObserver.BehandlingOpprettetEvent.Type.Revurdering)
 
-                override fun utbetaling(
+                override fun beregning(
                     behandling: Behandling,
                     aktivitetslogg: IAktivitetslogg,
                     beregning: BeregnetBehandling
                 ) {
-                    behandling.nyEndring(behandling.gjeldende.kopierMedUtbetaling(beregning))
+                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning))
                     behandling.tilstand(BeregnetRevurdering, aktivitetslogg)
                 }
 
@@ -1705,7 +1751,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             data object Beregnet : Tilstand {
                 override fun entering(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
-                    checkNotNull(behandling.gjeldende.utbetaling)
                     checkNotNull(behandling.gjeldende.grunnlagsdata)
                 }
 
@@ -2175,12 +2220,66 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 }
 
 internal data class BeregnetBehandling(
-    val utbetaling: Utbetaling,
     val maksdatoresultat: Maksdatoresultat,
     val utbetalingstidslinje: Utbetalingstidslinje,
     val grunnlagsdata: VilkårsgrunnlagElement,
     val alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>
-)
+) {
+    fun lagUtbetaling(
+        aktivitetslogg: IAktivitetslogg,
+        periode: Periode,
+        utbetalinger: List<Utbetaling>,
+        mottakerRefusjon: String,
+        mottakerBruker: String,
+        harFattetVedtak: Boolean,
+        arbeidssituasjon: Arbeidssituasjon
+    ): Utbetaling {
+        val utbetalingtype = if (harFattetVedtak)
+            Utbetalingtype.REVURDERING
+        else
+            Utbetalingtype.UTBETALING
+
+        val klassekodeBruker = when (arbeidssituasjon) {
+            Arbeidssituasjon.ARBEIDSLEDIG,
+            Arbeidssituasjon.ARBEIDSTAKER -> Klassekode.SykepengerArbeidstakerOrdinær
+
+            Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> Klassekode.SelvstendigNæringsdrivendeOppgavepliktig
+            Arbeidssituasjon.BARNEPASSER -> Klassekode.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
+            Arbeidssituasjon.JORDBRUKER -> Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk
+            Arbeidssituasjon.FRILANSER,
+            Arbeidssituasjon.FISKER,
+            Arbeidssituasjon.ANNET -> TODO("har ikke klassekode for $arbeidssituasjon")
+        }
+
+        val utbetalingen = Utbetaling.lagUtbetaling(
+            utbetalinger = utbetalinger,
+            vedtaksperiodekladd = lagUtbetalingkladd(utbetalingstidslinje, mottakerRefusjon, mottakerBruker, klassekodeBruker),
+            utbetalingstidslinje = utbetalingstidslinje,
+            periode = periode,
+            aktivitetslogg = aktivitetslogg,
+            maksdato = maksdatoresultat.maksdato,
+            forbrukteSykedager = maksdatoresultat.antallForbrukteDager,
+            gjenståendeSykedager = maksdatoresultat.gjenståendeDager,
+            type = utbetalingtype
+        )
+
+        return utbetalingen
+    }
+
+    private fun lagUtbetalingkladd(
+        utbetalingstidslinje: Utbetalingstidslinje,
+        mottakerRefusjon: String,
+        mottakerBruker: String,
+        klassekodeBruker: Klassekode
+    ): Utbetalingkladd {
+        return UtbetalingkladdBuilder(
+            tidslinje = utbetalingstidslinje,
+            mottakerRefusjon = mottakerRefusjon,
+            mottakerBruker = mottakerBruker,
+            klassekodeBruker = klassekodeBruker
+        ).build()
+    }
+}
 
 internal data class BehandlingerView(
     val behandlinger: List<BehandlingView>,

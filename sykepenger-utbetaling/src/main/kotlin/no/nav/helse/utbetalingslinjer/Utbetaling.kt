@@ -194,7 +194,7 @@ class Utbetaling private constructor(
         if (harNegativtTotalbeløp) aktivitetslogg.varsel(Varselkode.RV_SI_3)
     }
 
-    fun sisteAktiveMedSammeKorrelasjonsId(utbetalinger: MutableList<Utbetaling>): Utbetaling? {
+    fun sisteAktiveMedSammeKorrelasjonsId(utbetalinger: List<Utbetaling>): Utbetaling? {
         val aktiveUtbetalinger = utbetalinger.aktive()
 
         val sisteUtbetalteForUtbetaling = aktiveUtbetalinger.singleOrNull { it.hørerSammen(this) }

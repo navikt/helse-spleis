@@ -98,7 +98,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingslinjer.Fagområde
-import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
@@ -107,7 +106,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAv
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.validerNyUtbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd
-import no.nav.helse.utbetalingslinjer.UtbetalingkladdBuilder
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeberegner
@@ -128,7 +126,7 @@ internal class Yrkesaktivitet private constructor(
     perioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>,
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
     private val forkastede: MutableList<ForkastetVedtaksperiode>,
-    private val utbetalinger: MutableList<Utbetaling>,
+    private val _utbetalinger: MutableList<Utbetaling>,
     private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
     private val ubrukteRefusjonsopplysninger: Refusjonsservitør,
     private val regelverkslogg: Regelverkslogg
@@ -143,7 +141,7 @@ internal class Yrkesaktivitet private constructor(
         perioderUtenNavAnsvar = emptyList(),
         vedtaksperioder = mutableListOf(),
         forkastede = mutableListOf(),
-        utbetalinger = mutableListOf(),
+        _utbetalinger = mutableListOf(),
         feriepengeutbetalinger = mutableListOf(),
         ubrukteRefusjonsopplysninger = Refusjonsservitør(),
         regelverkslogg = regelverkslogg
@@ -159,15 +157,17 @@ internal class Yrkesaktivitet private constructor(
     internal var perioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar> = perioderUtenNavAnsvar
         private set
 
+    internal val utbetalinger get() = _utbetalinger.toList()
+
     init {
-        utbetalinger.forEach { it.registrer(this) }
+        _utbetalinger.forEach { it.registrer(this) }
     }
 
     fun view(): ArbeidsgiverView = ArbeidsgiverView(
         organisasjonsnummer = organisasjonsnummer,
         yrkesaktivitetssporing = yrkesaktivitetstype,
         sykdomshistorikk = sykdomshistorikk.view(),
-        utbetalinger = utbetalinger.map { it.view },
+        utbetalinger = _utbetalinger.map { it.view },
         inntektshistorikk = inntektshistorikk.view(),
         sykmeldingsperioder = sykmeldingsperioder.view(),
         ubrukteRefusjonsopplysninger = ubrukteRefusjonsopplysninger.view(),
@@ -280,7 +280,7 @@ internal class Yrkesaktivitet private constructor(
             .forEach { it.sykmeldingsperioder.fjern(periode) }
 
         private fun Iterable<Yrkesaktivitet>.harPågåeneAnnullering() =
-            any { it.utbetalinger.any { utbetaling -> utbetaling.erAnnulleringInFlight() } }
+            any { it._utbetalinger.any { utbetaling -> utbetaling.erAnnulleringInFlight() } }
 
         private fun Iterable<Yrkesaktivitet>.førsteAuuSomVilUtbetales() =
             nåværendeVedtaksperioder(AUU_SOM_VIL_UTBETALES).minOrNull()
@@ -335,7 +335,7 @@ internal class Yrkesaktivitet private constructor(
                 perioderUtenNavAnsvar = dto.perioderUtenNavAnsvar.map { PeriodeUtenNavAnsvar.gjenopprett(it) },
                 vedtaksperioder = vedtaksperioder,
                 forkastede = forkastede,
-                utbetalinger = utbetalinger.toMutableList(),
+                _utbetalinger = utbetalinger.toMutableList(),
                 feriepengeutbetalinger = dto.feriepengeutbetalinger.map { Feriepengeutbetaling.gjenopprett(it) }
                     .toMutableList(),
                 ubrukteRefusjonsopplysninger = Refusjonsservitør.gjenopprett(dto.ubrukteRefusjonsopplysninger),
@@ -382,7 +382,6 @@ internal class Yrkesaktivitet private constructor(
     }
 
     internal fun organisasjonsnummer() = organisasjonsnummer
-    internal fun utbetaling() = utbetalinger.lastOrNull()
     internal fun grunnlagForFeriepenger(): Feriepengegrunnlagstidslinje {
         val feriepengetidslinje = fun(oppdrag: Oppdrag, mottaker: Mottaker): Feriepengegrunnlagstidslinje {
             return Feriepengegrunnlagstidslinje.Builder().apply {
@@ -403,40 +402,6 @@ internal class Yrkesaktivitet private constructor(
             .fold(Feriepengegrunnlagstidslinje(emptyList()), Feriepengegrunnlagstidslinje::plus)
     }
 
-    private fun lagUtbetalingkladd(utbetalingstidslinje: Utbetalingstidslinje, klassekodeBruker: Klassekode): Utbetalingkladd {
-        return UtbetalingkladdBuilder(
-            tidslinje = utbetalingstidslinje,
-            mottakerRefusjon = organisasjonsnummer,
-            mottakerBruker = person.fødselsnummer,
-            klassekodeBruker = klassekodeBruker
-        ).build()
-    }
-
-    internal fun lagNyUtbetaling(
-        aktivitetslogg: IAktivitetslogg,
-        utbetalingstidslinje: Utbetalingstidslinje,
-        klassekodeBruker: Klassekode,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int,
-        gjenståendeSykedager: Int,
-        periode: Periode,
-        type: Utbetalingtype
-    ): Utbetaling {
-        val utbetalingen = Utbetaling.lagUtbetaling(
-            utbetalinger = utbetalinger,
-            vedtaksperiodekladd = lagUtbetalingkladd(utbetalingstidslinje, klassekodeBruker),
-            utbetalingstidslinje = utbetalingstidslinje,
-            periode = periode,
-            aktivitetslogg = aktivitetslogg,
-            maksdato = maksdato,
-            forbrukteSykedager = forbrukteSykedager,
-            gjenståendeSykedager = gjenståendeSykedager,
-            type = type
-        )
-        nyUtbetaling(aktivitetslogg, utbetalingen)
-        return utbetalingen
-    }
-
     internal fun lagTomUtbetaling(periode: Periode, type: Utbetalingtype): Utbetaling {
         val tomUtbetaling = Utbetaling.lagTomUtbetaling(
             vedtaksperiodekladd = Utbetalingkladd(
@@ -446,18 +411,18 @@ internal class Yrkesaktivitet private constructor(
             periode = periode,
             type = type
         )
-        check(utbetalinger.tillaterOpprettelseAvUtbetaling(tomUtbetaling)) { "Har laget en overlappende utbetaling" }
-        utbetalinger.add(tomUtbetaling)
+        check(_utbetalinger.tillaterOpprettelseAvUtbetaling(tomUtbetaling)) { "Har laget en overlappende utbetaling" }
+        _utbetalinger.add(tomUtbetaling)
         return tomUtbetaling
     }
 
-    private fun nyUtbetaling(
+    internal fun leggTilNyUtbetaling(
         aktivitetslogg: IAktivitetslogg,
         utbetaling: Utbetaling
     ) {
-        utbetalinger.validerNyUtbetaling(utbetaling)
-        check(utbetalinger.tillaterOpprettelseAvUtbetaling(utbetaling)) { "Har laget en overlappende utbetaling" }
-        utbetalinger.add(utbetaling)
+        _utbetalinger.validerNyUtbetaling(utbetaling)
+        check(_utbetalinger.tillaterOpprettelseAvUtbetaling(utbetaling)) { "Har laget en overlappende utbetaling" }
+        _utbetalinger.add(utbetaling)
         utbetaling.registrer(this)
         utbetaling.opprett(aktivitetslogg)
     }
@@ -749,7 +714,7 @@ internal class Yrkesaktivitet private constructor(
             ?: Utbetaling.Vurdering(true, "Automatisk behandlet", "tbd@nav.no", LocalDateTime.now(), true)
         val annullering = utbetalingSomSkalAnnulleres.lagAnnulleringsutbetaling(aktivitetslogg, vurdering)
         checkNotNull(annullering) { "Klarte ikke lage annullering for utbetaling ${utbetalingSomSkalAnnulleres.id}. Det er litt rart, eller?" }
-        nyUtbetaling(aktivitetslogg, annullering)
+        leggTilNyUtbetaling(aktivitetslogg, annullering)
         return annullering
     }
 
@@ -1218,7 +1183,7 @@ internal class Yrkesaktivitet private constructor(
             perioderUtenNavAnsvar = perioderUtenNavAnsvar.map { it.dto() },
             vedtaksperioder = vedtaksperioderDto,
             forkastede = forkastede.map { it.dto() },
-            utbetalinger = utbetalinger.map { it.dto() },
+            utbetalinger = _utbetalinger.map { it.dto() },
             feriepengeutbetalinger = feriepengeutbetalinger.map { it.dto() },
             ubrukteRefusjonsopplysninger = UbrukteRefusjonsopplysningerUtDto(
                 ubrukteRefusjonsopplysninger = ubrukteRefusjonsopplysninger.dto(),

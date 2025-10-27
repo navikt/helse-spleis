@@ -146,8 +146,8 @@ internal class MaksdatoE2ETest : AbstractDslTest() {
             forlengVedtakUtenUtbetaling(juni)
             forlengVedtakUtenUtbetaling(juli)
 
-            assertEquals(Maksdatoresultat.Bestemmelse.ORDINÆR_RETT, inspektør(1.vedtaksperiode).maksdatoer.single().bestemmelse)
-            val oppholdsdagerJuli = inspektør(7.vedtaksperiode).maksdatoer.single().oppholdsdager
+            assertEquals(Maksdatoresultat.Bestemmelse.ORDINÆR_RETT, inspektør(1.vedtaksperiode).maksdatoer.last().bestemmelse)
+            val oppholdsdagerJuli = inspektør(7.vedtaksperiode).maksdatoer.last().oppholdsdager
             assertEquals(182, oppholdsdagerJuli.sumOf { it.count() })
             assertEquals(31.juli, oppholdsdagerJuli.last().endInclusive)
 
@@ -178,8 +178,8 @@ internal class MaksdatoE2ETest : AbstractDslTest() {
             forlengVedtakUtenUtbetaling(juni)
             forlengVedtakUtenUtbetaling(juli)
 
-            assertEquals(Maksdatoresultat.Bestemmelse.BEGRENSET_RETT, inspektør(1.vedtaksperiode).maksdatoer.single().bestemmelse)
-            val oppholdsdagerJuli = inspektør(7.vedtaksperiode).maksdatoer.single().oppholdsdager
+            assertEquals(Maksdatoresultat.Bestemmelse.BEGRENSET_RETT, inspektør(1.vedtaksperiode).maksdatoer.last().bestemmelse)
+            val oppholdsdagerJuli = inspektør(7.vedtaksperiode).maksdatoer.last().oppholdsdager
             assertEquals(182, oppholdsdagerJuli.sumOf { it.count() })
             assertEquals(31.juli, oppholdsdagerJuli.last().endInclusive)
 
