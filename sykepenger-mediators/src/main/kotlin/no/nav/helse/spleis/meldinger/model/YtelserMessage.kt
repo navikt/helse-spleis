@@ -7,6 +7,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDate
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.GradertPeriode
@@ -17,12 +18,15 @@ import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
+import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -84,6 +88,25 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
         )
     })
 
+
+    private val selvstendigForsikring = when(yrkesaktivitetssporing) {
+        Behandlingsporing.Yrkesaktivitet.Selvstendig -> packet["@løsning.${Behovtype.SelvstendigForsikring.name}"].firstOrNull()?.let {
+            SelvstendigForsikring(
+                startdato = it.path("startdato").asLocalDate(),
+                sluttdato = it.path("sluttdato").asOptionalLocalDate(),
+                type = SelvstendigForsikring.Forsikringstype.valueOf(it.path("forsikringstype").asText())
+            )
+        }.also {
+            if (packet["@løsning.${Behovtype.SelvstendigForsikring.name}"].size() > 1) {
+                sikkerlogg.warn("Mottok mer enn én selvstendig forsikring i melding ${meldingsporing.id}")
+            }
+        }
+
+        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+        is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
+        Behandlingsporing.Yrkesaktivitet.Frilans -> null
+    }
+
     init {
         packet["@løsning.${Behovtype.Arbeidsavklaringspenger.name}.meldekortperioder"].map(::asDatePair)
             .partition { it.first <= it.second }
@@ -113,7 +136,8 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             institusjonsopphold = institusjonsopphold,
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger.map { Periode(it.first, it.second) }),
             dagpenger = Dagpenger(dagpenger.map { Periode(it.first, it.second) }),
-            inntekterForBeregning = inntekterForBeregning
+            inntekterForBeregning = inntekterForBeregning,
+            selvstendigForsikring = selvstendigForsikring
         ).also {
             if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom for")
             if (ugyldigeDagpengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom for")

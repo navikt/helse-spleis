@@ -24,6 +24,7 @@ import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
+import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmelding
@@ -190,7 +191,8 @@ internal abstract class AbstractObservableTest {
         orgnummer: String = ORGNUMMER,
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         inntekterForBeregning: List<Inntektsperiode> = emptyList(),
-        dagpenger: List<Periode> = emptyList()
+        dagpenger: List<Periode> = emptyList(),
+        selvstendigForsikring: SelvstendigForsikring? = null
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
@@ -213,7 +215,8 @@ internal abstract class AbstractObservableTest {
             ),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
-            dagpenger = Dagpenger(dagpenger)
+            dagpenger = Dagpenger(dagpenger),
+            selvstendigForsikring = selvstendigForsikring
         )
     }
 

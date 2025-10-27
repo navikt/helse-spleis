@@ -15,6 +15,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
@@ -47,6 +48,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class SelvstendigTest : AbstractDslTest() {
@@ -566,6 +568,7 @@ internal class SelvstendigTest : AbstractDslTest() {
         }
     }
 
+    @Disabled
     @Test
     fun `foreslår utbetaling på 80 prosent dekning ved oppgitt forsikring`() = Toggle.SelvstendigForsikring.enable {
         selvstendig {
@@ -582,6 +585,109 @@ internal class SelvstendigTest : AbstractDslTest() {
                 utbetalinginspektør.personOppdrag.single().inspektør.also { linje ->
                     assertEquals(1.januar til 31.januar, linje.periode)
                     assertEquals(1417, linje.beløp)
+                    assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
+                }
+            }
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt()
+        }
+    }
+
+
+    @Test
+    fun `foreslår utbetaling på 80 prosent dekning i ventetid ved denne type forsikring`() = Toggle.SelvstendigForsikring.enable {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode,
+                selvstendigForsikring = SelvstendigForsikring(
+                    startdato = 10.oktober(2017),
+                    sluttdato = null,
+                    type = SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn
+                )
+            )
+
+            val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
+            utbetalingstidslinje.subset(1.januar til 16.januar).forEach { assertUtbetalingsdag(it, Utbetalingsdag.Ventetidsdag::class,100) }
+
+            inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
+                assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
+                assertEquals(1, utbetalinginspektør.personOppdrag.size)
+                utbetalinginspektør.personOppdrag.single().inspektør.also { linje ->
+                    assertEquals(1.januar til 31.januar, linje.periode)
+                    assertEquals(1417, linje.beløp)
+                    assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
+                }
+            }
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt()
+
+            // Sjekk at forsikringen (dager nav overtar) er lagret på behandlingsendringen
+            assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+        }
+    }
+
+    @Test
+    fun `foreslår utbetaling på 100 prosent fra dag sytten`() = Toggle.SelvstendigForsikring.enable {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode,
+                selvstendigForsikring = SelvstendigForsikring(
+                    startdato = 10.oktober(2017),
+                    sluttdato = null,
+                    type = SelvstendigForsikring.Forsikringstype.HundreProsentFraDagSytten
+                )
+            )
+
+            val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
+            utbetalingstidslinje.subset(1.januar til 16.januar).forEach { assertUtbetalingsdag(it, Utbetalingsdag.Ventetidsdag::class,100) }
+
+            inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
+                assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
+                assertEquals(1, utbetalinginspektør.personOppdrag.size)
+                utbetalinginspektør.personOppdrag.single().inspektør.also { linje ->
+                    assertEquals(17.januar til 31.januar, linje.periode)
+                    assertEquals(1771, linje.beløp)
+                    assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
+                }
+            }
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt()
+        }
+    }
+
+    @Test
+    fun `foreslår utbetaling på 100 prosent fra dag 1`() = Toggle.SelvstendigForsikring.enable {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode,
+                selvstendigForsikring = SelvstendigForsikring(
+                    startdato = 10.oktober(2017),
+                    sluttdato = null,
+                    type = SelvstendigForsikring.Forsikringstype.HundreProsentFraDagEn
+                )
+            )
+
+            val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
+            utbetalingstidslinje.subset(1.januar til 16.januar).forEach { assertUtbetalingsdag(it, Utbetalingsdag.Ventetidsdag::class,100) }
+
+            inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
+                assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
+                assertEquals(1, utbetalinginspektør.personOppdrag.size)
+                utbetalinginspektør.personOppdrag.single().inspektør.also { linje ->
+                    assertEquals(1.januar til 31.januar, linje.periode)
+                    assertEquals(1771, linje.beløp)
                     assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
                 }
             }

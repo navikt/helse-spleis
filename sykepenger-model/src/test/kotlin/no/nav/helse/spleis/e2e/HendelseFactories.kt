@@ -34,6 +34,7 @@ import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
@@ -373,6 +374,7 @@ internal fun AbstractEndToEndTest.ytelser(
     arbeidsavklaringspenger: List<Periode> = emptyList(),
     inntekterForBeregning: List<Inntektsperiode> = emptyList(),
     dagpenger: List<Periode> = emptyList(),
+    selvstendigForsikring: SelvstendigForsikring? = null
 ): Ytelser {
     val meldingsreferanseId = UUID.randomUUID()
     return Ytelser(
@@ -399,7 +401,8 @@ internal fun AbstractEndToEndTest.ytelser(
         ),
         arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
         inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
-        dagpenger = Dagpenger(dagpenger)
+        dagpenger = Dagpenger(dagpenger),
+        selvstendigForsikring = selvstendigForsikring
     )
 }
 

@@ -19,9 +19,13 @@ import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.SelvstendigForsikring
+import no.nav.helse.hendelser.SelvstendigForsikring.Forsikringstype
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.vurdering
@@ -155,10 +159,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         )
     }
 
-    internal fun utbetalingstidslinjeBuilderForSelvstendig(): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode {
+    internal fun utbetalingstidslinjeBuilderForSelvstendig(selvstendigForsikring: SelvstendigForsikring?): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode {
         val dekningsgrad = when (val arbeidssituasjon = sisteBehandling.arbeidssituasjon) {
             Arbeidssituasjon.BARNEPASSER,
-            Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> 80.prosent
+            Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> when (selvstendigForsikring?.type) {
+                Forsikringstype.HundreProsentFraDagEn,
+                Forsikringstype.HundreProsentFraDagSytten -> 100.prosent
+
+                Forsikringstype.ÅttiProsentFraDagEn,
+                null -> 80.prosent
+            }
 
             Arbeidssituasjon.JORDBRUKER -> 100.prosent
 
@@ -167,6 +177,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             Arbeidssituasjon.ARBEIDSTAKER,
             Arbeidssituasjon.ARBEIDSLEDIG,
             Arbeidssituasjon.FRILANSER -> error("Har ikke implementert dekningsgrad for $arbeidssituasjon")
+        }
+
+        val dagerNavOvertarAnsvar = when (selvstendigForsikring?.type) {
+            Forsikringstype.HundreProsentFraDagEn,
+            Forsikringstype.ÅttiProsentFraDagEn -> behandlinger.last().dagerUtenNavAnsvar.dager
+
+            Forsikringstype.HundreProsentFraDagSytten,
+            null -> emptyList()
         }
 
         return SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
@@ -178,6 +196,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal val maksdato get() = sisteBehandling.maksdato
     internal val dagerNavOvertarAnsvar get() = sisteBehandling.dagerNavOvertarAnsvar
+    internal val dagerUtenNavAnsvar get() = behandlinger.last().dagerUtenNavAnsvar
     internal val faktaavklartInntekt get() = sisteBehandling.faktaavklartInntekt
     internal val arbeidssituasjon get() = sisteBehandling.arbeidssituasjon
     internal val utbetaling get() = sisteBehandling.utbetaling()
@@ -284,8 +303,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         checkNotNull(åpenBehandling).leggTilAnnullering(behandlingEventBus, utbetalingEventBus, annullering, vurdering,  forrigeVedtak, aktivitetslogg)
     }
 
-    internal fun beregnetBehandling(beregning: BeregnetBehandling) {
-        checkNotNull(åpenBehandling).utbetaling(beregning)
+    internal fun beregnetBehandling(beregning: BeregnetBehandling, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet) {
+        checkNotNull(åpenBehandling).utbetaling(beregning, yrkesaktivitet)
     }
 
     internal fun lagUtbetaling(
@@ -1035,11 +1054,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 )
             }
 
-            internal fun kopierMedBeregning(beregning: BeregnetBehandling) = kopierMed(
+            internal fun kopierMedBeregning(beregning: BeregnetBehandling, dagerNavOvertarAnsvar: List<Periode>) = kopierMed(
                 grunnlagsdata = beregning.grunnlagsdata,
                 utbetalingstidslinje = beregning.utbetalingstidslinje.subset(this.periode),
                 maksdatoresultat = beregning.maksdatoresultat,
-                inntektjusteringer = beregning.alleInntektjusteringer
+                inntektjusteringer = beregning.alleInntektjusteringer,
+                dagerNavOvertarAnsvar = dagerNavOvertarAnsvar
             )
 
             internal fun kopierMedUtbetaling(utbetaling: Utbetaling) = kopierMed(utbetaling = utbetaling)
@@ -1268,7 +1288,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         fun utbetaling() = gjeldende.utbetaling
-        fun utbetaling(beregning: BeregnetBehandling) = tilstand.beregning(this, beregning)
+        fun utbetaling(
+            beregning: BeregnetBehandling,
+            yrkesaktivitet: Behandlingsporing.Yrkesaktivitet
+        ) = tilstand.beregning(this, beregning, yrkesaktivitet)
 
         internal fun håndterAnnullering(utbetalingEventBus: UtbetalingEventBus, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg): Behandling? {
             return this.tilstand.håndterAnnullering(this, utbetalingEventBus, yrkesaktivitet, aktivitetslogg)
@@ -1637,7 +1660,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             fun beregning(
                 behandling: Behandling,
-                beregning: BeregnetBehandling
+                beregning: BeregnetBehandling,
+                yrkesaktivitet: Behandlingsporing.Yrkesaktivitet
             ) {
                 error("Støtter ikke å beregne behandlingen i $this")
             }
@@ -1680,9 +1704,29 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun utenBeregning(behandling: Behandling, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {}
                 override fun beregning(
                     behandling: Behandling,
-                    beregning: BeregnetBehandling
+                    beregning: BeregnetBehandling,
+                    yrkesaktivitet: Behandlingsporing.Yrkesaktivitet
                 ) {
-                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning))
+                    val dagerNavOvertarAnsvar = when (yrkesaktivitet) {
+                        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                        is Arbeidstaker,
+                        Behandlingsporing.Yrkesaktivitet.Frilans -> null
+
+                        Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (beregning.selvstendigForsikring?.type) {
+                            Forsikringstype.HundreProsentFraDagEn,
+                            Forsikringstype.ÅttiProsentFraDagEn -> behandling.dagerUtenNavAnsvar.dager
+
+                            Forsikringstype.HundreProsentFraDagSytten -> emptyList()
+                            null -> null
+                        }
+                    } ?: behandling.dagerNavOvertarAnsvar
+
+                    behandling.nyEndring(
+                        behandling.gjeldende.kopierMedBeregning(
+                            beregning,
+                            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar
+                        )
+                    )
                     behandling.tilstand(Beregnet)
                 }
 
@@ -1697,8 +1741,23 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun beregning(
                     behandling: Behandling,
                     beregning: BeregnetBehandling,
+                    yrkesaktivitet: Behandlingsporing.Yrkesaktivitet
                 ) {
-                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning))
+                    val dagerNavOvertarAnsvar = when (yrkesaktivitet) {
+                        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                        is Arbeidstaker,
+                        Behandlingsporing.Yrkesaktivitet.Frilans -> null
+
+                        Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (beregning.selvstendigForsikring?.type) {
+                            Forsikringstype.HundreProsentFraDagEn,
+                            Forsikringstype.ÅttiProsentFraDagEn -> behandling.dagerUtenNavAnsvar.dager
+
+                            Forsikringstype.HundreProsentFraDagSytten -> emptyList()
+                            null -> null
+                        }
+                    } ?: behandling.dagerNavOvertarAnsvar
+
+                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar))
                     behandling.tilstand(BeregnetOmgjøring)
                 }
             }
@@ -1710,9 +1769,24 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 override fun beregning(
                     behandling: Behandling,
-                    beregning: BeregnetBehandling
+                    beregning: BeregnetBehandling,
+                    yrkesaktivitet: Behandlingsporing.Yrkesaktivitet
                 ) {
-                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning))
+                    val dagerNavOvertarAnsvar = when (yrkesaktivitet) {
+                        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                        is Arbeidstaker,
+                        Behandlingsporing.Yrkesaktivitet.Frilans -> null
+
+                        Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (beregning.selvstendigForsikring?.type) {
+                            Forsikringstype.HundreProsentFraDagEn,
+                            Forsikringstype.ÅttiProsentFraDagEn -> behandling.dagerUtenNavAnsvar.dager
+
+                            Forsikringstype.HundreProsentFraDagSytten -> emptyList()
+                            null -> null
+                        }
+                    } ?: behandling.dagerNavOvertarAnsvar
+
+                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar))
                     behandling.tilstand(BeregnetRevurdering)
                 }
 
@@ -1932,7 +2006,8 @@ internal data class BeregnetBehandling(
     val maksdatoresultat: Maksdatoresultat,
     val utbetalingstidslinje: Utbetalingstidslinje,
     val grunnlagsdata: VilkårsgrunnlagElement,
-    val alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>
+    val alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
+    val selvstendigForsikring: SelvstendigForsikring? = null
 ) {
     fun lagUtbetaling(
         aktivitetslogg: IAktivitetslogg,

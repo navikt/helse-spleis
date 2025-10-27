@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
@@ -13,6 +15,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjons
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SelvstendigForsikring
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
@@ -88,6 +91,18 @@ internal class YtelserRiver(
             interestedIn("måndelig", JsonNode::asDouble)
             interestedIn("årlig", JsonNode::asDouble)
         }
+
+        message.requireKey("yrkesaktivitetstype")
+        if (message["yrkesaktivitetstype"].asText() == "SELVSTENDIG") {
+            message.require("@løsning.${SelvstendigForsikring.name}") {forsikringer ->
+                (forsikringer as ArrayNode).forEach {
+                    it.path("forsikringstype").textValue()
+                    it.path("startdato").asLocalDate()
+                    it.path("sluttdato").asOptionalLocalDate()
+                }
+            }
+        }
+
     }
 
     override fun createMessage(packet: JsonMessage) = YtelserMessage(

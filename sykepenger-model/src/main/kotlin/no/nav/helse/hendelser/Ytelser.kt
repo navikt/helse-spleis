@@ -23,7 +23,8 @@ class Ytelser(
     private val institusjonsopphold: Institusjonsopphold,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
     private val dagpenger: Dagpenger,
-    private val inntekterForBeregning: InntekterForBeregning
+    private val inntekterForBeregning: InntekterForBeregning,
+    private val selvstendigForsikring: SelvstendigForsikring?
 ) : Hendelse {
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
@@ -62,6 +63,8 @@ class Ytelser(
 
         return !aktivitetslogg.harFunksjonelleFeil()
     }
+
+    internal fun selvstendigForsikring(): SelvstendigForsikring? = selvstendigForsikring
 
     internal fun inntektsendringer(): Map<Arbeidsgiverberegning.Yrkesaktivitet, Beløpstidslinje> {
         val kilde = Kilde(metadata.meldingsreferanseId, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
