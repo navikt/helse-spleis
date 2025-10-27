@@ -187,6 +187,7 @@ import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering
 import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering.Companion.lagMinsteinntektsvurdering
 import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -2371,9 +2372,121 @@ internal class Vedtaksperiode private constructor(
             grunnlagsdata = grunnlagsdata,
             alleInntektjusteringer = alleInntektjusteringer
         )
+
+        beregnetBehandling.utbetaling.arbeidsgiverOppdrag.also { nyttOppdrag ->
+            //val nettobeløp = nettobeløpHensyntattAtOppdragVarDelt(beregnetBehandling)
+            val nettobeløp = nettobeløpHensyntattAtOppdragVarDelt2(beregnetBehandling)
+            //val nettobeløp = nettobeløp(beregnetBehandling)
+            check(nettobeløp == nyttOppdrag.nettoBeløp) {
+                "forventer at $nettobeløp skal være likt som ${nyttOppdrag.nettoBeløp}"
+            }
+        }
+
         beregnetBehandling.utbetaling.nyVedtaksperiodeUtbetaling(this.id)
         behandlinger.beregnetBehandling(aktivitetslogg, beregnetBehandling)
         return beregnetBehandling
+    }
+
+    private fun nettobeløp(beregnetBehandling: BeregnetBehandling): Int {
+        // denne varianten er ikke identisk med oppdrag.nettoBeløp()
+        // men jeg tenker den er mest sannferdig.
+        // det er kun endringer i *denne perioden* som skal ha noe å si.
+        // at oppdragene kan ha blitt delt med andre vedtaksperioder, og denne vedtaksperioden
+        // trekker nyere perioder ut, så skal jo de utbetales på egen fagsystemId etterpå uansett..
+        val totalbeløpForrigeBehandling = behandlinger
+            .utbetalingstidslinjeFraForrigeVedtak()
+            ?.totalbeløpRefusjon?.dagligInt
+            ?: 0
+        val totalbeløpDenneBehandlingen = beregnetBehandling
+            .utbetalingstidslinje
+            .totalbeløpRefusjon.dagligInt
+        return totalbeløpDenneBehandlingen - totalbeløpForrigeBehandling
+    }
+
+    private fun nettobeløpHensyntattAtOppdragVarDelt3(beregnetBehandling: BeregnetBehandling): Int {
+        // totalbeløpet som ble kjørt ut sist, fra og med denne perioden og frem.
+        // det er fordi *denne* perioden vil avslutte oppdraget på seg selv.
+        // altså vil differansen være enten ting som har skjedd i *denne* perioden, og/eller at senere perioder blir trekt ut
+        val forrigeUtbetaling = behandlinger.sisteUtbetalteUtbetaling()
+        // må hensynta at andre behandlinger kan ha kjørt oppdraget videre
+        val sisteKjøringSammeFagsystemId = forrigeUtbetaling?.let { yrkesaktivitet.sisteAktiveUtbetalingMedSammeKorrelasjonsId(it) }
+
+        val totalbeløpNyerePerioderForrigeOppdrag = sisteKjøringSammeFagsystemId
+            ?.arbeidsgiverOppdrag
+            ?.filter { it.periode.endInclusive > periode.endInclusive }
+            ?.map { it.copy(fom = maxOf(it.fom, periode.endInclusive.nesteDag)) }
+            ?.sumOf { it.totalbeløp() }
+            ?: 0
+
+        val totalbeløpForrigeBehandling = behandlinger
+            .utbetalingstidslinjeFraForrigeVedtak()
+            ?.totalbeløpRefusjon?.dagligInt
+            ?: 0
+
+        val totalbeløpDenneBehandlingen = beregnetBehandling
+            .utbetalingstidslinje
+            .totalbeløpRefusjon.dagligInt
+
+        // denne varianten er ikke identisk med oppdrag.nettoBeløp(),
+        // men jeg tenker den er mer sannferdig.
+        return totalbeløpDenneBehandlingen - (totalbeløpForrigeBehandling + totalbeløpNyerePerioderForrigeOppdrag)
+    }
+
+    private fun nettobeløpHensyntattAtOppdragVarDelt2(beregnetBehandling: BeregnetBehandling): Int {
+        // totalbeløpet som ble kjørt ut sist, fra og med denne perioden og frem.
+        // det er fordi *denne* perioden vil avslutte oppdraget på seg selv.
+        // altså vil differansen være enten ting som har skjedd i *denne* perioden, og/eller at senere perioder blir trekt ut
+        val forrigeUtbetaling = behandlinger.sisteUtbetalteUtbetaling()
+        // må hensynta at andre behandlinger kan ha kjørt oppdraget videre
+        val sisteKjøringSammeFagsystemId = forrigeUtbetaling?.let { yrkesaktivitet.sisteAktiveUtbetalingMedSammeKorrelasjonsId(it) }
+
+        val totalbeløpForrigeOppdrag = sisteKjøringSammeFagsystemId
+            ?.arbeidsgiverOppdrag
+            ?.filter { it.periode.endInclusive >= periode.start }
+            ?.map { it.copy(fom = maxOf(it.fom, periode.start)) }
+            ?.sumOf { it.totalbeløp() }
+            ?: 0
+
+        val totalbeløpDenneBehandlingen = beregnetBehandling
+            .utbetalingstidslinje
+            .totalbeløpRefusjon.dagligInt
+
+        return totalbeløpDenneBehandlingen - totalbeløpForrigeOppdrag
+    }
+
+    private fun nettobeløpHensyntattAtOppdragVarDelt(beregnetBehandling: BeregnetBehandling): Int {
+        // nettobeløp for  en behandling skulle i teorien være
+        // å ta totalbeløpet totalbeløpet fra den nye beregningen minus totalbeløpet
+        // fra forrige utbetalingstidslinje.
+        //
+        // men, siden oppdraget kan ha blitt delt med andre vedtaksperioder
+        // må vi justere for det ved å summere opp totalbeløpet
+        val totalbeløpForrigeOppdrag = behandlinger
+            .sisteUtbetalteUtbetaling()
+            ?.let {
+                // må hensynta at andre behandlinger kan ha kjørt oppdraget videre
+                yrkesaktivitet.sisteAktiveUtbetalingMedSammeKorrelasjonsId(it)
+            }
+            ?.arbeidsgiverOppdrag
+            ?.totalbeløp()
+            ?: 0
+
+        // håndterer at oppdraget kan ha blitt delt med andre vedtaksperioder
+        val totalbeløpForrigeOppdragFremTilPerioden = behandlinger
+            .sisteUtbetalteUtbetaling()
+            ?.arbeidsgiverOppdrag
+            ?.filter { it.periode.start < periode.start }
+            ?.map { it.copy(tom = minOf(it.tom, periode.start.minusDays(1))) }
+            ?.sumOf { it.totalbeløp() }
+            ?: 0
+
+        val totalbeløpDennePerioden = beregnetBehandling
+            .utbetalingstidslinje
+            .totalbeløpRefusjon.dagligInt
+
+        val nyttTotalbeløp = totalbeløpForrigeOppdragFremTilPerioden + totalbeløpDennePerioden
+        val nettobeløp = nyttTotalbeløp - totalbeløpForrigeOppdrag
+        return nettobeløp
     }
 
     private fun lagUtbetaling(aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, maksdatoresultat: BeregnetMaksdato): Utbetaling {
