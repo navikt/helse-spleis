@@ -8,17 +8,17 @@ import java.util.UUID
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.RefusjonservitørData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.ArbeidssituasjonData
-import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.ArbeidstakerFaktaavklartInntektData.InntektsopplysningskildeData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.PeriodeUtenNavAnsvarData
+import no.nav.helse.dto.SpannerPersonDto.ArbeidstakerFaktaavklartInntektData.InntektsopplysningskildeData.AORDNINGEN
+import no.nav.helse.dto.SpannerPersonDto.ArbeidstakerFaktaavklartInntektData.InntektsopplysningskildeData.ARBEIDSGIVER
+import no.nav.helse.dto.SpannerPersonDto.ArbeidstakerFaktaavklartInntektData.InntektsopplysningskildeData.INFOTRYGD
+import no.nav.helse.dto.SpannerPersonDto.ArbeidstakerFaktaavklartInntektData.SkatteopplysningData
 import no.nav.helse.dto.SpannerPersonDto.UtbetalingData
 import no.nav.helse.dto.SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData
-import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsopplysningstypeData
-import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData
-import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData.InntektsopplysningData.PensjonsgivendeInntektData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagInnslagData
 import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
@@ -27,6 +27,7 @@ import no.nav.helse.dto.serialisering.ArbeidstakerFaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.BehandlingendringUtDto
+import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.FeriepengeUtDto
 import no.nav.helse.dto.serialisering.FeriepengeoppdragUtDto
 import no.nav.helse.dto.serialisering.FeriepengeutbetalingslinjeUtDto
@@ -123,47 +124,10 @@ data class SpannerPersonDto(
 
         data class ArbeidsgiverInntektsopplysningData(
             val orgnummer: String,
-            val faktaavklartInntekt: InntektsopplysningData,
+            val faktaavklartInntekt: FaktaavklartInntektData,
             val korrigertInntekt: KorrigertInntektsopplysningData?,
             val skjønnsmessigFastsatt: SkjønnsmessigFastsattData?
         ) {
-            data class SkatteopplysningData(
-                val hendelseId: UUID,
-                val beløp: Double,
-                val måned: YearMonth,
-                val type: InntekttypeData,
-                val fordel: String,
-                val beskrivelse: String,
-                val tidsstempel: LocalDateTime
-            ) {
-                enum class InntekttypeData {
-                    LØNNSINNTEKT,
-                    NÆRINGSINNTEKT,
-                    PENSJON_ELLER_TRYGD,
-                    YTELSE_FRA_OFFENTLIGE
-                }
-            }
-
-            data class InntektsopplysningData(
-                val id: UUID,
-                val dato: LocalDate,
-                val hendelseId: UUID,
-                val beløp: InntektDto?,
-                val kilde: String?,
-                val type: InntektsopplysningstypeData,
-                val tidsstempel: LocalDateTime,
-                val skatteopplysninger: List<SkatteopplysningData>?,
-                val pensjonsgivendeInntekter: List<PensjonsgivendeInntektData>?,
-                val anvendtGrunnbeløp: InntektDto?
-            ) {
-                enum class InntektsopplysningstypeData {
-                    ARBEIDSTAKER,
-                    SELVSTENDIG
-                }
-
-                data class PensjonsgivendeInntektData(val årstall: Year, val beløp: InntektDto)
-            }
-
             data class KorrigertInntektsopplysningData(
                 val id: UUID,
                 val dato: LocalDate,
@@ -199,21 +163,9 @@ data class SpannerPersonDto(
         }
 
         data class SelvstendigInntektsopplysningData(
-            val faktaavklartInntekt: InntektsopplysningData,
+            val faktaavklartInntekt: FaktaavklartInntektData,
             val skjønnsmessigFastsatt: SkjønnsmessigFastsattData?
         ) {
-            data class InntektsopplysningData(
-                val id: UUID,
-                val dato: LocalDate,
-                val hendelseId: UUID,
-                val beløp: InntektDto?,
-                val tidsstempel: LocalDateTime,
-                val pensjonsgivendeInntekter: List<PensjonsgivendeInntektData>,
-                val anvendtGrunnbeløp: InntektDto
-            ) {
-                data class PensjonsgivendeInntektData(val årstall: Year, val beløp: InntektDto)
-            }
-
             data class SkjønnsmessigFastsattData( // holder denne separat fra ArbeidsgiverInntektsopplysningData for vi har foreløpig ingen god grunn til å slå dem sammen
                 val id: UUID,
                 val dato: LocalDate,
@@ -600,41 +552,6 @@ data class SpannerPersonDto(
                     FISKER,
                     ANNET
                 }
-
-                sealed interface FaktaavklartInntektData {
-                    val id: UUID
-                    val dato: LocalDate
-                    val hendelseId: UUID
-                    val beløp: InntektDto
-                    val tidsstempel: LocalDateTime
-                }
-
-                data class SelvstendigFaktaavklartInntektData(
-                    override val id: UUID,
-                    override val dato: LocalDate,
-                    override val hendelseId: UUID,
-                    override val beløp: InntektDto,
-                    override val tidsstempel: LocalDateTime,
-                    val pensjonsgivendeInntekter: List<PensjonsgivendeInntektData>,
-                    val anvendtGrunnbeløp: InntektDto
-                ) : FaktaavklartInntektData {
-                    data class PensjonsgivendeInntektData(val årstall: Year, val beløp: InntektDto)
-                }
-
-                data class ArbeidstakerFaktaavklartInntektData(
-                    override val id: UUID,
-                    override val dato: LocalDate,
-                    override val hendelseId: UUID,
-                    override val beløp: InntektDto,
-                    override val tidsstempel: LocalDateTime,
-                    val kilde: InntektsopplysningskildeData,
-                    val skatteopplysninger: List<SkatteopplysningData>?,
-                ) : FaktaavklartInntektData {
-                    enum class InntektsopplysningskildeData {
-                        ARBEIDSGIVER,
-                        AORDNINGEN
-                    }
-                }
             }
 
             data class DataForSimuleringData(
@@ -836,6 +753,63 @@ data class SpannerPersonDto(
 
     data class BeløpstidslinjeData(val perioder: List<BeløpstidslinjeperiodeData>)
     data class BeløpstidslinjeperiodeData(val fom: LocalDate, val tom: LocalDate, val dagligBeløp: Double, val meldingsreferanseId: UUID, val avsender: AvsenderData, val tidsstempel: LocalDateTime)
+
+    sealed interface FaktaavklartInntektData {
+        val id: UUID
+        val dato: LocalDate
+        val hendelseId: UUID
+        val beløp: InntektDto
+        val tidsstempel: LocalDateTime
+    }
+
+    data class SelvstendigFaktaavklartInntektData(
+        override val id: UUID,
+        override val dato: LocalDate,
+        override val hendelseId: UUID,
+        override val beløp: InntektDto,
+        override val tidsstempel: LocalDateTime,
+        val pensjonsgivendeInntekter: List<PensjonsgivendeInntektData>,
+        val anvendtGrunnbeløp: InntektDto
+    ) : FaktaavklartInntektData {
+        val type = "SELVSTENDIG"
+
+        data class PensjonsgivendeInntektData(val årstall: Year, val beløp: InntektDto)
+    }
+
+    data class ArbeidstakerFaktaavklartInntektData(
+        override val id: UUID,
+        override val dato: LocalDate,
+        override val hendelseId: UUID,
+        override val beløp: InntektDto,
+        override val tidsstempel: LocalDateTime,
+        val kilde: InntektsopplysningskildeData,
+        val skatteopplysninger: List<SkatteopplysningData>?,
+    ) : FaktaavklartInntektData {
+        val type = "ARBEIDSTAKER"
+
+        enum class InntektsopplysningskildeData {
+            ARBEIDSGIVER,
+            AORDNINGEN,
+            INFOTRYGD
+        }
+
+        data class SkatteopplysningData(
+            val hendelseId: UUID,
+            val beløp: Double,
+            val måned: YearMonth,
+            val type: InntekttypeData,
+            val fordel: String,
+            val beskrivelse: String,
+            val tidsstempel: LocalDateTime
+        ) {
+            enum class InntekttypeData {
+                LØNNSINNTEKT,
+                NÆRINGSINNTEKT,
+                PENSJON_ELLER_TRYGD,
+                YTELSE_FRA_OFFENTLIGE
+            }
+        }
+    }
 }
 
 fun PersonUtDto.tilSpannerPersonDto(): SpannerPersonDto {
@@ -1297,36 +1271,7 @@ private fun BehandlingendringUtDto.tilPersonData() =
         inntektjusteringer = inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
             inntektskilde.id to beløpstidslinje.tilPersonData()
         }.toMap(),
-        faktaavklartInntekt = when (val fi = faktaavklartInntekt) {
-            is ArbeidstakerFaktaavklartInntektUtDto -> {
-                val (kilde, skatteopplysninger) = when (val io = fi.inntektsopplysningskilde) {
-                    is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> InntektsopplysningskildeData.AORDNINGEN to io.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
-                    ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> InntektsopplysningskildeData.ARBEIDSGIVER to null
-                    ArbeidstakerinntektskildeUtDto.InfotrygdDto -> error("Skal ikke være infotrygd-inntekt på behandling")
-                }
-                SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.ArbeidstakerFaktaavklartInntektData(
-                    id = fi.id,
-                    dato = fi.inntektsdata.dato,
-                    hendelseId = fi.inntektsdata.hendelseId.id,
-                    beløp = fi.inntektsdata.beløp.tilPersonData(),
-                    tidsstempel = fi.inntektsdata.tidsstempel,
-                    kilde = kilde,
-                    skatteopplysninger = skatteopplysninger
-                )
-            }
-
-            is SelvstendigFaktaavklartInntektUtDto -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.SelvstendigFaktaavklartInntektData(
-                id = fi.id,
-                dato = fi.inntektsdata.dato,
-                hendelseId = fi.inntektsdata.hendelseId.id,
-                beløp = fi.inntektsdata.beløp.tilPersonData(),
-                tidsstempel = fi.inntektsdata.tidsstempel,
-                pensjonsgivendeInntekter = fi.pensjonsgivendeInntekter.map { SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.SelvstendigFaktaavklartInntektData.PensjonsgivendeInntektData(it.årstall, it.beløp.tilPersonData()) },
-                anvendtGrunnbeløp = fi.anvendtGrunnbeløp.tilPersonData()
-            )
-
-            null -> null
-        }
+        faktaavklartInntekt = this.faktaavklartInntekt?.tilPersonData()
     )
 
 private fun DagerUtenNavAnsvaravklaringDto.tilPersonData() = PeriodeUtenNavAnsvarData(
@@ -1779,43 +1724,6 @@ private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() =
         skjønnsmessigFastsatt = this.skjønnsmessigFastsatt?.tilPersonData()
     )
 
-private fun ArbeidstakerFaktaavklartInntektUtDto.tilPersonData() =
-    ArbeidsgiverInntektsopplysningData.InntektsopplysningData(
-        id = this.id,
-        dato = this.inntektsdata.dato,
-        hendelseId = this.inntektsdata.hendelseId.id,
-        beløp = this.inntektsdata.beløp.tilPersonData(),
-        tidsstempel = this.inntektsdata.tidsstempel,
-        type = InntektsopplysningstypeData.ARBEIDSTAKER,
-        kilde = when (this.inntektsopplysningskilde) {
-            is ArbeidstakerinntektskildeUtDto.InfotrygdDto -> "INFOTRYGD"
-            is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> "INNTEKTSMELDING"
-            is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> "SKATT_SYKEPENGEGRUNNLAG"
-        },
-        skatteopplysninger = when (val kilde = this.inntektsopplysningskilde) {
-            is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> kilde.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
-            else -> null
-        },
-        pensjonsgivendeInntekter = null,
-        anvendtGrunnbeløp = null
-    )
-
-private fun SelvstendigFaktaavklartInntektUtDto.tilPersonData() =
-    SelvstendigInntektsopplysningData.InntektsopplysningData(
-        id = this.id,
-        dato = this.inntektsdata.dato,
-        hendelseId = this.inntektsdata.hendelseId.id,
-        beløp = this.inntektsdata.beløp.tilPersonData(),
-        tidsstempel = this.inntektsdata.tidsstempel,
-        pensjonsgivendeInntekter = this.pensjonsgivendeInntekter.map {
-            PensjonsgivendeInntektData(
-                årstall = it.årstall,
-                beløp = it.beløp.tilPersonData()
-            )
-        },
-        anvendtGrunnbeløp = this.anvendtGrunnbeløp.tilPersonData()
-    )
-
 private fun SaksbehandlerUtDto.tilPersonData() =
     ArbeidsgiverInntektsopplysningData.KorrigertInntektsopplysningData(
         id = this.id,
@@ -1862,3 +1770,32 @@ private fun BeløpstidslinjeDto.tilPersonData() = SpannerPersonDto.Beløpstidsli
         )
     }
 )
+
+private fun FaktaavklartInntektUtDto.tilPersonData(): SpannerPersonDto.FaktaavklartInntektData = when (this) {
+    is ArbeidstakerFaktaavklartInntektUtDto -> {
+        val (kilde, skatteopplysninger) = when (val io = this.inntektsopplysningskilde) {
+            is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> AORDNINGEN to io.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
+            ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> ARBEIDSGIVER to null
+            ArbeidstakerinntektskildeUtDto.InfotrygdDto -> INFOTRYGD to null
+        }
+        SpannerPersonDto.ArbeidstakerFaktaavklartInntektData(
+            id = this.id,
+            dato = this.inntektsdata.dato,
+            hendelseId = this.inntektsdata.hendelseId.id,
+            beløp = this.inntektsdata.beløp.tilPersonData(),
+            tidsstempel = this.inntektsdata.tidsstempel,
+            kilde = kilde,
+            skatteopplysninger = skatteopplysninger
+        )
+    }
+
+    is SelvstendigFaktaavklartInntektUtDto -> SpannerPersonDto.SelvstendigFaktaavklartInntektData(
+        id = this.id,
+        dato = this.inntektsdata.dato,
+        hendelseId = this.inntektsdata.hendelseId.id,
+        beløp = this.inntektsdata.beløp.tilPersonData(),
+        tidsstempel = this.inntektsdata.tidsstempel,
+        pensjonsgivendeInntekter = this.pensjonsgivendeInntekter.map { SpannerPersonDto.SelvstendigFaktaavklartInntektData.PensjonsgivendeInntektData(it.årstall, it.beløp.tilPersonData()) },
+        anvendtGrunnbeløp = this.anvendtGrunnbeløp.tilPersonData()
+    )
+}
