@@ -231,6 +231,16 @@ sealed class Aktivitet(
                 )
             }
 
+            fun selvstendigForsikring(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
+                aktivitetslogg.behov(
+                    Behovtype.SelvstendigForsikring,
+                    "Trenger informasjon om forsikring for selvstendig næringsdrivende",
+                    mapOf(
+                        "skjæringstidspunkt" to skjæringstidspunkt.toString()
+                    )
+                )
+            }
+
             fun godkjenning(aktivitetslogg: IAktivitetslogg, godkjenningsbehov: Map<String, Any>) {
                 aktivitetslogg.behov(Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", godkjenningsbehov)
             }
@@ -261,7 +271,9 @@ sealed class Aktivitet(
             Arbeidsavklaringspenger,
             Medlemskap,
             Dødsinfo,
-            ArbeidsforholdV2
+            ArbeidsforholdV2,
+
+            SelvstendigForsikring
         }
     }
 

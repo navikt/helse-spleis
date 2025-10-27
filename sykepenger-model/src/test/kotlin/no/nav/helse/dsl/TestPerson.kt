@@ -26,6 +26,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -49,6 +50,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SelvstendigForsikring
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
@@ -569,6 +571,26 @@ internal class TestPerson(
                 inntekterForOpptjeningsvurdering
             ).håndter(Person::håndterVilkårsgrunnlag)
         }
+
+        internal fun håndterYtelserSelvstendig(
+            vedtaksperiodeId: UUID,
+            foreldrepenger: List<GradertPeriode> = emptyList(),
+            svangerskapspenger: List<GradertPeriode> = emptyList(),
+            pleiepenger: List<GradertPeriode> = emptyList(),
+            omsorgspenger: List<GradertPeriode> = emptyList(),
+            opplæringspenger: List<GradertPeriode> = emptyList(),
+            institusjonsoppholdsperioder: List<no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
+            arbeidsavklaringspenger: List<Periode> = emptyList(),
+            dagpenger: List<Periode> = emptyList(),
+            inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
+            selvstendigForsikring: SelvstendigForsikring? = null,
+            orgnummer: String = "aa"
+        ) {
+            behovsamler.bekreftBehov(vedtaksperiodeId, Dagpenger, Arbeidsavklaringspenger, Institusjonsopphold, Opplæringspenger, Pleiepenger, Omsorgspenger, Foreldrepenger, Aktivitet.Behov.Behovtype.InntekterForBeregning, SelvstendigForsikring)
+            arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, dagpenger, inntekterForBeregning, selvstendigForsikring)
+                .håndter(Person::håndterYtelser)
+        }
+
 
         internal fun håndterYtelser(
             vedtaksperiodeId: UUID,

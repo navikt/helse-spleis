@@ -39,6 +39,7 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
@@ -327,7 +328,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
-        inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList()
+        inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
+        selvstendigForsikring: SelvstendigForsikring? = null
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
@@ -354,7 +356,8 @@ internal class ArbeidsgiverHendelsefabrikk(
             ),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
             dagpenger = Dagpenger(dagpenger),
-            inntekterForBeregning = InntekterForBeregning(inntekterForBeregning)
+            inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
+            selvstendigForsikring = selvstendigForsikring
         )
     }
 
