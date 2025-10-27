@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.dto.BeløpstidslinjeDto.BeløpstidslinjeperiodeDto
+import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingtypeDto
@@ -16,7 +17,10 @@ import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.UbrukteRefusjonsopplysningerUtDto
+import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
+import no.nav.helse.dto.serialisering.UtbetalingstidslinjeUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
+import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.forrigeDag
 import no.nav.helse.mapWithNext
 import no.nav.helse.spleis.speil.SpekematDTO
@@ -152,9 +156,55 @@ internal class SpeilGenerasjonerBuilder(
         )
     }
 
+    private fun BehandlingUtDto.økonomiDagerNavUtbetaler(): List<ØkonomiUtDto> {
+        return endringer
+            .last()
+            .utbetalingstidslinje
+            .dager
+            .filter { it is UtbetalingsdagUtDto.ArbeidsgiverperiodeDagNavDto || it is UtbetalingsdagUtDto.NavDagDto }
+            .map { it.økonomi }
+    }
+
+    private fun BehandlingUtDto.totalbeløpRefusjon() = økonomiDagerNavUtbetaler().sumOf { it.arbeidsgiverbeløp?.dagligInt?.beløp ?: 0 }
+    private fun BehandlingUtDto.totalbeløpPerson() = økonomiDagerNavUtbetaler().sumOf { it.personbeløp?.dagligInt?.beløp ?: 0 }
+
+    private fun utledUtbetaling(behandling: BehandlingUtDto, nestSisteBehandling: BehandlingUtDto?): Utbetaling {
+        val nettobeløpRefusjon = behandling.totalbeløpRefusjon() - (nestSisteBehandling?.totalbeløpRefusjon() ?: 0)
+        val nettobeløpPerson = behandling.totalbeløpPerson() - (nestSisteBehandling?.totalbeløpPerson() ?: 0)
+        return Utbetaling(
+            id = UUID.randomUUID(),
+            type = when (behandling.tilstand) {
+                BehandlingtilstandDto.BEREGNET,
+                BehandlingtilstandDto.BEREGNET_OMGJØRING -> Utbetalingtype.UTBETALING
+
+                BehandlingtilstandDto.BEREGNET_REVURDERING -> Utbetalingtype.REVURDERING
+
+                BehandlingtilstandDto.UBEREGNET,
+                BehandlingtilstandDto.UBEREGNET_ANNULLERING,
+                BehandlingtilstandDto.UBEREGNET_OMGJØRING,
+                BehandlingtilstandDto.UBEREGNET_REVURDERING,
+                BehandlingtilstandDto.BEREGNET_ANNULLERING,
+                BehandlingtilstandDto.OVERFØRT_ANNULLERING,
+                BehandlingtilstandDto.REVURDERT_VEDTAK_AVVIST,
+                BehandlingtilstandDto.TIL_INFOTRYGD,
+                BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK,
+                BehandlingtilstandDto.ANNULLERT_PERIODE,
+                BehandlingtilstandDto.VEDTAK_FATTET,
+                BehandlingtilstandDto.VEDTAK_IVERKSATT -> error("Forventer ikke å utlede utbetaling for en behandling i tilstand ${behandling.tilstand}")
+            },
+            status = Utbetalingstatus.Ubetalt,
+            arbeidsgiverNettoBeløp = nettobeløpRefusjon,
+            personNettoBeløp = nettobeløpPerson,
+            arbeidsgiverFagsystemId = "",
+            personFagsystemId = "",
+            oppdrag = emptyMap(),
+            vurdering = null
+        )
+    }
     private fun mapBeregnetPeriode(vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto): BeregnetPeriode {
+        val nestSisteBehandling = vedtaksperiode.behandlinger.behandlinger.dropLast(1).lastOrNull()
         val sisteEndring = generasjon.endringer.last()
-        val utbetaling = utbetalinger.singleOrNull { it.id == sisteEndring.utbetalingId } ?: error("Fant ikke tilhørende utbetaling for vedtaksperiodeId=${vedtaksperiode.id}")
+        val utbetaling = utbetalinger.singleOrNull { it.id == sisteEndring.utbetalingId } ?: utledUtbetaling(generasjon, nestSisteBehandling)
         val utbetalingstidslinje = UtbetalingstidslinjeBuilder(sisteEndring.utbetalingstidslinje).build()
         val skjæringstidspunkt = sisteEndring.skjæringstidspunkt
         val sisteSykepengedag = utbetalingstidslinje.sisteNavDag()?.dato ?: sisteEndring.periode.tom
