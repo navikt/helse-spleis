@@ -519,11 +519,10 @@ internal class Vedtaksperiode private constructor(
             AvsluttetUtenUtbetaling -> {
                 val antallInntektsmeldinger = inntektsmeldinger.size
                 aktivitetsloggMedVedtaksperiodekontekst.info("Replayer inntektsmeldinger ($antallInntektsmeldinger stk) i $tilstand.")
-                val trengerRefusjonsopplysninger = refusjonstidslinje.isEmpty() == true
 
                 if (antallInntektsmeldinger > 1) aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
                 return inntektsmeldinger
-                    .mapNotNull { yrkesaktivitet.håndterInntektsmelding(it, aktivitetsloggMedVedtaksperiodekontekst, trengerRefusjonsopplysninger) }
+                    .mapNotNull { yrkesaktivitet.håndterInntektsmelding(it, aktivitetsloggMedVedtaksperiodekontekst) }
                     .tidligsteEventyr()
             }
 

@@ -577,7 +577,7 @@ internal class Yrkesaktivitet private constructor(
         return null
     }
 
-    internal fun håndterInntektsmelding(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, skalBehandleRefusjonsopplysningene: Boolean = true): Revurderingseventyr? {
+    internal fun håndterInntektsmelding(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         val dager = inntektsmelding.dager()
 
@@ -588,9 +588,7 @@ internal class Yrkesaktivitet private constructor(
         val dagoverstyring = håndterDagerFraInntektsmelding(dager, aktivitetsloggMedArbeidsgiverkontekst)
 
         // 3. starter håndtering av refusjonsopplysninger på vegne av alle mulige perioder
-        val refusjonsoverstyring = if (skalBehandleRefusjonsopplysningene)
-            håndterRefusjonsopplysninger(inntektsmelding, inntektsmeldingRefusjon(inntektsmelding.metadata.meldingsreferanseId), aktivitetsloggMedArbeidsgiverkontekst, inntektsmelding.refusjonsservitør)
-        else null
+        val refusjonsoverstyring = håndterRefusjonsopplysninger(inntektsmelding, inntektsmeldingRefusjon(inntektsmelding.metadata.meldingsreferanseId), aktivitetsloggMedArbeidsgiverkontekst, inntektsmelding.refusjonsservitør)
 
         // 4. håndterer inntekten fra inntektsmeldingen
         val inntektoverstyring = vedtaksperioder.firstNotNullOfOrNull {
