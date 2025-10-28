@@ -14,9 +14,8 @@ internal class V338JustereFomPåUtbetalinger : JsonMigration(338) {
         val fnr = jsonNode.path("fødselsnummer").asText()
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val aktivePerioder = arbeidsgiver.path("vedtaksperioder")
-            val forkastetPerioder = arbeidsgiver.path("forkastede").map { forkastet -> forkastet.path("vedtaksperiode") }
 
-            val vedtaksperioder = (aktivePerioder + forkastetPerioder)
+            val vedtaksperioder = aktivePerioder
                 .filter { vedtaksperiode ->
                     vedtaksperiode.path("tilstand").asText() != "AVSLUTTET_UTEN_UTBETALING"
                 }
@@ -30,6 +29,9 @@ internal class V338JustereFomPåUtbetalinger : JsonMigration(338) {
             arbeidsgiver.path("utbetalinger")
                 .filter { it.path("status").asText() in setOf("OVERFØRT", "UTBETALT", "GODKJENT_UTEN_UTBETALING", "ANNULLERT") }
                 .groupBy { it.path("korrelasjonsId").asText() }
+                .filterNot { (_, utbetalinger) ->
+                    utbetalinger.last().path("status").asText() == "ANNULLERT"
+                }
                 .forEach { (_, utbetalinger) ->
                     val siste = utbetalinger.last()
 

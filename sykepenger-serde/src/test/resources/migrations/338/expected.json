@@ -89,7 +89,7 @@
           "korrelasjonsId": "korrelasjon_1"
         },
         {
-          "fom": [2018, 1, 17],
+          "fom": [2018, 1, 1],
           "tom": [2018, 3, 31],
           "status": "ANNULLERT",
           "id": "utbetaling_3",
