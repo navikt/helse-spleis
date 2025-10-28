@@ -123,15 +123,9 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             val hendelseIdIM = håndterInntektsmelding(listOf(1.januar til 16.januar))
 
             val faktaavklartInntekt = inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView
-            assertForventetFeil(
-                forklaring = "Lagrer ikke faktaavklart inntekt fra inntektsmelding på behandling",
-                nå = { assertNull(faktaavklartInntekt) },
-                ønsket = {
-                    assertNotNull(faktaavklartInntekt)
-                    assertEquals(INNTEKT, faktaavklartInntekt.beløp)
-                    assertEquals(hendelseIdIM, faktaavklartInntekt.hendelseId)
-                }
-            )
+            assertNotNull(faktaavklartInntekt)
+            assertEquals(INNTEKT, faktaavklartInntekt.beløp)
+            assertEquals(hendelseIdIM, faktaavklartInntekt.hendelseId)
         }
     }
 }

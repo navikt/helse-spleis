@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.forrigeDag
-import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.mapWithNext
@@ -89,7 +88,7 @@ class Inntektsmelding(
 
     internal val inntektsdata = Inntektsdata(metadata.meldingsreferanseId, kompensertFørsteFraværsdag, beregnetInntekt, metadata.registrert)
 
-    internal fun korrigertInntekt() = ArbeidstakerFaktaavklartInntekt(
+    internal fun faktaavklartInntekt() = ArbeidstakerFaktaavklartInntekt(
         id = UUID.randomUUID(),
         inntektsdata = inntektsdata,
         inntektsopplysningskilde = Arbeidstakerinntektskilde.Arbeidsgiver

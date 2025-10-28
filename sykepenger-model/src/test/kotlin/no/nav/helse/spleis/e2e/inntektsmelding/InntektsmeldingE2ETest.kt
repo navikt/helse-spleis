@@ -47,7 +47,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
@@ -94,7 +93,6 @@ import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
-import no.nav.helse.spleis.e2e.håndterSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -126,61 +124,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
-
-    @Test
-    fun `Inntektsmelding som får spleis til å gå ned `() {
-        /***
-         * Her er noen jævlig viktige detaljer
-         * 1. Arbeidsgiverperioden må være fullført i en periode foran
-         * 2. Arbeidsgiver sender først inn inntektsmelding (les LPS/Altinn)
-         *    Den ligger og godgjør seg i Spedisjon i 30min (?)
-         * 3. Arbeidsgiver sender OGSÅ arbeidsgiveropplysninger (fra nav.no)
-         *    Den har merkelig nok en annen inntekt (veldig viktig)
-         *    Den håndteres av Spleis med en gang.
-         * 4. Nå har det gått 30min og vi håndterer inntektsmeldingen som egentlig kom først
-         *    Så de håndteres i motsatt rekkefølge av innsendingen
-         * 5. Behandling åpnes ikke pga dager, for de ligger i en annen periode
-         *    Behandling åpnes ikke pga refusjon, for det vi har har et nyere tidsstempel allerede
-         *    .. men vi forventer at en av de ovenfor har skjedd for å ha en åpen behandling å håndtere inntekten for
-         * 6. -> Feil
-         */
-        håndterSøknad(1.januar til 16.januar)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-
-        val innsendtInntektsmelding = LocalDateTime.now()
-        val inntektInntektsmelding = 31000.månedlig
-        val innsendtArbeidsgiveropplysninger = innsendtInntektsmelding.plusMinutes(1)
-        val inntektArbeidsgiveropplysninger = 30000.månedlig
-
-        håndterSøknad(17.januar til 31.januar)
-        håndterArbeidsgiveropplysninger(
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
-            arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            innsendt = innsendtArbeidsgiveropplysninger,
-            beregnetInntekt = inntektArbeidsgiveropplysninger,
-            refusjon = Refusjon(inntektArbeidsgiveropplysninger, null, emptyList())
-        )
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-
-        val err = assertThrows<IllegalStateException> {
-            håndterInntektsmelding(
-                arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                førsteFraværsdag = 1.januar,
-                mottatt = innsendtInntektsmelding,
-                beregnetInntekt = inntektInntektsmelding,
-                refusjon = Refusjon(inntektInntektsmelding  , null, emptyList())
-            )
-        }
-        assertEquals("forventer ikke at vedtaksperioden har en lukket behandling når inntekt håndteres", err.message)
-    }
 
     @Test
     fun `Arbeidsgiver opplyser om endret refusjon før søknad som kommer out of order`() {
@@ -322,49 +267,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 mottatt = lpsInntektsmeldingInnsendt
             )
         }
-    }
-
-    @Test
-    fun `AvsluttetUtenUtbetaling-periode uten åpen behandling håndterer inntekt fra inntektsmeldingen - pga hen kun består av arbeidager`() {
-        håndterSøknad(1.januar til 16.januar)
-        håndterSøknad(17.januar til 31.januar)
-        håndterSøknad(februar)
-
-        håndterInntektsmelding(listOf(1.februar til 16.februar))
-        // IM kommer ikke så spleis innhenter inntekter selv
-        this@InntektsmeldingE2ETest.håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), 1.januar.plusDays(90).atStartOfDay())
-        this@InntektsmeldingE2ETest.håndterSykepengegrunnlagForArbeidsgiver(17.januar, a1)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@InntektsmeldingE2ETest.håndterYtelser(2.vedtaksperiode)
-        this@InntektsmeldingE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        assertVarsler(listOf(RV_IV_10), 2.vedtaksperiode.filter())
-
-        håndterVilkårsgrunnlag(3.vedtaksperiode)
-        this@InntektsmeldingE2ETest.håndterYtelser(3.vedtaksperiode)
-        håndterSimulering(3.vedtaksperiode)
-        this@InntektsmeldingE2ETest.håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-        håndterUtbetalt()
-
-        assertVarsler(listOf(RV_IM_3), 3.vedtaksperiode.filter())
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
-
-        nullstillTilstandsendringer()
-
-        // vedtaksperiode 2 håndterer inntekt, men har ikke håndtert refusjonen fordi inntektsmeldingen teknisk
-        // sett har 1.januar som første fraværsdag, og vedtaksperiode 2 har eget skjæringstidspunkt på 17. januar.
-        // Sånn sett er det rart at vedtaksperiode 2 håndterer inntekten i det hele tatt.
-        val err = assertThrows<IllegalStateException> {
-            håndtererInntektsmeldingInntektUtenDokumentsporing(2.vedtaksperiode) {
-                håndterInntektsmelding(listOf(1.januar til 16.januar))
-            }
-        }
-        assertEquals("forventer ikke at vedtaksperioden har en lukket behandling når inntekt håndteres", err.message)
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET)
     }
 
     @Test
