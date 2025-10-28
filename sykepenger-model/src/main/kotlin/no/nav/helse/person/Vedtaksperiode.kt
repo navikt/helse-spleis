@@ -1076,9 +1076,14 @@ internal class Vedtaksperiode private constructor(
             perioderMedMinimumSykdomsgradVurdertOK = person.minimumSykdomsgradsvurdering.perioder,
             regler = person.regler
         )
-        // steg 4: lag et utbetalingsobjekt for vedtaksperioder som ikke har fått det enda (én per arbeidsgiver)
+        // steg 4.1: lag beregnede behandlinger
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
         lagBeregnetBehandlinger(aktivitetslogg, perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioder)
+
+        /* steg 4.2 lag utbetalinger */
+        perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
+            other.lagUtbetaling(other.registrerKontekst(aktivitetslogg))
+        }
 
         // steg 5: lage varsler ved gitte situasjoner
         vurderVarsler(aktivitetslogg, ytelser, infotrygdhistorikk, perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, minsteinntektsvurdering, harOpptjening, beregnetTidslinjePerVedtaksperiode)
@@ -1126,6 +1131,17 @@ internal class Vedtaksperiode private constructor(
                         .filterValues { it.isNotEmpty() }
                 )
             }
+    }
+
+    private fun lagUtbetaling(aktivitetslogg: IAktivitetslogg) {
+        val utbetaling = behandlinger.lagUtbetaling(
+            aktivitetslogg = aktivitetslogg,
+            utbetalinger = yrkesaktivitet.utbetalinger,
+            mottakerRefusjon = yrkesaktivitet.organisasjonsnummer,
+            mottakerBruker = person.fødselsnummer
+        )
+        yrkesaktivitet.leggTilNyUtbetaling(aktivitetslogg, utbetaling)
+        utbetaling.nyVedtaksperiodeUtbetaling(this.id)
     }
 
     private fun vurderVarsler(
@@ -2367,9 +2383,6 @@ internal class Vedtaksperiode private constructor(
             alleInntektjusteringer = alleInntektjusteringer
         )
         behandlinger.beregnetBehandling(aktivitetslogg, beregnetBehandling)
-        val utbetaling = behandlinger.lagUtbetaling(aktivitetslogg, yrkesaktivitet.utbetalinger, yrkesaktivitet.organisasjonsnummer, person.fødselsnummer)
-        yrkesaktivitet.leggTilNyUtbetaling(aktivitetslogg, utbetaling)
-        utbetaling.nyVedtaksperiodeUtbetaling(this.id)
         return beregnetBehandling
     }
 
@@ -2493,7 +2506,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg
     ) {
         revurdering.inngåSomEndring(this, aktivitetslogg)
-        behandlinger.forkastUtbetaling(aktivitetslogg)
+        behandlinger.forkastBeregning(aktivitetslogg)
         if (måInnhenteInntektEllerRefusjon()) return tilstand(aktivitetslogg, AvventerInntektsmelding)
         tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
     }
@@ -2503,7 +2516,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg
     ) {
         revurdering.inngåSomEndring(this, aktivitetslogg)
-        behandlinger.forkastUtbetaling(aktivitetslogg)
+        behandlinger.forkastBeregning(aktivitetslogg)
         tilstand(aktivitetslogg, SelvstendigAvventerBlokkerendePeriode)
     }
 

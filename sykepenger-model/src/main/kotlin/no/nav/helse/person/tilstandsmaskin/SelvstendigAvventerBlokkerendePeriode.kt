@@ -32,6 +32,6 @@ internal data object SelvstendigAvventerBlokkerendePeriode : Vedtaksperiodetilst
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.behandlinger.forkastUtbetaling(aktivitetslogg)
+        vedtaksperiode.behandlinger.forkastBeregning(aktivitetslogg)
     }
 }

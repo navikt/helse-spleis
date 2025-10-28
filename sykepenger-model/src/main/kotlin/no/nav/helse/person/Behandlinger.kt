@@ -275,8 +275,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.last().forkastetBehandling(automatiskBehandling)
     }
 
-    internal fun forkastUtbetaling(aktivitetslogg: IAktivitetslogg) {
-        behandlinger.last().forkastUtbetaling(aktivitetslogg)
+    internal fun forkastBeregning(aktivitetslogg: IAktivitetslogg) {
+        behandlinger.last().forkastBeregning(aktivitetslogg)
     }
 
     internal fun harIkkeUtbetaling() = behandlinger.last().harIkkeUtbetaling()
@@ -904,7 +904,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 )
             }
 
-            internal fun kopierUtenUtbetaling(
+            internal fun kopierUtenBeregning(
                 beregnSkjæringstidspunkt: Skjæringstidspunkter? = null,
                 beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>? = null
             ): Endring {
@@ -1123,8 +1123,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             tilstand.entering(this, aktivitetslogg)
         }
 
-        fun forkastUtbetaling(aktivitetslogg: IAktivitetslogg) {
-            tilstand.utenUtbetaling(this, aktivitetslogg)
+        fun forkastBeregning(aktivitetslogg: IAktivitetslogg) {
+            tilstand.utenBeregning(this, aktivitetslogg)
         }
 
         fun utbetaling() = gjeldende.utbetaling
@@ -1165,9 +1165,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             nyEndring(gjeldende.kopierMedUtbetalingstidslinje(utbetalingstidslinje, inntekterForBeregning))
         }
 
-        private fun utenUtbetaling(aktivitetslogg: IAktivitetslogg) {
+        private fun utenBeregning(aktivitetslogg: IAktivitetslogg) {
             gjeldende.utbetaling!!.forkast(aktivitetslogg)
-            nyEndring(gjeldende.kopierUtenUtbetaling())
+            nyEndring(gjeldende.kopierUtenBeregning())
         }
 
         private fun nyEndring(endring: Endring?) {
@@ -1324,7 +1324,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return Behandling(
                 observatører = this.observatører,
                 tilstand = starttilstand,
-                endringer = listOf(endringer.last().kopierUtenUtbetaling(beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar)),
+                endringer = listOf(endringer.last().kopierUtenBeregning(beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar)),
                 avsluttet = null,
                 kilde = behandlingkilde
             )
@@ -1338,7 +1338,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return Behandling(
                 observatører = this.observatører,
                 tilstand = Tilstand.UberegnetAnnullering,
-                endringer = listOf(endringer.last().kopierUtenUtbetaling()),
+                endringer = listOf(endringer.last().kopierUtenBeregning()),
                 avsluttet = null,
                 kilde = behandlingkilde
             )
@@ -1669,7 +1669,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 error("Kan ikke avslutte behandling i $this")
             }
 
-            fun utenUtbetaling(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
+            fun utenBeregning(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
                 error("Støtter ikke å forkaste utbetaling utbetaling i $this")
             }
 
@@ -1734,7 +1734,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing) =
                     behandling.kopierMedDokument(dokument)
 
-                override fun utenUtbetaling(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {}
+                override fun utenBeregning(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {}
                 override fun beregning(
                     behandling: Behandling,
                     aktivitetslogg: IAktivitetslogg,
@@ -1781,7 +1781,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandlingkilde: Behandlingkilde,
                     aktivitetslogg: IAktivitetslogg
                 ): Behandling? {
-                    behandling.nyEndring(behandling.endringer.last().kopierUtenUtbetaling())
+                    behandling.nyEndring(behandling.endringer.last().kopierUtenBeregning())
                     behandling.tilstand(UberegnetAnnullering, aktivitetslogg)
                     return null
                 }
@@ -1831,8 +1831,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing) =
                     behandling.kopierMedDokument(dokument)
 
-                override fun utenUtbetaling(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
-                    behandling.utenUtbetaling(aktivitetslogg)
+                override fun utenBeregning(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
+                    behandling.utenBeregning(aktivitetslogg)
                     behandling.tilstand(Uberegnet, aktivitetslogg)
                 }
 
@@ -1871,8 +1871,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return null
                 }
 
-                override fun utenUtbetaling(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
-                    behandling.utenUtbetaling(aktivitetslogg)
+                override fun utenBeregning(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
+                    behandling.utenBeregning(aktivitetslogg)
                     behandling.tilstand(UberegnetOmgjøring, aktivitetslogg)
                 }
 
@@ -1888,8 +1888,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return super.forkastVedtaksperiode(behandling, yrkesaktivitet, behandlingkilde, aktivitetslogg)
                 }
 
-                override fun utenUtbetaling(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
-                    behandling.utenUtbetaling(aktivitetslogg)
+                override fun utenBeregning(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
+                    behandling.utenBeregning(aktivitetslogg)
                     behandling.tilstand(UberegnetRevurdering, aktivitetslogg)
                 }
 
@@ -1938,7 +1938,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     aktivitetslogg: IAktivitetslogg
                 ): Behandling? {
                     behandling.gjeldende.forkastUtbetaling(aktivitetslogg)
-                    behandling.nyEndring(behandling.endringer.last().kopierUtenUtbetaling())
+                    behandling.nyEndring(behandling.endringer.last().kopierUtenBeregning())
                     behandling.tilstand(UberegnetAnnullering, aktivitetslogg)
                     return null
                 }
@@ -1995,7 +1995,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return true
                 }
 
-                override fun utenUtbetaling(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {}
+                override fun utenBeregning(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {}
 
                 override fun håndterRefusjonsopplysninger(
                     yrkesaktivitet: Yrkesaktivitet,
@@ -2051,7 +2051,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return Behandling(
                         observatører = behandling.observatører,
                         tilstand = TilInfotrygd,
-                        endringer = listOf(behandling.gjeldende.kopierUtenUtbetaling()),
+                        endringer = listOf(behandling.gjeldende.kopierUtenBeregning()),
                         avsluttet = LocalDateTime.now(),
                         kilde = behandlingkilde
                     )

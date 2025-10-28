@@ -14,7 +14,7 @@ import no.nav.helse.person.behandlingkilde
 internal data object AvventerRevurdering : Vedtaksperiodetilstand {
     override val type = TilstandType.AVVENTER_REVURDERING
     override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperiode.behandlinger.forkastUtbetaling(aktivitetslogg)
+        vedtaksperiode.behandlinger.forkastBeregning(aktivitetslogg)
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
@@ -24,7 +24,7 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
         aktivitetslogg: IAktivitetslogg
     ) {
         vedtaksperiode.håndterOverstyringIgangsattRevurderingArbeidstaker(revurdering, aktivitetslogg)
-        vedtaksperiode.behandlinger.forkastUtbetaling(aktivitetslogg)
+        vedtaksperiode.behandlinger.forkastBeregning(aktivitetslogg)
     }
 
     fun venterpå(vedtaksperiode: Vedtaksperiode) = when (val t = tilstand(vedtaksperiode)) {
