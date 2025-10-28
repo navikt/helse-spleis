@@ -631,51 +631,64 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return this.tilstand.håndterRefusjonsopplysninger(yrkesaktivitet, this, behandlingkilde, dokumentsporing, aktivitetslogg, beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar, benyttetRefusjonsopplysninger)
         }
 
-        fun håndterFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
-            return when (tilstand) {
+        fun håndterFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg) = håndterNyFakta(
+            endringMedNyFakta = { forrigeEndring -> forrigeEndring.copy(faktaavklartInntekt = arbeidstakerFaktaavklartInntekt) },
+            behandlingkilde = behandlingkilde,
+            yrkesaktivitet = yrkesaktivitet,
+            aktivitetslogg = aktivitetslogg
+        )
+
+        private fun håndterNyFakta(endringMedNyFakta: (forrigeEndring: Endring) -> Endring, behandlingkilde: Behandlingkilde, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg): Behandling? {
+            // Forsikrer oss at ny endring er Uberegnet og får ny ID og tidsstempel
+            val nyEndring = endringMedNyFakta(endringer.last()).kopierSomUberegnet()
+
+            val uberegnetBehandling: () -> Nothing? = {
+                nyEndring(nyEndring)
+                null
+            }
+
+            val beregnetBehandling: (uberegnetTilstand: Tilstand) -> Nothing? = { uberegnetTilstand ->
+                gjeldende.forkastUtbetaling(aktivitetslogg)
+                nyEndring(nyEndring)
+                tilstand(uberegnetTilstand, aktivitetslogg)
+                null
+            }
+
+            val avsluttetBehandling: (starttilstand: Tilstand) -> Behandling = { starttilstand ->
+                yrkesaktivitet.låsOpp(periode)
+                Behandling(
+                    observatører = this.observatører,
+                    tilstand = starttilstand,
+                    endringer = listOf(nyEndring),
+                    avsluttet = null,
+                    kilde = behandlingkilde
+                )
+            }
+
+            return when (this.tilstand) {
+                Tilstand.Uberegnet,
                 Tilstand.UberegnetOmgjøring,
-                Tilstand.UberegnetRevurdering,
-                Tilstand.Uberegnet -> {
-                    oppdaterMedFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt)
-                    null
-                }
+                Tilstand.UberegnetRevurdering -> uberegnetBehandling()
 
-                Tilstand.Beregnet -> {
-                    gjeldende.forkastUtbetaling(aktivitetslogg)
-                    oppdaterMedFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt)
-                    tilstand(Tilstand.Uberegnet, aktivitetslogg)
-                    null
-                }
+                Tilstand.Beregnet -> beregnetBehandling(Tilstand.Uberegnet)
+                Tilstand.BeregnetRevurdering -> beregnetBehandling(Tilstand.UberegnetRevurdering)
+                Tilstand.BeregnetOmgjøring -> beregnetBehandling(Tilstand.UberegnetOmgjøring)
 
-                Tilstand.BeregnetOmgjøring -> {
-                    gjeldende.forkastUtbetaling(aktivitetslogg)
-                    oppdaterMedFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt)
-                    tilstand(Tilstand.UberegnetOmgjøring, aktivitetslogg)
-                    null
-                }
-
-                Tilstand.BeregnetRevurdering -> {
-                    gjeldende.forkastUtbetaling(aktivitetslogg)
-                    oppdaterMedFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt)
-                    tilstand(Tilstand.UberegnetRevurdering, aktivitetslogg)
-                    null
-                }
-
-                Tilstand.AvsluttetUtenVedtak -> {
-                    nyBehandlingMedFaktaavklartInntekt(behandlingkilde, arbeidstakerFaktaavklartInntekt, Tilstand.UberegnetOmgjøring, yrkesaktivitet)
-                }
+                Tilstand.AvsluttetUtenVedtak -> avsluttetBehandling(Tilstand.UberegnetOmgjøring)
 
                 Tilstand.VedtakFattet,
-                Tilstand.VedtakIverksatt -> {
-                    nyBehandlingMedFaktaavklartInntekt(behandlingkilde, arbeidstakerFaktaavklartInntekt, Tilstand.UberegnetRevurdering, yrkesaktivitet)
+                Tilstand.VedtakIverksatt -> avsluttetBehandling(Tilstand.UberegnetRevurdering)
+
+                Tilstand.UberegnetAnnullering,
+                Tilstand.BeregnetAnnullering,
+                Tilstand.OverførtAnnullering -> {
+                    aktivitetslogg.info("Ignorerer ny fakta i tilstand ${tilstand::class.simpleName}")
+                    null
                 }
 
                 Tilstand.RevurdertVedtakAvvist,
-                Tilstand.OverførtAnnullering,
-                Tilstand.BeregnetAnnullering,
-                Tilstand.UberegnetAnnullering,
                 Tilstand.AnnullertPeriode,
-                Tilstand.TilInfotrygd -> error("Forventer ikke å håndtere faktaavklart inntekt i ${tilstand::class}")
+                Tilstand.TilInfotrygd -> error("Forventet ikke å håndtere ny fakta i tilstand ${tilstand::class.simpleName}")
             }
         }
 
@@ -931,22 +944,19 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 )
             }
 
-            internal fun kopierMedFaktaavklartInntekt(
-                arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
-            ) = kopierMed(
-                grunnlagsdata = null,
-                utbetaling = null,
-                utbetalingstidslinje = Utbetalingstidslinje(),
-                maksdatoresultat = Maksdatoresultat.IkkeVurdert,
-                faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
-                inntektjusteringer = emptyMap()
-            )
-
             internal fun kopierMedBeregning(beregning: BeregnetBehandling) = kopierMed(
                 grunnlagsdata = beregning.grunnlagsdata,
                 utbetalingstidslinje = beregning.utbetalingstidslinje.subset(this.periode),
                 maksdatoresultat = beregning.maksdatoresultat,
                 inntektjusteringer = beregning.alleInntektjusteringer
+            )
+
+            internal fun kopierSomUberegnet() = kopierMed(
+                grunnlagsdata = null,
+                utbetaling = null,
+                utbetalingstidslinje = Utbetalingstidslinje(),
+                maksdatoresultat = Maksdatoresultat.IkkeVurdert,
+                inntektjusteringer = emptyMap()
             )
 
             internal fun kopierMedUtbetaling(utbetaling: Utbetaling) = kopierMed(utbetaling = utbetaling)
@@ -1222,11 +1232,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             nyEndring(endring)
         }
 
-        private fun oppdaterMedFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt) {
-            val endring = endringer.last().kopierMedFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt)
-            nyEndring(endring)
-        }
-
         private fun oppdaterMedNyttSkjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>) {
             val endring = endringer.last().kopierMedNyttSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar) ?: return
             nyEndring(endring)
@@ -1307,18 +1312,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 kilde = behandlingkilde
             )
         }
-
-        private fun nyBehandlingMedFaktaavklartInntekt(behandlingkilde: Behandlingkilde, faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, starttilstand: Tilstand, yrkesaktivitet: Yrkesaktivitet): Behandling {
-            yrkesaktivitet.låsOpp(periode)
-            return Behandling(
-                observatører = this.observatører,
-                tilstand = starttilstand,
-                endringer = listOf(endringer.last().kopierMedFaktaavklartInntekt(faktaavklartInntekt)),
-                avsluttet = null,
-                kilde = behandlingkilde
-            )
-        }
-
 
         private fun sikreNyBehandling(
             yrkesaktivitet: Yrkesaktivitet,
@@ -1496,7 +1489,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             fun nyBehandling(
                 observatører: List<BehandlingObserver>,
                 sykdomstidslinje: Sykdomstidslinje,
-                arbeidssituasjon: Endring.Arbeidssituasjon,
+                arbeidssituasjon: Arbeidssituasjon,
                 egenmeldingsdager: List<Periode>,
                 faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
                 dokumentsporing: Dokumentsporing,
