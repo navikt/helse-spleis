@@ -1374,6 +1374,19 @@ internal class Vedtaksperiode private constructor(
             omregnetÅrsinntekt = omregnetÅrsinntekt
         )
 
+        val faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt(
+            id = UUID.randomUUID(),
+            inntektsdata = Inntektsdata(
+                hendelseId = sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
+                dato = skjæringstidspunkt,
+                beløp = omregnetÅrsinntekt,
+                tidsstempel = LocalDateTime.now()
+            ),
+            inntektsopplysningskilde = Arbeidstakerinntektskilde.AOrdningen(skatteopplysninger)
+        )
+
+        behandlinger.håndterFaktaavklartInntekt(faktaavklartInntekt, yrkesaktivitet, sykepengegrunnlagForArbeidsgiver.metadata.behandlingkilde, aktivitetslogg)
+
         videreførEllerIngenRefusjon(sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
 
         val event = PersonObserver.SkatteinntekterLagtTilGrunnEvent(

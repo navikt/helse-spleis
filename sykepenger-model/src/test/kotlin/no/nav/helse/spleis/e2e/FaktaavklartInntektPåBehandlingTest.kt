@@ -1,12 +1,14 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.Year
+import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.selvstendig
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
@@ -14,6 +16,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt.ArbeistakerFaktaavklartInntektView
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -182,6 +185,31 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                 assertEquals(INNTEKT, faktaavklartInntekt.beløp)
                 assertEquals(hendelseIdIM, faktaavklartInntekt.hendelseId)
             }
+        }
+    }
+
+    @Test
+    fun `lagrer faktaavklart inntekt fra a-ordningen`() {
+        a1 {
+            håndterSøknad(januar)
+            assertNull(inspektør.faktaavklartInntekt(1.vedtaksperiode))
+            håndterPåminnelse(1.vedtaksperiode, TilstandType.AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
+            val hendelseId = håndterSykepengegrunnlagForArbeidsgiver(
+                vedtaksperiodeId = 1.vedtaksperiode,
+                skjæringstidspunkt = 1.januar,
+                inntekter = listOf(
+                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
+                )
+            )
+
+            val faktaavklartInntekt = inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView
+            assertNotNull(faktaavklartInntekt)
+            assertEquals(INNTEKT, faktaavklartInntekt.beløp)
+            assertEquals(hendelseId, faktaavklartInntekt.hendelseId)
+
+            assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
         }
     }
 }
