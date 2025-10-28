@@ -35,17 +35,18 @@ internal class V339JustereFomPåSpesifikkeUtbetalinger : JsonMigration(339) {
 }
 
 private fun String.file() =
-    object {}.javaClass.getResource(this)?.toURI()?.let { File(it) } ?: error("did not find resource <$this>")
+    object {}.javaClass.getResource(this)?.readText()?.takeIf { it.isNotBlank() } ?: error("did not find resource <$this>")
 
 private val utbetalingerSomSkalFikses = "/utbetalinger.csv".file()
-    .useLines { lines ->
-        lines
-            .associate { line ->
-                val (utbetalingId, opprinneligFom, nyOgFeilFom) = line.split(",")
-                Pair(utbetalingId, Pair(opprinneligFom.dato, nyOgFeilFom.dato))
-            }
-            .toMap()
+    .lineSequence()
+    .filter { it.isNotBlank() }
+    .associate { line ->
+        val parts = line.split(",")
+        check(parts.size == 3) { "Kan ikke tolke linjen $parts" }
+        val (utbetalingId, opprinneligFom, nyOgFeilFom) = parts
+        Pair(utbetalingId, Pair(opprinneligFom.dato, nyOgFeilFom.dato))
     }
+    .toMap()
 
 private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
