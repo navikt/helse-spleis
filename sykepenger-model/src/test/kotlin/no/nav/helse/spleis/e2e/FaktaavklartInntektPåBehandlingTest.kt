@@ -114,4 +114,24 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             }
         }
     }
+
+    @Test
+    fun `Arbeidstaker får faktaavklart inntekt fra inntektsmelding`() {
+        a1 {
+            håndterSøknad(januar)
+            assertNull(inspektør.faktaavklartInntekt(1.vedtaksperiode))
+            val hendelseIdIM = håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+            val faktaavklartInntekt = inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView
+            assertForventetFeil(
+                forklaring = "Lagrer ikke faktaavklart inntekt fra inntektsmelding på behandling",
+                nå = { assertNull(faktaavklartInntekt) },
+                ønsket = {
+                    assertNotNull(faktaavklartInntekt)
+                    assertEquals(INNTEKT, faktaavklartInntekt.beløp)
+                    assertEquals(hendelseIdIM, faktaavklartInntekt.hendelseId)
+                }
+            )
+        }
+    }
 }
