@@ -25,6 +25,7 @@ import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_46
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
@@ -182,7 +183,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Person med frilanserinntekt i løpet av de siste 3 månedene sendes til infotrygd`() {
+    fun `Person med frilanserinntekt i løpet av de siste 3 månedene`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlag(
@@ -192,14 +193,14 @@ internal class SelvstendigTest : AbstractDslTest() {
                     Vilkårsgrunnlag.Arbeidsforhold(a1, 1.oktober(2017), 31.oktober(2017), Arbeidsforholdtype.FRILANSER),
                 )
             )
-            assertFunksjonellFeil(Varselkode.RV_IV_3.varseltekst, 1.vedtaksperiode.filter())
-            assertForkastetPeriodeTilstander(
+            assertVarsler(listOf(Varselkode.RV_IV_3), 1.vedtaksperiode.filter())
+            assertTilstander(
                 1.vedtaksperiode,
                 SELVSTENDIG_START,
                 SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
                 SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
                 SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
-                TIL_INFOTRYGD
+                SELVSTENDIG_AVVENTER_HISTORIKK
             )
         }
     }

@@ -57,7 +57,7 @@ internal class FrilanserTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Person med frilanserinntekt i løpet av de siste 3 månedene sendes til infotrygd`() {
+    fun `Person med frilanserinntekt i løpet av de siste 3 månedene`() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
@@ -70,16 +70,15 @@ internal class FrilanserTest : AbstractDslTest() {
                     Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = Arbeidsforholdtype.FRILANSER)
                 )
             )
-            assertVarsler(listOf(Varselkode.RV_VV_1), 1.vedtaksperiode.filter())
-            assertFunksjonellFeil("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene", 1.vedtaksperiode.filter())
-            assertForkastetPeriodeTilstander(
+            assertVarsler(listOf(Varselkode.RV_VV_1, Varselkode.RV_IV_3), 1.vedtaksperiode.filter())
+            assertTilstander(
                 1.vedtaksperiode,
                 START,
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
-                TIL_INFOTRYGD
+                AVVENTER_HISTORIKK
             )
         }
     }

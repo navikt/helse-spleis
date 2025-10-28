@@ -8,6 +8,8 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -65,7 +67,7 @@ internal class InntektForInntektsgrunnlagTest {
         val inntektForSykepengegrunnlag = lagStandardSykepengegrunnlag("orgnummer", 31000.månedlig, 1.april(2017))
         val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer", 1.januar(2017), 28.februar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
         arbeidsforhold.validerFrilans(aktivitetslogg, 1.februar(2017), emptyList(), inntektForSykepengegrunnlag)
-        assertTrue(aktivitetslogg.harFunksjonelleFeil())
+        aktivitetslogg.assertVarsel(Varselkode.RV_IV_3)
     }
 
     @Test
@@ -103,7 +105,7 @@ internal class InntektForInntektsgrunnlagTest {
         val arbeidsforhold = Vilkårsgrunnlag.Arbeidsforhold("orgnummer", 1.januar(2017), 31.januar(2017), Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.FRILANSER)
         val aktivitetslogg = Aktivitetslogg()
         arbeidsforhold.validerFrilans(aktivitetslogg, 1.april(2017), emptyList(), inntektForSykepengegrunnlag)
-        assertTrue(aktivitetslogg.harFunksjonelleFeil())
+        aktivitetslogg.assertVarsel(Varselkode.RV_IV_3)
     }
 
     @Test

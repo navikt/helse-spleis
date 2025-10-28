@@ -14,14 +14,11 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.oktober
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
+import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -94,8 +91,9 @@ internal class GosysoppgaveTest: AbstractDslTest() {
                     Vilkårsgrunnlag.Arbeidsforhold(a2, ansattFom = 1.oktober(2017), type = FRILANSER),
                 )
             )
-            assertVarsler(1.vedtaksperiode, RV_VV_1)
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD, varselkode = RV_IV_3)
+            håndterAnmodningOmForkasting(1.vedtaksperiode, force = true)
+            assertVarsler(1.vedtaksperiode, RV_VV_1, RV_IV_3)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
             assertOppgaveIInfotrygdkø(1.vedtaksperiode)
         }
         a1 {

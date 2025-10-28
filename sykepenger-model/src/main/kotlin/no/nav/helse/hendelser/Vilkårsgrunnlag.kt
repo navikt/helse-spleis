@@ -147,7 +147,7 @@ class Vilkårsgrunnlag(
                 val ansattIMåneden = ansettelseperiode.overlapperMed(månedenSomPeriode)
                 ansattIMåneden && inntektForSykepengegrunnlag.inntekter.harInntektFor(orgnummer, måned)
             }
-            if (finnerFrilansinntektDeSiste3Månedene) aktivitetslogg.funksjonellFeil(RV_IV_3)
+            if (finnerFrilansinntektDeSiste3Månedene) aktivitetslogg.varsel(RV_IV_3)
         }
 
         private fun sjekkFrilansArbeidsforholdMotAndreArbeidsforhold(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, andre: List<Arbeidsforhold>) {
