@@ -11,8 +11,10 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt.ArbeistakerFaktaavklartInntektView
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -126,6 +128,60 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             assertNotNull(faktaavklartInntekt)
             assertEquals(INNTEKT, faktaavklartInntekt.beløp)
             assertEquals(hendelseIdIM, faktaavklartInntekt.hendelseId)
+        }
+    }
+
+    @Test
+    fun `bruker ny faktaavklart inntekt fra korrigerende inntektsmelding`() {
+        a1 {
+            håndterSøknad(januar)
+            val hendelseIdIM = håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            (inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView).also { faktaavklartInntekt ->
+                assertNotNull(faktaavklartInntekt)
+                assertEquals(INNTEKT, faktaavklartInntekt.beløp)
+                assertEquals(hendelseIdIM, faktaavklartInntekt.hendelseId)
+            }
+
+            val hendelseIdKorrigerendeIM = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1)
+            (inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView).also { faktaavklartInntekt ->
+                assertNotNull(faktaavklartInntekt)
+                assertEquals(INNTEKT * 1.1, faktaavklartInntekt.beløp)
+                assertEquals(hendelseIdKorrigerendeIM, faktaavklartInntekt.hendelseId)
+            }
+
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `korrigerende inntektsmelding med samme inntekt som original inntektsmelding`() {
+        a1 {
+            håndterSøknad(januar)
+            val hendelseIdIM = håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            (inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView).also { faktaavklartInntekt ->
+                assertNotNull(faktaavklartInntekt)
+                assertEquals(INNTEKT, faktaavklartInntekt.beløp)
+                assertEquals(hendelseIdIM, faktaavklartInntekt.hendelseId)
+            }
+
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            (inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView).also { faktaavklartInntekt ->
+                assertNotNull(faktaavklartInntekt)
+                assertEquals(INNTEKT, faktaavklartInntekt.beløp)
+                assertEquals(hendelseIdIM, faktaavklartInntekt.hendelseId)
+            }
         }
     }
 }
