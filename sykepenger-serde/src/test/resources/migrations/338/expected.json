@@ -28,6 +28,49 @@
               ]
             }
           ]
+        },
+        {
+          "tilstand": "AVSLUTTET",
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "fom": [2019, 7, 1],
+                  "tom": [2019, 7, 25]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tilstand": "AVSLUTTET",
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "fom": [2019, 7, 26],
+                  "tom": [2019, 7, 30]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD",
+            "behandlinger": [
+              {
+                "endringer": [
+                  {
+                    "fom": [2019, 7, 20],
+                    "tom": [2019, 7, 30]
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "utbetalinger": [
@@ -65,6 +108,20 @@
           "status": "GODKJENT_UTEN_UTBETALING",
           "id": "utbetaling_4",
           "korrelasjonsId": "korrelasjon_4"
+        },
+        {
+          "fom": [2019, 7, 1],
+          "tom": [2019, 7, 25],
+          "status": "GODKJENT_UTEN_UTBETALING",
+          "id": "utbetaling_5",
+          "korrelasjonsId": "korrelasjon_5"
+        },
+        {
+          "fom": [2019, 7, 26],
+          "tom": [2019, 7, 30],
+          "status": "GODKJENT_UTEN_UTBETALING",
+          "id": "utbetaling_6",
+          "korrelasjonsId": "korrelasjon_6"
         }
       ]
     }
