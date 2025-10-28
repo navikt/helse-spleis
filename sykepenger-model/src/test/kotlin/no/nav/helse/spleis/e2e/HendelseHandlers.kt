@@ -529,6 +529,23 @@ internal fun AbstractEndToEndTest.håndterArbeidsgiveropplysninger(arbeidsgivero
     return arbeidsgiveropplysninger.metadata.meldingsreferanseId.id
 }
 
+internal fun AbstractEndToEndTest.håndterArbeidsgiveropplysninger(
+    vedtaksperiodeId: IdInnhenter,
+    vararg opplysning: Arbeidsgiveropplysning,
+    meldingsreferanseId: UUID = UUID.randomUUID(),
+    orgnummer: String = a1
+): UUID {
+    Arbeidsgiveropplysninger(
+        meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
+        innsendt = LocalDateTime.now(),
+        registrert = LocalDateTime.now().plusSeconds(1),
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
+        vedtaksperiodeId = vedtaksperiodeId.id(orgnummer),
+        opplysninger = opplysning.toList()
+    ).håndter(Person::håndterArbeidsgiveropplysninger)
+    return meldingsreferanseId
+}
+
 internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Inntektsmelding): UUID {
     håndterOgReplayInntektsmeldinger(inntektsmelding.behandlingsporing.organisasjonsnummer) {
         inntektsmelding.håndter(Person::håndterInntektsmelding)

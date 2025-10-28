@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.den
 import no.nav.helse.desember
@@ -20,6 +20,7 @@ import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.fredag
+import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -934,11 +935,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         // sender im på mursteinspølse hos a1
         a1 {
-            håndterArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT,
-                vedtaksperiodeId = 2.vedtaksperiode
-            )
+            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 2.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()))
         }
 
         a1 {
@@ -952,11 +949,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         // sender im på siste mursteinspølse på a2
         a2 {
-            håndterArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT,
-                vedtaksperiodeId = 2.vedtaksperiode
-            )
+            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 2.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()))
         }
 
         a1 {

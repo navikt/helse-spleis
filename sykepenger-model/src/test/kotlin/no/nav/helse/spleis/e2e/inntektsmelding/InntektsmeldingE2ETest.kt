@@ -600,12 +600,12 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        håndterArbeidsgiveropplysninger(
-            listOf(25.januar til 9.februar),
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
-        )
+        håndterInntektsmelding(listOf(25.januar til 9.februar))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+        assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
     }
 
     @Test
