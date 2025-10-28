@@ -46,7 +46,7 @@ import org.junit.jupiter.api.assertThrows
 internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
     @Test
-    fun `vedtaksperiode oppretter utbetaling for seg selv og andre`() {
+    fun `vedtaksperiode oppretter utbetaling for seg selv`() {
         nyPeriode(januar, a1)
         nyPeriode(januar, a2)
 
@@ -57,7 +57,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         assertEquals(1, observatør.vedtaksperiodeUtbetalinger(1.vedtaksperiode, a1).size)
-        assertEquals(1, observatør.vedtaksperiodeUtbetalinger(1.vedtaksperiode, a2).size)
+        assertEquals(0, observatør.vedtaksperiodeUtbetalinger(1.vedtaksperiode, a2).size)
     }
 
     @Test

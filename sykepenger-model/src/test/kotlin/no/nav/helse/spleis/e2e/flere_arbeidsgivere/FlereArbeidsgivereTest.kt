@@ -127,7 +127,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
 
-            assertEquals(listOf(Utbetalingstatus.UTBETALT, Utbetalingstatus.IKKE_UTBETALT), inspektør.utbetalinger(2.vedtaksperiode).map { it.status })
+            assertEquals(2, inspektør.antallUtbetalinger)
+            assertEquals(listOf(Utbetalingstatus.UTBETALT), inspektør.utbetalinger(2.vedtaksperiode).map { it.status })
             assertEquals(listOf(Utbetalingstatus.UTBETALT), inspektør.utbetalinger(3.vedtaksperiode).map { it.status })
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)

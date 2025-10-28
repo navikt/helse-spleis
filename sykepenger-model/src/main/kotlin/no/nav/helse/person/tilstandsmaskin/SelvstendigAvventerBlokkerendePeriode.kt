@@ -31,7 +31,5 @@ internal data object SelvstendigAvventerBlokkerendePeriode : Vedtaksperiodetilst
         vedtaksperiode: Vedtaksperiode,
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
-    ) {
-        vedtaksperiode.behandlinger.forkastBeregning(aktivitetslogg)
-    }
+    ) {}
 }

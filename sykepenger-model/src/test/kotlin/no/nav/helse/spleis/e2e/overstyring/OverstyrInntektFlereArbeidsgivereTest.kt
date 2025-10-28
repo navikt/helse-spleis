@@ -150,10 +150,14 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-        this@OverstyrInntektFlereArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrInntekt(8000.månedlig, skjæringstidspunkt = 1.januar, orgnummer = a1)
-        this@OverstyrInntektFlereArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         inspektør(a1).utbetaling(1).also { utbetaling ->
             assertEquals(1, utbetaling.arbeidsgiverOppdrag.size)
@@ -167,7 +171,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
             }
         }
-        inspektør(a2).utbetaling(1).also { utbetaling ->
+        inspektør(a2).utbetaling(0).also { utbetaling ->
             assertEquals(1, utbetaling.arbeidsgiverOppdrag.size)
             utbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
                 assertEquals(358, linje.beløp)

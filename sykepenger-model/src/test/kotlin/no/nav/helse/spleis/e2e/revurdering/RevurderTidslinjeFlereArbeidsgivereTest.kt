@@ -176,7 +176,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertIngenFunksjonelleFeil()
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
-            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(0, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
             assertEquals(0, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }

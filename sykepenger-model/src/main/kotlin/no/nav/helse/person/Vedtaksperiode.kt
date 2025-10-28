@@ -1080,10 +1080,8 @@ internal class Vedtaksperiode private constructor(
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
         lagBeregnetBehandlinger(aktivitetslogg, perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioder)
 
-        /* steg 4.2 lag utbetalinger */
-        perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
-            other.lagUtbetaling(other.registrerKontekst(aktivitetslogg))
-        }
+        /* steg 4.2 lag utbetaling kun for *this* */
+        lagUtbetaling(aktivitetslogg)
 
         // steg 5: lage varsler ved gitte situasjoner
         vurderVarsler(aktivitetslogg, ytelser, infotrygdhistorikk, perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, minsteinntektsvurdering, harOpptjening, beregnetTidslinjePerVedtaksperiode)
@@ -2270,6 +2268,7 @@ internal class Vedtaksperiode private constructor(
     internal fun igangsettOverstyring(revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (revurdering.erIkkeRelevantFor(periode)) return sendNyttGodkjenningsbehov(aktivitetsloggMedVedtaksperiodekontekst)
+        behandlinger.forkastBeregning(aktivitetslogg)
         tilstand.igangsettOverstyring(this, revurdering, aktivitetsloggMedVedtaksperiodekontekst)
         videreførEksisterendeOpplysninger(revurdering.hendelse.metadata.behandlingkilde, aktivitetsloggMedVedtaksperiodekontekst)
     }
@@ -2390,7 +2389,11 @@ internal class Vedtaksperiode private constructor(
         // lag utbetaling for seg selv + andre overlappende perioder hos andre arbeidsgivere (som ikke er utbetalt/avsluttet allerede)
         return person
             .nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
-            .filter { it.behandlinger.forventerUtbetaling(periode, skjæringstidspunkt, it.skalBehandlesISpeil()) }
+            .filter {
+                val skjæringstidspunktetErLikt = it.skjæringstidspunkt == this.skjæringstidspunkt
+                val overlapperMedDenBeregnedePerioden = it.periode.overlapperMed(this.periode)
+                skjæringstidspunktetErLikt && overlapperMedDenBeregnedePerioden
+            }
     }
 
     private fun mursteinsperioderMedSammeSkjæringstidspunkt(): List<Vedtaksperiode> {
@@ -2506,7 +2509,6 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg
     ) {
         revurdering.inngåSomEndring(this, aktivitetslogg)
-        behandlinger.forkastBeregning(aktivitetslogg)
         if (måInnhenteInntektEllerRefusjon()) return tilstand(aktivitetslogg, AvventerInntektsmelding)
         tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
     }
@@ -2516,7 +2518,6 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg
     ) {
         revurdering.inngåSomEndring(this, aktivitetslogg)
-        behandlinger.forkastBeregning(aktivitetslogg)
         tilstand(aktivitetslogg, SelvstendigAvventerBlokkerendePeriode)
     }
 

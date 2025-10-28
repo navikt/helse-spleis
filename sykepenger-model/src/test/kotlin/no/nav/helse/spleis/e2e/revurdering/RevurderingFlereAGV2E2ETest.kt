@@ -500,26 +500,26 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         nyeVedtak(januar, a1, a2)
         forlengVedtak(februar, a1, a2)
 
-        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(
+        håndterOverstyrTidslinje(
             listOf(
                 ManuellOverskrivingDag(17.januar, Feriedag),
                 ManuellOverskrivingDag(18.januar, Feriedag)
             ), a1
         )
-        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        this@RevurderingFlereAGV2E2ETest.håndterOverstyrTidslinje(
+        håndterOverstyrTidslinje(
             listOf(
                 ManuellOverskrivingDag(18.januar, Sykedag, 100)
             ), a1
         )
-        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        this@RevurderingFlereAGV2E2ETest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        this@RevurderingFlereAGV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
 
         assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
 
@@ -530,7 +530,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
             assertEquals(1, utbetalinger.size)
         }
         inspektør(a2).utbetalinger(1.vedtaksperiode).also { utbetalinger ->
-            assertEquals(3, utbetalinger.size)
+            assertEquals(2, utbetalinger.size)
             assertEquals(100, inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode)[18.januar].økonomi.inspektør.totalGrad)
         }
         inspektør(a2).utbetalinger(2.vedtaksperiode).also { utbetalinger ->

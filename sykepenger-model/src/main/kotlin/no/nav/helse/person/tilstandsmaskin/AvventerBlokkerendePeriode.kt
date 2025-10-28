@@ -62,7 +62,6 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.behandlinger.forkastBeregning(aktivitetslogg)
         if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) vedtaksperiode.tilstand(
             aktivitetslogg,
             AvventerInntektsmelding

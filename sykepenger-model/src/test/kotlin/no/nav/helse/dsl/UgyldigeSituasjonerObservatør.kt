@@ -24,6 +24,7 @@ import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_UTBETALT
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat.Bestemmelse.IKKE_VURDERT
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -267,9 +268,12 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
                             BehandlingView.TilstandView.BEREGNET_OMGJØRING,
                             BehandlingView.TilstandView.BEREGNET_ANNULLERING,
                             BehandlingView.TilstandView.BEREGNET_REVURDERING -> {
-                                assertNotNull(endring.utbetaling) { "forventer utbetaling i ${behandling.tilstand}" }
+                                assertTrue(endring.utbetalingstidslinje.isNotEmpty()) { "forventer utbetalingstidslinje i ${behandling.tilstand}" }
+                                assertNotEquals(IKKE_VURDERT, endring.maksdatoresultat.bestemmelse) { "forventer maksdatobestemmelse i ${behandling.tilstand}" }
                                 assertNotNull(endring.grunnlagsdata) { "forventer vilkårsgrunnlag i ${behandling.tilstand}" }
-                                assertEquals(IKKE_UTBETALT, endring.utbetaling!!.inspektør.tilstand) { "forventer at utbetaling i behandlingstilstand ${behandling.tilstand} skal være IKKE_UTBETALT, men var ${endring.utbetaling.inspektør.tilstand}" }
+                                endring.utbetaling?.also {
+                                    assertEquals(IKKE_UTBETALT, endring.utbetaling.inspektør.tilstand) { "forventer at utbetaling i behandlingstilstand ${behandling.tilstand} skal være IKKE_UTBETALT, men var ${endring.utbetaling.inspektør.tilstand}" }
+                                }
                             }
 
                             BehandlingView.TilstandView.REVURDERT_VEDTAK_AVVIST,
@@ -292,10 +296,8 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
                                 assertTrue(endring.utbetalingstidslinje.isEmpty()) { "forventer tom utbetalingstidslinje i ${behandling.tilstand}" }
                             }
 
-                            BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK -> {
+                            AVSLUTTET_UTEN_VEDTAK -> {
                                 assertNull(endring.utbetaling) { "forventer ingen utbetaling i ${behandling.tilstand}" }
-                                assertNull(endring.grunnlagsdata) { "forventer inget vilkårsgrunnlag i ${behandling.tilstand}" }
-                                assertEquals(IKKE_VURDERT, endring.maksdatoresultat.bestemmelse) { "forventer maksdatoresultat IKKE_VURDERT i ${behandling.tilstand}" }
                             }
                         }
                     }

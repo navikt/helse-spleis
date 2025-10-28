@@ -236,7 +236,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             }
             assertVarsler(listOf(Varselkode.RV_UT_23, Varselkode.RV_UT_24), 1.vedtaksperiode.filter())
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, flagg = setOf("ønskerReberegning"))
-            assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetaling(1).tilstand)
+            assertEquals(listOf(Utbetalingstatus.UTBETALT, Utbetalingstatus.IKKE_GODKJENT), inspektør.utbetalinger(1.vedtaksperiode).map { it.inspektør.tilstand })
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(3, behandlinger.size)
                 assertEquals(VEDTAK_IVERKSATT, behandlinger[0].tilstand)

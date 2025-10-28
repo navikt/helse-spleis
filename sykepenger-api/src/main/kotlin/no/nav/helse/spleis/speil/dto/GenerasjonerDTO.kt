@@ -150,6 +150,7 @@ data class BeregnetPeriode(
     // todo: feltet brukes så og si ikke i speil, kan fjernes fra graphql
     // verdien av ID-en brukes ifm. å lage en unik ID for notatet om utbetalingene.
     val beregningId: UUID,
+    // todo: fjerne bruken av utbetaling i speil
     val utbetaling: Utbetaling,
     val periodevilkår: Vilkår,
     val vilkårsgrunnlagId: UUID,
@@ -292,7 +293,7 @@ enum class Utbetalingtype {
     FERIEPENGER
 }
 
-class Utbetaling(
+data class Utbetaling(
     val id: UUID,
     val type: Utbetalingtype,
     val status: Utbetalingstatus,

@@ -561,7 +561,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(1, inspektør(a1).antallUtbetalinger)
         assertEquals(1, inspektør(a2).antallUtbetalinger)
 
-        this@OverstyrArbeidsgiveropplysningerTest.håndterOverstyrArbeidsgiveropplysninger(
+        håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
             arbeidsgiveropplysninger = listOf(
                 OverstyrtArbeidsgiveropplysning(
@@ -581,7 +581,12 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             )
         )
 
-        this@OverstyrArbeidsgiveropplysningerTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt()
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         assertEquals(2, inspektør(a1).antallUtbetalinger)
         assertEquals(2, inspektør(a2).antallUtbetalinger)

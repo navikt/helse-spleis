@@ -2,7 +2,7 @@ package no.nav.helse.spleis.speil.builders
 
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.BeløpstidslinjeDto
 import no.nav.helse.dto.BeløpstidslinjeDto.BeløpstidslinjeperiodeDto
@@ -16,7 +16,9 @@ import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.UbrukteRefusjonsopplysningerUtDto
+import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
+import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.forrigeDag
 import no.nav.helse.mapWithNext
 import no.nav.helse.spleis.speil.SpekematDTO
@@ -152,9 +154,64 @@ internal class SpeilGenerasjonerBuilder(
         )
     }
 
+    private fun BehandlingUtDto.økonomiDagerNavUtbetaler(): List<ØkonomiUtDto> {
+        return endringer
+            .last()
+            .utbetalingstidslinje
+            .dager
+            .filter { it is UtbetalingsdagUtDto.ArbeidsgiverperiodeDagNavDto || it is UtbetalingsdagUtDto.NavDagDto }
+            .map { it.økonomi }
+    }
+
+    private fun BehandlingUtDto.totalbeløpRefusjon() = økonomiDagerNavUtbetaler().sumOf { it.arbeidsgiverbeløp?.dagligInt?.beløp ?: 0 }
+    private fun BehandlingUtDto.totalbeløpPerson() = økonomiDagerNavUtbetaler().sumOf { it.personbeløp?.dagligInt?.beløp ?: 0 }
+
+    private fun utledUtbetaling(behandling: BehandlingUtDto, nestSisteBehandling: BehandlingUtDto?, utbetaling: Utbetaling?): Utbetaling {
+        val nettobeløpRefusjon = behandling.totalbeløpRefusjon() - (nestSisteBehandling?.totalbeløpRefusjon() ?: 0)
+        val nettobeløpPerson = behandling.totalbeløpPerson() - (nestSisteBehandling?.totalbeløpPerson() ?: 0)
+
+        val harFattetVedtak = nestSisteBehandling?.vedtakFattet != null
+        return Utbetaling(
+            id = utbetaling?.id ?: UUID.randomUUID(),
+            type = if (harFattetVedtak) Utbetalingtype.REVURDERING else Utbetalingtype.UTBETALING,
+            status = when (behandling.tilstand) {
+                BehandlingtilstandDto.ANNULLERT_PERIODE -> Utbetalingstatus.Annullert
+
+                BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK -> Utbetalingstatus.GodkjentUtenUtbetaling
+
+                BehandlingtilstandDto.BEREGNET,
+                BehandlingtilstandDto.BEREGNET_OMGJØRING,
+                BehandlingtilstandDto.BEREGNET_REVURDERING -> Utbetalingstatus.Ubetalt
+
+                BehandlingtilstandDto.REVURDERT_VEDTAK_AVVIST -> Utbetalingstatus.IkkeGodkjent
+
+                BehandlingtilstandDto.VEDTAK_FATTET -> Utbetalingstatus.Overført
+                BehandlingtilstandDto.VEDTAK_IVERKSATT -> if (nettobeløpPerson == 0 && nettobeløpRefusjon == 0) Utbetalingstatus.GodkjentUtenUtbetaling else Utbetalingstatus.Utbetalt
+
+                BehandlingtilstandDto.BEREGNET_ANNULLERING,
+                BehandlingtilstandDto.OVERFØRT_ANNULLERING,
+                BehandlingtilstandDto.TIL_INFOTRYGD,
+                BehandlingtilstandDto.UBEREGNET,
+                BehandlingtilstandDto.UBEREGNET_ANNULLERING,
+                BehandlingtilstandDto.UBEREGNET_OMGJØRING,
+                BehandlingtilstandDto.UBEREGNET_REVURDERING -> error("Forventer ikke å utlede utbetalingstatus for behandling i tilstand ${behandling.tilstand}")
+            },
+            arbeidsgiverNettoBeløp = nettobeløpRefusjon,
+            personNettoBeløp = nettobeløpPerson,
+            arbeidsgiverFagsystemId = utbetaling?.arbeidsgiverFagsystemId ?: "",
+            personFagsystemId = utbetaling?.personFagsystemId ?:"",
+            oppdrag = utbetaling?.oppdrag ?: emptyMap(),
+            vurdering = utbetaling?.vurdering
+        )
+    }
     private fun mapBeregnetPeriode(vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto): BeregnetPeriode {
+        // gir forrige behandling forut for denne generasjonen
+        val nestSisteBehandling = vedtaksperiode.behandlinger.behandlinger.takeWhile { it !== generasjon }.lastOrNull()
         val sisteEndring = generasjon.endringer.last()
-        val utbetaling = utbetalinger.singleOrNull { it.id == sisteEndring.utbetalingId } ?: error("Fant ikke tilhørende utbetaling for vedtaksperiodeId=${vedtaksperiode.id}")
+
+        val utbetaling = utbetalinger.singleOrNull { it.id == sisteEndring.utbetalingId }
+        val utledetUtbetaling = utledUtbetaling(generasjon, nestSisteBehandling, utbetaling)
+
         val utbetalingstidslinje = UtbetalingstidslinjeBuilder(sisteEndring.utbetalingstidslinje).build()
         val skjæringstidspunkt = sisteEndring.skjæringstidspunkt
         val sisteSykepengedag = utbetalingstidslinje.sisteNavDag()?.dato ?: sisteEndring.periode.tom
@@ -178,7 +235,7 @@ internal class SpeilGenerasjonerBuilder(
             forbrukteSykedager = sisteEndring.maksdatoresultat.forbrukteDager.antallDager(),
             gjenståendeDager = sisteEndring.maksdatoresultat.gjenståendeDager,
             beregningId = sisteEndring.id,
-            utbetaling = utbetaling,
+            utbetaling = utledetUtbetaling,
             periodevilkår = periodevilkår(sisteSykepengedag, sisteEndring.maksdatoresultat, alder, skjæringstidspunkt),
             vilkårsgrunnlagId = sisteEndring.vilkårsgrunnlagId!!,
             refusjonstidslinje = mapRefusjonstidslinje(arbeidsgiverUtDto.ubrukteRefusjonsopplysninger, generasjon.id, sisteEndring.refusjonstidslinje),

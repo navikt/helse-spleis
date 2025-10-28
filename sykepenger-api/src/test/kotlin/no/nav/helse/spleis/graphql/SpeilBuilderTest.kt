@@ -98,8 +98,9 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
         håndterSimulering()
 
         val arbeidsgiverrefusjoner = speilApi().vilkårsgrunnlag.values.single().arbeidsgiverrefusjoner
-        assertEquals(1, arbeidsgiverrefusjoner.size)
-        assertEquals(a1, arbeidsgiverrefusjoner.single().arbeidsgiver)
+        assertEquals(2, arbeidsgiverrefusjoner.size)
+        assertEquals(a1, arbeidsgiverrefusjoner[0].arbeidsgiver)
+        assertEquals(a2, arbeidsgiverrefusjoner[1].arbeidsgiver)
     }
 
     @Test

@@ -195,8 +195,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun harUtbetalinger() = siste?.harUtbetalinger() == true
     internal fun erUbetalt() = siste?.erUbetalt() == true
     internal fun kanForkastes(andreBehandlinger: List<Behandlinger>) = behandlinger.last().kanForkastes(andreBehandlinger.map { it.behandlinger.last() })
-    internal fun forventerUtbetaling(periodeSomBeregner: Periode, skjæringstidspunkt: LocalDate, skalBehandlesISpeil: Boolean) =
-        behandlinger.last().forventerUtbetaling(periodeSomBeregner, skjæringstidspunkt, skalBehandlesISpeil)
 
     internal fun harFlereSkjæringstidspunkt() = behandlinger.last().harFlereSkjæringstidspunkt()
     internal fun børBrukeSkatteinntekterDirekte() = behandlinger.last().skjæringstidspunkter.isEmpty()
@@ -1071,34 +1069,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return this.dokumentsporing.hashCode()
         }
 
-        internal fun forventerUtbetaling(periodeSomBeregner: Periode, skjæringstidspunkt: LocalDate, skalBehandlesISpeil: Boolean): Boolean {
-            val skjæringstidspunktetErLikt = this.skjæringstidspunkt == skjæringstidspunkt
-            val overlapperMedDenBeregnedePerioden = this.periode.overlapperMed(periodeSomBeregner)
-            val relevantForBeregning = skjæringstidspunktetErLikt && overlapperMedDenBeregnedePerioden
-
-            if (!relevantForBeregning) return false
-            return when (this.tilstand) {
-                Tilstand.UberegnetRevurdering -> true
-
-                Tilstand.Uberegnet,
-                Tilstand.UberegnetOmgjøring -> skalBehandlesISpeil
-
-                Tilstand.AnnullertPeriode,
-                Tilstand.UberegnetAnnullering,
-                Tilstand.AvsluttetUtenVedtak,
-                Tilstand.Beregnet,
-                Tilstand.BeregnetOmgjøring,
-                Tilstand.BeregnetRevurdering,
-                Tilstand.BeregnetAnnullering,
-                Tilstand.OverførtAnnullering,
-                Tilstand.RevurdertVedtakAvvist,
-                Tilstand.TilInfotrygd,
-                Tilstand.VedtakFattet,
-                Tilstand.VedtakIverksatt -> false
-
-            }
-        }
-
         internal fun erFattetVedtak() = vedtakFattet != null
         internal fun erInFlight() = erFattetVedtak() && !erAvsluttet()
         internal fun erAvsluttet() = avsluttet != null
@@ -1166,7 +1136,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         private fun utenBeregning(aktivitetslogg: IAktivitetslogg) {
-            gjeldende.utbetaling!!.forkast(aktivitetslogg)
+            gjeldende.utbetaling?.forkast(aktivitetslogg)
             nyEndring(gjeldende.kopierUtenBeregning())
         }
 
@@ -1669,9 +1639,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 error("Kan ikke avslutte behandling i $this")
             }
 
-            fun utenBeregning(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
-                error("Støtter ikke å forkaste utbetaling utbetaling i $this")
-            }
+            fun utenBeregning(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {}
 
             fun beregning(
                 behandling: Behandling,
@@ -1734,7 +1702,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing) =
                     behandling.kopierMedDokument(dokument)
 
-                override fun utenBeregning(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {}
                 override fun beregning(
                     behandling: Behandling,
                     aktivitetslogg: IAktivitetslogg,
@@ -1834,6 +1801,20 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun utenBeregning(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
                     behandling.utenBeregning(aktivitetslogg)
                     behandling.tilstand(Uberegnet, aktivitetslogg)
+                }
+
+                override fun beregning(
+                    behandling: Behandling,
+                    aktivitetslogg: IAktivitetslogg,
+                    beregning: BeregnetBehandling
+                ) {
+                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning))
+                }
+
+                override fun avsluttUtenVedtak(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
+                    check(behandling.utbetaling() == null)
+                    behandling.behandlingLukket(yrkesaktivitet)
+                    behandling.tilstand(AvsluttetUtenVedtak, aktivitetslogg)
                 }
 
                 override fun vedtakAvvist(behandling: Behandling, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
@@ -1994,8 +1975,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     if (utbetaling.erAvsluttet()) avsluttMedVedtak(behandling, aktivitetslogg)
                     return true
                 }
-
-                override fun utenBeregning(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {}
 
                 override fun håndterRefusjonsopplysninger(
                     yrkesaktivitet: Yrkesaktivitet,
@@ -2172,6 +2151,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return null
                 }
 
+                override fun utenBeregning(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
+                    error("Støtter ikke å forkaste beregnet behandling i $this")
+                }
+
                 override fun validerIkkeFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {}
             }
 
@@ -2214,6 +2197,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun behandlingOpprettet(behandling: Behandling) = behandling.emitNyBehandlingOpprettet(PersonObserver.BehandlingOpprettetEvent.Type.Omgjøring)
                 override fun entering(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
                     behandling.avsluttet = LocalDateTime.now()
+                }
+
+                override fun utenBeregning(behandling: Behandling, aktivitetslogg: IAktivitetslogg) {
+                    error("Støtter ikke å forkaste beregnet behandling i $this")
                 }
 
                 override fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {
