@@ -26,12 +26,21 @@ jobs:
         run: ./gradlew build
       - name: verifiser gyldig modell-jar
         run: unzip sykepenger-mediators/build/libs/sykepenger-model.jar -d /tmp/sykepenger-model
-      - name: build docker image
+      - name: build docker image - mediator
         uses: nais/docker-build-push@v0
-        id: docker-build-push
+        id: docker-build-push-mediator
         with:
           team: tbd
           image_suffix: spleis
           tag: "${{ github.ref_name }}-${{ github.sha }}"
           dockerfile: Dockerfile
           docker_context: sykepenger-mediators
+      - name: build docker image api
+        uses: nais/docker-build-push@v0
+        id: docker-build-push-api
+        with:
+          team: tbd
+          image_suffix: api
+          tag: "${{ github.ref_name }}-${{ github.sha }}"
+          dockerfile: Dockerfile
+          docker_context: sykepenger-api
