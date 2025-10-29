@@ -199,7 +199,7 @@ internal class Vedtaksperiode private constructor(
     internal val person: Person,
     internal val yrkesaktivitet: Yrkesaktivitet,
     internal val id: UUID,
-    internal var tilstand: Vedtaksperiodetilstand,
+    tilstand: Vedtaksperiodetilstand,
     internal val behandlinger: Behandlinger,
     private val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime = opprettet,
@@ -237,6 +237,9 @@ internal class Vedtaksperiode private constructor(
         person.vedtaksperiodeOpprettet(id, yrkesaktivitet.yrkesaktivitetstype, periode, periode.start, opprettet)
         behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, arbeidssituasjon, egenmeldingsperioder, faktaavklartInntekt, dokumentsporing, metadata.behandlingkilde, dagerNavOvertarAnsvar)
     }
+
+    internal var tilstand: Vedtaksperiodetilstand = tilstand
+        private set
 
     private val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()
     internal val periode get() = behandlinger.periode()
